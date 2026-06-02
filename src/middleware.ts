@@ -23,6 +23,7 @@ const PROTECTED_PREFIXES = [
   '/knowledge-base',
   '/help',
   '/topic-mastery',
+  '/practice',
   '/tpo',
   '/superadmin',
 ];

@@ -80,7 +80,7 @@ export default function TopicMasteryPage() {
             return (
               <a
                 key={cat.id}
-                href={`/topic-mastery/${cat.slug}`}
+                href={`/practice?topic=${cat.slug}`}
                 className={`group flex flex-col gap-4 rounded-xl bg-gradient-to-br ${cat.gradient} p-5 shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md`}
               >
                 <div className="flex items-center justify-between">
@@ -133,7 +133,7 @@ export default function TopicMasteryPage() {
               </div>
               <p className="mb-4 text-xs text-slate-400">{topic.questions} questions available</p>
               <a
-                href={`/topic-mastery/drill?topic=${encodeURIComponent(topic.name)}`}
+                href={`/practice?topic=${encodeURIComponent(topic.name.toLowerCase().replace(/\s+/g, '-').replace(/&/g, 'and'))}`}
                 className="inline-block rounded-full bg-orange px-5 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition-opacity"
               >
                 Drill now
@@ -177,7 +177,7 @@ export default function TopicMasteryPage() {
               </div>
               <p className="mb-4 text-xs text-slate-400">Accuracy</p>
               <a
-                href={`/topic-mastery/drill?topic=${encodeURIComponent(topic.name)}`}
+                href={`/practice?topic=${encodeURIComponent(topic.name.toLowerCase().replace(/\s+/g, '-').replace(/&/g, 'and'))}`}
                 className="inline-block rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
               >
                 Continue

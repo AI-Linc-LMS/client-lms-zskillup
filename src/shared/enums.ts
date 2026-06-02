@@ -41,3 +41,58 @@ export enum PpsBand {
   IN_TRAINING = 'IN_TRAINING',
   READY = 'READY',
 }
+
+// ─── Catalog (Sprint 3) ──────────────────────────────────────────────────────
+
+/** Company type (Implementation Plan §3.2). */
+export enum CompanyType {
+  SERVICE = 'SERVICE',
+  CONSULTING = 'CONSULTING',
+  PRODUCT = 'PRODUCT',
+}
+
+/** Course category (Implementation Plan §3.2). */
+export enum CourseCategory {
+  APTITUDE = 'APTITUDE',
+  PROGRAMMING_DSA = 'PROGRAMMING_DSA',
+  COMMUNICATION_HR = 'COMMUNICATION_HR',
+  MOCK_DRIVE = 'MOCK_DRIVE',
+}
+
+/** Course / lesson difficulty (Implementation Plan §3.2). */
+export enum CourseDifficulty {
+  BEGINNER = 'BEGINNER',
+  INTERMEDIATE = 'INTERMEDIATE',
+  ADVANCED = 'ADVANCED',
+}
+
+/** Lesson kind (Implementation Plan §3.2). */
+export enum LessonKind {
+  VIDEO = 'VIDEO',
+  TEXT = 'TEXT',
+  CONCEPT_REEL = 'CONCEPT_REEL',
+}
+
+// ─── Question bank (Sprint 3) ────────────────────────────────────────────────
+
+/** Question type (Implementation Plan §3.3). */
+export enum QuestionType {
+  MCQ = 'MCQ',
+  MULTI_SELECT = 'MULTI_SELECT',
+  NUMERIC = 'NUMERIC',
+  CODING = 'CODING',
+}
+
+/** Question difficulty (Implementation Plan §3.3). */
+export enum QuestionDifficulty {
+  EASY = 'EASY',
+  MEDIUM = 'MEDIUM',
+  HARD = 'HARD',
+}
+
+/** Question lifecycle status (Implementation Plan §3.3). */
+export enum QuestionStatus {
+  DRAFT = 'DRAFT',
+  PUBLISHED = 'PUBLISHED',
+  ARCHIVED = 'ARCHIVED',
+}
