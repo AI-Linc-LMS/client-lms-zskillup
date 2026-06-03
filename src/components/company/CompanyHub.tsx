@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   BookOpen,
   ClipboardList,
@@ -64,11 +65,15 @@ export function CompanyHub({ content }: { content: HubContent }) {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="gap-2">
-            <BookOpen className="size-4" aria-hidden="true" /> Practice topics
+          <Button asChild variant="outline" className="gap-2">
+            <Link href={`/practice?company=${c.slug}`}>
+              <BookOpen className="size-4" aria-hidden="true" /> Practice topics
+            </Link>
           </Button>
-          <Button variant="secondary" className="gap-2">
-            <Trophy className="size-4" aria-hidden="true" /> Timed assessment
+          <Button asChild variant="secondary" className="gap-2">
+            <Link href={`/dashboard/quiz?company=${c.slug}`}>
+              <Trophy className="size-4" aria-hidden="true" /> Timed assessment
+            </Link>
           </Button>
         </div>
       </div>

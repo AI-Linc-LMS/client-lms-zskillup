@@ -1,8 +1,10 @@
-import { apiClient } from './client';
+import { _rearmApiClient, apiClient } from './client';
 import { authToken } from '@/store/auth';
 import type {
+  AuthForgotPasswordDto,
   AuthLoginDto,
   AuthRegisterDto,
+  AuthResetPasswordDto,
   AuthVerifyEmailDto,
   OnboardingCollegeDto,
   OnboardingTargetsDto,
@@ -13,6 +15,11 @@ import type {
  * functions, not the client directly. Backend payload types will be generated
  * from OpenAPI (Block 4 contract) — these local shapes mirror that contract
  * until the generator is wired into CI.
+ *
+ * Every credential-establishing endpoint passes `auth: 'login'` so a 401
+ * surfaces as "bad credentials" instead of triggering the silent refresh +
+ * /login redirect cycle (which used to nuke the form's error-state component
+ * — the silent-login-failure bug from the QA audit).
  */
 
 export interface AuthUser {
@@ -28,18 +35,24 @@ export interface LoginResult {
 }
 
 export async function register(dto: AuthRegisterDto): Promise<{ message: string }> {
-  const res = await apiClient.post<{ message: string }>('/api/v1/auth/register', dto);
+  const res = await apiClient.post<{ message: string }>('/api/v1/auth/register', dto, {
+    auth: 'login',
+  });
   return res.data;
 }
 
 export async function verifyEmail(dto: AuthVerifyEmailDto): Promise<{ message: string }> {
-  const res = await apiClient.post<{ message: string }>('/api/v1/auth/verify-email', dto);
+  const res = await apiClient.post<{ message: string }>('/api/v1/auth/verify-email', dto, {
+    auth: 'login',
+  });
   return res.data;
 }
 
 export async function login(dto: AuthLoginDto): Promise<LoginResult> {
-  const res = await apiClient.post<LoginResult>('/api/v1/auth/login', dto);
+  const res = await apiClient.post<LoginResult>('/api/v1/auth/login', dto, { auth: 'login' });
   authToken.set(res.data.accessToken);
+  // Re-arm the API client circuit-breaker after a fresh successful login.
+  _rearmApiClient();
   // Non-sensitive hints for middleware redirects (UX only — server is authority).
   document.cookie = `role=${res.data.user.role}; path=/; samesite=lax`;
   document.cookie = `onboarded=${res.data.user.isOnboarded ? '1' : '0'}; path=/; samesite=lax`;
@@ -48,7 +61,15 @@ export async function login(dto: AuthLoginDto): Promise<LoginResult> {
 
 export async function logout(): Promise<void> {
   try {
-    await apiClient.post('/api/v1/auth/logout');
+    // Prefer the same-origin Next route proxy so the HttpOnly cookie is
+    // forwarded cleanly. Falls back to direct backend call if the proxy is
+    // unavailable for any reason (e.g. preview environments).
+    const proxy = await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    if (!proxy.ok) {
+      await apiClient.post('/api/v1/auth/logout', undefined, { auth: 'login' });
+    }
+  } catch {
+    // Even if the network call fails, clear local state below.
   } finally {
     authToken.clear();
     document.cookie = 'role=; path=/; max-age=0; samesite=lax';
@@ -86,11 +107,26 @@ export interface College {
   city: string;
 }
 
+export async function forgotPassword(dto: AuthForgotPasswordDto): Promise<{ message: string }> {
+  const res = await apiClient.post<{ message: string }>('/api/v1/auth/forgot-password', dto, {
+    auth: 'login',
+  });
+  return res.data;
+}
+
+export async function resetPassword(dto: AuthResetPasswordDto): Promise<{ message: string }> {
+  const res = await apiClient.post<{ message: string }>('/api/v1/auth/reset-password', dto, {
+    auth: 'login',
+  });
+  return res.data;
+}
+
 export async function listColleges(params: { state?: string; city?: string }): Promise<College[]> {
   const qs = new URLSearchParams();
   if (params.state) qs.set('state', params.state);
   if (params.city) qs.set('city', params.city);
   const suffix = qs.toString() ? `?${qs.toString()}` : '';
-  const res = await apiClient.get<College[]>(`/api/v1/colleges${suffix}`);
+  // Public endpoint — used by the signup wizard before login.
+  const res = await apiClient.get<College[]>(`/api/v1/colleges${suffix}`, { auth: 'public' });
   return res.data;
 }

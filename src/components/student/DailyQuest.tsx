@@ -1,8 +1,13 @@
-'use client';
-
+import Link from 'next/link';
 import { Zap } from 'lucide-react';
 import { DEMO_QUEST } from '@/lib/demo-data';
 
+/**
+ * Daily Quest banner. The full quest engine (server-generated, rewards,
+ * completion tracking) lands in Sprint 5. For now the CTA deep-links into the
+ * percentage-shortcut practice flow, which IS live (Sprint 3) — so the button
+ * actually does something useful.
+ */
 export function DailyQuest() {
   return (
     <section className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-orange/25 bg-gradient-to-r from-orange/5 to-amber-50/60 px-5 py-4 shadow-sm">
@@ -22,13 +27,13 @@ export function DailyQuest() {
           </p>
         </div>
       </div>
-      <button
-        type="button"
+      <Link
+        href="/practice?topic=percentages"
         className="inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90 active:scale-95"
       >
         <Zap className="size-4" aria-hidden="true" />
         Start quest
-      </button>
+      </Link>
     </section>
   );
 }

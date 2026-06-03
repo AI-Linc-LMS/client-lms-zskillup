@@ -4,16 +4,43 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { User, LogOut } from 'lucide-react';
 import { logout } from '@/lib/api/auth';
+import { getMe } from '@/lib/api/me';
 
 /**
  * Top-bar avatar + dropdown (CLAUDE.md §4). Client leaf — TopBar itself is RSC.
+ * Initials fall back to the prop while `GET /me` is in flight; once the
+ * response arrives we render the real user's initials from their full name
+ * (or the email local-part when no name is set).
+ *
  * Logout calls the backend, clears the in-memory token, and redirects to /.
  */
 export function AvatarMenu({ initials = 'AK' }: { initials?: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [resolvedInitials, setResolvedInitials] = useState<string>(initials);
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getMe()
+      .then((me) => {
+        if (cancelled) return;
+        const source = me.fullName ?? me.email.split('@')[0];
+        const parts = source.split(/\s+|[._-]/).filter(Boolean);
+        const next =
+          parts.length >= 2
+            ? (parts[0][0] + parts[1][0]).toUpperCase()
+            : source.slice(0, 2).toUpperCase();
+        setResolvedInitials(next);
+      })
+      .catch(() => {
+        // Not signed in / preview → keep the fallback initials
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Close on outside click
   useEffect(() => {
@@ -47,7 +74,7 @@ export function AvatarMenu({ initials = 'AK' }: { initials?: string }) {
         onClick={() => setOpen((v) => !v)}
         className="grid size-9 place-items-center rounded-full bg-navy text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy/40 focus-visible:ring-offset-2"
       >
-        {initials}
+        {resolvedInitials}
       </button>
       {open ? (
         <div

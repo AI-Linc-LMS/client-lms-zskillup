@@ -51,19 +51,19 @@ export function ContinueLearning() {
       </div>
 
       <div className="mt-4 flex items-center gap-3">
-        <button
-          type="button"
+        <Link
+          href="/practice?topic=percentages"
           className="inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
         >
           <Play className="size-4 fill-white" aria-hidden="true" />
           Resume
-        </button>
-        <button
-          type="button"
-          className="text-sm font-medium text-muted-foreground hover:text-foreground"
+        </Link>
+        <Link
+          href="/my-learning"
+          className="text-sm font-medium text-slate-500 transition-colors hover:text-navy"
         >
           Skip
-        </button>
+        </Link>
       </div>
     </section>
   );

@@ -23,8 +23,8 @@ export const authRegisterSchema = z
     name: z
       .string()
       .trim()
-      .min(2, 'Name is required')
-      .max(120)
+      .min(2, 'Name must be at least 2 characters')
+      .max(120, 'Name must be 120 characters or fewer')
       .regex(/^[a-zA-Z .'-]+$/, 'Name may contain letters and spaces only'),
     email,
     password,
@@ -39,7 +39,10 @@ export type AuthRegisterDto = z.infer<typeof authRegisterSchema>;
 export const authVerifyEmailSchema = z
   .object({
     email,
-    code: z.string().trim().regex(/^\d{6}$/, 'Enter the 6-digit code'),
+    code: z
+      .string()
+      .trim()
+      .regex(/^\d{6}$/, 'Enter the 6-digit code'),
   })
   .strict();
 export type AuthVerifyEmailDto = z.infer<typeof authVerifyEmailSchema>;
@@ -51,3 +54,22 @@ export const authLoginSchema = z
   })
   .strict();
 export type AuthLoginDto = z.infer<typeof authLoginSchema>;
+
+// ─── Password reset (Sprint 1) ───────────────────────────────────────────────
+// Single-use, short-TTL token delivered out-of-band by email (SECURITY_STANDARDS §1).
+// The /forgot-password endpoint never reveals whether an email is registered.
+
+export const authForgotPasswordSchema = z
+  .object({
+    email,
+  })
+  .strict();
+export type AuthForgotPasswordDto = z.infer<typeof authForgotPasswordSchema>;
+
+export const authResetPasswordSchema = z
+  .object({
+    token: z.string().min(20).max(200),
+    password,
+  })
+  .strict();
+export type AuthResetPasswordDto = z.infer<typeof authResetPasswordSchema>;

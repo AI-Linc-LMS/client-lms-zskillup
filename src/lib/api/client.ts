@@ -2,38 +2,59 @@ import { authToken } from '@/store/auth';
 import { ApiRequestError, type ApiResponse } from './types';
 
 /**
- * The single channel to the backend (frontend/CLAUDE.md §5/§6). No component or
- * page may `fetch` the backend directly — everything goes through here so token
- * attach, the 401→refresh→retry-once flow, and error normalization live in ONE
- * place.
+ * The single channel to the backend (CLAUDE.md §5/§6). No component or page may
+ * `fetch` the backend directly — everything goes through here so token attach,
+ * the 401→refresh→retry-once flow, and error normalization live in ONE place.
  *
- * Auth model (ADR-006 / DATA_FLOW §2):
- *  - Attaches the in-memory access token as `Authorization: Bearer …`.
- *  - On 401: calls the Next route handler `/api/auth/refresh` (which forwards the
- *    HttpOnly refresh cookie to Nest), stores the new access token, retries the
- *    original request ONCE.
- *  - On a second 401: clears the token and redirects to /login.
+ * Auth model (ADR-006 / DATA_FLOW §2). Each request has THREE auth postures:
+ *
+ *   - default          : retry once on 401 via /api/auth/refresh; on second
+ *                        failure clear all session state and redirect to /login.
+ *   - `auth: 'login'`  : 401 means BAD CREDENTIALS — surface as ApiRequestError;
+ *                        do NOT attempt refresh; do NOT redirect. Used by every
+ *                        auth-token-establishing endpoint (login, register,
+ *                        verify-email, refresh, forgot-password, reset-password).
+ *   - `auth: 'public'` : best-effort guest call. 401 surfaces as
+ *                        ApiRequestError; no refresh; no redirect. Used by
+ *                        public catalog reads so a logged-out visitor never
+ *                        gets thrown into a refresh loop.
+ *
+ * The QA audit (run wevz997ec) showed the previous "always retry, always
+ * redirect on a second 401" rule was the root cause of multiple production-
+ * grade bugs: an infinite `/me` polling loop on first paint, silent login
+ * failures (state nuked by the redirect), and a `/practice` 403 being masked
+ * by a forced /login bounce. This file is the single fix for all of them.
  */
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
+export type AuthPosture = 'default' | 'login' | 'public';
+
 type RequestOptions = Omit<RequestInit, 'body'> & {
   /** JSON-serializable body; set automatically with the JSON content-type. */
   json?: unknown;
+  /** Auth posture — see file header. Defaults to 'default'. */
+  auth?: AuthPosture;
 };
 
 let refreshInFlight: Promise<boolean> | null = null;
+/** Module-level latch — once we've decided this session is dead, stop retrying. */
+let sessionTerminated = false;
 
 /**
- * Calls the Next refresh route handler (same-origin) which forwards the HttpOnly
- * cookie to Nest. De-duplicates concurrent refreshes so a burst of 401s triggers
- * exactly one refresh. Returns true if a new access token was obtained.
+ * Calls the Next refresh route handler (same-origin) which forwards the
+ * HttpOnly refresh cookie to Nest. De-duplicates concurrent refreshes so a
+ * burst of 401s triggers EXACTLY ONE refresh.
  */
 async function refreshAccessToken(): Promise<boolean> {
+  if (sessionTerminated) return false;
   if (!refreshInFlight) {
     refreshInFlight = (async () => {
       try {
-        const res = await fetch('/api/auth/refresh', { method: 'POST' });
+        const res = await fetch('/api/auth/refresh', {
+          method: 'POST',
+          credentials: 'include',
+        });
         if (!res.ok) return false;
         const body = (await res.json()) as { accessToken?: string };
         if (!body.accessToken) return false;
@@ -49,10 +70,22 @@ async function refreshAccessToken(): Promise<boolean> {
   return refreshInFlight;
 }
 
-function redirectToLogin(): void {
-  if (typeof window !== 'undefined') {
-    window.location.assign('/login');
-  }
+/**
+ * Tear the session down fully and bounce to /login. Clears the in-memory
+ * access token AND the non-HttpOnly UX-hint cookies (`role`, `onboarded`).
+ * Without clearing the hint cookies the Next.js middleware sees an
+ * "authenticated" user and bounces /login → /dashboard, restarting the loop.
+ */
+function endSessionAndRedirect(): void {
+  if (typeof window === 'undefined') return;
+  if (sessionTerminated) return; // single-shot
+  sessionTerminated = true;
+  authToken.clear();
+  document.cookie = 'role=; path=/; max-age=0; samesite=lax';
+  document.cookie = 'onboarded=; path=/; max-age=0; samesite=lax';
+  // Hard navigation — wipes all in-flight component state and effects, so any
+  // pending requests in queued effects can't restart the loop.
+  window.location.assign('/login');
 }
 
 async function parseError(res: Response): Promise<ApiRequestError> {
@@ -65,7 +98,8 @@ async function parseError(res: Response): Promise<ApiRequestError> {
 }
 
 async function rawRequest<T>(path: string, options: RequestOptions): Promise<ApiResponse<T>> {
-  const { json, headers, ...rest } = options;
+  const { json, headers, auth: _auth, ...rest } = options;
+  void _auth;
   const token = authToken.get();
 
   const res = await fetch(`${API_BASE_URL}${path}`, {
@@ -77,8 +111,8 @@ async function rawRequest<T>(path: string, options: RequestOptions): Promise<Api
       ...headers,
     },
     ...(json !== undefined ? { body: JSON.stringify(json) } : {}),
-    // Must be 'include' so the backend Set-Cookie (zskillup_refresh HttpOnly) is
-    // accepted by the browser on login/logout, and sent on subsequent requests.
+    // 'include' so the backend Set-Cookie (zskillup_refresh HttpOnly) is
+    // accepted on login/logout and sent on subsequent same-site requests.
     credentials: 'include',
   });
 
@@ -93,35 +127,57 @@ async function rawRequest<T>(path: string, options: RequestOptions): Promise<Api
 }
 
 /**
- * Make an API request. Handles the 401 refresh-and-retry-once flow. `path` is
- * relative to the API base (e.g. `/api/v1/auth/login`).
+ * Make an API request. Handles the 401 refresh-and-retry-once flow.
+ *
+ * `path` is relative to the API base (e.g. `/api/v1/auth/login`).
  */
-export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<ApiResponse<T>> {
+export async function apiRequest<T>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<ApiResponse<T>> {
+  const posture: AuthPosture = options.auth ?? 'default';
+
   try {
     return await rawRequest<T>(path, options);
   } catch (err) {
-    if (err instanceof ApiRequestError && err.status === 401) {
+    if (!(err instanceof ApiRequestError)) throw err;
+
+    // 403 is "you are who you say you are, but you can't have this." NEVER
+    // retry or redirect on 403 — surface to caller so the UI can show an
+    // empty/forbidden state instead of bouncing.
+    if (err.status === 403) throw err;
+
+    // 401 handling depends on posture.
+    if (err.status === 401) {
+      // login/register/verify/forgot/reset: 401 == bad credentials. Surface.
+      if (posture === 'login') throw err;
+
+      // public reads: 401 just means "no session" — no refresh, no redirect.
+      if (posture === 'public') throw err;
+
+      // default: try a single silent refresh, then retry once.
+      if (sessionTerminated) throw err;
       const refreshed = await refreshAccessToken();
       if (refreshed) {
         try {
           return await rawRequest<T>(path, options);
         } catch (retryErr) {
           if (retryErr instanceof ApiRequestError && retryErr.status === 401) {
-            authToken.clear();
-            redirectToLogin();
+            endSessionAndRedirect();
           }
           throw retryErr;
         }
       }
-      authToken.clear();
-      redirectToLogin();
+      endSessionAndRedirect();
     }
+
     throw err;
   }
 }
 
 export const apiClient = {
-  get: <T>(path: string, options?: RequestOptions) => apiRequest<T>(path, { ...options, method: 'GET' }),
+  get: <T>(path: string, options?: RequestOptions) =>
+    apiRequest<T>(path, { ...options, method: 'GET' }),
   post: <T>(path: string, json?: unknown, options?: RequestOptions) =>
     apiRequest<T>(path, { ...options, method: 'POST', json }),
   patch: <T>(path: string, json?: unknown, options?: RequestOptions) =>
@@ -129,3 +185,15 @@ export const apiClient = {
   delete: <T>(path: string, options?: RequestOptions) =>
     apiRequest<T>(path, { ...options, method: 'DELETE' }),
 };
+
+/**
+ * Test-only escape hatch. After a successful logout from the client, components
+ * navigate (router.push('/')) and the page state is rebuilt — but the
+ * `sessionTerminated` latch above persists for the lifetime of the JS bundle.
+ * Call this on a fresh login to re-arm the client. The session itself is
+ * authoritative on the server; this flag is purely a circuit-breaker.
+ */
+export function _rearmApiClient(): void {
+  sessionTerminated = false;
+  refreshInFlight = null;
+}

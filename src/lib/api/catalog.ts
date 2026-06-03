@@ -64,13 +64,19 @@ export interface ApiCourseDetail extends ApiCourseSummary {
   modules: ApiModule[];
 }
 
+/**
+ * All catalog reads are `auth: 'public'` posture (CLAUDE.md §3 — the prepare
+ * catalog, homepage, and company hubs are all guest-accessible). This prevents
+ * a logged-out visitor from triggering the silent-refresh + /login redirect
+ * cycle on first page load — the bug surfaced in the QA audit on /prepare.
+ */
 export async function listCompanies(): Promise<ApiCompany[]> {
-  const res = await apiClient.get<ApiCompany[]>('/api/v1/companies');
+  const res = await apiClient.get<ApiCompany[]>('/api/v1/companies', { auth: 'public' });
   return res.data;
 }
 
 export async function getCompany(slug: string): Promise<ApiCompanyHub> {
-  const res = await apiClient.get<ApiCompanyHub>(`/api/v1/companies/${slug}`);
+  const res = await apiClient.get<ApiCompanyHub>(`/api/v1/companies/${slug}`, { auth: 'public' });
   return res.data;
 }
 
@@ -84,11 +90,25 @@ export async function listCourses(filters: {
   if (filters.difficulty) qs.set('difficulty', filters.difficulty);
   if (filters.companyId) qs.set('companyId', filters.companyId);
   const suffix = qs.toString() ? `?${qs.toString()}` : '';
-  const res = await apiClient.get<ApiCourseSummary[]>(`/api/v1/courses${suffix}`);
+  const res = await apiClient.get<ApiCourseSummary[]>(`/api/v1/courses${suffix}`, {
+    auth: 'public',
+  });
   return res.data;
 }
 
 export async function getCourse(slug: string): Promise<ApiCourseDetail> {
-  const res = await apiClient.get<ApiCourseDetail>(`/api/v1/courses/${slug}`);
+  const res = await apiClient.get<ApiCourseDetail>(`/api/v1/courses/${slug}`, { auth: 'public' });
+  return res.data;
+}
+
+export interface ApiTopic {
+  id: string;
+  slug: string;
+  name: string;
+  parentId: string | null;
+}
+
+export async function listTopics(): Promise<ApiTopic[]> {
+  const res = await apiClient.get<ApiTopic[]>('/api/v1/topics', { auth: 'public' });
   return res.data;
 }
