@@ -4,8 +4,7 @@ import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { authLoginSchema, type AuthLoginDto } from '@/shared';
+import type { AuthLoginDto } from '@/shared';
 import { login } from '@/lib/api/auth';
 import { ApiRequestError } from '@/lib/api/types';
 import { Button } from '@/components/ui/button';
@@ -27,7 +26,7 @@ function LoginForm() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<AuthLoginDto>({ resolver: zodResolver(authLoginSchema) });
+  } = useForm<AuthLoginDto>();
 
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
@@ -102,7 +101,13 @@ function LoginForm() {
             autoComplete="email"
             placeholder="you@college.edu"
             error={errors.email?.message}
-            {...register('email')}
+            {...register('email', {
+              required: 'Email is required',
+              pattern: {
+                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: 'Enter a valid email address',
+              },
+            })}
           />
           <FormField
             id="password"
@@ -110,7 +115,7 @@ function LoginForm() {
             type="password"
             autoComplete="current-password"
             error={errors.password?.message}
-            {...register('password')}
+            {...register('password', { required: 'Password is required' })}
           />
 
           <div className="flex items-center justify-between">

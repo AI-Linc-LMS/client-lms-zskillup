@@ -3,9 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Mail } from 'lucide-react';
-import { authForgotPasswordSchema, type AuthForgotPasswordDto } from '@/shared';
+import type { AuthForgotPasswordDto } from '@/shared';
 import { forgotPassword } from '@/lib/api/auth';
 import { ApiRequestError } from '@/lib/api/types';
 import { Button } from '@/components/ui/button';
@@ -28,7 +27,7 @@ export default function ForgotPasswordPage() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<AuthForgotPasswordDto>({ resolver: zodResolver(authForgotPasswordSchema) });
+  } = useForm<AuthForgotPasswordDto>();
 
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
@@ -89,7 +88,13 @@ export default function ForgotPasswordPage() {
                 autoComplete="email"
                 placeholder="you@college.edu"
                 error={errors.email?.message}
-                {...register('email')}
+                {...register('email', {
+                  required: 'Email is required',
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: 'Enter a valid email address',
+                  },
+                })}
               />
               {serverError ? (
                 <p

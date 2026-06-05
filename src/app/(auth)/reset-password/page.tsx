@@ -4,9 +4,8 @@ import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Lock } from 'lucide-react';
-import { authResetPasswordSchema, type AuthResetPasswordDto } from '@/shared';
+import type { AuthResetPasswordDto } from '@/shared';
 import { resetPassword } from '@/lib/api/auth';
 import { ApiRequestError } from '@/lib/api/types';
 import { Button } from '@/components/ui/button';
@@ -31,7 +30,6 @@ function ResetForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<AuthResetPasswordDto>({
-    resolver: zodResolver(authResetPasswordSchema),
     defaultValues: { token, password: '' },
   });
 
@@ -80,7 +78,7 @@ function ResetForm() {
         </div>
       </div>
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
-        <input type="hidden" {...register('token')} value={token} />
+        <input type="hidden" {...register('token', { required: true })} value={token} />
         <FormField
           id="password"
           label="New password"
@@ -88,7 +86,15 @@ function ResetForm() {
           autoComplete="new-password"
           placeholder="At least 8 characters, letters and numbers"
           error={errors.password?.message}
-          {...register('password')}
+          {...register('password', {
+            required: 'Password is required',
+            minLength: { value: 8, message: 'Password must be at least 8 characters' },
+            maxLength: { value: 128, message: 'Password must be 128 characters or fewer' },
+            validate: {
+              hasLetter: (v) => /[a-zA-Z]/.test(v) || 'Password must contain a letter',
+              hasNumber: (v) => /[0-9]/.test(v) || 'Password must contain a number',
+            },
+          })}
         />
         {serverError ? (
           <p

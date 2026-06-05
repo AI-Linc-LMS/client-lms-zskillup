@@ -4,8 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { authRegisterSchema, type AuthRegisterDto } from '@/shared';
+import type { AuthRegisterDto } from '@/shared';
 import { register as registerUser } from '@/lib/api/auth';
 import { ApiRequestError } from '@/lib/api/types';
 import { Button } from '@/components/ui/button';
@@ -13,10 +12,11 @@ import { FormField } from '@/components/ui/form-field';
 import { Logo } from '@/components/layout/Logo';
 
 /**
- * Signup step 1 — personal details (STUDENT_JOURNEY_SPEC §1). react-hook-form +
- * the SHARED Zod schema (identical client/server validation). On success →
- * /signup/verify?email=… (Block 5). Phone+SMS OTP is V1 UI-only (FEATURE_BACKLOG)
- * — collected here, SMS verification deferred.
+ * Signup step 1 — personal details (STUDENT_JOURNEY_SPEC §1). react-hook-form
+ * native validation rules mirror the constraints encoded on the shared
+ * class-validator DTO (`AuthRegisterDto`) — same rules, no Zod runtime on the
+ * client. The server re-validates on submit so even if the client checks are
+ * disabled the contract holds. On success → /signup/verify?email=… (Block 5).
  */
 export default function SignupPage() {
   const router = useRouter();
@@ -26,7 +26,7 @@ export default function SignupPage() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<AuthRegisterDto>({ resolver: zodResolver(authRegisterSchema) });
+  } = useForm<AuthRegisterDto>();
 
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
@@ -61,7 +61,15 @@ export default function SignupPage() {
                 label="Full name (as per college ID)"
                 autoComplete="name"
                 error={errors.name?.message}
-                {...register('name')}
+                {...register('name', {
+                  required: 'Name is required',
+                  minLength: { value: 2, message: 'Name must be at least 2 characters' },
+                  maxLength: { value: 120, message: 'Name must be 120 characters or fewer' },
+                  pattern: {
+                    value: /^[a-zA-Z .'-]+$/,
+                    message: 'Name may contain letters and spaces only',
+                  },
+                })}
               />
               <FormField
                 id="email"
@@ -69,7 +77,13 @@ export default function SignupPage() {
                 type="email"
                 autoComplete="email"
                 error={errors.email?.message}
-                {...register('email')}
+                {...register('email', {
+                  required: 'Email is required',
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: 'Enter a valid email address',
+                  },
+                })}
               />
               <FormField
                 id="phone"
@@ -78,7 +92,13 @@ export default function SignupPage() {
                 inputMode="numeric"
                 autoComplete="tel"
                 error={errors.phone?.message}
-                {...register('phone')}
+                {...register('phone', {
+                  required: 'Phone number is required',
+                  pattern: {
+                    value: /^[6-9]\d{9}$/,
+                    message: 'Enter a valid 10-digit Indian mobile number',
+                  },
+                })}
               />
               <FormField
                 id="password"
@@ -86,7 +106,17 @@ export default function SignupPage() {
                 type="password"
                 autoComplete="new-password"
                 error={errors.password?.message}
-                {...register('password')}
+                {...register('password', {
+                  required: 'Password is required',
+                  minLength: { value: 8, message: 'Password must be at least 8 characters' },
+                  maxLength: { value: 128, message: 'Password must be 128 characters or fewer' },
+                  validate: {
+                    hasLetter: (v) =>
+                      /[a-zA-Z]/.test(v) || 'Password must contain a letter',
+                    hasNumber: (v) =>
+                      /[0-9]/.test(v) || 'Password must contain a number',
+                  },
+                })}
               />
 
               {serverError ? (

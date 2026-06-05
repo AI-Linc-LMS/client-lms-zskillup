@@ -1,75 +1,104 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
- * Mirrored byte-for-byte at the same path in the other repo
- * (backend-repo/src/shared & frontend-repo/src/shared). Change both together.
+ * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011, amended 2026-06-03).
+ * Mirrored at frontend-repo/src/shared/dto/auth.dto.ts.
  *
- * Auth request DTOs (STUDENT_JOURNEY_SPEC §1–2). Validation is identical on
- * client (react-hook-form) and server (ZodValidationPipe), SECURITY_STANDARDS §3:
- * normalize email (trim + lowercase), reject unknown fields (.strict()).
+ * Validation: **class-validator + class-transformer** (Implementation Plan §4
+ * line 311 explicitly permits class-validator as the alternative to Zod;
+ * documented as the chosen path in BUILD_STATUS Day 3.5 close-out).
+ *
+ * Frontend imports each class `import type` so the decorator runtime never
+ * fires on the client; the form layer uses react-hook-form native validation
+ * rules with the same constraints encoded here. The class instance itself is
+ * only constructed server-side by Nest's global `ValidationPipe`.
+ *
+ * Auth request DTOs — STUDENT_JOURNEY_SPEC §1–2 / SECURITY_STANDARDS §3:
+ * email is normalized (trim + lowercase) and unknown fields are rejected
+ * (ValidationPipe `whitelist: true` + `forbidNonWhitelisted: true`).
  */
-import { z } from 'zod';
+import { Transform } from 'class-transformer';
+import { IsEmail, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
-const email = z.string().trim().toLowerCase().email();
-/** Min 8 chars with some complexity (SECURITY_STANDARDS §1 / spec §1). */
-const password = z
-  .string()
-  .min(8, 'Password must be at least 8 characters')
-  .max(128)
-  .regex(/[a-zA-Z]/, 'Password must contain a letter')
-  .regex(/[0-9]/, 'Password must contain a number');
+/** Trim + lowercase incoming email values before validation runs. */
+const normaliseEmail = ({ value }: { value: unknown }): unknown =>
+  typeof value === 'string' ? value.trim().toLowerCase() : value;
 
-export const authRegisterSchema = z
-  .object({
-    name: z
-      .string()
-      .trim()
-      .min(2, 'Name must be at least 2 characters')
-      .max(120, 'Name must be 120 characters or fewer')
-      .regex(/^[a-zA-Z .'-]+$/, 'Name may contain letters and spaces only'),
-    email,
-    password,
-    phone: z
-      .string()
-      .trim()
-      .regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit Indian mobile number'),
-  })
-  .strict();
-export type AuthRegisterDto = z.infer<typeof authRegisterSchema>;
+/** Trim a string field if it is one (leaves non-strings alone for IsString). */
+const trimString = ({ value }: { value: unknown }): unknown =>
+  typeof value === 'string' ? value.trim() : value;
 
-export const authVerifyEmailSchema = z
-  .object({
-    email,
-    code: z
-      .string()
-      .trim()
-      .regex(/^\d{6}$/, 'Enter the 6-digit code'),
-  })
-  .strict();
-export type AuthVerifyEmailDto = z.infer<typeof authVerifyEmailSchema>;
+// ─── Register (STUDENT self-signup) ─────────────────────────────────────────
 
-export const authLoginSchema = z
-  .object({
-    email,
-    password: z.string().min(1, 'Password is required'),
-  })
-  .strict();
-export type AuthLoginDto = z.infer<typeof authLoginSchema>;
+export class AuthRegisterDto {
+  @Transform(trimString)
+  @IsString()
+  @MinLength(2, { message: 'Name must be at least 2 characters' })
+  @MaxLength(120, { message: 'Name must be 120 characters or fewer' })
+  @Matches(/^[a-zA-Z .'-]+$/, { message: 'Name may contain letters and spaces only' })
+  name!: string;
 
-// ─── Password reset (Sprint 1) ───────────────────────────────────────────────
-// Single-use, short-TTL token delivered out-of-band by email (SECURITY_STANDARDS §1).
-// The /forgot-password endpoint never reveals whether an email is registered.
+  @Transform(normaliseEmail)
+  @IsEmail({}, { message: 'Enter a valid email address' })
+  email!: string;
 
-export const authForgotPasswordSchema = z
-  .object({
-    email,
-  })
-  .strict();
-export type AuthForgotPasswordDto = z.infer<typeof authForgotPasswordSchema>;
+  @IsString()
+  @MinLength(8, { message: 'Password must be at least 8 characters' })
+  @MaxLength(128)
+  @Matches(/[a-zA-Z]/, { message: 'Password must contain a letter' })
+  @Matches(/[0-9]/, { message: 'Password must contain a number' })
+  password!: string;
 
-export const authResetPasswordSchema = z
-  .object({
-    token: z.string().min(20).max(200),
-    password,
-  })
-  .strict();
-export type AuthResetPasswordDto = z.infer<typeof authResetPasswordSchema>;
+  @Transform(trimString)
+  @IsString()
+  @Matches(/^[6-9]\d{9}$/, { message: 'Enter a valid 10-digit Indian mobile number' })
+  phone!: string;
+}
+
+// ─── Verify email OTP ───────────────────────────────────────────────────────
+
+export class AuthVerifyEmailDto {
+  @Transform(normaliseEmail)
+  @IsEmail()
+  email!: string;
+
+  @Transform(trimString)
+  @IsString()
+  @Matches(/^\d{6}$/, { message: 'Enter the 6-digit code' })
+  code!: string;
+}
+
+// ─── Login ──────────────────────────────────────────────────────────────────
+
+export class AuthLoginDto {
+  @Transform(normaliseEmail)
+  @IsEmail()
+  email!: string;
+
+  @IsString()
+  @MinLength(1, { message: 'Password is required' })
+  password!: string;
+}
+
+// ─── Password reset (Sprint 1) ──────────────────────────────────────────────
+// Single-use, short-TTL token delivered out-of-band by email
+// (SECURITY_STANDARDS §1). The /forgot-password endpoint never reveals whether
+// an email is registered (anti-enumeration — same response either way).
+
+export class AuthForgotPasswordDto {
+  @Transform(normaliseEmail)
+  @IsEmail()
+  email!: string;
+}
+
+export class AuthResetPasswordDto {
+  @IsString()
+  @MinLength(20)
+  @MaxLength(200)
+  token!: string;
+
+  @IsString()
+  @MinLength(8, { message: 'Password must be at least 8 characters' })
+  @MaxLength(128)
+  @Matches(/[a-zA-Z]/, { message: 'Password must contain a letter' })
+  @Matches(/[0-9]/, { message: 'Password must contain a number' })
+  password!: string;
+}

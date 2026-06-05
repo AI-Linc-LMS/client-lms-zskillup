@@ -1,101 +1,295 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
- * Mirrored byte-for-byte at frontend-repo/src/shared/dto/admin-catalog.dto.ts.
+ * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011, amended 2026-06-03).
+ * Mirrored at frontend-repo/src/shared/dto/admin-catalog.dto.ts.
+ *
+ * Superadmin catalog CRUD — companies, courses, colleges, modules, lessons
+ * (Implementation Plan §4: `/admin/colleges`, `/admin/companies`, `/admin/courses`).
  */
-import { z } from 'zod';
-import { CompanyType, CourseCategory, CourseDifficulty, LessonKind } from '../enums';
+import { Type } from 'class-transformer';
+import {
+  IsBoolean,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  IsUrl,
+  Matches,
+  Max,
+  MaxLength,
+  Min,
+  MinLength,
+} from 'class-validator';
+import {
+  CollegeStatus,
+  CompanyType,
+  CourseCategory,
+  CourseDifficulty,
+  LessonKind,
+} from '../enums';
 
-const slugSchema = z
-  .string()
-  .min(2)
-  .max(120)
-  .regex(/^[a-z0-9-]+$/, 'slug must be lowercase letters, digits, and dashes only');
+const SLUG_REGEX = /^[a-z0-9-]+$/;
+const SLUG_RULE = {
+  message: 'slug must be lowercase letters, digits, and dashes only',
+};
 
 // ─── Companies (Sprint 2 — superadmin CRUD) ─────────────────────────────────
 
-export const adminCreateCompanySchema = z.object({
-  slug: slugSchema,
-  name: z.string().min(2).max(120),
-  tagline: z.string().max(200).optional(),
-  type: z.nativeEnum(CompanyType),
-  logoUrl: z.string().url().max(500).optional(),
-  brandColor: z.string().max(20).optional(),
-  accent: z.string().max(120).optional(),
-  description: z.string().max(5000).optional(),
-  badge: z.string().max(60).optional(),
-  displayOrder: z.number().int().min(0).max(1000).default(0),
-  isPublished: z.boolean().default(true),
-});
-export type AdminCreateCompanyDto = z.infer<typeof adminCreateCompanySchema>;
+export class AdminCreateCompanyDto {
+  @IsString()
+  @MinLength(2)
+  @MaxLength(120)
+  @Matches(SLUG_REGEX, SLUG_RULE)
+  slug!: string;
 
-export const adminUpdateCompanySchema = adminCreateCompanySchema.partial();
-export type AdminUpdateCompanyDto = z.infer<typeof adminUpdateCompanySchema>;
+  @IsString()
+  @MinLength(2)
+  @MaxLength(120)
+  name!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  tagline?: string;
+
+  @IsEnum(CompanyType)
+  type!: CompanyType;
+
+  @IsOptional()
+  @IsUrl()
+  @MaxLength(500)
+  logoUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  brandColor?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  accent?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(5000)
+  description?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(60)
+  badge?: string;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @Max(1000)
+  displayOrder: number = 0;
+
+  @IsBoolean()
+  isPublished: boolean = true;
+}
+
+/** Patch — every field optional, all rules from create still apply when present. */
+export class AdminUpdateCompanyDto {
+  @IsOptional() @IsString() @MinLength(2) @MaxLength(120) @Matches(SLUG_REGEX, SLUG_RULE)
+  slug?: string;
+
+  @IsOptional() @IsString() @MinLength(2) @MaxLength(120)
+  name?: string;
+
+  @IsOptional() @IsString() @MaxLength(200)
+  tagline?: string;
+
+  @IsOptional() @IsEnum(CompanyType)
+  type?: CompanyType;
+
+  @IsOptional() @IsUrl() @MaxLength(500)
+  logoUrl?: string;
+
+  @IsOptional() @IsString() @MaxLength(20)
+  brandColor?: string;
+
+  @IsOptional() @IsString() @MaxLength(120)
+  accent?: string;
+
+  @IsOptional() @IsString() @MaxLength(5000)
+  description?: string;
+
+  @IsOptional() @IsString() @MaxLength(60)
+  badge?: string;
+
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) @Max(1000)
+  displayOrder?: number;
+
+  @IsOptional() @IsBoolean()
+  isPublished?: boolean;
+}
 
 // ─── Courses (Sprint 2 — superadmin CRUD) ───────────────────────────────────
 
-export const adminCreateCourseSchema = z.object({
-  slug: slugSchema,
-  title: z.string().min(2).max(200),
-  summary: z.string().max(5000).optional(),
-  coverUrl: z.string().url().max(500).optional(),
-  category: z.nativeEnum(CourseCategory),
-  difficulty: z.nativeEnum(CourseDifficulty).default(CourseDifficulty.INTERMEDIATE),
-  estimatedHours: z.number().int().min(0).max(500).default(0),
-  isPublished: z.boolean().default(false),
-});
-export type AdminCreateCourseDto = z.infer<typeof adminCreateCourseSchema>;
+export class AdminCreateCourseDto {
+  @IsString() @MinLength(2) @MaxLength(120) @Matches(SLUG_REGEX, SLUG_RULE)
+  slug!: string;
 
-export const adminUpdateCourseSchema = adminCreateCourseSchema.partial();
-export type AdminUpdateCourseDto = z.infer<typeof adminUpdateCourseSchema>;
+  @IsString() @MinLength(2) @MaxLength(200)
+  title!: string;
 
-// ─── Colleges (Sprint 0 exit — superadmin can create a college) ──────────────
+  @IsOptional() @IsString() @MaxLength(5000)
+  summary?: string;
 
-export const adminCreateCollegeSchema = z.object({
-  name: z.string().min(2).max(200),
-  slug: slugSchema,
-  state: z.string().min(2).max(100),
-  city: z.string().min(2).max(100),
-});
-export type AdminCreateCollegeDto = z.infer<typeof adminCreateCollegeSchema>;
+  @IsOptional() @IsUrl() @MaxLength(500)
+  coverUrl?: string;
+
+  @IsEnum(CourseCategory)
+  category!: CourseCategory;
+
+  @IsEnum(CourseDifficulty)
+  difficulty: CourseDifficulty = CourseDifficulty.INTERMEDIATE;
+
+  @Type(() => Number) @IsInt() @Min(0) @Max(500)
+  estimatedHours: number = 0;
+
+  @IsBoolean()
+  isPublished: boolean = false;
+}
+
+export class AdminUpdateCourseDto {
+  @IsOptional() @IsString() @MinLength(2) @MaxLength(120) @Matches(SLUG_REGEX, SLUG_RULE)
+  slug?: string;
+
+  @IsOptional() @IsString() @MinLength(2) @MaxLength(200)
+  title?: string;
+
+  @IsOptional() @IsString() @MaxLength(5000)
+  summary?: string;
+
+  @IsOptional() @IsUrl() @MaxLength(500)
+  coverUrl?: string;
+
+  @IsOptional() @IsEnum(CourseCategory)
+  category?: CourseCategory;
+
+  @IsOptional() @IsEnum(CourseDifficulty)
+  difficulty?: CourseDifficulty;
+
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) @Max(500)
+  estimatedHours?: number;
+
+  @IsOptional() @IsBoolean()
+  isPublished?: boolean;
+}
+
+// ─── Colleges (Sprint 0 exit — superadmin can create a college) ─────────────
+
+export class AdminCreateCollegeDto {
+  @IsString() @MinLength(2) @MaxLength(200)
+  name!: string;
+
+  @IsString() @MinLength(2) @MaxLength(120) @Matches(SLUG_REGEX, SLUG_RULE)
+  slug!: string;
+
+  @IsString() @MinLength(2) @MaxLength(100)
+  state!: string;
+
+  @IsString() @MinLength(2) @MaxLength(100)
+  city!: string;
+}
+
+/**
+ * Patch a college — every field optional. `status` lets a superadmin suspend a
+ * tenant without deleting it (Sprint 8 / SECURITY_STANDARDS §6). Slug change
+ * checks for uniqueness server-side.
+ */
+export class AdminUpdateCollegeDto {
+  @IsOptional() @IsString() @MinLength(2) @MaxLength(200)
+  name?: string;
+
+  @IsOptional() @IsString() @MinLength(2) @MaxLength(120) @Matches(SLUG_REGEX, SLUG_RULE)
+  slug?: string;
+
+  @IsOptional() @IsString() @MinLength(2) @MaxLength(100)
+  state?: string;
+
+  @IsOptional() @IsString() @MinLength(2) @MaxLength(100)
+  city?: string;
+
+  @IsOptional() @IsEnum(CollegeStatus)
+  status?: CollegeStatus;
+}
 
 // ─── Course modules + lessons (Sprint 2 — superadmin authoring) ─────────────
 
-export const adminCreateModuleSchema = z.object({
-  courseSlug: slugSchema,
-  title: z.string().min(2).max(200),
-  summary: z.string().max(5000).optional(),
-  orderIndex: z.number().int().min(0).max(1000).default(0),
-});
-export type AdminCreateModuleDto = z.infer<typeof adminCreateModuleSchema>;
+export class AdminCreateModuleDto {
+  @IsString() @MinLength(2) @MaxLength(120) @Matches(SLUG_REGEX, SLUG_RULE)
+  courseSlug!: string;
 
-export const adminUpdateModuleSchema = z.object({
-  title: z.string().min(2).max(200).optional(),
-  summary: z.string().max(5000).nullable().optional(),
-  orderIndex: z.number().int().min(0).max(1000).optional(),
-});
-export type AdminUpdateModuleDto = z.infer<typeof adminUpdateModuleSchema>;
+  @IsString() @MinLength(2) @MaxLength(200)
+  title!: string;
 
-const lessonKindSchema = z.nativeEnum(LessonKind);
+  @IsOptional() @IsString() @MaxLength(5000)
+  summary?: string;
 
-export const adminCreateLessonSchema = z.object({
-  moduleId: z.string().uuid(),
-  title: z.string().min(2).max(200),
-  kind: lessonKindSchema.default(LessonKind.VIDEO),
-  durationMinutes: z.number().int().min(0).max(600).default(0),
-  videoProviderId: z.string().max(200).optional(),
-  body: z.string().max(50000).optional(),
-  orderIndex: z.number().int().min(0).max(1000).default(0),
-  isFree: z.boolean().default(false),
-});
-export type AdminCreateLessonDto = z.infer<typeof adminCreateLessonSchema>;
+  @Type(() => Number) @IsInt() @Min(0) @Max(1000)
+  orderIndex: number = 0;
+}
 
-export const adminUpdateLessonSchema = z.object({
-  title: z.string().min(2).max(200).optional(),
-  kind: lessonKindSchema.optional(),
-  durationMinutes: z.number().int().min(0).max(600).optional(),
-  videoProviderId: z.string().max(200).nullable().optional(),
-  body: z.string().max(50000).nullable().optional(),
-  orderIndex: z.number().int().min(0).max(1000).optional(),
-  isFree: z.boolean().optional(),
-});
-export type AdminUpdateLessonDto = z.infer<typeof adminUpdateLessonSchema>;
+export class AdminUpdateModuleDto {
+  @IsOptional() @IsString() @MinLength(2) @MaxLength(200)
+  title?: string;
+
+  @IsOptional() @IsString() @MaxLength(5000)
+  summary?: string | null;
+
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) @Max(1000)
+  orderIndex?: number;
+}
+
+export class AdminCreateLessonDto {
+  @IsUUID()
+  moduleId!: string;
+
+  @IsString() @MinLength(2) @MaxLength(200)
+  title!: string;
+
+  @IsEnum(LessonKind)
+  kind: LessonKind = LessonKind.VIDEO;
+
+  @Type(() => Number) @IsInt() @Min(0) @Max(600)
+  durationMinutes: number = 0;
+
+  @IsOptional() @IsString() @MaxLength(200)
+  videoProviderId?: string;
+
+  @IsOptional() @IsString() @MaxLength(50000)
+  body?: string;
+
+  @Type(() => Number) @IsInt() @Min(0) @Max(1000)
+  orderIndex: number = 0;
+
+  @IsBoolean()
+  isFree: boolean = false;
+}
+
+export class AdminUpdateLessonDto {
+  @IsOptional() @IsString() @MinLength(2) @MaxLength(200)
+  title?: string;
+
+  @IsOptional() @IsEnum(LessonKind)
+  kind?: LessonKind;
+
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) @Max(600)
+  durationMinutes?: number;
+
+  @IsOptional() @IsString() @MaxLength(200)
+  videoProviderId?: string | null;
+
+  @IsOptional() @IsString() @MaxLength(50000)
+  body?: string | null;
+
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) @Max(1000)
+  orderIndex?: number;
+
+  @IsOptional() @IsBoolean()
+  isFree?: boolean;
+}

@@ -3,9 +3,8 @@
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Mail, Sparkles } from 'lucide-react';
-import { authVerifyEmailSchema, type AuthVerifyEmailDto } from '@/shared';
+import type { AuthVerifyEmailDto } from '@/shared';
 import { verifyEmail } from '@/lib/api/auth';
 import { ApiRequestError } from '@/lib/api/types';
 import { Button } from '@/components/ui/button';
@@ -29,7 +28,6 @@ function VerifyForm() {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<AuthVerifyEmailDto>({
-    resolver: zodResolver(authVerifyEmailSchema),
     defaultValues: { email },
   });
 
@@ -95,7 +93,7 @@ function VerifyForm() {
         <span className="font-semibold text-navy">{email || 'your email'}</span>.
       </p>
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
-        <input type="hidden" {...register('email')} />
+        <input type="hidden" {...register('email', { required: true })} />
         <FormField
           id="code"
           label="Verification code"
@@ -104,7 +102,10 @@ function VerifyForm() {
           autoComplete="one-time-code"
           placeholder="123456"
           error={errors.code?.message}
-          {...register('code')}
+          {...register('code', {
+            required: 'Enter the 6-digit code',
+            pattern: { value: /^\d{6}$/, message: 'Enter the 6-digit code' },
+          })}
         />
         {serverError ? (
           <p role="alert" className="rounded-md bg-red-50 p-3 text-sm font-medium text-red-700 ring-1 ring-red-200">
