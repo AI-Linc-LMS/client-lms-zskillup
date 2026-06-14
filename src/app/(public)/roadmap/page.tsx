@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { CheckCircle2, Circle, Lock, BookOpen, Building2, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { ProgressBar } from '@/components/ui/progress-bar';
 import { DEMO_ROADMAP_STEPS, DEMO_ROADMAP_PROGRESS, type RoadmapStatus } from '@/lib/demo-data-extra';
 
 /**
@@ -10,7 +12,7 @@ import { DEMO_ROADMAP_STEPS, DEMO_ROADMAP_PROGRESS, type RoadmapStatus } from '@
 
 const STATUS_CONFIG: Record<RoadmapStatus, { icon: typeof CheckCircle2; label: string; style: string }> = {
   done: { icon: CheckCircle2, label: 'Done', style: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
-  active: { icon: Circle, label: 'Active', style: 'text-blue-600 bg-blue-50 border-blue-200' },
+  active: { icon: Circle, label: 'Active', style: 'text-sky-700 bg-sky-50 border-sky-200' },
   locked: { icon: Lock, label: 'Locked', style: 'text-slate-400 bg-slate-50 border-slate-200' },
 };
 
@@ -18,38 +20,44 @@ export default function RoadmapPage() {
   const p = DEMO_ROADMAP_PROGRESS;
 
   return (
-    <div className="min-h-screen bg-muted/20">
+    <div className="min-h-screen bg-background">
       {/* Public navbar */}
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white px-6">
         <Link href="/" className="flex items-center gap-1 text-xl font-extrabold">
           <span className="text-orange">Z</span>
           <span className="text-foreground">Skillup</span>
         </Link>
-        <div className="flex gap-3">
-          <Link href="/login" className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted">
-            Log in
-          </Link>
-          <Link href="/signup" className="rounded-md bg-orange px-4 py-2 text-sm font-semibold text-white">
-            Create account
-          </Link>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" asChild>
+            <Link href="/login">Log in</Link>
+          </Button>
+          <Button asChild>
+            <Link href="/signup">Create account</Link>
+          </Button>
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-6 py-10">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <span className="text-xs font-semibold uppercase tracking-widest text-orange">
+      {/* Hero (Zone C — dark navy) */}
+      <section className="relative overflow-hidden bg-navy text-white">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_100%_0%,rgba(243,112,33,0.18),transparent),radial-gradient(50%_50%_at_0%_100%,rgba(56,189,248,0.12),transparent)]"
+        />
+        <div className="relative mx-auto max-w-3xl px-6 py-16 text-center sm:py-20">
+          <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-orange">
             Your placement roadmap
           </span>
-          <h1 className="mt-2 text-3xl font-extrabold text-navy sm:text-4xl">
+          <h1 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-[42px]">
             From foundation to first offer.
           </h1>
-          <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
+          <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-white/70">
             Six steps. Each one unlocks when the previous is complete. Earn XP, unlock badges, and
             climb the leaderboard along the way.
           </p>
         </div>
+      </section>
 
+      <main className="mx-auto max-w-3xl px-6 py-10">
         {/* Progress summary */}
         <div className="mb-8 rounded-2xl border bg-white p-6 shadow-sm">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -81,18 +89,11 @@ export default function RoadmapPage() {
 
           {/* Progress bar */}
           <div className="mt-5">
-            <div
-              className="h-3 w-full overflow-hidden rounded-full bg-muted"
-              role="progressbar"
-              aria-valuenow={p.pct}
-              aria-valuemin={0}
-              aria-valuemax={100}
-            >
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600"
-                style={{ width: `${p.pct}%` }}
-              />
-            </div>
+            <ProgressBar
+              value={p.pct}
+              className="h-3"
+              barClassName="bg-gradient-to-r from-emerald-400 to-emerald-600"
+            />
             <p className="mt-2 text-xs text-muted-foreground">
               Personalized path · 14-day streak active
             </p>
@@ -104,12 +105,9 @@ export default function RoadmapPage() {
             <span className="flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
               Level 12 · 1,400 XP
             </span>
-            <Link
-              href="/prepare"
-              className="ml-auto rounded-md bg-navy px-4 py-1.5 text-sm font-semibold text-white hover:bg-navy/90"
-            >
-              Continue active step
-            </Link>
+            <Button variant="secondary" size="sm" className="ml-auto" asChild>
+              <Link href="/prepare">Continue active step</Link>
+            </Button>
           </div>
         </div>
 
@@ -185,12 +183,11 @@ export default function RoadmapPage() {
                   <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
                     <p className="text-xs text-orange">Reward: {step.reward}</p>
                     {!isLocked ? (
-                      <Link
-                        href={step.href}
-                        className="rounded-md bg-navy px-4 py-1.5 text-xs font-semibold text-white hover:bg-navy/90"
-                      >
-                        {step.status === 'done' ? 'Revisit' : 'Continue'}
-                      </Link>
+                      <Button variant="secondary" size="sm" asChild>
+                        <Link href={step.href}>
+                          {step.status === 'done' ? 'Revisit' : 'Continue'}
+                        </Link>
+                      </Button>
                     ) : null}
                   </div>
                 </div>

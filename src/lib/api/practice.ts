@@ -16,7 +16,6 @@ export interface ApiQuestion {
   type: 'MCQ' | 'MULTI_SELECT' | 'NUMERIC' | 'CODING';
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   stem: string;
-  hint: string | null;
   topicId: string;
   companyId: string | null;
   options: ApiQuestionOption[];
@@ -35,6 +34,16 @@ export interface ApiAccuracy {
   total: number;
   correct: number;
   accuracyPct: number;
+  avgTimeSec: number;
+}
+
+export interface ApiTopicAccuracy {
+  topicSlug: string;
+  topicName: string;
+  total: number;
+  correct: number;
+  accuracyPct: number;
+  lastAttemptAt: string;
 }
 
 export async function listPracticeQuestions(filters: {
@@ -65,7 +74,21 @@ export async function requestPracticeHint(attemptId: string): Promise<{ hint: st
   return res.data;
 }
 
+/** Reveal a question's hint BEFORE answering (sets usedHint on the next attempt). */
+export async function getQuestionHint(questionId: string): Promise<{ hint: string | null }> {
+  const res = await apiClient.get<{ hint: string | null }>(
+    `/api/v1/practice/questions/${questionId}/hint`,
+  );
+  return res.data;
+}
+
 export async function getPracticeAccuracy(): Promise<ApiAccuracy> {
   const res = await apiClient.get<ApiAccuracy>('/api/v1/practice/accuracy');
+  return res.data;
+}
+
+/** Per-topic accuracy, most recently practised first (weak/recent topic surfaces). */
+export async function getTopicAccuracy(): Promise<ApiTopicAccuracy[]> {
+  const res = await apiClient.get<ApiTopicAccuracy[]>('/api/v1/practice/accuracy/topics');
   return res.data;
 }

@@ -1,29 +1,32 @@
 import {
-  Award,
   BookOpen,
-  Briefcase,
+  Building2,
   ClipboardList,
   FileCheck2,
   GraduationCap,
   LayoutDashboard,
-  LifeBuoy,
-  Library,
   type LucideIcon,
-  Network,
+  Mail,
+  Target,
   TrendingUp,
-  Users,
 } from 'lucide-react';
 
 /**
- * Sidebar navigation model (frontend/CLAUDE.md §4). Grouped into PERSONAL /
- * PROGRAMS / RESOURCES exactly as the reference image. Static for Block 2 —
- * `badge` counts and `active` state are wired to real data in a later phase.
+ * Sidebar navigation model (frontend/CLAUDE.md §4), now ROLE/ROUTE-AWARE.
+ *
+ * The AppShell is shared by the student, super-admin and TPO route groups, so
+ * the sidebar must adapt to where the user is — an admin should never see
+ * "My Learning". `navForPath()` selects the right section list from the current
+ * pathname (which also makes the super-admin "view as student" preview render
+ * the student nav automatically, since it lives on `/dashboard`).
+ *
+ * Every link here points to a page that is actually wired to live data — no
+ * placeholder routes in the primary nav.
  */
 export interface NavItem {
   label: string;
   href: string;
   icon: LucideIcon;
-  badge?: number;
 }
 
 export interface NavSection {
@@ -31,41 +34,67 @@ export interface NavSection {
   items: NavItem[];
 }
 
-export const SIDEBAR_SECTIONS: NavSection[] = [
+export const STUDENT_NAV: NavSection[] = [
   {
-    heading: 'PERSONAL',
+    heading: 'WORKSPACE',
     items: [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { label: 'My Learning', href: '/my-learning', icon: BookOpen, badge: 8 },
-      { label: 'Assignments', href: '/assignments', icon: ClipboardList, badge: 3 },
-      { label: 'Mock Tests', href: '/mock-tests', icon: FileCheck2 },
-      { label: 'Certifications', href: '/certifications', icon: Award },
+      { label: 'My Learning', href: '/my-learning', icon: BookOpen },
       { label: 'Performance', href: '/performance', icon: TrendingUp },
     ],
   },
   {
-    heading: 'PROGRAMS',
+    heading: 'PRACTICE & ASSESSMENT',
     items: [
-      { label: 'Campus Recruitment', href: '/campus-recruitment', icon: Briefcase },
-      { label: 'Skill Tracks', href: '/skill-tracks', icon: Network },
-      { label: 'Cohort Programs', href: '/cohort-programs', icon: Users },
+      { label: 'Topic Mastery', href: '/topic-mastery', icon: Target },
+      { label: 'Mock Tests', href: '/mock-tests', icon: FileCheck2 },
     ],
   },
   {
-    heading: 'RESOURCES',
+    heading: 'EXPLORE',
+    items: [{ label: 'Company Hubs', href: '/dashboard/company', icon: Building2 }],
+  },
+];
+
+export const SUPERADMIN_NAV: NavSection[] = [
+  {
+    heading: 'OVERVIEW',
+    items: [{ label: 'Dashboard', href: '/superadmin/dashboard', icon: LayoutDashboard }],
+  },
+  {
+    heading: 'CONTENT',
     items: [
-      { label: 'Knowledge Base', href: '/knowledge-base', icon: Library },
-      { label: 'Help & Support', href: '/help', icon: LifeBuoy },
+      { label: 'Courses', href: '/superadmin/courses', icon: BookOpen },
+      { label: 'Question Bank', href: '/superadmin/questions', icon: ClipboardList },
+      { label: 'Mock Tests', href: '/superadmin/mocks', icon: FileCheck2 },
+      { label: 'Companies', href: '/superadmin/companies', icon: Building2 },
+      { label: 'Colleges', href: '/superadmin/colleges', icon: GraduationCap },
     ],
   },
 ];
 
-/** Primary top-bar navigation (STUDENT_JOURNEY_SPEC §4 — no duplicate "Companies"). */
-export const TOPBAR_NAV: { label: string; href: string }[] = [
-  { label: 'Explore', href: '/explore' },
-  { label: 'Company Hubs', href: '/company-hubs' },
-  { label: 'Topic Mastery', href: '/topic-mastery' },
-  { label: 'Mock Assessments', href: '/mock-assessments' },
+export const TPO_NAV: NavSection[] = [
+  {
+    heading: 'PLACEMENT OFFICE',
+    items: [
+      { label: 'Dashboard', href: '/tpo/dashboard', icon: LayoutDashboard },
+      { label: 'Invitations', href: '/tpo/invitations', icon: Mail },
+    ],
+  },
 ];
+
+/** Pick the nav for the current route group. */
+export function navForPath(pathname: string): NavSection[] {
+  if (pathname.startsWith('/superadmin')) return SUPERADMIN_NAV;
+  if (pathname.startsWith('/tpo')) return TPO_NAV;
+  return STUDENT_NAV;
+}
+
+/** Workspace label shown under the logo, by route group. */
+export function workspaceLabelForPath(pathname: string): string {
+  if (pathname.startsWith('/superadmin')) return 'Admin Workspace';
+  if (pathname.startsWith('/tpo')) return 'Placement Office';
+  return 'Student Workspace';
+}
 
 export { GraduationCap };

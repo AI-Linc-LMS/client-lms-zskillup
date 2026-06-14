@@ -25,3 +25,7 @@ npm-debug.log*
 .idea
 .vscode/*
 !.vscode/extensions.json
+
+CLAUDE.md
+.claude/
+.playwright-mcp/

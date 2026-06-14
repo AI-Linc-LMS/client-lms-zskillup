@@ -135,3 +135,27 @@ export class AdminUpdateQuestionDto {
   @Type(() => AdminQuestionOptionInputDto)
   options?: AdminQuestionOptionInputDto[];
 }
+
+/**
+ * Bulk question import (Sprint 3 — superadmin). The admin pastes / uploads a CSV
+ * with a header row. Columns (case-insensitive, order-independent):
+ *
+ *   stem, type, difficulty, topic, company, hint, explanation,
+ *   optionA, optionB, optionC, optionD, correct
+ *
+ *   - type        MCQ | MULTI_SELECT   (default MCQ)
+ *   - difficulty  EASY | MEDIUM | HARD (default MEDIUM)
+ *   - topic       topic slug           (required)
+ *   - company     company slug         (optional)
+ *   - optionA..D  option text          (≥2 for choice questions)
+ *   - correct     correct letter(s)    e.g. "B" or "A,C"
+ *
+ * Imported questions are PUBLISHED so they are immediately usable in practice /
+ * mocks. The server parses the CSV and reports a per-row outcome.
+ */
+export class AdminImportQuestionsDto {
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500_000)
+  csv!: string;
+}

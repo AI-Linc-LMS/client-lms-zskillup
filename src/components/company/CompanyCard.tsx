@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Star, Users, Clock } from 'lucide-react';
+import { ArrowRight, Star, Users, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 /**
@@ -61,12 +62,11 @@ export function CompanyCard({ company }: { company: CompanyCardData }) {
             <Clock className="size-3.5" aria-hidden="true" /> {company.package ?? '3.5 – 9 LPA'}
           </span>
         </div>
-        <Link
-          href={`/dashboard/company/${company.slug}`}
-          className="mt-4 inline-flex w-full items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-navy transition-colors hover:border-orange hover:bg-orange/5"
-        >
-          View track →
-        </Link>
+        <Button asChild variant="outline" className="mt-4 w-full">
+          <Link href={`/dashboard/company/${company.slug}`}>
+            View track <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
+        </Button>
       </div>
     </article>
   );

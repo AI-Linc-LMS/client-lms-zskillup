@@ -1,48 +1,53 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Flame } from 'lucide-react';
+import { BadgeCheck, GraduationCap, Target, Timer, Trophy } from 'lucide-react';
 import { ProgressBar } from '@/components/ui/progress-bar';
-import { DEMO_STUDENT } from '@/lib/demo-data';
 import { getMe, type ApiMe } from '@/lib/api/me';
+import { getPracticeAccuracy, type ApiAccuracy } from '@/lib/api/practice';
+import { getMockHistory, type ApiMockAttemptHistory } from '@/lib/api/mocks';
+import { getMockStats } from '@/lib/mock-stats';
 
 /**
- * Dashboard hero. Sprint 3 wires the IDENTITY half (name, college, branch,
- * passout year) to the live `GET /me` endpoint. The GAMIFICATION half (level,
- * XP, coins, streak, rank) remains demo data until Sprint 5 builds the XP
- * ledger / student_stats cache — those values can't be invented without
- * either lying to the user or breaking the spec.
+ * Dashboard hero — every number on it is live (Sprint 0–4 data only):
+ * identity from `GET /me`, practice stats from `GET /practice/accuracy`,
+ * mock stats from `GET /mocks/attempts/mine`. The Sprint 5 gamification
+ * chrome (XP, coins, streak) returns to these slots when the ledger ships;
+ * until then the same premium layout carries real readiness signals instead
+ * of invented ones.
  */
 export function DashboardHero() {
   const [me, setMe] = useState<ApiMe | null>(null);
+  const [accuracy, setAccuracy] = useState<ApiAccuracy | null>(null);
+  const [history, setHistory] = useState<ApiMockAttemptHistory[] | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     getMe()
-      .then((data) => {
-        if (!cancelled) setMe(data);
-      })
-      .catch(() => {
-        // Preview / unauthenticated → render with demo identity below
-      });
+      .then((data) => !cancelled && setMe(data))
+      .catch(() => {});
+    getPracticeAccuracy()
+      .then((data) => !cancelled && setAccuracy(data))
+      .catch(() => {});
+    getMockHistory()
+      .then((data) => !cancelled && setHistory(data))
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
   }, []);
 
-  // Identity (from API when available)
   const firstName =
     (me?.fullName ? me.fullName.split(' ')[0] : null) ??
     (me?.email ? me.email.split('@')[0] : null) ??
-    DEMO_STUDENT.firstName;
+    'there';
 
   const identity =
     me?.studentProfile?.collegeName && me.studentProfile.passoutYear
       ? `${me.studentProfile.collegeName} · ${me.studentProfile.branch ?? 'CSE'} ${me.studentProfile.passoutYear}`
-      : DEMO_STUDENT.identity;
+      : (me?.email ?? 'Complete onboarding to link your college');
 
-  // Gamification (still demo — Sprint 5)
-  const s = DEMO_STUDENT;
+  const { bestPct, bestPercentile } = getMockStats(history ?? []);
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -60,46 +65,57 @@ export function DashboardHero() {
             <h1 className="text-[28px] font-extrabold leading-tight tracking-tight text-navy">
               Welcome back, {firstName}
             </h1>
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
-              ✦ {s.status}
-            </span>
+            {me?.status === 'ACTIVE' ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
+                <BadgeCheck className="size-3.5" aria-hidden="true" /> Active
+              </span>
+            ) : null}
           </div>
           <p className="mt-1.5 flex items-center gap-1.5 text-[13px] text-slate-500">
-            <span>🎓</span>
+            <GraduationCap className="size-4 text-slate-400" aria-hidden="true" />
             <span>{identity}</span>
           </p>
         </div>
 
-        {/* Stat chips */}
+        {/* Stat chips — all live */}
         <div className="flex flex-col items-end gap-1.5">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-orange px-3 py-1 text-[11px] font-bold text-white shadow-sm">
-            <Flame className="size-3.5" aria-hidden="true" />
-            {s.streakDays} DAY STREAK
+            <Target className="size-3.5" aria-hidden="true" />
+            {accuracy ? `${accuracy.total} QUESTIONS PRACTISED` : 'START PRACTISING'}
           </span>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-200">
-            🪙 {s.coins.toLocaleString()} coins
+            <Timer className="size-3.5" aria-hidden="true" />
+            {accuracy && accuracy.total > 0
+              ? `${accuracy.accuracyPct}% practice accuracy`
+              : 'No attempts yet'}
           </span>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1 text-[11px] font-semibold text-sky-700 ring-1 ring-sky-200">
-            🏆 Rank #{s.rank}
+            <Trophy className="size-3.5" aria-hidden="true" />
+            {bestPercentile !== null ? `Best mock · ${bestPercentile}th percentile` : 'No mocks yet'}
           </span>
         </div>
       </div>
 
-      {/* XP row */}
+      {/* Mock readiness row — best mock score against the 60% pass mark */}
       <div className="mt-5 flex items-center gap-3.5">
-        <div className="grid size-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-amber-400 to-orange text-[13px] font-extrabold text-white shadow-md">
-          Lv {s.level}
+        <div className="grid size-11 shrink-0 place-items-center rounded-full bg-navy text-[13px] font-extrabold text-white shadow-md">
+          {bestPct !== null ? `${bestPct}%` : '—'}
         </div>
         <div className="flex-1">
           <div className="mb-1.5 flex items-center justify-between">
             <span className="text-[11px] font-semibold text-navy">
-              XP · LEVEL {s.level} → {s.nextLevel}
+              MOCK READINESS · BEST SCORE VS 60% PASS MARK
             </span>
             <span className="text-[11px] text-slate-500">
-              {s.currentXp.toLocaleString()} / {s.nextLevelXp.toLocaleString()}
+              {history && history.length > 0
+                ? `${history.length} mock${history.length === 1 ? '' : 's'} taken`
+                : 'Take your first timed mock'}
             </span>
           </div>
-          <ProgressBar value={(s.currentXp / s.nextLevelXp) * 100} variant="xp" />
+          <ProgressBar
+            value={bestPct ?? 0}
+            label="Best mock score against the pass mark"
+          />
         </div>
       </div>
     </section>

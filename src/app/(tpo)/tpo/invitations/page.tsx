@@ -88,7 +88,7 @@ export default function TpoInvitationsPage() {
       <Breadcrumb
         items={[
           { label: 'Home', href: '/' },
-          { label: 'TPO Dashboard', href: '/tpo/dashboard' },
+          { label: 'Placement Office', href: '/tpo/dashboard' },
           { label: 'Bulk invitations' },
         ]}
       />

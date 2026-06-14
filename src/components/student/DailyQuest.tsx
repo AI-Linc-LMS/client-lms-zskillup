@@ -1,39 +1,36 @@
 import Link from 'next/link';
-import { Zap } from 'lucide-react';
-import { DEMO_QUEST } from '@/lib/demo-data';
+import { Sparkles, Zap } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 /**
- * Daily Quest banner. The full quest engine (server-generated, rewards,
- * completion tracking) lands in Sprint 5. For now the CTA deep-links into the
- * percentage-shortcut practice flow, which IS live (Sprint 3) — so the button
- * actually does something useful.
+ * Today's-focus banner (§4.4(d) tinted accent). The full quest engine —
+ * server-generated quests, XP/coin rewards, completion tracking — lands in
+ * Sprint 5. Until then this slot carries a real, working call-to-action into
+ * the live percentage practice flow with no invented reward numbers.
  */
 export function DailyQuest() {
   return (
     <section className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-orange/25 bg-gradient-to-r from-orange/5 to-amber-50/60 px-5 py-4 shadow-sm">
       <div className="flex items-start gap-3">
         <span className="mt-0.5 inline-flex items-center gap-1.5 rounded-full bg-orange px-3 py-1 text-[11px] font-bold text-white shadow-sm">
-          ★ DAILY QUEST
+          <Sparkles className="size-3" aria-hidden="true" />
+          TODAY&apos;S FOCUS
         </span>
         <div>
-          <p className="text-sm font-semibold text-navy">{DEMO_QUEST.title}</p>
-          <p className="mt-0.5 text-xs">
-            <span className="font-medium text-orange">Reward:</span>{' '}
-            <span className="font-semibold text-orange">+150 XP</span>
-            <span className="text-muted-foreground"> · </span>
-            <span className="font-semibold text-amber-600">30 coins</span>
-            <span className="text-muted-foreground"> · </span>
-            <span className="font-semibold text-sky-600">Speedster badge</span>
+          <p className="text-sm font-semibold text-navy">
+            Sharpen percentages — the most-tested NQT quant topic
+          </p>
+          <p className="mt-0.5 text-xs text-slate-500">
+            Server-graded questions with instant hints and step-by-step explanations.
           </p>
         </div>
       </div>
-      <Link
-        href="/practice?topic=percentages"
-        className="inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90 active:scale-95"
-      >
-        <Zap className="size-4" aria-hidden="true" />
-        Start quest
-      </Link>
+      <Button asChild>
+        <Link href="/practice?topic=percentages">
+          <Zap className="size-4" aria-hidden="true" />
+          Start practising
+        </Link>
+      </Button>
     </section>
   );
 }

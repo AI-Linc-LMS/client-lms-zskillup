@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Flame, Trophy, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import {
   DEMO_LEADERBOARD_GLOBAL_STATS,
   DEMO_LEADERBOARD_PODIUM,
@@ -26,38 +27,44 @@ export default function LeaderboardPage() {
   const [timeRange, setTimeRange] = useState('This week');
 
   return (
-    <div className="min-h-screen bg-muted/20">
+    <div className="min-h-screen bg-background">
       {/* Public navbar */}
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white px-6">
         <Link href="/" className="flex items-center gap-1 text-xl font-extrabold">
           <span className="text-orange">Z</span>
           <span className="text-foreground">Skillup</span>
         </Link>
-        <div className="flex gap-3">
-          <Link href="/login" className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted">
-            Log in
-          </Link>
-          <Link href="/signup" className="rounded-md bg-orange px-4 py-2 text-sm font-semibold text-white">
-            Create account
-          </Link>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" asChild>
+            <Link href="/login">Log in</Link>
+          </Button>
+          <Button asChild>
+            <Link href="/signup">Create account</Link>
+          </Button>
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-6 py-10">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <span className="text-xs font-semibold uppercase tracking-widest text-orange">
+      {/* Hero (Zone C — dark navy) */}
+      <section className="relative overflow-hidden bg-navy text-white">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_100%_0%,rgba(243,112,33,0.18),transparent),radial-gradient(50%_50%_at_0%_100%,rgba(56,189,248,0.12),transparent)]"
+        />
+        <div className="relative mx-auto max-w-5xl px-6 py-16 text-center sm:py-20">
+          <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-orange">
             Compete · Climb · Earn rewards
           </span>
-          <h1 className="mt-2 text-3xl font-extrabold text-navy sm:text-4xl">
+          <h1 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-[42px]">
             National leaderboard.
           </h1>
-          <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground">
+          <p className="mx-auto mt-4 max-w-2xl text-[15px] leading-relaxed text-white/70">
             Earn XP for every drill. Streaks multiply your gains. Top 100 each month win mentor
             calls, certificates, and recruiter referrals.
           </p>
         </div>
+      </section>
 
+      <main className="mx-auto max-w-5xl px-6 py-10">
         {/* Global stats */}
         <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
           {DEMO_LEADERBOARD_GLOBAL_STATS.map((s) => (
@@ -130,14 +137,14 @@ export default function LeaderboardPage() {
                   'flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
                   scope === t.key
                     ? 'bg-navy text-white'
-                    : 'border bg-white text-muted-foreground hover:text-foreground',
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
                 )}
               >
                 {t.label}
                 <span
                   className={cn(
                     'rounded-full px-1.5 text-[10px]',
-                    scope === t.key ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground',
+                    scope === t.key ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500',
                   )}
                 >
                   {t.count.toLocaleString()}
@@ -154,7 +161,7 @@ export default function LeaderboardPage() {
                   'rounded-full px-3 py-1 text-xs font-medium transition-colors',
                   timeRange === t
                     ? 'bg-orange text-white'
-                    : 'border bg-white text-muted-foreground hover:text-foreground',
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
                 )}
               >
                 {t}
@@ -225,12 +232,9 @@ export default function LeaderboardPage() {
                 Top 100 this month win mentor calls + recruiter referrals. · 12 days left in this cycle.
               </p>
             </div>
-            <Link
-              href="/prepare"
-              className="rounded-md bg-orange px-6 py-3 text-sm font-bold text-white hover:bg-orange/90"
-            >
-              Start now
-            </Link>
+            <Button size="lg" asChild>
+              <Link href="/prepare">Start now</Link>
+            </Button>
           </div>
         </div>
       </main>
@@ -248,7 +252,7 @@ function TableRow({ entry }: { entry: LeaderboardEntry }) {
     <tr
       className={cn(
         'border-b last:border-0',
-        entry.isYou ? 'bg-orange/5' : 'hover:bg-muted/40',
+        entry.isYou ? 'bg-orange/5' : 'hover:bg-slate-50',
       )}
     >
       <td className="px-4 py-3 font-semibold text-navy">

@@ -139,14 +139,17 @@ export function CompaniesExplorer() {
         <div className="flex items-center gap-2">
           <SlidersHorizontal className="size-4 text-slate-400" aria-hidden="true" />
           <span className="text-xs text-slate-500">Difficulty</span>
-          <div className="flex gap-1">
+          <div className="flex gap-1.5">
             {DIFFICULTIES.map((d) => (
               <button
                 key={d}
+                type="button"
                 onClick={() => setDifficulty(d)}
                 className={cn(
-                  'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
-                  difficulty === d ? 'bg-navy text-white' : 'text-slate-500 hover:bg-slate-100',
+                  'rounded-full px-3 py-1 text-xs font-semibold transition-colors',
+                  difficulty === d
+                    ? 'bg-navy text-white'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
                 )}
               >
                 {d}

@@ -129,7 +129,7 @@ function LoginForm() {
           </div>
 
           {sessionWarning && (
-            <p role="alert" className="rounded-md bg-orange/10 p-3 text-sm text-orange">
+            <p role="alert" className="rounded-md bg-amber-50 p-3 text-sm font-medium text-amber-700 ring-1 ring-amber-200">
               You were signed out of another device — only one active session is allowed.
             </p>
           )}
@@ -176,7 +176,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-[#f8f9fc]">
+    <div className="flex min-h-screen flex-col bg-background">
       {/* Top bar */}
       <header className="flex h-14 items-center border-b border-slate-200 bg-white px-6 shadow-sm">
         <Link href="/" className="flex items-center gap-0.5 text-xl font-extrabold">

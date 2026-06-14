@@ -71,9 +71,10 @@ export async function logout(): Promise<void> {
   } catch {
     // Even if the network call fails, clear local state below.
   } finally {
-    authToken.clear();
+    authToken.clear(); // also drops any active "view as student" preview token
     document.cookie = 'role=; path=/; max-age=0; samesite=lax';
     document.cookie = 'onboarded=; path=/; max-age=0; samesite=lax';
+    document.cookie = 'preview=; path=/; max-age=0; samesite=lax';
   }
 }
 

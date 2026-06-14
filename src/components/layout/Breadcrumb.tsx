@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 
-export interface Crumb {
+interface Crumb {
   label: string;
   href?: string;
 }

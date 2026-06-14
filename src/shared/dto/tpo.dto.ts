@@ -14,7 +14,6 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
-  IsEmail,
   IsOptional,
   IsString,
   MaxLength,
@@ -29,8 +28,12 @@ const trimString = ({ value }: { value: unknown }): unknown =>
   typeof value === 'string' ? value.trim() : value;
 
 export class TpoInvitationRowDto {
+  // Email FORMAT is validated per-row inside TpoService (not via @IsEmail) so a
+  // single malformed CSV row is reported as `invalid` rather than 400-ing the
+  // whole batch — bulk CSV uploads routinely contain a few bad rows.
   @Transform(normaliseEmail)
-  @IsEmail()
+  @IsString()
+  @MaxLength(254)
   email!: string;
 
   @IsOptional()

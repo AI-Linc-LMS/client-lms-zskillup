@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Loader2, Search, Sparkles, Star, Users, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { listCourses, type ApiCourseSummary } from '@/lib/api/catalog';
+import { CATEGORY_LABEL } from '@/lib/ui-maps';
 
 const DIFFICULTIES = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'] as const;
 const TYPES = ['Self-paced course', 'Mock drive', 'Live cohort', 'Drill set'];
@@ -25,7 +27,7 @@ const TABS: Array<{ label: string; category: ApiCourseSummary['category'] | 'ALL
 const HERO_STATS = [
   { label: 'Students enrolled', value: '240,000+' },
   { label: 'Partner colleges', value: '1,200+' },
-  { label: 'Average rating', value: '4.7★' },
+  { label: 'Average rating', value: '4.7', rating: true },
   { label: 'Placement success', value: '82%' },
 ];
 
@@ -59,7 +61,12 @@ export function PrepareHero() {
               <p className="text-[10px] font-semibold uppercase tracking-widest text-white/50">
                 {s.label}
               </p>
-              <p className="mt-1 text-2xl font-extrabold sm:text-3xl">{s.value}</p>
+              <p className="mt-1 flex items-center gap-1.5 text-2xl font-extrabold sm:text-3xl">
+                {s.value}
+                {s.rating ? (
+                  <Star className="size-5 fill-amber-400 text-amber-400" aria-hidden="true" />
+                ) : null}
+              </p>
             </div>
           ))}
         </div>
@@ -76,20 +83,20 @@ export function PrepareHero() {
               aria-label="Search tracks"
               className="h-12 w-full rounded-full border-0 bg-white pl-11 pr-32 text-sm text-navy placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/40"
             />
-            <button
+            <Button
               type="button"
-              className="absolute right-1.5 top-1/2 inline-flex h-9 -translate-y-1/2 items-center rounded-full bg-navy px-5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              variant="secondary"
+              className="absolute right-1.5 top-1/2 h-9 -translate-y-1/2 px-5"
             >
               Search
-            </button>
+            </Button>
           </div>
-          <Link
-            href="/dashboard/company/tcs"
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-orange px-6 text-[15px] font-semibold text-white shadow-sm transition-colors hover:bg-orange/90 active:translate-y-px"
-          >
-            <Sparkles className="size-4" aria-hidden="true" />
-            Start with TCS NQT
-          </Link>
+          <Button size="lg" asChild>
+            <Link href="/dashboard/company/tcs">
+              <Sparkles className="size-4" aria-hidden="true" />
+              Start with TCS NQT
+            </Link>
+          </Button>
         </div>
 
         <div className="mt-6 flex flex-wrap items-center gap-2">
@@ -116,13 +123,6 @@ const CATEGORY_ACCENT: Record<ApiCourseSummary['category'], string> = {
   PROGRAMMING_DSA: 'from-blue-700 to-indigo-900',
   COMMUNICATION_HR: 'from-rose-500 to-red-600',
   MOCK_DRIVE: 'from-orange-500 to-amber-600',
-};
-
-const CATEGORY_LABEL: Record<ApiCourseSummary['category'], string> = {
-  APTITUDE: 'Aptitude',
-  PROGRAMMING_DSA: 'Programming · DSA',
-  COMMUNICATION_HR: 'Communication · HR',
-  MOCK_DRIVE: 'Mock drive',
 };
 
 export function PrepareCatalog() {

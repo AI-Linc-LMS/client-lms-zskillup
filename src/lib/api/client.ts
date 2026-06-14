@@ -1,4 +1,5 @@
 import { authToken } from '@/store/auth';
+import { hasPreviewHint, roleHint } from '@/lib/session-hints';
 import { ApiRequestError, type ApiResponse } from './types';
 
 /**
@@ -37,7 +38,15 @@ type RequestOptions = Omit<RequestInit, 'body'> & {
   auth?: AuthPosture;
 };
 
-let refreshInFlight: Promise<boolean> | null = null;
+/**
+ * Refresh verdicts are three-way, not boolean: only `unauthorized` is an auth
+ * decision. `network` means the refresh endpoint was UNREACHABLE — a transient
+ * (backend restart, blip) that must never tear the session down, or a few
+ * seconds of downtime would mass-logout every open tab.
+ */
+type RefreshOutcome = 'ok' | 'unauthorized' | 'network';
+
+let refreshInFlight: Promise<RefreshOutcome> | null = null;
 /** Module-level latch — once we've decided this session is dead, stop retrying. */
 let sessionTerminated = false;
 
@@ -46,22 +55,24 @@ let sessionTerminated = false;
  * HttpOnly refresh cookie to Nest. De-duplicates concurrent refreshes so a
  * burst of 401s triggers EXACTLY ONE refresh.
  */
-async function refreshAccessToken(): Promise<boolean> {
-  if (sessionTerminated) return false;
+async function refreshAccessToken(): Promise<RefreshOutcome> {
+  if (sessionTerminated) return 'unauthorized';
   if (!refreshInFlight) {
-    refreshInFlight = (async () => {
+    refreshInFlight = (async (): Promise<RefreshOutcome> => {
       try {
         const res = await fetch('/api/auth/refresh', {
           method: 'POST',
           credentials: 'include',
         });
-        if (!res.ok) return false;
+        if (!res.ok) return 'unauthorized';
         const body = (await res.json()) as { accessToken?: string };
-        if (!body.accessToken) return false;
+        if (!body.accessToken) return 'unauthorized';
         authToken.set(body.accessToken);
-        return true;
+        return 'ok';
       } catch {
-        return false;
+        // fetch() rejects only on network failure — the server never answered,
+        // so we have NO verdict on the session. Surface as transient.
+        return 'network';
       } finally {
         refreshInFlight = null;
       }
@@ -83,9 +94,59 @@ function endSessionAndRedirect(): void {
   authToken.clear();
   document.cookie = 'role=; path=/; max-age=0; samesite=lax';
   document.cookie = 'onboarded=; path=/; max-age=0; samesite=lax';
-  // Hard navigation — wipes all in-flight component state and effects, so any
-  // pending requests in queued effects can't restart the loop.
-  window.location.assign('/login');
+  // The refresh cookie is HttpOnly — only the logout route handler can clear
+  // it. A dead-but-present cookie makes the middleware treat the visitor as
+  // authenticated and bounce /login → /dashboard → 401 → /login in an endless
+  // navigation loop (each cycle is a fresh bundle, so no in-memory latch can
+  // stop it). Purge it server-side, then hard-navigate — which also wipes all
+  // in-flight component state so queued effects can't restart the loop.
+  void fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
+    .catch(() => {})
+    .finally(() => window.location.assign('/login'));
+}
+
+/**
+ * "View as student" restore (single channel, like refresh). The preview token
+ * is memory-only, so a hard refresh during a super-admin preview drops it while
+ * the `preview=student` hint cookie survives. Restoring it HERE — before any
+ * request leaves on a student-area page — guarantees no component ever hits a
+ * STUDENT-only endpoint with the admin token (which would 403 "Insufficient
+ * role"). The restorer is registered by lib/preview-actions to avoid an import
+ * cycle; restoration is single-flight like refresh.
+ */
+let previewRestorer: (() => Promise<void>) | null = null;
+let previewRestoreInFlight: Promise<void> | null = null;
+
+export function _setPreviewRestorer(fn: () => Promise<void>): void {
+  previewRestorer = fn;
+}
+
+function previewRestorePending(path: string): boolean {
+  if (typeof window === 'undefined') return false;
+  if (authToken.isPreview()) return false;
+  // The restore call itself must go out with the ADMIN token.
+  if (path === '/api/v1/admin/impersonate') return false;
+  if (!hasPreviewHint() || roleHint() !== 'SUPER_ADMIN') return false;
+  // Only student-area pages run as the student; consoles keep the admin token.
+  const page = window.location.pathname;
+  if (page.startsWith('/superadmin') || page.startsWith('/tpo')) return false;
+  return true;
+}
+
+async function ensureStudentPreview(path: string): Promise<void> {
+  if (!previewRestorer || !previewRestorePending(path)) return;
+  if (!previewRestoreInFlight) {
+    previewRestoreInFlight = previewRestorer()
+      .catch(() => {
+        // Admin session dead or preview no longer allowed — drop the stale hint
+        // so requests proceed (and fail/redirect) through the normal auth flow.
+        document.cookie = 'preview=; path=/; max-age=0; samesite=lax';
+      })
+      .finally(() => {
+        previewRestoreInFlight = null;
+      });
+  }
+  return previewRestoreInFlight;
 }
 
 async function parseError(res: Response): Promise<ApiRequestError> {
@@ -137,6 +198,27 @@ export async function apiRequest<T>(
 ): Promise<ApiResponse<T>> {
   const posture: AuthPosture = options.auth ?? 'default';
 
+  // Restore an interrupted "view as student" preview before the request leaves.
+  await ensureStudentPreview(path);
+
+  // Prime the access token before the FIRST attempt. On a hard navigation /
+  // full reload the in-memory token is gone, but an authenticated session is
+  // still valid (HttpOnly refresh cookie + the `role` hint cookie is present).
+  // Refreshing up-front turns the otherwise-guaranteed first-paint 401 burst
+  // (every authenticated call 401ing before the retry path kicks in) into a
+  // single silent refresh. Skipped for login/public/preview postures and for
+  // logged-out visitors (no role hint). Single-flight via refreshAccessToken,
+  // so a burst of concurrent calls all await ONE refresh.
+  if (
+    posture === 'default' &&
+    !sessionTerminated &&
+    !authToken.isPreview() &&
+    authToken.get() == null &&
+    roleHint() !== null
+  ) {
+    await refreshAccessToken();
+  }
+
   try {
     return await rawRequest<T>(path, options);
   } catch (err) {
@@ -155,10 +237,15 @@ export async function apiRequest<T>(
       // public reads: 401 just means "no session" — no refresh, no redirect.
       if (posture === 'public') throw err;
 
+      // Preview mode (super-admin "view as student"): the short-lived student
+      // token cannot be refreshed — refreshing would silently swap back to the
+      // admin session and corrupt the preview. Surface the 401 to the caller.
+      if (authToken.isPreview()) throw err;
+
       // default: try a single silent refresh, then retry once.
       if (sessionTerminated) throw err;
       const refreshed = await refreshAccessToken();
-      if (refreshed) {
+      if (refreshed === 'ok') {
         try {
           return await rawRequest<T>(path, options);
         } catch (retryErr) {
@@ -168,6 +255,9 @@ export async function apiRequest<T>(
           throw retryErr;
         }
       }
+      // Transient outage — surface the failure to the caller's error state and
+      // keep the session; the next user action retries against a live backend.
+      if (refreshed === 'network') throw err;
       endSessionAndRedirect();
     }
 

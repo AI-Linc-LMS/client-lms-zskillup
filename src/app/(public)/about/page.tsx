@@ -1,13 +1,16 @@
 import Link from 'next/link';
 import {
   ArrowRight,
+  Check,
   GraduationCap,
   Shield,
+  Star,
   Target,
   Trophy,
   Sparkles,
   Users,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 /**
  * Public /about page — Sprint 1 deliverable (Implementation Plan §7).
@@ -18,7 +21,7 @@ import {
 const STATS = [
   { label: 'Students enrolled', value: '240,000+' },
   { label: 'Partner colleges', value: '1,200+' },
-  { label: 'Average rating', value: '4.7★' },
+  { label: 'Average rating', value: '4.7', rating: true },
   { label: 'Placement success', value: '82%' },
 ];
 
@@ -31,12 +34,12 @@ const PILLARS = [
   {
     icon: Trophy,
     title: 'Gamified, but honest',
-    body: 'XP, streaks and badges are computed from a single append-only ledger — never edited, always reproducible. The Placement Readiness Score is the platform\'s honest answer to "am I ready?".',
+    body: 'XP, streaks and badges are computed from a single append-only ledger — never edited, always reproducible. Every score the platform shows is the backend\'s honest answer, never invented in the browser.',
   },
   {
     icon: Users,
     title: 'Built for placement cells',
-    body: 'TPOs see live cohort readiness, at-risk students and branch performance. Reports export to CSV/PDF without leaving the platform.',
+    body: 'TPOs onboard their whole cohort with a single CSV upload, with strict per-college tenant isolation. Cohort readiness analytics and exports are on the roadmap.',
   },
   {
     icon: Shield,
@@ -55,7 +58,7 @@ const PRINCIPLES = [
 
 export default function AboutPage() {
   return (
-    <main className="bg-[#f8f9fc]">
+    <main className="bg-background">
       {/* Hero */}
       <section className="relative overflow-hidden bg-navy text-white">
         <div
@@ -77,13 +80,12 @@ export default function AboutPage() {
             tools that let TPOs act on their cohort&apos;s state in real time.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link
-              href="/signup"
-              className="inline-flex h-12 items-center gap-2 rounded-full bg-orange px-7 text-[15px] font-semibold text-white shadow-sm transition-colors hover:bg-orange/90"
-            >
-              <Sparkles className="size-4" aria-hidden="true" />
-              Create free account
-            </Link>
+            <Button size="lg" asChild>
+              <Link href="/signup">
+                <Sparkles className="size-4" aria-hidden="true" />
+                Create free account
+              </Link>
+            </Button>
             <Link
               href="/dashboard/company"
               className="inline-flex h-12 items-center gap-1.5 rounded-full border border-white/20 px-6 text-[15px] font-semibold text-white/90 transition-colors hover:bg-white/5"
@@ -103,7 +105,12 @@ export default function AboutPage() {
               <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                 {s.label}
               </p>
-              <p className="mt-1 text-2xl font-extrabold text-navy sm:text-3xl">{s.value}</p>
+              <p className="mt-1 flex items-center gap-1.5 text-2xl font-extrabold text-navy sm:text-3xl">
+                {s.value}
+                {s.rating ? (
+                  <Star className="size-5 fill-amber-400 text-amber-400" aria-hidden="true" />
+                ) : null}
+              </p>
             </div>
           ))}
         </div>
@@ -144,12 +151,13 @@ export default function AboutPage() {
               Decisions, not dashboards.
             </h2>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-500">
-              TPOs see the full cohort PPS distribution, drill into at-risk students, compare
-              branches, and export CSV/PDF reports without leaving the platform. Tenant isolation
-              guarantees a TPO never sees another college&apos;s data.
+              TPOs onboard their cohort with a single CSV upload, with tenant isolation that
+              guarantees a TPO never sees another college&apos;s data. Cohort placement-readiness
+              analytics — PPS distribution, at-risk students, branch comparison and exports — are on
+              the roadmap.
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
-              {['Live PPS distribution', 'At-risk list', 'Branch performance', 'CSV / PDF export'].map((tag) => (
+              {['Bulk student invite', 'Tenant isolation', 'Cohort analytics — roadmap', 'CSV / PDF export — roadmap'].map((tag) => (
                 <span
                   key={tag}
                   className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-semibold text-slate-600"
@@ -182,7 +190,7 @@ export default function AboutPage() {
               className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
             >
               <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-600">
-                ✓
+                <Check className="size-3" aria-hidden="true" />
               </span>
               <span className="text-sm leading-relaxed text-slate-600">{p}</span>
             </li>
@@ -200,13 +208,12 @@ export default function AboutPage() {
             Create a free account in under a minute. We&apos;ll match you to the right tracks for
             your campus drives.
           </p>
-          <Link
-            href="/signup"
-            className="mt-6 inline-flex h-12 items-center gap-2 rounded-full bg-orange px-7 text-[15px] font-semibold text-white shadow-sm transition-colors hover:bg-orange/90"
-          >
-            Get started
-            <ArrowRight className="size-4" aria-hidden="true" />
-          </Link>
+          <Button size="lg" className="mt-6" asChild>
+            <Link href="/signup">
+              Get started
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+          </Button>
         </div>
       </section>
     </main>

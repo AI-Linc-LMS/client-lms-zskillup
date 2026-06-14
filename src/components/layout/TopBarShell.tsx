@@ -9,7 +9,7 @@ import { TopBar } from './TopBar';
  */
 export function TopBarShell({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#f8f9fc]">
+    <div className="min-h-screen bg-background">
       <TopBar />
       {children}
     </div>

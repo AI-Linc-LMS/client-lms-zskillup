@@ -96,3 +96,12 @@ export enum QuestionStatus {
   PUBLISHED = 'PUBLISHED',
   ARCHIVED = 'ARCHIVED',
 }
+
+// ─── Mock tests (Sprint 4) ───────────────────────────────────────────────────
+
+/** Mock attempt lifecycle (Implementation Plan §3.3). */
+export enum MockAttemptStatus {
+  IN_PROGRESS = 'IN_PROGRESS',
+  SUBMITTED = 'SUBMITTED',
+  EXPIRED = 'EXPIRED',
+}
