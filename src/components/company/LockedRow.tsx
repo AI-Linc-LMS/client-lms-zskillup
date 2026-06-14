@@ -20,18 +20,22 @@ export function LockedRow({
   onUnlockClick?: () => void;
 }) {
   if (!locked) {
-    return <div className="flex items-center justify-between rounded-lg border p-3">{children}</div>;
+    return (
+      <div className="flex items-center justify-between rounded-lg border border-slate-200 p-3">
+        {children}
+      </div>
+    );
   }
   return (
     <button
       type="button"
       onClick={onUnlockClick}
       className={cn(
-        'flex w-full items-center justify-between rounded-lg border p-3 text-left opacity-50 transition-opacity hover:opacity-70',
+        'flex w-full items-center justify-between rounded-lg border border-slate-200 p-3 text-left opacity-50 transition-opacity hover:opacity-70',
       )}
     >
       {children}
-      <Lock className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+      <Lock className="size-4 shrink-0 text-slate-400" aria-hidden="true" />
     </button>
   );
 }

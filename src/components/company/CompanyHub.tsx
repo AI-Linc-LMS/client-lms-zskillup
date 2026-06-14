@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   BookOpen,
   ClipboardList,
@@ -64,11 +65,15 @@ export function CompanyHub({ content }: { content: HubContent }) {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="gap-2">
-            <BookOpen className="size-4" aria-hidden="true" /> Practice topics
+          <Button asChild variant="outline" className="gap-2">
+            <Link href={`/practice?company=${c.slug}`}>
+              <BookOpen className="size-4" aria-hidden="true" /> Practice topics
+            </Link>
           </Button>
-          <Button variant="secondary" className="gap-2">
-            <Trophy className="size-4" aria-hidden="true" /> Timed assessment
+          <Button asChild variant="secondary" className="gap-2">
+            <Link href="/mock-tests">
+              <Trophy className="size-4" aria-hidden="true" /> Timed assessment
+            </Link>
           </Button>
         </div>
       </div>
@@ -118,7 +123,12 @@ export function CompanyHub({ content }: { content: HubContent }) {
           <div className="rounded-xl bg-navy p-4 text-white shadow-sm">
             <p className="text-sm font-semibold">Drive walkthrough</p>
             <p className="mt-1 text-xs text-white/70">Company-specific overview for this hub.</p>
-            <button className="mt-3 w-full rounded-full bg-white px-3 py-2 text-sm font-semibold text-navy shadow-sm transition-opacity hover:opacity-90">
+            <button
+              type="button"
+              disabled
+              title="Walkthrough videos arrive with the company-content release"
+              className="mt-3 w-full rounded-full bg-white px-3 py-2 text-sm font-semibold text-navy shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+            >
               Watch overview
             </button>
           </div>

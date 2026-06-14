@@ -3,17 +3,21 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { SIDEBAR_SECTIONS } from './nav-config';
-import { PpsGauge } from './PpsGauge';
-import { DEMO_PPS } from '@/lib/demo-data';
+import { navForPath } from './nav-config';
 
+/**
+ * Workspace sidebar — route-aware (student / super-admin / TPO). Pure
+ * navigation: the placement-readiness (PPS) footer was removed with the rest of
+ * the Sprint-7 surfaces, so nothing here renders fabricated data.
+ */
 export function Sidebar() {
   const pathname = usePathname();
+  const sections = navForPath(pathname);
 
   return (
     <aside className="hidden w-60 shrink-0 flex-col border-r border-slate-200 bg-white md:flex">
       <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-5" aria-label="Workspace">
-        {SIDEBAR_SECTIONS.map((section) => (
+        {sections.map((section) => (
           <div key={section.heading}>
             <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
               {section.heading}
@@ -39,11 +43,6 @@ export function Sidebar() {
                         aria-hidden="true"
                       />
                       <span className="flex-1 truncate">{item.label}</span>
-                      {typeof item.badge === 'number' ? (
-                        <span className="grid min-w-[18px] place-items-center rounded-full bg-navy px-1.5 py-px text-[10px] font-bold text-white">
-                          {item.badge}
-                        </span>
-                      ) : null}
                     </Link>
                   </li>
                 );
@@ -52,10 +51,6 @@ export function Sidebar() {
           </div>
         ))}
       </nav>
-
-      <div className="border-t border-slate-200 p-3">
-        <PpsGauge score={DEMO_PPS.score} delta={DEMO_PPS.delta} contextLine={DEMO_PPS.contextLine} />
-      </div>
     </aside>
   );
 }

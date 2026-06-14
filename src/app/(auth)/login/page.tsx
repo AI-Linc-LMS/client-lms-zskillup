@@ -4,8 +4,7 @@ import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { authLoginSchema, type AuthLoginDto } from '@/shared';
+import type { AuthLoginDto } from '@/shared';
 import { login } from '@/lib/api/auth';
 import { ApiRequestError } from '@/lib/api/types';
 import { Button } from '@/components/ui/button';
@@ -20,16 +19,19 @@ function LoginForm() {
   const [role, setRole] = useState<Role>('student');
   const [serverError, setServerError] = useState<string | null>(null);
   const [sessionWarning, setSessionWarning] = useState(false);
+  /** Email captured from the form when login fails with EMAIL_NOT_VERIFIED. */
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<AuthLoginDto>({ resolver: zodResolver(authLoginSchema) });
+  } = useForm<AuthLoginDto>();
 
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
     setSessionWarning(false);
+    setUnverifiedEmail(null);
     try {
       const result = await login(values);
       if (!result.user.isOnboarded) {
@@ -53,6 +55,11 @@ function LoginForm() {
     } catch (err) {
       if (err instanceof ApiRequestError && err.code === 'SESSION_CONFLICT') {
         setSessionWarning(true);
+        return;
+      }
+      if (err instanceof ApiRequestError && err.code === 'EMAIL_NOT_VERIFIED') {
+        // Capture the email so the recovery panel can route to /signup/verify.
+        setUnverifiedEmail(values.email);
         return;
       }
       setServerError(
@@ -94,7 +101,13 @@ function LoginForm() {
             autoComplete="email"
             placeholder="you@college.edu"
             error={errors.email?.message}
-            {...register('email')}
+            {...register('email', {
+              required: 'Email is required',
+              pattern: {
+                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: 'Enter a valid email address',
+              },
+            })}
           />
           <FormField
             id="password"
@@ -102,7 +115,7 @@ function LoginForm() {
             type="password"
             autoComplete="current-password"
             error={errors.password?.message}
-            {...register('password')}
+            {...register('password', { required: 'Password is required' })}
           />
 
           <div className="flex items-center justify-between">
@@ -116,12 +129,31 @@ function LoginForm() {
           </div>
 
           {sessionWarning && (
-            <p role="alert" className="rounded-md bg-orange/10 p-3 text-sm text-orange">
+            <p role="alert" className="rounded-md bg-amber-50 p-3 text-sm font-medium text-amber-700 ring-1 ring-amber-200">
               You were signed out of another device — only one active session is allowed.
             </p>
           )}
+          {unverifiedEmail && (
+            <div
+              role="alert"
+              className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"
+            >
+              <p className="font-semibold">Email not verified yet</p>
+              <p className="mt-1 text-xs leading-relaxed">
+                We sent a 6-digit code to{' '}
+                <span className="font-semibold">{unverifiedEmail}</span> when you first signed up.
+                Verify now to finish setting up your account.
+              </p>
+              <Link
+                href={`/signup/verify?email=${encodeURIComponent(unverifiedEmail)}`}
+                className="mt-2 inline-flex items-center gap-1 rounded-full bg-amber-600 px-3 py-1 text-[11px] font-semibold text-white transition-colors hover:bg-amber-700"
+              >
+                Verify email now &rarr;
+              </Link>
+            </div>
+          )}
           {serverError && (
-            <p role="alert" className="text-sm text-destructive">
+            <p role="alert" className="rounded-md bg-red-50 p-3 text-sm font-medium text-red-700 ring-1 ring-red-200">
               {serverError}
             </p>
           )}
@@ -144,7 +176,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-[#f8f9fc]">
+    <div className="flex min-h-screen flex-col bg-background">
       {/* Top bar */}
       <header className="flex h-14 items-center border-b border-slate-200 bg-white px-6 shadow-sm">
         <Link href="/" className="flex items-center gap-0.5 text-xl font-extrabold">

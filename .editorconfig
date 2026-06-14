@@ -1,0 +1,14 @@
+root = true
+
+# Enforce UTF-8 so multibyte glyphs (— – → ★ ₹ · 🔥) are never re-saved as
+# double-encoded mojibake. See the encoding repair on 2026-06-08.
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false

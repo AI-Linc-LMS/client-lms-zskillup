@@ -42,8 +42,22 @@ export async function POST(): Promise<NextResponse> {
     );
   }
 
-  const body = (await upstream.json()) as { accessToken?: string };
-  const response = NextResponse.json({ accessToken: body.accessToken });
+  // Backend wraps every success response in `{ data, meta }` (DATA_FLOW §3).
+  // The refresh payload is `{ data: { accessToken } }` — reading `accessToken`
+  // off the envelope root yields undefined and silently logs the user out the
+  // first time the in-memory access token expires. Always unwrap.
+  const body = (await upstream.json()) as {
+    accessToken?: string;
+    data?: { accessToken?: string };
+  };
+  const accessToken = body.data?.accessToken ?? body.accessToken;
+  if (!accessToken) {
+    return NextResponse.json(
+      { error: { code: 'REFRESH_FAILED', message: 'Refresh response missing token' } },
+      { status: 401 },
+    );
+  }
+  const response = NextResponse.json({ accessToken });
 
   // Forward the rotated refresh cookie (rotation, ADR-006) back to the browser.
   const setCookie = upstream.headers.get('set-cookie');

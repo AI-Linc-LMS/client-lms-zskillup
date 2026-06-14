@@ -1,0 +1,368 @@
+import { apiClient } from './client';
+import type {
+  AdminCreateCollegeDto,
+  AdminUpdateCollegeDto,
+  AdminCreateCompanyDto,
+  AdminUpdateCompanyDto,
+  AdminCreateCourseDto,
+  AdminUpdateCourseDto,
+  AdminCreateModuleDto,
+  AdminUpdateModuleDto,
+  AdminCreateLessonDto,
+  AdminUpdateLessonDto,
+  CourseCategory,
+  CourseDifficulty,
+  LessonKind,
+} from '@/shared';
+import type {
+  AdminCreateQuestionDto,
+  AdminUpdateQuestionDto,
+} from '@/shared/dto/admin-questions.dto';
+
+/**
+ * Admin (super-admin) API client. Wraps the `/api/v1/admin/*` endpoints.
+ * All routes are SUPER_ADMIN-only — backend RolesGuard enforces; this client
+ * is just transport. Day 3.5 brings up the colleges console first; other
+ * admin entities (companies, courses, questions) will fold into this file
+ * as their consoles are built (Sprint 8 polish).
+ */
+
+export interface AdminCollegeRow {
+  id: string;
+  name: string;
+  slug: string;
+  state: string;
+  city: string;
+  status: 'ACTIVE' | 'SUSPENDED';
+  createdAt: string;
+}
+
+export async function listAdminColleges(): Promise<AdminCollegeRow[]> {
+  const res = await apiClient.get<AdminCollegeRow[]>('/api/v1/admin/colleges');
+  return res.data;
+}
+
+export async function createAdminCollege(dto: AdminCreateCollegeDto): Promise<{ id: string }> {
+  const res = await apiClient.post<{ id: string }>('/api/v1/admin/colleges', dto);
+  return res.data;
+}
+
+export async function updateAdminCollege(
+  id: string,
+  dto: AdminUpdateCollegeDto,
+): Promise<{ id: string }> {
+  const res = await apiClient.patch<{ id: string }>(`/api/v1/admin/colleges/${id}`, dto);
+  return res.data;
+}
+
+export async function suspendAdminCollege(id: string): Promise<void> {
+  await apiClient.delete(`/api/v1/admin/colleges/${id}`);
+}
+
+// ─── Companies (Sprint 2 — superadmin authoring) ────────────────────────────
+
+export interface AdminCompanyRow {
+  id: string;
+  name: string;
+  slug: string;
+  type: 'SERVICE' | 'CONSULTING' | 'PRODUCT';
+  tagline: string | null;
+  displayOrder: number;
+  isPublished: boolean;
+}
+
+export async function listAdminCompanies(): Promise<AdminCompanyRow[]> {
+  const res = await apiClient.get<AdminCompanyRow[]>('/api/v1/admin/companies');
+  return res.data;
+}
+
+export async function createAdminCompany(dto: AdminCreateCompanyDto): Promise<{ id: string }> {
+  const res = await apiClient.post<{ id: string }>('/api/v1/admin/companies', dto);
+  return res.data;
+}
+
+export async function updateAdminCompany(
+  id: string,
+  dto: AdminUpdateCompanyDto,
+): Promise<{ id: string }> {
+  const res = await apiClient.patch<{ id: string }>(`/api/v1/admin/companies/${id}`, dto);
+  return res.data;
+}
+
+// ─── Questions (Sprint 3 — superadmin question-bank CRUD) ───────────────────
+
+export interface AdminQuestionRow {
+  id: string;
+  type: 'MCQ' | 'MULTI_SELECT' | 'NUMERIC' | 'CODING';
+  difficulty: 'EASY' | 'MEDIUM' | 'HARD';
+  stem: string;
+  /** The (leaf) topic this question is tagged to — backend field is `subtopicId`. */
+  subtopicId: string;
+  companyId: string | null;
+  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  createdAt: string;
+}
+
+export async function listAdminQuestions(
+  params: { status?: string; topic?: string; limit?: number; offset?: number } = {},
+): Promise<{ rows: AdminQuestionRow[]; total: number }> {
+  const qs = new URLSearchParams();
+  if (params.status) qs.set('status', params.status);
+  if (params.topic) qs.set('topic', params.topic);
+  if (params.limit) qs.set('limit', String(params.limit));
+  if (params.offset) qs.set('offset', String(params.offset));
+  const suffix = qs.toString() ? `?${qs.toString()}` : '';
+  const res = await apiClient.get<{ rows: AdminQuestionRow[]; total: number }>(
+    `/api/v1/admin/questions${suffix}`,
+  );
+  return res.data;
+}
+
+export async function createAdminQuestion(dto: AdminCreateQuestionDto): Promise<{ id: string }> {
+  const res = await apiClient.post<{ id: string }>('/api/v1/admin/questions', dto);
+  return res.data;
+}
+
+export async function updateAdminQuestion(
+  id: string,
+  dto: AdminUpdateQuestionDto,
+): Promise<{ id: string }> {
+  const res = await apiClient.patch<{ id: string }>(`/api/v1/admin/questions/${id}`, dto);
+  return res.data;
+}
+
+export async function archiveAdminQuestion(id: string): Promise<void> {
+  await apiClient.delete(`/api/v1/admin/questions/${id}`);
+}
+
+// ─── Platform stats (super-admin dashboard) ─────────────────────────────────
+
+export interface AdminPlatformStats {
+  students: number;
+  colleges: number;
+  companies: number;
+  courses: number;
+  questionsPublished: number;
+  questionsTotal: number;
+  mockTests: number;
+  mockAttempts: number;
+  practiceAttempts: number;
+}
+
+export async function getAdminStats(): Promise<AdminPlatformStats> {
+  const res = await apiClient.get<AdminPlatformStats>('/api/v1/admin/stats');
+  return res.data;
+}
+
+// ─── View-as-student preview (super-admin QA tool) ──────────────────────────
+
+export interface ImpersonatePreview {
+  /** Short-lived STUDENT access token (no refresh) — layer over the admin session. */
+  accessToken: string;
+  user: {
+    id: string;
+    name: string | null;
+    role: 'STUDENT' | 'COLLEGE_ADMIN' | 'SUPER_ADMIN';
+    isOnboarded: boolean;
+  };
+}
+
+/** Mint a student preview token. Omit studentId to auto-pick a demo student. */
+export async function impersonateStudent(studentId?: string): Promise<ImpersonatePreview> {
+  const res = await apiClient.post<ImpersonatePreview>(
+    '/api/v1/admin/impersonate',
+    studentId ? { studentId } : {},
+  );
+  return res.data;
+}
+
+// ─── Mock-test CRUD (Sprint 4 — superadmin "Mock test definitions") ──────────
+
+export interface AdminMockRow {
+  id: string;
+  title: string;
+  companyId: string | null;
+  durationMinutes: number;
+  totalQuestions: number;
+  passingScore: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface AdminMockQuestion {
+  id: string;
+  orderIndex: number;
+  stem: string;
+  difficulty: 'EASY' | 'MEDIUM' | 'HARD';
+}
+
+export interface AdminMockDetail extends AdminMockRow {
+  questions: AdminMockQuestion[];
+}
+
+export interface AdminCreateMock {
+  title: string;
+  companyId?: string | null;
+  durationMinutes: number;
+  passingScore: number;
+  questionIds: string[];
+  isActive?: boolean;
+}
+
+export type AdminUpdateMock = Partial<AdminCreateMock>;
+
+export async function listAdminMocks(): Promise<AdminMockRow[]> {
+  const res = await apiClient.get<AdminMockRow[]>('/api/v1/admin/mocks');
+  return res.data;
+}
+
+export async function getAdminMock(id: string): Promise<AdminMockDetail> {
+  const res = await apiClient.get<AdminMockDetail>(`/api/v1/admin/mocks/${id}`);
+  return res.data;
+}
+
+export async function createAdminMock(dto: AdminCreateMock): Promise<{ id: string }> {
+  const res = await apiClient.post<{ id: string }>('/api/v1/admin/mocks', dto);
+  return res.data;
+}
+
+export async function updateAdminMock(id: string, dto: AdminUpdateMock): Promise<{ id: string }> {
+  const res = await apiClient.patch<{ id: string }>(`/api/v1/admin/mocks/${id}`, dto);
+  return res.data;
+}
+
+export async function deleteAdminMock(id: string): Promise<void> {
+  await apiClient.delete(`/api/v1/admin/mocks/${id}`);
+}
+
+// ─── Bulk question import (CSV) ─────────────────────────────────────────────
+
+export interface AdminImportRow {
+  line: number;
+  stem: string;
+  status: 'created' | 'invalid';
+  reason?: string;
+}
+
+export interface AdminImportResult {
+  created: number;
+  invalid: number;
+  rows: AdminImportRow[];
+}
+
+export async function importAdminQuestions(csv: string): Promise<AdminImportResult> {
+  const res = await apiClient.post<AdminImportResult>('/api/v1/admin/questions/import', { csv });
+  return res.data;
+}
+
+// ─── Courses / modules / lessons (Sprint 2 — superadmin authoring) ──────────
+//
+// The public `GET /courses` filters is_published=true, so this console reads
+// through the admin-only `GET /admin/courses[/:slug]` endpoints, which include
+// drafts being authored. Mutations reuse the shared create/update DTOs.
+
+export interface AdminCourseRow {
+  id: string;
+  slug: string;
+  title: string;
+  category: CourseCategory;
+  difficulty: CourseDifficulty;
+  estimatedHours: number;
+  isPublished: boolean;
+  moduleCount: number;
+  lessonCount: number;
+  updatedAt: string;
+}
+
+export interface AdminCourseLesson {
+  id: string;
+  title: string;
+  kind: LessonKind;
+  durationMinutes: number;
+  videoProviderId: string | null;
+  body: string | null;
+  orderIndex: number;
+  isFree: boolean;
+}
+
+export interface AdminCourseModule {
+  id: string;
+  title: string;
+  summary: string | null;
+  orderIndex: number;
+  lessons: AdminCourseLesson[];
+}
+
+export interface AdminCourseDetail {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string | null;
+  coverUrl: string | null;
+  category: CourseCategory;
+  difficulty: CourseDifficulty;
+  estimatedHours: number;
+  isPublished: boolean;
+  modules: AdminCourseModule[];
+}
+
+export async function listAdminCourses(): Promise<AdminCourseRow[]> {
+  const res = await apiClient.get<AdminCourseRow[]>('/api/v1/admin/courses');
+  return res.data;
+}
+
+export async function getAdminCourse(slug: string): Promise<AdminCourseDetail> {
+  const res = await apiClient.get<AdminCourseDetail>(`/api/v1/admin/courses/${slug}`);
+  return res.data;
+}
+
+export async function createAdminCourse(dto: AdminCreateCourseDto): Promise<{ id: string }> {
+  const res = await apiClient.post<{ id: string }>('/api/v1/admin/courses', dto);
+  return res.data;
+}
+
+export async function updateAdminCourse(
+  id: string,
+  dto: AdminUpdateCourseDto,
+): Promise<{ id: string }> {
+  const res = await apiClient.patch<{ id: string }>(`/api/v1/admin/courses/${id}`, dto);
+  return res.data;
+}
+
+export async function createAdminModule(dto: AdminCreateModuleDto): Promise<{ id: string }> {
+  const res = await apiClient.post<{ id: string }>('/api/v1/admin/modules', dto);
+  return res.data;
+}
+
+export async function updateAdminModule(
+  id: string,
+  dto: AdminUpdateModuleDto,
+): Promise<{ id: string }> {
+  const res = await apiClient.patch<{ id: string }>(`/api/v1/admin/modules/${id}`, dto);
+  return res.data;
+}
+
+export async function deleteAdminModule(id: string): Promise<void> {
+  await apiClient.delete(`/api/v1/admin/modules/${id}`);
+}
+
+export async function createAdminLesson(dto: AdminCreateLessonDto): Promise<{ id: string }> {
+  const res = await apiClient.post<{ id: string }>('/api/v1/admin/lessons', dto);
+  return res.data;
+}
+
+export async function updateAdminLesson(
+  id: string,
+  dto: AdminUpdateLessonDto,
+): Promise<{ id: string }> {
+  const res = await apiClient.patch<{ id: string }>(`/api/v1/admin/lessons/${id}`, dto);
+  return res.data;
+}
+
+export async function deleteAdminLesson(id: string): Promise<void> {
+  await apiClient.delete(`/api/v1/admin/lessons/${id}`);
+}
+
+export async function deleteAdminCourse(id: string): Promise<void> {
+  await apiClient.delete(`/api/v1/admin/courses/${id}`);
+}

@@ -1,6 +1,8 @@
-﻿import Link from 'next/link';
-import { Star, Users, Clock, Zap, Trophy, BookOpen, BarChart3 } from 'lucide-react';
+import Link from 'next/link';
+import { Star, Users, Clock, Zap, Trophy, BookOpen, BarChart3, Flame } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ProgressBar } from '@/components/ui/progress-bar';
 import {
   HOMEPAGE_FEATURED_TRACKS,
   HOMEPAGE_WHY_BLOCKS,
@@ -10,14 +12,14 @@ import {
 } from '@/lib/demo-data-extra';
 
 /**
- * Public homepage (STUDENT_JOURNEY_SPEC Â§3). Server Component.
- * Matches the site analysis spec exactly â€” all 9 sections.
+ * Public homepage (STUDENT_JOURNEY_SPEC §3). Server Component.
+ * Matches the site analysis spec exactly — all 9 sections.
  */
 
 const HERO_STATS = [
   { value: '240,000+', label: 'Students enrolled' },
   { value: '1,200+', label: 'Partner colleges' },
-  { value: '4.7â˜…', label: 'Average rating' },
+  { value: '4.7', label: 'Average rating', rating: true },
   { value: '82%', label: 'Placement success' },
 ];
 
@@ -28,7 +30,7 @@ const WHY_ICONS = [BookOpen, Zap, Trophy, BarChart3];
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
-      {/* â”€â”€ Public navbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Public navbar ─────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white px-6">
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-1 text-xl font-extrabold">
@@ -38,22 +40,16 @@ export default function HomePage() {
           <span className="hidden text-sm text-muted-foreground sm:block">Placement prep</span>
         </div>
         <div className="flex items-center gap-3">
-          <Link
-            href="/login"
-            className="rounded-md px-4 py-2 text-sm font-medium text-foreground hover:bg-slate-50"
-          >
-            Log in
-          </Link>
-          <Link
-            href="/signup"
-            className="rounded-md bg-orange px-4 py-2 text-sm font-semibold text-white hover:bg-orange/90"
-          >
-            Create account
-          </Link>
+          <Button variant="ghost" asChild>
+            <Link href="/login">Log in</Link>
+          </Button>
+          <Button asChild>
+            <Link href="/signup">Create account</Link>
+          </Button>
         </div>
       </header>
 
-      {/* â”€â”€ Hero â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section className="bg-gradient-to-b from-navy/95 to-navy px-6 py-24 text-white">
         <div className="mx-auto max-w-4xl text-center">
           <span className="inline-block rounded-full bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-white/80">
@@ -69,17 +65,14 @@ export default function HomePage() {
             1,200+ campus placement cells.
           </p>
 
-          {/* CTAs â€” single primary + two secondary (STUDENT_JOURNEY_SPEC Â§6) */}
+          {/* CTAs — single primary + two secondary (STUDENT_JOURNEY_SPEC §6) */}
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/signup"
-              className="inline-flex h-12 items-center justify-center rounded-full bg-orange px-7 text-[15px] font-semibold text-white shadow-sm transition-colors hover:bg-orange/90 active:translate-y-px"
-            >
-              Create free account
-            </Link>
+            <Button size="lg" asChild>
+              <Link href="/signup">Create free account</Link>
+            </Button>
             <Link
               href="/dashboard/company"
-              className="rounded-md border border-white/30 bg-white/10 px-6 py-3 text-sm font-semibold text-white hover:bg-white/20"
+              className="inline-flex h-12 items-center justify-center rounded-full border border-white/30 bg-white/10 px-7 text-[15px] font-semibold text-white transition-colors hover:bg-white/20"
             >
               Browse companies
             </Link>
@@ -87,7 +80,7 @@ export default function HomePage() {
               href="/login"
               className="text-sm font-medium text-white/70 underline-offset-4 hover:underline"
             >
-              Existing user â€” log in
+              Existing user — log in
             </Link>
           </div>
 
@@ -105,26 +98,31 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* â”€â”€ Stats bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Stats bar ─────────────────────────────────────────────────────── */}
       <section className="bg-slate-50/60">
         <div className="mx-auto grid max-w-5xl grid-cols-2 gap-6 px-6 py-10 md:grid-cols-4">
           {HERO_STATS.map((s) => (
             <div key={s.label} className="text-center">
-              <p className="text-3xl font-extrabold text-navy">{s.value}</p>
+              <p className="flex items-center justify-center gap-1 text-3xl font-extrabold text-navy">
+                {s.value}
+                {s.rating ? (
+                  <Star className="size-5 fill-amber-400 text-amber-400" aria-hidden="true" />
+                ) : null}
+              </p>
               <p className="mt-1 text-sm text-muted-foreground">{s.label}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* â”€â”€ Mock product-preview card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Mock product-preview card ──────────────────────────────────────── */}
       <section className="mx-auto max-w-5xl px-6 py-16">
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="bg-gradient-to-r from-navy to-indigo-900 px-6 py-4 text-white">
             <p className="text-xs font-semibold uppercase tracking-widest text-white/60">
               Tata Consultancy Services
             </p>
-            <h3 className="mt-1 text-lg font-bold">TCS NQT 2026 â€” Complete Preparation</h3>
+            <h3 className="mt-1 text-lg font-bold">TCS NQT 2026 — Complete Preparation</h3>
             <div className="mt-1 flex items-center gap-3 text-xs text-white/70">
               <span className="flex items-center gap-1"><Star className="size-3 fill-amber-400 text-amber-400" /> 4.8</span>
               <span>52,400 enrolled</span>
@@ -139,15 +137,13 @@ export default function HomePage() {
                   Lv 12
                 </span>
                 <div className="flex-1">
-                  <p className="text-[10px] font-semibold text-muted-foreground">XP Â· LEVEL 12 â†’ 13</p>
-                  <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-100">
-                    <div className="h-full rounded-full bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500" style={{ width: '81%' }} />
-                  </div>
+                  <p className="text-[10px] font-semibold text-muted-foreground">XP · LEVEL 12 → 13</p>
+                  <ProgressBar value={81} variant="xp" className="mt-1 h-2" />
                   <p className="mt-0.5 text-[10px] text-muted-foreground">2,840 / 3,500</p>
                 </div>
               </div>
               <div className="mt-3 flex items-center gap-1.5">
-                <span className="text-orange">ðŸ”¥</span>
+                <Flame className="size-4 text-orange" aria-hidden="true" />
                 <span className="text-xs font-semibold">14-day streak</span>
               </div>
             </div>
@@ -157,11 +153,9 @@ export default function HomePage() {
               <p className="mt-1 text-sm font-medium text-navy">
                 Solve 5 percentage shortcuts in &lt; 8 min
               </p>
-              <p className="text-xs text-muted-foreground">+150 XP Â· 30 coins Â· Speedster badge</p>
+              <p className="text-xs text-muted-foreground">+150 XP · 30 coins · Speedster badge</p>
               <div className="mt-2 flex items-center gap-2">
-                <div className="flex-1 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                  <div className="h-full rounded-full bg-orange" style={{ width: '60%' }} />
-                </div>
+                <ProgressBar value={60} className="h-1.5 flex-1" barClassName="bg-orange" />
                 <span className="text-xs text-muted-foreground">3/5</span>
               </div>
             </div>
@@ -169,13 +163,13 @@ export default function HomePage() {
             <div className="border-l pl-6">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">National rank</p>
               <p className="mt-1 text-3xl font-extrabold text-navy">#228</p>
-              <p className="text-xs text-muted-foreground">â†‘ 12 places Â· cohort 4,910</p>
+              <p className="text-xs text-muted-foreground">↑ 12 places · cohort 4,910</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* â”€â”€ Company logos row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Company logos row ──────────────────────────────────────────────── */}
       <section className="bg-slate-50/60">
         <div className="mx-auto max-w-5xl px-6 py-8">
           <p className="mb-6 text-center text-xs font-semibold uppercase tracking-widest text-muted-foreground">
@@ -195,17 +189,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* â”€â”€ Featured tracks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Featured tracks ────────────────────────────────────────────────── */}
       <section className="mx-auto max-w-6xl px-6 py-16">
         <div className="mb-2 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-navy">Pattern-matched paths for top recruiters</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Each track follows the actual drive â€” paper section weights, time pressure, and section cut-offs.
+              Each track follows the actual drive — paper section weights, time pressure, and section cut-offs.
             </p>
           </div>
           <Link href="/prepare" className="hidden text-sm font-medium text-orange hover:underline sm:block">
-            View all tracks â†’
+            View all tracks →
           </Link>
         </div>
         <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -237,7 +231,7 @@ export default function HomePage() {
                   href={`/dashboard/company/${t.slug}`}
                   className="mt-3 inline-block text-xs font-semibold text-orange hover:underline"
                 >
-                  View â†’
+                  View →
                 </Link>
               </CardContent>
             </Card>
@@ -245,16 +239,16 @@ export default function HomePage() {
         </div>
         <div className="mt-6 text-center sm:hidden">
           <Link href="/prepare" className="text-sm font-medium text-orange hover:underline">
-            View all tracks â†’
+            View all tracks →
           </Link>
         </div>
       </section>
 
-      {/* â”€â”€ Why ZSkillup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Why ZSkillup ──────────────────────────────────────────────────── */}
       <section className="bg-slate-50/60">
         <div className="mx-auto max-w-5xl px-6 py-16">
           <h2 className="text-center text-2xl font-bold text-navy">
-            Built like the platforms students already trust â€” only smarter
+            Built like the platforms students already trust — only smarter
           </h2>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {HOMEPAGE_WHY_BLOCKS.map((b, i) => {
@@ -273,12 +267,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* â”€â”€ Gamification section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Gamification section ───────────────────────────────────────────── */}
       <section className="mx-auto max-w-5xl px-6 py-16">
         <div className="grid items-center gap-10 lg:grid-cols-2">
           <div>
             <h2 className="text-2xl font-bold text-navy">
-              Daily quests, streaks, levels â€” prep becomes a habit, not a grind
+              Daily quests, streaks, levels — prep becomes a habit, not a grind
             </h2>
             <p className="mt-3 text-muted-foreground">
               Earn XP for every drill. Unlock badges, level up, climb the national leaderboard.
@@ -291,12 +285,9 @@ export default function HomePage() {
                 </li>
               ))}
             </ul>
-            <Link
-              href="/leaderboard"
-              className="mt-6 inline-block rounded-md bg-navy px-5 py-2.5 text-sm font-semibold text-white hover:bg-navy/90"
-            >
-              See live leaderboard
-            </Link>
+            <Button variant="secondary" className="mt-6" asChild>
+              <Link href="/leaderboard">See live leaderboard</Link>
+            </Button>
           </div>
 
           {/* Mock gamification widget */}
@@ -305,16 +296,16 @@ export default function HomePage() {
               Today's focus
             </p>
             <p className="mt-1 font-semibold text-navy">Probability & permutations</p>
-            <p className="text-xs text-muted-foreground">20-min drill Â· High weight for TCS & Infosys</p>
-            <Link
-              href="/prepare"
-              className="mt-3 inline-block rounded-md bg-orange px-4 py-2 text-sm font-semibold text-white"
-            >
-              Start session
-            </Link>
+            <p className="text-xs text-muted-foreground">20-min drill · High weight for TCS & Infosys</p>
+            <Button className="mt-3" asChild>
+              <Link href="/prepare">Start session</Link>
+            </Button>
             <div className="mt-5 border-t pt-4">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-semibold text-navy">ðŸ”¥ Active streak: 14 days</span>
+                <span className="flex items-center gap-1.5 text-xs font-semibold text-navy">
+                  <Flame className="size-3.5 text-orange" aria-hidden="true" />
+                  Active streak: 14 days
+                </span>
                 <span className="text-xs text-muted-foreground">M T W T F S S</span>
               </div>
               <div className="flex gap-1">
@@ -350,12 +341,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* â”€â”€ Coverage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Coverage ──────────────────────────────────────────────────────── */}
       <section className="bg-slate-50/60">
         <div className="mx-auto max-w-4xl px-6 py-16 text-center">
           <h2 className="text-2xl font-bold text-navy">Every section the recruiters ask</h2>
           <Link href="/prepare" className="mt-1 inline-block text-sm font-medium text-orange hover:underline">
-            Browse the catalog â†’
+            Browse the catalog →
           </Link>
           <div className="mt-6 flex flex-wrap justify-center gap-2">
             {HOMEPAGE_COVERAGE_TOPICS.map((t) => (
@@ -370,7 +361,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* â”€â”€ Testimonials â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Testimonials ──────────────────────────────────────────────────── */}
       <section className="mx-auto max-w-5xl px-6 py-16">
         <h2 className="text-center text-2xl font-bold text-navy">
           Loved by students. Trusted by TPOs.
@@ -390,7 +381,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* â”€â”€ Final CTA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Final CTA ─────────────────────────────────────────────────────── */}
       <section className="bg-navy px-6 py-20 text-white">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-extrabold">Your next placement starts today.</h2>
@@ -399,15 +390,12 @@ export default function HomePage() {
             personalize your path.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/signup"
-              className="rounded-md bg-orange px-6 py-3 text-sm font-bold text-white hover:bg-orange/90"
-            >
-              Get started free
-            </Link>
+            <Button size="lg" asChild>
+              <Link href="/signup">Get started free</Link>
+            </Button>
             <Link
               href="/login"
-              className="rounded-md border border-white/30 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10"
+              className="inline-flex h-12 items-center justify-center rounded-full border border-white/30 px-7 text-[15px] font-semibold text-white transition-colors hover:bg-white/10"
             >
               Log in
             </Link>
@@ -415,7 +403,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Footer ────────────────────────────────────────────────────────── */}
       <footer className="border-t px-6 py-12">
         <div className="mx-auto grid max-w-5xl gap-8 sm:grid-cols-3">
           <div>
@@ -434,7 +422,7 @@ export default function HomePage() {
                 { label: 'Home', href: '/' },
                 { label: 'Companies', href: '/dashboard/company' },
                 { label: 'Prepare', href: '/prepare' },
-                { label: 'Full mock quiz', href: '/dashboard/quiz' },
+                { label: 'Full mock quiz', href: '/mock-tests' },
                 { label: 'Dashboard', href: '/dashboard' },
                 { label: 'Leaderboard', href: '/leaderboard' },
                 { label: 'Roadmap', href: '/roadmap' },
@@ -459,7 +447,7 @@ export default function HomePage() {
           </div>
         </div>
         <div className="mx-auto mt-10 max-w-5xl border-t pt-6 text-center text-xs text-muted-foreground">
-          Â© 2026 ZSkillup | Future-ready graduates, future-strong institutions
+          © 2026 ZSkillup | Future-ready graduates, future-strong institutions
         </div>
       </footer>
     </div>

@@ -14,11 +14,14 @@ export function ProgressBar({
   variant = 'default',
   className,
   barClassName,
+  label,
 }: {
   value: number;
   variant?: 'default' | 'xp';
   className?: string;
   barClassName?: string;
+  /** Optional accessible name (maps to aria-label) for standalone bars. */
+  label?: string;
 }) {
   const clamped = Math.max(0, Math.min(100, value));
 
@@ -29,11 +32,12 @@ export function ProgressBar({
 
   return (
     <div
-      className={cn('h-2.5 w-full overflow-hidden rounded-full bg-muted', className)}
+      className={cn('h-2.5 w-full overflow-hidden rounded-full bg-slate-100', className)}
       role="progressbar"
       aria-valuenow={clamped}
       aria-valuemin={0}
       aria-valuemax={100}
+      aria-label={label}
     >
       <div
         className={cn('h-full rounded-full transition-all', barColor, barClassName)}
