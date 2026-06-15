@@ -253,13 +253,21 @@ function MaterialTab({ content, onUnlock }: { content: HubContent; onUnlock: () 
 }
 
 function QuizTab({ content, onUnlock }: { content: HubContent; onUnlock: () => void }) {
+  // The free quiz drops into the real, server-graded practice flow filtered to
+  // this company's question bank. Locked sets stay on the upsell path.
+  const practiceHref = `/practice?company=${content.company.slug}`;
   return (
     <div className="space-y-3">
       <p className="text-sm text-slate-500">
         Low-pressure practice — no timer, instant solutions. First quiz free.
       </p>
       {content.quizzes.map((q) => (
-        <LockedRow key={q.title} locked={q.locked} onUnlockClick={onUnlock}>
+        <LockedRow
+          key={q.title}
+          locked={q.locked}
+          href={q.locked ? undefined : practiceHref}
+          onUnlockClick={onUnlock}
+        >
           <div>
             <p className="font-medium text-navy">{q.title}</p>
             <p className="text-xs text-slate-500">{q.questions} questions · instant solutions</p>
@@ -272,13 +280,20 @@ function QuizTab({ content, onUnlock }: { content: HubContent; onUnlock: () => v
 }
 
 function MockTab({ content, onUnlock }: { content: HubContent; onUnlock: () => void }) {
+  // The free mock launches the real timed mock engine (catalog → start → graded
+  // report). Locked mocks stay on the upsell path.
   return (
     <div className="space-y-3">
       <p className="text-sm text-slate-500">
         5 full mocks + 1 live contest. 1 mock is free; analytics unlock after upgrade.
       </p>
       {content.mocks.map((m) => (
-        <LockedRow key={m.title} locked={m.locked} onUnlockClick={onUnlock}>
+        <LockedRow
+          key={m.title}
+          locked={m.locked}
+          href={m.locked ? undefined : '/mock-tests'}
+          onUnlockClick={onUnlock}
+        >
           <div>
             <p className="font-medium text-navy">
               {m.title}
