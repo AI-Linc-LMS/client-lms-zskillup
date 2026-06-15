@@ -104,11 +104,12 @@ export interface AdminQuestionRow {
 }
 
 export async function listAdminQuestions(
-  params: { status?: string; topic?: string; limit?: number; offset?: number } = {},
+  params: { status?: string; topic?: string; company?: string; limit?: number; offset?: number } = {},
 ): Promise<{ rows: AdminQuestionRow[]; total: number }> {
   const qs = new URLSearchParams();
   if (params.status) qs.set('status', params.status);
   if (params.topic) qs.set('topic', params.topic);
+  if (params.company) qs.set('company', params.company);
   if (params.limit) qs.set('limit', String(params.limit));
   if (params.offset) qs.set('offset', String(params.offset));
   const suffix = qs.toString() ? `?${qs.toString()}` : '';

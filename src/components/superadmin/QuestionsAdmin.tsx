@@ -1,10 +1,20 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { Loader2, Plus, Search, Trash2, Upload, X } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Loader2,
+  Plus,
+  Search,
+  Sparkles,
+  Trash2,
+  X,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/ui/form-field';
-import { QuestionImportPanel } from './QuestionImportPanel';
 import { ApiRequestError } from '@/lib/api/types';
 import { listTopics, listCompanies } from '@/lib/api/catalog';
 import {
@@ -24,6 +34,22 @@ const TYPE_LABEL: Record<string, string> = {
   CODING: 'Coding',
 };
 
+const PAGE_SIZE = 12;
+
+type SortKey = 'recent' | 'oldest' | 'alphabetical' | 'difficulty' | 'status';
+
+const DIFFICULTY_WEIGHT: Record<string, number> = {
+  EASY: 0,
+  MEDIUM: 1,
+  HARD: 2,
+};
+
+const STATUS_WEIGHT: Record<string, number> = {
+  PUBLISHED: 0,
+  DRAFT: 1,
+  ARCHIVED: 2,
+};
+
 /**
  * Superadmin question-bank console (Sprint 3 exit criterion). Drives
  * `GET/POST/PATCH/DELETE /api/v1/admin/questions`. The form encodes the same
@@ -37,17 +63,33 @@ export function QuestionsAdmin() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState('');
   const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState<SortKey>('recent');
+  const [page, setPage] = useState(1);
   const [showForm, setShowForm] = useState(false);
-  const [showImport, setShowImport] = useState(false);
   const [topicNames, setTopicNames] = useState<Record<string, string>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     setLoadError(null);
     try {
-      const res = await listAdminQuestions({ status: statusFilter || undefined, limit: 100 });
-      setRows(res.rows);
-      setTotal(res.total);
+      const loaded: AdminQuestionRow[] = [];
+      let offset = 0;
+      let totalCount = 0;
+
+      while (true) {
+        const res = await listAdminQuestions({
+          status: statusFilter || undefined,
+          limit: 100,
+          offset,
+        });
+        totalCount = res.total;
+        loaded.push(...res.rows);
+        if (loaded.length >= res.total || res.rows.length === 0) break;
+        offset += 100;
+      }
+
+      setRows(loaded);
+      setTotal(totalCount);
     } catch (err) {
       setLoadError(err instanceof ApiRequestError ? err.message : 'Could not load questions.');
     }
@@ -58,14 +100,53 @@ export function QuestionsAdmin() {
   }, [refresh]);
 
   useEffect(() => {
+    setPage(1);
+  }, [statusFilter, search, sortBy]);
+
+  useEffect(() => {
     listTopics()
       .then((ts) => setTopicNames(Object.fromEntries(ts.map((t) => [t.id, t.name]))))
       .catch(() => {});
   }, []);
 
-  const filtered = (rows ?? []).filter(
-    (r) => !search || r.stem.toLowerCase().includes(search.trim().toLowerCase()),
-  );
+  const visibleRows = useMemo(() => {
+    const searchTerm = search.trim().toLowerCase();
+    const filteredRows = (rows ?? []).filter(
+      (r) => !searchTerm || r.stem.toLowerCase().includes(searchTerm),
+    );
+
+    return [...filteredRows].sort((a, b) => {
+      switch (sortBy) {
+        case 'oldest':
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case 'alphabetical':
+          return a.stem.localeCompare(b.stem);
+        case 'difficulty':
+          return DIFFICULTY_WEIGHT[a.difficulty] - DIFFICULTY_WEIGHT[b.difficulty];
+        case 'status':
+          return STATUS_WEIGHT[a.status] - STATUS_WEIGHT[b.status];
+        case 'recent':
+        default:
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
+  }, [rows, search, sortBy]);
+
+  const pageCount = Math.max(1, Math.ceil(visibleRows.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const pageStart = (currentPage - 1) * PAGE_SIZE;
+  const pageRows = visibleRows.slice(pageStart, pageStart + PAGE_SIZE);
+  const visibleStart = visibleRows.length === 0 ? 0 : pageStart + 1;
+  const visibleEnd = Math.min(pageStart + PAGE_SIZE, visibleRows.length);
+  const stats = useMemo(() => {
+    const source = rows ?? [];
+    return {
+      total: source.length,
+      published: source.filter((row) => row.status === 'PUBLISHED').length,
+      draft: source.filter((row) => row.status === 'DRAFT').length,
+      archived: source.filter((row) => row.status === 'ARCHIVED').length,
+    };
+  }, [rows]);
 
   const archive = useCallback(
     async (row: AdminQuestionRow) => {
@@ -99,66 +180,141 @@ export function QuestionsAdmin() {
     [refresh],
   );
 
+  const exportCsv = useCallback(() => {
+    const escapeCsv = (value: string | number | null | undefined) =>
+      JSON.stringify(String(value ?? ''));
+
+    const headers = [
+      'id',
+      'stem',
+      'type',
+      'difficulty',
+      'topic',
+      'topicId',
+      'status',
+      'companyId',
+      'createdAt',
+    ];
+    const lines = [headers.map(escapeCsv).join(',')];
+
+    for (const row of visibleRows) {
+      lines.push(
+        [
+          row.id,
+          row.stem,
+          TYPE_LABEL[row.type] ?? row.type,
+          row.difficulty,
+          topicNames[row.subtopicId] ?? '',
+          row.subtopicId,
+          row.status,
+          row.companyId ?? '',
+          row.createdAt,
+        ]
+          .map(escapeCsv)
+          .join(','),
+      );
+    }
+
+    const blob = new Blob([`${lines.join('\n')}\n`], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `zskillup-question-bank-${new Date().toISOString().slice(0, 10)}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }, [topicNames, visibleRows]);
+
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="relative max-w-md flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search question text"
-            className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-navy placeholder:text-slate-400 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
-            aria-label="Search questions"
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          {['', 'DRAFT', 'PUBLISHED', 'ARCHIVED'].map((s) => (
-            <button
-              key={s || 'all'}
-              type="button"
-              onClick={() => setStatusFilter(s)}
-              className={
-                'rounded-full px-3 py-1 text-xs font-semibold transition-colors ' +
-                (statusFilter === s
-                  ? 'bg-navy text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200')
-              }
-            >
-              {s ? s.charAt(0) + s.slice(1).toLowerCase() : 'All'}
-            </button>
-          ))}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setShowImport((v) => !v);
-              setShowForm(false);
-            }}
-          >
-            <Upload className="size-4" /> {showImport ? 'Close' : 'Import CSV'}
-          </Button>
-          <Button
-            onClick={() => {
-              setShowForm((v) => !v);
-              setShowImport(false);
-            }}
-            size="sm"
-          >
-            <Plus className="size-4" /> {showForm ? 'Close' : 'Add question'}
-          </Button>
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="bg-[radial-gradient(circle_at_top_right,_rgba(249,115,22,0.10),_transparent_28%),linear-gradient(135deg,_rgba(15,23,42,0.03),_rgba(248,250,252,1))] px-5 py-5 sm:px-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <MetricCard label="Total" value={stats.total} accent="text-navy" />
+              <MetricCard label="Published" value={stats.published} accent="text-emerald-700" />
+              <MetricCard label="Drafts" value={stats.draft} accent="text-amber-700" />
+              <MetricCard label="Archived" value={stats.archived} accent="text-slate-500" />
+            </div>
+          </div>
+
+          <div className="mt-5 flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3">
+            <div className="relative min-w-0 flex-1">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+                aria-hidden="true"
+              />
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+                placeholder="Search question text"
+                className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm text-navy placeholder:text-slate-400 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+                aria-label="Search questions"
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 p-1">
+                {['', 'DRAFT', 'PUBLISHED', 'ARCHIVED'].map((s) => (
+                  <button
+                    key={s || 'all'}
+                    type="button"
+                    onClick={() => {
+                      setStatusFilter(s);
+                      setPage(1);
+                    }}
+                    className={
+                      'rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ' +
+                      (statusFilter === s
+                        ? 'bg-navy text-white shadow-sm'
+                        : 'text-slate-600 hover:bg-white hover:text-navy')
+                    }
+                  >
+                    {s ? s.charAt(0) + s.slice(1).toLowerCase() : 'All'}
+                  </button>
+                ))}
+              </div>
+
+              <label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-500 shadow-sm">
+                <ArrowUpDown className="size-4 text-slate-400" aria-hidden="true" />
+                <span className="sr-only">Sort questions</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortKey)}
+                  className="bg-transparent text-sm font-semibold text-navy focus-visible:outline-none"
+                  aria-label="Sort questions"
+                >
+                  <option value="recent">Newest first</option>
+                  <option value="oldest">Oldest first</option>
+                  <option value="alphabetical">Stem A-Z</option>
+                  <option value="difficulty">Difficulty</option>
+                  <option value="status">Status</option>
+                </select>
+              </label>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={exportCsv}
+                disabled={visibleRows.length === 0}
+              >
+                <Download className="size-4" /> Download CSV
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowForm((v) => !v);
+                }}
+                size="sm"
+              >
+                <Plus className="size-4" /> {showForm ? 'Close' : 'Add question'}
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
-
-      {showImport ? (
-        <QuestionImportPanel
-          onDone={() => {
-            setShowImport(false);
-            void refresh();
-          }}
-        />
-      ) : null}
 
       {showForm ? (
         <AddQuestionForm
@@ -175,16 +331,16 @@ export function QuestionsAdmin() {
         </div>
       ) : null}
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50">
-            <tr className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-              <th className="px-4 py-3">Question</th>
-              <th className="px-4 py-3">Type</th>
-              <th className="px-4 py-3">Difficulty</th>
-              <th className="px-4 py-3">Topic</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+          <thead className="bg-slate-50/90">
+            <tr className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+              <th className="px-4 py-4">Question</th>
+              <th className="px-4 py-4">Type</th>
+              <th className="px-4 py-4">Difficulty</th>
+              <th className="px-4 py-4">Topic</th>
+              <th className="px-4 py-4">Status</th>
+              <th className="px-4 py-4 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -194,7 +350,7 @@ export function QuestionsAdmin() {
                   <Loader2 className="mx-auto size-5 animate-spin text-slate-400" aria-hidden="true" />
                 </td>
               </tr>
-            ) : filtered.length === 0 ? (
+            ) : visibleRows.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-4 py-12 text-center text-sm text-slate-500">
                   {search || statusFilter
@@ -203,18 +359,21 @@ export function QuestionsAdmin() {
                 </td>
               </tr>
             ) : (
-              filtered.map((q) => (
-                <tr key={q.id} className="border-t border-slate-100 align-top">
-                  <td className="max-w-md px-4 py-3 text-navy">
+              pageRows.map((q) => (
+                <tr
+                  key={q.id}
+                  className="border-t border-slate-100/80 align-top transition-colors hover:bg-slate-50/60"
+                >
+                  <td className="max-w-md px-4 py-4 text-navy">
                     <span className="line-clamp-2">{q.stem}</span>
                   </td>
-                  <td className="px-4 py-3 text-slate-600">{TYPE_LABEL[q.type] ?? q.type}</td>
-                  <td className="px-4 py-3 text-slate-600 capitalize">{q.difficulty.toLowerCase()}</td>
-                  <td className="px-4 py-3 text-slate-600">{topicNames[q.subtopicId] ?? '—'}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-4 text-slate-600">{TYPE_LABEL[q.type] ?? q.type}</td>
+                  <td className="px-4 py-4 text-slate-600 capitalize">{q.difficulty.toLowerCase()}</td>
+                  <td className="px-4 py-4 text-slate-600">{topicNames[q.subtopicId] ?? '—'}</td>
+                  <td className="px-4 py-4">
                     <QStatusPill status={q.status} />
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-4 py-4 text-right">
                     <div className="inline-flex items-center gap-3">
                       {q.status !== 'ARCHIVED' ? (
                         <button
@@ -246,12 +405,60 @@ export function QuestionsAdmin() {
             )}
           </tbody>
         </table>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-4 py-4">
+          <p className="text-sm text-slate-500">
+            {visibleRows.length === 0
+              ? 'No rows to show.'
+              : `Showing ${visibleStart}–${visibleEnd} of ${visibleRows.length} filtered questions`}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage <= 1 || visibleRows.length === 0}
+            >
+              <ChevronLeft className="size-4" /> Previous
+            </Button>
+            <span className="rounded-full bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-500">
+              Page {Math.min(currentPage, pageCount)} of {pageCount}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+              disabled={currentPage >= pageCount || visibleRows.length === 0}
+            >
+              Next <ChevronRight className="size-4" />
+            </Button>
+          </div>
+        </div>
       </div>
 
       <p className="text-xs text-slate-400">
         {total} question{total === 1 ? '' : 's'} total
-        {search ? ` · ${filtered.length} matching` : ''}
+        {search ? ` · ${visibleRows.length} matching` : ''}
       </p>
+    </div>
+  );
+}
+
+function MetricCard({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: number;
+  accent: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 shadow-sm">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+        {label}
+      </p>
+      <p className={`mt-2 text-2xl font-black tracking-tight ${accent}`}>{value}</p>
     </div>
   );
 }

@@ -83,7 +83,7 @@ export function QuestionImportPanel({ onDone }: { onDone: () => void }) {
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={downloadTemplate}>
-          <Download className="size-4" aria-hidden="true" /> Template
+          <Download className="size-4" aria-hidden="true" /> Download CSV template
         </Button>
       </div>
 
