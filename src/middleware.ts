@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const REFRESH_COOKIE = 'zskillup_refresh';
 const ROLE_COOKIE = 'role';
 /** UX hint set while a super-admin runs the "view as student" preview. */
 const PREVIEW_COOKIE = 'preview';
@@ -61,8 +60,13 @@ function roleHome(role: string | undefined): string {
  */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const hasSession = request.cookies.has(REFRESH_COOKIE);
+  // Frontend and API are on different domains in prod, so the HttpOnly refresh
+  // cookie (set on the API domain) is invisible to this middleware. Use the
+  // first-party `role` hint cookie (set by the client on login, cleared on
+  // logout) as the session signal for routing — Nest guards remain the security
+  // boundary (CLAUDE.md §5).
   const role = request.cookies.get(ROLE_COOKIE)?.value;
+  const hasSession = role !== undefined;
 
   // Unauthenticated → redirect to login, preserve deep-link target.
   if (isProtected(pathname) && !hasSession) {

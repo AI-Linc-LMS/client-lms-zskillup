@@ -60,14 +60,21 @@ async function refreshAccessToken(): Promise<RefreshOutcome> {
   if (!refreshInFlight) {
     refreshInFlight = (async (): Promise<RefreshOutcome> => {
       try {
-        const res = await fetch('/api/auth/refresh', {
+        // Call the backend refresh endpoint DIRECTLY (cross-origin, credentials
+        // included) so the browser sends the API-domain refresh cookie. The Next
+        // same-origin proxy can't read a cookie scoped to the API's domain.
+        const res = await fetch(`${API_BASE_URL}/api/v1/auth/refresh`, {
           method: 'POST',
           credentials: 'include',
         });
         if (!res.ok) return 'unauthorized';
-        const body = (await res.json()) as { accessToken?: string };
-        if (!body.accessToken) return 'unauthorized';
-        authToken.set(body.accessToken);
+        const body = (await res.json()) as {
+          accessToken?: string;
+          data?: { accessToken?: string };
+        };
+        const accessToken = body.data?.accessToken ?? body.accessToken;
+        if (!accessToken) return 'unauthorized';
+        authToken.set(accessToken);
         return 'ok';
       } catch {
         // fetch() rejects only on network failure — the server never answered,
@@ -100,7 +107,7 @@ function endSessionAndRedirect(): void {
   // navigation loop (each cycle is a fresh bundle, so no in-memory latch can
   // stop it). Purge it server-side, then hard-navigate — which also wipes all
   // in-flight component state so queued effects can't restart the loop.
-  void fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
+  void fetch(`${API_BASE_URL}/api/v1/auth/logout`, { method: 'POST', credentials: 'include' })
     .catch(() => {})
     .finally(() => window.location.assign('/login'));
 }

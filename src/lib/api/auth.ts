@@ -61,13 +61,11 @@ export async function login(dto: AuthLoginDto): Promise<LoginResult> {
 
 export async function logout(): Promise<void> {
   try {
-    // Prefer the same-origin Next route proxy so the HttpOnly cookie is
-    // forwarded cleanly. Falls back to direct backend call if the proxy is
-    // unavailable for any reason (e.g. preview environments).
-    const proxy = await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-    if (!proxy.ok) {
-      await apiClient.post('/api/v1/auth/logout', undefined, { auth: 'login' });
-    }
+    // Call the backend directly (cross-origin, credentials included) so the
+    // browser sends the API-domain refresh cookie and the server can revoke the
+    // session + clear it. A same-origin Next proxy can't read that cookie when
+    // the frontend and API are on different domains.
+    await apiClient.post('/api/v1/auth/logout', undefined, { auth: 'login' });
   } catch {
     // Even if the network call fails, clear local state below.
   } finally {

@@ -294,7 +294,7 @@ export function MocksAdmin() {
                         </span>
                         <span className="mt-1 flex items-center gap-2 text-[11px] text-slate-400">
                           <StatusPill tone={diff.tone} label={diff.label} />
-                          {topicNames[q.topicId] ? <span>{topicNames[q.topicId]}</span> : null}
+                          {topicNames[q.subtopicId] ? <span>{topicNames[q.subtopicId]}</span> : null}
                         </span>
                       </span>
                     </button>
