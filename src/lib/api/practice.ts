@@ -11,13 +11,20 @@ export interface ApiQuestionOption {
   orderIndex: number;
 }
 
+export interface ApiQuestionCompanyTag {
+  companyId: string;
+  importance: string;
+}
+
 export interface ApiQuestion {
   id: string;
   type: 'MCQ' | 'MULTI_SELECT' | 'NUMERIC' | 'CODING';
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   stem: string;
-  topicId: string;
-  companyId: string | null;
+  /** Backend `QuestionPublicDto` field names — was previously mistyped as
+   *  topicId/companyId, which never matched the wire shape. */
+  subtopicId: string;
+  companyTags: ApiQuestionCompanyTag[];
   options: ApiQuestionOption[];
 }
 

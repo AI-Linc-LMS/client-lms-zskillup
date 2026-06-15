@@ -68,7 +68,17 @@ export interface HubContent {
 }
 
 function bySlug(slug: string): DemoCompany {
-  return DEMO_COMPANIES.find((c) => c.slug === slug) ?? DEMO_COMPANIES[0];
+  const found = DEMO_COMPANIES.find((c) => c.slug === slug);
+  if (found) return found;
+  // Company exists in the backend but not the demo seed (e.g. zoho). Synthesize a
+  // neutral shell from the slug so the generated copy reads "The Zoho drive…"
+  // instead of falling back to DEMO_COMPANIES[0] (Accenture) and mislabelling the
+  // hub. The [slug] page overlays the real name/tagline on top of this.
+  const name = slug
+    .split('-')
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(' ');
+  return { ...DEMO_COMPANIES[0], slug, name };
 }
 
 /** Generic content generator — all 9 hubs are instances of the same template. */
