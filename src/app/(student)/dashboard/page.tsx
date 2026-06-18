@@ -1,6 +1,6 @@
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
-import { DashboardHero } from '@/components/student/DashboardHero';
-import { KpiRow } from '@/components/student/KpiRow';
+import { AiBriefingHero } from '@/components/student/AiBriefingHero';
+import { AuroraStats } from '@/components/student/AuroraStats';
 import { DailyQuest } from '@/components/student/DailyQuest';
 import { ContinueLearning } from '@/components/student/ContinueLearning';
 import { CourseTable } from '@/components/student/CourseTable';
@@ -8,12 +8,13 @@ import { PracticeHub } from '@/components/student/PracticeHub';
 import { DashboardRightRail } from '@/components/student/DashboardRightRail';
 import { AdaptiveSkillProfile } from '@/components/student/AdaptiveSkillProfile';
 import { CompanyReadiness } from '@/components/student/CompanyReadiness';
+import { Reveal } from '@/components/motion/primitives';
 
 /**
- * Student dashboard (frontend/CLAUDE §4 — the canonical reference UI). Server
- * Component: composes mostly-static presentational cards from seeded data
- * (DEMO_TIMELINE). Only genuinely interactive pieces (course-table tabs, Explore
- * menu, avatar) are client leaves.
+ * Student dashboard — redesigned (Aurora). Above the fold is the AI-personalized
+ * briefing hero (GET /students/briefing) over the signature aurora backdrop,
+ * then live animated XP/level/streak tiles, then the learning sections, each
+ * revealing on scroll.
  */
 export default function StudentDashboardPage() {
   return (
@@ -24,18 +25,32 @@ export default function StudentDashboardPage() {
 
       <div className="grid gap-6 xl:grid-cols-[1fr_20rem]">
         <div className="space-y-6">
-          <DashboardHero />
-          <KpiRow />
-          <DailyQuest />
-          <ContinueLearning />
-          <CourseTable />
-          <PracticeHub />
+          <AiBriefingHero />
+          <AuroraStats />
+          <Reveal>
+            <DailyQuest />
+          </Reveal>
+          <Reveal>
+            <ContinueLearning />
+          </Reveal>
+          <Reveal>
+            <CourseTable />
+          </Reveal>
+          <Reveal>
+            <PracticeHub />
+          </Reveal>
         </div>
 
         <aside className="space-y-6">
-          <AdaptiveSkillProfile />
-          <CompanyReadiness />
-          <DashboardRightRail />
+          <Reveal delay={0.05}>
+            <AdaptiveSkillProfile />
+          </Reveal>
+          <Reveal delay={0.1}>
+            <CompanyReadiness />
+          </Reveal>
+          <Reveal delay={0.15}>
+            <DashboardRightRail />
+          </Reveal>
         </aside>
       </div>
     </div>
