@@ -1,6 +1,7 @@
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { MockTestsCatalog } from '@/components/practice/MockTestsCatalog';
 import { MockHistory } from '@/components/practice/MockHistory';
+import { AdaptiveMockHistory } from '@/components/practice/AdaptiveMockHistory';
 
 const CRUMBS = [
   { label: 'Home', href: '/' },
@@ -26,6 +27,7 @@ export default function MockTestsPage() {
       </div>
 
       <MockHistory />
+      <AdaptiveMockHistory />
 
       <section className="mt-8">
         <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
