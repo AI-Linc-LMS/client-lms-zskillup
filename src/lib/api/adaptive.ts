@@ -232,3 +232,25 @@ export async function adminGetAdaptiveSession(sessionId: string): Promise<Adapti
   );
   return res.data;
 }
+
+// ── Company Readiness ─────────────────────────────────────────────────────────
+
+export interface CompanyReadiness {
+  companyId: string;
+  companyName: string;
+  companySlug: string;
+  brandColor: string | null;
+  logoUrl: string | null;
+  companyType: string;
+  readinessPct: number;
+  readinessBand: 'emerging' | 'developing' | 'proficient' | 'mastered';
+  mockTestId: string;
+  mockTitle: string;
+  topSkill: { skill: string; masteryPct: number } | null;
+  weakSkill: { skill: string; masteryPct: number } | null;
+}
+
+export async function getCompanyReadiness(): Promise<CompanyReadiness[]> {
+  const res = await apiClient.get<CompanyReadiness[]>('/api/v1/adaptive-mocks/company-readiness');
+  return res.data;
+}
