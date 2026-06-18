@@ -13,6 +13,7 @@ import {
 } from '@/lib/api/challenges';
 import type { GamificationSummary } from '@/lib/api/gamification-types';
 import { RewardOverlay } from '@/components/gamification/RewardOverlay';
+import { notifyXpUpdated } from '@/lib/xp-events';
 
 const DIFF_TONE: Record<string, string> = {
   EASY: 'bg-emerald-50 text-emerald-700',
@@ -189,8 +190,10 @@ function ChallengeSolveModal({
     setBusy(true);
     try {
       const r = await submitChallenge(id, selected);
-      if (r.correct && r.completed) onCompleted(r.gamification);
-      else setWrong(true);
+      if (r.correct && r.completed) {
+        notifyXpUpdated();
+        onCompleted(r.gamification);
+      } else setWrong(true);
     } catch {
       setWrong(true);
     } finally {

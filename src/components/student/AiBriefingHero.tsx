@@ -18,6 +18,7 @@ import { getBriefing, type StudentBriefing } from '@/lib/api/personalization';
 import { getStudentStats, type ApiStudentStats } from '@/lib/api/gamification';
 import { getMe, type ApiMe } from '@/lib/api/me';
 import { AnimatedNumber, AuroraBackground } from '@/components/motion/primitives';
+import { onXpUpdated } from '@/lib/xp-events';
 
 /**
  * The dashboard centerpiece — a personalized, AI-written briefing over the
@@ -63,29 +64,36 @@ export function AiBriefingHero() {
   // blocks another, and every rejection silently degrades to a derived value.
   useEffect(() => {
     let cancelled = false;
+    const loadStats = () =>
+      getStudentStats()
+        .then((d) => !cancelled && setStats(d))
+        .catch(() => {});
     getMe()
       .then((d) => !cancelled && setMe(d))
       .catch(() => {});
-    getStudentStats()
-      .then((d) => !cancelled && setStats(d))
-      .catch(() => {});
+    loadStats();
     getBriefing()
       .then((d) => !cancelled && setBriefing(d))
       .catch(() => {});
+    // Live-refresh the level/XP/streak when any widget awards XP.
+    const off = onXpUpdated(loadStats);
     return () => {
       cancelled = true;
+      off();
     };
   }, []);
 
   const firstName = firstNameOf(me?.fullName);
 
-  // Effective stats: prefer the briefing's snapshot once it lands (kept in sync
-  // server-side), else the live /students/stats, else zeroes.
-  const level = briefing?.stats.level ?? stats?.level ?? 0;
-  const totalXp = briefing?.stats.totalXp ?? stats?.totalXp ?? 0;
-  const streak = briefing?.stats.currentStreakDays ?? stats?.currentStreakDays ?? 0;
-  const xpInto = briefing?.stats.xpIntoLevel ?? stats?.xpIntoLevel ?? 0;
-  const xpSpan = briefing?.stats.xpForNextLevel ?? stats?.xpForNextLevel ?? 0;
+  // Effective stats: ALWAYS prefer the LIVE /students/stats — the briefing's
+  // stats are a cached snapshot from generation time and go stale (it only
+  // regenerates on activity), which made the hero show a different level than
+  // the stat cards. The briefing snapshot is only a pre-load fallback.
+  const level = stats?.level ?? briefing?.stats.level ?? 0;
+  const totalXp = stats?.totalXp ?? briefing?.stats.totalXp ?? 0;
+  const streak = stats?.currentStreakDays ?? briefing?.stats.currentStreakDays ?? 0;
+  const xpInto = stats?.xpIntoLevel ?? briefing?.stats.xpIntoLevel ?? 0;
+  const xpSpan = stats?.xpForNextLevel ?? briefing?.stats.xpForNextLevel ?? 0;
   const xpToGo = Math.max(0, xpSpan - xpInto);
 
   const nextPct = xpSpan > 0 ? Math.min(100, Math.round((xpInto / xpSpan) * 100)) : 0;
@@ -241,7 +249,7 @@ export function AiBriefingHero() {
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
 
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-stretch gap-3 sm:gap-4">
             {/* Level / XP progress */}
             <div className="min-w-[10rem] flex-1 rounded-2xl border border-white/10 bg-white/[0.05] px-3.5 py-2.5 backdrop-blur sm:flex-none">
               <div className="mb-1.5 flex items-center justify-between text-[11px] font-semibold">

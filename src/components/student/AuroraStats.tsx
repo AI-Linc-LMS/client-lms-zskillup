@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useState } from 'react';
 import { Award, Coins, Flame, Star, Zap } from 'lucide-react';
 import { getStudentStats, type ApiStudentStats } from '@/lib/api/gamification';
 import { AnimatedNumber, Stagger, StaggerItem } from '@/components/motion/primitives';
+import { onXpUpdated } from '@/lib/xp-events';
 
 /**
  * Animated XP / level / streak / coins / badges tiles for the dashboard.
@@ -14,11 +15,15 @@ export function AuroraStats() {
 
   useEffect(() => {
     let cancelled = false;
-    getStudentStats()
-      .then((data) => !cancelled && setS(data))
-      .catch(() => {});
+    const load = () =>
+      getStudentStats()
+        .then((data) => !cancelled && setS(data))
+        .catch(() => {});
+    load();
+    const off = onXpUpdated(load); // refresh when any widget awards XP
     return () => {
       cancelled = true;
+      off();
     };
   }, []);
 

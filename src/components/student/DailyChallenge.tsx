@@ -12,6 +12,7 @@ import {
 } from '@/lib/api/challenges';
 import type { GamificationSummary } from '@/lib/api/gamification-types';
 import { RewardOverlay } from '@/components/gamification/RewardOverlay';
+import { notifyXpUpdated } from '@/lib/xp-events';
 
 /**
  * Daily Challenge ("Today's Questions") — a once-a-day curated set. Each answer
@@ -68,6 +69,7 @@ export function DailyChallenge() {
       });
       setResult(r);
       if (r.isCorrect) setCorrect((c) => c + 1);
+      if (r.gamification) notifyXpUpdated();
     } catch {
       /* resilient */
     } finally {
@@ -89,6 +91,7 @@ export function DailyChallenge() {
       const summary = await completeDailyChallenge(correct);
       setCompleted(true);
       if (summary) setReward(summary);
+      notifyXpUpdated();
     } catch {
       setCompleted(true);
     } finally {

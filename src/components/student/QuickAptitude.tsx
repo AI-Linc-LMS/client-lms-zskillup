@@ -11,6 +11,7 @@ import {
   type ApiAttemptResult,
   type ApiQuestion,
 } from '@/lib/api/practice';
+import { notifyXpUpdated } from '@/lib/xp-events';
 
 /**
  * Quick Aptitude — a compact, interactive dashboard warm-up. Pulls a small
@@ -64,6 +65,7 @@ export function QuickAptitude() {
         clientAttemptId: crypto.randomUUID(),
       });
       setResult(r);
+      if (r.gamification) notifyXpUpdated();
     } catch {
       /* swallow — keep the widget resilient */
     } finally {
