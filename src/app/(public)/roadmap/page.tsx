@@ -26,8 +26,20 @@ export default function RoadmapPage() {
 
   const xpEarned = stats?.totalXp ?? 0;
   const pct = Math.min(100, Math.round((xpEarned / ROADMAP_TOTAL_XP) * 100));
-  const stepsCompleted = DEMO_ROADMAP_STEPS.filter((s) => s.status === 'done').length;
-  const activeStep = DEMO_ROADMAP_STEPS.find((s) => s.status === 'active')?.number ?? 1;
+
+  // Derive each step's status from the student's REAL XP against an even XP band
+  // per step (no fabricated done/active/locked). Anonymous visitors (xp 0) see
+  // step 1 active and the rest locked — an honest "starting point" view.
+  const totalSteps = DEMO_ROADMAP_STEPS.length;
+  const thresholdFor = (n: number) => Math.round((n / totalSteps) * ROADMAP_TOTAL_XP);
+  const statusFor = (n: number): RoadmapStatus => {
+    if (xpEarned >= thresholdFor(n)) return 'done';
+    const prevDone = n === 1 || xpEarned >= thresholdFor(n - 1);
+    return prevDone ? 'active' : 'locked';
+  };
+  const steps = DEMO_ROADMAP_STEPS.map((s) => ({ ...s, status: statusFor(s.number) }));
+  const stepsCompleted = steps.filter((s) => s.status === 'done').length;
+  const activeStep = steps.find((s) => s.status === 'active')?.number ?? totalSteps;
 
   return (
     <div className="min-h-screen bg-background">
@@ -87,7 +99,7 @@ export default function RoadmapPage() {
             <div className="text-center">
               <p className="text-2xl font-extrabold text-navy">
                 {stepsCompleted}
-                <span className="text-sm font-normal text-muted-foreground">/{DEMO_ROADMAP_STEPS.length}</span>
+                <span className="text-sm font-normal text-muted-foreground">/{totalSteps}</span>
               </p>
               <p className="text-xs text-muted-foreground">Steps completed</p>
             </div>
@@ -113,7 +125,7 @@ export default function RoadmapPage() {
           {/* Quick summary */}
           <div className="mt-4 flex flex-wrap items-center gap-4 border-t pt-4 text-sm">
             <span className="text-muted-foreground">
-              {stepsCompleted} done · {DEMO_ROADMAP_STEPS.filter(s => s.status === 'active').length} in progress · {DEMO_ROADMAP_STEPS.filter(s => s.status === 'locked').length} locked
+              {stepsCompleted} done · {steps.filter((s) => s.status === 'active').length} in progress · {steps.filter((s) => s.status === 'locked').length} locked
             </span>
             {stats && (
               <span className="flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
@@ -131,7 +143,7 @@ export default function RoadmapPage() {
           {/* Connector line */}
           <div className="absolute left-[23px] top-8 h-full w-0.5 bg-border" aria-hidden="true" />
 
-          {DEMO_ROADMAP_STEPS.map((step) => {
+          {steps.map((step) => {
             const cfg = STATUS_CONFIG[step.status];
             const Icon = cfg.icon;
             const TypeIcon = step.type === 'topic' ? BookOpen : Building2;

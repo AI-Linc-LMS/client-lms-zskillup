@@ -19,14 +19,12 @@ const TYPE_TABS: Array<{ key: 'All' | ApiCompany['type']; label: string }> = [
 const DIFFICULTIES = ['All', 'Easy', 'Medium', 'Hard'] as const;
 
 /**
- * Companies explorer — Sprint 3. Fetches the live catalog from `GET /companies`
- * (public). Type is taken from the API enum directly (no demo overlay) so
- * companies created by superadmin CRUD show up under the correct tab. Display-
- * only metadata (rating, enrolled, package) is overlaid from DEMO_COMPANIES
- * when the slug matches — it's a v1 placeholder that won't survive the API
- * adding those fields in Sprint 5+.
+ * Companies explorer. Fetches the live catalog from `GET /companies` (public).
+ * Type AND card metadata (rating/enrolled/package/difficulty/mcqs/rounds) now
+ * come straight from the API (DB-backed catalog.companies) — no demo overlay.
  *
- * If the API is unreachable (preview), falls back to the demo grid.
+ * If the API is unreachable (preview), falls back to the demo grid so the page
+ * still renders something instead of an empty state.
  */
 
 interface ExplorerCompany extends CompanyCardData {
@@ -42,28 +40,24 @@ export function CompaniesExplorer() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    const demoBySlug = new Map(DEMO_COMPANIES.map((d) => [d.slug, d]));
     listCompanies()
       .then((live) => {
         if (cancelled) return;
         setCompanies(
-          live.map((c) => {
-            const demo = demoBySlug.get(c.slug);
-            return {
-              slug: c.slug,
-              name: c.name,
-              tagline: c.tagline,
-              accent: c.accent,
-              badge: c.badge,
-              type: c.type,
-              difficulty: demo?.difficulty,
-              rating: demo?.rating,
-              enrolled: demo?.enrolled,
-              package: demo?.package,
-              mcqs: demo?.mcqs,
-              rounds: demo?.rounds,
-            };
-          }),
+          live.map((c) => ({
+            slug: c.slug,
+            name: c.name,
+            tagline: c.tagline,
+            accent: c.accent,
+            badge: c.badge,
+            type: c.type,
+            difficulty: (c.difficulty as CompanyCardData['difficulty']) ?? undefined,
+            rating: c.rating ?? undefined,
+            enrolled: c.enrolled ?? undefined,
+            package: c.package ?? undefined,
+            mcqs: c.mcqs ?? undefined,
+            rounds: c.rounds ?? undefined,
+          })),
         );
       })
       .catch(() => {

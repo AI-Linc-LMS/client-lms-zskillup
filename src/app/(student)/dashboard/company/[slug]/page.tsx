@@ -1,23 +1,22 @@
 import { notFound } from 'next/navigation';
 import { CompanyHub } from '@/components/company/CompanyHub';
-import { DEMO_COMPANIES } from '@/lib/demo-data';
 import { getHubContent, type HubContent } from '@/lib/hub-data';
 import { getCompany } from '@/lib/api/catalog';
+import type { CompanyType, Difficulty } from '@/lib/demo-data';
 
 /**
- * Generate static params at build time from the seeded company list. We can't
- * call the auth-required API here, so we fall back to the demo company slugs
- * which mirror the seed. Pages are dynamically re-rendered if the slug exists.
+ * Company hub page — now fully backed by the live API. The company hero + card
+ * metadata come from `catalog.companies`, and the 7-tab body from
+ * `catalog.company_hub_content` (per-company, admin-editable). The templated
+ * `getHubContent` is used only as a graceful fallback if a company has no hub
+ * row authored yet, so the page never renders empty.
  */
-export function generateStaticParams() {
-  return DEMO_COMPANIES.map((c) => ({ slug: c.slug }));
+export const dynamic = 'force-dynamic';
+
+function mapType(t: string): CompanyType {
+  return t === 'PRODUCT' ? 'Product' : t === 'CONSULTING' ? 'Consulting' : 'Service';
 }
 
-/**
- * Company hub page — Sprint 3 wires this to the real backend hub endpoint
- * (`GET /api/v1/companies/:slug`) with a graceful fallback to the demo content
- * so the page still renders if the backend is unreachable in preview.
- */
 export default async function CompanyHubPage({
   params,
 }: {
@@ -25,38 +24,45 @@ export default async function CompanyHubPage({
 }) {
   const { slug } = await params;
 
-  // Try the live backend (public endpoint, no auth required).
-  let liveHub = null;
+  let live = null;
   try {
-    liveHub = await getCompany(slug);
+    live = await getCompany(slug);
   } catch {
-    // Network error or 404 → fall through to demo content
+    live = null;
   }
+  if (!live) notFound();
 
-  // If the slug isn't in either source, 404.
-  if (!liveHub && !DEMO_COMPANIES.some((c) => c.slug === slug)) {
-    notFound();
-  }
+  const fallback = getHubContent(slug);
 
-  // Start from the demo hub content (which has the full 7-tab body), then
-  // overlay the live company metadata when available. Only fields present on
-  // the demo `company` shape are overlaid; description lives in `overview`.
-  const demoContent = getHubContent(slug);
-  const content: HubContent = liveHub
+  const company: HubContent['company'] = {
+    slug: live.slug,
+    name: live.name,
+    tagline: live.tagline ?? fallback.company.tagline,
+    type: mapType(live.type),
+    difficulty: (live.difficulty as Difficulty | null) ?? fallback.company.difficulty,
+    rating: live.rating ?? fallback.company.rating,
+    enrolled: live.enrolled ?? fallback.company.enrolled,
+    package: live.package ?? fallback.company.package,
+    mcqs: live.mcqs ?? fallback.company.mcqs,
+    rounds: live.rounds ?? fallback.company.rounds,
+    badge: live.badge ?? fallback.company.badge,
+    accent: live.accent ?? fallback.company.accent,
+  };
+
+  const h = live.hub;
+  const content: HubContent = h
     ? {
-        ...demoContent,
-        company: {
-          ...demoContent.company,
-          name: liveHub.name,
-          tagline: liveHub.tagline ?? demoContent.company.tagline,
-          accent: liveHub.accent ?? demoContent.company.accent,
-          badge: liveHub.badge ?? demoContent.company.badge,
-        },
-        overview: liveHub.description
-          ? { ...demoContent.overview, summary: liveHub.description }
-          : demoContent.overview,
+        company,
+        overview: h.overview,
+        syllabus: h.syllabus,
+        quickStats: h.quickStats,
+        material: h.material,
+        quizzes: h.quizzes,
+        mocks: h.mocks,
+        formulaSheets: h.formulaSheets,
+        interviews: h.interviews,
       }
-    : demoContent;
+    : { ...fallback, company };
 
   return <CompanyHub content={content} />;
 }

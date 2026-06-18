@@ -16,10 +16,9 @@ import {
   Users,
   Zap,
 } from 'lucide-react';
-import {
-  HOMEPAGE_FEATURED_TRACKS,
-  HOMEPAGE_COMPANY_LOGOS,
-} from '@/lib/demo-data-extra';
+import { HOMEPAGE_COMPANY_LOGOS } from '@/lib/demo-data-extra';
+import { HomeFeaturedTracks } from '@/components/marketing/HomeFeaturedTracks';
+import { HomeTopCohort } from '@/components/marketing/HomeTopCohort';
 
 const HERO_STATS = [
   { label: 'Students enrolled', value: '240,000+' },
@@ -369,71 +368,7 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {HOMEPAGE_FEATURED_TRACKS.map((t) => (
-              <Link
-                key={t.slug}
-                href={`/dashboard/company/${t.slug}`}
-                className="hover-lift group flex flex-col overflow-hidden rounded-[var(--radius-card-lg)] border border-[var(--color-line)] bg-white shadow-[var(--shadow-card)]"
-              >
-                {/* ── Card header — white, logo fills the width ── */}
-                <div className="relative flex h-36 items-center justify-center border-b border-[var(--color-line)] bg-white px-8 py-6">
-                  {/* Thin top accent strip */}
-                  <span
-                    aria-hidden
-                    className={`absolute inset-x-0 top-0 h-[3px] rounded-t-[var(--radius-card-lg)] bg-gradient-to-r ${t.accent}`}
-                  />
-
-                  {/* Badge */}
-                  {t.badge && (
-                    <span className="absolute left-4 top-4 inline-flex items-center rounded-full bg-[var(--color-surface-2)] px-2.5 py-1 text-[10px] font-bold text-[var(--color-text)] ring-1 ring-[var(--color-line)]">
-                      {t.badge}
-                    </span>
-                  )}
-
-                  {/* Logo — full width of the header */}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={t.logoSrc}
-                    alt={t.logoAlt}
-                    className="h-auto max-h-12 w-full object-contain"
-                  />
-                </div>
-
-                {/* ── Card body ── */}
-                <div className="flex flex-1 flex-col p-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--color-text-subtle)]">
-                    {t.company}
-                  </p>
-                  <p className="mt-1 font-bold leading-snug text-[var(--color-text)]">{t.title}</p>
-                  <p className="mt-1.5 text-xs leading-relaxed text-[var(--color-text-muted)]">
-                    {t.description}
-                  </p>
-
-                  {/* Stats */}
-                  <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-[var(--color-text-muted)]">
-                    <span className="inline-flex items-center gap-1 font-medium">
-                      <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                      {t.rating}
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <Users className="h-3 w-3" /> {t.enrolled}
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <Clock3 className="h-3 w-3" /> {t.hours}h
-                    </span>
-                    <span>{t.mcqs} MCQs</span>
-                    <span>{t.rounds} rounds</span>
-                  </div>
-
-                  {/* CTA */}
-                  <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-[var(--color-brand)] transition-colors group-hover:text-[var(--color-brand-strong)]">
-                    Prepare now <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+          <HomeFeaturedTracks />
         </div>
       </section>
 
@@ -552,39 +487,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="lms-card sm:col-span-2 p-5">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-subtle)]">
-                Top of cohort
-              </p>
-              <ul className="mt-3 space-y-2">
-                {[
-                  { rank: 1, name: 'Aditya Krishnan', xp: '12,840', tone: 'gold' },
-                  { rank: 2, name: 'Sneha Iyer', xp: '11,420', tone: 'silver' },
-                  { rank: 3, name: 'Karan Patel', xp: '10,180', tone: 'bronze' },
-                ].map((r) => (
-                  <li
-                    key={r.rank}
-                    className="flex items-center gap-3 rounded-lg border border-[var(--color-line)] bg-[var(--color-surface-2)] px-3 py-2"
-                  >
-                    <span
-                      className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-extrabold ${
-                        r.tone === 'gold'
-                          ? 'bg-gradient-to-br from-amber-300 to-orange-500 text-amber-950'
-                          : r.tone === 'silver'
-                            ? 'bg-gradient-to-br from-slate-200 to-slate-400 text-slate-800'
-                            : 'bg-gradient-to-br from-orange-200 to-orange-500 text-orange-950'
-                      }`}
-                    >
-                      {r.rank}
-                    </span>
-                    <span className="flex-1 text-sm font-bold text-[var(--color-text)]">{r.name}</span>
-                    <span className="num-tab text-xs font-bold text-[var(--color-text-muted)]">
-                      {r.xp} XP
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <HomeTopCohort />
           </div>
         </div>
       </section>

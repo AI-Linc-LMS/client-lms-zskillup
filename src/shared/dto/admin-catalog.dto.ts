@@ -7,9 +7,12 @@
  */
 import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsBoolean,
   IsEnum,
   IsInt,
+  IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   IsUUID,
@@ -80,6 +83,14 @@ export class AdminCreateCompanyDto {
   @MaxLength(60)
   badge?: string;
 
+  // Card metadata (explorer grid / hub hero) — display-only catalog copy.
+  @IsOptional() @Type(() => Number) @IsNumber() @Min(0) @Max(5) rating?: number;
+  @IsOptional() @IsString() @MaxLength(20) enrolled?: string;
+  @IsOptional() @IsString() @MaxLength(40) package?: string;
+  @IsOptional() @IsString() @MaxLength(12) difficulty?: string;
+  @IsOptional() @IsString() @MaxLength(20) mcqs?: string;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) @Max(20) rounds?: number;
+
   @Type(() => Number)
   @IsInt()
   @Min(0)
@@ -124,6 +135,29 @@ export class AdminUpdateCompanyDto {
 
   @IsOptional() @IsBoolean()
   isPublished?: boolean;
+
+  // Card metadata (explorer grid / hub hero) — display-only catalog copy.
+  @IsOptional() @Type(() => Number) @IsNumber() @Min(0) @Max(5) rating?: number;
+  @IsOptional() @IsString() @MaxLength(20) enrolled?: string;
+  @IsOptional() @IsString() @MaxLength(40) package?: string;
+  @IsOptional() @IsString() @MaxLength(12) difficulty?: string;
+  @IsOptional() @IsString() @MaxLength(20) mcqs?: string;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) @Max(20) rounds?: number;
+}
+
+// ─── Company hub content (7-tab body) ───────────────────────────────────────
+
+/** Upsert the per-company hub body. Sections are JSON; validated structurally
+ *  (objects/arrays) since the inner shape is the frontend HubContent contract. */
+export class AdminUpsertCompanyHubDto {
+  @IsObject() overview!: Record<string, unknown>;
+  @IsObject() quickStats!: Record<string, unknown>;
+  @IsArray() syllabus!: unknown[];
+  @IsArray() material!: unknown[];
+  @IsArray() quizzes!: unknown[];
+  @IsArray() mocks!: unknown[];
+  @IsArray() formulaSheets!: unknown[];
+  @IsArray() interviews!: unknown[];
 }
 
 // ─── Courses (Sprint 2 — superadmin CRUD) ───────────────────────────────────

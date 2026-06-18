@@ -18,6 +18,36 @@ export interface ApiCompany {
   accent: string | null;
   description: string | null;
   badge: string | null;
+  // Card metadata (explorer grid / hub hero) — DB-backed, was demo-data.
+  rating: number | null;
+  enrolled: string | null;
+  package: string | null;
+  difficulty: string | null;
+  mcqs: string | null;
+  rounds: number | null;
+}
+
+/** The 7-tab hub body + quick stats (mirrors backend CompanyHubContentDto). */
+export interface ApiCompanyHubContent {
+  overview: {
+    summary: string;
+    process: { stage: string; detail: string }[];
+    topicGrid: { group: string; topics: string[] }[];
+  };
+  quickStats: {
+    rounds: number;
+    examType: string;
+    negativeMarking: string;
+    applicants: string;
+    readiness: string;
+    openRoles: string;
+  };
+  syllabus: { round: string; info: string; type: 'Elimination' | 'Final' }[];
+  material: { topic: string; videos: number; locked: boolean }[];
+  quizzes: { title: string; questions: number; locked: boolean }[];
+  mocks: { title: string; questions: number; minutes: number; kind: 'mock' | 'contest'; locked: boolean }[];
+  formulaSheets: { topic: string; locked: boolean }[];
+  interviews: { role: string; year: string; rounds: number; verdict: 'Selected' | 'Rejected'; excerpt: string }[];
 }
 
 export interface ApiCompanyHub extends ApiCompany {
@@ -30,6 +60,7 @@ export interface ApiCompanyHub extends ApiCompany {
     difficulty: string;
     estimatedHours: number;
   }>;
+  hub: ApiCompanyHubContent | null;
 }
 
 export interface ApiCourseSummary {
