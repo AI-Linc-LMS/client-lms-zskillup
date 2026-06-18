@@ -200,3 +200,35 @@ export async function listAdaptiveSessions(): Promise<AdaptiveSessionSummary[]> 
   const res = await apiClient.get<AdaptiveSessionSummary[]>('/api/v1/adaptive-mocks/sessions');
   return res.data;
 }
+
+// ── Admin API ─────────────────────────────────────────────────────────────────
+
+export interface AdminAdaptiveSession {
+  sessionId: string;
+  userId: string;
+  mockTestId: string;
+  mockTitle: string;
+  status: string;
+  questionCount: number;
+  hintsUsed: number;
+  abilityState: Record<string, number>;
+  seState: Record<string, number>;
+  startedAt: string;
+  completedAt: string | null;
+  correct: number;
+  total: number;
+  accuracy: number;
+  skillMastery: SkillMastery[];
+}
+
+export async function adminListAdaptiveSessions(): Promise<AdminAdaptiveSession[]> {
+  const res = await apiClient.get<AdminAdaptiveSession[]>('/api/v1/admin/adaptive-mocks/sessions');
+  return res.data;
+}
+
+export async function adminGetAdaptiveSession(sessionId: string): Promise<AdaptiveResults & { userId: string }> {
+  const res = await apiClient.get<AdaptiveResults & { userId: string }>(
+    `/api/v1/admin/adaptive-mocks/sessions/${sessionId}`,
+  );
+  return res.data;
+}
