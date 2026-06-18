@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
-import { BookOpen, Building2, ClipboardList, PlusCircle, Timer } from 'lucide-react';
+import { BookOpen, Building2, ClipboardList, PlusCircle, Timer, Users } from 'lucide-react';
 import { PlatformOverviewLive } from '@/components/superadmin/PlatformOverviewLive';
 
 /**
@@ -11,6 +11,7 @@ import { PlatformOverviewLive } from '@/components/superadmin/PlatformOverviewLi
  */
 
 const QUICK_ACTIONS = [
+  { label: 'Manage Users', icon: Users, href: '/superadmin/users' },
   { label: 'Manage Courses', icon: BookOpen, href: '/superadmin/courses' },
   { label: 'Manage Colleges', icon: PlusCircle, href: '/superadmin/colleges' },
   { label: 'Manage Companies', icon: Building2, href: '/superadmin/companies' },

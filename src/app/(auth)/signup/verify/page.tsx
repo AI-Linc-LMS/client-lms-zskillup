@@ -1,11 +1,11 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { Mail, Sparkles } from 'lucide-react';
+import { Mail, RefreshCw, Sparkles } from 'lucide-react';
 import type { AuthVerifyEmailDto } from '@/shared';
-import { verifyEmail } from '@/lib/api/auth';
+import { resendOtp, verifyEmail } from '@/lib/api/auth';
 import { ApiRequestError } from '@/lib/api/types';
 import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/ui/form-field';
@@ -13,12 +13,19 @@ import { Logo } from '@/components/layout/Logo';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const IS_DEV = process.env.NODE_ENV !== 'production';
+const RESEND_COOLDOWN_S = 60;
 
 function VerifyForm() {
   const router = useRouter();
   const params = useSearchParams();
   const email = params.get('email') ?? '';
+
   const [serverError, setServerError] = useState<string | null>(null);
+  const [resendMsg, setResendMsg] = useState<string | null>(null);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const [devHint, setDevHint] = useState<string | null>(null);
   const [devLoading, setDevLoading] = useState(false);
 
@@ -31,12 +38,42 @@ function VerifyForm() {
     defaultValues: { email },
   });
 
+  const startCooldown = useCallback(() => {
+    setCooldown(RESEND_COOLDOWN_S);
+    cooldownRef.current = setInterval(() => {
+      setCooldown((s) => {
+        if (s <= 1) {
+          clearInterval(cooldownRef.current!);
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+  }, []);
+
+  useEffect(() => () => { if (cooldownRef.current) clearInterval(cooldownRef.current); }, []);
+
+  const handleResend = async () => {
+    if (!email || cooldown > 0) return;
+    setResendLoading(true);
+    setResendMsg(null);
+    setServerError(null);
+    try {
+      await resendOtp(email);
+      setResendMsg('A new code has been sent to your email.');
+      startCooldown();
+    } catch (err) {
+      setServerError(
+        err instanceof ApiRequestError ? err.message : 'Failed to resend. Please try again.',
+      );
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   /**
    * Dev-only convenience: pull the OTP straight from the backend's in-memory
-   * store (`GET /auth/_dev/last-otp`) and pre-fill the form. The endpoint is
-   * gated to `NODE_ENV !== 'production'` on the backend — in prod it 404s and
-   * this button has no effect. Means a developer can complete signup without
-   * Mailhog / SMTP running.
+   * store and pre-fill the form. Disabled in production.
    */
   const fetchDevOtp = async () => {
     if (!email) return;
@@ -47,7 +84,7 @@ function VerifyForm() {
         `${API_BASE_URL}/api/v1/auth/_dev/last-otp?email=${encodeURIComponent(email)}`,
       );
       if (!res.ok) {
-        setDevHint('No OTP found — try registering again, or check your inbox.');
+        setDevHint('No OTP found — try registering again or check backend logs.');
         return;
       }
       const json = (await res.json()) as { data?: { code?: string } };
@@ -112,13 +149,33 @@ function VerifyForm() {
             {serverError}
           </p>
         ) : null}
+        {resendMsg ? (
+          <p role="status" className="rounded-md bg-green-50 p-3 text-sm font-medium text-green-700 ring-1 ring-green-200">
+            {resendMsg}
+          </p>
+        ) : null}
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? 'Verifying…' : 'Verify email'}
         </Button>
       </form>
-      <p className="mt-4 text-center text-xs text-slate-400">
-        Didn&apos;t get a code? Check spam, or wait 60 seconds and request a new one.
-      </p>
+
+      {/* Resend section */}
+      <div className="mt-4 flex items-center justify-center gap-1.5 text-sm text-slate-500">
+        <span>Didn&apos;t get a code?</span>
+        <button
+          type="button"
+          onClick={handleResend}
+          disabled={resendLoading || cooldown > 0 || !email}
+          className="inline-flex items-center gap-1 font-semibold text-orange transition-colors hover:text-orange/80 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <RefreshCw className={`size-3.5 ${resendLoading ? 'animate-spin' : ''}`} />
+          {resendLoading
+            ? 'Sending…'
+            : cooldown > 0
+              ? `Resend in ${cooldown}s`
+              : 'Resend code'}
+        </button>
+      </div>
 
       {IS_DEV ? (
         <div className="mt-5 rounded-lg border border-amber-200 bg-amber-50 p-3">
@@ -131,6 +188,8 @@ function VerifyForm() {
               <p className="mt-1 text-xs leading-relaxed text-amber-800">
                 SMTP not wired? Click below to pull the OTP from the backend dev store
                 and pre-fill it. This shortcut is disabled in production.
+                If Mailhog is unavailable, the backend auto-creates an Ethereal.email
+                account — check the backend logs for a preview URL.
               </p>
               <button
                 type="button"

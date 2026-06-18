@@ -48,6 +48,15 @@ export async function verifyEmail(dto: AuthVerifyEmailDto): Promise<{ message: s
   return res.data;
 }
 
+export async function resendOtp(email: string): Promise<{ message: string }> {
+  const res = await apiClient.post<{ message: string }>(
+    '/api/v1/auth/resend-otp',
+    { email },
+    { auth: 'login' },
+  );
+  return res.data;
+}
+
 export async function login(dto: AuthLoginDto): Promise<LoginResult> {
   const res = await apiClient.post<LoginResult>('/api/v1/auth/login', dto, { auth: 'login' });
   authToken.set(res.data.accessToken);
