@@ -1,4 +1,44 @@
 import { apiClient } from './client';
+
+// ─── User management (super-admin) ──────────────────────────────────────────
+
+export interface AdminUserRow {
+  id: string;
+  email: string;
+  fullName: string | null;
+  role: 'STUDENT' | 'COLLEGE_ADMIN' | 'SUPER_ADMIN';
+  status: 'ACTIVE' | 'INVITED' | 'SUSPENDED';
+  isEmailVerified: boolean;
+  createdAt: string;
+}
+
+export async function listAdminUsers(params: {
+  role?: string;
+  status?: string;
+  search?: string;
+  limit?: number;
+  offset?: number;
+} = {}): Promise<{ rows: AdminUserRow[]; total: number }> {
+  const qs = new URLSearchParams();
+  if (params.role) qs.set('role', params.role);
+  if (params.status) qs.set('status', params.status);
+  if (params.search) qs.set('search', params.search);
+  if (params.limit) qs.set('limit', String(params.limit));
+  if (params.offset) qs.set('offset', String(params.offset));
+  const suffix = qs.toString() ? `?${qs.toString()}` : '';
+  const res = await apiClient.get<{ rows: AdminUserRow[]; total: number }>(
+    `/api/v1/admin/users${suffix}`,
+  );
+  return res.data;
+}
+
+export async function updateAdminUserRole(
+  id: string,
+  role: 'STUDENT' | 'COLLEGE_ADMIN' | 'SUPER_ADMIN',
+): Promise<{ id: string }> {
+  const res = await apiClient.patch<{ id: string }>(`/api/v1/admin/users/${id}/role`, { role });
+  return res.data;
+}
 import type {
   AdminCreateCollegeDto,
   AdminUpdateCollegeDto,

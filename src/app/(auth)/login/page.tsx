@@ -225,24 +225,22 @@ function LoginForm() {
           </button>
         </form>
 
-        {/* Google Sign-In — only shown for student role */}
-        {role === 'student' && (
-          <div className="mt-4 space-y-3">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-[var(--color-line)]" />
-              </div>
-              <div className="relative flex justify-center text-xs text-[var(--color-text-muted)]">
-                <span className="bg-white px-3">or continue with</span>
-              </div>
+        {/* Google Sign-In — available for both student and admin roles */}
+        <div className="mt-4 space-y-3">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-[var(--color-line)]" />
             </div>
-            <GoogleSignInButton
-              onSuccess={handleLoginSuccess}
-              onError={(msg) => setServerError(msg)}
-              text="signin_with"
-            />
+            <div className="relative flex justify-center text-xs text-[var(--color-text-muted)]">
+              <span className="bg-white px-3">or continue with</span>
+            </div>
           </div>
-        )}
+          <GoogleSignInButton
+            onSuccess={handleLoginSuccess}
+            onError={(msg) => setServerError(msg)}
+            text="signin_with"
+          />
+        </div>
 
         <p className="mt-5 text-center text-sm text-[var(--color-text-muted)]">
           New to ZSkillup?{' '}
