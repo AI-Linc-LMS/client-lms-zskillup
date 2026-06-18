@@ -4,6 +4,7 @@ import { AuroraStats } from '@/components/student/AuroraStats';
 import { TodaysTip } from '@/components/student/TodaysTip';
 import { QuickAptitude } from '@/components/student/QuickAptitude';
 import { DailyChallenge } from '@/components/student/DailyChallenge';
+import { CodingPractice } from '@/components/student/CodingPractice';
 import { Challenges } from '@/components/student/Challenges';
 import { DailyQuest } from '@/components/student/DailyQuest';
 import { ContinueLearning } from '@/components/student/ContinueLearning';
@@ -40,6 +41,9 @@ export default function StudentDashboardPage() {
           </Reveal>
           <Reveal>
             <QuickAptitude />
+          </Reveal>
+          <Reveal>
+            <CodingPractice />
           </Reveal>
           <Reveal>
             <Challenges />

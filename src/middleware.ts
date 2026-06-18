@@ -18,6 +18,7 @@ const PROTECTED_PREFIXES = [
   '/performance',
   '/topic-mastery',
   '/practice',
+  '/coding',
   '/tpo',
   '/superadmin',
 ];

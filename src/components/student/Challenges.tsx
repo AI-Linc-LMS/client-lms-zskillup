@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Check, Code2, Loader2, Lock, Sparkles, Swords, Trophy, X, Zap } from 'lucide-react';
+import { ArrowRight, Check, Code2, Loader2, Sparkles, Swords, Trophy, X, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   getChallenge,
@@ -78,66 +79,91 @@ function ChallengeCard({
 }) {
   const [open, setOpen] = useState(false);
   const coding = c.type === 'CODING';
+  // CODING challenges complete by solving the linked problem in the workspace.
+  const codingLink = coding && !c.completed && c.codingProblemSlug;
+
+  const cardClass = cn(
+    'group relative block overflow-hidden rounded-xl border p-4 text-left transition-all',
+    c.completed
+      ? 'border-emerald-200 bg-emerald-50/50'
+      : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-rose-300 hover:shadow-md',
+  );
+
+  const inner = (
+    <>
+      <div className="flex items-start justify-between gap-2">
+        <span
+          className={cn(
+            'flex size-9 items-center justify-center rounded-lg text-white',
+            c.completed
+              ? 'bg-gradient-to-br from-emerald-400 to-emerald-600'
+              : coding
+                ? 'bg-gradient-to-br from-violet-500 to-indigo-600'
+                : 'bg-gradient-to-br from-rose-400 to-rose-600',
+          )}
+        >
+          {c.completed ? (
+            <Check className="size-4" />
+          ) : coding ? (
+            <Code2 className="size-4" />
+          ) : (
+            <Sparkles className="size-4" />
+          )}
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-600">
+          <Zap className="size-3 fill-amber-400 text-amber-500" /> {c.xpReward}
+        </span>
+      </div>
+      <p className="mt-2.5 text-sm font-bold text-navy">{c.title}</p>
+      {c.description ? (
+        <p className="mt-0.5 line-clamp-2 text-xs text-slate-500">{c.description}</p>
+      ) : null}
+      <div className="mt-2 flex items-center gap-1.5">
+        {c.difficulty ? (
+          <span
+            className={cn('rounded-full px-2 py-0.5 text-[10px] font-semibold', DIFF_TONE[c.difficulty])}
+          >
+            {c.difficulty}
+          </span>
+        ) : null}
+        {codingLink ? (
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600">
+            Solve problem <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
+          </span>
+        ) : null}
+        {coding && !c.completed && !c.codingProblemSlug ? (
+          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-400">
+            <Code2 className="size-2.5" /> Coding
+          </span>
+        ) : null}
+        {c.completed ? (
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600">
+            <Trophy className="size-3" /> Completed
+          </span>
+        ) : null}
+      </div>
+    </>
+  );
+
+  // CODING (with a linked problem) → deep-link to the workspace; it auto-completes
+  // on an accepted submission. MCQ/OTHER → open the in-place solve modal.
+  if (codingLink) {
+    return (
+      <Link href={`/coding/${c.codingProblemSlug}`} className={cardClass}>
+        {inner}
+      </Link>
+    );
+  }
 
   return (
     <>
       <button
         type="button"
-        disabled={c.completed}
+        disabled={c.completed || coding}
         onClick={() => !coding && setOpen(true)}
-        className={cn(
-          'group relative overflow-hidden rounded-xl border p-4 text-left transition-all',
-          c.completed
-            ? 'border-emerald-200 bg-emerald-50/50'
-            : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-rose-300 hover:shadow-md',
-        )}
+        className={cn(cardClass, 'w-full')}
       >
-        <div className="flex items-start justify-between gap-2">
-          <span
-            className={cn(
-              'flex size-9 items-center justify-center rounded-lg text-white',
-              c.completed
-                ? 'bg-gradient-to-br from-emerald-400 to-emerald-600'
-                : coding
-                  ? 'bg-gradient-to-br from-violet-500 to-indigo-600'
-                  : 'bg-gradient-to-br from-rose-400 to-rose-600',
-            )}
-          >
-            {c.completed ? (
-              <Check className="size-4" />
-            ) : coding ? (
-              <Code2 className="size-4" />
-            ) : (
-              <Sparkles className="size-4" />
-            )}
-          </span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-600">
-            <Zap className="size-3 fill-amber-400 text-amber-500" /> {c.xpReward}
-          </span>
-        </div>
-        <p className="mt-2.5 text-sm font-bold text-navy">{c.title}</p>
-        {c.description ? (
-          <p className="mt-0.5 line-clamp-2 text-xs text-slate-500">{c.description}</p>
-        ) : null}
-        <div className="mt-2 flex items-center gap-1.5">
-          {c.difficulty ? (
-            <span
-              className={cn('rounded-full px-2 py-0.5 text-[10px] font-semibold', DIFF_TONE[c.difficulty])}
-            >
-              {c.difficulty}
-            </span>
-          ) : null}
-          {coding && !c.completed ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-400">
-              <Lock className="size-2.5" /> Coding · soon
-            </span>
-          ) : null}
-          {c.completed ? (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600">
-              <Trophy className="size-3" /> Completed
-            </span>
-          ) : null}
-        </div>
+        {inner}
       </button>
 
       <AnimatePresence>

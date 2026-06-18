@@ -4,6 +4,7 @@ import {
   Brain,
   Building2,
   ClipboardList,
+  Code2,
   FileCheck2,
   GraduationCap,
   LayoutDashboard,
@@ -52,6 +53,7 @@ export const STUDENT_NAV: NavSection[] = [
     heading: 'PRACTICE & ASSESSMENT',
     items: [
       { label: 'Topic Mastery', href: '/topic-mastery', icon: Target },
+      { label: 'Coding', href: '/coding', icon: Code2 },
       { label: 'Mock Tests', href: '/mock-tests', icon: FileCheck2 },
     ],
   },

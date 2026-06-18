@@ -42,6 +42,8 @@ export interface ApiChallenge {
   xpReward: number;
   coinReward: number;
   completed: boolean;
+  /** For CODING challenges — slug of the linked coding problem (deep-link target). */
+  codingProblemSlug: string | null;
 }
 
 export interface ApiChallengeDetail extends ApiChallenge {
@@ -84,6 +86,7 @@ export interface AdminChallenge {
   description: string | null;
   type: ChallengeType;
   refQuestionId: string | null;
+  refCodingProblemId: string | null;
   difficulty: 'EASY' | 'MEDIUM' | 'HARD' | null;
   xpReward: number;
   coinReward: number;
@@ -97,6 +100,7 @@ export interface AdminChallengeInput {
   description?: string | null;
   type?: ChallengeType;
   refQuestionId?: string | null;
+  refCodingProblemId?: string | null;
   difficulty?: 'EASY' | 'MEDIUM' | 'HARD' | null;
   xpReward?: number;
   coinReward?: number;

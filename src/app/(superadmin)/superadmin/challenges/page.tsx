@@ -11,6 +11,7 @@ import {
   type AdminChallengeInput,
   type ChallengeType,
 } from '@/lib/api/challenges';
+import { listAdminCodingProblems, type AdminCodingProblemSummary } from '@/lib/api/coding';
 import { Code2, Loader2, Pencil, Plus, Sparkles, Swords, Trash2, X } from 'lucide-react';
 
 const INPUT =
@@ -22,6 +23,7 @@ const EMPTY: AdminChallengeInput = {
   description: '',
   type: 'MCQ',
   refQuestionId: '',
+  refCodingProblemId: '',
   difficulty: 'MEDIUM',
   xpReward: 60,
   coinReward: 0,
@@ -35,6 +37,7 @@ export default function AdminChallengesPage() {
   const [draft, setDraft] = useState<AdminChallengeInput | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [codingProblems, setCodingProblems] = useState<AdminCodingProblemSummary[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -49,6 +52,9 @@ export default function AdminChallengesPage() {
 
   useEffect(() => {
     void load();
+    listAdminCodingProblems()
+      .then(setCodingProblems)
+      .catch(() => {});
   }, [load]);
 
   const openEdit = (c: AdminChallenge) => {
@@ -59,6 +65,7 @@ export default function AdminChallengesPage() {
       description: c.description ?? '',
       type: c.type,
       refQuestionId: c.refQuestionId ?? '',
+      refCodingProblemId: c.refCodingProblemId ?? '',
       difficulty: c.difficulty ?? 'MEDIUM',
       xpReward: c.xpReward,
       coinReward: c.coinReward,
@@ -72,7 +79,9 @@ export default function AdminChallengesPage() {
     setError(null);
     const payload: AdminChallengeInput = {
       ...draft,
-      refQuestionId: draft.refQuestionId ? draft.refQuestionId : null,
+      refQuestionId: draft.type === 'MCQ' && draft.refQuestionId ? draft.refQuestionId : null,
+      refCodingProblemId:
+        draft.type === 'CODING' && draft.refCodingProblemId ? draft.refCodingProblemId : null,
     };
     try {
       if (editing) {
@@ -114,7 +123,7 @@ export default function AdminChallengesPage() {
           </p>
           <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Challenges</h1>
           <p className="mt-1 text-sm text-slate-500">
-            {rows.length} challenges · MCQ now, coding lands with Judge0
+            {rows.length} challenges · MCQ, Coding (Judge0) & free-form
           </p>
         </div>
         <button
@@ -156,7 +165,7 @@ export default function AdminChallengesPage() {
                 className={INPUT}
               >
                 <option value="MCQ">MCQ</option>
-                <option value="CODING">Coding (Judge0 — soon)</option>
+                <option value="CODING">Coding (Judge0)</option>
                 <option value="OTHER">Other</option>
               </select>
             </Field>
@@ -183,6 +192,22 @@ export default function AdminChallengesPage() {
                   className={INPUT}
                   placeholder="UUID of a published question"
                 />
+              </Field>
+            ) : null}
+            {draft.type === 'CODING' ? (
+              <Field label="Coding problem (solving it completes the challenge)" full>
+                <select
+                  value={draft.refCodingProblemId ?? ''}
+                  onChange={(e) => setDraft({ ...draft, refCodingProblemId: e.target.value })}
+                  className={INPUT}
+                >
+                  <option value="">— Select a coding problem —</option>
+                  {codingProblems.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.title} ({p.difficulty}){p.isActive ? '' : ' · inactive'}
+                    </option>
+                  ))}
+                </select>
               </Field>
             ) : null}
             <Field label="Difficulty">
