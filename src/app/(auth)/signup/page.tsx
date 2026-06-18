@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -10,6 +10,8 @@ import { ApiRequestError } from '@/lib/api/types';
 import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/ui/form-field';
 import { Logo } from '@/components/layout/Logo';
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
+import type { LoginResult } from '@/lib/api/auth';
 
 /**
  * Signup step 1 — personal details (STUDENT_JOURNEY_SPEC §1). react-hook-form
@@ -27,6 +29,14 @@ export default function SignupPage() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<AuthRegisterDto>();
+
+  const handleGoogleSuccess = useCallback((result: LoginResult) => {
+    if (!result.user.isOnboarded) {
+      router.push('/signup/onboarding');
+    } else {
+      router.push('/dashboard');
+    }
+  }, [router]);
 
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
@@ -129,6 +139,22 @@ export default function SignupPage() {
                 {isSubmitting ? 'Creating account…' : 'Continue'}
               </Button>
             </form>
+
+            <div className="mt-4 space-y-3">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-200" />
+                </div>
+                <div className="relative flex justify-center text-xs text-slate-400">
+                  <span className="bg-white px-3">or sign up with Google</span>
+                </div>
+              </div>
+              <GoogleSignInButton
+                onSuccess={handleGoogleSuccess}
+                onError={(msg) => setServerError(msg)}
+                text="continue_with"
+              />
+            </div>
 
             <p className="mt-4 text-center text-sm text-slate-500">
               Already have an account?{' '}

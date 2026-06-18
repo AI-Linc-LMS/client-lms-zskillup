@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useCallback, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -18,6 +18,8 @@ import { login } from '@/lib/api/auth';
 import { ApiRequestError } from '@/lib/api/types';
 import { FormField } from '@/components/ui/form-field';
 import { cn } from '@/lib/utils';
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
+import type { LoginResult } from '@/lib/api/auth';
 
 type Role = 'student' | 'admin';
 
@@ -56,22 +58,7 @@ function LoginForm() {
     setUnverifiedEmail(null);
     try {
       const result = await login(values);
-      if (!result.user.isOnboarded) {
-        router.push('/signup/onboarding');
-        return;
-      }
-      const redirect = searchParams.get('redirect');
-      if (redirect && redirect.startsWith('/')) {
-        router.push(redirect);
-        return;
-      }
-      if (result.user.role === 'SUPER_ADMIN') {
-        router.push('/superadmin/dashboard');
-      } else if (result.user.role === 'COLLEGE_ADMIN') {
-        router.push('/tpo/dashboard');
-      } else {
-        router.push('/dashboard');
-      }
+      handleLoginSuccess(result);
     } catch (err) {
       if (err instanceof ApiRequestError && err.code === 'SESSION_CONFLICT') {
         setSessionWarning(true);
@@ -86,6 +73,25 @@ function LoginForm() {
       );
     }
   });
+
+  const handleLoginSuccess = useCallback((result: LoginResult) => {
+    if (!result.user.isOnboarded) {
+      router.push('/signup/onboarding');
+      return;
+    }
+    const redirect = searchParams.get('redirect');
+    if (redirect && redirect.startsWith('/')) {
+      router.push(redirect);
+      return;
+    }
+    if (result.user.role === 'SUPER_ADMIN') {
+      router.push('/superadmin/dashboard');
+    } else if (result.user.role === 'COLLEGE_ADMIN') {
+      router.push('/tpo/dashboard');
+    } else {
+      router.push('/dashboard');
+    }
+  }, [router, searchParams]);
 
   return (
     <div className="w-full max-w-md">
@@ -218,6 +224,25 @@ function LoginForm() {
             {!isSubmitting && <ArrowRight className="h-4 w-4" />}
           </button>
         </form>
+
+        {/* Google Sign-In — only shown for student role */}
+        {role === 'student' && (
+          <div className="mt-4 space-y-3">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[var(--color-line)]" />
+              </div>
+              <div className="relative flex justify-center text-xs text-[var(--color-text-muted)]">
+                <span className="bg-white px-3">or continue with</span>
+              </div>
+            </div>
+            <GoogleSignInButton
+              onSuccess={handleLoginSuccess}
+              onError={(msg) => setServerError(msg)}
+              text="signin_with"
+            />
+          </div>
+        )}
 
         <p className="mt-5 text-center text-sm text-[var(--color-text-muted)]">
           New to ZSkillup?{' '}

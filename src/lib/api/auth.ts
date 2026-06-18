@@ -59,6 +59,15 @@ export async function login(dto: AuthLoginDto): Promise<LoginResult> {
   return res.data;
 }
 
+export async function loginWithGoogle(idToken: string): Promise<LoginResult> {
+  const res = await apiClient.post<LoginResult>('/api/v1/auth/google', { idToken }, { auth: 'login' });
+  authToken.set(res.data.accessToken);
+  _rearmApiClient();
+  document.cookie = `role=${res.data.user.role}; path=/; samesite=lax`;
+  document.cookie = `onboarded=${res.data.user.isOnboarded ? '1' : '0'}; path=/; samesite=lax`;
+  return res.data;
+}
+
 export async function logout(): Promise<void> {
   try {
     // Call the backend directly (cross-origin, credentials included) so the
