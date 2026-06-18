@@ -1,9 +1,41 @@
 import type { NextConfig } from 'next';
 
+/**
+ * Production API proxy (Netlify). The site is served over HTTPS but the backend
+ * ALB is plain HTTP, so the browser cannot call it directly (mixed content).
+ * Instead the browser calls the API SAME-ORIGIN (`/api/v1/*` on the Netlify
+ * domain) and this rewrite proxies those requests server-side to the backend.
+ *
+ * Why same-origin matters: the refresh token is an HttpOnly cookie. Proxying
+ * keeps it a first-party cookie on the Netlify domain, so it is stored and sent
+ * automatically — no cross-site / third-party-cookie fragility.
+ *
+ * Set `BACKEND_ORIGIN` in the Netlify env (e.g. http://<alb-dns>) to enable the
+ * proxy. When unset (local dev) no rewrite is added and the client talks to the
+ * backend directly via NEXT_PUBLIC_API_URL (http://localhost:3001).
+ *
+ * Note: the Next route handlers at /api/auth/* are intentionally NOT proxied —
+ * only /api/v1/* (the Nest API) is.
+ */
+const BACKEND_ORIGIN = process.env.BACKEND_ORIGIN;
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Required for Amplify Hosting SSR (compute) deployments
   output: 'standalone',
+  async rewrites() {
+    if (!BACKEND_ORIGIN) return [];
+    return {
+      beforeFiles: [
+        {
+          source: '/api/v1/:path*',
+          destination: `${BACKEND_ORIGIN}/api/v1/:path*`,
+        },
+      ],
+      afterFiles: [],
+      fallback: [],
+    };
+  },
 };
 
 export default nextConfig;
