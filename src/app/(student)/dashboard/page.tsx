@@ -3,6 +3,8 @@ import { AiBriefingHero } from '@/components/student/AiBriefingHero';
 import { AuroraStats } from '@/components/student/AuroraStats';
 import { TodaysTip } from '@/components/student/TodaysTip';
 import { QuickAptitude } from '@/components/student/QuickAptitude';
+import { DailyChallenge } from '@/components/student/DailyChallenge';
+import { Challenges } from '@/components/student/Challenges';
 import { DailyQuest } from '@/components/student/DailyQuest';
 import { ContinueLearning } from '@/components/student/ContinueLearning';
 import { CourseTable } from '@/components/student/CourseTable';
@@ -31,10 +33,16 @@ export default function StudentDashboardPage() {
           <AuroraStats />
           <TodaysTip />
           <Reveal>
+            <DailyChallenge />
+          </Reveal>
+          <Reveal>
             <DailyQuest />
           </Reveal>
           <Reveal>
             <QuickAptitude />
+          </Reveal>
+          <Reveal>
+            <Challenges />
           </Reveal>
           <Reveal>
             <ContinueLearning />

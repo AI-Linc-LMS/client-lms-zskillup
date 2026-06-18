@@ -10,6 +10,7 @@ import {
   Lightbulb,
   type LucideIcon,
   Mail,
+  Swords,
   Target,
   TrendingUp,
   Users,
@@ -82,6 +83,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
       { label: 'Companies', href: '/superadmin/companies', icon: Building2 },
       { label: 'Colleges', href: '/superadmin/colleges', icon: GraduationCap },
       { label: 'Tips', href: '/superadmin/tips', icon: Lightbulb },
+      { label: 'Challenges', href: '/superadmin/challenges', icon: Swords },
     ],
   },
 ];
