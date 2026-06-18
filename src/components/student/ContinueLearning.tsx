@@ -3,18 +3,11 @@
 import { useEffect, useState } from 'react';
 import { formatDateIN } from '@/lib/format';
 import Link from 'next/link';
-import { Play } from 'lucide-react';
+import { ArrowRight, Play, RotateCcw } from 'lucide-react';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { getMockHistory, type ApiMockAttemptHistory } from '@/lib/api/mocks';
 import { getPracticeAccuracy, type ApiAccuracy } from '@/lib/api/practice';
 
-/**
- * "Pick up where you left off" — live continuation card. Shows the student's
- * latest finalized mock (score, percentile, report deep-link) next to their
- * running practice accuracy. Per-course lesson progress arrives with the
- * Sprint 5 enrollment ledger; until then this card only states what actually
- * happened.
- */
 export function ContinueLearning() {
   const [latest, setLatest] = useState<ApiMockAttemptHistory | null | undefined>(undefined);
   const [accuracy, setAccuracy] = useState<ApiAccuracy | null>(null);
@@ -33,98 +26,101 @@ export function ContinueLearning() {
   }, []);
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="flex items-center justify-between">
+    <section className="lms-card overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-[var(--color-line)] px-6 py-4">
         <div>
-          <h2 className="text-base font-bold text-navy">Pick up where you left off</h2>
-          <p className="text-xs text-slate-500">Your latest assessment and practice signals</p>
+          <h2 className="text-base font-bold text-[var(--color-ink)]">Pick up where you left off</h2>
+          <p className="text-xs text-[var(--color-text-muted)]">Your latest assessment and practice signals</p>
         </div>
-        <Link href="/mock-tests" className="text-xs font-semibold text-orange hover:underline">
-          View all →
+        <Link
+          href="/mock-tests"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-brand)] hover:underline"
+        >
+          View all <ArrowRight className="h-3 w-3" />
         </Link>
       </div>
 
-      {latest === undefined ? (
-        <div className="mt-5 h-24 animate-pulse rounded-lg bg-slate-50" />
-      ) : latest === null ? (
-        <div className="mt-5 rounded-lg bg-slate-50 p-5 text-center">
-          <p className="text-sm font-semibold text-navy">No assessments yet.</p>
-          <p className="mt-1 text-xs text-slate-500">
-            Take your first timed mock to see your score, percentile, and a full answer review here.
-          </p>
-        </div>
-      ) : (
-        <>
-          <div className="mt-5 grid gap-6 md:grid-cols-3">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-                Latest mock
-              </p>
-              <p className="mt-1.5 font-semibold leading-snug text-navy">{latest.title}</p>
-              <p className="mt-0.5 text-xs text-slate-500">
-                {latest.status === 'EXPIRED' ? 'Timed out · ' : ''}
-                {formatDateIN(latest.submittedAt)}
-              </p>
-            </div>
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-                Score
-              </p>
-              <p className="mt-1.5 font-semibold leading-snug text-navy">
-                {latest.score}/{latest.total} · {latest.pct}%
-              </p>
-              <p className="mt-0.5 text-xs text-slate-500">{latest.percentile}th percentile</p>
-            </div>
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-                Practice accuracy
-              </p>
-              <p className="mt-1.5 font-semibold leading-snug text-navy">
-                {accuracy && accuracy.total > 0 ? `${accuracy.accuracyPct}%` : '—'}
-              </p>
-              <p className="mt-0.5 text-xs text-slate-500">
-                {accuracy && accuracy.total > 0
-                  ? `across ${accuracy.total} question${accuracy.total === 1 ? '' : 's'}`
-                  : 'No practice attempts yet'}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-5">
-            <ProgressBar value={latest.pct} label="Latest mock score" />
-            <p className="mt-1 text-xs text-slate-500">
-              {latest.passed
-                ? 'Cleared the pass mark — push the percentile higher.'
-                : 'Below the 60% pass mark — review the report and retake.'}
+      <div className="p-6">
+        {latest === undefined ? (
+          <div className="h-24 animate-pulse rounded-xl bg-[var(--color-surface-2)]" />
+        ) : latest === null ? (
+          <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)] p-6 text-center">
+            <p className="text-sm font-semibold text-[var(--color-ink)]">No assessments yet.</p>
+            <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+              Take your first timed mock to see your score, percentile, and a full answer review
+              here.
             </p>
           </div>
-        </>
-      )}
-
-      <div className="mt-4 flex items-center gap-3">
-        {latest ? (
-          <Link
-            href={`/dashboard/quiz?report=${latest.attemptId}`}
-            className="inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
-          >
-            <Play className="size-4 fill-white" aria-hidden="true" />
-            Review report
-          </Link>
         ) : (
-          <Link
-            href="/mock-tests"
-            className="inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
-          >
-            <Play className="size-4 fill-white" aria-hidden="true" />
-            Start a mock
-          </Link>
+          <>
+            <div className="grid gap-6 md:grid-cols-3">
+              <div>
+                <p className="group-label mb-1.5">Latest mock</p>
+                <p className="font-semibold leading-snug text-[var(--color-ink)]">{latest.title}</p>
+                <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
+                  {latest.status === 'EXPIRED' ? 'Timed out · ' : ''}
+                  {formatDateIN(latest.submittedAt)}
+                </p>
+              </div>
+              <div>
+                <p className="group-label mb-1.5">Score</p>
+                <p className="font-semibold leading-snug text-[var(--color-ink)]">
+                  {latest.score}/{latest.total} · {latest.pct}%
+                </p>
+                <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
+                  {latest.percentile}th percentile
+                </p>
+              </div>
+              <div>
+                <p className="group-label mb-1.5">Practice accuracy</p>
+                <p className="font-semibold leading-snug text-[var(--color-ink)]">
+                  {accuracy && accuracy.total > 0 ? `${accuracy.accuracyPct}%` : '—'}
+                </p>
+                <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
+                  {accuracy && accuracy.total > 0
+                    ? `across ${accuracy.total} question${accuracy.total === 1 ? '' : 's'}`
+                    : 'No practice attempts yet'}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5">
+              <ProgressBar value={latest.pct} label="Latest mock score" />
+              <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                {latest.passed
+                  ? 'Cleared the pass mark — push the percentile higher.'
+                  : 'Below the 60% pass mark — review the report and retake.'}
+              </p>
+            </div>
+          </>
         )}
-        <Link
-          href="/practice"
-          className="text-sm font-medium text-slate-500 transition-colors hover:text-navy"
-        >
-          Resume practice
-        </Link>
+
+        <div className="mt-5 flex items-center gap-3">
+          {latest ? (
+            <Link
+              href={`/dashboard/quiz?report=${latest.attemptId}`}
+              className="btn-brand inline-flex rounded-full px-5 py-2 text-sm"
+            >
+              <Play className="h-4 w-4 fill-white" aria-hidden />
+              Review report
+            </Link>
+          ) : (
+            <Link
+              href="/mock-tests"
+              className="btn-brand inline-flex rounded-full px-5 py-2 text-sm"
+            >
+              <Play className="h-4 w-4 fill-white" aria-hidden />
+              Start a mock
+            </Link>
+          )}
+          <Link
+            href="/practice"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-ink)]"
+          >
+            <RotateCcw className="h-3.5 w-3.5" /> Resume practice
+          </Link>
+        </div>
       </div>
     </section>
   );

@@ -6,6 +6,8 @@ import { ContinueLearning } from '@/components/student/ContinueLearning';
 import { CourseTable } from '@/components/student/CourseTable';
 import { PracticeHub } from '@/components/student/PracticeHub';
 import { DashboardRightRail } from '@/components/student/DashboardRightRail';
+import { AdaptiveSkillProfile } from '@/components/student/AdaptiveSkillProfile';
+import { CompanyReadiness } from '@/components/student/CompanyReadiness';
 
 /**
  * Student dashboard (frontend/CLAUDE §4 — the canonical reference UI). Server
@@ -31,6 +33,8 @@ export default function StudentDashboardPage() {
         </div>
 
         <aside className="space-y-6">
+          <AdaptiveSkillProfile />
+          <CompanyReadiness />
           <DashboardRightRail />
         </aside>
       </div>

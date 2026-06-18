@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Clock, FileText, Loader2, Star, Timer } from 'lucide-react';
+import { Brain, Clock, FileText, Loader2, Sparkles, Star, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { listMocks, type ApiMockSummary } from '@/lib/api/mocks';
 
 /**
@@ -62,21 +63,49 @@ export function MockTestsCatalog() {
   return (
     <div className="grid gap-4 md:grid-cols-2">
       {mocks.map((mock) => (
-        <div key={mock.id} className="flex flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div
+          key={mock.id}
+          className={cn(
+            'flex flex-col rounded-xl border p-5 shadow-sm',
+            mock.isAdaptive
+              ? 'border-orange/30 bg-gradient-to-br from-orange/5 to-white'
+              : 'border-slate-200 bg-white',
+          )}
+        >
           <div className="flex items-start gap-3">
-            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-orange/10 text-orange ring-1 ring-orange/20">
-              <Timer className="size-5" aria-hidden="true" />
+            <span
+              className={cn(
+                'grid size-11 shrink-0 place-items-center rounded-xl ring-1',
+                mock.isAdaptive
+                  ? 'bg-orange/10 text-orange ring-orange/20'
+                  : 'bg-orange/10 text-orange ring-orange/20',
+              )}
+            >
+              {mock.isAdaptive ? (
+                <Brain className="size-5" aria-hidden="true" />
+              ) : (
+                <Timer className="size-5" aria-hidden="true" />
+              )}
             </span>
-            <div className="min-w-0">
-              <p className="font-bold text-navy">{mock.title}</p>
-              <p className="text-xs text-slate-400">Timed mock assessment</p>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-start gap-2 flex-wrap">
+                <p className="font-bold text-navy">{mock.title}</p>
+                {mock.isAdaptive && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-orange/30 bg-orange/10 px-2 py-0.5 text-[10px] font-semibold text-orange">
+                    <Sparkles className="size-2.5" /> AI Adaptive
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-400">
+                {mock.isAdaptive ? 'Personalised adaptive assessment · IRT engine' : 'Timed mock assessment'}
+              </p>
             </div>
           </div>
 
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1.5">
             <span className="flex items-center gap-1.5 text-xs text-slate-500">
               <FileText className="size-3.5 text-slate-400" aria-hidden="true" />
-              {mock.totalQuestions} questions
+              {mock.isAdaptive ? `up to ${mock.totalQuestions} questions` : `${mock.totalQuestions} questions`}
             </span>
             <span className="flex items-center gap-1.5 text-xs text-slate-500">
               <Clock className="size-3.5 text-slate-400" aria-hidden="true" />
@@ -89,12 +118,21 @@ export function MockTestsCatalog() {
           </div>
 
           <div className="mt-5 flex items-center justify-end border-t border-slate-100 pt-4">
-            <Button asChild size="sm">
-              <Link href={`/dashboard/quiz?mock=${mock.id}`} aria-label={`Start ${mock.title}`}>
-                <Timer className="size-4" aria-hidden="true" />
-                Start test
-              </Link>
-            </Button>
+            {mock.isAdaptive ? (
+              <Button asChild size="sm" className="bg-orange hover:bg-orange/90">
+                <Link href={`/dashboard/quiz/adaptive?mock=${mock.id}`} aria-label={`Start adaptive ${mock.title}`}>
+                  <Sparkles className="size-3.5 mr-1.5" aria-hidden="true" />
+                  Start adaptive test
+                </Link>
+              </Button>
+            ) : (
+              <Button asChild size="sm">
+                <Link href={`/dashboard/quiz?mock=${mock.id}`} aria-label={`Start ${mock.title}`}>
+                  <Timer className="size-4" aria-hidden="true" />
+                  Start test
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       ))}

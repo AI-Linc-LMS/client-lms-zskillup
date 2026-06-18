@@ -137,10 +137,14 @@ export const DEMO_ROADMAP_PROGRESS = {
 
 // ── Homepage ──────────────────────────────────────────────────────────────────
 
+const wiki = 'https://upload.wikimedia.org/wikipedia/commons';
+
 export interface HomepageTrack {
   slug: string;
   badge?: string;
   company: string;
+  logoSrc: string;
+  logoAlt: string;
   description: string;
   title: string;
   mcqs: string;
@@ -152,12 +156,12 @@ export interface HomepageTrack {
 }
 
 export const HOMEPAGE_FEATURED_TRACKS: HomepageTrack[] = [
-  { slug: 'accenture', badge: 'Most enrolled', company: 'Accenture', description: 'Cognitive, Technical & English tracks with adaptive section timing.', title: 'Accenture — Complete preparation', mcqs: '2.4k+', rounds: 5, rating: 4.5, enrolled: '12k+', hours: 10, accent: 'from-violet-600 to-indigo-700' },
-  { slug: 'tcs', badge: 'Recruiter-endorsed', company: 'TCS', description: 'NQT-style quant, verbal & reasoning updated to 2026 paper pattern.', title: 'TCS — Complete preparation', mcqs: '3.1k+', rounds: 5, rating: 4.6, enrolled: '25k+', hours: 12, accent: 'from-teal-600 to-emerald-700' },
-  { slug: 'infosys', badge: 'New 2026 syllabus', company: 'Infosys', description: 'Puzzle-heavy specialist paths with InfyTQ Power Programmer drills.', title: 'Infosys — Complete preparation', mcqs: '2.8k+', rounds: 5, rating: 4.7, enrolled: '18k+', hours: 14, accent: 'from-orange-500 to-amber-600' },
-  { slug: 'wipro', company: 'Wipro', description: 'Aptitude + OOP + coding fundamentals for the NTH elite track.', title: 'Wipro — Complete preparation', mcqs: '1.9k+', rounds: 4, rating: 4.8, enrolled: '10k+', hours: 16, accent: 'from-purple-600 to-fuchsia-700' },
-  { slug: 'cognizant', company: 'Cognizant', description: 'GenC and GenC Next tracks with game-based aptitude simulation.', title: 'Cognizant — Complete preparation', mcqs: '2.2k+', rounds: 4, rating: 4.5, enrolled: '15k+', hours: 18, accent: 'from-rose-500 to-red-600' },
-  { slug: 'capgemini', company: 'Capgemini', description: 'Pseudocode, game-based aptitude, and communication assessment prep.', title: 'Capgemini — Complete preparation', mcqs: '2.0k+', rounds: 5, rating: 4.6, enrolled: '12k+', hours: 20, accent: 'from-sky-600 to-blue-700' },
+  { slug: 'accenture', badge: 'Most enrolled', company: 'Accenture', logoSrc: `${wiki}/c/cd/Accenture.svg`, logoAlt: 'Accenture logo', description: 'Cognitive, Technical & English tracks with adaptive section timing.', title: 'Accenture — Complete preparation', mcqs: '2.4k+', rounds: 5, rating: 4.5, enrolled: '12k+', hours: 10, accent: 'from-violet-600 to-indigo-700' },
+  { slug: 'tcs', badge: 'Recruiter-endorsed', company: 'TCS', logoSrc: `${wiki}/0/0e/Tata_Consultancy_Services_old_logo.svg`, logoAlt: 'TCS logo', description: 'NQT-style quant, verbal & reasoning updated to 2026 paper pattern.', title: 'TCS — Complete preparation', mcqs: '3.1k+', rounds: 5, rating: 4.6, enrolled: '25k+', hours: 12, accent: 'from-teal-600 to-emerald-700' },
+  { slug: 'infosys', badge: 'New 2026 syllabus', company: 'Infosys', logoSrc: `${wiki}/9/95/Infosys_logo.svg`, logoAlt: 'Infosys logo', description: 'Puzzle-heavy specialist paths with InfyTQ Power Programmer drills.', title: 'Infosys — Complete preparation', mcqs: '2.8k+', rounds: 5, rating: 4.7, enrolled: '18k+', hours: 14, accent: 'from-orange-500 to-amber-600' },
+  { slug: 'wipro', company: 'Wipro', logoSrc: `${wiki}/a/a0/Wipro_Primary_Logo_Color_RGB.svg`, logoAlt: 'Wipro logo', description: 'Aptitude + OOP + coding fundamentals for the NTH elite track.', title: 'Wipro — Complete preparation', mcqs: '1.9k+', rounds: 4, rating: 4.8, enrolled: '10k+', hours: 16, accent: 'from-purple-600 to-fuchsia-700' },
+  { slug: 'cognizant', company: 'Cognizant', logoSrc: `${wiki}/4/43/Cognizant_logo_2022.svg`, logoAlt: 'Cognizant logo', description: 'GenC and GenC Next tracks with game-based aptitude simulation.', title: 'Cognizant — Complete preparation', mcqs: '2.2k+', rounds: 4, rating: 4.5, enrolled: '15k+', hours: 18, accent: 'from-rose-500 to-red-600' },
+  { slug: 'capgemini', company: 'Capgemini', logoSrc: `${wiki}/9/9d/Capgemini_201x_logo.svg`, logoAlt: 'Capgemini logo', description: 'Pseudocode, game-based aptitude, and communication assessment prep.', title: 'Capgemini — Complete preparation', mcqs: '2.0k+', rounds: 5, rating: 4.6, enrolled: '12k+', hours: 20, accent: 'from-sky-600 to-blue-700' },
 ];
 
 export const HOMEPAGE_WHY_BLOCKS = [
@@ -180,12 +184,12 @@ export const HOMEPAGE_TESTIMONIALS = [
 ];
 
 export const HOMEPAGE_COMPANY_LOGOS = [
-  { name: 'Accenture', slug: 'accenture' },
-  { name: 'TCS', slug: 'tcs' },
-  { name: 'Infosys', slug: 'infosys' },
-  { name: 'Wipro', slug: 'wipro' },
-  { name: 'Cognizant', slug: 'cognizant' },
-  { name: 'Capgemini', slug: 'capgemini' },
-  { name: 'Deloitte', slug: 'deloitte' },
-  { name: 'Amazon', slug: 'amazon' },
+  { name: 'Accenture', slug: 'accenture', logoSrc: `${wiki}/c/cd/Accenture.svg`, logoAlt: 'Accenture logo' },
+  { name: 'TCS',       slug: 'tcs',       logoSrc: `${wiki}/0/0e/Tata_Consultancy_Services_old_logo.svg`, logoAlt: 'TCS logo' },
+  { name: 'Infosys',   slug: 'infosys',   logoSrc: `${wiki}/9/95/Infosys_logo.svg`, logoAlt: 'Infosys logo' },
+  { name: 'Wipro',     slug: 'wipro',     logoSrc: `${wiki}/a/a0/Wipro_Primary_Logo_Color_RGB.svg`, logoAlt: 'Wipro logo' },
+  { name: 'Cognizant', slug: 'cognizant', logoSrc: `${wiki}/4/43/Cognizant_logo_2022.svg`, logoAlt: 'Cognizant logo' },
+  { name: 'Capgemini', slug: 'capgemini', logoSrc: `${wiki}/9/9d/Capgemini_201x_logo.svg`, logoAlt: 'Capgemini logo' },
+  { name: 'Deloitte',  slug: 'deloitte',  logoSrc: `${wiki}/e/ed/Logo_of_Deloitte.svg`, logoAlt: 'Deloitte logo' },
+  { name: 'Amazon',    slug: 'amazon',    logoSrc: `${wiki}/a/a9/Amazon_logo.svg`, logoAlt: 'Amazon logo' },
 ];

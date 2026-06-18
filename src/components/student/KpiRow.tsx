@@ -1,46 +1,33 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { listCourses, listTopics } from '@/lib/api/catalog';
 import { getPracticeAccuracy } from '@/lib/api/practice';
 import { getMockHistory } from '@/lib/api/mocks';
+import { getStudentStats, type ApiStudentStats } from '@/lib/api/gamification';
 import { getMockStats } from '@/lib/mock-stats';
 
-/**
- * Dashboard KPI row — all four tiles are live: practice accuracy
- * (`GET /practice/accuracy`), catalog size (`GET /courses`), topic count
- * (`GET /topics`), and mock attempts (`GET /mocks/attempts/mine`).
- */
 export function KpiRow() {
   const [accuracy, setAccuracy] = useState<{ total: number; accuracyPct: number } | null>(null);
-  const [courses, setCourses] = useState<number | null>(null);
-  const [topics, setTopics] = useState<number | null>(null);
   const [mocks, setMocks] = useState<{ taken: number; best: number | null } | null>(null);
+  const [stats, setStats] = useState<ApiStudentStats | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     getPracticeAccuracy()
       .then((a) => !cancelled && setAccuracy(a))
       .catch(() => {});
-    listCourses()
-      .then((c) => !cancelled && setCourses(c.length))
-      .catch(() => {});
-    listTopics()
-      .then((t) => !cancelled && setTopics(t.length))
-      .catch(() => {});
     getMockHistory()
       .then((rows) => {
         if (cancelled) return;
-        const stats = getMockStats(rows);
-        setMocks({ taken: stats.taken, best: stats.bestPct });
+        const s = getMockStats(rows);
+        setMocks({ taken: s.taken, best: s.bestPct });
       })
       .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
+    getStudentStats()
+      .then((s) => !cancelled && setStats(s))
+      .catch(() => {});
+    return () => { cancelled = true; };
   }, []);
-
-  const fmt = (v: number | null) => (v === null ? '—' : String(v));
 
   const kpis = [
     {
@@ -50,28 +37,43 @@ export function KpiRow() {
         accuracy && accuracy.total > 0
           ? `${accuracy.total} question${accuracy.total === 1 ? '' : 's'} attempted`
           : 'Start a practice set',
+      accent: '#2563eb',
     },
-    { label: 'Prep courses', value: fmt(courses), sub: 'Available in your catalog' },
-    { label: 'Topics to master', value: fmt(topics), sub: 'Across every track' },
     {
-      label: 'Mock tests',
+      label: 'XP earned',
+      value: stats ? stats.totalXp.toLocaleString() : '—',
+      sub: stats ? `Level ${stats.level} · ${stats.badgesEarned} badge${stats.badgesEarned === 1 ? '' : 's'}` : 'Complete quests to earn XP',
+      accent: '#1e3a8a',
+    },
+    {
+      label: 'Day streak',
+      value: stats ? String(stats.currentStreakDays) : '—',
+      sub: stats && stats.longestStreakDays > 0 ? `Best: ${stats.longestStreakDays} day${stats.longestStreakDays === 1 ? '' : 's'}` : 'Practice daily to build a streak',
+      accent: '#f97316',
+    },
+    {
+      label: 'Mock tests taken',
       value: mocks ? String(mocks.taken) : '—',
-      sub: mocks && mocks.taken > 0 ? `Best score ${mocks.best}%` : 'Take your first timed mock',
+      sub:
+        mocks && mocks.taken > 0
+          ? `Best score ${mocks.best}%`
+          : 'Take your first timed mock',
+      accent: '#f37021',
     },
   ];
 
   return (
     <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       {kpis.map((kpi) => (
-        <div
-          key={kpi.label}
-          className="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm"
-        >
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-            {kpi.label}
-          </p>
-          <p className="mt-2 text-[26px] font-extrabold leading-none text-navy">{kpi.value}</p>
-          <p className="mt-1.5 text-[11px] text-slate-400">{kpi.sub}</p>
+        <div key={kpi.label} className="stat-card relative overflow-hidden">
+          <span
+            aria-hidden
+            className="absolute inset-x-0 top-0 h-[3px]"
+            style={{ background: kpi.accent }}
+          />
+          <p className="stat-label mt-1">{kpi.label}</p>
+          <p className="stat-value num-tab">{kpi.value}</p>
+          <p className="stat-meta">{kpi.sub}</p>
         </div>
       ))}
     </section>

@@ -1,5 +1,6 @@
 import {
   BookOpen,
+  Brain,
   Building2,
   ClipboardList,
   FileCheck2,
@@ -67,6 +68,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
       { label: 'Courses', href: '/superadmin/courses', icon: BookOpen },
       { label: 'Question Bank', href: '/superadmin/questions', icon: ClipboardList },
       { label: 'Mock Tests', href: '/superadmin/mocks', icon: FileCheck2 },
+      { label: 'Adaptive Sessions', href: '/superadmin/adaptive-sessions', icon: Brain },
       { label: 'Companies', href: '/superadmin/companies', icon: Building2 },
       { label: 'Colleges', href: '/superadmin/colleges', icon: GraduationCap },
     ],

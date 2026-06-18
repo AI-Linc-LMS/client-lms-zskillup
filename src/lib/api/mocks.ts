@@ -14,6 +14,7 @@ export interface ApiMockSummary {
   durationMinutes: number;
   totalQuestions: number;
   passingScore: number;
+  isAdaptive: boolean;
 }
 
 export interface ApiMockOption {

@@ -22,7 +22,7 @@ export function TopBar() {
   const isStudentZone = !pathname.startsWith('/superadmin') && !pathname.startsWith('/tpo');
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-5 border-b border-slate-200 bg-white px-6 shadow-sm">
+    <header className="sticky top-0 z-30 flex h-14 items-center gap-5 border-b border-[var(--color-line)] glass px-6 shadow-sm">
       <Logo workspaceLabel={workspaceLabelForPath(pathname)} />
 
       {isStudentZone ? (
