@@ -1,0 +1,28 @@
+# Netlify edge proxy for the backend API.
+#
+# The site is HTTPS but the backend ALB is plain HTTP, so the browser can't call
+# it directly (mixed content). These rewrites serve the API SAME-ORIGIN and are
+# processed at Netlify's edge BEFORE the Next.js serverless function — so API
+# calls skip the function cold start that was making the question bank / courses
+# pages slow to load. (next.config.ts keeps an equivalent rewrite as a fallback
+# for any path the edge layer doesn't capture.)
+#
+# Keep the host below in sync with the backend ALB DNS.
+
+[[redirects]]
+  from = "/api/v1/*"
+  to = "http://zskillup-backend-alb-576289254.ap-south-1.elb.amazonaws.com/api/v1/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/ready"
+  to = "http://zskillup-backend-alb-576289254.ap-south-1.elb.amazonaws.com/ready"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/health"
+  to = "http://zskillup-backend-alb-576289254.ap-south-1.elb.amazonaws.com/health"
+  status = 200
+  force = true
