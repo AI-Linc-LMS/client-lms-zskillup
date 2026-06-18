@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react';
 import { formatDateIN } from '@/lib/format';
 import Link from 'next/link';
-import { BookOpen, Calendar, Target, Timer } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowUpRight, BookOpen, Calendar, Target, Timer } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Reveal, Stagger, StaggerItem } from '@/components/motion/primitives';
 import { getMockHistory, type ApiMockAttemptHistory } from '@/lib/api/mocks';
 import { getPracticeAccuracy, type ApiAccuracy } from '@/lib/api/practice';
 
@@ -22,20 +24,69 @@ const UP_NEXT = [
     title: 'Take a timed mock',
     meta: 'Score, percentile, and a full answer review',
     href: '/mock-tests',
+    from: '#f7a14e',
+    to: '#f37021',
   },
   {
     icon: Target,
     title: 'Drill a weak topic',
     meta: 'Server-graded practice with instant hints',
     href: '/topic-mastery',
+    from: '#7c6cf5',
+    to: '#5b3bf5',
   },
   {
     icon: BookOpen,
     title: 'Browse company hubs',
     meta: 'Pattern-matched prep for 9 recruiters',
     href: '/dashboard/company',
+    from: '#1e6ff5',
+    to: '#2563eb',
   },
-];
+] as const;
+
+/** Tiny uppercase section eyebrow shared across the rail's cards. */
+function RailLabel({ icon: Icon, children }: { icon?: typeof Calendar; children: React.ReactNode }) {
+  return (
+    <h2 className="mb-4 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+      {Icon ? <Icon className="size-3.5" aria-hidden="true" /> : null}
+      {children}
+    </h2>
+  );
+}
+
+/** Crisp white Aurora card with a soft gradient wash + colored glow on hover. */
+function RailCard({
+  glow,
+  className,
+  children,
+}: {
+  glow: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section
+      className={cn(
+        'group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_8px_30px_-18px_rgba(15,23,42,0.35)] transition-shadow hover:shadow-[0_18px_50px_-24px_rgba(15,23,42,0.45)]',
+        className,
+      )}
+    >
+      {/* faint gradient wash */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-50/70 via-transparent to-transparent"
+      />
+      {/* colored glow blob — intensifies on hover */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-10 -top-12 size-32 rounded-full opacity-[0.08] blur-2xl transition-opacity duration-500 group-hover:opacity-20"
+        style={{ background: glow }}
+      />
+      <div className="relative z-10">{children}</div>
+    </section>
+  );
+}
 
 export function DashboardRightRail() {
   const [history, setHistory] = useState<ApiMockAttemptHistory[] | null>(null);
@@ -69,97 +120,176 @@ export function DashboardRightRail() {
   }, []);
 
   return (
-    <div className="space-y-5">
+    <Stagger className="space-y-5">
       {/* Up next — live feature entry points */}
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <h2 className="mb-3 text-[11px] font-bold uppercase tracking-widest text-slate-400">
-          Up Next
-        </h2>
-        <div className="space-y-2.5">
-          {UP_NEXT.map(({ icon: Icon, title, meta, href }) => (
-            <Link
-              key={title}
-              href={href}
-              className="flex items-start gap-3 rounded-lg border border-slate-200 bg-white p-3 transition-colors hover:border-orange/40 hover:bg-orange/5"
-            >
-              <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-sky-50 text-navy">
-                <Icon className="size-4" aria-hidden="true" />
-              </span>
-              <span>
-                <span className="block text-sm font-semibold leading-snug text-navy">{title}</span>
-                <span className="mt-0.5 block text-xs text-slate-500">{meta}</span>
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <StaggerItem>
+        <RailCard glow="#f37021">
+          <RailLabel>Up Next</RailLabel>
+          <div className="space-y-2.5">
+            {UP_NEXT.map(({ icon: Icon, title, meta, href, from, to }) => (
+              <motion.div key={title} whileHover={{ y: -2 }} transition={{ duration: 0.2 }}>
+                <Link
+                  href={href}
+                  className="group/item relative flex items-center gap-3.5 overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-3.5 transition-colors hover:border-transparent hover:bg-slate-50/80"
+                >
+                  {/* gradient-filled icon chip */}
+                  <span
+                    className="grid size-10 shrink-0 place-items-center rounded-xl text-white shadow-sm transition-transform duration-200 group-hover/item:scale-105"
+                    style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
+                  >
+                    <Icon className="size-[18px]" aria-hidden="true" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-bold leading-snug text-navy">{title}</span>
+                    <span className="mt-0.5 block text-xs leading-snug text-slate-500">{meta}</span>
+                  </span>
+                  <ArrowUpRight
+                    className="size-4 shrink-0 -translate-x-1 text-slate-300 opacity-0 transition-all duration-200 group-hover/item:translate-x-0 group-hover/item:text-orange group-hover/item:opacity-100"
+                    aria-hidden="true"
+                  />
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </RailCard>
+      </StaggerItem>
 
       {/* This Week — real calendar */}
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <h2 className="mb-3 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-slate-400">
-          <Calendar className="size-3.5" aria-hidden="true" />
-          This Week
-        </h2>
-        <div className="flex justify-between">
-          {week.map((day) => (
-            <div key={day.d} className="flex flex-col items-center gap-1">
-              <span className="text-[10px] font-medium uppercase text-slate-400">{day.d}</span>
-              <span
-                className={cn(
-                  'grid size-8 place-items-center rounded-lg text-xs font-semibold',
-                  day.today ? 'bg-navy text-white shadow-sm' : 'text-slate-700',
-                )}
+      <StaggerItem>
+        <RailCard glow="#2563eb">
+          <RailLabel icon={Calendar}>This Week</RailLabel>
+          <div className="flex justify-between">
+            {week.map((day, i) => (
+              <motion.div
+                key={day.d}
+                className="flex flex-col items-center gap-1.5"
+                initial={{ opacity: 0, y: 8 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.35, delay: i * 0.04 }}
               >
-                {day.n}
-              </span>
-            </div>
-          ))}
-        </div>
-        <p className="mt-3 text-[11px] text-slate-400">
-          {accuracy && accuracy.total > 0
-            ? `${accuracy.total} questions practised overall · ${accuracy.accuracyPct}% accuracy`
-            : 'Your practice totals appear here as you attempt questions.'}
-        </p>
-      </section>
-
-      {/* Recent Activity — real mock attempts */}
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <h2 className="mb-3 text-[11px] font-bold uppercase tracking-widest text-slate-400">
-          Recent Activity
-        </h2>
-        {history === null ? (
-          <div className="h-20 animate-pulse rounded-lg bg-slate-50" />
-        ) : history.length === 0 ? (
-          <p className="text-xs text-slate-500">
-            No assessments yet — your mock results will show up here.
-          </p>
-        ) : (
-          <ul className="space-y-3">
-            {history.slice(0, 4).map((a) => (
-              <li key={a.attemptId} className="flex gap-2.5">
+                <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                  {day.d}
+                </span>
                 <span
                   className={cn(
-                    'mt-1.5 size-1.5 shrink-0 rounded-full',
-                    a.passed ? 'bg-emerald-500' : a.status === 'EXPIRED' ? 'bg-amber-500' : 'bg-orange',
+                    'relative grid size-9 place-items-center rounded-xl text-[13px] font-bold tabular-nums transition-colors',
+                    day.today
+                      ? 'bg-gradient-to-b from-[#1f2d4d] to-[#0b1220] text-white shadow-[0_8px_18px_-8px_rgba(11,18,32,0.7)]'
+                      : 'text-slate-600 hover:bg-slate-100',
                   )}
-                  aria-hidden="true"
-                />
-                <div className="min-w-0">
-                  <Link
-                    href={`/dashboard/quiz?report=${a.attemptId}`}
-                    className="block truncate text-xs font-medium leading-snug text-slate-700 transition-colors hover:text-navy"
-                  >
-                    {a.title} — {a.pct}%
-                  </Link>
-                  <p className="mt-0.5 text-[11px] text-slate-400">
-                    {formatDateIN(a.submittedAt, { year: false })} · {a.percentile}th percentile
-                  </p>
-                </div>
-              </li>
+                >
+                  {day.today && (
+                    <motion.span
+                      aria-hidden
+                      layoutId="today-glow"
+                      className="absolute inset-0 -z-10 rounded-xl bg-gradient-to-b from-orange/30 to-orange/0 blur-md"
+                    />
+                  )}
+                  {day.n}
+                </span>
+                {day.today && (
+                  <span aria-hidden className="size-1 rounded-full bg-orange shadow-[0_0_6px_rgba(243,112,33,0.8)]" />
+                )}
+              </motion.div>
             ))}
-          </ul>
-        )}
-      </section>
-    </div>
+          </div>
+          <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50/70 px-3 py-2.5">
+            <p className="text-[11px] leading-relaxed text-slate-500">
+              {accuracy && accuracy.total > 0 ? (
+                <>
+                  <span className="font-bold text-navy tabular-nums">{accuracy.total}</span> questions
+                  practised overall ·{' '}
+                  <span className="font-bold text-emerald-600 tabular-nums">
+                    {accuracy.accuracyPct}%
+                  </span>{' '}
+                  accuracy
+                </>
+              ) : (
+                'Your practice totals appear here as you attempt questions.'
+              )}
+            </p>
+          </div>
+        </RailCard>
+      </StaggerItem>
+
+      {/* Recent Activity — real mock attempts */}
+      <StaggerItem>
+        <RailCard glow="#6d3bf5">
+          <RailLabel>Recent Activity</RailLabel>
+          {history === null ? (
+            <div className="space-y-3">
+              {[0, 1, 2].map((k) => (
+                <div key={k} className="flex gap-3">
+                  <div className="mt-1.5 size-2 shrink-0 animate-pulse rounded-full bg-slate-200" />
+                  <div className="flex-1 space-y-1.5">
+                    <div className="h-3 w-3/4 animate-pulse rounded bg-slate-100" />
+                    <div className="h-2.5 w-1/2 animate-pulse rounded bg-slate-100" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : history.length === 0 ? (
+            <p className="text-xs leading-relaxed text-slate-500">
+              No assessments yet — your mock results will show up here.
+            </p>
+          ) : (
+            <Reveal>
+              <ul className="relative space-y-1">
+                {/* connecting timeline spine */}
+                <span
+                  aria-hidden
+                  className="absolute left-[3.5px] top-2 bottom-2 w-px bg-gradient-to-b from-slate-200 via-slate-200 to-transparent"
+                />
+                {history.slice(0, 4).map((a) => {
+                  const tone = a.passed
+                    ? { dot: 'bg-emerald-500', ring: 'ring-emerald-500/20' }
+                    : a.status === 'EXPIRED'
+                      ? { dot: 'bg-amber-500', ring: 'ring-amber-500/20' }
+                      : { dot: 'bg-orange', ring: 'ring-orange/20' };
+                  return (
+                    <li key={a.attemptId} className="relative">
+                      <Link
+                        href={`/dashboard/quiz?report=${a.attemptId}`}
+                        className="flex gap-3 rounded-xl px-2 py-2 -mx-2 transition-colors hover:bg-slate-50"
+                      >
+                        <span
+                          className={cn(
+                            'relative mt-[5px] size-2 shrink-0 rounded-full ring-4 ring-white',
+                            tone.dot,
+                          )}
+                          aria-hidden="true"
+                        >
+                          <span
+                            className={cn(
+                              'absolute inset-0 rounded-full ring-2',
+                              tone.ring,
+                            )}
+                          />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="flex items-baseline justify-between gap-2">
+                            <span className="truncate text-[13px] font-semibold leading-snug text-navy">
+                              {a.title}
+                            </span>
+                            <span className="shrink-0 text-[13px] font-extrabold tabular-nums text-slate-700">
+                              {a.pct}%
+                            </span>
+                          </p>
+                          <p className="mt-0.5 text-[11px] text-slate-400">
+                            {formatDateIN(a.submittedAt, { year: false })} · {a.percentile}th
+                            percentile
+                          </p>
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </Reveal>
+          )}
+        </RailCard>
+      </StaggerItem>
+    </Stagger>
   );
 }

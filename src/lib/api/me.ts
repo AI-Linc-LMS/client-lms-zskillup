@@ -46,6 +46,7 @@ export interface ApiMe {
   isEmailVerified: boolean;
   collegeId: string | null;
   studentProfile: ApiStudentProfile | null;
+  avatarUrl?: string | null;
 }
 
 /** Module-scope dedup. Cleared on resolve/reject so the next mount re-fetches. */
