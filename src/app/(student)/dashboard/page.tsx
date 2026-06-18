@@ -2,6 +2,7 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { AiBriefingHero } from '@/components/student/AiBriefingHero';
 import { AuroraStats } from '@/components/student/AuroraStats';
 import { TodaysTip } from '@/components/student/TodaysTip';
+import { QuickAptitude } from '@/components/student/QuickAptitude';
 import { DailyQuest } from '@/components/student/DailyQuest';
 import { ContinueLearning } from '@/components/student/ContinueLearning';
 import { CourseTable } from '@/components/student/CourseTable';
@@ -31,6 +32,9 @@ export default function StudentDashboardPage() {
           <TodaysTip />
           <Reveal>
             <DailyQuest />
+          </Reveal>
+          <Reveal>
+            <QuickAptitude />
           </Reveal>
           <Reveal>
             <ContinueLearning />

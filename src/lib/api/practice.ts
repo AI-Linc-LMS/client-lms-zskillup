@@ -1,5 +1,6 @@
 import { apiClient } from './client';
 import type { PracticeSubmitDto } from '@/shared/dto/practice.dto';
+import type { GamificationSummary } from './gamification-types';
 
 /**
  * Practice API client (Sprint 3). All endpoints are auth-gated and STUDENT-only.
@@ -35,6 +36,8 @@ export interface ApiAttemptResult {
   explanation: string | null;
   timeTakenSec: number;
   usedHint: boolean;
+  /** XP/streak deltas from this attempt (null on idempotent replay). */
+  gamification?: GamificationSummary | null;
 }
 
 export interface ApiAccuracy {
@@ -71,6 +74,12 @@ export async function listPracticeQuestions(filters: {
 
 export async function submitPracticeAttempt(dto: PracticeSubmitDto): Promise<ApiAttemptResult> {
   const res = await apiClient.post<ApiAttemptResult>('/api/v1/practice/attempts', dto);
+  return res.data;
+}
+
+/** A small random warm-up set for the dashboard Quick Aptitude widget. */
+export async function getQuickAptitude(limit = 5): Promise<ApiQuestion[]> {
+  const res = await apiClient.get<ApiQuestion[]>(`/api/v1/practice/quick-aptitude?limit=${limit}`);
   return res.data;
 }
 
