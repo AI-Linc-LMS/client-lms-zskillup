@@ -1,13 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { formatDateIN } from '@/lib/format';
 import {
-  BarChart2,
+  Activity,
+  BookOpen,
+  Brain,
+  Briefcase,
   Building2,
+  CheckCircle2,
   ClipboardList,
-  Loader2,
+  Database,
+  GraduationCap,
+  Layers,
+  RefreshCw,
+  Server,
+  ShieldCheck,
   Timer,
+  TrendingUp,
   Users,
 } from 'lucide-react';
 import { StatusPill } from '@/components/student/StatusPill';
@@ -18,108 +28,290 @@ import {
   type AdminCollegeRow,
   type AdminPlatformStats,
 } from '@/lib/api/admin';
+import { AreaChart, Donut, MiniStat, Panel, ProgressRow, StatCard } from './dashboard-ui';
 
-/**
- * Super-admin platform overview — fully live: counts from `GET /admin/stats`,
- * the college register from `GET /admin/colleges`, and service health from
- * the real `GET /ready` probe. Audit logging joins in Sprint 8.
- */
+type Ready = { database: string; migrations: string } | null;
+
 export function PlatformOverviewLive() {
   const [stats, setStats] = useState<AdminPlatformStats | null>(null);
   const [colleges, setColleges] = useState<AdminCollegeRow[] | null>(null);
-  const [ready, setReady] = useState<{ database: string; migrations: string } | null>(null);
+  const [ready, setReady] = useState<Ready>(null);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const load = useCallback(async () => {
+    setRefreshing(true);
+    const results = await Promise.allSettled([
+      getAdminStats(),
+      listAdminColleges(),
+      apiClient.get<{ ready: boolean; checks: { database: string; migrations: string } }>('/ready', {
+        auth: 'public',
+      }),
+    ]);
+    if (results[0].status === 'fulfilled') {
+      setStats(results[0].value);
+      setError(null);
+    } else if (!stats) {
+      setError('Could not load platform stats.');
+    }
+    setColleges(results[1].status === 'fulfilled' ? results[1].value : []);
+    setReady(results[2].status === 'fulfilled' ? results[2].value.data.checks : null);
+    setRefreshing(false);
+  }, [stats]);
 
   useEffect(() => {
-    let cancelled = false;
-    getAdminStats()
-      .then((s) => !cancelled && setStats(s))
-      .catch((err: Error) => !cancelled && setError(err.message || 'Could not load platform stats.'));
-    listAdminColleges()
-      .then((rows) => !cancelled && setColleges(rows))
-      .catch(() => !cancelled && setColleges([]));
-    apiClient
-      .get<{ ready: boolean; checks: { database: string; migrations: string } }>('/ready', {
-        auth: 'public',
-      })
-      .then((res) => !cancelled && setReady(res.data.checks))
-      .catch(() => !cancelled && setReady(null));
-    return () => {
-      cancelled = true;
-    };
+    void load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (error) {
+  if (error && !stats) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">{error}</div>
-    );
-  }
-
-  if (!stats) {
-    return (
-      <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white p-16 shadow-sm">
-        <Loader2 className="size-5 animate-spin text-slate-400" aria-hidden="true" />
+      <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+        {error}
       </div>
     );
   }
 
+  if (!stats) return <DashboardSkeleton />;
+
+  // Derived (with safe fallbacks for an older backend).
+  const totalUsers = stats.totalUsers ?? stats.students;
+  const admins = stats.admins ?? 0;
+  const verified = stats.verifiedStudents ?? 0;
+  const new7d = stats.newStudents7d ?? 0;
+  const adaptive = stats.adaptiveSessions ?? 0;
+  const inProgress = stats.mockAttemptsInProgress ?? 0;
+  const diff = stats.questionsByDifficulty;
+  const signups = stats.signups ?? [];
+
   const kpis = [
-    { label: 'Colleges', value: stats.colleges, icon: Building2, sub: 'Institutions registered' },
-    { label: 'Students', value: stats.students, icon: Users, sub: 'Accounts on the platform' },
     {
-      label: 'Published questions',
-      value: stats.questionsPublished,
-      icon: ClipboardList,
-      sub: `${stats.questionsTotal} in the bank`,
+      label: 'Total users',
+      value: totalUsers,
+      icon: <Users className="size-4" />,
+      accent: '#2563eb',
+      sub: `${admins.toLocaleString()} admins · ${stats.students.toLocaleString()} students`,
+      trend: new7d ? { value: new7d, label: '7d' } : undefined,
+    },
+    {
+      label: 'Verified students',
+      value: verified,
+      icon: <CheckCircle2 className="size-4" />,
+      accent: '#059669',
+      sub:
+        stats.students > 0
+          ? `${Math.round((verified / stats.students) * 100)}% of students verified`
+          : 'No students yet',
     },
     {
       label: 'Mock attempts',
       value: stats.mockAttempts,
-      icon: Timer,
-      sub: `across ${stats.mockTests} live mocks`,
+      icon: <Timer className="size-4" />,
+      accent: '#f37021',
+      sub: `${inProgress.toLocaleString()} in progress · ${stats.mockTests} live`,
+    },
+    {
+      label: 'Questions live',
+      value: stats.questionsPublished,
+      icon: <ClipboardList className="size-4" />,
+      accent: '#7c3aed',
+      sub: `${stats.questionsTotal.toLocaleString()} in the bank`,
+    },
+    {
+      label: 'Adaptive sessions',
+      value: adaptive,
+      icon: <Brain className="size-4" />,
+      accent: '#0ea5e9',
+      sub: `${stats.practiceAttempts.toLocaleString()} practice attempts`,
     },
   ];
 
   const coverage = [
-    { label: 'Recruiter companies', value: stats.companies },
-    { label: 'Prep courses', value: stats.courses },
-    { label: 'Practice attempts', value: stats.practiceAttempts },
-    { label: 'Live mock tests', value: stats.mockTests },
+    { label: 'Colleges', value: stats.colleges, icon: <Building2 className="size-4" />, color: '#2563eb' },
+    { label: 'Companies', value: stats.companies, icon: <Briefcase className="size-4" />, color: '#f37021' },
+    { label: 'Courses', value: stats.courses, icon: <BookOpen className="size-4" />, color: '#7c3aed' },
+    { label: 'Live mocks', value: stats.mockTests, icon: <Timer className="size-4" />, color: '#059669' },
+    { label: 'Practice', value: stats.practiceAttempts, icon: <Layers className="size-4" />, color: '#0ea5e9' },
+    { label: 'Adaptive', value: adaptive, icon: <Brain className="size-4" />, color: '#db2777' },
+  ];
+
+  const health = [
+    { label: 'API', detail: ready ? 'Healthy' : 'Unreachable', ok: !!ready, icon: <Server className="size-4" /> },
+    {
+      label: 'Database',
+      detail: ready ? (ready.database === 'ok' ? 'Connected' : ready.database) : 'Unknown',
+      ok: ready?.database === 'ok',
+      icon: <Database className="size-4" />,
+    },
+    {
+      label: 'Migrations',
+      detail: ready ? ready.migrations : 'Unknown',
+      ok: ready?.migrations === 'applied',
+      icon: <ShieldCheck className="size-4" />,
+    },
   ];
 
   return (
-    <div className="space-y-8">
-      {/* KPI Row — live counts */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {kpis.map(({ label, value, icon: Icon, sub }) => (
-          <div key={label} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-                {label}
-              </p>
-              <Icon className="size-4 text-slate-400" aria-hidden="true" />
-            </div>
-            <p className="text-[26px] font-extrabold leading-none text-navy">
-              {value.toLocaleString()}
-            </p>
-            <p className="mt-1.5 text-xs text-slate-400">{sub}</p>
-          </div>
+    <div className="space-y-6">
+      {/* Refresh control */}
+      <div className="flex items-center justify-between">
+        <p className="flex items-center gap-1.5 text-xs text-slate-400">
+          <span className="relative flex size-2">
+            <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+            <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+          </span>
+          Live data
+        </p>
+        <button
+          onClick={() => void load()}
+          disabled={refreshing}
+          className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 shadow-sm transition-colors hover:bg-slate-50 hover:text-navy disabled:opacity-60"
+        >
+          <RefreshCw className={`size-3.5 ${refreshing ? 'animate-spin' : ''}`} aria-hidden />
+          Refresh
+        </button>
+      </div>
+
+      {/* KPI row */}
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
+        {kpis.map((k) => (
+          <StatCard key={k.label} {...k} />
         ))}
       </div>
 
-      {/* College register — live */}
-      <section>
-        <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-          College Register
-        </p>
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      {/* Trend + composition */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Panel
+          title="Student signups · last 14 days"
+          className="lg:col-span-2"
+          action={
+            <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600">
+              <TrendingUp className="size-3.5" /> +{new7d} this week
+            </span>
+          }
+        >
+          {signups.length > 0 ? (
+            <AreaChart id="signups" data={signups} color="#2563eb" height={210} />
+          ) : (
+            <EmptyChart label="Signup trend will appear once the enriched stats API is deployed." />
+          )}
+        </Panel>
+
+        <Panel title="User composition">
+          <Donut
+            size={150}
+            segments={[
+              { label: 'Students', value: stats.students, color: '#2563eb' },
+              { label: 'Admins', value: admins, color: '#f37021' },
+            ]}
+            centerTop={totalUsers.toLocaleString()}
+            centerBottom="users"
+          />
+          <div className="mt-5 space-y-3 border-t border-slate-100 pt-4">
+            <ProgressRow
+              label="Email verified"
+              value={verified}
+              total={stats.students}
+              color="#059669"
+              hint={stats.students > 0 ? `(${Math.round((verified / stats.students) * 100)}%)` : ''}
+            />
+          </div>
+        </Panel>
+      </div>
+
+      {/* Question bank + coverage + health */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Panel title="Question bank">
+          {diff ? (
+            <Donut
+              size={150}
+              segments={[
+                { label: 'Easy', value: diff.easy, color: '#059669' },
+                { label: 'Medium', value: diff.medium, color: '#f59e0b' },
+                { label: 'Hard', value: diff.hard, color: '#ef4444' },
+              ]}
+              centerTop={stats.questionsTotal.toLocaleString()}
+              centerBottom="questions"
+            />
+          ) : (
+            <div className="flex items-center gap-4">
+              <p className="text-3xl font-extrabold text-navy">{stats.questionsTotal.toLocaleString()}</p>
+              <p className="text-xs text-slate-400">total questions</p>
+            </div>
+          )}
+          <div className="mt-5 border-t border-slate-100 pt-4">
+            <ProgressRow
+              label="Published"
+              value={stats.questionsPublished}
+              total={stats.questionsTotal}
+              color="#7c3aed"
+            />
+          </div>
+        </Panel>
+
+        <Panel title="Content coverage">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {coverage.map((c) => (
+              <MiniStat key={c.label} {...c} />
+            ))}
+          </div>
+        </Panel>
+
+        <Panel
+          title="Platform health"
+          action={
+            <span
+              className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                health.every((h) => h.ok)
+                  ? 'bg-emerald-50 text-emerald-600'
+                  : 'bg-amber-50 text-amber-600'
+              }`}
+            >
+              {health.every((h) => h.ok) ? 'All systems go' : 'Degraded'}
+            </span>
+          }
+        >
+          <div className="space-y-3">
+            {health.map((h) => (
+              <div
+                key={h.label}
+                className="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-slate-50/50 p-3"
+              >
+                <span
+                  className={`flex size-9 items-center justify-center rounded-lg ${
+                    h.ok ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'
+                  }`}
+                >
+                  {h.icon}
+                </span>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-navy">{h.label}</p>
+                  <p className="text-xs capitalize text-slate-400">{h.detail}</p>
+                </div>
+                <span className={`size-2.5 rounded-full ${h.ok ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </div>
+
+      {/* College register */}
+      <Panel
+        title="College register"
+        action={
+          <span className="text-xs text-slate-400">
+            {colleges?.length ?? 0} registered
+          </span>
+        }
+      >
+        <div className="-mx-5 -mb-5 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50">
-                {['College Name', 'State', 'City', 'Registered', 'Status'].map((col) => (
+              <tr className="border-y border-slate-100 bg-slate-50/60">
+                {['College name', 'State', 'City', 'Registered', 'Status'].map((col) => (
                   <th
                     key={col}
-                    className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-400"
+                    className="px-5 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-400"
                   >
                     {col}
                   </th>
@@ -129,29 +321,25 @@ export function PlatformOverviewLive() {
             <tbody>
               {colleges === null ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-sm text-slate-400">
+                  <td colSpan={5} className="px-5 py-8 text-center text-sm text-slate-400">
                     Loading…
                   </td>
                 </tr>
               ) : colleges.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-sm text-slate-400">
+                  <td colSpan={5} className="px-5 py-10 text-center text-sm text-slate-400">
+                    <Activity className="mx-auto mb-2 size-5 text-slate-300" />
                     No colleges registered yet.
                   </td>
                 </tr>
               ) : (
-                colleges.slice(0, 6).map((college, i) => (
-                  <tr
-                    key={college.id}
-                    className={`border-b border-slate-100 last:border-0 ${i % 2 === 0 ? '' : 'bg-slate-50/40'}`}
-                  >
-                    <td className="px-4 py-3 font-medium text-navy">{college.name}</td>
-                    <td className="px-4 py-3 text-slate-600">{college.state}</td>
-                    <td className="px-4 py-3 text-slate-600">{college.city}</td>
-                    <td className="px-4 py-3 text-xs text-slate-400">
-                      {formatDateIN(college.createdAt)}
-                    </td>
-                    <td className="px-4 py-3">
+                colleges.slice(0, 8).map((college) => (
+                  <tr key={college.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/40">
+                    <td className="px-5 py-3 font-medium text-navy">{college.name}</td>
+                    <td className="px-5 py-3 text-slate-600">{college.state}</td>
+                    <td className="px-5 py-3 text-slate-600">{college.city}</td>
+                    <td className="px-5 py-3 text-xs text-slate-400">{formatDateIN(college.createdAt)}</td>
+                    <td className="px-5 py-3">
                       {college.status === 'ACTIVE' ? (
                         <StatusPill tone="positive" label="Active" />
                       ) : (
@@ -164,66 +352,36 @@ export function PlatformOverviewLive() {
             </tbody>
           </table>
         </div>
-      </section>
+      </Panel>
+    </div>
+  );
+}
 
-      {/* Content coverage + Platform health */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <section>
-          <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-            Content Coverage
-          </p>
-          <div className="grid grid-cols-2 gap-4">
-            {coverage.map(({ label, value }) => (
-              <div key={label} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-                  <BarChart2 className="size-3.5" aria-hidden="true" />
-                  {label}
-                </p>
-                <p className="mt-2 text-xl font-extrabold leading-none text-navy">
-                  {value.toLocaleString()}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
+function EmptyChart({ label }: { label: string }) {
+  return (
+    <div className="flex h-[210px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 text-center">
+      <TrendingUp className="size-6 text-slate-300" />
+      <p className="max-w-xs text-xs text-slate-400">{label}</p>
+    </div>
+  );
+}
 
-        <section>
-          <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-            Platform Health
-          </p>
-          <div className="grid grid-cols-1 gap-4">
-            {[
-              {
-                label: 'API',
-                detail: ready ? 'Healthy' : 'Unreachable',
-                ok: !!ready,
-              },
-              {
-                label: 'Database',
-                detail: ready ? (ready.database === 'ok' ? 'Connected' : ready.database) : 'Unknown',
-                ok: ready?.database === 'ok',
-              },
-              {
-                label: 'Migrations',
-                detail: ready ? ready.migrations : 'Unknown',
-                ok: ready?.migrations === 'applied',
-              },
-            ].map(({ label, detail, ok }) => (
-              <div key={label} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                <div className="flex items-center gap-2.5">
-                  <span
-                    className={`size-2.5 shrink-0 rounded-full ${ok ? 'bg-emerald-500' : 'bg-amber-500'}`}
-                    aria-hidden="true"
-                  />
-                  <div>
-                    <p className="text-sm font-semibold text-navy">{label}</p>
-                    <p className="text-xs capitalize text-slate-400">{detail}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="h-28 animate-pulse rounded-2xl border border-slate-200 bg-white" />
+        ))}
+      </div>
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="h-72 animate-pulse rounded-2xl border border-slate-200 bg-white lg:col-span-2" />
+        <div className="h-72 animate-pulse rounded-2xl border border-slate-200 bg-white" />
+      </div>
+      <div className="grid gap-6 lg:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="h-56 animate-pulse rounded-2xl border border-slate-200 bg-white" />
+        ))}
       </div>
     </div>
   );

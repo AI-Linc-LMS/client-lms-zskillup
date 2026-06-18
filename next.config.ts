@@ -31,6 +31,10 @@ const nextConfig: NextConfig = {
           source: '/api/v1/:path*',
           destination: `${BACKEND_ORIGIN}/api/v1/:path*`,
         },
+        // Health probes live at the API root (NOT under /api/v1) — proxy them too
+        // so the dashboard's Platform Health widget can reach GET /ready & /health.
+        { source: '/ready', destination: `${BACKEND_ORIGIN}/ready` },
+        { source: '/health', destination: `${BACKEND_ORIGIN}/health` },
       ],
       afterFiles: [],
       fallback: [],

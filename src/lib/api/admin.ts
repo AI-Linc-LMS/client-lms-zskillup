@@ -188,6 +188,17 @@ export interface AdminPlatformStats {
   mockTests: number;
   mockAttempts: number;
   practiceAttempts: number;
+  // Enriched telemetry (added alongside the dashboard revamp). Optional so the
+  // UI degrades gracefully against an older backend that omits them.
+  totalUsers?: number;
+  admins?: number;
+  verifiedStudents?: number;
+  newStudents7d?: number;
+  newStudents30d?: number;
+  mockAttemptsInProgress?: number;
+  adaptiveSessions?: number;
+  questionsByDifficulty?: { easy: number; medium: number; hard: number };
+  signups?: Array<{ date: string; count: number }>;
 }
 
 export async function getAdminStats(): Promise<AdminPlatformStats> {
