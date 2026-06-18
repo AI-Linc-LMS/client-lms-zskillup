@@ -1,14 +1,13 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle2, Circle, Lock, BookOpen, Building2, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ProgressBar } from '@/components/ui/progress-bar';
-import { DEMO_ROADMAP_STEPS, DEMO_ROADMAP_PROGRESS, type RoadmapStatus } from '@/lib/demo-data-extra';
-
-/**
- * Public roadmap (demo data, no auth required).
- * Matches the site spec exactly — progress bar, 6 steps, summit.
- */
+import { DEMO_ROADMAP_STEPS, type RoadmapStatus } from '@/lib/demo-data-extra';
+import { getStudentStats, type ApiStudentStats } from '@/lib/api/gamification';
 
 const STATUS_CONFIG: Record<RoadmapStatus, { icon: typeof CheckCircle2; label: string; style: string }> = {
   done: { icon: CheckCircle2, label: 'Done', style: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
@@ -16,8 +15,19 @@ const STATUS_CONFIG: Record<RoadmapStatus, { icon: typeof CheckCircle2; label: s
   locked: { icon: Lock, label: 'Locked', style: 'text-slate-400 bg-slate-50 border-slate-200' },
 };
 
+const ROADMAP_TOTAL_XP = 7000;
+
 export default function RoadmapPage() {
-  const p = DEMO_ROADMAP_PROGRESS;
+  const [stats, setStats] = useState<ApiStudentStats | null>(null);
+
+  useEffect(() => {
+    getStudentStats().then(setStats).catch(() => {});
+  }, []);
+
+  const xpEarned = stats?.totalXp ?? 0;
+  const pct = Math.min(100, Math.round((xpEarned / ROADMAP_TOTAL_XP) * 100));
+  const stepsCompleted = DEMO_ROADMAP_STEPS.filter((s) => s.status === 'done').length;
+  const activeStep = DEMO_ROADMAP_STEPS.find((s) => s.status === 'active')?.number ?? 1;
 
   return (
     <div className="min-h-screen bg-background">
@@ -62,27 +72,27 @@ export default function RoadmapPage() {
         <div className="mb-8 rounded-2xl border bg-white p-6 shadow-sm">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div className="text-center">
-              <p className="text-2xl font-extrabold text-navy">{p.pct}%</p>
+              <p className="text-2xl font-extrabold text-navy">{pct}%</p>
               <p className="text-xs text-muted-foreground">Roadmap progress</p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-extrabold text-navy">
-                {p.xpEarned.toLocaleString()}
+                {xpEarned.toLocaleString()}
                 <span className="text-sm font-normal text-muted-foreground">
-                  /{p.xpTotal.toLocaleString()}
+                  /{ROADMAP_TOTAL_XP.toLocaleString()}
                 </span>
               </p>
               <p className="text-xs text-muted-foreground">XP earned</p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-extrabold text-navy">
-                {p.stepsCompleted}
-                <span className="text-sm font-normal text-muted-foreground">/{p.stepsTotal}</span>
+                {stepsCompleted}
+                <span className="text-sm font-normal text-muted-foreground">/{DEMO_ROADMAP_STEPS.length}</span>
               </p>
               <p className="text-xs text-muted-foreground">Steps completed</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-extrabold text-navy">Step {p.activeStep}</p>
+              <p className="text-2xl font-extrabold text-navy">Step {activeStep}</p>
               <p className="text-xs text-muted-foreground">Active step</p>
             </div>
           </div>
@@ -90,23 +100,28 @@ export default function RoadmapPage() {
           {/* Progress bar */}
           <div className="mt-5">
             <ProgressBar
-              value={p.pct}
+              value={pct}
               className="h-3"
               barClassName="bg-gradient-to-r from-emerald-400 to-emerald-600"
             />
             <p className="mt-2 text-xs text-muted-foreground">
-              Personalized path · 14-day streak active
+              Personalized path
+              {stats && stats.currentStreakDays > 0 ? ` · ${stats.currentStreakDays}-day streak active` : ''}
             </p>
           </div>
 
           {/* Quick summary */}
           <div className="mt-4 flex flex-wrap items-center gap-4 border-t pt-4 text-sm">
-            <span className="text-muted-foreground">1 done · 1 in progress · 4 locked</span>
-            <span className="flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
-              Level 12 · 1,400 XP
+            <span className="text-muted-foreground">
+              {stepsCompleted} done · {DEMO_ROADMAP_STEPS.filter(s => s.status === 'active').length} in progress · {DEMO_ROADMAP_STEPS.filter(s => s.status === 'locked').length} locked
             </span>
+            {stats && (
+              <span className="flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
+                Level {stats.level} · {stats.totalXp.toLocaleString()} XP
+              </span>
+            )}
             <Button variant="secondary" size="sm" className="ml-auto" asChild>
-              <Link href="/prepare">Continue active step</Link>
+              <Link href="/practice">Continue active step</Link>
             </Button>
           </div>
         </div>

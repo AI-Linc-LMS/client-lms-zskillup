@@ -1,401 +1,682 @@
 import Link from 'next/link';
-import { Star, Users, Clock, Zap, Trophy, BookOpen, BarChart3, Flame } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ProgressBar } from '@/components/ui/progress-bar';
+import {
+  ArrowRight,
+  BadgeCheck,
+  BookOpen,
+  Building2,
+  CheckCircle2,
+  Clock3,
+  Compass,
+  Flame,
+  LineChart,
+  PlayCircle,
+  Sparkles,
+  Star,
+  Trophy,
+  Users,
+  Zap,
+} from 'lucide-react';
 import {
   HOMEPAGE_FEATURED_TRACKS,
-  HOMEPAGE_WHY_BLOCKS,
-  HOMEPAGE_COVERAGE_TOPICS,
-  HOMEPAGE_TESTIMONIALS,
   HOMEPAGE_COMPANY_LOGOS,
 } from '@/lib/demo-data-extra';
 
-/**
- * Public homepage (STUDENT_JOURNEY_SPEC §3). Server Component.
- * Matches the site analysis spec exactly — all 9 sections.
- */
-
 const HERO_STATS = [
-  { value: '240,000+', label: 'Students enrolled' },
-  { value: '1,200+', label: 'Partner colleges' },
-  { value: '4.7', label: 'Average rating', rating: true },
-  { value: '82%', label: 'Placement success' },
+  { label: 'Students enrolled', value: '240,000+' },
+  { label: 'Partner colleges', value: '1,200+' },
+  { label: 'Average rating', value: '4.7★' },
+  { label: 'Placement success', value: '82%' },
 ];
 
-const TOPIC_TABS = ['Aptitude', 'Coding', 'Interview prep', 'Company tracks'];
+const FEATURES = [
+  {
+    icon: Compass,
+    title: 'Company-wise tracks',
+    body: 'Pattern-matched papers for TCS NQT, Infosys InfyTQ, Wipro NTH, Cognizant GenC and more. Real previous-year coverage updated each season.',
+  },
+  {
+    icon: Zap,
+    title: 'Adaptive quizzing',
+    body: 'Difficulty re-tunes to your accuracy and speed. Hint ladders, video walkthroughs, and bookmarked weak spots — never grind blindly.',
+  },
+  {
+    icon: Trophy,
+    title: 'Gamified progress',
+    body: 'XP, streaks, daily quests, level badges and a national leaderboard turn prep into a habit you actually want to keep.',
+  },
+  {
+    icon: LineChart,
+    title: 'Institutional analytics',
+    body: 'TPOs see cohort heat-maps, at-risk students and PPS distributions — export-ready and audit-friendly.',
+  },
+];
 
-const WHY_ICONS = [BookOpen, Zap, Trophy, BarChart3];
+const TOPIC_PILLS = [
+  'Quantitative Aptitude',
+  'Logical Reasoning',
+  'Verbal Ability',
+  'Programming Fundamentals',
+  'Data Structures',
+  'OOPS',
+  'DBMS · SQL',
+  'Operating Systems',
+  'Computer Networks',
+  'HR Interview',
+  'Group Discussion',
+  'Resume & LinkedIn',
+];
+
+const TESTIMONIALS = [
+  {
+    quote:
+      'The TCS NQT track is shockingly close to the actual paper. I cleared in my first attempt — the daily quests kept me consistent.',
+    name: 'Aditya Krishnan',
+    meta: 'VIT Vellore · CSE 2025',
+    initials: 'AK',
+  },
+  {
+    quote:
+      'Adaptive difficulty meant I stopped grinding easy problems. My quant accuracy went from 58% to 84% in eight weeks.',
+    name: 'Sneha Iyer',
+    meta: 'PSG Tech · IT 2025',
+    initials: 'SI',
+  },
+  {
+    quote:
+      'As a TPO, the cohort heat-map is invaluable. We caught at-risk students three weeks before our placement window.',
+    name: 'Dr. Priya Menon',
+    meta: 'TPO, VVIT',
+    initials: 'PM',
+  },
+];
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white">
-      {/* ── Public navbar ─────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white px-6">
+    <main className="min-h-screen overflow-x-hidden bg-white text-[var(--color-text)]">
+
+      {/* ── Public Navbar ─────────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-white/10 bg-gradient-to-r from-[#0b1220] to-[#1e3a8a] px-5 md:px-8">
+        <Link href="/" className="flex items-center gap-1.5 text-xl font-extrabold text-white">
+          <span className="text-[#f37021]">Z</span>
+          <span>Skillup</span>
+        </Link>
+        <nav className="hidden items-center gap-6 lg:flex" aria-label="Primary">
+          {[
+            { label: 'Companies', href: '/dashboard/company' },
+            { label: 'Prepare', href: '/prepare' },
+            { label: 'Leaderboard', href: '/leaderboard' },
+          ].map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className="text-sm font-medium text-white/75 transition-colors hover:text-white"
+            >
+              {l.label}
+            </Link>
+          ))}
+        </nav>
         <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-1 text-xl font-extrabold">
-            <span className="text-orange">Z</span>
-            <span className="text-foreground">Skillup</span>
+          <Link
+            href="/login"
+            className="hidden text-sm font-semibold text-white/80 transition-colors hover:text-white sm:block"
+          >
+            Log in
           </Link>
-          <span className="hidden text-sm text-muted-foreground sm:block">Placement prep</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" asChild>
-            <Link href="/login">Log in</Link>
-          </Button>
-          <Button asChild>
-            <Link href="/signup">Create account</Link>
-          </Button>
+          <Link
+            href="/signup"
+            className="btn-brand rounded-full px-5 py-2 text-sm"
+          >
+            Get started free
+          </Link>
         </div>
       </header>
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section className="bg-gradient-to-b from-navy/95 to-navy px-6 py-24 text-white">
-        <div className="mx-auto max-w-4xl text-center">
-          <span className="inline-block rounded-full bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-white/80">
-            Campus placement, simplified
-          </span>
-          <h1 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
-            Land your first tech job with<br />
-            <span className="text-orange">India's top recruiters.</span>
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-base text-white/80 sm:text-lg">
-            Real previous-year questions for TCS, Infosys, Wipro, Cognizant, Capgemini, and
-            Accenture. Live mock drives, expert instructors, and verified certificates accepted by
-            1,200+ campus placement cells.
-          </p>
+      <section className="relative overflow-hidden">
+        {/* Dark navy gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0b1220] via-[#101d4a] to-[#1e3a8a]" />
+        {/* Glow orbs */}
+        <div aria-hidden className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-white/[0.08] blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-32 -right-24 h-96 w-96 rounded-full bg-[#f37021]/20 blur-3xl" />
+        {/* Dotted grid overlay */}
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage: 'radial-gradient(rgb(255 255 255 / 0.7) 1px, transparent 1px)',
+            backgroundSize: '22px 22px',
+          }}
+        />
 
-          {/* CTAs — single primary + two secondary (STUDENT_JOURNEY_SPEC §6) */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Button size="lg" asChild>
-              <Link href="/signup">Create free account</Link>
-            </Button>
-            <Link
-              href="/dashboard/company"
-              className="inline-flex h-12 items-center justify-center rounded-full border border-white/30 bg-white/10 px-7 text-[15px] font-semibold text-white transition-colors hover:bg-white/20"
-            >
-              Browse companies
-            </Link>
-            <Link
-              href="/login"
-              className="text-sm font-medium text-white/70 underline-offset-4 hover:underline"
-            >
-              Existing user — log in
-            </Link>
-          </div>
+        <div className="relative mx-auto grid max-w-[1400px] items-center gap-12 px-5 pb-16 pt-12 md:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-14 lg:pb-24 lg:pt-20">
+          {/* Left — copy */}
+          <div className="text-white">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-white/85">
+              <Sparkles className="h-3.5 w-3.5 text-amber-300" /> Campus placement, simplified
+            </span>
 
-          {/* Topic tabs */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
-            {TOPIC_TABS.map((t) => (
-              <span
-                key={t}
-                className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/80"
-              >
-                {t}
+            <h1 className="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
+              Land your first tech job with{' '}
+              <span className="bg-gradient-to-r from-[#fbbf24] via-[#f97316] to-[#ef4444] bg-clip-text text-transparent">
+                India&apos;s top recruiters
               </span>
-            ))}
-          </div>
-        </div>
-      </section>
+              .
+            </h1>
 
-      {/* ── Stats bar ─────────────────────────────────────────────────────── */}
-      <section className="bg-slate-50/60">
-        <div className="mx-auto grid max-w-5xl grid-cols-2 gap-6 px-6 py-10 md:grid-cols-4">
-          {HERO_STATS.map((s) => (
-            <div key={s.label} className="text-center">
-              <p className="flex items-center justify-center gap-1 text-3xl font-extrabold text-navy">
-                {s.value}
-                {s.rating ? (
-                  <Star className="size-5 fill-amber-400 text-amber-400" aria-hidden="true" />
-                ) : null}
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">{s.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Mock product-preview card ──────────────────────────────────────── */}
-      <section className="mx-auto max-w-5xl px-6 py-16">
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="bg-gradient-to-r from-navy to-indigo-900 px-6 py-4 text-white">
-            <p className="text-xs font-semibold uppercase tracking-widest text-white/60">
-              Tata Consultancy Services
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg">
+              Structured prep for TCS, Infosys, Wipro, Cognizant, Capgemini and Accenture — real
+              previous-year questions, live mock drives, expert instructors, and verified
+              certificates accepted by 1,200+ campus placement cells.
             </p>
-            <h3 className="mt-1 text-lg font-bold">TCS NQT 2026 — Complete Preparation</h3>
-            <div className="mt-1 flex items-center gap-3 text-xs text-white/70">
-              <span className="flex items-center gap-1"><Star className="size-3 fill-amber-400 text-amber-400" /> 4.8</span>
-              <span>52,400 enrolled</span>
-              <span>24h</span>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Link href="/signup" className="btn-brand rounded-full px-7 py-3 text-sm">
+                Create free account <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/dashboard/company"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/[0.08] px-7 py-3 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/[0.14]"
+              >
+                <Building2 className="h-4 w-4" /> Browse companies
+              </Link>
+              <Link
+                href="/login"
+                className="text-sm font-semibold text-white/70 transition hover:text-white sm:ml-2"
+              >
+                Existing user → log in
+              </Link>
+            </div>
+
+            <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm font-semibold text-white/85">
+              {['Aptitude', 'Coding', 'Interview prep', 'Company tracks'].map((label) => (
+                <span key={label} className="inline-flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-300" aria-hidden />
+                  {label}
+                </span>
+              ))}
+            </div>
+
+            <div className="mt-10 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-4">
+              {HERO_STATS.map((s) => (
+                <div key={s.label}>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-white/55">
+                    {s.label}
+                  </p>
+                  <p className="mt-1 text-2xl font-extrabold tracking-tight num-tab sm:text-[1.7rem]">
+                    {s.value}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
-          <div className="grid gap-0 p-6 sm:grid-cols-3">
-            {/* Level + XP */}
-            <div className="border-r pr-6">
-              <div className="flex items-center gap-2">
-                <span className="grid size-8 place-items-center rounded-full bg-gradient-to-br from-amber-400 to-orange text-xs font-bold text-white">
-                  Lv 12
+
+          {/* Right — floating preview cards */}
+          <div className="relative hidden h-[28rem] lg:block">
+            {/* Card 1 — course card */}
+            <div
+              className="float-card-1 absolute left-0 top-4 w-[18rem] overflow-hidden rounded-2xl border border-white/15 bg-white shadow-2xl"
+              style={{ transformOrigin: 'center center' }}
+            >
+              <div className="relative flex h-24 items-center justify-center bg-gradient-to-br from-[#1d4ed8] to-[#0b1220]">
+                <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-md bg-[#1d4ed8] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-white shadow">
+                  Most enrolled
                 </span>
-                <div className="flex-1">
-                  <p className="text-[10px] font-semibold text-muted-foreground">XP · LEVEL 12 → 13</p>
-                  <ProgressBar value={81} variant="xp" className="mt-1 h-2" />
-                  <p className="mt-0.5 text-[10px] text-muted-foreground">2,840 / 3,500</p>
+                <span className="flex h-12 w-32 items-center justify-center rounded-md bg-white/95 px-3 py-2 shadow-md">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/0/0e/Tata_Consultancy_Services_old_logo.svg"
+                    alt="TCS"
+                    className="max-h-7 max-w-full object-contain"
+                  />
+                </span>
+              </div>
+              <div className="p-4 text-[var(--color-text)]">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-subtle)]">
+                  TATA Consultancy Services
+                </p>
+                <p className="mt-1 text-sm font-bold leading-snug">TCS NQT 2026 — Complete Preparation</p>
+                <div className="mt-3 flex items-center gap-3 text-[11px] font-semibold text-[var(--color-text-muted)]">
+                  <span className="inline-flex items-center gap-1">
+                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> 4.8
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Users className="h-3 w-3" /> 52,400
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Clock3 className="h-3 w-3" /> 24h
+                  </span>
                 </div>
               </div>
-              <div className="mt-3 flex items-center gap-1.5">
-                <Flame className="size-4 text-orange" aria-hidden="true" />
-                <span className="text-xs font-semibold">14-day streak</span>
+            </div>
+
+            {/* Card 2 — XP / level */}
+            <div
+              className="float-card-2 absolute right-0 top-0 w-[16rem] rounded-2xl border border-white/15 bg-white p-5 shadow-2xl"
+              style={{ transformOrigin: 'center center' }}
+            >
+              <div className="flex items-center gap-3">
+                <span className="level-badge shrink-0">Lv 12</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-subtle)]">
+                    XP · 12 → 13
+                  </p>
+                  <p className="text-sm font-extrabold tracking-tight num-tab text-[var(--color-text)]">
+                    2,840 / 3,500
+                  </p>
+                </div>
+              </div>
+              <div className="mt-3 xp-bar xp-shine">
+                <div className="xp-fill" style={{ width: '81%' }} />
+              </div>
+              <div className="mt-3 flex items-center justify-between">
+                <span className="streak-flame" style={{ padding: '0.25rem 0.6rem', fontSize: '0.66rem' }}>
+                  <Flame className="h-3 w-3" /> 14d
+                </span>
+                <span className="coin-pill">
+                  <span className="coin-dot" />
+                  1,420
+                </span>
               </div>
             </div>
-            {/* Daily quest */}
-            <div className="px-6">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Daily quest</p>
-              <p className="mt-1 text-sm font-medium text-navy">
+
+            {/* Card 3 — daily quest */}
+            <div
+              className="float-card-3 quest-card absolute bottom-0 right-6 w-[18rem]"
+              style={{ transformOrigin: 'center center' }}
+            >
+              <p className="earned-badge">
+                <Star className="h-3 w-3 fill-current" /> Daily quest
+              </p>
+              <p className="mt-2 text-sm font-bold text-[var(--color-text)]">
                 Solve 5 percentage shortcuts in &lt; 8 min
               </p>
-              <p className="text-xs text-muted-foreground">+150 XP · 30 coins · Speedster badge</p>
-              <div className="mt-2 flex items-center gap-2">
-                <ProgressBar value={60} className="h-1.5 flex-1" barClassName="bg-orange" />
-                <span className="text-xs text-muted-foreground">3/5</span>
+              <p className="mt-0.5 text-[11px] font-medium text-[var(--color-text-muted)]">
+                +150 XP · 30 coins · Speedster badge
+              </p>
+              <div className="mt-3 flex items-center gap-2">
+                <div className="flex-1 progress-track">
+                  <div className="progress-fill" style={{ width: '60%' }} />
+                </div>
+                <span className="num-tab text-[11px] font-bold text-[var(--color-brand-ink)]">3/5</span>
               </div>
             </div>
-            {/* Rank */}
-            <div className="border-l pl-6">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">National rank</p>
-              <p className="mt-1 text-3xl font-extrabold text-navy">#228</p>
-              <p className="text-xs text-muted-foreground">↑ 12 places · cohort 4,910</p>
+
+            {/* Card 4 — leaderboard rank */}
+            <div
+              className="float-card-4 trophy-tile absolute bottom-12 left-12 w-[15rem] p-4"
+              style={{ transformOrigin: 'center center' }}
+            >
+              <div className="flex items-center gap-3">
+                <Trophy className="h-7 w-7" />
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">
+                    National rank
+                  </p>
+                  <p className="text-2xl font-extrabold tracking-tight num-tab">#228</p>
+                  <p className="text-[11px] font-semibold opacity-80">↑ 12 places · cohort 4,910</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recruiter logo strip */}
+        <div className="relative border-t border-white/10 bg-white/[0.03]">
+          <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-6 px-5 py-5 md:px-8 lg:gap-10">
+            <p className="shrink-0 text-[11px] font-bold uppercase tracking-[0.18em] text-white/55">
+              Aligned with hiring patterns of
+            </p>
+            <div className="flex flex-1 flex-wrap items-center gap-x-3 gap-y-2 sm:gap-x-5">
+              {HOMEPAGE_COMPANY_LOGOS.map((c) => (
+                <Link
+                  key={c.slug}
+                  href={`/dashboard/company/${c.slug}`}
+                  title={c.name}
+                  className="group relative flex h-9 w-24 items-center justify-center overflow-hidden rounded-md bg-white/[0.06] px-2 py-1 transition hover:bg-white/[0.14] sm:w-28"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={c.logoSrc}
+                    alt={c.logoAlt}
+                    className="max-h-5 max-w-full object-contain brightness-0 invert opacity-70 transition group-hover:opacity-100"
+                  />
+                </Link>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Company logos row ──────────────────────────────────────────────── */}
-      <section className="bg-slate-50/60">
-        <div className="mx-auto max-w-5xl px-6 py-8">
-          <p className="mb-6 text-center text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            Prep tracks for
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            {HOMEPAGE_COMPANY_LOGOS.map((c) => (
+      {/* ── Featured Tracks ───────────────────────────────────────────────── */}
+      <section className="relative bg-[var(--color-bg)] py-16 lg:py-20">
+        <div className="mx-auto max-w-[1400px] px-5 md:px-8">
+          <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="section-tag">Featured tracks</p>
+              <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
+                Pattern-matched paths for top recruiters
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm text-[var(--color-text-muted)] sm:text-base">
+                Each track follows the actual drive — paper section weights, time pressure, and
+                section cut-offs.
+              </p>
+            </div>
+            <Link
+              href="/prepare"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-line)] bg-white px-4 py-2 text-sm font-semibold text-[var(--color-text)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-primary)]"
+            >
+              View all tracks <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {HOMEPAGE_FEATURED_TRACKS.map((t) => (
               <Link
-                key={c.slug}
-                href={`/dashboard/company/${c.slug}`}
-                className="rounded-lg border bg-white px-5 py-2.5 text-sm font-semibold text-navy shadow-sm transition-shadow hover:shadow-md"
+                key={t.slug}
+                href={`/dashboard/company/${t.slug}`}
+                className="hover-lift group flex flex-col overflow-hidden rounded-[var(--radius-card-lg)] border border-[var(--color-line)] bg-white shadow-[var(--shadow-card)]"
               >
-                {c.name}
+                {/* ── Card header — white, logo fills the width ── */}
+                <div className="relative flex h-36 items-center justify-center border-b border-[var(--color-line)] bg-white px-8 py-6">
+                  {/* Thin top accent strip */}
+                  <span
+                    aria-hidden
+                    className={`absolute inset-x-0 top-0 h-[3px] rounded-t-[var(--radius-card-lg)] bg-gradient-to-r ${t.accent}`}
+                  />
+
+                  {/* Badge */}
+                  {t.badge && (
+                    <span className="absolute left-4 top-4 inline-flex items-center rounded-full bg-[var(--color-surface-2)] px-2.5 py-1 text-[10px] font-bold text-[var(--color-text)] ring-1 ring-[var(--color-line)]">
+                      {t.badge}
+                    </span>
+                  )}
+
+                  {/* Logo — full width of the header */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={t.logoSrc}
+                    alt={t.logoAlt}
+                    className="h-auto max-h-12 w-full object-contain"
+                  />
+                </div>
+
+                {/* ── Card body ── */}
+                <div className="flex flex-1 flex-col p-5">
+                  <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--color-text-subtle)]">
+                    {t.company}
+                  </p>
+                  <p className="mt-1 font-bold leading-snug text-[var(--color-text)]">{t.title}</p>
+                  <p className="mt-1.5 text-xs leading-relaxed text-[var(--color-text-muted)]">
+                    {t.description}
+                  </p>
+
+                  {/* Stats */}
+                  <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-[var(--color-text-muted)]">
+                    <span className="inline-flex items-center gap-1 font-medium">
+                      <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                      {t.rating}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Users className="h-3 w-3" /> {t.enrolled}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Clock3 className="h-3 w-3" /> {t.hours}h
+                    </span>
+                    <span>{t.mcqs} MCQs</span>
+                    <span>{t.rounds} rounds</span>
+                  </div>
+
+                  {/* CTA */}
+                  <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-[var(--color-brand)] transition-colors group-hover:text-[var(--color-brand-strong)]">
+                    Prepare now <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  </div>
+                </div>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Featured tracks ────────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-6xl px-6 py-16">
-        <div className="mb-2 flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-navy">Pattern-matched paths for top recruiters</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Each track follows the actual drive — paper section weights, time pressure, and section cut-offs.
-            </p>
+      {/* ── Why ZSkillup ─────────────────────────────────────────────────── */}
+      <section className="bg-white py-16 lg:py-20">
+        <div className="mx-auto max-w-[1400px] px-5 md:px-8">
+          <div className="mb-12 max-w-3xl text-center sm:mx-auto">
+            <p className="section-tag">Why ZSkillup</p>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
+              Built like the platforms students already trust — only smarter
+            </h2>
           </div>
-          <Link href="/prepare" className="hidden text-sm font-medium text-orange hover:underline sm:block">
-            View all tracks →
-          </Link>
-        </div>
-        <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {HOMEPAGE_FEATURED_TRACKS.map((t) => (
-            <Card key={t.slug} className="overflow-hidden">
-              <div className={`relative h-20 bg-gradient-to-br ${t.accent} p-3`}>
-                {t.badge ? (
-                  <span className="rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-bold uppercase text-navy">
-                    {t.badge}
-                  </span>
-                ) : null}
-                <div className="flex h-full items-center justify-center">
-                  <span className="rounded bg-white/20 px-3 py-1 text-base font-extrabold text-white">
-                    {t.company}
-                  </span>
+
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {FEATURES.map((f) => (
+              <div
+                key={f.title}
+                className="hover-lift relative h-full rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6"
+              >
+                <span
+                  aria-hidden
+                  className="absolute inset-x-0 top-0 h-[3px] rounded-t-[var(--radius-card)] bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-primary)]"
+                />
+                <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--color-primary-highlight)] to-white text-[var(--color-primary)]">
+                  <f.icon className="h-5 w-5" />
                 </div>
+                <h3 className="text-lg font-bold tracking-tight">{f.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">{f.body}</p>
               </div>
-              <CardContent className="p-4">
-                <p className="text-xs text-muted-foreground">{t.description}</p>
-                <p className="mt-1 text-sm font-semibold text-navy">{t.title}</p>
-                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                  <span>{t.mcqs} MCQs</span>
-                  <span>{t.rounds} rounds</span>
-                  <span className="flex items-center gap-1"><Star className="size-3 fill-amber-400 text-amber-400" />{t.rating}</span>
-                  <span className="flex items-center gap-1"><Users className="size-3" />{t.enrolled}</span>
-                  <span className="flex items-center gap-1"><Clock className="size-3" />{t.hours}h</span>
-                </div>
-                <Link
-                  href={`/dashboard/company/${t.slug}`}
-                  className="mt-3 inline-block text-xs font-semibold text-orange hover:underline"
-                >
-                  View →
-                </Link>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        <div className="mt-6 text-center sm:hidden">
-          <Link href="/prepare" className="text-sm font-medium text-orange hover:underline">
-            View all tracks →
-          </Link>
-        </div>
-      </section>
-
-      {/* ── Why ZSkillup ──────────────────────────────────────────────────── */}
-      <section className="bg-slate-50/60">
-        <div className="mx-auto max-w-5xl px-6 py-16">
-          <h2 className="text-center text-2xl font-bold text-navy">
-            Built like the platforms students already trust — only smarter
-          </h2>
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {HOMEPAGE_WHY_BLOCKS.map((b, i) => {
-              const Icon = WHY_ICONS[i];
-              return (
-                <div key={b.title} className="rounded-xl border bg-white p-5">
-                  <span className="grid size-9 place-items-center rounded-lg bg-navy/10 text-navy">
-                    <Icon className="size-5" />
-                  </span>
-                  <h3 className="mt-3 font-semibold text-navy">{b.title}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">{b.body}</p>
-                </div>
-              );
-            })}
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ── Gamification section ───────────────────────────────────────────── */}
-      <section className="mx-auto max-w-5xl px-6 py-16">
-        <div className="grid items-center gap-10 lg:grid-cols-2">
+      {/* ── Gamification Preview ──────────────────────────────────────────── */}
+      <section className="relative overflow-hidden bg-[var(--color-bg)] py-16 lg:py-24">
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 15% 20%, rgb(243 112 33 / 0.12), transparent 40%), radial-gradient(circle at 85% 70%, rgb(37 99 235 / 0.15), transparent 45%)',
+          }}
+        />
+        <div className="relative mx-auto grid max-w-[1400px] gap-10 px-5 md:px-8 lg:grid-cols-[1fr_1.1fr] lg:items-center">
           <div>
-            <h2 className="text-2xl font-bold text-navy">
+            <p className="section-tag">Gamified prep</p>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
               Daily quests, streaks, levels — prep becomes a habit, not a grind
             </h2>
-            <p className="mt-3 text-muted-foreground">
+            <p className="mt-3 text-base text-[var(--color-text-muted)]">
               Earn XP for every drill. Unlock badges, level up, climb the national leaderboard.
+              The dopamine loop does the work — you just show up.
             </p>
-            <ul className="mt-4 space-y-2">
-              {['Streaks', 'Daily quests with XP rewards', 'College & national leaderboard', 'Earnable concept badges'].map((f) => (
-                <li key={f} className="flex items-center gap-2 text-sm">
-                  <span className="size-1.5 rounded-full bg-orange" />
-                  {f}
+
+            <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {[
+                { icon: Flame, label: 'Streaks' },
+                { icon: Zap, label: 'Daily quests with XP rewards' },
+                { icon: Trophy, label: 'College & national leaderboard' },
+                { icon: BadgeCheck, label: 'Earnable concept badges' },
+              ].map((row) => (
+                <li
+                  key={row.label}
+                  className="flex items-center gap-3 rounded-xl border border-[var(--color-line)] bg-white px-4 py-3"
+                >
+                  <row.icon className="h-5 w-5 shrink-0 text-[var(--color-brand)]" aria-hidden />
+                  <span className="text-sm font-semibold text-[var(--color-text)]">{row.label}</span>
                 </li>
               ))}
             </ul>
-            <Button variant="secondary" className="mt-6" asChild>
-              <Link href="/leaderboard">See live leaderboard</Link>
-            </Button>
+
+            <Link href="/leaderboard" className="btn-brand mt-6 inline-flex text-sm">
+              <Trophy className="h-4 w-4" /> See live leaderboard
+            </Link>
           </div>
 
-          {/* Mock gamification widget */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Today's focus
-            </p>
-            <p className="mt-1 font-semibold text-navy">Probability & permutations</p>
-            <p className="text-xs text-muted-foreground">20-min drill · High weight for TCS & Infosys</p>
-            <Button className="mt-3" asChild>
-              <Link href="/prepare">Start session</Link>
-            </Button>
-            <div className="mt-5 border-t pt-4">
-              <div className="mb-2 flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-xs font-semibold text-navy">
-                  <Flame className="size-3.5 text-orange" aria-hidden="true" />
-                  Active streak: 14 days
+          {/* Preview grid */}
+          <div className="relative grid gap-4 sm:grid-cols-2">
+            <div className="lms-card p-5">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-subtle)]">
+                Today&apos;s focus
+              </p>
+              <p className="mt-1 text-base font-bold tracking-tight">
+                Probability &amp; permutations
+              </p>
+              <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                20-min drill · High weight for TCS &amp; Infosys
+              </p>
+              <Link href="/prepare" className="btn-brand mt-3 inline-flex text-xs">
+                <PlayCircle className="h-3.5 w-3.5" /> Start session
+              </Link>
+            </div>
+
+            <div className="lms-card p-5">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-subtle)]">
+                  Active streak
+                </p>
+                <span className="streak-flame" style={{ padding: '0.25rem 0.6rem', fontSize: '0.66rem' }}>
+                  <Flame className="h-3 w-3" />14d
                 </span>
-                <span className="text-xs text-muted-foreground">M T W T F S S</span>
               </div>
-              <div className="flex gap-1">
-                {['M','T','W','T','F','S','S'].map((d, i) => (
-                  <div
-                    key={`${d}-${i}`}
-                    className={`flex h-7 w-full items-center justify-center rounded text-[10px] font-semibold ${i < 6 ? 'bg-orange text-white' : 'bg-slate-100 text-slate-400'}`}
-                  >
-                    {d}
+              <div className="mt-3 flex h-12 items-end gap-1.5">
+                {[42, 60, 38, 72, 88, 65, 90].map((h, i) => (
+                  <div key={i} className="flex flex-1 flex-col items-center gap-1">
+                    <div
+                      className="w-full rounded-md bg-[var(--color-primary-highlight)]"
+                      style={{ height: `${(h / 100) * 36}px` }}
+                    />
+                    <span className="text-[9px] font-semibold text-[var(--color-text-subtle)]">
+                      {['M', 'T', 'W', 'T', 'F', 'S', 'S'][i]}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="mt-4 space-y-2 border-t pt-4">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Top of your cohort
+
+            <div className="lms-card sm:col-span-2 p-5">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-subtle)]">
+                Top of cohort
               </p>
-              {[
-                { n: 'Aditya Krishnan', xp: '12,840 XP' },
-                { n: 'Sneha Iyer', xp: '11,420 XP' },
-                { n: 'Karan Patel', xp: '10,180 XP' },
-              ].map((p, i) => (
-                <div key={p.n} className="flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-orange">#{i + 1}</span>
-                    <span className="text-navy">{p.n}</span>
-                  </span>
-                  <span className="text-xs text-muted-foreground">{p.xp}</span>
-                </div>
-              ))}
+              <ul className="mt-3 space-y-2">
+                {[
+                  { rank: 1, name: 'Aditya Krishnan', xp: '12,840', tone: 'gold' },
+                  { rank: 2, name: 'Sneha Iyer', xp: '11,420', tone: 'silver' },
+                  { rank: 3, name: 'Karan Patel', xp: '10,180', tone: 'bronze' },
+                ].map((r) => (
+                  <li
+                    key={r.rank}
+                    className="flex items-center gap-3 rounded-lg border border-[var(--color-line)] bg-[var(--color-surface-2)] px-3 py-2"
+                  >
+                    <span
+                      className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-extrabold ${
+                        r.tone === 'gold'
+                          ? 'bg-gradient-to-br from-amber-300 to-orange-500 text-amber-950'
+                          : r.tone === 'silver'
+                            ? 'bg-gradient-to-br from-slate-200 to-slate-400 text-slate-800'
+                            : 'bg-gradient-to-br from-orange-200 to-orange-500 text-orange-950'
+                      }`}
+                    >
+                      {r.rank}
+                    </span>
+                    <span className="flex-1 text-sm font-bold text-[var(--color-text)]">{r.name}</span>
+                    <span className="num-tab text-xs font-bold text-[var(--color-text-muted)]">
+                      {r.xp} XP
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Coverage ──────────────────────────────────────────────────────── */}
-      <section className="bg-slate-50/60">
-        <div className="mx-auto max-w-4xl px-6 py-16 text-center">
-          <h2 className="text-2xl font-bold text-navy">Every section the recruiters ask</h2>
-          <Link href="/prepare" className="mt-1 inline-block text-sm font-medium text-orange hover:underline">
-            Browse the catalog →
-          </Link>
-          <div className="mt-6 flex flex-wrap justify-center gap-2">
-            {HOMEPAGE_COVERAGE_TOPICS.map((t) => (
+      {/* ── Topics Coverage ───────────────────────────────────────────────── */}
+      <section className="bg-white py-14">
+        <div className="mx-auto max-w-[1400px] px-5 md:px-8">
+          <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="section-tag">Coverage</p>
+              <h2 className="mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl">
+                Every section the recruiters ask
+              </h2>
+            </div>
+            <Link href="/prepare" className="text-sm font-bold text-[var(--color-primary)] hover:underline">
+              Browse the catalog →
+            </Link>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {TOPIC_PILLS.map((p) => (
               <span
-                key={t}
-                className="rounded-full border bg-white px-3 py-1 text-sm font-medium text-navy"
+                key={p}
+                className="inline-flex cursor-default items-center gap-1.5 rounded-full border border-[var(--color-line)] bg-[var(--color-surface-2)] px-3.5 py-1.5 text-sm font-semibold text-[var(--color-text)] transition hover:border-[var(--color-brand)] hover:bg-[var(--color-brand-soft)] hover:text-[var(--color-brand-ink)]"
               >
-                {t}
+                <BookOpen className="h-3.5 w-3.5 text-[var(--color-text-subtle)]" aria-hidden />
+                {p}
               </span>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Testimonials ──────────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-5xl px-6 py-16">
-        <h2 className="text-center text-2xl font-bold text-navy">
-          Loved by students. Trusted by TPOs.
-        </h2>
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {HOMEPAGE_TESTIMONIALS.map((t) => (
-            <Card key={t.name}>
-              <CardContent className="space-y-4 p-6">
-                <p className="text-sm italic text-foreground">"{t.quote}"</p>
-                <div>
-                  <p className="text-sm font-semibold text-navy">{t.name}</p>
-                  <p className="text-xs text-muted-foreground">{t.detail}</p>
+      {/* ── Testimonials ─────────────────────────────────────────────────── */}
+      <section className="bg-[var(--color-bg)] py-16 lg:py-20">
+        <div className="mx-auto max-w-[1400px] px-5 md:px-8">
+          <div className="mb-10 max-w-2xl">
+            <p className="section-tag">Outcomes</p>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
+              Loved by students. Trusted by TPOs.
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+            {TESTIMONIALS.map((t) => (
+              <figure
+                key={t.name}
+                className="hover-lift flex h-full flex-col rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6"
+              >
+                <div className="mb-3 flex items-center gap-1">
+                  {Array.from({ length: 5 }).map((_, k) => (
+                    <Star key={k} className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden />
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+                <blockquote className="text-sm leading-relaxed text-[var(--color-text)]">
+                  &ldquo;{t.quote}&rdquo;
+                </blockquote>
+                <figcaption className="mt-5 flex items-center gap-3 border-t border-[var(--color-line)] pt-4">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] text-xs font-extrabold text-white">
+                    {t.initials}
+                  </span>
+                  <span>
+                    <p className="text-sm font-bold text-[var(--color-text)]">{t.name}</p>
+                    <p className="text-xs text-[var(--color-text-muted)]">{t.meta}</p>
+                  </span>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* ── Final CTA ─────────────────────────────────────────────────────── */}
-      <section className="bg-navy px-6 py-20 text-white">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-extrabold">Your next placement starts today.</h2>
-          <p className="mt-3 text-white/70">
-            Free to start. No credit card. Pick a target company, take an assessment, and we'll
-            personalize your path.
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#0b1220] via-[#101d4a] to-[#1e3a8a] py-16 text-white lg:py-24">
+        <div aria-hidden className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-[#f37021]/30 blur-3xl" />
+        <div aria-hidden className="absolute -right-24 -bottom-24 h-72 w-72 rounded-full bg-white/[0.08] blur-3xl" />
+        <div className="relative mx-auto max-w-3xl px-5 text-center md:px-8">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/55">
+            Ready when you are
           </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Button size="lg" asChild>
-              <Link href="/signup">Get started free</Link>
-            </Button>
+          <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
+            Your next placement starts today.
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-base text-white/75">
+            Free to start. No credit card. Pick a target company, take an assessment, and
+            we&apos;ll personalize your path.
+          </p>
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link href="/signup" className="btn-brand inline-flex h-12 rounded-full px-8 text-sm">
+              Get started free <ArrowRight className="h-4 w-4" />
+            </Link>
             <Link
               href="/login"
-              className="inline-flex h-12 items-center justify-center rounded-full border border-white/30 px-7 text-[15px] font-semibold text-white transition-colors hover:bg-white/10"
+              className="inline-flex h-12 items-center justify-center rounded-full border border-white/25 bg-white/[0.08] px-8 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/[0.14]"
             >
               Log in
             </Link>
@@ -404,31 +685,28 @@ export default function HomePage() {
       </section>
 
       {/* ── Footer ────────────────────────────────────────────────────────── */}
-      <footer className="border-t px-6 py-12">
-        <div className="mx-auto grid max-w-5xl gap-8 sm:grid-cols-3">
-          <div>
+      <footer className="border-t border-[var(--color-line)] bg-white px-5 py-12 md:px-8">
+        <div className="mx-auto grid max-w-[1400px] gap-8 sm:grid-cols-4">
+          <div className="sm:col-span-1">
             <Link href="/" className="flex items-center gap-1 text-xl font-extrabold">
-              <span className="text-orange">Z</span>
+              <span className="text-[#f37021]">Z</span>
               <span>Skillup</span>
             </Link>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Company-wise prep, timed mocks, and cohort analytics.
+            <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+              Company-wise prep, timed mocks, and cohort analytics — all in one platform.
             </p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Pages</p>
-            <ul className="mt-3 space-y-2">
+            <p className="group-label mb-3">Product</p>
+            <ul className="space-y-2">
               {[
-                { label: 'Home', href: '/' },
-                { label: 'Companies', href: '/dashboard/company' },
                 { label: 'Prepare', href: '/prepare' },
-                { label: 'Full mock quiz', href: '/mock-tests' },
-                { label: 'Dashboard', href: '/dashboard' },
+                { label: 'Mock tests', href: '/mock-tests' },
+                { label: 'Companies', href: '/dashboard/company' },
                 { label: 'Leaderboard', href: '/leaderboard' },
-                { label: 'Roadmap', href: '/roadmap' },
               ].map((l) => (
                 <li key={l.href}>
-                  <Link href={l.href} className="text-sm text-muted-foreground hover:text-foreground">
+                  <Link href={l.href} className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
                     {l.label}
                   </Link>
                 </li>
@@ -436,20 +714,37 @@ export default function HomePage() {
             </ul>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">On this page</p>
-            <ul className="mt-3 space-y-2">
-              {['Platform', 'Adaptive engine', 'Gamification', 'Institutions'].map((a) => (
+            <p className="group-label mb-3">Account</p>
+            <ul className="space-y-2">
+              {[
+                { label: 'Log in', href: '/login' },
+                { label: 'Create account', href: '/signup' },
+                { label: 'Dashboard', href: '/dashboard' },
+                { label: 'Roadmap', href: '/roadmap' },
+              ].map((l) => (
+                <li key={l.href}>
+                  <Link href={l.href} className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="group-label mb-3">Coverage</p>
+            <ul className="space-y-2">
+              {['Aptitude & Reasoning', 'Coding & DSA', 'Interview Prep', 'Company Tracks'].map((a) => (
                 <li key={a}>
-                  <span className="text-sm text-muted-foreground">{a}</span>
+                  <span className="text-sm text-[var(--color-text-muted)]">{a}</span>
                 </li>
               ))}
             </ul>
           </div>
         </div>
-        <div className="mx-auto mt-10 max-w-5xl border-t pt-6 text-center text-xs text-muted-foreground">
-          © 2026 ZSkillup | Future-ready graduates, future-strong institutions
+        <div className="mx-auto mt-10 max-w-[1400px] border-t border-[var(--color-line)] pt-6 text-center text-xs text-[var(--color-text-subtle)]">
+          © 2026 ZSkillup · Future-ready graduates, future-strong institutions
         </div>
       </footer>
-    </div>
+    </main>
   );
 }
