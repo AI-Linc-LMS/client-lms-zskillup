@@ -1,4 +1,5 @@
 import {
+  BarChart3,
   BookOpen,
   Brain,
   Building2,
@@ -10,6 +11,7 @@ import {
   Mail,
   Target,
   TrendingUp,
+  Users,
 } from 'lucide-react';
 
 /**
@@ -61,6 +63,13 @@ export const SUPERADMIN_NAV: NavSection[] = [
   {
     heading: 'OVERVIEW',
     items: [{ label: 'Dashboard', href: '/superadmin/dashboard', icon: LayoutDashboard }],
+  },
+  {
+    heading: 'PEOPLE',
+    items: [
+      { label: 'Student Reports', href: '/superadmin/students', icon: BarChart3 },
+      { label: 'Users', href: '/superadmin/users', icon: Users },
+    ],
   },
   {
     heading: 'CONTENT',

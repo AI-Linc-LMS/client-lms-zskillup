@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import {
   ArrowUpRight,
+  BarChart3,
   BookOpen,
   Building2,
   Brain,
@@ -19,6 +20,7 @@ import { PlatformOverviewLive } from '@/components/superadmin/PlatformOverviewLi
  */
 
 const QUICK_ACTIONS = [
+  { label: 'Student Reports', icon: BarChart3, href: '/superadmin/students' },
   { label: 'Users', icon: Users, href: '/superadmin/users' },
   { label: 'Courses', icon: BookOpen, href: '/superadmin/courses' },
   { label: 'Colleges', icon: Building2, href: '/superadmin/colleges' },

@@ -418,3 +418,74 @@ export async function deleteAdminLesson(id: string): Promise<void> {
 export async function deleteAdminCourse(id: string): Promise<void> {
   await apiClient.delete(`/api/v1/admin/courses/${id}`);
 }
+
+// ─── Student performance reports (super-admin) ──────────────────────────────
+
+export interface AdminStudentReportRow {
+  id: string;
+  email: string;
+  fullName: string | null;
+  status: string;
+  collegeName: string | null;
+  createdAt: string;
+  attempts: number;
+  avgScorePct: number | null;
+  bestScorePct: number | null;
+  lastAttemptAt: string | null;
+}
+
+export interface AdminMockAttemptReport {
+  id: string;
+  mockTitle: string;
+  score: number | null;
+  total: number | null;
+  percentage: number | null;
+  percentile: number | null;
+  status: string;
+  startedAt: string;
+  submittedAt: string | null;
+  timeTakenSec: number | null;
+}
+
+export interface AdminStudentFullReport {
+  student: {
+    id: string;
+    email: string;
+    fullName: string | null;
+    status: string;
+    isEmailVerified: boolean;
+    collegeName: string | null;
+    phone: string | null;
+    passoutYear: number | null;
+    createdAt: string;
+  };
+  summary: {
+    totalAttempts: number;
+    avgScorePct: number | null;
+    bestScorePct: number | null;
+    totalTimeSec: number;
+    practiceAttempts: number;
+    practiceCorrect: number;
+    adaptiveSessions: number;
+  };
+  mockAttempts: AdminMockAttemptReport[];
+}
+
+export async function listStudentReports(
+  params: { search?: string; limit?: number; offset?: number } = {},
+): Promise<{ rows: AdminStudentReportRow[]; total: number }> {
+  const qs = new URLSearchParams();
+  if (params.search) qs.set('search', params.search);
+  if (params.limit) qs.set('limit', String(params.limit));
+  if (params.offset) qs.set('offset', String(params.offset));
+  const suffix = qs.toString() ? `?${qs.toString()}` : '';
+  const res = await apiClient.get<{ rows: AdminStudentReportRow[]; total: number }>(
+    `/api/v1/admin/reports/students${suffix}`,
+  );
+  return res.data;
+}
+
+export async function getStudentReport(id: string): Promise<AdminStudentFullReport> {
+  const res = await apiClient.get<AdminStudentFullReport>(`/api/v1/admin/reports/students/${id}`);
+  return res.data;
+}
