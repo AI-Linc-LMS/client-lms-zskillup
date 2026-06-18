@@ -7,6 +7,7 @@ import {
   FileCheck2,
   GraduationCap,
   LayoutDashboard,
+  Lightbulb,
   type LucideIcon,
   Mail,
   Target,
@@ -80,6 +81,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
       { label: 'Adaptive Sessions', href: '/superadmin/adaptive-sessions', icon: Brain },
       { label: 'Companies', href: '/superadmin/companies', icon: Building2 },
       { label: 'Colleges', href: '/superadmin/colleges', icon: GraduationCap },
+      { label: 'Tips', href: '/superadmin/tips', icon: Lightbulb },
     ],
   },
 ];
