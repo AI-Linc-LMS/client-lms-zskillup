@@ -2,9 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Calendar } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { ProgressBar } from '@/components/ui/progress-bar';
+import { motion, useReducedMotion } from 'framer-motion';
+import {
+  ArrowRight,
+  Calendar,
+  Sparkles,
+  Target,
+  TrendingDown,
+  TrendingUp,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Reveal, Stagger, StaggerItem, AnimatedNumber } from '@/components/motion/primitives';
 import { getTopicAccuracy, type ApiTopicAccuracy } from '@/lib/api/practice';
 
 /**
@@ -14,6 +22,217 @@ import { getTopicAccuracy, type ApiTopicAccuracy } from '@/lib/api/practice';
  * `GET /practice/accuracy/topics`; with no attempts yet the panels render
  * an honest empty state instead of invented numbers.
  */
+
+/** Mastery band derived purely from a topic's accuracy — drives all coloring. */
+type Band = 'strong' | 'developing' | 'weak';
+
+interface BandTheme {
+  label: string;
+  /** progress-bar / ring gradient stops */
+  from: string;
+  to: string;
+  /** colored glow blob */
+  glow: string;
+  /** badge + accent text */
+  text: string;
+  pill: string;
+  ring: string;
+}
+
+const BANDS: Record<Band, BandTheme> = {
+  strong: {
+    label: 'Strong',
+    from: '#34d399',
+    to: '#059669',
+    glow: '#10b981',
+    text: 'text-emerald-700',
+    pill: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+    ring: 'border-emerald-200/80',
+  },
+  developing: {
+    label: 'Developing',
+    from: '#7c6cf5',
+    to: '#2563eb',
+    glow: '#4f7bf5',
+    text: 'text-blue-700',
+    pill: 'bg-blue-50 text-blue-700 ring-blue-200',
+    ring: 'border-blue-200/80',
+  },
+  weak: {
+    label: 'Weak',
+    from: '#fbbf24',
+    to: '#f37021',
+    glow: '#f59e0b',
+    text: 'text-amber-700',
+    pill: 'bg-amber-50 text-amber-700 ring-amber-200',
+    ring: 'border-amber-200/80',
+  },
+};
+
+function bandOf(pct: number): Band {
+  if (pct >= 80) return 'strong';
+  if (pct >= 60) return 'developing';
+  return 'weak';
+}
+
+/** Tiny uppercase section eyebrow shared by both panels. */
+function SectionLabel({
+  icon: Icon,
+  children,
+}: {
+  icon: typeof Target;
+  children: React.ReactNode;
+}) {
+  return (
+    <p className="mb-4 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+      <Icon className="size-3.5" aria-hidden="true" />
+      {children}
+    </p>
+  );
+}
+
+/** Animated, gradient-filled accuracy meter with a band badge above it. */
+function AccuracyMeter({
+  pct,
+  band,
+  label,
+}: {
+  pct: number;
+  band: Band;
+  label: string;
+}) {
+  const reduce = useReducedMotion();
+  const theme = BANDS[band];
+  const clamped = Math.max(0, Math.min(100, pct));
+  return (
+    <div
+      role="progressbar"
+      aria-valuenow={clamped}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={label}
+      className="relative h-2 w-full overflow-hidden rounded-full bg-slate-100"
+    >
+      {/* faint track tint in the band color so empty space still reads as "this topic" */}
+      <div
+        aria-hidden
+        className="absolute inset-0 opacity-[0.18]"
+        style={{ background: `linear-gradient(90deg, ${theme.from}, ${theme.to})` }}
+      />
+      <motion.div
+        className="relative h-full rounded-full"
+        style={{ background: `linear-gradient(90deg, ${theme.from}, ${theme.to})` }}
+        initial={reduce ? false : { width: 0 }}
+        whileInView={{ width: `${clamped}%` }}
+        viewport={{ once: true, margin: '-40px' }}
+        transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+      >
+        {/* glossy highlight along the fill */}
+        <span
+          aria-hidden
+          className="absolute inset-x-0 top-0 h-1/2 rounded-full bg-white/25"
+        />
+      </motion.div>
+    </div>
+  );
+}
+
+/** A premium per-topic mastery card: layered depth, band-driven color + meter. */
+function TopicCard({
+  topic,
+  cta,
+  trailing,
+  ctaVariant = 'solid',
+}: {
+  topic: ApiTopicAccuracy;
+  cta: string;
+  trailing: React.ReactNode;
+  ctaVariant?: 'solid' | 'ghost';
+}) {
+  const band = bandOf(topic.accuracyPct);
+  const theme = BANDS[band];
+  return (
+    <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }} className="h-full">
+      <div
+        className={cn(
+          'group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-white p-5 shadow-[0_8px_30px_-18px_rgba(15,23,42,0.35)] transition-shadow duration-300 hover:shadow-[0_22px_55px_-26px_rgba(15,23,42,0.5)]',
+          theme.ring,
+        )}
+      >
+        {/* faint gradient wash */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-50/70 via-transparent to-transparent"
+        />
+        {/* band-colored glow blob — intensifies on hover-lift */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-10 -top-12 size-32 rounded-full opacity-[0.1] blur-2xl transition-opacity duration-500 group-hover:opacity-25"
+          style={{ background: theme.glow }}
+        />
+
+        <div className="relative z-10 flex h-full flex-col">
+          <div className="mb-4 flex items-start justify-between gap-2">
+            <p className="font-bold leading-snug text-navy">{topic.topicName}</p>
+            <span
+              className={cn(
+                'shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1',
+                theme.pill,
+              )}
+            >
+              {theme.label}
+            </span>
+          </div>
+
+          {/* big accuracy figure + meter */}
+          <div className="mb-1.5 flex items-baseline justify-between gap-2">
+            <p className="flex items-baseline gap-0.5">
+              <AnimatedNumber
+                value={topic.accuracyPct}
+                className={cn('text-3xl font-extrabold leading-none tracking-tight tabular-nums', theme.text)}
+              />
+              <span className={cn('text-base font-bold', theme.text)}>%</span>
+            </p>
+            <span className="text-[11px] font-medium text-slate-400">accuracy</span>
+          </div>
+          <AccuracyMeter
+            pct={topic.accuracyPct}
+            band={band}
+            label={`${topic.topicName} accuracy`}
+          />
+
+          <div className="mb-4 mt-2 flex items-center justify-between gap-2 text-xs text-slate-400">
+            <span>
+              <span className="font-semibold text-slate-500 tabular-nums">{topic.correct}</span>/
+              <span className="tabular-nums">{topic.total}</span> correct
+            </span>
+            {trailing}
+          </div>
+
+          {/* CTA pinned to the bottom so cards align on a row */}
+          <Link
+            href={`/practice?topic=${encodeURIComponent(topic.topicSlug)}`}
+            className={cn(
+              'mt-auto inline-flex w-fit items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-bold transition-all active:translate-y-px',
+              ctaVariant === 'solid'
+                ? 'text-white shadow-sm hover:-translate-y-0.5'
+                : 'border border-slate-200 bg-white text-navy hover:border-slate-300 hover:bg-slate-50',
+            )}
+            style={
+              ctaVariant === 'solid'
+                ? { background: `linear-gradient(135deg, ${theme.from}, ${theme.to})` }
+                : undefined
+            }
+          >
+            {cta}
+            <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export function TopicAccuracyPanels() {
   const [rows, setRows] = useState<ApiTopicAccuracy[] | null>(null);
 
@@ -28,7 +247,16 @@ export function TopicAccuracyPanels() {
   }, []);
 
   if (rows === null) {
-    return <div className="h-40 animate-pulse rounded-xl border border-slate-200 bg-white shadow-sm" />;
+    return (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {[0, 1, 2].map((k) => (
+          <div
+            key={k}
+            className="h-44 animate-pulse rounded-2xl border border-slate-200/80 bg-white shadow-[0_8px_30px_-18px_rgba(15,23,42,0.35)]"
+          />
+        ))}
+      </div>
+    );
   }
 
   const weak = rows.filter((r) => r.total >= 3 && r.accuracyPct < 60).slice(0, 3);
@@ -38,84 +266,78 @@ export function TopicAccuracyPanels() {
     <>
       {/* Weak topics */}
       <div>
-        <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-          Your Weak Topics
-        </p>
+        <SectionLabel icon={TrendingDown}>Your Weak Topics</SectionLabel>
         {weak.length === 0 ? (
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm font-semibold text-navy">
-              {rows.length === 0 ? 'No practice data yet.' : 'No weak topics detected.'}
-            </p>
-            <p className="mt-1 text-xs text-slate-500">
-              {rows.length === 0
-                ? 'Attempt a few questions and your weakest topics will surface here automatically.'
-                : 'Topics drop in here when accuracy falls under 60% across 3+ attempts.'}
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {weak.map((topic) => (
-              <div key={topic.topicSlug} className="rounded-xl border border-amber-200 bg-white p-5 shadow-sm">
-                <div className="mb-3 flex items-start justify-between gap-2">
-                  <p className="font-semibold text-navy">{topic.topicName}</p>
-                  <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-200">
-                    Weak
-                  </span>
+          <Reveal>
+            <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-7 shadow-[0_8px_30px_-18px_rgba(15,23,42,0.35)]">
+              {/* layered depth even in the empty state */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-50/70 via-transparent to-transparent"
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -right-12 -top-14 size-40 rounded-full bg-emerald-400/10 blur-2xl"
+              />
+              <div className="relative z-10 flex items-start gap-4">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-sm">
+                  <Sparkles className="size-5" aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-navy">
+                    {rows.length === 0 ? 'No practice data yet.' : 'No weak topics detected.'}
+                  </p>
+                  <p className="mt-1 max-w-md text-xs leading-relaxed text-slate-500">
+                    {rows.length === 0
+                      ? 'Attempt a few questions and your weakest topics will surface here automatically.'
+                      : 'Nice work — nothing has dropped under 60% across 3+ attempts. Topics appear here the moment one slips.'}
+                  </p>
                 </div>
-                <div className="mb-1 flex items-center gap-2">
-                  <ProgressBar
-                    value={topic.accuracyPct}
-                    className="h-1.5 flex-1"
-                    barClassName="bg-amber-400"
-                    label={`${topic.topicName} accuracy`}
-                  />
-                  <span className="text-xs font-semibold text-amber-700">{topic.accuracyPct}%</span>
-                </div>
-                <p className="mb-4 text-xs text-slate-400">
-                  {topic.correct}/{topic.total} correct so far
-                </p>
-                <Button asChild size="sm">
-                  <Link href={`/practice?topic=${encodeURIComponent(topic.topicSlug)}`}>Drill now</Link>
-                </Button>
               </div>
+            </div>
+          </Reveal>
+        ) : (
+          <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {weak.map((topic) => (
+              <StaggerItem key={topic.topicSlug} className="h-full">
+                <TopicCard
+                  topic={topic}
+                  cta="Drill now"
+                  ctaVariant="solid"
+                  trailing={
+                    <span className="inline-flex items-center gap-1 font-semibold text-amber-600">
+                      <TrendingUp className="size-3" aria-hidden="true" />
+                      needs work
+                    </span>
+                  }
+                />
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         )}
       </div>
 
       {/* Recently practised */}
       {recent.length > 0 ? (
         <div>
-          <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-            Continue Where You Left Off
-          </p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <SectionLabel icon={Target}>Continue Where You Left Off</SectionLabel>
+          <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {recent.map((topic) => (
-              <div key={topic.topicSlug} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div className="mb-3 flex items-start justify-between gap-2">
-                  <p className="font-semibold text-navy">{topic.topicName}</p>
-                  <div className="flex items-center gap-1 text-xs text-slate-400">
-                    <Calendar className="size-3" aria-hidden="true" />
-                    <span>{formatRelative(topic.lastAttemptAt)}</span>
-                  </div>
-                </div>
-                <div className="mb-1 flex items-center gap-2">
-                  <ProgressBar
-                    value={topic.accuracyPct}
-                    className="h-1.5 flex-1"
-                    label={`${topic.topicName} accuracy`}
-                  />
-                  <span className="text-xs font-semibold text-navy">{topic.accuracyPct}%</span>
-                </div>
-                <p className="mb-4 text-xs text-slate-400">
-                  {topic.correct}/{topic.total} correct
-                </p>
-                <Button asChild variant="outline" size="sm">
-                  <Link href={`/practice?topic=${encodeURIComponent(topic.topicSlug)}`}>Continue</Link>
-                </Button>
-              </div>
+              <StaggerItem key={topic.topicSlug} className="h-full">
+                <TopicCard
+                  topic={topic}
+                  cta="Continue"
+                  ctaVariant="ghost"
+                  trailing={
+                    <span className="inline-flex items-center gap-1 text-slate-400">
+                      <Calendar className="size-3" aria-hidden="true" />
+                      {formatRelative(topic.lastAttemptAt)}
+                    </span>
+                  }
+                />
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </div>
       ) : null}
     </>

@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Brain, Clock, FileText, Loader2, Sparkles, Star, Timer } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
+import { ArrowRight, Brain, Clock, FileText, Loader2, Sparkles, Star, Timer } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Stagger, StaggerItem } from '@/components/motion/primitives';
 import { listMocks, type ApiMockSummary } from '@/lib/api/mocks';
 
 /**
@@ -36,106 +37,193 @@ export function MockTestsCatalog() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white p-12">
-        <Loader2 className="size-5 animate-spin text-slate-400" aria-hidden="true" />
+      <div className="grid gap-4 md:grid-cols-2">
+        {[0, 1].map((k) => (
+          <div
+            key={k}
+            className="h-52 animate-pulse rounded-3xl border border-slate-200/80 bg-white shadow-sm"
+          >
+            <div className="flex items-start gap-3 p-6">
+              <div className="size-12 rounded-2xl bg-slate-100" />
+              <div className="flex-1 space-y-2 pt-1">
+                <div className="h-3.5 w-3/4 rounded bg-slate-100" />
+                <div className="h-2.5 w-1/2 rounded bg-slate-100" />
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">{error}</div>
+      <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+        {error}
+      </div>
     );
   }
 
   if (!mocks || mocks.length === 0) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-10 text-center">
-        <span className="mx-auto grid size-11 place-items-center rounded-xl bg-orange/10 text-orange ring-1 ring-orange/20">
-          <FileText className="size-5" aria-hidden="true" />
-        </span>
-        <p className="mt-3 text-sm font-semibold text-navy">No mock tests are live yet.</p>
-        <p className="mt-1 text-xs text-slate-500">Check back soon — new timed drives are added regularly.</p>
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-12 text-center shadow-[0_8px_30px_-18px_rgba(15,23,42,0.35)]">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-50/70 via-transparent to-transparent"
+        />
+        <div className="relative z-10">
+          <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-sm">
+            <FileText className="size-5" aria-hidden="true" />
+          </span>
+          <p className="mt-4 text-base font-bold text-navy">No mock tests are live yet.</p>
+          <p className="mt-1 text-sm text-slate-500">
+            Check back soon — new timed drives are added regularly.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <Stagger className="grid gap-5 md:grid-cols-2">
       {mocks.map((mock) => (
+        <StaggerItem key={mock.id} className="h-full">
+          <MockCard mock={mock} />
+        </StaggerItem>
+      ))}
+    </Stagger>
+  );
+}
+
+/** A single premium mock card — layered depth, gradient icon chip, info chips,
+ *  a confident gradient Start CTA, and a hover lift with an intensifying glow. */
+function MockCard({ mock }: { mock: ApiMockSummary }) {
+  const adaptive = mock.isAdaptive;
+  const from = adaptive ? '#7c6cf5' : '#f7a14e';
+  const to = adaptive ? '#5b3bf5' : '#f37021';
+  const glow = adaptive ? '#6d3bf5' : '#f37021';
+  const href = adaptive
+    ? `/dashboard/quiz/adaptive?mock=${mock.id}`
+    : `/dashboard/quiz?mock=${mock.id}`;
+  const Icon = adaptive ? Brain : Timer;
+
+  return (
+    <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.25 }} className="h-full">
+      <div className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_8px_30px_-18px_rgba(15,23,42,0.35)] transition-shadow duration-300 hover:shadow-[0_24px_60px_-24px_rgba(15,23,42,0.5)]">
+        {/* faint gradient wash */}
         <div
-          key={mock.id}
-          className={cn(
-            'flex flex-col rounded-xl border p-5 shadow-sm',
-            mock.isAdaptive
-              ? 'border-orange/30 bg-gradient-to-br from-orange/5 to-white'
-              : 'border-slate-200 bg-white',
-          )}
-        >
-          <div className="flex items-start gap-3">
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-50/70 via-transparent to-transparent"
+        />
+        {/* colored glow blob — intensifies on hover-lift */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-12 -top-14 size-40 rounded-full opacity-[0.07] blur-2xl transition-opacity duration-500 group-hover:opacity-25"
+          style={{ background: glow }}
+        />
+        {/* top-edge highlight */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-slate-200/80 to-transparent"
+        />
+
+        <div className="relative z-10 flex h-full flex-col">
+          <div className="flex items-start gap-3.5">
             <span
-              className={cn(
-                'grid size-11 shrink-0 place-items-center rounded-xl ring-1',
-                mock.isAdaptive
-                  ? 'bg-orange/10 text-orange ring-orange/20'
-                  : 'bg-orange/10 text-orange ring-orange/20',
-              )}
+              className="grid size-12 shrink-0 place-items-center rounded-2xl text-white shadow-sm transition-transform duration-300 group-hover:scale-105"
+              style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
             >
-              {mock.isAdaptive ? (
-                <Brain className="size-5" aria-hidden="true" />
-              ) : (
-                <Timer className="size-5" aria-hidden="true" />
-              )}
+              <Icon className="size-[22px]" aria-hidden="true" />
             </span>
             <div className="min-w-0 flex-1">
-              <div className="flex items-start gap-2 flex-wrap">
-                <p className="font-bold text-navy">{mock.title}</p>
-                {mock.isAdaptive && (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-orange/30 bg-orange/10 px-2 py-0.5 text-[10px] font-semibold text-orange">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-base font-bold leading-snug text-navy">{mock.title}</p>
+                {adaptive && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[#6d3bf5]/25 bg-[#6d3bf5]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#5b3bf5]">
                     <Sparkles className="size-2.5" /> AI Adaptive
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-400">
-                {mock.isAdaptive ? 'Personalised adaptive assessment · IRT engine' : 'Timed mock assessment'}
+              <p className="mt-0.5 text-xs leading-snug text-slate-500">
+                {adaptive
+                  ? 'Personalised adaptive assessment · IRT engine'
+                  : 'Timed mock assessment'}
               </p>
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1.5">
-            <span className="flex items-center gap-1.5 text-xs text-slate-500">
-              <FileText className="size-3.5 text-slate-400" aria-hidden="true" />
-              {mock.isAdaptive ? `up to ${mock.totalQuestions} questions` : `${mock.totalQuestions} questions`}
-            </span>
-            <span className="flex items-center gap-1.5 text-xs text-slate-500">
-              <Clock className="size-3.5 text-slate-400" aria-hidden="true" />
-              {mock.durationMinutes} min
-            </span>
-            <span className="flex items-center gap-1.5 text-xs text-slate-500">
-              <Star className="size-3.5 text-slate-400" aria-hidden="true" />
-              Pass {mock.passingScore}%
-            </span>
+          {/* Info chips — questions / duration / pass mark */}
+          <div className="mt-5 grid grid-cols-3 gap-2.5">
+            <InfoChip
+              icon={<FileText className="size-4" aria-hidden="true" />}
+              value={String(mock.totalQuestions)}
+              label={adaptive ? 'max Qs' : 'Questions'}
+            />
+            <InfoChip
+              icon={<Clock className="size-4" aria-hidden="true" />}
+              value={`${mock.durationMinutes}`}
+              label="Minutes"
+            />
+            <InfoChip
+              icon={<Star className="size-4" aria-hidden="true" />}
+              value={`${mock.passingScore}%`}
+              label="Pass mark"
+            />
           </div>
 
-          <div className="mt-5 flex items-center justify-end border-t border-slate-100 pt-4">
-            {mock.isAdaptive ? (
-              <Button asChild size="sm" className="bg-orange hover:bg-orange/90">
-                <Link href={`/dashboard/quiz/adaptive?mock=${mock.id}`} aria-label={`Start adaptive ${mock.title}`}>
-                  <Sparkles className="size-3.5 mr-1.5" aria-hidden="true" />
-                  Start adaptive test
-                </Link>
-              </Button>
-            ) : (
-              <Button asChild size="sm">
-                <Link href={`/dashboard/quiz?mock=${mock.id}`} aria-label={`Start ${mock.title}`}>
-                  <Timer className="size-4" aria-hidden="true" />
-                  Start test
-                </Link>
-              </Button>
-            )}
+          {/* CTA */}
+          <div className="mt-auto pt-6">
+            <Link
+              href={href}
+              aria-label={adaptive ? `Start adaptive ${mock.title}` : `Start ${mock.title}`}
+              className="group/cta relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-full px-6 py-3 text-sm font-extrabold text-white shadow-[0_14px_34px_-14px_rgba(243,112,33,0.85)] transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
+              style={{ background: `linear-gradient(180deg, ${from}, ${to})` }}
+            >
+              <span
+                aria-hidden
+                className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover/cta:translate-x-full"
+              />
+              {adaptive ? (
+                <Sparkles className="size-4" aria-hidden="true" />
+              ) : (
+                <Timer className="size-4" aria-hidden="true" />
+              )}
+              {adaptive ? 'Start adaptive test' : 'Start test'}
+              <ArrowRight className="size-4 transition-transform group-hover/cta:translate-x-0.5" />
+            </Link>
           </div>
         </div>
-      ))}
+      </div>
+    </motion.div>
+  );
+}
+
+/** A single stat chip inside a mock card. */
+function InfoChip({
+  icon,
+  value,
+  label,
+  className,
+}: {
+  icon: React.ReactNode;
+  value: string;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        'flex flex-col items-center gap-1 rounded-2xl border border-slate-200/70 bg-slate-50/70 px-2 py-3 text-center',
+        className,
+      )}
+    >
+      <span className="text-slate-400">{icon}</span>
+      <span className="text-base font-extrabold leading-none tracking-tight text-navy tabular-nums">
+        {value}
+      </span>
+      <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+        {label}
+      </span>
     </div>
   );
 }

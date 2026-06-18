@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Loader2, SlidersHorizontal } from 'lucide-react';
+import { Loader2, SlidersHorizontal, Building2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { CompanyCard, type CompanyCardData } from './CompanyCard';
 import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
 import { DEMO_COMPANIES } from '@/lib/demo-data';
+import { Stagger, StaggerItem } from '@/components/motion/primitives';
 
 const TYPE_TABS: Array<{ key: 'All' | ApiCompany['type']; label: string }> = [
   { key: 'All', label: 'All' },
@@ -105,78 +107,116 @@ export function CompaniesExplorer() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
-        <div className="flex flex-wrap gap-4" role="tablist" aria-label="Company type">
-          {TYPE_TABS.map((t) => {
-            const active = type === t.key;
-            return (
-              <button
-                key={t.key}
-                role="tab"
-                aria-selected={active}
-                onClick={() => setType(t.key)}
-                className={cn(
-                  'flex items-center gap-1.5 border-b-2 pb-2 text-sm font-medium transition-colors',
-                  active
-                    ? 'border-orange font-semibold text-navy'
-                    : 'border-transparent text-slate-400 hover:text-slate-600',
-                )}
-              >
-                {t.label}
-                <span
+      {/* Filter bar — a crisp white control panel with layered depth */}
+      <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-3 shadow-[0_8px_30px_-20px_rgba(15,23,42,0.35)] sm:p-3.5">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-50/70 via-transparent to-transparent"
+        />
+        <div className="relative z-10 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          {/* Type tabs — pill segmented control with sliding active state */}
+          <div
+            className="flex flex-wrap items-center gap-1"
+            role="tablist"
+            aria-label="Company type"
+          >
+            {TYPE_TABS.map((t) => {
+              const active = type === t.key;
+              return (
+                <button
+                  key={t.key}
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setType(t.key)}
                   className={cn(
-                    'rounded-full px-1.5 py-px text-[10px] font-bold',
-                    active ? 'bg-orange text-white' : 'bg-slate-100 text-slate-500',
+                    'relative flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-semibold transition-colors',
+                    active ? 'text-white' : 'text-slate-500 hover:text-navy',
                   )}
                 >
-                  {typeCount(t.key)}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+                  {active && (
+                    <motion.span
+                      layoutId="company-type-pill"
+                      aria-hidden
+                      className="absolute inset-0 rounded-full bg-gradient-to-b from-[#1f2d4d] to-[#0b1220] shadow-[0_8px_18px_-8px_rgba(11,18,32,0.7)]"
+                      transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                    />
+                  )}
+                  <span className="relative z-10">{t.label}</span>
+                  <span
+                    className={cn(
+                      'relative z-10 rounded-full px-1.5 py-px text-[10px] font-bold tabular-nums',
+                      active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500',
+                    )}
+                  >
+                    {typeCount(t.key)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
 
-        <div className="flex items-center gap-2">
-          <SlidersHorizontal className="size-4 text-slate-400" aria-hidden="true" />
-          <span className="text-xs text-slate-500">Difficulty</span>
-          <div className="flex gap-1.5">
-            {DIFFICULTIES.map((d) => (
-              <button
-                key={d}
-                type="button"
-                onClick={() => setDifficulty(d)}
-                className={cn(
-                  'rounded-full px-3 py-1 text-xs font-semibold transition-colors',
-                  difficulty === d
-                    ? 'bg-navy text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
-                )}
-              >
-                {d}
-              </button>
-            ))}
+          {/* Difficulty filter */}
+          <div className="flex items-center gap-2">
+            <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              <SlidersHorizontal className="size-3.5" aria-hidden="true" />
+              Difficulty
+            </span>
+            <div className="flex flex-wrap gap-1">
+              {DIFFICULTIES.map((d) => {
+                const active = difficulty === d;
+                return (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => setDifficulty(d)}
+                    className={cn(
+                      'rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
+                      active
+                        ? 'bg-gradient-to-b from-[#f7a14e] to-[#f37021] text-white shadow-[0_8px_18px_-8px_rgba(243,112,33,0.8)]'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
+                    )}
+                  >
+                    {d}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
 
-      <p className="py-3 text-xs text-slate-500">
-        Showing {filtered.length} of {companies?.length ?? 0} companies
+      <p className="px-1 py-4 text-xs font-medium text-slate-500">
+        Showing{' '}
+        <span className="font-bold tabular-nums text-navy">{filtered.length}</span> of{' '}
+        <span className="font-bold tabular-nums text-navy">{companies?.length ?? 0}</span> companies
       </p>
 
       {loading ? (
-        <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white p-16">
-          <Loader2 className="size-5 animate-spin text-slate-400" aria-hidden="true" />
+        <div className="flex items-center justify-center rounded-3xl border border-slate-200/80 bg-white p-20 shadow-[0_8px_30px_-20px_rgba(15,23,42,0.35)]">
+          <Loader2 className="size-6 animate-spin text-orange" aria-hidden="true" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
-          No companies match these filters.
+        <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-14 text-center shadow-[0_8px_30px_-20px_rgba(15,23,42,0.35)]">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-orange/10 blur-3xl"
+          />
+          <span className="relative mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400">
+            <Building2 className="size-6" aria-hidden="true" />
+          </span>
+          <p className="relative mt-4 text-sm font-bold text-navy">No companies match these filters.</p>
+          <p className="relative mt-1 text-xs text-slate-500">
+            Try a different type or difficulty to see more hubs.
+          </p>
         </div>
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <Stagger className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((c) => (
-            <CompanyCard key={c.slug} company={c} />
+            <StaggerItem key={c.slug} className="h-full">
+              <CompanyCard company={c} />
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       )}
     </div>
   );

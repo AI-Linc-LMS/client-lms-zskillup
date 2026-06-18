@@ -1,6 +1,8 @@
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { CompaniesExplorer } from '@/components/company/CompaniesExplorer';
 import { listCompanies, listCourses, listTopics } from '@/lib/api/catalog';
+import { AnimatedNumber, AuroraBackground, Reveal } from '@/components/motion/primitives';
+import { Building2, Layers, ListChecks, Sparkles } from 'lucide-react';
 
 export default async function CompaniesPage() {
   // Real catalog counts for the hero stat bar (public reads). If the backend is
@@ -17,39 +19,70 @@ export default async function CompaniesPage() {
     stats = null;
   }
 
+  const statTiles = stats
+    ? [
+        { label: 'Recruiting companies', value: stats.companies, icon: Building2 },
+        { label: 'Prep tracks', value: stats.tracks, icon: Layers },
+        { label: 'Practice topics', value: stats.topics, icon: ListChecks },
+      ]
+    : [];
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-6">
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Companies' }]} />
 
-      <section className="mb-8 overflow-hidden rounded-2xl bg-gradient-to-br from-navy to-indigo-900 p-8 text-white">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-white/50">
-          Catalog · Campus recruitment · Company hubs
-        </p>
-        <h1 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-[40px] sm:leading-tight">
-          Choose your <span className="text-orange">target company</span>.
-        </h1>
-        <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-white/70">
-          Pick a recruiter and follow a guided track — process overview, topic-wise practice from the
-          real question bank, and timed mocks pattern-matched to the actual drive.
-        </p>
+      {/* Hero — deep navy aurora canvas with glass stat cards */}
+      <Reveal>
+        <section className="relative isolate mb-8 overflow-hidden rounded-[1.75rem] p-7 text-white shadow-[0_30px_90px_-32px_rgba(11,18,32,0.85)] sm:rounded-[2rem] sm:p-10">
+          <AuroraBackground />
 
-        {stats ? (
-          <dl className="mt-7 grid max-w-2xl grid-cols-3 gap-px overflow-hidden rounded-xl border border-white/10">
-            {[
-              { label: 'Recruiting companies', value: stats.companies },
-              { label: 'Prep tracks', value: stats.tracks },
-              { label: 'Practice topics', value: stats.topics },
-            ].map((s) => (
-              <div key={s.label} className="bg-white/5 px-5 py-4">
-                <dd className="text-2xl font-extrabold leading-none">{s.value}</dd>
-                <dt className="mt-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/50">
-                  {s.label}
-                </dt>
-              </div>
-            ))}
-          </dl>
-        ) : null}
-      </section>
+          {/* layered depth — inner ring + top-edge highlight */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 rounded-[1.75rem] ring-1 ring-inset ring-white/10 sm:rounded-[2rem]"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"
+          />
+
+          <div className="relative z-10 max-w-3xl">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-white/75 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur">
+              <Sparkles className="size-3.5 text-[#ffb877]" />
+              Catalog · Campus recruitment · Company hubs
+            </span>
+
+            <h1 className="mt-6 bg-gradient-to-b from-white to-white/70 bg-clip-text text-3xl font-extrabold leading-[1.08] tracking-tight text-transparent sm:text-[42px]">
+              Choose your <span className="text-[#ffb877]">target company</span>.
+            </h1>
+            <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-white/65 sm:text-base">
+              Pick a recruiter and follow a guided track — process overview, topic-wise practice
+              from the real question bank, and timed mocks pattern-matched to the actual drive.
+            </p>
+
+            {stats ? (
+              <dl className="mt-8 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3">
+                {statTiles.map(({ label, value, icon: Icon }) => (
+                  <div
+                    key={label}
+                    className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur transition-colors hover:border-white/20 hover:bg-white/[0.1]"
+                  >
+                    <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_8px_20px_-8px_rgba(243,112,33,0.7)]">
+                      <Icon className="size-4" aria-hidden="true" />
+                    </span>
+                    <dd className="mt-3 text-2xl font-extrabold leading-none tabular-nums">
+                      <AnimatedNumber value={value} />
+                    </dd>
+                    <dt className="mt-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/50">
+                      {label}
+                    </dt>
+                  </div>
+                ))}
+              </dl>
+            ) : null}
+          </div>
+        </section>
+      </Reveal>
 
       <CompaniesExplorer />
     </div>

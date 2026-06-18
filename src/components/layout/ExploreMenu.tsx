@@ -121,11 +121,12 @@ export function ExploreMenu() {
       <AnimatePresence>
         {open ? (
           <motion.div
-            // The panel is the FULL width of the viewport beneath the TopBar.
-            // Wrapping a hover-friendly region around it (handlers below) so the
-            // cursor crossing the small visual gap from the trigger doesn't fire
-            // a real mouseLeave on the root.
-            className="absolute left-0 right-0 top-14 z-40"
+            // FULL-WIDTH panel pinned to the viewport just under the (sticky, h-14)
+            // TopBar. `fixed inset-x-0` makes the width independent of whatever
+            // positioned ancestor the TopBar provides — otherwise the 12-col grid
+            // collapses into a narrow, overlapping column. Hover handlers keep it
+            // open while the cursor crosses the small gap from the trigger.
+            className="fixed inset-x-0 top-14 z-40"
             onMouseEnter={openNow}
             onMouseLeave={scheduleClose}
             role="menu"
