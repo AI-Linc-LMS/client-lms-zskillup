@@ -1,5 +1,6 @@
 import { apiClient } from './client';
 import type { MockAnswerDto } from '@/shared/dto/mock.dto';
+import type { GamificationSummary } from './gamification-types';
 
 /**
  * Mock-test API client (Sprint 4). All endpoints are auth-gated and STUDENT-only.
@@ -59,6 +60,8 @@ export interface ApiMockResult {
   passed: boolean;
   timeTakenSec: number;
   avgSecPerQuestion: number;
+  /** XP/streak/level deltas from this submission (present on the submit response). */
+  gamification?: GamificationSummary | null;
 }
 
 export interface ApiMockAttemptHistory {

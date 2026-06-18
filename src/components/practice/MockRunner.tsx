@@ -35,6 +35,8 @@ import {
   type ApiMockStart,
   type ApiMockSummary,
 } from '@/lib/api/mocks';
+import type { GamificationSummary } from '@/lib/api/gamification-types';
+import { RewardOverlay } from '@/components/gamification/RewardOverlay';
 
 /**
  * Mock-test runner — the Sprint 4 timed assessment surface (Zone B → focused
@@ -61,6 +63,7 @@ export function MockRunner({ mockId }: { mockId: string }) {
   const [idx, setIdx] = useState(0);
   const [remaining, setRemaining] = useState<number | null>(null);
   const [report, setReport] = useState<ApiMockReport | null>(null);
+  const [reward, setReward] = useState<GamificationSummary | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
@@ -142,7 +145,8 @@ export function MockRunner({ mockId }: { mockId: string }) {
           answerMock(start.attemptId, { questionId, selectedOptionIds }),
         ),
       );
-      await submitMock(start.attemptId);
+      const result = await submitMock(start.attemptId);
+      setReward(result.gamification ?? null);
       const r = await getMockReport(start.attemptId);
       setReport(r);
       setPhase('report');
@@ -219,7 +223,7 @@ export function MockRunner({ mockId }: { mockId: string }) {
   }
 
   if (phase === 'report' && report) {
-    return <MockReportView report={report} />;
+    return <MockReportView report={report} reward={reward} />;
   }
 
   if (phase === 'running' && start) {
@@ -564,10 +568,21 @@ function MockRunningView({
 
 // ── Report view ─────────────────────────────────────────────────────────────
 
-function MockReportView({ report }: { report: ApiMockReport }) {
+function MockReportView({
+  report,
+  reward = null,
+}: {
+  report: ApiMockReport;
+  reward?: GamificationSummary | null;
+}) {
   const tone = report.passed ? 'emerald' : report.pct >= 40 ? 'amber' : 'red';
+  // Show the reward reveal first (only when we actually awarded this submission).
+  const [showReward, setShowReward] = useState<boolean>(!!reward);
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      {showReward && reward ? (
+        <RewardOverlay summary={reward} passed={report.passed} onClose={() => setShowReward(false)} />
+      ) : null}
       <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-6 shadow-sm">
         <span className="flex items-center gap-1.5 text-sm font-bold text-navy">
           <Trophy className="size-4 text-amber-500" aria-hidden="true" /> Mock report
@@ -629,6 +644,34 @@ function MockReportView({ report }: { report: ApiMockReport }) {
             <StatTile label="Time" value={formatDuration(report.timeTakenSec)} />
             <StatTile label="Avg / question" value={`${report.avgSecPerQuestion}s`} />
           </div>
+
+          {reward && (reward.xpEarned > 0 || reward.streakDays > 0) ? (
+            <div className="mx-auto mt-5 flex max-w-lg flex-wrap items-center justify-center gap-2">
+              {reward.xpEarned > 0 ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-sm font-bold text-amber-700 ring-1 ring-amber-200">
+                  <Star className="size-4 fill-amber-400 text-amber-500" aria-hidden="true" /> +
+                  {reward.xpEarned} XP
+                </span>
+              ) : null}
+              {reward.streakDays > 0 ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1.5 text-sm font-bold text-orange-600 ring-1 ring-orange-200">
+                  🔥 {reward.streakDays} day{reward.streakDays === 1 ? '' : 's'}
+                </span>
+              ) : null}
+              {reward.leveledUp ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-bold text-emerald-700 ring-1 ring-emerald-200">
+                  <Trophy className="size-4 text-emerald-600" aria-hidden="true" /> Level{' '}
+                  {reward.level}
+                </span>
+              ) : null}
+              <button
+                onClick={() => setShowReward(true)}
+                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-500 transition-colors hover:bg-slate-50"
+              >
+                <Sparkles className="size-4" aria-hidden="true" /> Replay
+              </button>
+            </div>
+          ) : null}
         </section>
 
         {/* Topic breakdown */}
