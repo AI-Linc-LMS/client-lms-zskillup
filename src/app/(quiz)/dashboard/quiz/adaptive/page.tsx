@@ -113,7 +113,7 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
       {/* Top bar */}
       <header className="relative z-10 flex items-center justify-between px-6 py-4 border-b border-white/10">
         <button
-          onClick={() => setShowConfirm(false) || void abandon().then(() => router.replace('/mock-tests'))}
+          onClick={() => { setShowConfirm(false); void abandon().then(() => router.replace('/mock-tests')); }}
           className="inline-flex items-center gap-1.5 text-xs text-white/60 hover:text-white transition-colors"
         >
           <ArrowLeft className="size-3.5" />
