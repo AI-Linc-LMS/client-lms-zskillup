@@ -80,6 +80,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
     items: [
       { label: 'Courses', href: '/superadmin/courses', icon: BookOpen },
       { label: 'Question Bank', href: '/superadmin/questions', icon: ClipboardList },
+      { label: 'Coding Bank', href: '/superadmin/coding', icon: Code2 },
       { label: 'Mock Tests', href: '/superadmin/mocks', icon: FileCheck2 },
       { label: 'Adaptive Sessions', href: '/superadmin/adaptive-sessions', icon: Brain },
       { label: 'Companies', href: '/superadmin/companies', icon: Building2 },

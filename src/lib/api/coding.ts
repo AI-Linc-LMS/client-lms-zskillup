@@ -132,11 +132,24 @@ export interface AdminCodingProblemSummary {
   title: string;
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   isActive: boolean;
+  // Provenance + verification (parity with the quiz bank).
+  companies?: string[];
+  roleTags?: string[];
+  source?: string | null;
+  yearTags?: number[];
+  sourceRef?: string | null;
+  verified?: boolean;
+  tags?: string[];
+  xpReward?: number;
 }
 
 export async function listAdminCodingProblems(): Promise<AdminCodingProblemSummary[]> {
   const res = await apiClient.get<AdminCodingProblemSummary[]>('/api/v1/admin/coding/problems');
   return res.data;
+}
+
+export async function setCodingProblemActive(id: string, isActive: boolean): Promise<void> {
+  await apiClient.patch(`/api/v1/admin/coding/problems/${id}`, { isActive });
 }
 
 /** Run arbitrary code with custom stdin (scratchpad / "Run" with custom input). */
