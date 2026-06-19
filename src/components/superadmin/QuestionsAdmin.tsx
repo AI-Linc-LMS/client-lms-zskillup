@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  ArrowRight,
   BadgeCheck,
   ChevronLeft,
   ChevronRight,
   ExternalLink,
+  History,
   Loader2,
   Plus,
   Search,
@@ -278,6 +280,16 @@ export function QuestionsAdmin() {
         </div>
       </div>
 
+      <PyqSpotlight
+        companyNameBySlug={Object.fromEntries(companies.map((c) => [c.slug, c.name]))}
+        active={sourceFilter === 'PREVIOUS_YEAR_QUESTIONS' ? companyFilter : ''}
+        onPick={(slug) => {
+          setSourceFilter('PREVIOUS_YEAR_QUESTIONS');
+          setCompanyFilter(slug);
+          setStatusFilter('');
+        }}
+      />
+
       {showForm ? (
         <AddQuestionForm
           onCreated={() => {
@@ -493,6 +505,91 @@ function FilterSelect({
     >
       {children}
     </select>
+  );
+}
+
+// ─── Previous-Year-Questions spotlight ──────────────────────────────────────
+
+const PYQ_COMPANIES = ['tcs', 'accenture', 'capgemini', 'infosys'];
+
+function PyqSpotlight({
+  companyNameBySlug,
+  active,
+  onPick,
+}: {
+  companyNameBySlug: Record<string, string>;
+  active: string;
+  onPick: (slug: string) => void;
+}) {
+  const [counts, setCounts] = useState<Record<string, number> | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all(
+      PYQ_COMPANIES.map((slug) =>
+        listAdminQuestions({ company: slug, source: 'PREVIOUS_YEAR_QUESTIONS', limit: 1, offset: 0 })
+          .then((r) => [slug, r.total] as const)
+          .catch(() => [slug, 0] as const),
+      ),
+    ).then((pairs) => {
+      if (!cancelled) setCounts(Object.fromEntries(pairs));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const totalPyq = counts ? Object.values(counts).reduce((a, b) => a + b, 0) : null;
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-violet-200/70 bg-gradient-to-br from-violet-50 via-white to-white p-5 shadow-sm">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-violet-300/20 blur-3xl"
+      />
+      <div className="relative mb-4 flex items-center gap-2.5">
+        <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white">
+          <History className="size-5" />
+        </span>
+        <div>
+          <p className="text-sm font-extrabold text-navy">Previous Year Questions</p>
+          <p className="text-[12px] text-slate-500">
+            Genuinely sourced PYQs with year + citation
+            {totalPyq !== null ? ` · ${totalPyq} total` : ''}
+          </p>
+        </div>
+      </div>
+
+      <div className="relative grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {PYQ_COMPANIES.map((slug) => {
+          const isActive = active === slug;
+          const n = counts?.[slug];
+          return (
+            <button
+              key={slug}
+              type="button"
+              onClick={() => onPick(slug)}
+              className={
+                'group flex flex-col rounded-xl border p-3 text-left transition-all ' +
+                (isActive
+                  ? 'border-violet-400 bg-white shadow-[0_8px_20px_-12px_rgba(124,58,237,0.5)] ring-1 ring-violet-300'
+                  : 'border-slate-200 bg-white/70 hover:border-violet-300 hover:bg-white')
+              }
+            >
+              <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                {companyNameBySlug[slug] ?? slug}
+              </span>
+              <span className="mt-1 text-2xl font-black tracking-tight text-navy tabular-nums">
+                {n === undefined ? '—' : n.toLocaleString()}
+              </span>
+              <span className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-violet-600">
+                View PYQs <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
