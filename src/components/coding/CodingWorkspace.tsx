@@ -364,15 +364,30 @@ function ResultPanel({ result }: { result: CodingResult }) {
               </div>
               {!c.hidden ? (
                 <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                  <IoCell label="Input" text={c.input} />
+                  <IoCell label="Input" text={c.input} emptyLabel="(no input)" />
                   <IoCell label="Expected" text={c.expectedOutput} />
-                  <IoCell label="Got" text={c.actualOutput} tone={c.passed ? undefined : 'bad'} />
+                  <IoCell
+                    label="Got"
+                    text={c.actualOutput}
+                    tone={c.passed ? undefined : 'bad'}
+                    emptyLabel={c.stderr ? '(error — see below)' : '(no output)'}
+                  />
                 </div>
               ) : null}
               {!c.hidden && c.stderr ? (
-                <pre className="mt-2 max-h-28 overflow-auto rounded-md bg-[#0b1220] p-2 text-[11px] text-rose-300">
-                  {c.stderr}
-                </pre>
+                <div className="mt-2">
+                  <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-rose-400">
+                    Runtime error / stderr
+                  </p>
+                  <pre className="max-h-28 overflow-auto rounded-md bg-[#0b1220] p-2 text-[11px] text-rose-300">
+                    {c.stderr}
+                  </pre>
+                </div>
+              ) : null}
+              {!c.hidden && !c.passed && !c.stderr && (c.actualOutput == null || c.actualOutput.trim() === '') ? (
+                <p className="mt-2 text-[11px] font-medium text-amber-700">
+                  Your program produced no output — make sure you print the answer to stdout.
+                </p>
               ) : null}
             </div>
           ))}
@@ -404,19 +419,32 @@ function Sample({ label, text }: { label: string; text: string }) {
   );
 }
 
-function IoCell({ label, text, tone }: { label: string; text: string | null; tone?: 'bad' }) {
+function IoCell({
+  label,
+  text,
+  tone,
+  emptyLabel = '—',
+}: {
+  label: string;
+  text: string | null;
+  tone?: 'bad';
+  emptyLabel?: string;
+}) {
+  const isEmpty = text == null || text.trim() === '';
   return (
     <div>
       <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">{label}</p>
       <pre
         className={cn(
-          'overflow-auto whitespace-pre-wrap break-words rounded-md border px-2 py-1.5 font-mono text-[12px]',
-          tone === 'bad'
-            ? 'border-rose-200 bg-white text-rose-700'
-            : 'border-slate-200 bg-white text-slate-700',
+          'min-h-[2rem] overflow-auto whitespace-pre-wrap break-words rounded-md border px-2 py-1.5 font-mono text-[12px]',
+          isEmpty
+            ? 'border-slate-200 bg-slate-50 italic text-slate-400'
+            : tone === 'bad'
+              ? 'border-rose-200 bg-white text-rose-700'
+              : 'border-slate-200 bg-white text-slate-700',
         )}
       >
-        {text ?? '—'}
+        {isEmpty ? emptyLabel : text}
       </pre>
     </div>
   );
