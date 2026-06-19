@@ -150,6 +150,8 @@ export interface AdminQuestionRow {
   frequency?: 'VERY_HIGH' | 'HIGH' | 'MEDIUM' | 'LOW' | null;
   yearTags?: number[];
   roleTags?: string[];
+  sourceRef?: string | null;
+  verified?: boolean;
 }
 
 export interface AdminQuestionDetail {
@@ -166,6 +168,7 @@ export async function listAdminQuestions(
     company?: string;
     difficulty?: string;
     source?: string;
+    verified?: boolean;
     search?: string;
     limit?: number;
     offset?: number;
@@ -177,6 +180,7 @@ export async function listAdminQuestions(
   if (params.company) qs.set('company', params.company);
   if (params.difficulty) qs.set('difficulty', params.difficulty);
   if (params.source) qs.set('source', params.source);
+  if (params.verified !== undefined) qs.set('verified', String(params.verified));
   if (params.search) qs.set('search', params.search);
   if (params.limit) qs.set('limit', String(params.limit));
   if (params.offset !== undefined) qs.set('offset', String(params.offset));

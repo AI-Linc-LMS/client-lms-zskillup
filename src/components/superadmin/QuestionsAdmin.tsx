@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  BadgeCheck,
   ChevronLeft,
   ChevronRight,
+  ExternalLink,
   Loader2,
   Plus,
   Search,
@@ -70,6 +72,7 @@ export function QuestionsAdmin() {
   const [companyFilter, setCompanyFilter] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('');
   const [sourceFilter, setSourceFilter] = useState('');
+  const [verifiedFilter, setVerifiedFilter] = useState('');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -89,16 +92,17 @@ export function QuestionsAdmin() {
   // Reset to page 1 whenever a filter changes.
   useEffect(() => {
     setPage(1);
-  }, [statusFilter, companyFilter, difficultyFilter, sourceFilter, debouncedSearch]);
+  }, [statusFilter, companyFilter, difficultyFilter, sourceFilter, verifiedFilter, debouncedSearch]);
 
   const baseFilters = useMemo(
     () => ({
       company: companyFilter || undefined,
       difficulty: difficultyFilter || undefined,
       source: sourceFilter || undefined,
+      verified: verifiedFilter === '' ? undefined : verifiedFilter === 'true',
       search: debouncedSearch || undefined,
     }),
-    [companyFilter, difficultyFilter, sourceFilter, debouncedSearch],
+    [companyFilter, difficultyFilter, sourceFilter, verifiedFilter, debouncedSearch],
   );
 
   const loadPage = useCallback(async () => {
@@ -243,6 +247,12 @@ export function QuestionsAdmin() {
               ))}
             </FilterSelect>
 
+            <FilterSelect value={verifiedFilter} onChange={setVerifiedFilter} ariaLabel="Filter by verification">
+              <option value="">Any verification</option>
+              <option value="true">Verified ✓</option>
+              <option value="false">Unverified</option>
+            </FilterSelect>
+
             <Button onClick={() => setShowForm((v) => !v)} size="sm">
               <Plus className="size-4" /> {showForm ? 'Close' : 'Add'}
             </Button>
@@ -355,7 +365,12 @@ export function QuestionsAdmin() {
                       )}
                     </td>
                     <td className="px-4 py-3.5">
-                      <QStatusPill status={q.status} />
+                      <div className="flex items-center gap-1.5">
+                        <QStatusPill status={q.status} />
+                        {q.verified ? (
+                          <BadgeCheck className="size-4 text-emerald-600" aria-label="Verified" />
+                        ) : null}
+                      </div>
                     </td>
                     <td className="px-4 py-3.5 text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="inline-flex items-center gap-3">
@@ -564,6 +579,13 @@ function QuestionDetailDrawer({
                 </Pill>
               ) : null}
               {q.frequency ? <Pill>{cap(q.frequency.replace('_', ' '))} freq</Pill> : null}
+              {q.verified ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                  <BadgeCheck className="size-3.5" /> Verified
+                </span>
+              ) : (
+                <Pill>Unverified</Pill>
+              )}
               <QStatusPill status={q.status} />
             </div>
 
@@ -634,6 +656,26 @@ function QuestionDetailDrawer({
                 </p>
               </div>
             </div>
+
+            {q.sourceRef ? (
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                  Source citation
+                </p>
+                {/^https?:\/\//.test(q.sourceRef) ? (
+                  <a
+                    href={q.sourceRef}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1 inline-flex items-center gap-1 break-all text-sm font-medium text-sky-700 hover:underline"
+                  >
+                    {q.sourceRef} <ExternalLink className="size-3.5 shrink-0" />
+                  </a>
+                ) : (
+                  <p className="mt-1 break-words text-sm text-slate-700">{q.sourceRef}</p>
+                )}
+              </div>
+            ) : null}
 
             {q.roleTags && q.roleTags.length ? (
               <div>
