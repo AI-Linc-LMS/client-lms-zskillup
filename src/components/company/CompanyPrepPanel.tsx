@@ -102,7 +102,7 @@ export function CompanyPrepPanel({
             {prep.topics.map((t) => (
               <Link
                 key={t.slug}
-                href={`/practice?company=${companySlug}&subtopic=${t.slug}`}
+                href={`/dashboard/company/${companySlug}/prep/${t.slug}`}
                 className="group flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3.5 transition-all hover:-translate-y-0.5 hover:border-orange/40 hover:shadow-sm"
               >
                 <span className="min-w-0">
