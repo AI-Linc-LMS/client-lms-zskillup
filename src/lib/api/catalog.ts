@@ -111,6 +111,21 @@ export async function getCompany(slug: string): Promise<ApiCompanyHub> {
   return res.data;
 }
 
+/** Aggregated prep stats for a company hub: topics (w/ counts), years, roles. */
+export interface ApiCompanyPrep {
+  topics: Array<{ slug: string; name: string; parentId: string | null; count: number }>;
+  years: Array<{ year: number; count: number }>;
+  roles: string[];
+  totals: { total: number; verified: number; pyq: number };
+}
+
+export async function getCompanyPrep(slug: string): Promise<ApiCompanyPrep> {
+  const res = await apiClient.get<ApiCompanyPrep>(`/api/v1/companies/${slug}/prep`, {
+    auth: 'public',
+  });
+  return res.data;
+}
+
 export async function listCourses(filters: {
   category?: string;
   difficulty?: string;

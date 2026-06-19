@@ -57,15 +57,21 @@ export interface ApiTopicAccuracy {
 }
 
 export async function listPracticeQuestions(filters: {
+  /** Subtopic slug — the backend filters on `subtopic`. `topic` is accepted as
+   *  an alias for back-compat. */
   topic?: string;
+  subtopic?: string;
   company?: string;
   difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
+  year?: number;
   limit?: number;
 }): Promise<ApiQuestion[]> {
   const qs = new URLSearchParams();
-  if (filters.topic) qs.set('topic', filters.topic);
+  const subtopic = filters.subtopic ?? filters.topic;
+  if (subtopic) qs.set('subtopic', subtopic);
   if (filters.company) qs.set('company', filters.company);
   if (filters.difficulty) qs.set('difficulty', filters.difficulty);
+  if (filters.year) qs.set('year', String(filters.year));
   if (filters.limit) qs.set('limit', String(filters.limit));
   const suffix = qs.toString() ? `?${qs.toString()}` : '';
   const res = await apiClient.get<ApiQuestion[]>(`/api/v1/practice/questions${suffix}`);

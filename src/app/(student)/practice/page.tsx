@@ -3,7 +3,12 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { PracticeSession } from '@/components/practice/PracticeSession';
 
 interface PageProps {
-  searchParams: Promise<{ topic?: string; company?: string }>;
+  searchParams: Promise<{
+    topic?: string;
+    subtopic?: string;
+    company?: string;
+    year?: string;
+  }>;
 }
 
 /**
@@ -17,11 +22,13 @@ interface PageProps {
  * client leaf (`PracticeSession`).
  */
 export default async function PracticePage({ searchParams }: PageProps) {
-  const { topic, company } = await searchParams;
-  const headline = topic
-    ? `Practice · ${formatSlug(topic)}`
+  const { topic, subtopic, company, year } = await searchParams;
+  const sub = subtopic ?? topic;
+  const yearNum = year ? parseInt(year, 10) || undefined : undefined;
+  const headline = sub
+    ? `Practice · ${formatSlug(sub)}`
     : company
-      ? `Practice · ${company.toUpperCase()}`
+      ? `Practice · ${company.toUpperCase()}${yearNum ? ` ${yearNum}` : ''}`
       : 'Practice';
 
   return (
@@ -49,7 +56,7 @@ export default async function PracticePage({ searchParams }: PageProps) {
           <div className="h-96 animate-pulse rounded-xl border border-slate-200 bg-white" />
         }
       >
-        <PracticeSession topicSlug={topic} companySlug={company} limit={10} />
+        <PracticeSession topicSlug={sub} companySlug={company} year={yearNum} limit={10} />
       </Suspense>
     </div>
   );

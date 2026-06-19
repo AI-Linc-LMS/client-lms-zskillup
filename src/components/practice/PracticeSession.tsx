@@ -43,10 +43,12 @@ import {
 export function PracticeSession({
   topicSlug,
   companySlug,
+  year,
   limit = 10,
 }: {
   topicSlug?: string;
   companySlug?: string;
+  year?: number;
   limit?: number;
 }) {
   const [questions, setQuestions] = useState<ApiQuestion[] | null>(null);
@@ -67,7 +69,7 @@ export function PracticeSession({
     let cancelled = false;
     setLoading(true);
     setError(null);
-    listPracticeQuestions({ topic: topicSlug, company: companySlug, limit })
+    listPracticeQuestions({ subtopic: topicSlug, company: companySlug, year, limit })
       .then((qs) => {
         if (cancelled) return;
         setQuestions(qs);
@@ -82,7 +84,7 @@ export function PracticeSession({
     return () => {
       cancelled = true;
     };
-  }, [topicSlug, companySlug, limit]);
+  }, [topicSlug, companySlug, year, limit]);
 
   const current = questions?.[idx];
   const currentResult = current ? results[current.id] : undefined;

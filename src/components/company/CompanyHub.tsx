@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils';
 import { HUB_TABS, type HubContent, type HubTab } from '@/lib/hub-data';
 import { AnimatedNumber, AuroraBackground, Reveal, Stagger, StaggerItem } from '@/components/motion/primitives';
 import { LockedRow } from './LockedRow';
+import { CompanyPrepPanel } from './CompanyPrepPanel';
 
 const TAB_ICONS: Record<HubTab, typeof BookOpen> = {
   Overview: LayoutGrid,
@@ -129,7 +130,12 @@ export function CompanyHub({ content }: { content: HubContent }) {
             {tab === 'Overview' && <OverviewTab content={content} />}
             {tab === 'Syllabus' && <SyllabusTab content={content} />}
             {tab === 'Material' && <MaterialTab content={content} onUnlock={onUnlock} />}
-            {tab === 'Practice Quiz' && <QuizTab content={content} onUnlock={onUnlock} />}
+            {tab === 'Practice Quiz' && (
+              <CompanyPrepPanel
+                companySlug={content.company.slug}
+                companyName={content.company.name}
+              />
+            )}
             {tab === 'Full Mock Assessment' && <MockTab content={content} onUnlock={onUnlock} />}
             {tab === 'Formula Sheet' && <FormulaTab content={content} onUnlock={onUnlock} />}
             {tab === 'Interview Experience' && <InterviewTab content={content} />}
@@ -605,46 +611,6 @@ function MaterialTab({ content, onUnlock }: { content: HubContent; onUnlock: () 
                 </div>
               </div>
               {!m.locked ? <FreeBadge /> : null}
-            </LockedRow>
-          </StaggerItem>
-        ))}
-      </Stagger>
-    </div>
-  );
-}
-
-function QuizTab({ content, onUnlock }: { content: HubContent; onUnlock: () => void }) {
-  // The free quiz drops into the real, server-graded practice flow filtered to
-  // this company's question bank. Locked sets stay on the upsell path.
-  const practiceHref = `/practice?company=${content.company.slug}`;
-  return (
-    <div className="space-y-4">
-      <TabIntro>Low-pressure practice — no timer, instant solutions. First quiz free.</TabIntro>
-      <Stagger className="space-y-3">
-        {content.quizzes.map((q) => (
-          <StaggerItem key={q.title}>
-            <LockedRow
-              locked={q.locked}
-              href={q.locked ? undefined : practiceHref}
-              onUnlockClick={onUnlock}
-            >
-              <div className="flex items-center gap-3">
-                <span
-                  className={cn(
-                    'grid size-10 shrink-0 place-items-center rounded-xl text-white shadow-sm',
-                    q.locked
-                      ? 'bg-gradient-to-br from-slate-400 to-slate-500'
-                      : 'bg-gradient-to-br from-[#1e6ff5] to-[#2563eb]',
-                  )}
-                >
-                  <ListChecks className="size-5" aria-hidden="true" />
-                </span>
-                <div>
-                  <p className="font-bold text-navy">{q.title}</p>
-                  <p className="text-xs text-slate-500">{q.questions} questions · instant solutions</p>
-                </div>
-              </div>
-              {!q.locked ? <FreeBadge /> : null}
             </LockedRow>
           </StaggerItem>
         ))}
