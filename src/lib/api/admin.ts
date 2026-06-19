@@ -137,25 +137,58 @@ export interface AdminQuestionRow {
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   stem: string;
   /** The (leaf) topic this question is tagged to — backend field is `subtopicId`. */
-  subtopicId: string;
+  subtopicId: string | null;
   companyId: string | null;
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
   createdAt: string;
+  // Enriched metadata (now populated by the dedicated company banks).
+  answer?: string | null;
+  solution?: string | null;
+  explanation?: string | null;
+  hint?: string | null;
+  source?: 'PREVIOUS_YEAR_QUESTIONS' | 'MEMORY_BASED' | 'PATTERN_BASED' | 'MOCK_DERIVED' | null;
+  frequency?: 'VERY_HIGH' | 'HIGH' | 'MEDIUM' | 'LOW' | null;
+  yearTags?: number[];
+  roleTags?: string[];
+}
+
+export interface AdminQuestionDetail {
+  question: AdminQuestionRow;
+  options: Array<{ id: string; text: string; isCorrect: boolean; orderIndex: number }>;
+  companyTags: Array<{ companyId: string; importance: string }>;
+  contentUsage: Array<{ usageType: string }>;
 }
 
 export async function listAdminQuestions(
-  params: { status?: string; topic?: string; company?: string; limit?: number; offset?: number } = {},
+  params: {
+    status?: string;
+    topic?: string;
+    company?: string;
+    difficulty?: string;
+    source?: string;
+    search?: string;
+    limit?: number;
+    offset?: number;
+  } = {},
 ): Promise<{ rows: AdminQuestionRow[]; total: number }> {
   const qs = new URLSearchParams();
   if (params.status) qs.set('status', params.status);
   if (params.topic) qs.set('topic', params.topic);
   if (params.company) qs.set('company', params.company);
+  if (params.difficulty) qs.set('difficulty', params.difficulty);
+  if (params.source) qs.set('source', params.source);
+  if (params.search) qs.set('search', params.search);
   if (params.limit) qs.set('limit', String(params.limit));
-  if (params.offset) qs.set('offset', String(params.offset));
+  if (params.offset !== undefined) qs.set('offset', String(params.offset));
   const suffix = qs.toString() ? `?${qs.toString()}` : '';
   const res = await apiClient.get<{ rows: AdminQuestionRow[]; total: number }>(
     `/api/v1/admin/questions${suffix}`,
   );
+  return res.data;
+}
+
+export async function getAdminQuestion(id: string): Promise<AdminQuestionDetail> {
+  const res = await apiClient.get<AdminQuestionDetail>(`/api/v1/admin/questions/${id}`);
   return res.data;
 }
 
