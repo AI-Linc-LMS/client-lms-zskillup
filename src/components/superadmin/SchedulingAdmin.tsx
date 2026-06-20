@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { BarChart3, Loader2, Plus, ShieldAlert, Trash2, Video, X } from 'lucide-react';
+import { BarChart3, Loader2, Plus, ShieldAlert, Sparkles, Trash2, Video, X } from 'lucide-react';
+import { AssessmentWizard } from '@/components/superadmin/AssessmentWizard';
 import { cn } from '@/lib/utils';
 import { ApiRequestError } from '@/lib/api/types';
 import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
@@ -34,6 +35,7 @@ export function SchedulingAdmin() {
   const [creating, setCreating] = useState(false);
   const [results, setResults] = useState<AssessmentResults | null>(null);
   const [resultsLoading, setResultsLoading] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
 
   const openResults = async (id: string) => {
     setResultsLoading(true);
@@ -113,10 +115,36 @@ export function SchedulingAdmin() {
 
   return (
     <div className="space-y-6">
-      {/* Schedule form */}
+      {wizardOpen ? (
+        <AssessmentWizard onClose={() => setWizardOpen(false)} onCreated={load} />
+      ) : null}
+
+      {/* Build assessment (auto from question bank) */}
+      <div className="flex items-center justify-between gap-4 rounded-2xl border border-orange/30 bg-gradient-to-br from-orange/[0.06] to-transparent p-5">
+        <div className="flex items-center gap-3">
+          <span className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white">
+            <Sparkles className="size-5" />
+          </span>
+          <div>
+            <p className="text-sm font-bold text-navy">Build an assessment from the question bank</p>
+            <p className="text-xs text-slate-500">
+              Pick a company, define sections by topic &amp; count — we auto-assemble it, preview, and schedule.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setWizardOpen(true)}
+          className="shrink-0 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.8)]"
+        >
+          Build assessment
+        </button>
+      </div>
+
+      {/* Quick schedule (bind an existing mock) */}
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="flex items-center gap-2 text-sm font-bold text-navy">
-          <Plus className="size-4 text-orange" /> Schedule an assessment
+          <Plus className="size-4 text-orange" /> Quick schedule (existing mock)
         </h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <label className="space-y-1">
