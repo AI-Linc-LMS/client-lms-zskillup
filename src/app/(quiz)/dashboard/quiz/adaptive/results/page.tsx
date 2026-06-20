@@ -96,7 +96,11 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
 
   const incorrect = results.total - results.correct;
   const timeMin = Math.max(1, Math.round(results.questions.reduce((s, q) => s + (q.timeMs ?? 0), 0) / 60000));
-  const ready = [headline, perQuestion, misconceptions, remediation].filter((s) => s.data).length;
+  // A section is "settled" once it resolves to data OR an error — gating the
+  // composer on data alone hangs the loader forever if any section errors.
+  const settled = [headline, perQuestion, misconceptions, remediation].filter(
+    (s) => s.data || s.error,
+  ).length;
   const SECTIONS = [
     { label: 'Headline read', s: headline },
     { label: 'Per-question rationale', s: perQuestion },
@@ -158,7 +162,7 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
       </div>
 
       {/* ── Magic streaming composer ─────────────────────────────────────── */}
-      {ready < 4 ? (
+      {settled < 4 ? (
         <div className="mx-auto max-w-5xl space-y-3 px-5 pt-6 sm:px-6">
           <MagicLoader />
           <div className="flex flex-wrap gap-2">
