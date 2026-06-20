@@ -112,7 +112,7 @@ export default function CalendarPage() {
   const isCurrentMonth = cursor.year === now.getFullYear() && cursor.month === now.getMonth();
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="w-full">
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Calendar' }]} />
 
       {/* ── Premium navy hero with live stats ─────────────────────────────── */}
