@@ -59,24 +59,41 @@ export function AiBriefingHero() {
   const [me, setMe] = useState<ApiMe | null>(null);
   const [stats, setStats] = useState<ApiStudentStats | null>(null);
   const [briefing, setBriefing] = useState<StudentBriefing | null>(null);
+  // Gate the first paint on the essentials (name + stats) so the hero never
+  // flashes a "Level 0 · 0 XP" / "Welcome back, there" fallback before the real
+  // data arrives. The AI briefing still layers in afterwards (off critical path).
+  const [ready, setReady] = useState(false);
 
-  // Three independent fetches — each renders the moment it resolves, none
-  // blocks another, and every rejection silently degrades to a derived value.
   useEffect(() => {
     let cancelled = false;
-    const loadStats = () =>
-      getStudentStats()
-        .then((d) => !cancelled && setStats(d))
-        .catch(() => {});
+    let meDone = false;
+    let statsDone = false;
+    const settle = () => {
+      if (meDone && statsDone && !cancelled) setReady(true);
+    };
     getMe()
       .then((d) => !cancelled && setMe(d))
-      .catch(() => {});
-    loadStats();
+      .catch(() => {})
+      .finally(() => {
+        meDone = true;
+        settle();
+      });
+    getStudentStats()
+      .then((d) => !cancelled && setStats(d))
+      .catch(() => {})
+      .finally(() => {
+        statsDone = true;
+        settle();
+      });
     getBriefing()
       .then((d) => !cancelled && setBriefing(d))
       .catch(() => {});
     // Live-refresh the level/XP/streak when any widget awards XP.
-    const off = onXpUpdated(loadStats);
+    const off = onXpUpdated(() =>
+      getStudentStats()
+        .then((d) => !cancelled && setStats(d))
+        .catch(() => {}),
+    );
     return () => {
       cancelled = true;
       off();
@@ -98,21 +115,30 @@ export function AiBriefingHero() {
 
   const nextPct = xpSpan > 0 ? Math.min(100, Math.round((xpInto / xpSpan) * 100)) : 0;
 
+  // A brand-new student (no XP, no streak, still Level 1) has never been here —
+  // "Welcome back" is wrong. Greet with "Welcome" and soften any AI greeting
+  // that says "back".
+  const isReturning = totalXp > 0 || streak > 0 || level > 1;
+
   // Derived, always-confident copy. The AI briefing wins when present; otherwise
   // we build a strong personalized headline from name + stats.
-  const greeting = briefing?.greeting ?? `Welcome back, ${firstName}`;
+  const rawGreeting = briefing?.greeting ?? `${isReturning ? 'Welcome back' : 'Welcome'}, ${firstName}`;
+  const greeting = isReturning ? rawGreeting : rawGreeting.replace(/welcome back/i, 'Welcome');
   const headline = useMemo(() => {
     if (briefing?.headline) return briefing.headline;
+    if (!isReturning) return `Welcome aboard, ${firstName}`;
     const bits: string[] = [`Level ${level}`];
     if (streak > 0) bits.push(`${streak}-day streak`);
     bits.push(`${totalXp.toLocaleString()} XP`);
     return bits.join('  ·  ');
-  }, [briefing?.headline, level, streak, totalXp]);
+  }, [briefing?.headline, isReturning, firstName, level, streak, totalXp]);
   const subline =
     briefing?.subline ??
-    (streak > 0
-      ? `You're on a roll — keep the streak alive and close in on Level ${level + 1}.`
-      : `One focused session today reignites your streak and pushes you toward Level ${level + 1}.`);
+    (!isReturning
+      ? `Kick off your first session today to start earning XP and build your skill profile.`
+      : streak > 0
+        ? `You're on a roll — keep the streak alive and close in on Level ${level + 1}.`
+        : `One focused session today reignites your streak and pushes you toward Level ${level + 1}.`);
 
   const focusAreas = briefing?.focusAreas?.length ? briefing.focusAreas : DEFAULT_FOCUS;
   const nextAction = briefing?.nextAction ?? DEFAULT_ACTION;
@@ -123,6 +149,33 @@ export function AiBriefingHero() {
         y: [0, -12, 0],
         transition: { duration: 7, repeat: Infinity, ease: 'easeInOut' as const },
       };
+
+  // First paint: a shimmering skeleton over the aurora — never the 0-state.
+  if (!ready) {
+    return (
+      <section className="relative isolate overflow-hidden rounded-[1.75rem] p-7 text-white shadow-[0_30px_90px_-32px_rgba(11,18,32,0.85)] sm:rounded-[2rem] sm:p-10">
+        <AuroraBackground />
+        <div aria-hidden className="pointer-events-none absolute inset-0 rounded-[1.75rem] ring-1 ring-inset ring-white/10 sm:rounded-[2rem]" />
+        <div className="relative z-10 max-w-3xl animate-pulse" aria-busy="true" aria-label="Loading your briefing">
+          <div className="h-7 w-36 rounded-full bg-white/10" />
+          <div className="mt-6 h-4 w-40 rounded bg-white/10" />
+          <div className="mt-3 h-9 w-3/4 rounded-lg bg-white/15 sm:h-11" />
+          <div className="mt-3 h-4 w-2/3 rounded bg-white/10" />
+          <div className="mt-7 flex flex-wrap gap-2.5">
+            <div className="h-[3.25rem] w-52 rounded-2xl bg-white/10" />
+            <div className="h-[3.25rem] w-52 rounded-2xl bg-white/10" />
+          </div>
+          <div className="mt-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="h-12 w-40 rounded-full bg-white/15" />
+            <div className="flex gap-3">
+              <div className="h-[3.75rem] w-40 rounded-2xl bg-white/10" />
+              <div className="h-[3.75rem] w-24 rounded-2xl bg-white/10" />
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="relative isolate overflow-hidden rounded-[1.75rem] p-7 text-white shadow-[0_30px_90px_-32px_rgba(11,18,32,0.85)] sm:rounded-[2rem] sm:p-10">
