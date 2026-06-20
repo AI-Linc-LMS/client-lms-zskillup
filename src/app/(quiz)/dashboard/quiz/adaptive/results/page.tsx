@@ -34,6 +34,15 @@ import {
 
 const BRAND_GRAD = 'linear-gradient(135deg,#f7a14e 0%,#f37021 100%)';
 
+/** Humanise an engine skill key for a button label. */
+const prettySkill = (s: string) =>
+  (s || 'skills')
+    .replace(/^section-\d+-[a-z-]+--/, '')
+    .replace(/[-_]/g, ' ')
+    .replace(/\b\w/g, (m) => m.toUpperCase())
+    .trim()
+    .slice(0, 24);
+
 type NarrationState<T> = { loading: boolean; data: T | null; error: string | null };
 function useNarrationSection<T>(
   sessionId: string | null,
@@ -96,6 +105,11 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
 
   const incorrect = results.total - results.correct;
   const timeMin = Math.max(1, Math.round(results.questions.reduce((s, q) => s + (q.timeMs ?? 0), 0) / 60000));
+  // Weakest skills (lowest mastery) — power the "practise weak skills" deep-link.
+  const weakSkills = [...results.skillMastery].sort((a, b) => a.masteryPct - b.masteryPct);
+  const practiseHref = weakSkills[0]
+    ? `/practice?topic=${encodeURIComponent(weakSkills[0].skill)}`
+    : '/practice';
   // A section is "settled" once it resolves to data OR an error — gating the
   // composer on data alone hangs the loader forever if any section errors.
   const settled = [headline, perQuestion, misconceptions, remediation].filter(
@@ -239,7 +253,9 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
           </div>
           <div className="flex gap-2">
             <Button variant="secondary" size="sm" asChild>
-              <Link href="/practice">Practise skills</Link>
+              <Link href={practiseHref}>
+                {weakSkills[0] ? `Practise ${prettySkill(weakSkills[0].skill)}` : 'Practise skills'}
+              </Link>
             </Button>
             <Button size="sm" asChild>
               <Link href="/mock-tests"><RefreshCw className="mr-1 size-3.5" /> Retake</Link>

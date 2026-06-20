@@ -40,6 +40,29 @@ export function SchedulingAdmin() {
   const [edit, setEdit] = useState({ title: '', scheduledAt: '', durationMinutes: 60, proctored: true });
   const [savingEdit, setSavingEdit] = useState(false);
 
+  // filters
+  const [fCompany, setFCompany] = useState('');
+  const [fStatus, setFStatus] = useState<'all' | 'upcoming' | 'live' | 'past' | 'inactive'>('all');
+  const [fDuration, setFDuration] = useState<'all' | 'short' | 'medium' | 'long'>('all');
+
+  const filtered = useMemo(() => {
+    if (!rows) return [];
+    const now = Date.now();
+    return rows.filter((r) => {
+      if (fCompany && r.companyId !== fCompany) return false;
+      if (fDuration === 'short' && r.durationMinutes > 30) return false;
+      if (fDuration === 'medium' && (r.durationMinutes <= 30 || r.durationMinutes > 90)) return false;
+      if (fDuration === 'long' && r.durationMinutes <= 90) return false;
+      const start = +new Date(r.scheduledAt);
+      const end = start + r.durationMinutes * 60_000;
+      if (fStatus === 'inactive') return !r.isActive;
+      if (fStatus === 'upcoming') return now < start;
+      if (fStatus === 'live') return now >= start && now <= end;
+      if (fStatus === 'past') return now > end;
+      return true;
+    });
+  }, [rows, fCompany, fStatus, fDuration]);
+
   const toLocalInput = (iso: string) => {
     const d = new Date(iso);
     const off = d.getTimezoneOffset();
@@ -288,6 +311,34 @@ export function SchedulingAdmin() {
         </button>
       </div>
 
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Filter</span>
+        <select value={fCompany} onChange={(e) => setFCompany(e.target.value)} className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-navy focus:border-orange focus:outline-none">
+          <option value="">All companies</option>
+          {companies.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+        <select value={fStatus} onChange={(e) => setFStatus(e.target.value as typeof fStatus)} className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-navy focus:border-orange focus:outline-none">
+          <option value="all">Any status</option>
+          <option value="upcoming">Upcoming</option>
+          <option value="live">Live now</option>
+          <option value="past">Past</option>
+          <option value="inactive">Inactive</option>
+        </select>
+        <select value={fDuration} onChange={(e) => setFDuration(e.target.value as typeof fDuration)} className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-navy focus:border-orange focus:outline-none">
+          <option value="all">Any duration</option>
+          <option value="short">≤ 30 min</option>
+          <option value="medium">31–90 min</option>
+          <option value="long">&gt; 90 min</option>
+        </select>
+        {(fCompany || fStatus !== 'all' || fDuration !== 'all') ? (
+          <button type="button" onClick={() => { setFCompany(''); setFStatus('all'); setFDuration('all'); }} className="text-xs font-bold text-orange hover:underline">
+            Clear
+          </button>
+        ) : null}
+        {rows ? <span className="ml-auto text-xs font-medium text-slate-400">{filtered.length} of {rows.length}</span> : null}
+      </div>
+
       {/* List */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <table className="w-full text-left text-sm">
@@ -309,14 +360,14 @@ export function SchedulingAdmin() {
                   <Loader2 className="mx-auto size-5 animate-spin text-slate-400" />
                 </td>
               </tr>
-            ) : rows.length === 0 ? (
+            ) : filtered.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-4 py-12 text-center text-sm text-slate-500">
-                  No assessments scheduled yet.
+                  {rows.length === 0 ? 'No assessments scheduled yet.' : 'No assessments match these filters.'}
                 </td>
               </tr>
             ) : (
-              rows.map((r) => (
+              filtered.map((r) => (
                 <tr key={r.id} className="border-t border-slate-100/80 hover:bg-slate-50/60">
                   <td className="px-4 py-3.5 font-semibold text-navy">{r.title}</td>
                   <td className="px-4 py-3.5 text-slate-600">{companyName[r.companyId] ?? r.companyName}</td>

@@ -1,402 +1,494 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowLeft,
   ArrowRight,
+  Brain,
   Check,
   CheckCircle2,
+  Code2,
   Loader2,
   Plus,
-  Search,
   Sparkles,
   Trash2,
+  Wand2,
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ApiRequestError } from '@/lib/api/types';
-import { listCompanies, listTopics, type ApiCompany, type ApiTopic } from '@/lib/api/catalog';
+import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
 import {
   createAssessment,
-  previewAssessment,
-  type AssessmentPreview,
-  type BuilderSection,
+  generateOne,
+  sourceTopic,
+  type AssessmentItemType,
+  type CreatedAssessment,
 } from '@/lib/api/assessment-builder';
 
-const STEPS = ['Details', 'Sections', 'Preview', 'Done'];
+const STEPS = ['Details', 'Questions', 'Review'];
 
-/** AI Linc-style assessment builder wizard (MCQ v1). */
+interface ResolvedItem {
+  key: string;
+  topic: string;
+  topicName: string;
+  type: AssessmentItemType;
+  count: number;
+  ids: string[];
+  fromBank: number;
+  generated: number;
+}
+interface Section {
+  name: string;
+  items: ResolvedItem[];
+}
+interface GenState {
+  sectionIdx: number;
+  topic: string;
+  type: AssessmentItemType;
+  requested: number;
+  phase: 'sourcing' | 'generating' | 'done' | 'error';
+  bankCount: number;
+  labels: string[];
+  error?: string;
+}
+
+const labelCls = 'block text-[11px] font-bold uppercase tracking-widest text-slate-400';
+const inputCls =
+  'mt-1 h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30';
+
+/** AI-assisted assessment builder wizard. */
 export function AssessmentWizard({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
   const [step, setStep] = useState(0);
   const [companies, setCompanies] = useState<ApiCompany[]>([]);
-  const [topics, setTopics] = useState<ApiTopic[]>([]);
 
   // details
   const [companyId, setCompanyId] = useState('');
   const [title, setTitle] = useState('');
-  const [scheduledAt, setScheduledAt] = useState('');
+  const [startAt, setStartAt] = useState('');
+  const [endAt, setEndAt] = useState('');
+  const [durationMinutes, setDurationMinutes] = useState(60);
   const [proctored, setProctored] = useState(true);
   const [passingScore, setPassingScore] = useState(60);
 
   // sections
-  const [sections, setSections] = useState<BuilderSection[]>([
-    { name: 'Section 1', topicIds: [], numQuestions: 10, durationMinutes: 20 },
-  ]);
+  const [sections, setSections] = useState<Section[]>([{ name: 'Section 1', items: [] }]);
+  const [gen, setGen] = useState<GenState | null>(null);
 
-  const [preview, setPreview] = useState<AssessmentPreview | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [created, setCreated] = useState<CreatedAssessment | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
     listCompanies().then(setCompanies).catch(() => {});
-    listTopics().then(setTopics).catch(() => {});
   }, []);
 
-  const topicLabel = useMemo(() => {
-    const byId = new Map(topics.map((t) => [t.id, t]));
-    return (id: string) => {
-      const t = byId.get(id);
-      if (!t) return id;
-      const parent = t.parentId ? byId.get(t.parentId) : null;
-      return parent ? `${parent.name} › ${t.name}` : t.name;
-    };
-  }, [topics]);
+  const totals = useMemo(() => {
+    let mcq = 0;
+    let coding = 0;
+    for (const s of sections)
+      for (const it of s.items) (it.type === 'MCQ' ? (mcq += it.ids.length) : (coding += it.ids.length));
+    return { mcq, coding, total: mcq + coding };
+  }, [sections]);
 
-  const totalMinutes = sections.reduce((a, s) => a + (s.durationMinutes ?? 0), 0) || 60;
-  const totalQuestions = sections.reduce((a, s) => a + s.numQuestions, 0);
+  const detailsValid =
+    title.trim().length >= 2 &&
+    companyId &&
+    startAt &&
+    endAt &&
+    new Date(endAt) > new Date(startAt) &&
+    durationMinutes >= 5;
 
-  const updateSection = (i: number, patch: Partial<BuilderSection>) =>
-    setSections((prev) => prev.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
-
-  const goPreview = async () => {
-    setErr(null);
-    if (sections.some((s) => s.topicIds.length === 0)) {
-      setErr('Every section needs at least one topic.');
-      return;
-    }
-    setBusy(true);
+  // ── AI sourcing + live generation ────────────────────────────────────────────
+  const runSource = async (sectionIdx: number, topic: string, type: AssessmentItemType, count: number) => {
+    setGen({ sectionIdx, topic, type, requested: count, phase: 'sourcing', bankCount: 0, labels: [] });
     try {
-      setPreview(await previewAssessment(sections));
-      setStep(2);
+      const sourced = await sourceTopic(topic, type, count);
+      const ids = sourced.fromBank.map((b) => b.id);
+      const labels = sourced.fromBank.map((b) => b.label);
+      const willGen = sourced.aiAvailable ? sourced.toGenerate : 0;
+      setGen((g) =>
+        g ? { ...g, phase: willGen > 0 ? 'generating' : 'done', bankCount: ids.length, labels } : g,
+      );
+      for (let i = 0; i < willGen; i += 1) {
+        const item = await generateOne({
+          topicId: sourced.topicId,
+          topicName: sourced.topicName,
+          type,
+          avoid: labels.slice(-40),
+        });
+        ids.push(item.id);
+        labels.push(item.label);
+        setGen((g) => (g ? { ...g, labels: [...labels] } : g));
+      }
+      const resolved: ResolvedItem = {
+        key: `${Date.now()}-${Math.round(performance.now())}`,
+        topic,
+        topicName: sourced.topicName,
+        type,
+        count,
+        ids,
+        fromBank: sourced.fromBank.length,
+        generated: ids.length - sourced.fromBank.length,
+      };
+      setSections((prev) =>
+        prev.map((s, i) => (i === sectionIdx ? { ...s, items: [...s.items, resolved] } : s)),
+      );
+      setGen((g) => (g ? { ...g, phase: 'done', labels } : g));
     } catch (e) {
-      setErr(e instanceof ApiRequestError ? e.message : 'Could not build the preview.');
-    } finally {
-      setBusy(false);
+      setGen((g) =>
+        g
+          ? { ...g, phase: 'error', error: e instanceof ApiRequestError ? e.message : 'Generation failed.' }
+          : g,
+      );
     }
   };
 
+  const removeItem = (si: number, key: string) =>
+    setSections((prev) =>
+      prev.map((s, i) => (i === si ? { ...s, items: s.items.filter((it) => it.key !== key) } : s)),
+    );
+
   const create = async () => {
+    setCreating(true);
     setErr(null);
-    setBusy(true);
     try {
-      await createAssessment({
+      const payloadSections = sections
+        .filter((s) => s.items.length)
+        .map((s) => ({
+          name: s.name,
+          questionIds: s.items.filter((i) => i.type === 'MCQ').flatMap((i) => i.ids),
+          codingProblemIds: s.items.filter((i) => i.type === 'CODING').flatMap((i) => i.ids),
+        }));
+      const result = await createAssessment({
         companyId,
         title: title.trim(),
-        scheduledAt: new Date(scheduledAt).toISOString(),
-        durationMinutes: totalMinutes,
+        scheduledAt: new Date(startAt).toISOString(),
+        endsAt: new Date(endAt).toISOString(),
+        durationMinutes,
         proctored,
         passingScore,
-        sections,
+        sections: payloadSections,
       });
-      setStep(3);
+      setCreated(result);
     } catch (e) {
       setErr(e instanceof ApiRequestError ? e.message : 'Could not create the assessment.');
     } finally {
-      setBusy(false);
+      setCreating(false);
     }
   };
 
-  const detailsValid = companyId && title.trim().length >= 2 && scheduledAt;
-
   return (
-    <div className="fixed inset-0 z-50 flex justify-center overflow-y-auto bg-slate-900/50 p-4 backdrop-blur-sm">
-      <div className="relative my-4 h-fit w-full max-w-3xl rounded-3xl border border-slate-200 bg-white shadow-2xl">
-        {/* header + steps */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" />
+      <div className="relative flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
+        {/* header */}
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white">
-              <Sparkles className="size-5" />
+              <Wand2 className="size-5" />
             </span>
-            <h2 className="text-lg font-extrabold text-navy">Build an assessment</h2>
+            <div>
+              <h2 className="text-base font-black text-navy">Build an assessment</h2>
+              <p className="text-[11px] text-slate-400">AI-sourced from your bank · generates the rest</p>
+            </div>
           </div>
           <button type="button" onClick={onClose} className="grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100">
             <X className="size-4" />
           </button>
         </div>
 
-        <div className="flex items-center gap-1.5 px-6 py-3">
-          {STEPS.map((s, i) => (
-            <div key={s} className="flex items-center gap-1.5">
-              <span
-                className={cn(
-                  'grid size-6 place-items-center rounded-full text-[11px] font-bold',
-                  i < step ? 'bg-emerald-500 text-white' : i === step ? 'bg-orange text-white' : 'bg-slate-100 text-slate-400',
-                )}
-              >
-                {i < step ? <Check className="size-3.5" /> : i + 1}
+        {/* steps */}
+        {!created ? (
+          <div className="flex items-center gap-2 border-b border-slate-100 px-6 py-3">
+            {STEPS.map((s, i) => (
+              <div key={s} className="flex items-center gap-2">
+                <span className={cn('grid size-6 place-items-center rounded-full text-[11px] font-bold', i < step ? 'bg-emerald-500 text-white' : i === step ? 'bg-orange text-white' : 'bg-slate-100 text-slate-400')}>
+                  {i < step ? <Check className="size-3.5" /> : i + 1}
+                </span>
+                <span className={cn('text-xs font-semibold', i === step ? 'text-navy' : 'text-slate-400')}>{s}</span>
+                {i < STEPS.length - 1 ? <span className="mx-1 h-px w-6 bg-slate-200" /> : null}
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        {/* body */}
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+          {created ? (
+            <div className="grid place-items-center py-10 text-center">
+              <span className="grid size-14 place-items-center rounded-full bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
+                <CheckCircle2 className="size-7" />
               </span>
-              <span className={cn('text-xs font-semibold', i === step ? 'text-navy' : 'text-slate-400')}>{s}</span>
-              {i < STEPS.length - 1 ? <span className="mx-1 h-px w-5 bg-slate-200" /> : null}
+              <h3 className="mt-4 text-lg font-black text-navy">Assessment published</h3>
+              <p className="mt-1 text-sm text-slate-500">
+                {created.totalQuestions} questions ({created.mcqCount} MCQ · {created.codingCount} coding) for{' '}
+                {created.companyName}. It&apos;s now on the calendars of registered students.
+              </p>
+              <button type="button" onClick={() => { onCreated(); onClose(); }} className="mt-5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-6 py-2.5 text-sm font-extrabold text-white">
+                Done
+              </button>
             </div>
-          ))}
-        </div>
-
-        <div className="px-6 pb-6">
-          {/* STEP 1 — details */}
-          {step === 0 ? (
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Company">
-                <select value={companyId} onChange={(e) => setCompanyId(e.target.value)} className={inputCls}>
-                  <option value="">Select company</option>
-                  {companies.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-              </Field>
-              <Field label="Assessment title">
-                <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. TCS NQT — Round 1" className={inputCls} />
-              </Field>
-              <Field label="Date & time">
-                <input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)} className={inputCls} />
-              </Field>
-              <Field label="Pass mark (%)">
-                <input type="number" min={0} max={100} value={passingScore} onChange={(e) => setPassingScore(Number(e.target.value))} className={inputCls} />
-              </Field>
-              <label className="flex items-center gap-2 sm:col-span-2">
-                <input type="checkbox" checked={proctored} onChange={(e) => setProctored(e.target.checked)} className="size-4 accent-orange" />
-                <span className="text-sm font-medium text-slate-600">Proctored (camera + monitoring)</span>
-              </label>
-            </div>
-          ) : null}
-
-          {/* STEP 2 — sections */}
-          {step === 1 ? (
+          ) : step === 0 ? (
             <div className="space-y-4">
-              {sections.map((s, i) => (
+              <label className="block">
+                <span className={labelCls}>Title</span>
+                <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="TCS NQT — Round 1" className={inputCls} />
+              </label>
+              <label className="block">
+                <span className={labelCls}>Company</span>
+                <select value={companyId} onChange={(e) => setCompanyId(e.target.value)} className={inputCls}>
+                  <option value="">Select a company</option>
+                  {companies.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </label>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <label className="block">
+                  <span className={labelCls}>Start time *</span>
+                  <input type="datetime-local" value={startAt} onChange={(e) => setStartAt(e.target.value)} className={inputCls} />
+                </label>
+                <label className="block">
+                  <span className={labelCls}>End time *</span>
+                  <input type="datetime-local" value={endAt} onChange={(e) => setEndAt(e.target.value)} className={inputCls} />
+                </label>
+                <label className="block">
+                  <span className={labelCls}>Duration (min) *</span>
+                  <input type="number" min={5} max={600} value={durationMinutes} onChange={(e) => setDurationMinutes(Number(e.target.value))} className={inputCls} />
+                </label>
+              </div>
+              {startAt && endAt && new Date(endAt) <= new Date(startAt) ? (
+                <p className="text-xs font-semibold text-rose-600">End time must be after start time.</p>
+              ) : null}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block">
+                  <span className={labelCls}>Passing score (%)</span>
+                  <input type="number" min={0} max={100} value={passingScore} onChange={(e) => setPassingScore(Number(e.target.value))} className={inputCls} />
+                </label>
+                <label className="mt-5 flex items-center gap-2">
+                  <input type="checkbox" checked={proctored} onChange={(e) => setProctored(e.target.checked)} className="size-4 accent-orange" />
+                  <span className="text-sm font-medium text-slate-600">Proctored (camera + mic)</span>
+                </label>
+              </div>
+            </div>
+          ) : step === 1 ? (
+            <div className="space-y-5">
+              {sections.map((sec, si) => (
                 <SectionEditor
-                  key={i}
-                  index={i}
-                  section={s}
-                  topics={topics}
-                  topicLabel={topicLabel}
-                  onChange={(patch) => updateSection(i, patch)}
-                  onRemove={sections.length > 1 ? () => setSections((p) => p.filter((_, idx) => idx !== i)) : undefined}
+                  key={si}
+                  section={sec}
+                  onRename={(name) => setSections((p) => p.map((s, i) => (i === si ? { ...s, name } : s)))}
+                  onAddTopic={(topic, type, count) => runSource(si, topic, type, count)}
+                  onRemoveItem={(key) => removeItem(si, key)}
+                  onRemoveSection={sections.length > 1 ? () => setSections((p) => p.filter((_, i) => i !== si)) : undefined}
                 />
               ))}
               <button
                 type="button"
-                onClick={() => setSections((p) => [...p, { name: `Section ${p.length + 1}`, topicIds: [], numQuestions: 10, durationMinutes: 20 }])}
-                className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-slate-300 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-50"
+                onClick={() => setSections((p) => [...p, { name: `Section ${p.length + 1}`, items: [] }])}
+                className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-slate-300 px-4 py-2 text-sm font-bold text-slate-500 hover:border-orange hover:text-orange"
               >
                 <Plus className="size-4" /> Add section
               </button>
-              <p className="text-xs text-slate-500">
-                Total: <strong>{totalQuestions}</strong> questions · ~{totalMinutes} min
-              </p>
             </div>
-          ) : null}
-
-          {/* STEP 3 — preview */}
-          {step === 2 && preview ? (
-            <div className="space-y-3">
-              <p className="text-sm text-slate-600">
-                The platform picked <strong>{preview.totalQuestions}</strong> questions from the bank
-                across {preview.sections.length} section{preview.sections.length === 1 ? '' : 's'}.
-              </p>
-              {preview.sections.map((s, i) => (
-                <div key={i} className="rounded-xl border border-slate-200 p-3.5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-navy">{s.name}</span>
-                    <span className={cn('text-xs font-bold', s.shortfall > 0 ? 'text-amber-600' : 'text-emerald-600')}>
-                      {s.picked}/{s.requested} picked
-                    </span>
-                  </div>
-                  {s.shortfall > 0 ? (
-                    <p className="mt-1 text-[11px] text-amber-600">
-                      Only {s.available} questions available in these topics — {s.shortfall} short.
-                    </p>
-                  ) : null}
-                  {s.sample.length ? (
-                    <ul className="mt-2 space-y-1 text-[11px] text-slate-500">
-                      {s.sample.map((stem, j) => (
-                        <li key={j} className="line-clamp-1">• {stem}</li>
-                      ))}
-                    </ul>
-                  ) : null}
+          ) : (
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4">
+                <p className="text-sm font-black text-navy">{title || 'Untitled assessment'}</p>
+                <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[12px] text-slate-600 sm:grid-cols-3">
+                  <span>Company: <b className="text-navy">{companies.find((c) => c.id === companyId)?.name ?? '—'}</b></span>
+                  <span>Duration: <b className="text-navy">{durationMinutes}m</b></span>
+                  <span>Pass: <b className="text-navy">{passingScore}%</b></span>
+                  <span>Start: <b className="text-navy">{startAt ? new Date(startAt).toLocaleString() : '—'}</b></span>
+                  <span>End: <b className="text-navy">{endAt ? new Date(endAt).toLocaleString() : '—'}</b></span>
+                  <span>Proctored: <b className="text-navy">{proctored ? 'Yes' : 'No'}</b></span>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <div className="flex-1 rounded-2xl border border-slate-200 p-4 text-center">
+                  <Brain className="mx-auto size-5 text-indigo-500" />
+                  <p className="mt-1 text-2xl font-black text-navy">{totals.mcq}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">MCQ questions</p>
+                </div>
+                <div className="flex-1 rounded-2xl border border-slate-200 p-4 text-center">
+                  <Code2 className="mx-auto size-5 text-emerald-500" />
+                  <p className="mt-1 text-2xl font-black text-navy">{totals.coding}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Coding problems</p>
+                </div>
+              </div>
+              {sections.filter((s) => s.items.length).map((s, i) => (
+                <div key={i} className="rounded-xl border border-slate-100 p-3">
+                  <p className="text-sm font-bold text-navy">{s.name}</p>
+                  <ul className="mt-1 space-y-0.5 text-xs text-slate-500">
+                    {s.items.map((it) => (
+                      <li key={it.key}>· {it.topicName} — {it.ids.length} {it.type === 'MCQ' ? 'MCQ' : 'coding'} ({it.fromBank} bank + {it.generated} AI)</li>
+                    ))}
+                  </ul>
                 </div>
               ))}
+              {err ? <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">{err}</p> : null}
             </div>
-          ) : null}
-
-          {/* STEP 4 — done */}
-          {step === 3 ? (
-            <div className="py-8 text-center">
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: 'spring', stiffness: 260 }}
-                className="mx-auto grid size-16 place-items-center rounded-full bg-emerald-100 text-emerald-600"
-              >
-                <CheckCircle2 className="size-8" />
-              </motion.span>
-              <h3 className="mt-4 text-lg font-extrabold text-navy">Assessment created &amp; scheduled</h3>
-              <p className="mt-1 text-sm text-slate-500">
-                It&apos;s live — every registered student sees it on their calendar and gets notified.
-              </p>
-              <button
-                type="button"
-                onClick={() => { onCreated(); onClose(); }}
-                className="mt-5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-6 py-2.5 text-sm font-extrabold text-white"
-              >
-                Done
-              </button>
-            </div>
-          ) : null}
-
-          {err ? <p className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">{err}</p> : null}
-
-          {/* nav */}
-          {step < 3 ? (
-            <div className="mt-6 flex justify-between">
-              <button
-                type="button"
-                onClick={() => (step === 0 ? onClose() : setStep(step - 1))}
-                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50"
-              >
-                <ArrowLeft className="size-4" /> {step === 0 ? 'Cancel' : 'Back'}
-              </button>
-              {step === 0 ? (
-                <NavBtn disabled={!detailsValid} onClick={() => setStep(1)}>Next: Sections</NavBtn>
-              ) : step === 1 ? (
-                <NavBtn disabled={busy} onClick={goPreview}>{busy ? 'Building…' : 'Preview'}</NavBtn>
-              ) : (
-                <NavBtn disabled={busy} onClick={create}>{busy ? 'Creating…' : 'Create & publish'}</NavBtn>
-              )}
-            </div>
-          ) : null}
+          )}
         </div>
-      </div>
-    </div>
-  );
-}
 
-function SectionEditor({
-  index,
-  section,
-  topics,
-  topicLabel,
-  onChange,
-  onRemove,
-}: {
-  index: number;
-  section: BuilderSection;
-  topics: ApiTopic[];
-  topicLabel: (id: string) => string;
-  onChange: (patch: Partial<BuilderSection>) => void;
-  onRemove?: () => void;
-}) {
-  const [q, setQ] = useState('');
-  const matches = useMemo(() => {
-    const needle = q.trim().toLowerCase();
-    return topics
-      .filter((t) => !section.topicIds.includes(t.id))
-      .filter((t) => !needle || t.name.toLowerCase().includes(needle))
-      .slice(0, 8);
-  }, [q, topics, section.topicIds]);
-
-  return (
-    <div className="rounded-2xl border border-slate-200 p-4">
-      <div className="flex items-center justify-between">
-        <input
-          value={section.name}
-          onChange={(e) => onChange({ name: e.target.value })}
-          className="rounded-lg border border-transparent px-1 text-sm font-bold text-navy hover:border-slate-200 focus:border-orange focus:outline-none"
-        />
-        {onRemove ? (
-          <button type="button" onClick={onRemove} className="grid size-7 place-items-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600">
-            <Trash2 className="size-4" />
-          </button>
-        ) : null}
-      </div>
-
-      {/* selected topics */}
-      {section.topicIds.length ? (
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          {section.topicIds.map((id) => (
-            <span key={id} className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">
-              {topicLabel(id)}
-              <button type="button" onClick={() => onChange({ topicIds: section.topicIds.filter((t) => t !== id) })}>
-                <X className="size-3" />
+        {/* footer */}
+        {!created ? (
+          <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4">
+            <button type="button" onClick={() => (step === 0 ? onClose() : setStep(step - 1))} className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100">
+              <ArrowLeft className="size-4" /> {step === 0 ? 'Cancel' : 'Back'}
+            </button>
+            {step === 0 ? (
+              <button type="button" disabled={!detailsValid} onClick={() => setStep(1)} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white disabled:opacity-50">
+                Next <ArrowRight className="size-4" />
               </button>
-            </span>
-          ))}
-        </div>
-      ) : null}
-
-      {/* topic search */}
-      <div className="relative mt-2">
-        <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search topics to add…"
-          className="h-9 w-full rounded-lg border border-slate-200 bg-white pl-8 pr-3 text-xs text-navy focus:border-orange focus:outline-none"
-        />
-        {q.trim() && matches.length ? (
-          <div className="absolute z-10 mt-1 max-h-44 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
-            {matches.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => { onChange({ topicIds: [...section.topicIds, t.id] }); setQ(''); }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-slate-600 hover:bg-slate-50"
-              >
-                <Plus className="size-3 text-orange" /> {topicLabel(t.id)}
+            ) : step === 1 ? (
+              <button type="button" disabled={totals.total === 0} onClick={() => setStep(2)} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white disabled:opacity-50">
+                Review ({totals.total}) <ArrowRight className="size-4" />
               </button>
-            ))}
+            ) : (
+              <button type="button" disabled={creating || totals.total === 0} onClick={create} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white disabled:opacity-50">
+                {creating ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />} Publish assessment
+              </button>
+            )}
           </div>
         ) : null}
       </div>
 
-      <div className="mt-3 grid grid-cols-3 gap-2">
-        <Field label="Questions">
-          <input type="number" min={1} max={100} value={section.numQuestions} onChange={(e) => onChange({ numQuestions: Number(e.target.value) })} className={inputCls} />
-        </Field>
-        <Field label="Marks/Q">
-          <input type="number" min={1} max={20} value={section.marksPerQuestion ?? 1} onChange={(e) => onChange({ marksPerQuestion: Number(e.target.value) })} className={inputCls} />
-        </Field>
-        <Field label="Minutes">
-          <input type="number" min={1} max={300} value={section.durationMinutes ?? 20} onChange={(e) => onChange({ durationMinutes: Number(e.target.value) })} className={inputCls} />
-        </Field>
-      </div>
-      <span className="sr-only">Section {index + 1}</span>
+      {/* Live AI generation modal */}
+      <AnimatePresence>{gen ? <GenerationModal gen={gen} onClose={() => setGen(null)} /> : null}</AnimatePresence>
     </div>
   );
 }
 
-const inputCls =
-  'flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30';
+/** Per-section editor: name + resolved items + the add-topic row. */
+function SectionEditor({
+  section,
+  onRename,
+  onAddTopic,
+  onRemoveItem,
+  onRemoveSection,
+}: {
+  section: Section;
+  onRename: (name: string) => void;
+  onAddTopic: (topic: string, type: AssessmentItemType, count: number) => void;
+  onRemoveItem: (key: string) => void;
+  onRemoveSection?: () => void;
+}) {
+  const [topic, setTopic] = useState('');
+  const [type, setType] = useState<AssessmentItemType>('MCQ');
+  const [count, setCount] = useState(5);
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  const submit = () => {
+    if (topic.trim().length < 2) return;
+    onAddTopic(topic.trim(), type, count);
+    setTopic('');
+  };
+
   return (
-    <label className="block space-y-1">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{label}</span>
-      {children}
-    </label>
+    <div className="rounded-2xl border border-slate-200 p-4">
+      <div className="flex items-center justify-between gap-2">
+        <input value={section.name} onChange={(e) => onRename(e.target.value)} className="w-40 rounded-lg border border-transparent px-1 text-sm font-black text-navy hover:border-slate-200 focus:border-orange focus:outline-none" />
+        {onRemoveSection ? (
+          <button type="button" onClick={onRemoveSection} className="text-slate-300 hover:text-rose-500"><Trash2 className="size-4" /></button>
+        ) : null}
+      </div>
+
+      {/* resolved items */}
+      {section.items.length ? (
+        <div className="mt-3 space-y-1.5">
+          {section.items.map((it) => (
+            <div key={it.key} className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50/60 px-3 py-2 text-xs">
+              <span className={cn('grid size-6 shrink-0 place-items-center rounded-md', it.type === 'MCQ' ? 'bg-indigo-100 text-indigo-600' : 'bg-emerald-100 text-emerald-600')}>
+                {it.type === 'MCQ' ? <Brain className="size-3.5" /> : <Code2 className="size-3.5" />}
+              </span>
+              <span className="min-w-0 flex-1 truncate font-semibold text-navy">{it.topicName}</span>
+              <span className="text-slate-400">{it.ids.length} {it.type === 'MCQ' ? 'Q' : 'coding'} · {it.fromBank} bank + {it.generated} AI</span>
+              <button type="button" onClick={() => onRemoveItem(it.key)} className="text-slate-300 hover:text-rose-500"><X className="size-3.5" /></button>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      {/* add-topic row */}
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <input
+          value={topic}
+          onChange={(e) => setTopic(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && submit()}
+          placeholder="Type a topic, e.g. Time & Work…"
+          className="h-10 min-w-[12rem] flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+        />
+        <div className="inline-flex overflow-hidden rounded-lg border border-slate-200">
+          {(['MCQ', 'CODING'] as const).map((t) => (
+            <button key={t} type="button" onClick={() => setType(t)} className={cn('px-3 py-2 text-xs font-bold', type === t ? 'bg-navy text-white' : 'bg-white text-slate-500')}>
+              {t === 'MCQ' ? 'Quiz' : 'Coding'}
+            </button>
+          ))}
+        </div>
+        <input type="number" min={1} max={50} value={count} onChange={(e) => setCount(Number(e.target.value))} className="h-10 w-16 rounded-lg border border-slate-200 bg-white px-2 text-sm text-navy focus:border-orange focus:outline-none" />
+        <button type="button" onClick={submit} disabled={topic.trim().length < 2} className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-4 py-2 text-sm font-extrabold text-white disabled:opacity-50">
+          <Wand2 className="size-4" /> Add
+        </button>
+      </div>
+    </div>
   );
 }
 
-function NavBtn({ children, disabled, onClick }: { children: React.ReactNode; disabled?: boolean; onClick: () => void }) {
+/** Live AI generation modal — bank items + each generated item streaming in. */
+function GenerationModal({ gen, onClose }: { gen: GenState; onClose: () => void }) {
+  const generatedCount = Math.max(0, gen.labels.length - gen.bankCount);
+  const toGen = Math.max(0, gen.requested - gen.bankCount);
+  const pct = gen.phase === 'done' ? 100 : toGen ? Math.round((generatedCount / toGen) * 100) : 100;
   return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={onClick}
-      className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.8)] disabled:opacity-50"
-    >
-      {disabled ? <Loader2 className="hidden size-4 animate-spin" /> : null}
-      {children} <ArrowRight className="size-4" />
-    </button>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+      <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="relative w-full max-w-md overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
+        <div className="relative overflow-hidden bg-gradient-to-br from-[#6366f1] via-[#a855f7] to-[#ec4899] px-6 py-5 text-white">
+          <div className="flex items-center gap-2.5">
+            <motion.span animate={{ rotate: gen.phase === 'done' || gen.phase === 'error' ? 0 : 360 }} transition={{ duration: 3, repeat: gen.phase === 'done' || gen.phase === 'error' ? 0 : Infinity, ease: 'linear' }}>
+              <Sparkles className="size-5" />
+            </motion.span>
+            <div>
+              <p className="text-sm font-black">
+                {gen.phase === 'sourcing' ? 'Searching the question bank…' : gen.phase === 'generating' ? 'Generating questions with AI…' : gen.phase === 'error' ? 'Generation failed' : 'Questions ready'}
+              </p>
+              <p className="text-[11px] text-white/80">{gen.topic} · {gen.type === 'MCQ' ? 'Quiz' : 'Coding'}</p>
+            </div>
+          </div>
+          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/20">
+            <motion.div className="h-full rounded-full bg-white" animate={{ width: `${pct}%` }} transition={{ duration: 0.4 }} />
+          </div>
+          <p className="mt-1.5 text-[11px] font-semibold text-white/85">
+            {gen.bankCount} from bank · {generatedCount}{toGen ? `/${toGen}` : ''} AI-generated
+          </p>
+        </div>
+
+        <div className="max-h-64 overflow-y-auto p-4">
+          {gen.error ? (
+            <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{gen.error}</p>
+          ) : (
+            <ul className="space-y-1.5">
+              {gen.labels.map((l, i) => (
+                <motion.li key={i} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} className="flex items-start gap-2 text-xs">
+                  <span className={cn('mt-0.5 grid size-4 shrink-0 place-items-center rounded-full', i < gen.bankCount ? 'bg-slate-200 text-slate-500' : 'bg-emerald-500 text-white')}>
+                    {i < gen.bankCount ? <Check className="size-2.5" /> : <Sparkles className="size-2.5" />}
+                  </span>
+                  <span className="line-clamp-2 text-slate-600">{l}</span>
+                </motion.li>
+              ))}
+              {(gen.phase === 'sourcing' || gen.phase === 'generating') ? (
+                <li className="flex items-center gap-2 text-xs text-slate-400"><Loader2 className="size-3.5 animate-spin" /> working…</li>
+              ) : null}
+            </ul>
+          )}
+        </div>
+
+        <div className="border-t border-slate-100 px-4 py-3 text-right">
+          <button type="button" onClick={onClose} disabled={gen.phase === 'sourcing' || gen.phase === 'generating'} className="rounded-full bg-navy px-4 py-2 text-sm font-bold text-white disabled:opacity-40">
+            {gen.phase === 'done' ? 'Add to section' : gen.phase === 'error' ? 'Close' : 'Generating…'}
+          </button>
+        </div>
+      </motion.div>
+    </div>
   );
 }
