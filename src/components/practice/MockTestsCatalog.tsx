@@ -133,40 +133,48 @@ function MockCard({ mock }: { mock: ApiMockSummary }) {
         <div className="relative z-10 flex h-full flex-col">
           <div className="flex items-start gap-3">
             <span
-              className="grid size-10 shrink-0 place-items-center rounded-xl text-white shadow-sm transition-transform duration-300 group-hover:scale-105"
+              className="grid size-11 shrink-0 place-items-center rounded-2xl text-white shadow-sm transition-transform duration-300 group-hover:scale-105"
               style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
             >
-              <Icon className="size-5" aria-hidden="true" />
+              <Icon className="size-[22px]" aria-hidden="true" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="line-clamp-2 text-sm font-bold leading-snug text-navy">{mock.title}</p>
               <span
                 className={cn(
-                  'mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide',
+                  'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide',
                   adaptive ? 'bg-orange/10 text-orange' : 'bg-slate-100 text-slate-500',
                 )}
               >
                 {adaptive ? <Sparkles className="size-2.5" /> : <Timer className="size-2.5" />}
                 {adaptive ? 'Mock Quiz' : 'Assessment'}
               </span>
+              <p className="mt-1.5 line-clamp-2 text-[15px] font-bold leading-snug text-navy">{mock.title}</p>
             </div>
           </div>
 
-          {/* Compact inline stats */}
-          <div className="mt-3 flex items-center gap-3 text-[11px] font-semibold text-slate-500">
-            <span className="flex items-center gap-1"><FileText className="size-3.5 text-slate-400" /> {mock.totalQuestions} Q</span>
-            <span className="flex items-center gap-1"><Clock className="size-3.5 text-slate-400" /> {mock.durationMinutes}m</span>
-            <span className="flex items-center gap-1"><Star className="size-3.5 text-amber-400" /> {mock.passingScore}%</span>
+          <p className="mt-2 text-xs leading-snug text-slate-500">
+            {adaptive ? 'Adapts to your level with AI-graded feedback.' : 'Timed mock assessment with a full review.'}
+          </p>
+
+          {/* Stat tiles */}
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            <MiniStat icon={FileText} value={String(mock.totalQuestions)} label={adaptive ? 'max Qs' : 'Questions'} />
+            <MiniStat icon={Clock} value={String(mock.durationMinutes)} label="Minutes" />
+            <MiniStat icon={Star} value={`${mock.passingScore}%`} label="Pass" />
           </div>
 
           {/* CTA */}
-          <div className="mt-auto pt-3.5">
+          <div className="mt-auto pt-4">
             <Link
               href={href}
               aria-label={`Start ${mock.title}`}
-              className="group/cta relative inline-flex w-full items-center justify-center gap-1.5 overflow-hidden rounded-xl px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_10px_24px_-14px_rgba(243,112,33,0.9)] transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
+              className="group/cta relative inline-flex w-full items-center justify-center gap-1.5 overflow-hidden rounded-xl px-4 py-3 text-sm font-extrabold text-white shadow-[0_12px_28px_-14px_rgba(243,112,33,0.9)] transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
               style={{ background: `linear-gradient(180deg, ${from}, ${to})` }}
             >
+              <span
+                aria-hidden
+                className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover/cta:translate-x-full"
+              />
               {adaptive ? <Sparkles className="size-4" aria-hidden="true" /> : <Timer className="size-4" aria-hidden="true" />}
               {adaptive ? 'Start quiz' : 'Start test'}
               <ArrowRight className="size-4 transition-transform group-hover/cta:translate-x-0.5" />
@@ -175,5 +183,16 @@ function MockCard({ mock }: { mock: ApiMockSummary }) {
         </div>
       </div>
     </motion.div>
+  );
+}
+
+/** Compact stat tile inside a mock card. */
+function MiniStat({ icon: Icon, value, label }: { icon: typeof FileText; value: string; label: string }) {
+  return (
+    <div className="rounded-xl border border-slate-200/70 bg-slate-50/70 px-2 py-2.5 text-center">
+      <Icon className="mx-auto size-4 text-slate-400" aria-hidden="true" />
+      <p className="mt-1 text-base font-extrabold leading-none tabular-nums text-navy">{value}</p>
+      <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
+    </div>
   );
 }

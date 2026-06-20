@@ -4,11 +4,24 @@ import { useEffect, useState } from 'react';
 import { formatDateIN } from '@/lib/format';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowUpRight, BookOpen, Calendar, Target, Timer } from 'lucide-react';
+import { ArrowUpRight, BookOpen, Calendar, CalendarClock, Clock, ShieldCheck, Target, Timer, Video } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Reveal, Stagger, StaggerItem } from '@/components/motion/primitives';
 import { getMockHistory, type ApiMockAttemptHistory } from '@/lib/api/mocks';
 import { getPracticeAccuracy, type ApiAccuracy } from '@/lib/api/practice';
+import { getMySchedule, type ApiScheduledAssessment } from '@/lib/api/scheduling';
+
+const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+/** Human countdown to a future ISO time. */
+function countdownTo(iso: string): string {
+  const ms = new Date(iso).getTime() - Date.now();
+  if (ms <= 0) return 'now';
+  const days = Math.floor(ms / 86_400_000);
+  if (days >= 1) return `in ${days} day${days > 1 ? 's' : ''}`;
+  const hrs = Math.floor(ms / 3_600_000);
+  if (hrs >= 1) return `in ${hrs}h`;
+  return 'soon';
+}
 
 /**
  * Dashboard right rail — every number is live: recent activity from the
@@ -91,7 +104,8 @@ function RailCard({
 export function DashboardRightRail() {
   const [history, setHistory] = useState<ApiMockAttemptHistory[] | null>(null);
   const [accuracy, setAccuracy] = useState<ApiAccuracy | null>(null);
-  const [week, setWeek] = useState<Array<{ d: string; n: number; today: boolean }>>([]);
+  const [schedule, setSchedule] = useState<ApiScheduledAssessment[] | null>(null);
+  const [week, setWeek] = useState<Array<{ d: string; n: number; today: boolean; key: string }>>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -101,6 +115,9 @@ export function DashboardRightRail() {
     getPracticeAccuracy()
       .then((a) => !cancelled && setAccuracy(a))
       .catch(() => {});
+    getMySchedule()
+      .then((rows) => !cancelled && setSchedule(rows))
+      .catch(() => !cancelled && setSchedule([]));
 
     // Build the real current week (Mon–Sun) client-side so "today" is true.
     const now = new Date();
@@ -111,7 +128,7 @@ export function DashboardRightRail() {
       labels.map((d, i) => {
         const date = new Date(monday);
         date.setDate(monday.getDate() + i);
-        return { d, n: date.getDate(), today: date.toDateString() === now.toDateString() };
+        return { d, n: date.getDate(), today: date.toDateString() === now.toDateString(), key: dayKey(date) };
       }),
     );
     return () => {
@@ -119,8 +136,94 @@ export function DashboardRightRail() {
     };
   }, []);
 
+  // Upcoming assessments (window not yet over), soonest first.
+  const upcoming = (schedule ?? [])
+    .filter((s) => s.isActive && new Date(s.scheduledAt).getTime() + s.durationMinutes * 60_000 >= Date.now())
+    .sort((a, b) => +new Date(a.scheduledAt) - +new Date(b.scheduledAt));
+  // Days this week that have a scheduled assessment (for the calendar dots).
+  const scheduledDays = new Set((schedule ?? []).map((s) => dayKey(new Date(s.scheduledAt))));
+
   return (
     <Stagger className="space-y-5">
+      {/* Upcoming assessments — the student's scheduled/enrolled drives */}
+      <StaggerItem>
+        <RailCard glow="#ef4444">
+          <div className="mb-4 flex items-center justify-between">
+            <RailLabel icon={CalendarClock}>Upcoming assessments</RailLabel>
+            <Link href="/calendar" className="text-[11px] font-bold text-orange hover:underline">View all</Link>
+          </div>
+          {schedule === null ? (
+            <div className="space-y-2.5">
+              {[0, 1].map((k) => (
+                <div key={k} className="h-16 animate-pulse rounded-2xl bg-slate-100" />
+              ))}
+            </div>
+          ) : upcoming.length === 0 ? (
+            <p className="text-xs leading-relaxed text-slate-500">
+              No assessments scheduled yet.{' '}
+              <Link href="/dashboard/company" className="font-semibold text-orange hover:underline">
+                Register for a company drive
+              </Link>{' '}
+              to get one on your calendar.
+            </p>
+          ) : (
+            <div className="space-y-2.5">
+              {upcoming.slice(0, 3).map((a) => {
+                const startMs = new Date(a.scheduledAt).getTime();
+                const endMs = startMs + a.durationMinutes * 60_000;
+                const live = Date.now() >= startMs && Date.now() <= endMs;
+                const daysLeft = Math.floor((startMs - Date.now()) / 86_400_000);
+                const tone = live
+                  ? { card: 'border-emerald-200 bg-emerald-50/50', text: 'text-emerald-700' }
+                  : daysLeft <= 1
+                    ? { card: 'border-rose-200 bg-rose-50/50', text: 'text-rose-700' }
+                    : daysLeft <= 3
+                      ? { card: 'border-amber-200 bg-amber-50/50', text: 'text-amber-700' }
+                      : { card: 'border-sky-200 bg-sky-50/40', text: 'text-sky-700' };
+                return (
+                  <div key={a.id} className={cn('rounded-2xl border p-3', tone.card)}>
+                    <div className="flex items-start gap-2.5">
+                      <span className="grid size-8 shrink-0 place-items-center overflow-hidden rounded-lg border border-slate-200 bg-white">
+                        {a.companyLogoUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={a.companyLogoUrl} alt="" className="max-h-5 max-w-full object-contain" />
+                        ) : (
+                          <span className="text-[10px] font-bold text-slate-500">{a.companyName.slice(0, 2).toUpperCase()}</span>
+                        )}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[13px] font-bold leading-snug text-navy">{a.title}</p>
+                        <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] font-medium text-slate-500">
+                          <span>{a.companyName}</span>
+                          <span className="flex items-center gap-0.5"><Clock className="size-2.5" /> {a.durationMinutes}m</span>
+                          {a.proctored ? <span className="flex items-center gap-0.5 text-violet-600"><Video className="size-2.5" /> Proctored</span> : null}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between">
+                      <span className={cn('text-[11px] font-extrabold', tone.text)}>
+                        {live ? 'Live now' : `Due ${countdownTo(a.scheduledAt)}`}
+                        <span className="ml-1 font-semibold text-slate-400">
+                          · {new Date(a.scheduledAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                        </span>
+                      </span>
+                      {live && a.mockTestId ? (
+                        <Link
+                          href={`/dashboard/quiz?mock=${a.mockTestId}${a.proctored ? '&proctored=1' : ''}`}
+                          className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-2.5 py-1 text-[10px] font-extrabold text-white"
+                        >
+                          <ShieldCheck className="size-3" /> Start
+                        </Link>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </RailCard>
+      </StaggerItem>
+
       {/* Up next — live feature entry points */}
       <StaggerItem>
         <RailCard glow="#f37021">
@@ -188,28 +291,46 @@ export function DashboardRightRail() {
                   )}
                   {day.n}
                 </span>
-                {day.today && (
-                  <span aria-hidden className="size-1 rounded-full bg-orange shadow-[0_0_6px_rgba(243,112,33,0.8)]" />
+                {scheduledDays.has(day.key) ? (
+                  <span aria-hidden title="Assessment scheduled" className="size-1.5 rounded-full bg-orange shadow-[0_0_6px_rgba(243,112,33,0.8)]" />
+                ) : day.today ? (
+                  <span aria-hidden className="size-1 rounded-full bg-slate-300" />
+                ) : (
+                  <span aria-hidden className="size-1.5" />
                 )}
               </motion.div>
             ))}
           </div>
-          <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50/70 px-3 py-2.5">
-            <p className="text-[11px] leading-relaxed text-slate-500">
-              {accuracy && accuracy.total > 0 ? (
-                <>
-                  <span className="font-bold text-navy tabular-nums">{accuracy.total}</span> questions
-                  practised overall ·{' '}
-                  <span className="font-bold text-emerald-600 tabular-nums">
-                    {accuracy.accuracyPct}%
-                  </span>{' '}
-                  accuracy
-                </>
-              ) : (
-                'Your practice totals appear here as you attempt questions.'
-              )}
-            </p>
-          </div>
+          {(() => {
+            const weekKeys = new Set(week.map((d) => d.key));
+            const weekCount = (schedule ?? []).filter((s) => weekKeys.has(dayKey(new Date(s.scheduledAt)))).length;
+            return (
+              <div className="mt-4 space-y-1.5">
+                {weekCount > 0 ? (
+                  <div className="flex items-center gap-1.5 rounded-xl border border-orange/20 bg-orange/[0.06] px-3 py-2">
+                    <CalendarClock className="size-3.5 text-orange" />
+                    <p className="text-[11px] font-semibold text-navy">
+                      {weekCount} assessment{weekCount > 1 ? 's' : ''} this week
+                    </p>
+                  </div>
+                ) : null}
+                <div className="rounded-xl border border-slate-100 bg-slate-50/70 px-3 py-2.5">
+                  <p className="text-[11px] leading-relaxed text-slate-500">
+                    {accuracy && accuracy.total > 0 ? (
+                      <>
+                        <span className="font-bold text-navy tabular-nums">{accuracy.total}</span> questions
+                        practised overall ·{' '}
+                        <span className="font-bold text-emerald-600 tabular-nums">{accuracy.accuracyPct}%</span>{' '}
+                        accuracy
+                      </>
+                    ) : (
+                      'Your practice totals appear here as you attempt questions.'
+                    )}
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
         </RailCard>
       </StaggerItem>
 

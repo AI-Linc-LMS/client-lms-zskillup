@@ -83,7 +83,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
   const reduce = useReducedMotion();
 
   return (
-    <div className="mx-auto max-w-6xl px-5 py-6 sm:px-6">
+    <div className="w-full">
       <Breadcrumb
         items={[
           { label: 'Home', href: '/' },
