@@ -73,9 +73,9 @@ export default function LeaderboardPage() {
         <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
           {[
             { label: 'Active learners', value: data ? data.total.toLocaleString() : '—' },
-            { label: 'Students on board', value: '240k+' },
+            { label: 'Students on board', value: data ? data.totalStudents.toLocaleString() : '—' },
             { label: 'Your rank', value: data?.myRank ? `#${data.myRank}` : '—' },
-            { label: 'Top streak today', value: data?.entries[0] ? `${data.entries[0].currentStreakDays} days` : '—' },
+            { label: 'Top streak today', value: data ? `${data.topStreak} day${data.topStreak === 1 ? '' : 's'}` : '—' },
           ].map((s) => (
             <div key={s.label} className="rounded-xl border bg-white p-4 text-center shadow-sm">
               <p className="text-2xl font-extrabold text-navy">{s.value}</p>

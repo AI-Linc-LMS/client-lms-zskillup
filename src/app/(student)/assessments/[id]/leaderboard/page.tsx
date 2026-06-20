@@ -155,19 +155,29 @@ export default function AssessmentLeaderboardPage({ params }: { params: Promise<
                 key={e.userId}
                 className={cn('flex items-center gap-3 px-4 py-3', e.isYou && 'bg-orange/[0.05]')}
               >
-                <span className="w-8 shrink-0 text-center text-sm font-black text-slate-400">#{e.rank}</span>
-                <Avatar src={e.avatarUrl} name={e.name} size={36} />
+                <span
+                  className={cn(
+                    'grid size-8 shrink-0 place-items-center rounded-full text-xs font-black',
+                    e.rank === 1 ? 'bg-amber-100 text-amber-700'
+                      : e.rank === 2 ? 'bg-slate-200 text-slate-600'
+                      : e.rank === 3 ? 'bg-orange-100 text-orange-700'
+                      : 'text-slate-400',
+                  )}
+                >
+                  {e.rank}
+                </span>
+                <Avatar src={e.avatarUrl} name={e.name} size={38} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-bold text-navy">
                     {e.name} {e.isYou ? <span className="ml-1 rounded-full bg-sky-100 px-1.5 py-0.5 text-[10px] font-bold text-sky-700">You</span> : null}
                   </p>
                   <p className="truncate text-[11px] text-slate-400">{e.collegeName ?? '—'}</p>
                 </div>
-                <span className="hidden items-center gap-1 text-[11px] font-semibold text-amber-600 sm:flex"><Flame className="size-3" /> {e.currentStreakDays}d</span>
-                <span className="hidden items-center gap-1 text-[11px] font-semibold text-violet-600 sm:flex"><Award className="size-3" /> {e.badgesEarned}</span>
-                <span className="hidden items-center gap-1 text-[11px] font-semibold text-slate-500 sm:flex"><Star className="size-3 text-amber-400" /> Lv {e.level}</span>
-                <span className="w-12 shrink-0 text-right text-[11px] font-medium text-slate-400">{e.percentile}th</span>
-                <span className="w-12 shrink-0 text-right text-sm font-black" style={{ color: toneFor(e.scorePct) }}>{e.scorePct}%</span>
+                <span className="hidden items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-600 sm:inline-flex" title="Streak"><Flame className="size-3" /> {e.currentStreakDays}d</span>
+                <span className="hidden items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-bold text-violet-600 sm:inline-flex" title="Badges"><Award className="size-3" /> {e.badgesEarned}</span>
+                <span className="hidden items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-600 sm:inline-flex" title="Level"><Star className="size-3 text-amber-400" /> Lv {e.level}</span>
+                <span className="w-14 shrink-0 text-right text-[11px] font-semibold text-slate-400" title="Percentile">{e.percentile}th pct</span>
+                <span className="w-12 shrink-0 text-right text-base font-black tabular-nums" style={{ color: toneFor(e.scorePct) }}>{e.scorePct}%</span>
               </li>
             ))}
           </ul>

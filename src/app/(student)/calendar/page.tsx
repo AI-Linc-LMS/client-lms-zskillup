@@ -173,7 +173,7 @@ export default function CalendarPage() {
           <Loader2 className="size-6 animate-spin text-slate-400" />
         </div>
       ) : (
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_21rem]">
+        <div className="mt-6 grid gap-6 lg:grid-cols-[23rem_1fr]">
           {/* ── Month grid ──────────────────────────────────────────────── */}
           <Reveal>
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
@@ -327,7 +327,7 @@ export default function CalendarPage() {
                 </Link>
               </div>
             ) : (
-              <Stagger className="space-y-3">
+              <Stagger className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {upcoming.map((it) => {
                   const dimmed =
                     selectedDay !== null && dayKey(new Date(it.scheduledAt)) !== selectedDay;

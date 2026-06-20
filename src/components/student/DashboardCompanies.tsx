@@ -25,6 +25,7 @@ export function DashboardCompanies() {
   const [companies, setCompanies] = useState<ApiCompany[] | null>(null);
   const [registered, setRegistered] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState<string | null>(null);
+  const [confirm, setConfirm] = useState<ApiCompany | null>(null);
 
   useEffect(() => {
     listCompanies().then(setCompanies).catch(() => setCompanies([]));
@@ -38,6 +39,7 @@ export function DashboardCompanies() {
     try {
       await registerForCompany(slug);
       setRegistered((p) => new Set(p).add(slug));
+      setConfirm(null);
     } catch {
       /* ignore */
     } finally {
@@ -121,7 +123,7 @@ export function DashboardCompanies() {
                 ) : (
                   <button
                     type="button"
-                    onClick={() => register(c.slug)}
+                    onClick={() => setConfirm(c)}
                     disabled={busy === c.slug}
                     className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#f7a14e] to-[#f37021] py-2.5 text-sm font-extrabold text-white shadow-[0_10px_24px_-12px_rgba(243,112,33,0.9)] transition-transform hover:brightness-105 active:scale-[0.99] disabled:opacity-50"
                   >
@@ -133,6 +135,40 @@ export function DashboardCompanies() {
           );
         })}
       </div>
+
+      {/* Register confirmation */}
+      {confirm ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button type="button" aria-label="Close" onClick={() => setConfirm(null)} className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" />
+          <div className="relative w-full max-w-sm rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-2xl">
+            <span className="mx-auto grid size-14 place-items-center overflow-hidden rounded-2xl border border-slate-200 bg-white p-2">
+              {confirm.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={confirm.logoUrl} alt={confirm.name} className="max-h-full max-w-full object-contain" />
+              ) : (
+                <span className="text-sm font-black text-slate-500">{confirm.name.slice(0, 2).toUpperCase()}</span>
+              )}
+            </span>
+            <h3 className="mt-3 text-lg font-black text-navy">Register for {confirm.name}?</h3>
+            <p className="mt-1 text-sm leading-relaxed text-slate-500">
+              You&apos;ll get {confirm.name}&apos;s scheduled assessments on your calendar and reminders before each one.
+            </p>
+            <div className="mt-5 flex gap-2">
+              <button type="button" onClick={() => setConfirm(null)} className="flex-1 rounded-full border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50">
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => register(confirm.slug)}
+                disabled={busy === confirm.slug}
+                className="flex-[1.4] inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-4 py-2.5 text-sm font-extrabold text-white disabled:opacity-60"
+              >
+                {busy === confirm.slug ? <Loader2 className="size-4 animate-spin" /> : <><BadgeCheck className="size-4" /> Confirm</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

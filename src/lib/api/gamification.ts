@@ -78,6 +78,8 @@ export interface ApiLeaderboard {
   myRank: number | null;
   myEntry: ApiLeaderboardEntry | null;
   total: number;
+  totalStudents: number;
+  topStreak: number;
 }
 
 export async function getLeaderboard(scope: 'national' | 'college' = 'national', limit = 50): Promise<ApiLeaderboard> {
