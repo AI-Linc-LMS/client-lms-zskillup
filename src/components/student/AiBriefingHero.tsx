@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
   ArrowRight,
-  Brain,
   Flame,
   Rocket,
   Sparkles,
@@ -143,13 +142,6 @@ export function AiBriefingHero() {
   const focusAreas = briefing?.focusAreas?.length ? briefing.focusAreas : DEFAULT_FOCUS;
   const nextAction = briefing?.nextAction ?? DEFAULT_ACTION;
 
-  const float = reduce
-    ? undefined
-    : {
-        y: [0, -12, 0],
-        transition: { duration: 7, repeat: Infinity, ease: 'easeInOut' as const },
-      };
-
   // First paint: a shimmering skeleton over the aurora — never the 0-state.
   if (!ready) {
     return (
@@ -192,24 +184,8 @@ export function AiBriefingHero() {
         className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"
       />
 
-      {/* Floating parallax accent — a soft AI orb in the top-right that drifts. */}
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute -right-10 -top-10 hidden sm:block"
-        animate={float}
-      >
-        <div className="relative size-44">
-          <div className="absolute inset-0 rounded-full bg-[#f37021]/25 blur-2xl" />
-          <div className="absolute inset-6 rounded-full bg-[#6d3bf5]/30 blur-xl" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex size-16 items-center justify-center rounded-2xl border border-white/15 bg-white/[0.08] shadow-[0_8px_30px_-8px_rgba(0,0,0,0.5)] backdrop-blur">
-              <Brain className="size-7 text-[#ffb877]" />
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      <div className="relative z-10 max-w-3xl">
+      {/* Top bar — eyebrow (left) + live level/XP/streak (right) */}
+      <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
         {/* eyebrow — keeps the live dot */}
         <motion.div
           className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-white/75 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur"
@@ -224,6 +200,48 @@ export function AiBriefingHero() {
             <span className="relative inline-flex size-1.5 rounded-full bg-emerald-400" />
           </span>
         </motion.div>
+
+        {/* live level/XP/streak — pinned top-right */}
+        <motion.div
+          className="flex items-stretch gap-3"
+          initial={reduce ? false : { opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.06 }}
+        >
+          <div className="min-w-[10rem] rounded-2xl border border-white/10 bg-white/[0.05] px-3.5 py-2.5 backdrop-blur">
+            <div className="mb-1.5 flex items-center justify-between gap-3 text-[11px] font-semibold">
+              <span className="flex items-center gap-1 text-white/80">
+                <Star className="size-3 fill-amber-300 text-amber-300" /> Level {level}
+              </span>
+              <span className="tabular-nums text-white/45">
+                {xpSpan > 0 ? `${xpToGo.toLocaleString()} XP to go` : `${nextPct}%`}
+              </span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-white/10">
+              <motion.div
+                className="h-full rounded-full bg-gradient-to-r from-[#f7a14e] via-[#f37021] to-[#f5491e]"
+                initial={reduce ? false : { width: 0 }}
+                animate={{ width: `${nextPct}%` }}
+                transition={{ duration: 1.1, delay: 0.55, ease: 'easeOut' }}
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 rounded-2xl border border-white/10 bg-white/[0.06] px-3.5 py-2.5 text-sm font-extrabold backdrop-blur">
+            <motion.span
+              animate={
+                reduce || streak === 0
+                  ? undefined
+                  : { scale: [1, 1.18, 1], transition: { duration: 1.6, repeat: Infinity, ease: 'easeInOut' } }
+              }
+            >
+              <Flame className={streak > 0 ? 'size-4 fill-orange-500 text-orange-400' : 'size-4 text-white/40'} />
+            </motion.span>
+            <AnimatedNumber value={streak} className="tabular-nums" />
+          </div>
+        </motion.div>
+      </div>
+
+      <div className="relative z-10 mt-6 max-w-3xl">
 
         {/* greeting */}
         <motion.p
@@ -276,9 +294,9 @@ export function AiBriefingHero() {
           ))}
         </div>
 
-        {/* CTA + live progress */}
+        {/* CTA */}
         <motion.div
-          className="mt-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between"
+          className="mt-8"
           initial={reduce ? false : { opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.42 }}
@@ -301,48 +319,6 @@ export function AiBriefingHero() {
             {nextAction.label}
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
-
-          <div className="flex items-stretch gap-3 sm:gap-4">
-            {/* Level / XP progress */}
-            <div className="min-w-[10rem] flex-1 rounded-2xl border border-white/10 bg-white/[0.05] px-3.5 py-2.5 backdrop-blur sm:flex-none">
-              <div className="mb-1.5 flex items-center justify-between text-[11px] font-semibold">
-                <span className="flex items-center gap-1 text-white/80">
-                  <Star className="size-3 fill-amber-300 text-amber-300" /> Level {level}
-                </span>
-                <span className="tabular-nums text-white/45">
-                  {xpSpan > 0 ? `${xpToGo.toLocaleString()} XP to go` : `${nextPct}%`}
-                </span>
-              </div>
-              <div className="h-2 overflow-hidden rounded-full bg-white/10">
-                <motion.div
-                  className="h-full rounded-full bg-gradient-to-r from-[#f7a14e] via-[#f37021] to-[#f5491e]"
-                  initial={reduce ? false : { width: 0 }}
-                  animate={{ width: `${nextPct}%` }}
-                  transition={{ duration: 1.1, delay: 0.55, ease: 'easeOut' }}
-                />
-              </div>
-            </div>
-
-            {/* Streak flame */}
-            <div className="flex items-center gap-1.5 rounded-2xl border border-white/10 bg-white/[0.06] px-3.5 py-2.5 text-sm font-extrabold backdrop-blur">
-              <motion.span
-                animate={
-                  reduce || streak === 0
-                    ? undefined
-                    : { scale: [1, 1.18, 1], transition: { duration: 1.6, repeat: Infinity, ease: 'easeInOut' } }
-                }
-              >
-                <Flame
-                  className={
-                    streak > 0
-                      ? 'size-4 fill-orange-500 text-orange-400'
-                      : 'size-4 text-white/40'
-                  }
-                />
-              </motion.span>
-              <AnimatedNumber value={streak} className="tabular-nums" />
-            </div>
-          </div>
         </motion.div>
       </div>
     </section>
