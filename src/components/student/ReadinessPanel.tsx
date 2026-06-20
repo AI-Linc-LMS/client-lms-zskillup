@@ -107,13 +107,15 @@ const COMP_ICON: Record<string, LucideIcon> = {
 
 export function ReadinessPanel({ compact = false }: { compact?: boolean }) {
   const [data, setData] = useState<Readiness | null>(null);
-  const [logos, setLogos] = useState<Record<string, string | null>>({});
+  const [companies, setCompanies] = useState<ApiCompany[]>([]);
   const [err, setErr] = useState(false);
 
   useEffect(() => {
     getReadiness().then(setData).catch(() => setErr(true));
+    // Published companies (the live company-hub set) are the source of truth for
+    // which readiness cards to show — not whatever slugs the readiness rollup saw.
     listCompanies()
-      .then((cs: ApiCompany[]) => setLogos(Object.fromEntries(cs.map((c) => [c.slug, c.logoUrl]))))
+      .then((cs: ApiCompany[]) => setCompanies(cs))
       .catch(() => {});
   }, []);
 
@@ -123,6 +125,7 @@ export function ReadinessPanel({ compact = false }: { compact?: boolean }) {
   }
 
   const c = tone(data.overall.score);
+  const rdyBySlug = new Map(data.companies.map((co) => [co.slug, co]));
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -150,14 +153,28 @@ export function ReadinessPanel({ compact = false }: { compact?: boolean }) {
 
       {!compact ? (
         <div className="space-y-6 p-6">
-          {/* company readiness — donut cards */}
-          {data.companies.length ? (
+          {/* company readiness — one card per PUBLISHED company (logo + score) */}
+          {companies.length ? (
             <div>
               <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Company readiness</p>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                {data.companies.slice(0, 8).map((co) => (
-                  <CompanyRing key={co.slug} name={co.name} logo={logos[co.slug] ?? null} pct={co.readiness} level={co.level} sub={`${co.questionsAttempted}q${co.codingTotal ? ` · ${co.codingSolved}/${co.codingTotal}` : ''}`} />
-                ))}
+              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                {companies.map((co) => {
+                  const r = rdyBySlug.get(co.slug);
+                  return (
+                    <CompanyRing
+                      key={co.slug}
+                      name={co.name}
+                      logo={co.logoUrl}
+                      pct={r?.readiness ?? 0}
+                      level={r?.level ?? 'Not started'}
+                      sub={
+                        r
+                          ? `${r.questionsAttempted}q${r.codingTotal ? ` · ${r.codingSolved}/${r.codingTotal} code` : ''}`
+                          : 'Start practising'
+                      }
+                    />
+                  );
+                })}
               </div>
             </div>
           ) : null}
@@ -188,7 +205,7 @@ export function ReadinessPanel({ compact = false }: { compact?: boolean }) {
             </div>
           ) : null}
 
-          {data.companies.length === 0 && data.topics.length === 0 ? (
+          {companies.length === 0 && data.topics.length === 0 ? (
             <p className="text-xs text-slate-500">
               Practice questions, take mock quizzes and assessments to build your readiness.
             </p>
@@ -208,30 +225,31 @@ function toneSolid(pct: number): string {
 }
 
 function CompanyRing({ name, logo, pct, level, sub }: { name: string; logo: string | null; pct: number; level: string; sub: string }) {
-  const size = 76;
-  const r = size / 2 - 7;
-  const circ = 2 * Math.PI * r;
   const c = toneSolid(pct);
   const n = useCountUp(pct);
   return (
-    <div className="flex flex-col items-center rounded-xl border border-slate-200 bg-white p-3 text-center transition-colors hover:border-slate-300">
-      <div className="relative" style={{ width: size, height: size }}>
-        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
-          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#eef2f7" strokeWidth={7} />
-          <motion.circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={c} strokeWidth={7} strokeLinecap="round" strokeDasharray={circ} initial={{ strokeDashoffset: circ }} animate={{ strokeDashoffset: circ - (pct / 100) * circ }} transition={{ duration: 0.9, ease: EASE }} />
-        </svg>
-        <span className="absolute inset-0 grid place-items-center">
+    <div className="group flex flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md">
+      <div className="flex items-center gap-2.5">
+        <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5">
           {logo ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={logo} alt={name} className="max-h-7 max-w-9 object-contain" />
+            <img src={logo} alt={name} className="max-h-full max-w-full object-contain" />
           ) : (
-            <span className="text-sm font-black tabular-nums text-navy">{n}</span>
+            <span className="text-xs font-black text-slate-500">{name.slice(0, 2).toUpperCase()}</span>
           )}
         </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-extrabold text-navy" title={name}>{name}</p>
+          <p className="text-[11px] font-bold" style={{ color: c }}>{level}</p>
+        </div>
       </div>
-      <span className="mt-2 truncate text-xs font-bold text-navy" title={name}>{name}</span>
-      <span className="text-[11px] font-extrabold" style={{ color: c }}>{pct}% · {level}</span>
-      <span className="mt-0.5 text-[10px] text-slate-400">{sub}</span>
+      <div className="mt-3 flex items-end justify-between">
+        <span className="text-2xl font-black leading-none tabular-nums" style={{ color: c }}>{n}<span className="text-sm">%</span></span>
+        <span className="text-[10px] font-medium text-slate-400">{sub}</span>
+      </div>
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
+        <motion.div className="h-full rounded-full" style={{ background: c }} initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.9, ease: EASE }} />
+      </div>
     </div>
   );
 }

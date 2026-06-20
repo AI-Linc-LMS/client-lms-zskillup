@@ -11,7 +11,7 @@ import {
   Layers,
   Sparkles,
 } from 'lucide-react';
-import { listTopicsWithCounts, type ApiTopic } from '@/lib/api/catalog';
+import { listTopics, listTopicsWithCounts, type ApiTopic } from '@/lib/api/catalog';
 import { TopicAccuracyPanels } from '@/components/practice/TopicAccuracyPanels';
 import { Reveal, Stagger, StaggerItem } from '@/components/motion/primitives';
 
@@ -55,16 +55,20 @@ interface RootTopic extends ApiTopic {
   accent: Accent;
 }
 
-const hasQuestions = (t: ApiTopic) => (t.questionCount ?? 0) > 0;
+// Always fetch fresh — a build-time fetch could bake in a transient failure
+// (e.g. the counts endpoint not yet deployed) and leave the page permanently empty.
+export const dynamic = 'force-dynamic';
 
-function buildRoots(topics: ApiTopic[]): RootTopic[] {
-  // Only bank-backed topics — drop taxonomy entries with no published questions
-  // (e.g. the empty "Interview Preparation" section) so nothing reads as a placeholder.
-  const roots = topics.filter((t) => t.parentId === null && hasQuestions(t));
+function buildRoots(topics: ApiTopic[], filterEmpty: boolean): RootTopic[] {
+  // When counts are available, drop taxonomy entries with no published questions
+  // (e.g. the empty "Interview Preparation" section). Without counts (fallback),
+  // show everything rather than nothing.
+  const ok = (t: ApiTopic) => !filterEmpty || (t.questionCount ?? 0) > 0;
+  const roots = topics.filter((t) => t.parentId === null && ok(t));
   return roots
     .map((r, i) => ({
       ...r,
-      children: topics.filter((t) => t.parentId === r.id && hasQuestions(t)),
+      children: topics.filter((t) => t.parentId === r.id && ok(t)),
       icon: CATEGORY_ICON[r.slug] ?? Layers,
       accent: CATEGORY_ACCENT[r.slug] ?? ACCENT_CYCLE[i % ACCENT_CYCLE.length],
     }))
@@ -73,12 +77,20 @@ function buildRoots(topics: ApiTopic[]): RootTopic[] {
 
 export default async function TopicMasteryPage() {
   let topics: ApiTopic[] = [];
+  let filterEmpty = false;
   try {
     topics = await listTopicsWithCounts();
+    filterEmpty = true;
   } catch {
-    // Backend unreachable in preview — render empty root list with sensible CTAs.
+    // Counts endpoint unavailable (e.g. mid-deploy) — fall back to the always-on
+    // taxonomy so the page still renders all topics instead of an empty state.
+    try {
+      topics = await listTopics();
+    } catch {
+      // Backend unreachable — render empty root list with sensible CTAs.
+    }
   }
-  const roots = buildRoots(topics);
+  const roots = buildRoots(topics, filterEmpty);
   const subtopicCount = roots.reduce((s, r) => s + r.children.length, 0);
   const questionTotal = roots.reduce((s, r) => s + (r.questionCount ?? 0), 0);
 

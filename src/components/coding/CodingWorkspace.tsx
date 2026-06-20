@@ -13,7 +13,7 @@ import {
   Send,
   XCircle,
 } from 'lucide-react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
   getCodingLanguages,
@@ -46,6 +46,14 @@ const VERDICT_LABEL: Record<string, string> = {
 };
 
 export function CodingWorkspace({ slug }: { slug: string }) {
+  const router = useRouter();
+  // Coding problems are opened from the dashboard or a company hub — there is no
+  // standalone /coding index. "Back" returns to wherever the user came from,
+  // falling back to the dashboard (never a dead /coding route).
+  const goBack = () => {
+    if (typeof window !== 'undefined' && window.history.length > 1) router.back();
+    else router.push('/dashboard');
+  };
   const [problem, setProblem] = useState<CodingProblem | null>(null);
   const [missing, setMissing] = useState(false);
   const [languages, setLanguages] = useState<CodingLanguage[]>([]);
@@ -93,9 +101,9 @@ export function CodingWorkspace({ slug }: { slug: string }) {
       <div className="rounded-2xl border border-slate-200/80 bg-white p-10 text-center shadow-sm">
         <CircleSlash className="mx-auto mb-3 size-8 text-slate-300" />
         <p className="text-sm font-semibold text-navy">Problem not found</p>
-        <Link href="/coding" className="mt-3 inline-block text-sm font-bold text-orange">
-          ← Back to problems
-        </Link>
+        <button type="button" onClick={goBack} className="mt-3 inline-block text-sm font-bold text-orange">
+          ← Back
+        </button>
       </div>
     );
   }
@@ -146,12 +154,13 @@ export function CodingWorkspace({ slug }: { slug: string }) {
       {reward ? <RewardOverlay summary={reward} onClose={() => setReward(null)} passed /> : null}
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <Link
-          href="/coding"
+        <button
+          type="button"
+          onClick={goBack}
           className="inline-flex items-center gap-1 text-sm font-semibold text-slate-500 hover:text-navy"
         >
-          <ChevronLeft className="size-4" /> Problems
-        </Link>
+          <ChevronLeft className="size-4" /> Back
+        </button>
         <span
           className={cn(
             'rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide ring-1 ring-inset',
