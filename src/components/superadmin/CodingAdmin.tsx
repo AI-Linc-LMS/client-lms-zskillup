@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { BadgeCheck, ExternalLink, Loader2, Search } from 'lucide-react';
+import { BadgeCheck, Code2, ExternalLink, Loader2, Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ApiRequestError } from '@/lib/api/types';
 import { listCompanies } from '@/lib/api/catalog';
@@ -43,6 +43,7 @@ export function CodingAdmin() {
   const [company, setCompany] = useState('');
   const [source, setSource] = useState('');
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<AdminCodingProblemSummary | null>(null);
 
   const load = () =>
     listAdminCodingProblems()
@@ -174,8 +175,16 @@ export function CodingAdmin() {
                 filtered.map((r) => (
                   <tr key={r.id} className="border-t border-slate-100/80 align-top hover:bg-slate-50/60">
                     <td className="max-w-xs px-4 py-3.5">
-                      <span className="block font-semibold text-navy">{r.title}</span>
-                      <span className="text-[11px] text-slate-400">{r.slug}</span>
+                      <button
+                        type="button"
+                        onClick={() => setSelected(r)}
+                        className="group/title block text-left"
+                      >
+                        <span className="block font-semibold text-navy group-hover/title:text-orange group-hover/title:underline">
+                          {r.title}
+                        </span>
+                        <span className="text-[11px] text-slate-400">{r.slug}</span>
+                      </button>
                     </td>
                     <td className="px-4 py-3.5">
                       <Pill tone={DIFF_TONE[r.difficulty]}>{cap(r.difficulty)}</Pill>
@@ -245,6 +254,199 @@ export function CodingAdmin() {
           Showing {filtered.length} of {rows?.length ?? 0}
         </div>
       </div>
+
+      <CodingDetailDrawer
+        problem={selected}
+        companyName={companyName}
+        onClose={() => setSelected(null)}
+      />
+    </div>
+  );
+}
+
+function CodingDetailDrawer({
+  problem,
+  companyName,
+  onClose,
+}: {
+  problem: AdminCodingProblemSummary | null;
+  companyName: Record<string, string>;
+  onClose: () => void;
+}) {
+  if (!problem) return null;
+  const p = problem;
+  const cases = p.testCases ?? [];
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end">
+      <button
+        type="button"
+        aria-label="Close"
+        onClick={onClose}
+        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+      />
+      <aside className="relative flex h-full w-full max-w-2xl flex-col overflow-y-auto bg-white shadow-2xl">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-slate-200 bg-white/95 px-6 py-4 backdrop-blur">
+          <div className="min-w-0">
+            <h2 className="truncate text-lg font-extrabold text-navy">{p.title}</h2>
+            <p className="text-[11px] text-slate-400">{p.slug}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="grid size-9 shrink-0 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+          >
+            <X className="size-5" />
+          </button>
+        </div>
+
+        <div className="space-y-5 px-6 py-5">
+          {/* badges */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Pill tone={DIFF_TONE[p.difficulty]}>{cap(p.difficulty)}</Pill>
+            {p.source ? (
+              <Pill tone={SOURCE_TONE[p.source] ?? SOURCE_TONE.PATTERN_BASED}>
+                {SOURCE_LABEL[p.source] ?? p.source}
+                {p.yearTags && p.yearTags.length ? ` · ${p.yearTags.join(', ')}` : ''}
+              </Pill>
+            ) : null}
+            {p.verified ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                <BadgeCheck className="size-3.5" /> Judge0-verified
+              </span>
+            ) : (
+              <Pill tone="bg-slate-50 text-slate-500 ring-slate-200">Unverified</Pill>
+            )}
+            <Pill tone={p.isActive ? 'bg-sky-50 text-sky-700 ring-sky-200' : 'bg-slate-100 text-slate-500 ring-slate-200'}>
+              {p.isActive ? 'Active' : 'Inactive'}
+            </Pill>
+            {p.xpReward ? <Pill tone="bg-orange/10 text-orange ring-orange/20">{p.xpReward} XP</Pill> : null}
+          </div>
+
+          {/* source citation — the whole point */}
+          {p.sourceRef ? (
+            <Field label="Source citation">
+              {/^https?:\/\//.test(p.sourceRef) ? (
+                <a
+                  href={p.sourceRef}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 break-all text-[13px] font-medium text-sky-700 hover:underline"
+                >
+                  {p.sourceRef} <ExternalLink className="size-3.5 shrink-0" />
+                </a>
+              ) : (
+                <span className="break-words text-[13px] text-slate-600">{p.sourceRef}</span>
+              )}
+            </Field>
+          ) : null}
+
+          {/* companies + roles */}
+          {(p.companies ?? []).length ? (
+            <Field label="Companies">
+              <div className="flex flex-wrap gap-1.5">
+                {(p.companies ?? []).map((c) => (
+                  <Pill key={c} tone="bg-slate-50 text-slate-600 ring-slate-200">
+                    {companyName[c] ?? c}
+                  </Pill>
+                ))}
+              </div>
+            </Field>
+          ) : null}
+          {(p.roleTags ?? []).length ? (
+            <Field label="Target roles">
+              <div className="flex flex-wrap gap-1.5">
+                {(p.roleTags ?? []).map((r) => (
+                  <Pill key={r} tone="bg-violet-50 text-violet-700 ring-violet-200">
+                    {r}
+                  </Pill>
+                ))}
+              </div>
+            </Field>
+          ) : null}
+
+          {p.statement ? (
+            <Field label="Problem statement">
+              <p className="whitespace-pre-wrap text-[13.5px] leading-relaxed text-slate-700">{p.statement}</p>
+            </Field>
+          ) : null}
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {p.inputFormat ? (
+              <Field label="Input format">
+                <p className="whitespace-pre-wrap text-[13px] text-slate-600">{p.inputFormat}</p>
+              </Field>
+            ) : null}
+            {p.outputFormat ? (
+              <Field label="Output format">
+                <p className="whitespace-pre-wrap text-[13px] text-slate-600">{p.outputFormat}</p>
+              </Field>
+            ) : null}
+          </div>
+
+          {p.constraints ? (
+            <Field label="Constraints">
+              <p className="whitespace-pre-wrap text-[13px] text-slate-600">{p.constraints}</p>
+            </Field>
+          ) : null}
+
+          {/* test cases */}
+          {cases.length ? (
+            <Field label={`Test cases (${cases.length})`}>
+              <div className="space-y-2">
+                {cases.map((t, i) => (
+                  <div key={i} className="rounded-xl border border-slate-200 bg-slate-50/60 p-2.5">
+                    <div className="mb-1.5 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                      Case {i + 1}
+                      {t.isSample ? (
+                        <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-emerald-700">Sample</span>
+                      ) : (
+                        <span className="rounded-full bg-slate-200 px-1.5 py-0.5 text-slate-500">Hidden</span>
+                      )}
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <IoBox label="Input" text={t.input} />
+                      <IoBox label="Expected" text={t.expectedOutput} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Field>
+          ) : null}
+
+          {/* reference solution */}
+          {p.referenceSolution?.source ? (
+            <Field label={`Reference solution (${p.referenceSolution.language})`}>
+              <pre className="max-h-80 overflow-auto rounded-xl bg-[#0b1220] p-3 text-[12px] leading-relaxed text-slate-100">
+                <code>{p.referenceSolution.source}</code>
+              </pre>
+            </Field>
+          ) : (
+            <p className="inline-flex items-center gap-1.5 text-[12px] text-slate-400">
+              <Code2 className="size-3.5" /> No reference solution stored yet.
+            </p>
+          )}
+        </div>
+      </aside>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">{label}</p>
+      {children}
+    </div>
+  );
+}
+
+function IoBox({ label, text }: { label: string; text: string }) {
+  return (
+    <div>
+      <p className="mb-1 text-[9px] font-bold uppercase tracking-widest text-slate-400">{label}</p>
+      <pre className="max-h-32 overflow-auto whitespace-pre-wrap break-words rounded-md border border-slate-200 bg-white px-2 py-1.5 font-mono text-[12px] text-slate-700">
+        {text || '(empty)'}
+      </pre>
     </div>
   );
 }

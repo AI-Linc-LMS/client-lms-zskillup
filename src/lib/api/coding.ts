@@ -141,6 +141,19 @@ export interface AdminCodingProblemSummary {
   verified?: boolean;
   tags?: string[];
   xpReward?: number;
+  // Full problem body — the admin list endpoint returns whole entities, so the
+  // detail drawer renders straight from the row (no extra fetch).
+  statement?: string;
+  inputFormat?: string | null;
+  outputFormat?: string | null;
+  constraints?: string | null;
+  sampleInput?: string | null;
+  sampleOutput?: string | null;
+  testCases?: { input: string; expectedOutput: string; isSample?: boolean }[];
+  starterCode?: Record<string, string>;
+  referenceSolution?: { language: string; source: string } | null;
+  timeLimitMs?: number | null;
+  memoryLimitKb?: number | null;
 }
 
 export async function listAdminCodingProblems(): Promise<AdminCodingProblemSummary[]> {
