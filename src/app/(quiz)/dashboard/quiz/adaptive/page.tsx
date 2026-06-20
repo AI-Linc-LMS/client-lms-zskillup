@@ -37,9 +37,9 @@ function certaintyBand(answered: number): { label: string; color: string } {
 }
 
 const DIFF_TONE: Record<string, { text: string; ring: string; bg: string }> = {
-  EASY: { text: 'text-emerald-300', ring: 'ring-emerald-400/30', bg: 'bg-emerald-400/10' },
-  MEDIUM: { text: 'text-indigo-300', ring: 'ring-indigo-400/30', bg: 'bg-indigo-400/10' },
-  HARD: { text: 'text-rose-300', ring: 'ring-rose-400/30', bg: 'bg-rose-400/10' },
+  EASY: { text: 'text-emerald-600', ring: 'ring-emerald-400/30', bg: 'bg-emerald-400/10' },
+  MEDIUM: { text: 'text-indigo-600', ring: 'ring-indigo-400/30', bg: 'bg-indigo-400/10' },
+  HARD: { text: 'text-rose-600', ring: 'ring-rose-400/30', bg: 'bg-rose-400/10' },
 };
 
 const CONFIDENCE = [
@@ -108,8 +108,8 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
 
   if (phase === 'loading' || phase === 'complete') {
     return (
-      <div className="grid min-h-screen place-items-center bg-[#0a0a14]">
-        <div className="flex flex-col items-center gap-3 text-white/60">
+      <div className="grid min-h-screen place-items-center bg-background">
+        <div className="flex flex-col items-center gap-3 text-slate-400">
           <AIBeacon size={44} />
           <p className="text-sm">{phase === 'complete' ? 'Composing your diagnostic…' : 'Starting your adaptive quiz…'}</p>
         </div>
@@ -118,8 +118,8 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
   }
   if (phase === 'error') {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#0a0a14] text-white">
-        <p className="text-rose-300">{error ?? 'Something went wrong.'}</p>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background text-navy">
+        <p className="text-rose-600">{error ?? 'Something went wrong.'}</p>
         <Button variant="secondary" onClick={() => router.replace('/mock-tests')}>Back to mock quizzes</Button>
       </div>
     );
@@ -142,12 +142,12 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#0a0a14] text-white">
+    <div className="relative min-h-screen overflow-hidden bg-background text-navy">
       {/* radial mesh backdrop */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-1/4 -top-1/4 size-[60vw] rounded-full bg-indigo-600/20 blur-[120px]" />
-        <div className="absolute -right-1/4 -top-1/3 size-[55vw] rounded-full bg-pink-600/15 blur-[120px]" />
-        <div className="absolute bottom-0 left-1/3 size-[50vw] rounded-full bg-purple-600/15 blur-[120px]" />
+        <div className="absolute -left-1/4 -top-1/4 size-[60vw] rounded-full bg-indigo-600/[0.04] blur-[120px]" />
+        <div className="absolute -right-1/4 -top-1/3 size-[55vw] rounded-full bg-pink-600/[0.03] blur-[120px]" />
+        <div className="absolute bottom-0 left-1/3 size-[50vw] rounded-full bg-purple-600/[0.03] blur-[120px]" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-[1200px] px-4 py-6 sm:px-6">
@@ -155,11 +155,11 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
         <div className="flex items-center justify-between">
           <button
             onClick={() => void abandon().then(() => router.replace('/mock-tests'))}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-navy"
           >
             <ArrowLeft className="size-3.5" /> Exit quiz
           </button>
-          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
             Mock Quiz · Adaptive
           </span>
         </div>
@@ -170,7 +170,7 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
             <Brain className="size-6 text-white" />
           </span>
           <div>
-            <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-indigo-300">
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-indigo-600">
               Live · Adaptive engine
             </p>
             <h1 className="text-xl font-black tracking-tight">{sessionMeta?.title ?? 'Adaptive Mock Quiz'}</h1>
@@ -178,24 +178,24 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
         </div>
 
         {/* meta strip */}
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 backdrop-blur">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-full border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
           <span className="text-sm">
             Question <span className="font-extrabold">{answered + 1}</span>
-            <span className="text-white/40"> · ~{minQ}–{maxQ}</span>
+            <span className="text-slate-400"> · ~{minQ}–{maxQ}</span>
           </span>
           <span className="flex items-center gap-1.5 text-xs">
-            <span className="text-white/40">AI&apos;s read:</span>
+            <span className="text-slate-400">AI&apos;s read:</span>
             <span className="font-bold" style={{ color: cert.color }}>{cert.label}</span>
           </span>
         </div>
 
         {/* difficulty pulse */}
-        <div className="mt-3 flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 backdrop-blur">
+        <div className="mt-3 flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
           <AIBeacon size={34} />
           <div className="min-w-0 flex-1">
-            <p className="text-[12px] text-white/70">
+            <p className="text-[12px] text-slate-600">
               Testing{' '}
-              <span className="rounded-full bg-indigo-500/20 px-2 py-0.5 text-[11px] font-bold text-indigo-200">
+              <span className="rounded-full bg-indigo-500/20 px-2 py-0.5 text-[11px] font-bold text-indigo-600">
                 {prettySkill(q.targetSkill)}
               </span>{' '}
               · <span className="font-semibold" style={{ color: cert.color }}>{cert.label}</span> · ~
@@ -210,7 +210,7 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
                 style={{ marginLeft: -7 }}
               />
             </div>
-            <div className="mt-1 flex justify-between text-[9px] font-bold uppercase tracking-wider text-white/35">
+            <div className="mt-1 flex justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400">
               <span>Easy</span><span>Hard</span>
             </div>
           </div>
@@ -221,7 +221,7 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
           {/* LEFT — timer + skill confidence */}
           <aside className="space-y-4">
             <Glass>
-              <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/40">
+              <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
                 <Clock className="size-3.5" /> On this question
               </div>
               <p className="mt-2 text-2xl font-black tabular-nums">
@@ -229,7 +229,7 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
               </p>
             </Glass>
             <Glass>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">Skill confidence</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Skill confidence</p>
               <div className="mt-3 space-y-3">
                 {Object.entries(abilityState).map(([skill, theta]) => {
                   const pct = masteryPct(theta);
@@ -238,12 +238,12 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
                   return (
                     <div key={skill}>
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className={cn('truncate', targeting ? 'font-bold text-indigo-300' : 'text-white/70')}>
+                        <span className={cn('truncate', targeting ? 'font-bold text-indigo-600' : 'text-slate-600')}>
                           {prettySkill(skill)}{targeting ? ' · targeting' : ''}
                         </span>
                         <span className="font-bold" style={{ color: b.color }}>{pct}%</span>
                       </div>
-                      <div className="mt-1 h-2 rounded-full bg-white/10">
+                      <div className="mt-1 h-2 rounded-full bg-slate-100">
                         <motion.div
                           className="h-full rounded-full"
                           initial={false}
@@ -256,7 +256,7 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
                   );
                 })}
                 {Object.keys(abilityState).length === 0 ? (
-                  <p className="text-[11px] text-white/40">Building your skill profile…</p>
+                  <p className="text-[11px] text-slate-400">Building your skill profile…</p>
                 ) : null}
               </div>
             </Glass>
@@ -268,7 +268,7 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: EASE }}
-            className="rounded-[1.75rem] border border-white/10 bg-white/[0.05] p-6 backdrop-blur-xl"
+            className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center gap-1.5">
@@ -282,7 +282,7 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
                 <button
                   onClick={askHint}
                   disabled={hintLoading || submitting}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-purple-400/50 px-3 py-1.5 text-[11px] font-bold text-purple-200 hover:bg-purple-500/10 disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-purple-400/50 px-3 py-1.5 text-[11px] font-bold text-violet-600 hover:bg-purple-500/10 disabled:opacity-50"
                 >
                   {hintLoading ? <Loader2 className="size-3.5 animate-spin" /> : <Lightbulb className="size-3.5" />}
                   Ask for a hint · {q.hintTokensRemaining} left
@@ -304,16 +304,16 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
                       'flex w-full items-center gap-3 rounded-2xl border px-4 py-3.5 text-left text-sm transition-colors',
                       isSel
                         ? 'border-indigo-400 bg-indigo-500/10'
-                        : 'border-white/12 bg-white/[0.03] hover:border-white/25 hover:bg-white/[0.06]',
+                        : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
                     )}
                   >
                     <span className={cn(
                       'grid size-7 shrink-0 place-items-center rounded-full text-[11px] font-bold ring-1 ring-inset',
-                      isSel ? 'bg-indigo-500/20 text-indigo-200 ring-indigo-400/40' : 'text-white/60 ring-white/15',
+                      isSel ? 'bg-indigo-500/20 text-indigo-600 ring-indigo-400/40' : 'text-slate-400 ring-slate-200',
                     )}>
                       {String.fromCharCode(65 + i)}
                     </span>
-                    <span className="text-white/90">{opt.text}</span>
+                    <span className="text-slate-700">{opt.text}</span>
                   </button>
                 );
               })}
@@ -321,16 +321,16 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
 
             {hintState ? (
               <div className="mt-4 rounded-2xl border border-purple-400/30 bg-purple-500/10 p-3.5">
-                <p className="mb-1 flex items-center gap-1.5 text-[11px] font-bold text-purple-200">
+                <p className="mb-1 flex items-center gap-1.5 text-[11px] font-bold text-violet-600">
                   <Lightbulb className="size-3.5" /> Hint
                 </p>
-                <p className="text-sm text-purple-100">{hintState.hint}</p>
+                <p className="text-sm text-slate-700">{hintState.hint}</p>
               </div>
             ) : null}
 
             {confidenceRequired ? (
               <div className="mt-5">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
                   How confident are you?
                 </p>
                 <div className="mt-2 grid grid-cols-4 gap-2">
@@ -341,8 +341,8 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
                       className={cn(
                         'flex flex-col items-center gap-1 rounded-xl border px-2 py-2.5 text-[11px] font-semibold transition-colors',
                         confidence === c.value
-                          ? 'border-indigo-400 bg-indigo-500/10 text-indigo-200'
-                          : 'border-white/12 bg-white/[0.03] text-white/60 hover:bg-white/[0.06]',
+                          ? 'border-indigo-400 bg-indigo-500/10 text-indigo-600'
+                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50',
                       )}
                     >
                       <span className="text-lg">{c.emoji}</span>
@@ -372,14 +372,14 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
               <div className="flex items-center gap-2">
                 <AIBeacon size={28} />
                 <div>
-                  <p className="text-[9px] font-extrabold uppercase tracking-[0.18em] text-purple-300">AI Tutor</p>
-                  <p className="text-[11px] font-bold text-white/80">Coaching this question</p>
+                  <p className="text-[9px] font-extrabold uppercase tracking-[0.18em] text-violet-600">AI Tutor</p>
+                  <p className="text-[11px] font-bold text-slate-600">Coaching this question</p>
                 </div>
               </div>
 
               <Pill className="mt-4">Why you got this Q</Pill>
-              <p className="mt-1.5 text-[12px] leading-relaxed text-white/70">
-                Testing <span className="font-semibold text-indigo-200">{prettySkill(q.targetSkill)}</span> at the{' '}
+              <p className="mt-1.5 text-[12px] leading-relaxed text-slate-600">
+                Testing <span className="font-semibold text-indigo-600">{prettySkill(q.targetSkill)}</span> at the{' '}
                 <span className="font-semibold">{q.difficultyLabel.toLowerCase()}</span> level ·{' '}
                 ~{Math.round((q.predictedPCorrect ?? 0.5) * 100)}% predicted.
               </p>
@@ -387,8 +387,8 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
               {q.selectorRationale ? (
                 <>
                   <Pill className="mt-4">What comes next</Pill>
-                  <p className="mt-1.5 flex items-start gap-1.5 text-[12px] leading-relaxed text-white/70">
-                    <TrendingUp className="mt-0.5 size-3.5 shrink-0 text-emerald-300" />
+                  <p className="mt-1.5 flex items-start gap-1.5 text-[12px] leading-relaxed text-slate-600">
+                    <TrendingUp className="mt-0.5 size-3.5 shrink-0 text-emerald-600" />
                     {q.selectorRationale}
                   </p>
                 </>
@@ -400,7 +400,7 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
                   <button
                     onClick={askHint}
                     disabled={hintLoading || submitting}
-                    className="mt-1.5 w-full rounded-xl border border-dashed border-purple-400/40 px-3 py-2 text-[11px] font-bold text-purple-200 hover:bg-purple-500/10 disabled:opacity-50"
+                    className="mt-1.5 w-full rounded-xl border border-dashed border-purple-400/40 px-3 py-2 text-[11px] font-bold text-violet-600 hover:bg-purple-500/10 disabled:opacity-50"
                     style={{ background: 'transparent' }}
                   >
                     {hintLoading ? 'Thinking…' : `Spend 1 hint · ${q.hintTokensRemaining} left`}
@@ -408,7 +408,7 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
                 </>
               ) : null}
 
-              <p className="mt-4 text-center text-[10px] italic text-white/30">
+              <p className="mt-4 text-center text-[10px] italic text-slate-400">
                 Powered by the ZSkillup Adaptive Engine
               </p>
             </Glass>
@@ -429,12 +429,12 @@ function prettySkill(s: string): string {
 
 function Glass({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-4 backdrop-blur-xl">{children}</div>
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">{children}</div>
   );
 }
 function Chip({ children }: { children: React.ReactNode }) {
   return (
-    <span className="rounded-full bg-indigo-500/15 px-2.5 py-1 text-[10px] font-bold text-indigo-200">{children}</span>
+    <span className="rounded-full bg-indigo-500/15 px-2.5 py-1 text-[10px] font-bold text-indigo-600">{children}</span>
   );
 }
 function Pill({ children, className }: { children: React.ReactNode; className?: string }) {
@@ -451,10 +451,10 @@ function Pill({ children, className }: { children: React.ReactNode; className?: 
 function AdaptiveQuizLanding() {
   const router = useRouter();
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-[#0a0a14] px-6 text-center text-white">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background px-6 text-center text-navy">
       <AIBeacon size={48} />
       <h1 className="text-2xl font-black">Adaptive Mock Quiz</h1>
-      <p className="max-w-sm text-sm text-white/60">
+      <p className="max-w-sm text-sm text-slate-400">
         No mock quiz selected. Pick an adaptive mock quiz from the catalog.
       </p>
       <Button onClick={() => router.replace('/mock-tests')}>Browse mock quizzes</Button>

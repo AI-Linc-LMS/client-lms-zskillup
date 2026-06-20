@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Loader2, SlidersHorizontal, Building2 } from 'lucide-react';
+import { Loader2, Building2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { CompanyCard, type CompanyCardData } from './CompanyCard';
@@ -15,8 +15,6 @@ const TYPE_TABS: Array<{ key: 'All' | ApiCompany['type']; label: string }> = [
   { key: 'PRODUCT', label: 'Product' },
   { key: 'CONSULTING', label: 'Consulting' },
 ];
-
-const DIFFICULTIES = ['All', 'Easy', 'Medium', 'Hard'] as const;
 
 /**
  * Companies explorer. Fetches the live catalog from `GET /companies` (public).
@@ -33,7 +31,6 @@ interface ExplorerCompany extends CompanyCardData {
 
 export function CompaniesExplorer() {
   const [type, setType] = useState<'All' | ApiCompany['type']>('All');
-  const [difficulty, setDifficulty] = useState<(typeof DIFFICULTIES)[number]>('All');
   const [companies, setCompanies] = useState<ExplorerCompany[] | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -88,10 +85,9 @@ export function CompaniesExplorer() {
     if (!companies) return [];
     return companies.filter((c) => {
       if (type !== 'All' && c.type !== type) return false;
-      if (difficulty !== 'All' && c.difficulty !== difficulty) return false;
       return true;
     });
-  }, [companies, type, difficulty]);
+  }, [companies, type]);
 
   const typeCount = (key: 'All' | ApiCompany['type']) => {
     if (!companies) return 0;
@@ -149,41 +145,18 @@ export function CompaniesExplorer() {
             })}
           </div>
 
-          {/* Difficulty filter */}
-          <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-              <SlidersHorizontal className="size-3.5" aria-hidden="true" />
-              Difficulty
-            </span>
-            <div className="flex flex-wrap gap-1">
-              {DIFFICULTIES.map((d) => {
-                const active = difficulty === d;
-                return (
-                  <button
-                    key={d}
-                    type="button"
-                    onClick={() => setDifficulty(d)}
-                    className={cn(
-                      'rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
-                      active
-                        ? 'bg-gradient-to-b from-[#f7a14e] to-[#f37021] text-white shadow-[0_8px_18px_-8px_rgba(243,112,33,0.8)]'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
-                    )}
-                  >
-                    {d}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          {/* Result count — keeps the bar balanced now that difficulty is gone */}
+          <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            <Building2 className="size-3.5" aria-hidden="true" />
+            <span className="tabular-nums text-navy">{filtered.length}</span>
+            <span className="text-slate-300">/</span>
+            <span className="tabular-nums">{companies?.length ?? 0}</span>
+            companies
+          </span>
         </div>
       </div>
 
-      <p className="px-1 py-4 text-xs font-medium text-slate-500">
-        Showing{' '}
-        <span className="font-bold tabular-nums text-navy">{filtered.length}</span> of{' '}
-        <span className="font-bold tabular-nums text-navy">{companies?.length ?? 0}</span> companies
-      </p>
+      <div className="py-4" />
 
       {loading ? (
         <div className="flex items-center justify-center rounded-3xl border border-slate-200/80 bg-white p-20 shadow-[0_8px_30px_-20px_rgba(15,23,42,0.35)]">

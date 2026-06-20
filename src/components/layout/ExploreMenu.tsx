@@ -8,15 +8,14 @@ import {
   Building2,
   ChevronDown,
   Compass,
-  LayoutGrid,
   Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ASSESSMENT_PLATFORMS, DEMO_COMPANIES, EXPLORE_TRACKS } from '@/lib/demo-data';
+import { DEMO_COMPANIES, EXPLORE_TRACKS } from '@/lib/demo-data';
 
 /**
- * Explore mega-menu — Aurora redesign of the demo prototype's three-column layout
- * (TRACKS · PLATFORMS · COMPANIES) plus the ZSkillup Plus promo card.
+ * Explore mega-menu — Aurora redesign of the demo prototype's two-column layout
+ * (TRACKS · COMPANIES) plus the ZSkillup Plus promo card.
  *
  * Open/close model (CLAUDE.md §4.13 interactions):
  *
@@ -164,7 +163,7 @@ export function ExploreMenu() {
                 }}
               >
                 {/* TRACKS */}
-                <Column className="col-span-2">
+                <Column className="col-span-3">
                   <SectionLabel icon={<Compass className="size-3" />}>Tracks</SectionLabel>
                   <ul className="space-y-1">
                     {EXPLORE_TRACKS.map((t) => (
@@ -182,34 +181,11 @@ export function ExploreMenu() {
                   </ul>
                 </Column>
 
-                {/* PLATFORMS */}
-                <Column className="col-span-4">
-                  <SectionLabel icon={<LayoutGrid className="size-3" />}>Platforms</SectionLabel>
-                  <div className="grid grid-cols-2 gap-2">
-                    {ASSESSMENT_PLATFORMS.map((p, i) => (
-                      <Link
-                        key={p}
-                        href={`/prepare?platform=${encodeURIComponent(p.toLowerCase())}`}
-                        onClick={closeNow}
-                        className="group relative flex items-center gap-2.5 overflow-hidden rounded-xl border border-slate-200/80 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-all hover:-translate-y-0.5 hover:border-orange/40 hover:text-navy hover:shadow-[0_10px_24px_-14px_rgba(243,112,33,0.6)]"
-                      >
-                        <span
-                          className="grid size-7 shrink-0 place-items-center rounded-lg text-[10px] font-bold text-white shadow-sm"
-                          style={{ background: chipGradient(i) }}
-                        >
-                          {p.slice(0, 2).toUpperCase()}
-                        </span>
-                        {p}
-                      </Link>
-                    ))}
-                  </div>
-                </Column>
-
                 {/* COMPANIES */}
-                <Column className="col-span-4">
+                <Column className="col-span-6">
                   <SectionLabel icon={<Building2 className="size-3" />}>Companies</SectionLabel>
                   <div className="grid grid-cols-2 gap-2">
-                    {DEMO_COMPANIES.slice(0, 9).map((c) => (
+                    {DEMO_COMPANIES.slice(0, 4).map((c) => (
                       <Link
                         key={c.slug}
                         href={`/dashboard/company/${c.slug}`}
@@ -239,7 +215,7 @@ export function ExploreMenu() {
                 </Column>
 
                 {/* ZSkillup Plus promo card */}
-                <Column className="col-span-2">
+                <Column className="col-span-3">
                   <div className="group relative h-full overflow-hidden rounded-2xl bg-gradient-to-br from-[#1a2440] via-[#0b1220] to-[#0b1220] p-4 text-white shadow-[0_20px_50px_-24px_rgba(11,18,32,0.8)]">
                     {/* aurora orbs inside the promo */}
                     <div
@@ -302,20 +278,4 @@ function SectionLabel({ icon, children }: { icon: React.ReactNode; children: Rea
       {children}
     </p>
   );
-}
-
-/** Deterministic gradient palette for the platform chips (no accent in data). */
-const CHIP_GRADIENTS = [
-  'linear-gradient(135deg, #f7a14e, #f37021)',
-  'linear-gradient(135deg, #7c6cf5, #5b3bf5)',
-  'linear-gradient(135deg, #38bdf8, #1e6ff5)',
-  'linear-gradient(135deg, #34d399, #059669)',
-  'linear-gradient(135deg, #fb7185, #e11d48)',
-  'linear-gradient(135deg, #f5c451, #e0a91b)',
-  'linear-gradient(135deg, #a78bfa, #7c3aed)',
-  'linear-gradient(135deg, #2dd4bf, #0d9488)',
-];
-
-function chipGradient(i: number): string {
-  return CHIP_GRADIENTS[i % CHIP_GRADIENTS.length];
 }

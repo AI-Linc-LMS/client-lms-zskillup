@@ -32,11 +32,13 @@ import {
   startMock,
   submitMock,
   type ApiMockReport,
+  type ApiMockSavedCoding,
   type ApiMockStart,
   type ApiMockSummary,
 } from '@/lib/api/mocks';
 import type { GamificationSummary } from '@/lib/api/gamification-types';
 import { RewardOverlay } from '@/components/gamification/RewardOverlay';
+import { MockCodingPanel } from '@/components/practice/MockCodingPanel';
 import { useProctoring } from '@/lib/proctoring/useProctoring';
 import { ProctorOverlay } from '@/components/proctoring/ProctorOverlay';
 
@@ -63,6 +65,9 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
   const [mock, setMock] = useState<ApiMockSummary | null>(null);
   const [start, setStart] = useState<ApiMockStart | null>(null);
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
+  // Coding answers (keyed by problemId) — recorded server-side on submit, mirrored
+  // here so the navigator + answered count reflect coding questions too.
+  const [codingResults, setCodingResults] = useState<Record<string, ApiMockSavedCoding>>({});
   const [idx, setIdx] = useState(0);
   const [remaining, setRemaining] = useState<number | null>(null);
   const [report, setReport] = useState<ApiMockReport | null>(null);
@@ -119,6 +124,9 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
       }
       setStart(s);
       setAnswers(hydrated);
+      setCodingResults(
+        Object.fromEntries((s.savedCoding ?? []).map((c) => [c.problemId, c])),
+      );
       setIdx(0);
       deadlineRef.current = new Date(s.expiresAt).getTime();
       setRemaining(Math.max(0, Math.round((deadlineRef.current - Date.now()) / 1000)));
@@ -204,6 +212,24 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
     [start],
   );
 
+  const onCodeSubmitted = useCallback(
+    (problemId: string, r: { verdict: string; passed: number; total: number; isCorrect: boolean }) => {
+      setCodingResults((prev) => ({
+        ...prev,
+        [problemId]: {
+          problemId,
+          language: prev[problemId]?.language ?? null,
+          sourceCode: prev[problemId]?.sourceCode ?? null,
+          verdict: r.verdict,
+          passed: r.passed,
+          total: r.total,
+          isCorrect: r.isCorrect,
+        },
+      }));
+    },
+    [],
+  );
+
   // ── Render ────────────────────────────────────────────────────────────────
 
   if (loading) {
@@ -242,10 +268,12 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
           idx={idx}
           setIdx={setIdx}
           answers={answers}
+          codingResults={codingResults}
           remaining={remaining ?? 0}
           submitting={submitting}
           error={error}
           onSelect={selectOption}
+          onCodeSubmitted={onCodeSubmitted}
           onSubmit={finishAttempt}
         />
         {proctored ? <ProctorOverlay controller={proctor} /> : null}
@@ -370,28 +398,38 @@ function MockRunningView({
   idx,
   setIdx,
   answers,
+  codingResults,
   remaining,
   submitting,
   error,
   onSelect,
+  onCodeSubmitted,
   onSubmit,
 }: {
   start: ApiMockStart;
   idx: number;
   setIdx: (updater: (i: number) => number) => void;
   answers: Record<string, string[]>;
+  codingResults: Record<string, ApiMockSavedCoding>;
   remaining: number;
   submitting: boolean;
   error: string | null;
   onSelect: (questionId: string, optionId: string, multi: boolean) => void;
+  onCodeSubmitted: (
+    problemId: string,
+    r: { verdict: string; passed: number; total: number; isCorrect: boolean },
+  ) => void;
   onSubmit: () => void;
 }) {
   const [confirming, setConfirming] = useState(false);
   const question = start.questions[idx];
   const total = start.questions.length;
+  const isAnswered = (q: ApiMockStart['questions'][number]) =>
+    q.type === 'CODING' ? !!codingResults[q.id] : (answers[q.id]?.length ?? 0) > 0;
   const answeredCount = useMemo(
-    () => start.questions.filter((q) => (answers[q.id]?.length ?? 0) > 0).length,
-    [start.questions, answers],
+    () => start.questions.filter((q) => isAnswered(q)).length,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [start.questions, answers, codingResults],
   );
   const low = remaining <= 60;
   const mid = remaining <= 300 && remaining > 60;
@@ -436,7 +474,7 @@ function MockRunningView({
           </div>
           <div className="mt-2 flex max-h-[6.25rem] flex-wrap items-center gap-1.5 overflow-y-auto pr-1">
             {start.questions.map((q, i) => {
-              const done = (answers[q.id]?.length ?? 0) > 0;
+              const done = isAnswered(q);
               return (
                 <button
                   key={q.id}
@@ -479,39 +517,53 @@ function MockRunningView({
           {question.type === 'MULTI_SELECT' ? (
             <p className="mt-1 text-xs text-slate-400">Select all that apply.</p>
           ) : null}
+          {question.type === 'CODING' ? (
+            <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-bold text-indigo-600">
+              Coding problem
+            </p>
+          ) : null}
 
-          <div className="mt-5 space-y-2.5">
-            {question.options.map((opt, i) => {
-              const isSelected = (answers[question.id] ?? []).includes(opt.id);
-              return (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => onSelect(question.id, opt.id, question.type === 'MULTI_SELECT')}
-                  aria-pressed={isSelected}
-                  className={cn(
-                    'flex w-full items-center gap-3 rounded-lg border p-3 text-left text-sm transition-colors',
-                    isSelected
-                      ? 'border-orange bg-orange/5 text-navy'
-                      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
-                  )}
-                >
-                  <span
+          {question.type === 'CODING' && question.coding ? (
+            <MockCodingPanel
+              attemptId={start.attemptId}
+              question={question}
+              saved={codingResults[question.id]}
+              onSubmitted={(r) => onCodeSubmitted(question.id, r)}
+            />
+          ) : (
+            <div className="mt-5 space-y-2.5">
+              {question.options.map((opt, i) => {
+                const isSelected = (answers[question.id] ?? []).includes(opt.id);
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => onSelect(question.id, opt.id, question.type === 'MULTI_SELECT')}
+                    aria-pressed={isSelected}
                     className={cn(
-                      'grid size-7 shrink-0 place-items-center rounded-full text-xs font-bold',
-                      isSelected ? 'bg-orange text-white' : 'bg-slate-100 text-slate-500',
+                      'flex w-full items-center gap-3 rounded-lg border p-3 text-left text-sm transition-colors',
+                      isSelected
+                        ? 'border-orange bg-orange/5 text-navy'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
                     )}
                   >
-                    {String.fromCharCode(65 + i)}
-                  </span>
-                  <span className="flex-1">{opt.text}</span>
-                  {isSelected ? (
-                    <Check className="size-4 shrink-0 text-orange" aria-hidden="true" />
-                  ) : null}
-                </button>
-              );
-            })}
-          </div>
+                    <span
+                      className={cn(
+                        'grid size-7 shrink-0 place-items-center rounded-full text-xs font-bold',
+                        isSelected ? 'bg-orange text-white' : 'bg-slate-100 text-slate-500',
+                      )}
+                    >
+                      {String.fromCharCode(65 + i)}
+                    </span>
+                    <span className="flex-1">{opt.text}</span>
+                    {isSelected ? (
+                      <Check className="size-4 shrink-0 text-orange" aria-hidden="true" />
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           <div className="mt-6 flex items-center justify-between">
             <Button
@@ -771,47 +823,69 @@ function MockReportView({
                   </span>
                 </div>
 
-                <div className="mt-3 space-y-2">
-                  {q.options.map((opt, i) => {
-                    const chosen = q.yourOptionIds.includes(opt.id);
-                    const correct = opt.isCorrect;
-                    return (
-                      <div
-                        key={opt.id}
-                        className={cn(
-                          'flex items-center gap-3 rounded-lg border p-2.5 text-sm',
-                          correct && 'border-emerald-300 bg-emerald-50 text-emerald-900',
-                          chosen && !correct && 'border-red-300 bg-red-50 text-red-900',
-                          !correct && !chosen && 'border-slate-200 bg-white text-slate-600',
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            'grid size-6 shrink-0 place-items-center rounded-full text-[11px] font-bold',
-                            correct && 'bg-emerald-600 text-white',
-                            chosen && !correct && 'bg-red-600 text-white',
-                            !correct && !chosen && 'bg-slate-100 text-slate-500',
-                          )}
-                        >
-                          {String.fromCharCode(65 + i)}
-                        </span>
-                        <span className="flex-1">{opt.text}</span>
-                        {correct ? (
-                          <span className="text-[11px] font-semibold text-emerald-700">Correct</span>
-                        ) : chosen ? (
-                          <span className="text-[11px] font-semibold text-red-700">Your answer</span>
-                        ) : null}
-                      </div>
-                    );
-                  })}
-                </div>
+                {q.type === 'CODING' && q.coding ? (
+                  <div className="mt-3 space-y-2">
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      <span className="rounded-full bg-indigo-50 px-2 py-0.5 font-bold text-indigo-600">Coding problem</span>
+                      <span className="text-slate-500">
+                        {q.coding.passed}/{q.coding.total} tests passed
+                        {q.coding.verdict ? ` · ${q.coding.verdict}` : ''}
+                        {q.coding.language ? ` · ${q.coding.language}` : ''}
+                      </span>
+                    </div>
+                    {q.coding.sourceCode ? (
+                      <pre className="max-h-64 overflow-auto rounded-lg border border-slate-200 bg-navy p-3 font-mono text-[11px] leading-relaxed text-slate-100">
+                        {q.coding.sourceCode}
+                      </pre>
+                    ) : (
+                      <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-500">No solution submitted.</p>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <div className="mt-3 space-y-2">
+                      {q.options.map((opt, i) => {
+                        const chosen = q.yourOptionIds.includes(opt.id);
+                        const correct = opt.isCorrect;
+                        return (
+                          <div
+                            key={opt.id}
+                            className={cn(
+                              'flex items-center gap-3 rounded-lg border p-2.5 text-sm',
+                              correct && 'border-emerald-300 bg-emerald-50 text-emerald-900',
+                              chosen && !correct && 'border-red-300 bg-red-50 text-red-900',
+                              !correct && !chosen && 'border-slate-200 bg-white text-slate-600',
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                'grid size-6 shrink-0 place-items-center rounded-full text-[11px] font-bold',
+                                correct && 'bg-emerald-600 text-white',
+                                chosen && !correct && 'bg-red-600 text-white',
+                                !correct && !chosen && 'bg-slate-100 text-slate-500',
+                              )}
+                            >
+                              {String.fromCharCode(65 + i)}
+                            </span>
+                            <span className="flex-1">{opt.text}</span>
+                            {correct ? (
+                              <span className="text-[11px] font-semibold text-emerald-700">Correct</span>
+                            ) : chosen ? (
+                              <span className="text-[11px] font-semibold text-red-700">Your answer</span>
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                    </div>
 
-                {q.explanation ? (
-                  <p className="mt-3 rounded-lg bg-slate-50 p-3 text-sm leading-relaxed text-slate-600">
-                    <span className="font-semibold text-navy">Why: </span>
-                    {q.explanation}
-                  </p>
-                ) : null}
+                    {q.explanation ? (
+                      <p className="mt-3 rounded-lg bg-slate-50 p-3 text-sm leading-relaxed text-slate-600">
+                        <span className="font-semibold text-navy">Why: </span>
+                        {q.explanation}
+                      </p>
+                    ) : null}
+                  </>
+                )}
               </article>
             ))}
           </div>

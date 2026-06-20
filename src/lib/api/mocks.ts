@@ -24,17 +24,63 @@ export interface ApiMockOption {
   orderIndex: number;
 }
 
+/** Coding payload carried on a CODING-type mock question. */
+export interface ApiMockCodingPayload {
+  slug: string;
+  statement: string;
+  inputFormat: string | null;
+  outputFormat: string | null;
+  constraints: string | null;
+  sampleInput: string | null;
+  sampleOutput: string | null;
+  starterCode: Record<string, string>;
+  sampleCases: Array<{ input: string; expectedOutput: string }>;
+  timeLimitMs: number;
+}
+
 export interface ApiMockQuestion {
   id: string;
   type: 'MCQ' | 'MULTI_SELECT' | 'NUMERIC' | 'CODING';
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   stem: string;
   options: ApiMockOption[];
+  coding?: ApiMockCodingPayload;
 }
 
 export interface ApiMockSavedAnswer {
   questionId: string;
   selectedOptionIds: string[];
+}
+
+export interface ApiMockSavedCoding {
+  problemId: string;
+  language: string | null;
+  sourceCode: string | null;
+  verdict: string | null;
+  passed: number;
+  total: number;
+  isCorrect: boolean;
+}
+
+/** Result of a Judge0-graded coding submission (POST /mocks/attempts/:id/code). */
+export interface ApiMockCodeResult {
+  ok: boolean;
+  error: string | null;
+  verdict: string;
+  passed: number;
+  total: number;
+  compileOutput: string | null;
+  cases: Array<{
+    index: number;
+    hidden: boolean;
+    passed: boolean;
+    status: string;
+    input: string | null;
+    expectedOutput: string | null;
+    actualOutput: string | null;
+    stderr: string | null;
+    timeSec: number | null;
+  }>;
 }
 
 export interface ApiMockStart {
@@ -46,6 +92,7 @@ export interface ApiMockStart {
   expiresAt: string;
   questions: ApiMockQuestion[];
   savedAnswers: ApiMockSavedAnswer[];
+  savedCoding: ApiMockSavedCoding[];
 }
 
 export type MockAttemptStatus = 'IN_PROGRESS' | 'SUBMITTED' | 'EXPIRED';
@@ -80,6 +127,7 @@ export interface ApiMockAttemptHistory {
 
 export interface ApiMockReviewQuestion {
   id: string;
+  type: 'MCQ' | 'MULTI_SELECT' | 'NUMERIC' | 'CODING';
   stem: string;
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   explanation: string | null;
@@ -87,6 +135,13 @@ export interface ApiMockReviewQuestion {
   correctOptionIds: string[];
   yourOptionIds: string[];
   isCorrect: boolean;
+  coding?: {
+    language: string | null;
+    sourceCode: string | null;
+    verdict: string | null;
+    passed: number;
+    total: number;
+  } | null;
 }
 
 export interface ApiMockTopicBreakdown {
@@ -133,6 +188,18 @@ export async function answerMock(attemptId: string, dto: MockAnswerDto): Promise
   const res = await apiClient.post<{ ok: boolean }>(
     `/api/v1/mocks/attempts/${attemptId}/answer`,
     dto,
+  );
+  return res.data;
+}
+
+/** Submit a coding solution for a coding problem inside a mock attempt (Judge0-graded). */
+export async function submitMockCode(
+  attemptId: string,
+  body: { problemId: string; language: string; source: string },
+): Promise<ApiMockCodeResult> {
+  const res = await apiClient.post<ApiMockCodeResult>(
+    `/api/v1/mocks/attempts/${attemptId}/code`,
+    body,
   );
   return res.data;
 }

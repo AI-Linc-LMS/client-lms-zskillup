@@ -6,7 +6,7 @@
  * grading, scoring, and percentile happen server-side at submit (the client
  * never receives `isCorrect` on a question during the attempt).
  */
-import { ArrayMaxSize, IsArray, IsString, IsUUID } from 'class-validator';
+import { ArrayMaxSize, IsArray, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 
 export class MockAnswerDto {
   @IsUUID()
@@ -16,4 +16,18 @@ export class MockAnswerDto {
   @ArrayMaxSize(10)
   @IsString({ each: true })
   selectedOptionIds: string[] = [];
+}
+
+/** Submit a coding solution for a CODING problem within a mock attempt. */
+export class SubmitMockCodeDto {
+  @IsUUID()
+  problemId!: string;
+
+  @IsString()
+  language!: string;
+
+  @IsString()
+  @MinLength(1)
+  @MaxLength(60000)
+  source!: string;
 }

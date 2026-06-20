@@ -64,7 +64,7 @@ export function PerformanceDashboard() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Practice accuracy */}
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-400">
             <Target className="size-4 text-orange" /> Practice accuracy
           </h3>
@@ -80,7 +80,7 @@ export function PerformanceDashboard() {
         </div>
 
         {/* Mock score trend */}
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between">
             <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-400">
               <TrendingUp className="size-4 text-orange" /> Assessment scores
@@ -90,25 +90,49 @@ export function PerformanceDashboard() {
             ) : null}
           </div>
           {chrono.length === 0 ? (
-            <p className="mt-6 text-sm text-slate-500">
-              No mock/assessment attempts yet.{' '}
-              <Link href="/mock-tests" className="font-semibold text-orange hover:underline">Take a mock quiz →</Link>
-            </p>
+            <div className="mt-6 grid place-items-center rounded-xl border border-dashed border-slate-200 py-10 text-center">
+              <p className="text-sm text-slate-500">
+                No mock/assessment attempts yet.{' '}
+                <Link href="/mock-tests" className="font-semibold text-orange hover:underline">Take a mock quiz →</Link>
+              </p>
+            </div>
           ) : (
-            <div className="mt-5 flex h-40 items-end gap-2">
-              {chrono.slice(-14).map((m, i) => (
-                <div key={m.attemptId} className="group relative flex flex-1 flex-col items-center justify-end">
-                  <motion.div
-                    className="w-full rounded-t-md"
-                    style={{ background: tone(m.pct) }}
-                    initial={{ height: 0 }}
-                    animate={{ height: `${Math.max(4, m.pct)}%` }}
-                    transition={{ duration: 0.6, delay: i * 0.04, ease: EASE }}
-                    title={`${m.title}: ${m.pct}%`}
+            <div className="mt-5">
+              <div className="relative h-40">
+                {/* gridlines */}
+                {[100, 75, 50, 25, 0].map((g) => (
+                  <div
+                    key={g}
+                    aria-hidden
+                    className="absolute inset-x-0 border-t border-dashed border-slate-100"
+                    style={{ bottom: `${g}%` }}
                   />
-                  <span className="mt-1 text-[9px] font-bold tabular-nums text-slate-400">{m.pct}</span>
+                ))}
+                {/* bars */}
+                <div className="absolute inset-0 flex items-end gap-1.5">
+                  {chrono.slice(-14).map((m, i) => (
+                    <div
+                      key={m.attemptId}
+                      className="group relative flex h-full flex-1 flex-col items-center justify-end"
+                      title={`${m.title}: ${m.pct}%`}
+                    >
+                      <span className="mb-1 text-[9px] font-bold tabular-nums text-slate-500 opacity-0 transition-opacity group-hover:opacity-100">
+                        {m.pct}
+                      </span>
+                      <motion.div
+                        className="w-full rounded-t-md transition-[filter] group-hover:brightness-110"
+                        style={{ background: tone(m.pct) }}
+                        initial={{ height: 0 }}
+                        animate={{ height: `${Math.max(3, m.pct)}%` }}
+                        transition={{ duration: 0.6, delay: i * 0.04, ease: EASE }}
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+              <p className="mt-2 text-right text-[10px] font-medium text-slate-400">
+                last {Math.min(14, chrono.length)} attempts →
+              </p>
             </div>
           )}
         </div>
@@ -116,7 +140,7 @@ export function PerformanceDashboard() {
 
       {/* Focus areas */}
       {weak.length ? (
-        <div className="rounded-3xl border border-amber-200 bg-amber-50/40 p-6 shadow-sm">
+        <div className="rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50/70 to-orange-50/40 p-6 shadow-sm">
           <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-amber-700">
             <AlertTriangle className="size-4" /> Focus areas
           </h3>
@@ -141,7 +165,7 @@ export function PerformanceDashboard() {
 
 function Kpi({ icon: Icon, label, value, tone: t }: { icon: typeof Target; label: string; value: number | string; tone: string }) {
   return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-2.5">
+    <div className="rounded-xl border border-slate-200 bg-white p-2.5 transition-colors hover:border-slate-300">
       <Icon className={cn('size-3.5', t)} />
       <p className={cn('mt-1 text-lg font-black tabular-nums', t)}>{value}</p>
       <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>

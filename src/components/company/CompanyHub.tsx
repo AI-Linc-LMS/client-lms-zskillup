@@ -43,6 +43,28 @@ function parsePct(raw: string): number | null {
 }
 
 /**
+ * Single source of truth for "rounds" so the headline count, the quick-stat, and
+ * the syllabus list can never drift apart.
+ *
+ * RCA: the seed authored `quickStats.rounds` (a raw number), `overview.process`,
+ * and `syllabus[]` independently — Infosys showed "3 online stages" while the
+ * list rendered 6 rows. We now derive both counts from the syllabus array and
+ * only fall back to the stored number when a hub has no syllabus rows.
+ *
+ * - totalRounds  = every stage in the syllabus (incl. the final interview)
+ * - onlineStages = stages that happen online, *before* the final interview
+ */
+function roundCounts(content: HubContent): { totalRounds: number; onlineStages: number } {
+  const syllabus = content.syllabus ?? [];
+  if (syllabus.length === 0) {
+    const r = content.quickStats.rounds;
+    return { totalRounds: r, onlineStages: Math.max(1, r - 1) };
+  }
+  const onlineStages = syllabus.filter((r) => r.type !== 'Final').length;
+  return { totalRounds: syllabus.length, onlineStages: onlineStages || syllabus.length };
+}
+
+/**
  * Company hub — the ONE 7-tab template (COMPANY_HUB_SPEC). All 9 hubs are
  * content instances of this. Client component because the tabs are interactive;
  * content is seeded and passed in from the server page. No left sidebar inside
@@ -139,7 +161,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
           <AuroraCard glow="#2563eb">
             <SectionLabel icon={Gauge}>Quick stats</SectionLabel>
             <div className="mt-3 divide-y divide-slate-100">
-              <Stat label="Total rounds" value={String(content.quickStats.rounds)} />
+              <Stat label="Total rounds" value={String(roundCounts(content).totalRounds)} />
               <Stat label="Type of exam" value={content.quickStats.examType} />
               <Stat label="Negative marking" value={content.quickStats.negativeMarking} />
               <Stat label="Applicants (est.)" value={content.quickStats.applicants} />
@@ -293,7 +315,7 @@ function CompanyHero({ content, reduce }: { content: HubContent; reduce: boolean
               Community readiness
             </p>
             <p className="mt-1 text-xs leading-relaxed text-white/55">
-              {content.quickStats.rounds} rounds · {content.quickStats.examType}
+              {roundCounts(content).totalRounds} rounds · {content.quickStats.examType}
             </p>
           </div>
         </motion.div>
@@ -471,7 +493,8 @@ function SyllabusTab({ content }: { content: HubContent }) {
           {content.company.name} syllabus
         </h2>
         <p className="mt-1 text-sm leading-relaxed text-slate-500">
-          The drive is usually structured in {content.quickStats.rounds} online stages before interviews.
+          The drive is usually structured in {roundCounts(content).onlineStages} online stages before
+          interviews, then a final interview round.
         </p>
 
         {/* Round cards (a table on a phone is unkind) */}

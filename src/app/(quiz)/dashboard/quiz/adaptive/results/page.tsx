@@ -78,15 +78,15 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
 
   if (loadError) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#0a0a14] text-white">
-        <p className="text-rose-300">{loadError}</p>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background text-navy">
+        <p className="text-rose-600">{loadError}</p>
         <Button variant="secondary" onClick={() => router.replace('/mock-tests')}>Back</Button>
       </div>
     );
   }
   if (!results) {
     return (
-      <div className="grid min-h-screen place-items-center bg-[#0a0a14] text-white/60">
+      <div className="grid min-h-screen place-items-center bg-background text-slate-400">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="size-7 animate-spin" /> Loading your diagnostic…
         </div>
@@ -107,18 +107,18 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* ── Diagnostic hero (dark glass) ─────────────────────────────────── */}
-      <div className="relative overflow-hidden bg-[#0a0a14] text-white">
+      <div className="relative overflow-hidden border-b border-slate-200 bg-white text-navy">
         <div aria-hidden className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-1/4 -top-1/3 size-[55vw] rounded-full bg-indigo-600/25 blur-[120px]" />
-          <div className="absolute -right-1/4 -top-1/4 size-[50vw] rounded-full bg-pink-600/20 blur-[120px]" />
-          <div className="absolute bottom-0 left-1/3 size-[45vw] rounded-full bg-purple-600/20 blur-[120px]" />
+          <div className="absolute -left-1/4 -top-1/3 size-[55vw] rounded-full bg-indigo-100/40 blur-[120px]" />
+          <div className="absolute -right-1/4 -top-1/4 size-[50vw] rounded-full bg-pink-100/40 blur-[120px]" />
+          <div className="absolute bottom-0 left-1/3 size-[45vw] rounded-full bg-purple-100/40 blur-[120px]" />
         </div>
         <div className="relative z-10 mx-auto max-w-5xl px-5 pb-8 pt-6 sm:px-6">
           <div className="flex items-center justify-between">
-            <Link href="/mock-tests" className="inline-flex items-center gap-1.5 text-xs text-white/60 hover:text-white">
+            <Link href="/mock-tests" className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-navy">
               <ArrowLeft className="size-3.5" /> Back to mock quizzes
             </Link>
-            <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-pink-300">
+            <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-pink-600">
               Results · Diagnostic
             </span>
           </div>
@@ -132,7 +132,7 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
                 <Sparkles className="size-3" /> AI Tutor&apos;s read
               </div>
               {headline.loading ? (
-                <p className="flex items-center justify-center gap-2 text-sm text-white/50 sm:justify-start">
+                <p className="flex items-center justify-center gap-2 text-sm text-slate-400 sm:justify-start">
                   <Loader2 className="size-4 animate-spin" /> Reading your accuracy curve…
                 </p>
               ) : headline.data?.headline ? (
@@ -149,7 +149,7 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
           </div>
 
           {/* KPI rail */}
-          <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] sm:grid-cols-4 lg:grid-cols-5">
+          <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-slate-200 bg-slate-200 shadow-sm sm:grid-cols-4 lg:grid-cols-5">
             <Kpi icon={Target} label="Accuracy" value={`${results.accuracy}%`} tone="#10b981" />
             <Kpi icon={CheckCircle2} label="Correct" value={results.correct} tone="#10b981" />
             <Kpi icon={XCircle} label="Incorrect" value={incorrect} tone="#ef4444" />
@@ -261,11 +261,11 @@ function Kpi({
   tone: string;
 }) {
   return (
-    <div className="bg-[#0a0a14]/40 px-4 py-3.5">
+    <div className="bg-white px-4 py-3.5">
       <span className="flex items-center gap-1.5 text-2xl font-black tabular-nums" style={{ color: tone }}>
         <Icon className="size-4" /> {value}
       </span>
-      <span className="mt-1 block text-[10px] font-semibold uppercase tracking-wider text-white/45">{label}</span>
+      <span className="mt-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</span>
     </div>
   );
 }
@@ -296,8 +296,8 @@ function ResultsPage() {
   const sessionId = searchParams.get('session');
   if (!sessionId) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#0a0a14] text-white">
-        <p className="text-white/60">No session specified.</p>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background text-navy">
+        <p className="text-slate-400">No session specified.</p>
         <Button asChild variant="secondary"><Link href="/mock-tests">Back to mock quizzes</Link></Button>
       </div>
     );
@@ -309,8 +309,8 @@ export default function AdaptiveResultsPage() {
   return (
     <Suspense
       fallback={
-        <div className="grid min-h-screen place-items-center bg-[#0a0a14]">
-          <Loader2 className="size-8 animate-spin text-white/40" />
+        <div className="grid min-h-screen place-items-center bg-background">
+          <Loader2 className="size-8 animate-spin text-slate-400" />
         </div>
       }
     >

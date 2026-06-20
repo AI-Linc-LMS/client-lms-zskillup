@@ -1,8 +1,19 @@
 import Link from 'next/link';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
-import { Calculator, BookOpen, Brain, Code2 } from 'lucide-react';
+import {
+  ArrowRight,
+  BookOpen,
+  Brain,
+  Calculator,
+  Code2,
+  Cpu,
+  GraduationCap,
+  Layers,
+  Sparkles,
+} from 'lucide-react';
 import { listTopics, type ApiTopic } from '@/lib/api/catalog';
 import { TopicAccuracyPanels } from '@/components/practice/TopicAccuracyPanels';
+import { Reveal, Stagger, StaggerItem } from '@/components/motion/primitives';
 
 /**
  * Topic Mastery — fully live. The category tiles + subtopic chips come from
@@ -11,28 +22,46 @@ import { TopicAccuracyPanels } from '@/components/practice/TopicAccuracyPanels';
  * (`GET /practice/accuracy/topics`, client leaf).
  */
 
-const CATEGORY_VISUALS: Record<
-  string,
-  { icon: typeof Calculator; gradient: string }
-> = {
-  'quantitative-aptitude': { icon: Calculator, gradient: 'from-navy to-blue-700' },
-  'verbal-ability': { icon: BookOpen, gradient: 'from-violet-600 to-violet-800' },
-  'logical-reasoning': { icon: Brain, gradient: 'from-orange to-amber-600' },
-  'programming-dsa': { icon: Code2, gradient: 'from-blue-700 to-indigo-900' },
-  'cs-fundamentals': { icon: Code2, gradient: 'from-emerald-600 to-emerald-800' },
+type Accent = 'sky' | 'violet' | 'orange' | 'emerald' | 'indigo' | 'amber';
+const ACCENT_CYCLE: Accent[] = ['sky', 'violet', 'orange', 'emerald', 'indigo', 'amber'];
+
+const ACCENT_CLASS: Record<Accent, { tile: string; chip: string; bar: string }> = {
+  sky: { tile: 'bg-sky-50 text-sky-600 ring-sky-100', chip: 'hover:border-sky-300 hover:bg-sky-50/70', bar: 'from-sky-400 to-sky-600' },
+  violet: { tile: 'bg-violet-50 text-violet-600 ring-violet-100', chip: 'hover:border-violet-300 hover:bg-violet-50/70', bar: 'from-violet-400 to-violet-600' },
+  orange: { tile: 'bg-orange-50 text-orange-600 ring-orange-100', chip: 'hover:border-orange-300 hover:bg-orange-50/70', bar: 'from-orange-400 to-orange-600' },
+  emerald: { tile: 'bg-emerald-50 text-emerald-600 ring-emerald-100', chip: 'hover:border-emerald-300 hover:bg-emerald-50/70', bar: 'from-emerald-400 to-emerald-600' },
+  indigo: { tile: 'bg-indigo-50 text-indigo-600 ring-indigo-100', chip: 'hover:border-indigo-300 hover:bg-indigo-50/70', bar: 'from-indigo-400 to-indigo-600' },
+  amber: { tile: 'bg-amber-50 text-amber-600 ring-amber-100', chip: 'hover:border-amber-300 hover:bg-amber-50/70', bar: 'from-amber-400 to-amber-600' },
 };
 
-const FALLBACK = { icon: BookOpen, gradient: 'from-slate-700 to-slate-900' };
+const CATEGORY_ICON: Record<string, typeof Calculator> = {
+  'quantitative-aptitude': Calculator,
+  'verbal-ability': BookOpen,
+  'logical-reasoning': Brain,
+  'programming-dsa': Code2,
+  'cs-fundamentals': Cpu,
+};
+const CATEGORY_ACCENT: Record<string, Accent> = {
+  'quantitative-aptitude': 'sky',
+  'verbal-ability': 'violet',
+  'logical-reasoning': 'orange',
+  'programming-dsa': 'indigo',
+  'cs-fundamentals': 'emerald',
+};
 
 interface RootTopic extends ApiTopic {
   children: ApiTopic[];
+  icon: typeof Calculator;
+  accent: Accent;
 }
 
 function buildRoots(topics: ApiTopic[]): RootTopic[] {
   const roots = topics.filter((t) => t.parentId === null);
-  return roots.map((r) => ({
+  return roots.map((r, i) => ({
     ...r,
     children: topics.filter((t) => t.parentId === r.id),
+    icon: CATEGORY_ICON[r.slug] ?? Layers,
+    accent: CATEGORY_ACCENT[r.slug] ?? ACCENT_CYCLE[i % ACCENT_CYCLE.length],
   }));
 }
 
@@ -44,6 +73,7 @@ export default async function TopicMasteryPage() {
     // Backend unreachable in preview — render empty root list with sensible CTAs.
   }
   const roots = buildRoots(topics);
+  const subtopicCount = roots.reduce((s, r) => s + r.children.length, 0);
 
   return (
     <div className="space-y-8">
@@ -55,81 +85,116 @@ export default async function TopicMasteryPage() {
         ]}
       />
 
-      <div>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-          Topic mastery
-        </p>
-        <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">
-          Drill any topic, any time
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Pattern-matched questions across {topics.length > 0 ? `${topics.length} topics` : 'every topic'}.
-          Server-graded, with step-by-step explanations and instant hints.
-        </p>
-      </div>
+      {/* ── Navy premium hero ─────────────────────────────────────────────── */}
+      <Reveal>
+        <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-sm sm:p-8">
+          <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#6d3bf5]/25 blur-3xl" />
+          <span aria-hidden className="pointer-events-none absolute -bottom-20 left-1/4 size-56 rounded-full bg-[#f37021]/20 blur-3xl" />
+          <div className="relative">
+            <div className="flex items-center gap-3">
+              <span className="grid size-11 place-items-center rounded-2xl border border-white/10 bg-white/5 text-[#c9b6ff]">
+                <GraduationCap className="size-5" />
+              </span>
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-white/50">Topic mastery</p>
+                <h1 className="text-2xl font-black tracking-tight sm:text-[28px]">Drill any topic, any time</h1>
+              </div>
+            </div>
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/60">
+              Pattern-matched questions across {topics.length > 0 ? `${topics.length} topics` : 'every topic'},
+              server-graded with step-by-step explanations and instant hints.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <HeroStat icon={Layers} value={String(roots.length)} label="Categories" />
+              <HeroStat icon={Sparkles} value={String(subtopicCount)} label="Subtopics" />
+            </div>
+          </div>
+        </section>
+      </Reveal>
 
-      {/* Category tiles */}
+      {/* ── Category cards ────────────────────────────────────────────────── */}
       {roots.length > 0 ? (
         <div>
-          <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-            Browse by Category
-          </p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Browse by category</p>
+          <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {roots.map((root) => {
-              const visuals = CATEGORY_VISUALS[root.slug] ?? FALLBACK;
-              const Icon = visuals.icon;
+              const Icon = root.icon;
+              const a = ACCENT_CLASS[root.accent];
               return (
-                <Link
-                  key={root.id}
-                  href={`/practice?topic=${encodeURIComponent(root.slug)}`}
-                  className={`group flex flex-col gap-4 rounded-xl bg-gradient-to-br ${visuals.gradient} p-5 shadow-sm transition-shadow hover:shadow-md`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20">
-                      <Icon className="size-5 text-white" aria-hidden="true" />
+                <StaggerItem key={root.id} className="h-full">
+                  <Link
+                    href={`/practice?topic=${encodeURIComponent(root.slug)}`}
+                    className="group flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className={`grid size-11 place-items-center rounded-xl ring-1 ${a.tile}`}>
+                        <Icon className="size-5" aria-hidden="true" />
+                      </span>
+                      <ArrowRight className="size-4 text-slate-300 transition-all group-hover:translate-x-0.5 group-hover:text-navy" />
                     </div>
-                  </div>
-                  <div>
-                    <p className="font-bold text-white">{root.name}</p>
-                    <p className="mt-1 text-xs text-white/70">
+                    <p className="mt-4 font-bold leading-snug text-navy">{root.name}</p>
+                    <p className="mt-1 text-xs text-slate-500">
                       {root.children.length} subtopic{root.children.length === 1 ? '' : 's'}
                     </p>
-                  </div>
-                </Link>
+                    <span className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-orange opacity-0 transition-opacity group-hover:opacity-100">
+                      Start practice →
+                    </span>
+                  </Link>
+                </StaggerItem>
               );
             })}
-          </div>
+          </Stagger>
         </div>
       ) : (
-        <div className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm">
           Topic catalog is not available right now. Try refreshing — the backend may be warming up.
         </div>
       )}
 
-      {/* Subtopic chips per root */}
-      {roots.map((root) => (
+      {/* ── Subtopic groups (one structured card per category) ────────────── */}
+      {roots.map((root) =>
         root.children.length > 0 ? (
-          <div key={root.id}>
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-              {root.name} — drill a subtopic
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {root.children.map((child) => (
-                <Link
-                  key={child.id}
-                  href={`/practice?topic=${encodeURIComponent(child.slug)}`}
-                  className="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-navy transition-colors hover:border-orange hover:bg-orange/5"
-                >
-                  {child.name}
-                </Link>
-              ))}
+          <Reveal key={root.id}>
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+              <div className="mb-4 flex items-center gap-3">
+                <span className={`grid size-9 place-items-center rounded-lg ring-1 ${ACCENT_CLASS[root.accent].tile}`}>
+                  <root.icon className="size-4" aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-navy">{root.name}</p>
+                  <p className="text-[11px] text-slate-400">Pick a subtopic to drill</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {root.children.map((child) => (
+                  <Link
+                    key={child.id}
+                    href={`/practice?topic=${encodeURIComponent(child.slug)}`}
+                    className={`rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-navy transition-colors ${ACCENT_CLASS[root.accent].chip}`}
+                  >
+                    {child.name}
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
-        ) : null
-      ))}
+          </Reveal>
+        ) : null,
+      )}
 
       {/* Live per-topic accuracy (weak + recently practised) */}
       <TopicAccuracyPanels />
+    </div>
+  );
+}
+
+function HeroStat({ icon: Icon, value, label }: { icon: typeof Layers; value: string; label: string }) {
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+      <Icon className="size-4 text-white/40" />
+      <div>
+        <p className="text-lg font-extrabold leading-none text-white tabular-nums">{value}</p>
+        <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-white/40">{label}</p>
+      </div>
     </div>
   );
 }
