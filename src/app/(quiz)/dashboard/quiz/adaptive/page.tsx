@@ -5,10 +5,12 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
+  CheckCircle2,
   Clock,
   Compass,
   Lightbulb,
   Loader2,
+  RotateCcw,
   Target,
   TrendingUp,
 } from 'lucide-react';
@@ -42,10 +44,10 @@ const DIFF_TONE: Record<string, { text: string; ring: string; bg: string }> = {
 };
 
 const CONFIDENCE = [
-  { value: 1, label: 'Guessing' },
-  { value: 2, label: 'Unsure' },
-  { value: 3, label: 'Pretty sure' },
-  { value: 4, label: 'Certain' },
+  { value: 1, label: 'Guessing', emoji: '🤷' },
+  { value: 2, label: 'Unsure', emoji: '🤔' },
+  { value: 3, label: 'Pretty sure', emoji: '🙂' },
+  { value: 4, label: 'Certain', emoji: '💯' },
 ];
 
 /* Clean brand mark — orange disc with a soft halo (no flashy ping). */
@@ -346,29 +348,30 @@ function AdaptiveQuizRunner({
               </div>
             ) : null}
 
-            {confidenceRequired ? (
-              <div className="mt-5">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                  How confident are you?
-                </p>
-                <div className="mt-2 grid grid-cols-4 gap-2">
-                  {CONFIDENCE.map((c) => (
-                    <button
-                      key={c.value}
-                      onClick={() => setConfidence(c.value)}
-                      className={cn(
-                        'rounded-xl border px-2 py-2.5 text-[11px] font-semibold transition-colors',
-                        confidence === c.value
-                          ? 'border-orange bg-orange/10 text-orange'
-                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50',
-                      )}
-                    >
-                      {c.label}
-                    </button>
-                  ))}
-                </div>
+            <div className="mt-5">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                How confident are you before submitting?
+                {!confidenceRequired ? <span className="ml-1 font-semibold normal-case tracking-normal text-slate-300">(optional)</span> : null}
+              </p>
+              <div className="mt-2 grid grid-cols-4 gap-2">
+                {CONFIDENCE.map((c) => (
+                  <button
+                    key={c.value}
+                    onClick={() => setConfidence((prev) => (prev === c.value ? null : c.value))}
+                    aria-pressed={confidence === c.value}
+                    className={cn(
+                      'flex flex-col items-center gap-1 rounded-xl border px-2 py-2.5 text-[11px] font-semibold transition-colors',
+                      confidence === c.value
+                        ? 'border-orange bg-orange/10 text-orange'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50',
+                    )}
+                  >
+                    <span className="text-base leading-none">{c.emoji}</span>
+                    {c.label}
+                  </button>
+                ))}
               </div>
-            ) : null}
+            </div>
 
             <div className="mt-6 flex justify-end">
               <button
@@ -403,14 +406,34 @@ function AdaptiveQuizRunner({
                 ~{Math.round((q.predictedPCorrect ?? 0.5) * 100)}% predicted.
               </p>
 
-              {q.selectorRationale ? (
-                <>
-                  <Pill className="mt-4">What comes next</Pill>
-                  <p className="mt-1.5 flex items-start gap-1.5 text-[12px] leading-relaxed text-slate-600">
-                    <TrendingUp className="mt-0.5 size-3.5 shrink-0 text-emerald-600" />
-                    {q.selectorRationale}
+              <Pill className="mt-4">What comes next</Pill>
+              <div className="mt-1.5 space-y-1.5">
+                <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/70 p-2">
+                  <CheckCircle2 className="size-4 shrink-0 text-emerald-600" />
+                  <p className="text-[12px] font-semibold leading-snug text-slate-700">
+                    If you answer ✓:{' '}
+                    <span className="font-extrabold text-emerald-600">
+                      {q.difficultyLabel === 'HARD'
+                        ? `Stretch question on ${prettySkill(q.targetSkill)}`
+                        : `Harder question on ${prettySkill(q.targetSkill)}`}
+                    </span>
                   </p>
-                </>
+                </div>
+                <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50/70 p-2">
+                  <RotateCcw className="size-4 shrink-0 text-rose-500" />
+                  <p className="text-[12px] font-semibold leading-snug text-slate-700">
+                    If you answer ✗:{' '}
+                    <span className="font-extrabold text-rose-500">
+                      Easier {prettySkill(q.targetSkill)} warm-up
+                    </span>
+                  </p>
+                </div>
+              </div>
+              {q.selectorRationale ? (
+                <p className="mt-2 flex items-start gap-1.5 text-[11px] leading-relaxed text-slate-400">
+                  <TrendingUp className="mt-0.5 size-3 shrink-0 text-slate-300" />
+                  {q.selectorRationale}
+                </p>
               ) : null}
 
               {q.hintTokensRemaining > 0 && !hintState ? (
