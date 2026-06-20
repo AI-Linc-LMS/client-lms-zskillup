@@ -1,101 +1,144 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, CheckCircle2, XCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { CheckCircle2, Clock, Sparkles, Target, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { AdaptiveQuestionRecord } from '@/lib/api/adaptive';
-import type { NarrationPerQuestion } from '@/lib/api/adaptive';
+import { Typewriter } from './ResultsVisuals';
+import type { AdaptiveQuestionRecord, NarrationPerQuestion } from '@/lib/api/adaptive';
 
 interface PerQuestionBreakdownProps {
   questions: AdaptiveQuestionRecord[];
   perQuestionNarration?: NarrationPerQuestion['per_question'];
 }
 
+const prettySkill = (s: string) =>
+  (s || '').replace(/[-_]/g, ' ').replace(/section \d+\s*/i, '').replace(/\b\w/g, (m) => m.toUpperCase()).trim();
+
 export function PerQuestionBreakdown({ questions, perQuestionNarration }: PerQuestionBreakdownProps) {
-  const [expanded, setExpanded] = useState<number | null>(null);
+  const [sel, setSel] = useState(0);
+  if (questions.length === 0) {
+    return (
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
+        No questions to review.
+      </div>
+    );
+  }
+  const q = questions[Math.min(sel, questions.length - 1)];
+  const narration = perQuestionNarration?.find((n) => n.index === (q.index ?? sel + 1));
 
   return (
-    <div className="space-y-2">
-      {questions.map((q, idx) => {
-        const narration = perQuestionNarration?.find((n) => n.index === idx + 1);
-        const isOpen = expanded === idx;
-        return (
-          <div
-            key={q.questionId}
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      {/* number pills */}
+      <p className="mb-2 text-[11px] text-slate-400">Tap a question to see the AI&apos;s read on it.</p>
+      <div className="flex flex-wrap gap-2">
+        {questions.map((qq, i) => {
+          const active = i === sel;
+          return (
+            <button
+              key={qq.questionId}
+              type="button"
+              onClick={() => setSel(i)}
+              aria-label={`Question ${i + 1} — ${qq.isCorrect ? 'correct' : 'wrong'}`}
+              className={cn(
+                'grid size-9 place-items-center rounded-full text-[12px] font-extrabold transition-all',
+                active
+                  ? qq.isCorrect
+                    ? 'bg-emerald-500 text-white ring-2 ring-emerald-300'
+                    : 'bg-rose-500 text-white ring-2 ring-rose-300'
+                  : qq.isCorrect
+                    ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200 hover:bg-emerald-100'
+                    : 'bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200 hover:bg-rose-100',
+              )}
+            >
+              {i + 1}
+            </button>
+          );
+        })}
+      </div>
+      <div className="mt-2.5 flex gap-3 text-[11px] text-slate-400">
+        <span className="flex items-center gap-1">
+          <span className="size-2 rounded-full bg-emerald-500" /> Correct
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="size-2 rounded-full bg-rose-500" /> Wrong
+        </span>
+      </div>
+
+      {/* selected question card */}
+      <motion.div
+        key={q.questionId}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="mt-4 rounded-2xl border border-slate-100 bg-slate-50/50 p-4"
+      >
+        <div className="flex items-center justify-between gap-2">
+          <span
             className={cn(
-              'rounded-xl border transition-colors',
-              q.isCorrect ? 'border-emerald-200 bg-emerald-50' : 'border-red-100 bg-red-50',
+              'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold',
+              q.isCorrect ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700',
             )}
           >
-            <button
-              className="flex w-full items-center gap-3 p-4 text-left"
-              onClick={() => setExpanded(isOpen ? null : idx)}
-            >
-              {q.isCorrect ? (
-                <CheckCircle2 className="size-5 shrink-0 text-emerald-600" />
-              ) : (
-                <XCircle className="size-5 shrink-0 text-red-500" />
-              )}
-              <span className="flex-1 text-sm font-medium text-navy line-clamp-2">
-                Q{idx + 1}. {q.stem}
+            {q.isCorrect ? <CheckCircle2 className="size-3.5" /> : <XCircle className="size-3.5" />}
+            Question {sel + 1}
+          </span>
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-400">
+            <span>{q.difficulty}</span>
+            <span className="flex items-center gap-1">
+              <Target className="size-3" /> {prettySkill(q.targetSkill)}
+            </span>
+            {q.timeMs ? (
+              <span className="flex items-center gap-1">
+                <Clock className="size-3" /> {(q.timeMs / 1000).toFixed(1)}s
               </span>
-              <span className="text-[10px] text-muted-foreground mr-1">{q.difficulty}</span>
-              {isOpen ? (
-                <ChevronUp className="size-4 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="size-4 text-muted-foreground" />
-              )}
-            </button>
+            ) : null}
+          </span>
+        </div>
 
-            {isOpen && (
-              <div className="border-t px-4 pb-4 pt-3 space-y-3">
-                {/* Your vs Correct */}
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className={cn('rounded-lg p-2', q.isCorrect ? 'bg-emerald-100' : 'bg-red-100')}>
-                    <p className="font-semibold mb-1">Your answer</p>
-                    <p className={q.isCorrect ? 'text-emerald-800' : 'text-red-700'}>{q.selectedOption}</p>
-                  </div>
-                  <div className="rounded-lg bg-emerald-100 p-2">
-                    <p className="font-semibold mb-1 text-emerald-800">Correct answer</p>
-                    <p className="text-emerald-800">{q.correctOption}</p>
-                  </div>
-                </div>
+        <p className="mt-3 text-sm font-semibold leading-relaxed text-navy">{q.stem}</p>
 
-                {/* AI Narration */}
-                {narration && (
-                  <div className="rounded-lg bg-white/70 border p-3 text-sm space-y-2">
-                    <p className="text-navy">{narration.rationale}</p>
-                    {narration.correct_concept && (
-                      <div className="text-xs text-muted-foreground">
-                        <span className="font-semibold">Key concept: </span>
-                        {narration.correct_concept}
-                      </div>
-                    )}
-                    {narration.your_mistake && (
-                      <div className="text-xs text-red-600">
-                        <span className="font-semibold">What went wrong: </span>
-                        {narration.your_mistake}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Explanation fallback */}
-                {!narration && q.explanation && (
-                  <div className="rounded-lg bg-white/70 border p-3 text-sm text-muted-foreground">
-                    {q.explanation}
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                  <span>Skill: {q.targetSkill}</span>
-                  {q.timeMs && <span>Time: {(q.timeMs / 1000).toFixed(1)}s</span>}
-                </div>
-              </div>
-            )}
+        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div className={cn('rounded-lg p-2.5 text-xs', q.isCorrect ? 'bg-emerald-100/70' : 'bg-rose-100/70')}>
+            <p className="mb-0.5 font-bold text-slate-500">Your answer</p>
+            <p className={q.isCorrect ? 'text-emerald-800' : 'text-rose-700'}>{q.selectedOption || '—'}</p>
           </div>
-        );
-      })}
+          <div className="rounded-lg bg-emerald-100/70 p-2.5 text-xs">
+            <p className="mb-0.5 font-bold text-slate-500">Correct answer</p>
+            <p className="text-emerald-800">{q.correctOption}</p>
+          </div>
+        </div>
+
+        {/* AI rationale — types out word-by-word for the selected question */}
+        {narration ? (
+          <div className="mt-3 rounded-xl border border-indigo-100 bg-indigo-50/50 p-3">
+            <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#6366f1] to-[#a855f7] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-white">
+              <Sparkles className="size-2.5" /> Why you got this {q.isCorrect ? 'right' : 'wrong'}
+            </span>
+            <p className="mt-2 text-sm leading-relaxed text-navy">
+              <Typewriter key={`${q.questionId}-r`} text={narration.rationale} wordMs={28} />
+            </p>
+            {narration.correct_concept ? (
+              <p className="mt-2 text-xs text-slate-600">
+                <span className="font-semibold text-slate-700">Key concept: </span>
+                {narration.correct_concept}
+              </p>
+            ) : null}
+            {narration.your_mistake ? (
+              <p className="mt-1.5 text-xs text-rose-600">
+                <span className="font-semibold">Where you went off: </span>
+                {narration.your_mistake}
+              </p>
+            ) : null}
+          </div>
+        ) : q.explanation ? (
+          <div className="mt-3 rounded-xl border border-slate-100 bg-white/70 p-3 text-sm text-slate-600">
+            {q.explanation}
+          </div>
+        ) : (
+          <p className="mt-3 text-xs text-slate-400">AI rationale is still composing…</p>
+        )}
+      </motion.div>
     </div>
   );
 }
