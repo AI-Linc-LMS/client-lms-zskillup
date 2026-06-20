@@ -21,7 +21,7 @@ export interface AdaptivePendingQuestion {
 
 export interface AdaptiveSessionStart {
   sessionId: string;
-  mockTestId: string;
+  mockTestId: string | null;
   title: string;
   minQuestions: number;
   maxQuestions: number;
@@ -149,6 +149,18 @@ export async function startAdaptiveSession(mockTestId: string): Promise<Adaptive
   const res = await apiClient.post<AdaptiveSessionStart>('/api/v1/adaptive-mocks/sessions/start', {
     mockTestId,
   });
+  return res.data;
+}
+
+/** Start (or resume) an adaptive mock quiz drawn from a topic (+ optional company). */
+export async function startAdaptiveSessionByTopic(
+  topicSlug: string,
+  companySlug?: string,
+): Promise<AdaptiveSessionStart> {
+  const res = await apiClient.post<AdaptiveSessionStart>(
+    '/api/v1/adaptive-mocks/sessions/start-by-topic',
+    { topicSlug, companySlug },
+  );
   return res.data;
 }
 

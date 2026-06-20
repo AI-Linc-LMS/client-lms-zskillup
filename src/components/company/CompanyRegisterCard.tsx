@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
 import { BadgeCheck, CalendarCheck, Loader2, ShieldCheck, X } from 'lucide-react';
@@ -37,6 +38,9 @@ export function CompanyRegisterCard({
   const [justRegistered, setJustRegistered] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [nextAssessment, setNextAssessment] = useState<ApiScheduledAssessment | null>(null);
+  // Portal target: only available after mount (avoids SSR/hydration mismatch).
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     // Upcoming scheduled assessment for this company (public).
@@ -188,70 +192,75 @@ export function CompanyRegisterCard({
         </div>
       </div>
 
-      <AnimatePresence>
-        {dialog ? (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-            <motion.button
-              type="button"
-              aria-label="Close"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => !submitting && setDialog(false)}
-              className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ opacity: 0, y: 16, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 16, scale: 0.97 }}
-              transition={{ type: 'spring', stiffness: 320, damping: 28 }}
-              className="relative w-full max-w-md overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl"
-            >
-              <button
-                type="button"
-                onClick={() => !submitting && setDialog(false)}
-                className="absolute right-4 top-4 grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100"
-              >
-                <X className="size-4" />
-              </button>
-              <span className="grid size-12 place-items-center rounded-2xl bg-orange/10 text-orange">
-                <ShieldCheck className="size-6" />
-              </span>
-              <h3 className="mt-3 text-lg font-extrabold text-navy">
-                Confirm registration
-              </h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
-                You&apos;re about to register for the <strong>{companyName}</strong> hiring drive.
-                Once registered, your assessment slot (when scheduled) will be blocked on your
-                calendar and you&apos;ll get reminders before it starts.
-              </p>
-              {err ? (
-                <p className="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">
-                  {err}
-                </p>
+      {mounted
+        ? createPortal(
+            <AnimatePresence>
+              {dialog ? (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                  <motion.button
+                    type="button"
+                    aria-label="Close"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => !submitting && setDialog(false)}
+                    className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+                  />
+                  <motion.div
+                    initial={{ opacity: 0, y: 16, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 16, scale: 0.97 }}
+                    transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+                    className="relative w-full max-w-md overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => !submitting && setDialog(false)}
+                      className="absolute right-4 top-4 grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100"
+                    >
+                      <X className="size-4" />
+                    </button>
+                    <span className="grid size-12 place-items-center rounded-2xl bg-orange/10 text-orange">
+                      <ShieldCheck className="size-6" />
+                    </span>
+                    <h3 className="mt-3 text-lg font-extrabold text-navy">
+                      Confirm registration
+                    </h3>
+                    <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
+                      You&apos;re about to register for the <strong>{companyName}</strong> hiring drive.
+                      Once registered, your assessment slot (when scheduled) will be blocked on your
+                      calendar and you&apos;ll get reminders before it starts.
+                    </p>
+                    {err ? (
+                      <p className="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">
+                        {err}
+                      </p>
+                    ) : null}
+                    <div className="mt-5 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setDialog(false)}
+                        disabled={submitting}
+                        className="flex-1 rounded-full border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={confirm}
+                        disabled={submitting}
+                        className="flex flex-[1.4] items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.8)] disabled:opacity-60"
+                      >
+                        {submitting ? <Loader2 className="size-4 animate-spin" /> : 'Confirm & register'}
+                      </button>
+                    </div>
+                  </motion.div>
+                </div>
               ) : null}
-              <div className="mt-5 flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setDialog(false)}
-                  disabled={submitting}
-                  className="flex-1 rounded-full border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={confirm}
-                  disabled={submitting}
-                  className="flex flex-[1.4] items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.8)] disabled:opacity-60"
-                >
-                  {submitting ? <Loader2 className="size-4 animate-spin" /> : 'Confirm & register'}
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        ) : null}
-      </AnimatePresence>
+            </AnimatePresence>,
+            document.body,
+          )
+        : null}
     </>
   );
 }

@@ -96,12 +96,12 @@ export function CompanyPrepPanel({
       {/* All topics */}
       {prep.topics.length ? (
         <section>
-          <SectionHead icon={Layers} title="All topics" sub="Drill any topic — counts are live" />
+          <SectionHead icon={Layers} title="All topics" sub="Start a mock quiz on any topic — counts are live" />
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {prep.topics.map((t) => (
               <Link
                 key={t.slug}
-                href={`/dashboard/company/${companySlug}/prep/${t.slug}`}
+                href={`/dashboard/quiz/adaptive?topic=${encodeURIComponent(t.slug)}&company=${encodeURIComponent(companySlug)}`}
                 className="group flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3.5 transition-all hover:-translate-y-0.5 hover:border-orange/40 hover:shadow-sm"
               >
                 <span className="min-w-0">

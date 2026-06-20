@@ -95,7 +95,7 @@ export function MagicLoader({ messages = LOADER_MESSAGES }: { messages?: string[
           </span>
         </span>
         <div className="min-w-0">
-          <p className="text-sm font-bold text-navy">Composing your diagnostic</p>
+          <p className="text-sm font-bold text-navy">Composing your results</p>
           <motion.p
             key={i}
             initial={{ opacity: 0, y: 4 }}
@@ -167,7 +167,7 @@ export function AccuracyDonut({ accuracy, size = 132 }: { accuracy: number; size
 const prettySkill = (s: string) =>
   (s || '').replace(/[-_]/g, ' ').replace(/section \d+\s*/i, '').replace(/\b\w/g, (m) => m.toUpperCase()).trim();
 
-export function SkillRadar({ skills: allSkills, size = 300 }: { skills: SkillMastery[]; size?: number }) {
+export function SkillRadar({ skills: allSkills, size = 260 }: { skills: SkillMastery[]; size?: number }) {
   // A radar is only legible up to ~8 spokes — show the strongest skills here;
   // the full list lives in the mastery bars beside it.
   const skills = [...allSkills].sort((a, b) => b.masteryPct - a.masteryPct).slice(0, 8);
@@ -175,7 +175,7 @@ export function SkillRadar({ skills: allSkills, size = 300 }: { skills: SkillMas
   if (n < 3) return null;
   const cx = size / 2;
   const cy = size / 2;
-  const R = size / 2 - 54;
+  const R = size / 2 - 56;
   const angle = (i: number) => -Math.PI / 2 + (i * 2 * Math.PI) / n;
   const pt = (i: number, radius: number) => ({
     x: cx + radius * Math.cos(angle(i)),
@@ -191,7 +191,7 @@ export function SkillRadar({ skills: allSkills, size = 300 }: { skills: SkillMas
   const dataPolygon = dataPoints.map((p) => `${p.x},${p.y}`).join(' ');
 
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="mx-auto">
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="mx-auto overflow-visible">
       <defs>
         <linearGradient id="radarFill" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#6366f1" stopOpacity="0.45" />
@@ -233,10 +233,12 @@ export function SkillRadar({ skills: allSkills, size = 300 }: { skills: SkillMas
           transition={{ delay: 0.3 + i * 0.06, type: 'spring', stiffness: 300 }}
         />
       ))}
-      {/* labels */}
+      {/* labels — name on top, % beneath, so long skill names don't overflow */}
       {skills.map((s, i) => {
-        const p = pt(i, R + 26);
+        const p = pt(i, R + 14);
         const anchor = Math.abs(p.x - cx) < 8 ? 'middle' : p.x > cx ? 'start' : 'end';
+        const name = prettySkill(s.skill);
+        const short = name.length > 11 ? `${name.slice(0, 10)}…` : name;
         return (
           <text
             key={s.skill}
@@ -244,10 +246,12 @@ export function SkillRadar({ skills: allSkills, size = 300 }: { skills: SkillMas
             y={p.y}
             textAnchor={anchor}
             dominantBaseline="middle"
-            className="fill-slate-500 text-[9px] font-semibold"
+            className="fill-slate-500 text-[8px] font-semibold"
           >
-            {prettySkill(s.skill).slice(0, 14)}
-            <tspan className="fill-navy font-bold"> {s.masteryPct}%</tspan>
+            <tspan x={p.x} dy="-0.3em">{short}</tspan>
+            <tspan x={p.x} dy="1.05em" className="fill-navy font-bold">
+              {s.masteryPct}%
+            </tspan>
           </text>
         );
       })}

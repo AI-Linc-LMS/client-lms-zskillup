@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   startAdaptiveSession,
+  startAdaptiveSessionByTopic,
   submitAdaptiveAnswer,
   requestHint,
   abandonSession,
@@ -39,7 +40,14 @@ interface UseAdaptiveSessionReturn extends AdaptiveSessionState {
   submitting: boolean;
 }
 
-export function useAdaptiveSession(mockTestId: string): UseAdaptiveSessionReturn {
+export interface AdaptiveSessionParams {
+  mockTestId?: string | null;
+  topicSlug?: string | null;
+  companySlug?: string | null;
+}
+
+export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSessionReturn {
+  const { mockTestId = null, topicSlug = null, companySlug = null } = params;
   const [state, setState] = useState<AdaptiveSessionState>({
     phase: 'loading',
     sessionId: null,
@@ -64,8 +72,16 @@ export function useAdaptiveSession(mockTestId: string): UseAdaptiveSessionReturn
     let cancelled = false;
     (async () => {
       try {
-        const data = await startAdaptiveSession(mockTestId);
+        const data = mockTestId
+          ? await startAdaptiveSession(mockTestId)
+          : topicSlug
+            ? await startAdaptiveSessionByTopic(topicSlug, companySlug ?? undefined)
+            : null;
         if (cancelled) return;
+        if (!data) {
+          setState((s) => ({ ...s, phase: 'error', error: 'No mock quiz selected' }));
+          return;
+        }
         sessionIdRef.current = data.sessionId;
         setState((s) => ({
           ...s,
@@ -93,7 +109,7 @@ export function useAdaptiveSession(mockTestId: string): UseAdaptiveSessionReturn
       }
     })();
     return () => { cancelled = true; };
-  }, [mockTestId]);
+  }, [mockTestId, topicSlug, companySlug]);
 
   const submitAnswer = useCallback(
     async (optionId: string, confidence?: number) => {

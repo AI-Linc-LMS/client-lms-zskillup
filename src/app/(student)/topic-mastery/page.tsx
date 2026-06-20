@@ -123,7 +123,7 @@ export default async function TopicMasteryPage() {
               return (
                 <StaggerItem key={root.id} className="h-full">
                   <Link
-                    href={`/practice?topic=${encodeURIComponent(root.slug)}`}
+                    href={`/dashboard/quiz/adaptive?topic=${encodeURIComponent(root.slug)}`}
                     className="group flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
                   >
                     <div className="flex items-center justify-between">
@@ -169,7 +169,7 @@ export default async function TopicMasteryPage() {
                 {root.children.map((child) => (
                   <Link
                     key={child.id}
-                    href={`/practice?topic=${encodeURIComponent(child.slug)}`}
+                    href={`/dashboard/quiz/adaptive?topic=${encodeURIComponent(child.slug)}`}
                     className={`rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-navy transition-colors ${ACCENT_CLASS[root.accent].chip}`}
                   >
                     {child.name}

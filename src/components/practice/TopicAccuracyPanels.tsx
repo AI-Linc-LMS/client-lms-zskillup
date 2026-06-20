@@ -211,7 +211,7 @@ function TopicCard({
 
           {/* CTA pinned to the bottom so cards align on a row */}
           <Link
-            href={`/practice?topic=${encodeURIComponent(topic.topicSlug)}`}
+            href={`/dashboard/quiz/adaptive?topic=${encodeURIComponent(topic.topicSlug)}`}
             className={cn(
               'mt-auto inline-flex w-fit items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-bold transition-all active:translate-y-px',
               ctaVariant === 'solid'

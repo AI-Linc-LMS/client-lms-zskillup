@@ -60,7 +60,15 @@ function QuizMark({ size = 32 }: { size?: number }) {
   );
 }
 
-function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
+function AdaptiveQuizRunner({
+  mockId,
+  topicSlug,
+  companySlug,
+}: {
+  mockId: string | null;
+  topicSlug: string | null;
+  companySlug: string | null;
+}) {
   const router = useRouter();
   const {
     phase,
@@ -77,7 +85,7 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
     submitAnswer,
     askHint,
     abandon,
-  } = useAdaptiveSession(mockId);
+  } = useAdaptiveSession({ mockTestId: mockId, topicSlug, companySlug });
 
   const [selected, setSelected] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
@@ -473,8 +481,10 @@ function AdaptiveQuizLanding() {
 function AdaptivePage() {
   const searchParams = useSearchParams();
   const mockId = searchParams.get('mock');
-  if (!mockId) return <AdaptiveQuizLanding />;
-  return <AdaptiveQuizRunner mockId={mockId} />;
+  const topicSlug = searchParams.get('topic');
+  const companySlug = searchParams.get('company');
+  if (!mockId && !topicSlug) return <AdaptiveQuizLanding />;
+  return <AdaptiveQuizRunner mockId={mockId} topicSlug={topicSlug} companySlug={companySlug} />;
 }
 
 export default function AdaptiveQuizPage() {
