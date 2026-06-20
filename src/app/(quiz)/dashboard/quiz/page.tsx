@@ -2,24 +2,24 @@ import Link from 'next/link';
 import { ArrowLeft, ArrowRight, BarChart3, Sparkles, Target, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MockReportLoader, MockRunner } from '@/components/practice/MockRunner';
+import { ProctoredAssessmentHost } from '@/components/proctoring/ProctoredAssessmentHost';
 
 /**
  * Full-screen assessment route (Zone B, no AppShell).
  *
- * `?mock=<id>`   — runs the real server-timed mock engine (start → answer →
- *                  submit → report).
- * `?report=<id>` — re-opens the persisted report for a finalized attempt
- *                  (the "View report" action on /mock-tests history).
- * Neither        — a landing that sends the student to the catalog; there is
- *                  no fabricated "demo" run.
+ * `?mock=<id>`            — runs the real server-timed mock engine.
+ * `?mock=<id>&proctored=1`— proctored ASSESSMENT: device-check → proctored run.
+ * `?report=<id>`          — re-opens the persisted report for a finalized attempt.
+ * Neither                 — a landing that sends the student to the catalog.
  */
 export default async function FullMockQuizPage({
   searchParams,
 }: {
-  searchParams: Promise<{ mock?: string; report?: string }>;
+  searchParams: Promise<{ mock?: string; report?: string; proctored?: string }>;
 }) {
-  const { mock, report } = await searchParams;
+  const { mock, report, proctored } = await searchParams;
   if (report) return <MockReportLoader attemptId={report} />;
+  if (mock && proctored === '1') return <ProctoredAssessmentHost mockId={mock} />;
   if (mock) return <MockRunner mockId={mock} />;
   return <QuizLanding />;
 }

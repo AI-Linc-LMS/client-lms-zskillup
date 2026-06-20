@@ -228,17 +228,34 @@ export default function CalendarPage() {
                       </span>
                     ) : null}
                   </div>
-                  <div className="mt-3 flex items-center justify-between">
-                    <span className="rounded-full bg-orange/10 px-2.5 py-1 text-[11px] font-bold text-orange">
-                      {countdown(it.scheduledAt)}
-                    </span>
-                    <Link
-                      href={`/dashboard/company/${it.companySlug}`}
-                      className="flex items-center gap-1 text-xs font-bold text-navy hover:text-orange"
-                    >
-                      <ShieldCheck className="size-3.5" /> View hub
-                    </Link>
-                  </div>
+                  {(() => {
+                    const startMs = new Date(it.scheduledAt).getTime();
+                    const endMs = startMs + it.durationMinutes * 60_000;
+                    const live = Date.now() >= startMs && Date.now() <= endMs;
+                    if (live && it.mockTestId) {
+                      return (
+                        <Link
+                          href={`/dashboard/quiz?mock=${it.mockTestId}${it.proctored ? '&proctored=1' : ''}`}
+                          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-3 py-2 text-xs font-extrabold text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.8)]"
+                        >
+                          <ShieldCheck className="size-4" /> Start assessment now
+                        </Link>
+                      );
+                    }
+                    return (
+                      <div className="mt-3 flex items-center justify-between">
+                        <span className="rounded-full bg-orange/10 px-2.5 py-1 text-[11px] font-bold text-orange">
+                          {countdown(it.scheduledAt)}
+                        </span>
+                        <Link
+                          href={`/dashboard/company/${it.companySlug}`}
+                          className="flex items-center gap-1 text-xs font-bold text-navy hover:text-orange"
+                        >
+                          <ShieldCheck className="size-3.5" /> View hub
+                        </Link>
+                      </div>
+                    );
+                  })()}
                 </div>
               ))
             )}

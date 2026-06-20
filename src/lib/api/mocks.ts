@@ -126,8 +126,14 @@ export async function answerMock(attemptId: string, dto: MockAnswerDto): Promise
   return res.data;
 }
 
-export async function submitMock(attemptId: string): Promise<ApiMockResult> {
-  const res = await apiClient.post<ApiMockResult>(`/api/v1/mocks/attempts/${attemptId}/submit`);
+export async function submitMock(
+  attemptId: string,
+  proctoring?: import('@/lib/proctoring/useProctoring').ProctoringSummary,
+): Promise<ApiMockResult> {
+  const res = await apiClient.post<ApiMockResult>(
+    `/api/v1/mocks/attempts/${attemptId}/submit`,
+    proctoring ? { proctoring } : {},
+  );
   return res.data;
 }
 

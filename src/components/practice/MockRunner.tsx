@@ -37,6 +37,8 @@ import {
 } from '@/lib/api/mocks';
 import type { GamificationSummary } from '@/lib/api/gamification-types';
 import { RewardOverlay } from '@/components/gamification/RewardOverlay';
+import { useProctoring } from '@/lib/proctoring/useProctoring';
+import { ProctorOverlay } from '@/components/proctoring/ProctorOverlay';
 
 /**
  * Mock-test runner — the Sprint 4 timed assessment surface (Zone B → focused
@@ -55,7 +57,8 @@ import { RewardOverlay } from '@/components/gamification/RewardOverlay';
 
 type Phase = 'intro' | 'running' | 'report';
 
-export function MockRunner({ mockId }: { mockId: string }) {
+export function MockRunner({ mockId, proctored = false }: { mockId: string; proctored?: boolean }) {
+  const proctor = useProctoring(proctored);
   const [phase, setPhase] = useState<Phase>('intro');
   const [mock, setMock] = useState<ApiMockSummary | null>(null);
   const [start, setStart] = useState<ApiMockStart | null>(null);
@@ -119,6 +122,7 @@ export function MockRunner({ mockId }: { mockId: string }) {
       setIdx(0);
       deadlineRef.current = new Date(s.expiresAt).getTime();
       setRemaining(Math.max(0, Math.round((deadlineRef.current - Date.now()) / 1000)));
+      if (proctored) void proctor.start();
       setPhase('running');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not start the mock test.');
@@ -145,7 +149,11 @@ export function MockRunner({ mockId }: { mockId: string }) {
           answerMock(start.attemptId, { questionId, selectedOptionIds }),
         ),
       );
-      const result = await submitMock(start.attemptId);
+      const result = await submitMock(
+        start.attemptId,
+        proctored ? proctor.summary() : undefined,
+      );
+      if (proctored) proctor.stop();
       setReward(result.gamification ?? null);
       const r = await getMockReport(start.attemptId);
       setReport(r);
@@ -157,7 +165,7 @@ export function MockRunner({ mockId }: { mockId: string }) {
     } finally {
       setSubmitting(false);
     }
-  }, [start]);
+  }, [start, proctored, proctor]);
 
   // ── Server-authoritative countdown ────────────────────────────────────────
   useEffect(() => {
@@ -228,17 +236,20 @@ export function MockRunner({ mockId }: { mockId: string }) {
 
   if (phase === 'running' && start) {
     return (
-      <MockRunningView
-        start={start}
-        idx={idx}
-        setIdx={setIdx}
-        answers={answers}
-        remaining={remaining ?? 0}
-        submitting={submitting}
-        error={error}
-        onSelect={selectOption}
-        onSubmit={finishAttempt}
-      />
+      <>
+        <MockRunningView
+          start={start}
+          idx={idx}
+          setIdx={setIdx}
+          answers={answers}
+          remaining={remaining ?? 0}
+          submitting={submitting}
+          error={error}
+          onSelect={selectOption}
+          onSubmit={finishAttempt}
+        />
+        {proctored ? <ProctorOverlay controller={proctor} /> : null}
+      </>
     );
   }
 
