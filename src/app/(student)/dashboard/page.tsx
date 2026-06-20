@@ -12,6 +12,7 @@ import { CourseTable } from '@/components/student/CourseTable';
 import { PracticeHub } from '@/components/student/PracticeHub';
 import { DashboardRightRail } from '@/components/student/DashboardRightRail';
 import { AdaptiveSkillProfile } from '@/components/student/AdaptiveSkillProfile';
+import { ReadinessPanel } from '@/components/student/ReadinessPanel';
 import { CompanyReadiness } from '@/components/student/CompanyReadiness';
 import { Reveal } from '@/components/motion/primitives';
 
@@ -32,6 +33,9 @@ export default function StudentDashboardPage() {
         <div className="space-y-6">
           <AiBriefingHero />
           <AuroraStats />
+          <Reveal>
+            <ReadinessPanel />
+          </Reveal>
           <TodaysTip />
           <Reveal>
             <DailyChallenge />

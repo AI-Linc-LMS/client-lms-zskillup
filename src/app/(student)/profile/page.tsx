@@ -7,6 +7,7 @@ import { getMe, updateMe, type ApiMe } from '@/lib/api/me';
 import { getMyRegistrations, type ApiRegistration } from '@/lib/api/registrations';
 import { ApiRequestError } from '@/lib/api/types';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ReadinessPanel } from '@/components/student/ReadinessPanel';
 import { cn } from '@/lib/utils';
 
 const ROLE_OPTIONS = [
@@ -116,6 +117,10 @@ export default function ProfilePage() {
             <Mail className="size-3.5" /> {me?.email}
           </p>
         </div>
+      </div>
+
+      <div className="mt-6">
+        <ReadinessPanel />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_18rem]">
