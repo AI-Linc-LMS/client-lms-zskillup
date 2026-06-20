@@ -102,6 +102,7 @@ export interface EditableAssessment {
   mcqCount: number;
   codingCount: number;
   editable: boolean;
+  items: Array<{ type: 'MCQ' | 'CODING'; label: string; difficulty: string; marks: number }>;
 }
 
 export async function getEditableAssessment(id: string): Promise<EditableAssessment> {

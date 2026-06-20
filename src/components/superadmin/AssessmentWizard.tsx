@@ -32,11 +32,14 @@ import {
 
 const STEPS = ['Details', 'Questions', 'Review'];
 
+type Difficulty = 'EASY' | 'MEDIUM' | 'HARD';
 interface ResolvedItem {
   key: string;
   topic: string;
   topicName: string;
   type: AssessmentItemType;
+  difficulty: Difficulty;
+  marks: number;
   count: number;
   ids: string[];
   fromBank: number;
@@ -50,6 +53,8 @@ interface GenState {
   sectionIdx: number;
   topic: string;
   type: AssessmentItemType;
+  difficulty: Difficulty;
+  marks: number;
   requested: number;
   phase: 'sourcing' | 'generating' | 'done' | 'error';
   bankCount: number;
@@ -136,8 +141,15 @@ export function AssessmentWizard({
     durationMinutes >= 5;
 
   // ── AI sourcing + live generation ────────────────────────────────────────────
-  const runSource = async (sectionIdx: number, topic: string, type: AssessmentItemType, count: number) => {
-    setGen({ sectionIdx, topic, type, requested: count, phase: 'sourcing', bankCount: 0, labels: [] });
+  const runSource = async (
+    sectionIdx: number,
+    topic: string,
+    type: AssessmentItemType,
+    count: number,
+    difficulty: Difficulty,
+    marks: number,
+  ) => {
+    setGen({ sectionIdx, topic, type, difficulty, marks, requested: count, phase: 'sourcing', bankCount: 0, labels: [] });
     try {
       const sourced = await sourceTopic(topic, type, count);
       const ids = sourced.fromBank.map((b) => b.id);
@@ -151,6 +163,7 @@ export function AssessmentWizard({
           topicId: sourced.topicId,
           topicName: sourced.topicName,
           type,
+          difficulty,
           avoid: labels.slice(-40),
         });
         ids.push(item.id);
@@ -162,6 +175,8 @@ export function AssessmentWizard({
         topic,
         topicName: sourced.topicName,
         type,
+        difficulty,
+        marks,
         count,
         ids,
         fromBank: sourced.fromBank.length,
@@ -189,13 +204,15 @@ export function AssessmentWizard({
     setCreating(true);
     setErr(null);
     try {
-      const payloadSections = sections
-        .filter((s) => s.items.length)
-        .map((s) => ({
-          name: s.name,
-          questionIds: s.items.filter((i) => i.type === 'MCQ').flatMap((i) => i.ids),
-          codingProblemIds: s.items.filter((i) => i.type === 'CODING').flatMap((i) => i.ids),
-        }));
+      // One payload section per topic-item so its marks (and difficulty mix) are preserved.
+      const payloadSections = sections.flatMap((s) =>
+        s.items.map((it) => ({
+          name: `${s.name} · ${it.topicName}`,
+          questionIds: it.type === 'MCQ' ? it.ids : [],
+          codingProblemIds: it.type === 'CODING' ? it.ids : [],
+          marksPerQuestion: it.marks,
+        })),
+      );
       const isPlatform = companyId === PLATFORM;
       const companyArg = isPlatform || !companyId ? undefined : companyId;
       if (editId) {
@@ -336,22 +353,43 @@ export function AssessmentWizard({
           ) : step === 1 ? (
             <div className="space-y-5">
               {existing ? (
-                existing.editable ? (
-                  <div className="rounded-xl border border-sky-200 bg-sky-50/60 px-4 py-2.5 text-xs text-sky-800">
-                    This assessment has <b>{existing.mcqCount + existing.codingCount}</b> question(s) ({existing.mcqCount} MCQ · {existing.codingCount} coding). New sections you add below are <b>appended</b>.
-                  </div>
-                ) : (
-                  <div className="rounded-xl border border-rose-200 bg-rose-50/60 px-4 py-2.5 text-xs font-semibold text-rose-700">
-                    🔒 This assessment already has {existing.attempts} submission(s) — questions can no longer be changed. You can still cancel.
-                  </div>
-                )
+                <div className="space-y-2">
+                  {existing.editable ? (
+                    <p className="rounded-xl border border-sky-200 bg-sky-50/60 px-4 py-2.5 text-xs text-sky-800">
+                      Existing: <b>{existing.mcqCount + existing.codingCount}</b> question(s) ({existing.mcqCount} MCQ · {existing.codingCount} coding). New sections you add below are <b>appended</b>.
+                    </p>
+                  ) : (
+                    <p className="rounded-xl border border-rose-200 bg-rose-50/60 px-4 py-2.5 text-xs font-semibold text-rose-700">
+                      🔒 This assessment already has {existing.attempts} submission(s) — questions can no longer be changed. You can still cancel.
+                    </p>
+                  )}
+                  {existing.items.length ? (
+                    <div className="rounded-xl border border-slate-200 bg-white">
+                      <p className="border-b border-slate-100 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                        Current questions ({existing.items.length})
+                      </p>
+                      <ul className="max-h-44 space-y-0.5 overflow-y-auto p-2">
+                        {existing.items.map((it, i) => (
+                          <li key={i} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs hover:bg-slate-50">
+                            <span className={cn('grid size-5 shrink-0 place-items-center rounded', it.type === 'MCQ' ? 'bg-indigo-100 text-indigo-600' : 'bg-emerald-100 text-emerald-600')}>
+                              {it.type === 'MCQ' ? <Brain className="size-3" /> : <Code2 className="size-3" />}
+                            </span>
+                            <span className="min-w-0 flex-1 truncate text-slate-600">{it.label}</span>
+                            <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500">{it.difficulty?.[0]}</span>
+                            <span className="text-[10px] font-medium text-slate-400">{it.marks}m</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                </div>
               ) : null}
               {sections.map((sec, si) => (
                 <SectionEditor
                   key={si}
                   section={sec}
                   onRename={(name) => setSections((p) => p.map((s, i) => (i === si ? { ...s, name } : s)))}
-                  onAddTopic={(topic, type, count) => runSource(si, topic, type, count)}
+                  onAddTopic={(topic, type, count, difficulty, marks) => runSource(si, topic, type, count, difficulty, marks)}
                   onRemoveItem={(key) => removeItem(si, key)}
                   onRemoveSection={sections.length > 1 ? () => setSections((p) => p.filter((_, i) => i !== si)) : undefined}
                 />
@@ -443,17 +481,19 @@ function SectionEditor({
 }: {
   section: Section;
   onRename: (name: string) => void;
-  onAddTopic: (topic: string, type: AssessmentItemType, count: number) => void;
+  onAddTopic: (topic: string, type: AssessmentItemType, count: number, difficulty: Difficulty, marks: number) => void;
   onRemoveItem: (key: string) => void;
   onRemoveSection?: () => void;
 }) {
   const [topic, setTopic] = useState('');
   const [type, setType] = useState<AssessmentItemType>('MCQ');
   const [count, setCount] = useState(5);
+  const [difficulty, setDifficulty] = useState<Difficulty>('MEDIUM');
+  const [marks, setMarks] = useState(1);
 
   const submit = () => {
     if (topic.trim().length < 2) return;
-    onAddTopic(topic.trim(), type, count);
+    onAddTopic(topic.trim(), type, count, difficulty, Math.max(1, marks));
     setTopic('');
   };
 
@@ -475,7 +515,8 @@ function SectionEditor({
                 {it.type === 'MCQ' ? <Brain className="size-3.5" /> : <Code2 className="size-3.5" />}
               </span>
               <span className="min-w-0 flex-1 truncate font-semibold text-navy">{it.topicName}</span>
-              <span className="text-slate-400">{it.ids.length} {it.type === 'MCQ' ? 'Q' : 'coding'} · {it.fromBank} bank + {it.generated} AI</span>
+              <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500">{it.difficulty[0]}</span>
+              <span className="text-slate-400">{it.ids.length} {it.type === 'MCQ' ? 'Q' : 'coding'} · {it.marks}m · {it.fromBank}+{it.generated}AI</span>
               <button type="button" onClick={() => onRemoveItem(it.key)} className="text-slate-300 hover:text-rose-500"><X className="size-3.5" /></button>
             </div>
           ))}
@@ -498,7 +539,24 @@ function SectionEditor({
             </button>
           ))}
         </div>
-        <input type="number" min={1} max={50} value={count} onChange={(e) => setCount(Number(e.target.value))} className="h-10 w-16 rounded-lg border border-slate-200 bg-white px-2 text-sm text-navy focus:border-orange focus:outline-none" />
+        <select
+          value={difficulty}
+          onChange={(e) => setDifficulty(e.target.value as Difficulty)}
+          title="Difficulty"
+          className="h-10 rounded-lg border border-slate-200 bg-white px-2 text-xs font-bold text-navy focus:border-orange focus:outline-none"
+        >
+          <option value="EASY">Easy</option>
+          <option value="MEDIUM">Medium</option>
+          <option value="HARD">Hard</option>
+        </select>
+        <label className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-slate-400" title="Number of questions">
+          Qs
+          <input type="number" min={1} max={50} value={count} onChange={(e) => setCount(Number(e.target.value))} className="h-10 w-14 rounded-lg border border-slate-200 bg-white px-2 text-sm text-navy focus:border-orange focus:outline-none" />
+        </label>
+        <label className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-slate-400" title="Marks per question">
+          Marks
+          <input type="number" min={1} max={20} value={marks} onChange={(e) => setMarks(Number(e.target.value))} className="h-10 w-14 rounded-lg border border-slate-200 bg-white px-2 text-sm text-navy focus:border-orange focus:outline-none" />
+        </label>
         <button type="button" onClick={submit} disabled={topic.trim().length < 2} className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-4 py-2 text-sm font-extrabold text-white disabled:opacity-50">
           <Wand2 className="size-4" /> Add
         </button>
