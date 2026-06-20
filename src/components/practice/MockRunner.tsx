@@ -466,8 +466,12 @@ function MockRunningView({
   }, [start.questions]);
 
   const activeKey: 'quiz' | 'coding' = question?.type === 'CODING' ? 'coding' : 'quiz';
+  const activeSectionIdx = Math.max(0, sections.findIndex((s) => s.key === activeKey));
   const activeItems = sections.find((s) => s.key === activeKey)?.items ?? [];
   const posInSec = activeItems.findIndex((x) => x.i === idx);
+  const isLastInSection = posInSec >= activeItems.length - 1;
+  const isLastSection = activeSectionIdx >= sections.length - 1;
+  const nextSection = !isLastSection ? sections[activeSectionIdx + 1] : null;
 
   const low = remaining <= 60;
   const mid = remaining <= 300 && remaining > 60;
@@ -520,7 +524,14 @@ function MockRunningView({
         </div>
       ) : null}
 
-      <main className="mx-auto grid w-full max-w-6xl flex-1 gap-5 px-4 py-6 sm:px-6 lg:grid-cols-[1fr_17rem]">
+      <main
+        className={cn(
+          'mx-auto grid w-full max-w-6xl flex-1 gap-5 px-4 pb-6 sm:px-6 lg:grid-cols-[1fr_17rem]',
+          // When proctored, the fixed top-center camera bar needs clearance. The
+          // section-tabs row already provides it; without tabs, reserve top space.
+          proctored && sections.length <= 1 ? 'pt-28' : 'pt-6',
+        )}
+      >
         {/* Question card (left/main) */}
         <article className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="flex items-center justify-between gap-3">
@@ -575,9 +586,15 @@ function MockRunningView({
             <Button variant="outline" size="sm" onClick={() => posInSec > 0 && setIdx(() => activeItems[posInSec - 1].i)} disabled={posInSec <= 0}>
               <ChevronLeft className="size-4" aria-hidden="true" /> Previous
             </Button>
-            {posInSec < activeItems.length - 1 ? (
+            {!isLastInSection ? (
               <Button size="sm" onClick={() => setIdx(() => activeItems[posInSec + 1].i)}>
                 Next <ChevronRight className="size-4" aria-hidden="true" />
+              </Button>
+            ) : nextSection ? (
+              // End of a non-final section → advance to the next section instead
+              // of submitting, so a student can't end the whole assessment early.
+              <Button size="sm" onClick={() => setIdx(() => nextSection.items[0].i)}>
+                Next section: {nextSection.label} <ChevronRight className="size-4" aria-hidden="true" />
               </Button>
             ) : (
               <Button size="sm" onClick={() => setConfirming(true)} disabled={submitting}>

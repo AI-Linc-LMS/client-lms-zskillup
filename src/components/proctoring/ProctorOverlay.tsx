@@ -15,8 +15,10 @@ export function ProctorOverlay({ controller }: { controller: ProctoringControlle
 
   return (
     <>
-      {/* Top-center proctor bar with the live self-view (NTA-style). */}
-      <div className="fixed left-1/2 top-[3.75rem] z-[80] -translate-x-1/2">
+      {/* Top-center proctor bar with the live self-view (NTA-style). Pinned to
+          the very top edge so it sits above the runner chrome and never covers
+          the question (the runner reserves matching top space when proctored). */}
+      <div className="fixed left-1/2 top-1.5 z-[80] -translate-x-1/2">
         <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white/95 p-1.5 pr-3.5 shadow-[0_12px_34px_-12px_rgba(15,23,42,0.45)] backdrop-blur">
           {/* live self-view — larger landscape thumbnail */}
           <span className="relative h-[6rem] w-[8rem] shrink-0 overflow-hidden rounded-xl bg-black ring-1 ring-slate-200">
@@ -61,7 +63,7 @@ export function ProctorOverlay({ controller }: { controller: ProctoringControlle
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="fixed left-1/2 top-[6.5rem] z-[80] -translate-x-1/2"
+            className="fixed left-1/2 top-[8.5rem] z-[80] -translate-x-1/2"
           >
             <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2 text-[12px] font-medium text-amber-700 shadow-sm">
               <AlertTriangle className="size-4 shrink-0" />
