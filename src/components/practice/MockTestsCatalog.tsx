@@ -13,7 +13,12 @@ import { listMocks, type ApiMockSummary } from '@/lib/api/mocks';
  * routes each "Start" into the real timed runner at `/dashboard/quiz?mock=<id>`.
  * Client component because the API client attaches the in-memory access token.
  */
-export function MockTestsCatalog() {
+export function MockTestsCatalog({
+  filter = 'all',
+}: {
+  /** 'adaptive' = Mock Quiz (self-practice); 'plain' = non-adaptive; 'all'. */
+  filter?: 'all' | 'adaptive' | 'plain';
+} = {}) {
   const [mocks, setMocks] = useState<ApiMockSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -22,7 +27,15 @@ export function MockTestsCatalog() {
     let cancelled = false;
     listMocks()
       .then((rows) => {
-        if (!cancelled) setMocks(rows);
+        if (!cancelled) {
+          setMocks(
+            filter === 'adaptive'
+              ? rows.filter((m) => m.isAdaptive)
+              : filter === 'plain'
+                ? rows.filter((m) => !m.isAdaptive)
+                : rows,
+          );
+        }
       })
       .catch((err: Error) => {
         if (!cancelled) setError(err.message || 'Could not load mock tests.');
@@ -33,7 +46,7 @@ export function MockTestsCatalog() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [filter]);
 
   if (loading) {
     return (
@@ -146,7 +159,7 @@ function MockCard({ mock }: { mock: ApiMockSummary }) {
               </div>
               <p className="mt-0.5 text-xs leading-snug text-slate-500">
                 {adaptive
-                  ? 'Personalised adaptive assessment · IRT engine'
+                  ? 'Adaptive AI quiz · IRT engine'
                   : 'Timed mock assessment'}
               </p>
             </div>
@@ -188,7 +201,7 @@ function MockCard({ mock }: { mock: ApiMockSummary }) {
               ) : (
                 <Timer className="size-4" aria-hidden="true" />
               )}
-              {adaptive ? 'Start adaptive test' : 'Start test'}
+              {adaptive ? 'Start mock quiz' : 'Start test'}
               <ArrowRight className="size-4 transition-transform group-hover/cta:translate-x-0.5" />
             </Link>
           </div>

@@ -4,7 +4,6 @@ import {
   Brain,
   Building2,
   CalendarClock,
-  CalendarDays,
   ClipboardList,
   Code2,
   FileCheck2,
@@ -48,7 +47,6 @@ export const STUDENT_NAV: NavSection[] = [
     items: [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
       { label: 'My Learning', href: '/my-learning', icon: BookOpen },
-      { label: 'Calendar', href: '/calendar', icon: CalendarDays },
       { label: 'Performance', href: '/performance', icon: TrendingUp },
     ],
   },
@@ -57,7 +55,8 @@ export const STUDENT_NAV: NavSection[] = [
     items: [
       { label: 'Topic Mastery', href: '/topic-mastery', icon: Target },
       { label: 'Coding', href: '/coding', icon: Code2 },
-      { label: 'Mock Tests', href: '/mock-tests', icon: FileCheck2 },
+      { label: 'Mock Quiz', href: '/mock-tests', icon: Brain },
+      { label: 'Assessments', href: '/calendar', icon: FileCheck2 },
     ],
   },
   {
