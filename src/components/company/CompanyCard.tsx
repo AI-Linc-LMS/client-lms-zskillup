@@ -89,12 +89,12 @@ export function CompanyCard({ company }: { company: CompanyCardData }) {
           {/* header — monogram tile + name/tagline */}
           <div className="flex items-start gap-3.5">
             {showLogo ? (
-              <span className="relative grid size-14 shrink-0 place-items-center overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-2 shadow-[0_10px_24px_-12px_rgba(15,23,42,0.35)] transition-transform duration-300 group-hover:scale-[1.06]">
+              <span className="relative grid h-14 w-[4.75rem] shrink-0 place-items-center overflow-hidden rounded-2xl border border-slate-200/80 bg-white px-2.5 py-2 shadow-[0_10px_24px_-12px_rgba(15,23,42,0.35)] transition-transform duration-300 group-hover:scale-[1.04]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={company.logoUrl as string}
                   alt={`${company.name} logo`}
-                  className="size-full object-contain"
+                  className="max-h-9 max-w-full object-contain"
                   loading="lazy"
                   onError={() => setLogoFailed(true)}
                 />
