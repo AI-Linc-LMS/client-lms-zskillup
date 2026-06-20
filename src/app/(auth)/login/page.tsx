@@ -8,7 +8,7 @@ import {
   ArrowRight,
   BarChart3,
   BookOpen,
-  GraduationCap,
+  Loader2,
   Star,
   Trophy,
   Zap,
@@ -17,11 +17,8 @@ import type { AuthLoginDto } from '@/shared';
 import { login } from '@/lib/api/auth';
 import { ApiRequestError } from '@/lib/api/types';
 import { FormField } from '@/components/ui/form-field';
-import { cn } from '@/lib/utils';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import type { LoginResult } from '@/lib/api/auth';
-
-type Role = 'student' | 'admin';
 
 const BRAND_FEATURES = [
   { icon: BookOpen, label: 'Company-wise tracks', desc: 'TCS, Infosys, Wipro & more' },
@@ -41,10 +38,10 @@ const TESTIMONIAL = {
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [role, setRole] = useState<Role>('student');
   const [serverError, setServerError] = useState<string | null>(null);
   const [sessionWarning, setSessionWarning] = useState(false);
   const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
+  const [redirecting, setRedirecting] = useState(false);
 
   const {
     register,
@@ -75,23 +72,32 @@ function LoginForm() {
   });
 
   const handleLoginSuccess = useCallback((result: LoginResult) => {
+    // Show a full-screen "signing you in" overlay immediately so the login page
+    // never looks frozen during the navigation + first dashboard data load.
+    setRedirecting(true);
+    let target = '/dashboard';
     if (!result.user.isOnboarded) {
-      router.push('/signup/onboarding');
-      return;
-    }
-    const redirect = searchParams.get('redirect');
-    if (redirect && redirect.startsWith('/')) {
-      router.push(redirect);
-      return;
-    }
-    if (result.user.role === 'SUPER_ADMIN') {
-      router.push('/superadmin/dashboard');
-    } else if (result.user.role === 'COLLEGE_ADMIN') {
-      router.push('/tpo/dashboard');
+      target = '/signup/onboarding';
     } else {
-      router.push('/dashboard');
+      const redirect = searchParams.get('redirect');
+      if (redirect && redirect.startsWith('/')) target = redirect;
+      else if (result.user.role === 'SUPER_ADMIN') target = '/superadmin/dashboard';
+      else if (result.user.role === 'COLLEGE_ADMIN') target = '/tpo/dashboard';
     }
+    // replace() so Back doesn't return to the login page; the in-memory access
+    // token is preserved (soft nav) so the destination loads its data fast.
+    router.replace(target);
   }, [router, searchParams]);
+
+  if (redirecting) {
+    return (
+      <div className="flex w-full max-w-md flex-col items-center justify-center gap-3 py-24 text-center">
+        <Loader2 className="size-7 animate-spin text-[var(--color-brand)]" />
+        <p className="text-sm font-semibold text-[var(--color-text)]">Signing you in…</p>
+        <p className="text-xs text-[var(--color-text-muted)]">Taking you to your workspace.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-md">
@@ -104,39 +110,8 @@ function LoginForm() {
           Sign in to your workspace
         </h1>
         <p className="mt-1.5 text-sm text-[var(--color-text-muted)]">
-          Pick your role, drop in your email, and we&apos;ll take you straight there.
+          Drop in your email — we&apos;ll take you straight to the right workspace.
         </p>
-      </div>
-
-      {/* Role toggle */}
-      <div
-        className="mb-6 grid grid-cols-2 overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)] p-1"
-        role="group"
-        aria-label="Sign-in role"
-      >
-        {(['student', 'admin'] as Role[]).map((r) => (
-          <button
-            key={r}
-            type="button"
-            onClick={() => setRole(r)}
-            className={cn(
-              'flex items-center justify-center gap-1.5 rounded-lg py-2 text-sm font-semibold capitalize transition-all',
-              role === r
-                ? 'bg-[var(--color-ink)] text-white shadow'
-                : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]',
-            )}
-          >
-            {r === 'student' ? (
-              <>
-                <GraduationCap className="h-3.5 w-3.5" /> Student
-              </>
-            ) : (
-              <>
-                <BarChart3 className="h-3.5 w-3.5" /> Admin
-              </>
-            )}
-          </button>
-        ))}
       </div>
 
       {/* Form */}
@@ -147,7 +122,7 @@ function LoginForm() {
             label="Email address"
             type="email"
             autoComplete="email"
-            placeholder={role === 'student' ? 'you@college.edu' : 'admin@institution.edu'}
+            placeholder="you@email.com"
             error={errors.email?.message}
             {...register('email', {
               required: 'Email is required',
@@ -220,7 +195,7 @@ function LoginForm() {
             disabled={isSubmitting}
             className="btn-brand w-full rounded-full py-3 text-sm disabled:opacity-60"
           >
-            {isSubmitting ? 'Signing in…' : 'Sign in to placement portal'}
+            {isSubmitting ? 'Signing in…' : 'Sign in'}
             {!isSubmitting && <ArrowRight className="h-4 w-4" />}
           </button>
         </form>
