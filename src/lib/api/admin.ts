@@ -116,6 +116,21 @@ export async function listAdminCompanies(): Promise<AdminCompanyRow[]> {
   return res.data;
 }
 
+export interface AdminCompanyStat {
+  id: string;
+  name: string;
+  slug: string;
+  registrations: number;
+  assessments: number;
+  questionCount: number;
+  codingCount: number;
+}
+
+export async function getAdminCompanyStats(): Promise<AdminCompanyStat[]> {
+  const res = await apiClient.get<AdminCompanyStat[]>('/api/v1/admin/company-stats');
+  return res.data;
+}
+
 export async function createAdminCompany(dto: AdminCreateCompanyDto): Promise<{ id: string }> {
   const res = await apiClient.post<{ id: string }>('/api/v1/admin/companies', dto);
   return res.data;

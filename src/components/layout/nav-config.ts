@@ -9,10 +9,8 @@ import {
   FileCheck2,
   GraduationCap,
   LayoutDashboard,
-  Lightbulb,
   type LucideIcon,
   Mail,
-  Swords,
   Target,
   TrendingUp,
   Users,
@@ -80,16 +78,11 @@ export const SUPERADMIN_NAV: NavSection[] = [
   {
     heading: 'CONTENT',
     items: [
-      { label: 'Courses', href: '/superadmin/courses', icon: BookOpen },
       { label: 'Question Bank', href: '/superadmin/questions', icon: ClipboardList },
       { label: 'Coding Bank', href: '/superadmin/coding', icon: Code2 },
       { label: 'Mock Tests', href: '/superadmin/mocks', icon: FileCheck2 },
       { label: 'Scheduled Assessments', href: '/superadmin/scheduled-assessments', icon: CalendarClock },
-      { label: 'Adaptive Sessions', href: '/superadmin/adaptive-sessions', icon: Brain },
       { label: 'Companies', href: '/superadmin/companies', icon: Building2 },
-      { label: 'Colleges', href: '/superadmin/colleges', icon: GraduationCap },
-      { label: 'Tips', href: '/superadmin/tips', icon: Lightbulb },
-      { label: 'Challenges', href: '/superadmin/challenges', icon: Swords },
     ],
   },
 ];
