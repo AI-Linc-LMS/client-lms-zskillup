@@ -143,7 +143,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
               <Stat label="Type of exam" value={content.quickStats.examType} />
               <Stat label="Negative marking" value={content.quickStats.negativeMarking} />
               <Stat label="Applicants (est.)" value={content.quickStats.applicants} />
-              <Stat label="Company readiness" value={content.quickStats.readiness} accent />
+              <Stat label="Competitiveness" value={content.quickStats.readiness} accent />
               <Stat label="Open roles (est.)" value={content.quickStats.openRoles} />
             </div>
           </AuroraCard>
