@@ -116,6 +116,22 @@ function LoginForm() {
 
       {/* Form */}
       <div className="rounded-2xl border border-[var(--color-line)] bg-white p-6 shadow-[var(--shadow-card-lg)]">
+        {/* Google first — the primary, one-tap path */}
+        <GoogleSignInButton
+          onSuccess={handleLoginSuccess}
+          onError={(msg) => setServerError(msg)}
+          text="continue_with"
+        />
+
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-[var(--color-line)]" />
+          </div>
+          <div className="relative flex justify-center text-xs text-[var(--color-text-muted)]">
+            <span className="bg-white px-3">or sign in with email</span>
+          </div>
+        </div>
+
         <form onSubmit={onSubmit} className="space-y-4" noValidate>
           <FormField
             id="email"
@@ -199,23 +215,6 @@ function LoginForm() {
             {!isSubmitting && <ArrowRight className="h-4 w-4" />}
           </button>
         </form>
-
-        {/* Google Sign-In — available for both student and admin roles */}
-        <div className="mt-4 space-y-3">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[var(--color-line)]" />
-            </div>
-            <div className="relative flex justify-center text-xs text-[var(--color-text-muted)]">
-              <span className="bg-white px-3">or continue with</span>
-            </div>
-          </div>
-          <GoogleSignInButton
-            onSuccess={handleLoginSuccess}
-            onError={(msg) => setServerError(msg)}
-            text="signin_with"
-          />
-        </div>
 
         <p className="mt-5 text-center text-sm text-[var(--color-text-muted)]">
           New to ZSkillup?{' '}
