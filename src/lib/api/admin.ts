@@ -180,6 +180,7 @@ export async function listAdminQuestions(
   params: {
     status?: string;
     topic?: string;
+    role?: string;
     company?: string;
     difficulty?: string;
     source?: string;
@@ -192,6 +193,7 @@ export async function listAdminQuestions(
   const qs = new URLSearchParams();
   if (params.status) qs.set('status', params.status);
   if (params.topic) qs.set('topic', params.topic);
+  if (params.role) qs.set('role', params.role);
   if (params.company) qs.set('company', params.company);
   if (params.difficulty) qs.set('difficulty', params.difficulty);
   if (params.source) qs.set('source', params.source);

@@ -42,6 +42,7 @@ const SOURCE_LABEL: Record<string, string> = {
   MEMORY_BASED: 'Memory-based',
   PATTERN_BASED: 'Pattern-based',
   MOCK_DERIVED: 'Mock-derived',
+  AI_GENERATED: 'AI-generated',
 };
 
 const SOURCE_TONE: Record<string, string> = {
@@ -49,6 +50,7 @@ const SOURCE_TONE: Record<string, string> = {
   MEMORY_BASED: 'bg-sky-50 text-sky-700 ring-sky-200',
   PATTERN_BASED: 'bg-slate-50 text-slate-600 ring-slate-200',
   MOCK_DERIVED: 'bg-amber-50 text-amber-700 ring-amber-200',
+  AI_GENERATED: 'bg-fuchsia-50 text-fuchsia-700 ring-fuchsia-200',
 };
 
 const DIFF_TONE: Record<string, string> = {
@@ -56,6 +58,22 @@ const DIFF_TONE: Record<string, string> = {
   MEDIUM: 'bg-amber-50 text-amber-700 ring-amber-200',
   HARD: 'bg-rose-50 text-rose-700 ring-rose-200',
 };
+
+/** Target roles present in the bank (drives the role funnel filter). */
+const ROLE_OPTIONS = [
+  'Software Engineer',
+  'Associate Software Engineer',
+  'Systems Engineer',
+  'Systems Engineer Specialist',
+  'Digital Specialist Engineer',
+  'Application Development Associate',
+  'Analyst',
+  'Senior Analyst',
+  'Data Analyst',
+  'Operations Executive',
+  'TCS Ninja',
+  'TCS Digital',
+];
 
 const PAGE_SIZE = 15;
 
@@ -75,6 +93,9 @@ export function QuestionsAdmin() {
   const [difficultyFilter, setDifficultyFilter] = useState('');
   const [sourceFilter, setSourceFilter] = useState('');
   const [verifiedFilter, setVerifiedFilter] = useState('');
+  const [topicFilter, setTopicFilter] = useState('');
+  const [roleFilter, setRoleFilter] = useState('');
+  const [topicOptions, setTopicOptions] = useState<Array<{ id: string; slug: string; name: string; parentId: string | null }>>([]);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -94,17 +115,19 @@ export function QuestionsAdmin() {
   // Reset to page 1 whenever a filter changes.
   useEffect(() => {
     setPage(1);
-  }, [statusFilter, companyFilter, difficultyFilter, sourceFilter, verifiedFilter, debouncedSearch]);
+  }, [statusFilter, companyFilter, difficultyFilter, sourceFilter, verifiedFilter, topicFilter, roleFilter, debouncedSearch]);
 
   const baseFilters = useMemo(
     () => ({
       company: companyFilter || undefined,
+      topic: topicFilter || undefined,
+      role: roleFilter || undefined,
       difficulty: difficultyFilter || undefined,
       source: sourceFilter || undefined,
       verified: verifiedFilter === '' ? undefined : verifiedFilter === 'true',
       search: debouncedSearch || undefined,
     }),
-    [companyFilter, difficultyFilter, sourceFilter, verifiedFilter, debouncedSearch],
+    [companyFilter, topicFilter, roleFilter, difficultyFilter, sourceFilter, verifiedFilter, debouncedSearch],
   );
 
   const loadPage = useCallback(async () => {
@@ -155,7 +178,10 @@ export function QuestionsAdmin() {
 
   useEffect(() => {
     listTopics()
-      .then((ts) => setTopicNames(Object.fromEntries(ts.map((t) => [t.id, t.name]))))
+      .then((ts) => {
+        setTopicNames(Object.fromEntries(ts.map((t) => [t.id, t.name])));
+        setTopicOptions(ts.map((t) => ({ id: t.id, slug: t.slug, name: t.name, parentId: t.parentId })));
+      })
       .catch(() => {});
     listCompanies()
       .then((cs) => {
@@ -223,6 +249,34 @@ export function QuestionsAdmin() {
               {companies.map((c) => (
                 <option key={c.slug} value={c.slug}>
                   {c.name}
+                </option>
+              ))}
+            </FilterSelect>
+
+            <FilterSelect value={topicFilter} onChange={setTopicFilter} ariaLabel="Filter by topic">
+              <option value="">All topics</option>
+              {topicOptions
+                .filter((t) => !t.parentId)
+                .map((root) => {
+                  const children = topicOptions.filter((c) => c.parentId === root.id);
+                  return (
+                    <optgroup key={root.id} label={root.name}>
+                      <option value={root.slug}>All {root.name}</option>
+                      {children.map((c) => (
+                        <option key={c.id} value={c.slug}>
+                          &nbsp;&nbsp;{c.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  );
+                })}
+            </FilterSelect>
+
+            <FilterSelect value={roleFilter} onChange={setRoleFilter} ariaLabel="Filter by target role">
+              <option value="">All roles</option>
+              {ROLE_OPTIONS.map((r) => (
+                <option key={r} value={r}>
+                  {r}
                 </option>
               ))}
             </FilterSelect>
