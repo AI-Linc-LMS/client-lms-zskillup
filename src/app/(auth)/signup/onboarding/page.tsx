@@ -6,6 +6,7 @@ import { Check } from 'lucide-react';
 import {
   listColleges,
   saveOnboardingCollege,
+  saveOnboardingProfile,
   saveOnboardingTargets,
   type College,
 } from '@/lib/api/auth';
@@ -26,18 +27,38 @@ import { cn } from '@/lib/utils';
  * Dependent dropdowns: state → city → college (college list fetched from the
  * API per state/city, with free-text fallback). On step-3 submit → /dashboard.
  */
+const ROLE_OPTIONS = [
+  'Software Engineer',
+  'Frontend Developer',
+  'Backend Developer',
+  'Full Stack Developer',
+  'Data Analyst',
+  'Data Scientist',
+  'DevOps Engineer',
+  'QA / SDET',
+  'Business Analyst',
+  'Systems Engineer',
+];
+
 export default function OnboardingPage() {
   const router = useRouter();
-  const [step, setStep] = useState<2 | 3>(2);
+  const [step, setStep] = useState<2 | 3 | 4>(2);
 
-  // Step 2 state
+  // Step 2 state — college
   const [state, setState] = useState('');
   const [city, setCity] = useState('');
   const [collegeName, setCollegeName] = useState('');
   const [passoutYear, setPassoutYear] = useState<number | ''>('');
   const [colleges, setColleges] = useState<College[]>([]);
 
-  // Step 3 state
+  // Step 3 state — profile completion
+  const [phone, setPhone] = useState('');
+  const [course, setCourse] = useState('');
+  const [yearOfStudy, setYearOfStudy] = useState<number | ''>('');
+  const [skillsInput, setSkillsInput] = useState('');
+  const [roles, setRoles] = useState<string[]>([]);
+
+  // Step 4 state — target companies
   const [selected, setSelected] = useState<{ serviceBased: string[]; productBased: string[] }>({
     serviceBased: [],
     productBased: [],
@@ -93,7 +114,34 @@ export default function OnboardingPage() {
     }
   }
 
-  async function submitStep3() {
+  function toggleRole(name: string) {
+    setRoles((prev) => (prev.includes(name) ? prev.filter((r) => r !== name) : [...prev, name]));
+  }
+
+  async function submitProfile() {
+    setError(null);
+    const skills = skillsInput
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    setSubmitting(true);
+    try {
+      await saveOnboardingProfile({
+        phone: phone.trim() || undefined,
+        course: course.trim() || undefined,
+        yearOfStudy: yearOfStudy ? Number(yearOfStudy) : undefined,
+        skills,
+        rolesInterested: roles,
+      });
+      setStep(4);
+    } catch (err) {
+      setError(err instanceof ApiRequestError ? err.message : 'Could not save. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function submitTargets() {
     setError(null);
     if (totalSelected < 1) {
       setError('Select at least one target company so we can personalise your journey.');
@@ -120,24 +168,32 @@ export default function OnboardingPage() {
         {/* Step indicator */}
         <div className="flex items-center justify-center gap-2 text-[11px] font-semibold uppercase tracking-widest">
           <StepBubble num={1} active={false} done />
-          <span className="h-px w-6 bg-emerald-300" />
-          <StepBubble num={2} active={step === 2} done={step === 3} />
-          <span className={cn('h-px w-6', step === 3 ? 'bg-emerald-300' : 'bg-slate-200')} />
-          <StepBubble num={3} active={step === 3} done={false} />
+          <span className="h-px w-5 bg-emerald-300" />
+          <StepBubble num={2} active={step === 2} done={step > 2} />
+          <span className={cn('h-px w-5', step > 2 ? 'bg-emerald-300' : 'bg-slate-200')} />
+          <StepBubble num={3} active={step === 3} done={step > 3} />
+          <span className={cn('h-px w-5', step > 3 ? 'bg-emerald-300' : 'bg-slate-200')} />
+          <StepBubble num={4} active={step === 4} done={false} />
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="mb-5">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-              Step {step} of 3
+              Step {step} of 4
             </p>
             <h1 className="mt-1 text-xl font-bold text-navy">
-              {step === 2 ? 'Tell us about your college' : 'Pick your target companies'}
+              {step === 2
+                ? 'Tell us about your college'
+                : step === 3
+                  ? 'Complete your profile'
+                  : 'Pick your target companies'}
             </h1>
             <p className="mt-0.5 text-sm text-slate-500">
               {step === 2
                 ? 'We use this to surface drives and benchmarks for your campus.'
-                : 'Choose all that interest you — we personalise your roadmap to these.'}
+                : step === 3
+                  ? 'This tailors your dashboard, recommended roles, and skill tracking.'
+                  : 'Choose all that interest you — we personalise your roadmap to these.'}
             </p>
           </div>
 
@@ -233,6 +289,103 @@ export default function OnboardingPage() {
                 {submitting ? 'Saving…' : 'Continue'}
               </Button>
             </div>
+          ) : step === 3 ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="phone">Phone</Label>
+                  <input
+                    id="phone"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="10-digit number"
+                    inputMode="tel"
+                    className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors placeholder:text-slate-400 focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="year">Year of study</Label>
+                  <select
+                    id="year"
+                    value={yearOfStudy}
+                    onChange={(e) => setYearOfStudy(e.target.value ? Number(e.target.value) : '')}
+                    className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+                  >
+                    <option value="">Select</option>
+                    {[1, 2, 3, 4, 5].map((y) => (
+                      <option key={y} value={y}>
+                        {y === 1 ? '1st' : y === 2 ? '2nd' : y === 3 ? '3rd' : `${y}th`} year
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="course">Course / Degree</Label>
+                <input
+                  id="course"
+                  value={course}
+                  onChange={(e) => setCourse(e.target.value)}
+                  placeholder="e.g. B.Tech Computer Science"
+                  className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors placeholder:text-slate-400 focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="skills">Skills</Label>
+                <input
+                  id="skills"
+                  value={skillsInput}
+                  onChange={(e) => setSkillsInput(e.target.value)}
+                  placeholder="Comma-separated, e.g. Java, SQL, React, DSA"
+                  className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors placeholder:text-slate-400 focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Roles you&apos;re interested in</Label>
+                <div className="flex flex-wrap gap-2">
+                  {ROLE_OPTIONS.map((name) => {
+                    const active = roles.includes(name);
+                    return (
+                      <button
+                        key={name}
+                        type="button"
+                        aria-pressed={active}
+                        onClick={() => toggleRole(name)}
+                        className={cn(
+                          'rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors',
+                          active
+                            ? 'border-orange bg-orange/10 text-orange'
+                            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50',
+                        )}
+                      >
+                        {name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {error ? (
+                <p
+                  role="alert"
+                  className="rounded-md bg-red-50 p-3 text-sm font-medium text-red-700 ring-1 ring-red-200"
+                >
+                  {error}
+                </p>
+              ) : null}
+
+              <div className="flex gap-3">
+                <Button variant="outline" className="flex-1" onClick={() => setStep(2)}>
+                  Back
+                </Button>
+                <Button className="flex-1" onClick={submitProfile} disabled={submitting}>
+                  {submitting ? 'Saving…' : 'Continue'}
+                </Button>
+              </div>
+            </div>
           ) : (
             <div className="space-y-5">
               <CompanyGroup
@@ -264,10 +417,10 @@ export default function OnboardingPage() {
               ) : null}
 
               <div className="flex gap-3">
-                <Button variant="outline" className="flex-1" onClick={() => setStep(2)}>
+                <Button variant="outline" className="flex-1" onClick={() => setStep(3)}>
                   Back
                 </Button>
-                <Button className="flex-1" onClick={submitStep3} disabled={submitting}>
+                <Button className="flex-1" onClick={submitTargets} disabled={submitting}>
                   {submitting ? 'Finishing…' : 'Finish onboarding'}
                 </Button>
               </div>

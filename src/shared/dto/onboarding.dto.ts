@@ -6,10 +6,13 @@
  */
 import { Transform, Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   IsArray,
   IsInt,
+  IsOptional,
   IsString,
   Max,
+  MaxLength,
   Min,
   MinLength,
   registerDecorator,
@@ -63,6 +66,47 @@ export class OnboardingCollegeDto {
   @Min(currentYear, { message: 'Invalid passout year' })
   @Max(currentYear + 4, { message: 'Invalid passout year' })
   passoutYear!: number;
+}
+
+const trimList = ({ value }: { value: unknown }): unknown =>
+  Array.isArray(value)
+    ? value.map((v) => (typeof v === 'string' ? v.trim() : v)).filter((v) => v !== '')
+    : value;
+
+/** Profile-completion step — phone, course, year of study, skills, roles. */
+export class OnboardingProfileDto {
+  @IsOptional()
+  @Transform(trimString)
+  @IsString()
+  @MaxLength(20)
+  phone?: string;
+
+  @IsOptional()
+  @Transform(trimString)
+  @IsString()
+  @MaxLength(160)
+  course?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  yearOfStudy?: number;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @ArrayMaxSize(30)
+  @Transform(trimList)
+  skills?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @ArrayMaxSize(20)
+  @Transform(trimList)
+  rolesInterested?: string[];
 }
 
 export class OnboardingTargetsDto {

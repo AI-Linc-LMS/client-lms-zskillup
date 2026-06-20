@@ -21,6 +21,7 @@ import {
   Users,
 } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { CompanyRegisterCard } from '@/components/company/CompanyRegisterCard';
 import { cn } from '@/lib/utils';
 import { HUB_TABS, type HubContent, type HubTab } from '@/lib/hub-data';
 import { AnimatedNumber, AuroraBackground, Reveal, Stagger, StaggerItem } from '@/components/motion/primitives';
@@ -143,6 +144,9 @@ export function CompanyHub({ content }: { content: HubContent }) {
         </div>
 
         <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
+          {/* Register for this drive (assessment lifecycle) */}
+          <CompanyRegisterCard companySlug={c.slug} companyName={c.name} />
+
           {/* Drive walkthrough — dark glass companion card */}
           <div className="relative isolate overflow-hidden rounded-3xl p-5 text-white shadow-[0_24px_60px_-30px_rgba(11,18,32,0.8)]">
             <AuroraBackground />

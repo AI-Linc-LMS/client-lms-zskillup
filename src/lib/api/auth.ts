@@ -7,6 +7,7 @@ import type {
   AuthResetPasswordDto,
   AuthVerifyEmailDto,
   OnboardingCollegeDto,
+  OnboardingProfileDto,
   OnboardingTargetsDto,
 } from '@/shared';
 
@@ -103,6 +104,13 @@ export async function saveOnboardingCollege(
   dto: OnboardingCollegeDto,
 ): Promise<{ isComplete: boolean }> {
   const res = await apiClient.post<{ isComplete: boolean }>('/api/v1/onboarding/step/college', dto);
+  return res.data;
+}
+
+export async function saveOnboardingProfile(
+  dto: OnboardingProfileDto,
+): Promise<{ isComplete: boolean }> {
+  const res = await apiClient.post<{ isComplete: boolean }>('/api/v1/onboarding/step/profile', dto);
   return res.data;
 }
 

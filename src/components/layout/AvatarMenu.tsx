@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, ChevronRight, Eye, Loader2, LogOut, User } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Eye, IdCard, Loader2, LogOut, User } from 'lucide-react';
 import { logout } from '@/lib/api/auth';
 import { getMe } from '@/lib/api/me';
 import { startStudentPreview, exitStudentPreview } from '@/lib/preview-actions';
@@ -125,6 +125,14 @@ export function AvatarMenu({ initials = '··' }: { initials?: string }) {
     }
   }
 
+  function handleProfile() {
+    setOpen(false);
+    router.push('/profile');
+  }
+
+  // Profile is a student-area page; show it for students and admins-previewing.
+  const showProfile = isPreviewing || sessionRole === 'STUDENT';
+
   return (
     <div className="relative" ref={ref}>
       <button
@@ -229,6 +237,16 @@ export function AvatarMenu({ initials = '··' }: { initials?: string }) {
                 tone="default"
                 trailing
               />
+
+              {showProfile ? (
+                <MenuRow
+                  icon={<IdCard className="size-4" aria-hidden="true" />}
+                  label="My Profile"
+                  onClick={handleProfile}
+                  tone="default"
+                  trailing
+                />
+              ) : null}
 
               {canPreview ? (
                 <MenuRow

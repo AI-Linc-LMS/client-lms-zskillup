@@ -34,7 +34,24 @@ export interface ApiStudentProfile {
   passoutYear: number | null;
   branch: 'CSE' | 'IT' | 'ECE' | 'EEE' | 'MECH' | 'CIVIL' | 'OTHER' | null;
   rollNumber: string | null;
+  phone: string | null;
+  course: string | null;
+  yearOfStudy: number | null;
+  skills: string[];
+  rolesInterested: string[];
   isOnboarded: boolean;
+}
+
+/** Patchable profile fields (PATCH /me). */
+export interface UpdateMePayload {
+  fullName?: string;
+  phone?: string;
+  course?: string;
+  yearOfStudy?: number;
+  skills?: string[];
+  rolesInterested?: string[];
+  collegeName?: string;
+  passoutYear?: number;
 }
 
 export interface ApiMe {
@@ -66,4 +83,10 @@ export async function getMe(): Promise<ApiMe> {
     }
   })();
   return inFlight;
+}
+
+/** Patch the authenticated user's profile (name + student-profile fields). */
+export async function updateMe(patch: UpdateMePayload): Promise<ApiMe> {
+  const res = await apiClient.patch<ApiMe>('/api/v1/me', patch);
+  return res.data;
 }
