@@ -13,13 +13,10 @@ import {
   Sparkles,
   Trophy,
   Video,
-  X,
 } from 'lucide-react';
 import {
-  getAssessmentLeaderboard,
   getMySchedule,
   type ApiScheduledAssessment,
-  type AssessmentLeaderboard,
 } from '@/lib/api/scheduling';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { Reveal, Stagger, StaggerItem } from '@/components/motion/primitives';
@@ -62,21 +59,6 @@ export default function CalendarPage() {
     return { year: n.getFullYear(), month: n.getMonth() };
   });
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
-
-  const [lb, setLb] = useState<AssessmentLeaderboard | null>(null);
-  const [lbLoading, setLbLoading] = useState(false);
-
-  const openLeaderboard = async (id: string) => {
-    setLbLoading(true);
-    setLb(null);
-    try {
-      setLb(await getAssessmentLeaderboard(id));
-    } catch {
-      /* ignore */
-    } finally {
-      setLbLoading(false);
-    }
-  };
 
   useEffect(() => {
     getMySchedule()
@@ -423,22 +405,27 @@ export default function CalendarPage() {
                             >
                               {countdown(it.scheduledAt)}
                             </span>
-                            <Link
-                              href={`/dashboard/company/${it.companySlug}`}
-                              className="flex items-center gap-1 text-xs font-bold text-navy transition-colors hover:text-orange"
-                            >
-                              <ShieldCheck className="size-3.5" /> View hub
-                            </Link>
+                            {it.companySlug ? (
+                              <Link
+                                href={`/dashboard/company/${it.companySlug}`}
+                                className="flex items-center gap-1 text-xs font-bold text-navy transition-colors hover:text-orange"
+                              >
+                                <ShieldCheck className="size-3.5" /> View hub
+                              </Link>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 px-2.5 py-0.5 text-[11px] font-bold text-violet-600">
+                                🌐 Platform-wide
+                              </span>
+                            )}
                           </div>
                         )}
                         {ended ? (
-                          <button
-                            type="button"
-                            onClick={() => openLeaderboard(it.id)}
+                          <Link
+                            href={`/assessments/${it.id}/leaderboard`}
                             className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-[11px] font-bold text-slate-600 transition-colors hover:bg-slate-50"
                           >
                             <Trophy className="size-3.5 text-amber-500" /> Leaderboard
-                          </button>
+                          </Link>
                         ) : null}
                       </div>
                     </StaggerItem>
@@ -449,91 +436,6 @@ export default function CalendarPage() {
           </aside>
         </div>
       )}
-
-      {/* ── Leaderboard modal ─────────────────────────────────────────────── */}
-      {lbLoading || lb ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <button
-            type="button"
-            aria-label="Close"
-            onClick={() => setLb(null)}
-            className="absolute inset-0 bg-slate-900/60"
-          />
-          <div className="relative flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
-            {lbLoading || !lb ? (
-              <div className="grid h-56 place-items-center">
-                <Loader2 className="size-6 animate-spin text-slate-400" />
-              </div>
-            ) : (
-              <>
-                <div className="flex items-start justify-between border-b border-slate-100 px-6 py-4">
-                  <div>
-                    <h3 className="flex items-center gap-2 text-lg font-extrabold text-navy">
-                      <Trophy className="size-5 text-amber-500" /> {lb.assessment.title}
-                    </h3>
-                    <p className="text-xs text-slate-500">
-                      {lb.assessment.companyName} · {lb.total} participants
-                      {lb.myRank ? ` · you're #${lb.myRank}` : ''}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setLb(null)}
-                    className="grid size-8 place-items-center rounded-full text-slate-400 transition-colors hover:bg-slate-100"
-                  >
-                    <X className="size-4" />
-                  </button>
-                </div>
-                <div className="min-h-0 flex-1 overflow-y-auto p-4">
-                  {lb.entries.length === 0 ? (
-                    <p className="py-8 text-center text-sm text-slate-500">
-                      No attempts yet — be the first to take this assessment.
-                    </p>
-                  ) : (
-                    <ul className="space-y-1.5">
-                      {lb.entries.map((e) => (
-                        <li
-                          key={`${e.rank}-${e.name}`}
-                          className={cn(
-                            'flex items-center gap-3 rounded-xl px-3 py-2.5',
-                            e.isYou
-                              ? 'bg-orange/10 ring-1 ring-inset ring-orange/30'
-                              : 'hover:bg-slate-50',
-                          )}
-                        >
-                          <span
-                            className={cn(
-                              'grid size-7 shrink-0 place-items-center rounded-full text-[11px] font-black',
-                              e.rank === 1
-                                ? 'bg-amber-100 text-amber-700'
-                                : e.rank === 2
-                                  ? 'bg-slate-200 text-slate-600'
-                                  : e.rank === 3
-                                    ? 'bg-orange-100 text-orange-700'
-                                    : 'bg-slate-100 text-slate-500',
-                            )}
-                          >
-                            {e.rank}
-                          </span>
-                          <span className="min-w-0 flex-1 truncate text-sm font-semibold text-navy">
-                            {e.name}
-                            {e.isYou ? (
-                              <span className="ml-1.5 text-[10px] font-bold text-orange">YOU</span>
-                            ) : null}
-                          </span>
-                          <span className="text-sm font-extrabold tabular-nums text-navy">
-                            {e.scorePct}%
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 }

@@ -122,17 +122,34 @@ export async function getAssessmentResults(id: string): Promise<AssessmentResult
 
 export interface AssessmentLeaderboardEntry {
   rank: number;
+  userId: string;
   name: string;
+  avatarUrl: string | null;
+  collegeName: string | null;
+  level: number;
+  totalXp: number;
+  badgesEarned: number;
+  currentStreakDays: number;
   scorePct: number;
+  percentile: number;
   score: number;
   total: number;
   timeTakenSec: number;
   isYou: boolean;
 }
+export interface AssessmentSectionPercentile {
+  section: string;
+  correct: number;
+  total: number;
+  accuracyPct: number;
+  percentile: number;
+}
 export interface AssessmentLeaderboard {
   assessment: { id: string; title: string; companyName: string };
   total: number;
   myRank: number | null;
+  myPercentile: number | null;
+  sections: AssessmentSectionPercentile[];
   entries: AssessmentLeaderboardEntry[];
 }
 

@@ -62,6 +62,7 @@ export interface ApiLeaderboardEntry {
   userId: string;
   fullName: string | null;
   initials: string;
+  avatarUrl: string | null;
   collegeName: string | null;
   branch: string | null;
   passoutYear: number | null;

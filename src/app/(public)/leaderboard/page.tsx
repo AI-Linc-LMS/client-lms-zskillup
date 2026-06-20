@@ -87,9 +87,7 @@ export default function LeaderboardPage() {
         {/* My position strip — only if authenticated and ranked */}
         {data?.myEntry && (
           <div className="mb-8 flex items-center gap-4 rounded-xl border-2 border-orange/30 bg-orange/5 px-4 py-3">
-            <span className="grid size-10 shrink-0 place-items-center rounded-full bg-navy text-sm font-bold text-white">
-              {data.myEntry.initials}
-            </span>
+            <LbAvatar src={data.myEntry.avatarUrl} initials={data.myEntry.initials} className="size-10 shrink-0 text-sm bg-navy" />
             <div className="flex-1">
               <p className="font-semibold text-navy">
                 {data.myEntry.fullName ?? 'You'}
@@ -141,9 +139,7 @@ export default function LeaderboardPage() {
               <div className="mb-8 flex items-end justify-center gap-4 rounded-2xl bg-gradient-to-b from-navy/5 to-transparent px-6 pb-8 pt-4">
                 {podium.map((entry, i) => (
                   <div key={entry.userId} className={cn('flex flex-col items-center', PODIUM_HEIGHTS[i])}>
-                    <span className={cn('grid size-12 place-items-center rounded-full text-sm font-bold text-white', entry.isYou ? 'bg-orange' : 'bg-navy')}>
-                      {entry.initials}
-                    </span>
+                    <LbAvatar src={entry.avatarUrl} initials={entry.initials} className={cn('size-12 text-sm', entry.isYou ? 'bg-orange' : 'bg-navy')} />
                     <p className="mt-2 text-center text-sm font-semibold text-navy">{entry.fullName ?? 'Student'}</p>
                     <p className="text-center text-xs text-muted-foreground">{entry.collegeName}</p>
                     <div
@@ -235,9 +231,7 @@ function TableRow({ entry }: { entry: ApiLeaderboardEntry }) {
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
-          <span className={cn('grid size-7 place-items-center rounded-full text-[10px] font-bold text-white', entry.isYou ? 'bg-orange' : 'bg-navy')}>
-            {entry.initials}
-          </span>
+          <LbAvatar src={entry.avatarUrl} initials={entry.initials} className={cn('size-7 text-[10px]', entry.isYou ? 'bg-orange' : 'bg-navy')} />
           <div>
             <p className="font-medium text-navy">
               {entry.fullName ?? 'Student'}
@@ -260,5 +254,20 @@ function TableRow({ entry }: { entry: ApiLeaderboardEntry }) {
       <td className="px-4 py-3 text-muted-foreground">{entry.badgesEarned}</td>
       <td className="px-4 py-3 text-right font-semibold text-navy">{entry.totalXp.toLocaleString()}</td>
     </tr>
+  );
+}
+
+/** Leaderboard avatar — Google profile image (avatarUrl) with an initials fallback. */
+function LbAvatar({ src, initials, className }: { src: string | null; initials: string; className?: string }) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <span className={cn('grid shrink-0 place-items-center overflow-hidden rounded-full font-bold text-white', className)}>
+      {src && !failed ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt={initials} referrerPolicy="no-referrer" onError={() => setFailed(true)} className="size-full object-cover" />
+      ) : (
+        initials
+      )}
+    </span>
   );
 }
