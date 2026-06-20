@@ -11,6 +11,10 @@ import {
   getMyRegistrations,
   registerForCompany,
 } from '@/lib/api/registrations';
+import {
+  getCompanyScheduledAssessments,
+  type ApiScheduledAssessment,
+} from '@/lib/api/scheduling';
 import { AuroraBackground } from '@/components/motion/primitives';
 
 type Phase = 'loading' | 'guest' | 'idle' | 'registered';
@@ -32,6 +36,19 @@ export function CompanyRegisterCard({
   const [submitting, setSubmitting] = useState(false);
   const [justRegistered, setJustRegistered] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [nextAssessment, setNextAssessment] = useState<ApiScheduledAssessment | null>(null);
+
+  useEffect(() => {
+    // Upcoming scheduled assessment for this company (public).
+    getCompanyScheduledAssessments(companySlug)
+      .then((rows) => {
+        const upcoming = rows
+          .filter((r) => new Date(r.scheduledAt).getTime() >= Date.now() - 86400000)
+          .sort((a, b) => +new Date(a.scheduledAt) - +new Date(b.scheduledAt));
+        setNextAssessment(upcoming[0] ?? null);
+      })
+      .catch(() => {});
+  }, [companySlug]);
 
   useEffect(() => {
     if (!hasRoleHint()) {
@@ -149,6 +166,25 @@ export function CompanyRegisterCard({
               </button>
             </>
           )}
+
+          {nextAssessment ? (
+            <div className="mt-4 rounded-xl border border-white/15 bg-white/[0.06] p-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#ffb877]">
+                Next assessment
+              </p>
+              <p className="mt-1 text-xs font-semibold text-white">{nextAssessment.title}</p>
+              <p className="mt-0.5 text-xs text-white/65">
+                {new Date(nextAssessment.scheduledAt).toLocaleString([], {
+                  weekday: 'short',
+                  month: 'short',
+                  day: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                })}{' '}
+                · {nextAssessment.durationMinutes}m{nextAssessment.proctored ? ' · proctored' : ''}
+              </p>
+            </div>
+          ) : null}
         </div>
       </div>
 
