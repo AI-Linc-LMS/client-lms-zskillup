@@ -22,7 +22,7 @@ import type { LoginResult } from '@/lib/api/auth';
 
 const BRAND_FEATURES = [
   { icon: BookOpen, label: 'Company-wise tracks', desc: 'TCS, Infosys, Wipro & more' },
-  { icon: Zap,       label: 'Adaptive quizzing',  desc: 'Re-tunes to your accuracy' },
+  { icon: Zap,       label: 'Mock quizzes',  desc: 'Re-tunes to your accuracy' },
   { icon: Trophy,    label: 'National leaderboard', desc: 'Rank among 240,000+ students' },
   { icon: BarChart3, label: 'Cohort analytics',   desc: 'TPO heat-maps & risk alerts' },
 ];

@@ -10,6 +10,7 @@ export const HUB_TABS = [
   'Overview',
   'Syllabus',
   'Practice Quiz',
+  'Coding',
   'Full Mock Assessment',
 ] as const;
 export type HubTab = (typeof HUB_TABS)[number];

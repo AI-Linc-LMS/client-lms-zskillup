@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowRight, Brain, Clock, FileText, Loader2, Sparkles, Star, Timer } from 'lucide-react';
+import { ArrowRight, Target, Clock, FileText, Sparkles, Star, Timer } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Stagger, StaggerItem } from '@/components/motion/primitives';
 import { listMocks, type ApiMockSummary } from '@/lib/api/mocks';
@@ -112,17 +112,17 @@ export function MockTestsCatalog({
  *  a confident gradient Start CTA, and a hover lift with an intensifying glow. */
 function MockCard({ mock }: { mock: ApiMockSummary }) {
   const adaptive = mock.isAdaptive;
-  const from = adaptive ? '#7c6cf5' : '#f7a14e';
-  const to = adaptive ? '#5b3bf5' : '#f37021';
-  const glow = adaptive ? '#6d3bf5' : '#f37021';
+  const from = '#f7a14e';
+  const to = '#f37021';
+  const glow = '#f37021';
   const href = adaptive
     ? `/dashboard/quiz/adaptive?mock=${mock.id}`
     : `/dashboard/quiz?mock=${mock.id}`;
-  const Icon = adaptive ? Brain : Timer;
+  const Icon = adaptive ? Target : Timer;
 
   return (
     <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.25 }} className="h-full">
-      <div className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_8px_30px_-18px_rgba(15,23,42,0.35)] transition-shadow duration-300 hover:shadow-[0_24px_60px_-24px_rgba(15,23,42,0.5)]">
+      <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_8px_30px_-18px_rgba(15,23,42,0.35)] transition-shadow duration-300 hover:shadow-[0_24px_60px_-24px_rgba(15,23,42,0.5)]">
         {/* faint gradient wash */}
         <div
           aria-hidden
@@ -152,15 +152,13 @@ function MockCard({ mock }: { mock: ApiMockSummary }) {
               <div className="flex flex-wrap items-center gap-2">
                 <p className="text-base font-bold leading-snug text-navy">{mock.title}</p>
                 {adaptive && (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[#6d3bf5]/25 bg-[#6d3bf5]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#5b3bf5]">
-                    <Sparkles className="size-2.5" /> AI Adaptive
+                  <span className="inline-flex items-center gap-1 rounded-full border border-orange/25 bg-orange/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-orange">
+                    <Sparkles className="size-2.5" /> Mock Quiz
                   </span>
                 )}
               </div>
               <p className="mt-0.5 text-xs leading-snug text-slate-500">
-                {adaptive
-                  ? 'Adaptive AI quiz · IRT engine'
-                  : 'Timed mock assessment'}
+                {adaptive ? 'Adjusts to your level' : 'Timed mock assessment'}
               </p>
             </div>
           </div>
@@ -188,7 +186,7 @@ function MockCard({ mock }: { mock: ApiMockSummary }) {
           <div className="mt-auto pt-6">
             <Link
               href={href}
-              aria-label={adaptive ? `Start adaptive ${mock.title}` : `Start ${mock.title}`}
+              aria-label={`Start ${mock.title}`}
               className="group/cta relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-full px-6 py-3 text-sm font-extrabold text-white shadow-[0_14px_34px_-14px_rgba(243,112,33,0.85)] transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
               style={{ background: `linear-gradient(180deg, ${from}, ${to})` }}
             >

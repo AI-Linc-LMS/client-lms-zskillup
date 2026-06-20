@@ -35,7 +35,7 @@ const FEATURES = [
   },
   {
     icon: Zap,
-    title: 'Adaptive quizzing',
+    title: 'Mock quizzes',
     body: 'Difficulty re-tunes to your accuracy and speed. Hint ladders, video walkthroughs, and bookmarked weak spots — never grind blindly.',
   },
   {

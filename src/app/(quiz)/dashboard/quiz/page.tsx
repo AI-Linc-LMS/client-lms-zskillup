@@ -31,21 +31,21 @@ function QuizLanding() {
     { icon: BarChart3, text: 'A percentile, topic-by-topic breakdown, and full answer review at the end.' },
   ];
   return (
-    <div className="relative min-h-screen overflow-hidden bg-navy text-white">
+    <div className="relative min-h-screen overflow-hidden bg-background text-navy">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_-10%,rgba(243,112,33,0.15),transparent),radial-gradient(50%_50%_at_100%_100%,rgba(56,189,248,0.12),transparent)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_-10%,rgba(243,112,33,0.08),transparent),radial-gradient(50%_50%_at_100%_100%,rgba(56,189,248,0.07),transparent)]"
       />
       <div className="relative z-10 flex items-center justify-between px-8 py-6">
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-semibold text-white/90 transition-colors hover:bg-white/10"
+          className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
         >
           <ArrowLeft className="size-3.5" aria-hidden="true" />
           Exit to dashboard
         </Link>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-white/70">
-          <Sparkles className="size-3" aria-hidden="true" /> Assessment mode
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-slate-500 shadow-sm">
+          <Sparkles className="size-3 text-orange" aria-hidden="true" /> Assessment mode
         </span>
       </div>
 
@@ -53,7 +53,7 @@ function QuizLanding() {
         <h1 className="text-4xl font-extrabold leading-tight tracking-tight md:text-5xl">
           Timed mock tests
         </h1>
-        <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-white/70">
+        <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-slate-600">
           Pick a mock from the catalog to start a real, server-graded timed assessment. Your score,
           percentile, and a full answer review are ready the moment you submit.
         </p>
@@ -62,7 +62,7 @@ function QuizLanding() {
           {points.map(({ icon: Icon, text }) => (
             <li
               key={text}
-              className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-4 text-[13px] leading-snug text-white/80"
+              className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 text-[13px] leading-snug text-slate-600 shadow-sm"
             >
               <Icon className="mt-0.5 size-4 shrink-0 text-orange" aria-hidden="true" />
               <span>{text}</span>

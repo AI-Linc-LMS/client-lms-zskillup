@@ -13,13 +13,18 @@ const DIFF_TONE: Record<string, string> = {
   HARD: 'bg-rose-50 text-rose-700 ring-rose-200',
 };
 
-export function CodingProblemsList() {
+/**
+ * Coding problem catalogue. With a `company` slug it scopes to the problems that
+ * company has asked (used inside the company hub's Coding tab); without one it
+ * lists the full active bank.
+ */
+export function CodingProblemsList({ company }: { company?: string } = {}) {
   const [problems, setProblems] = useState<CodingProblemListItem[] | null>(null);
   const [errored, setErrored] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    listCodingProblems()
+    listCodingProblems(company)
       .then((p) => {
         if (!cancelled) setProblems(p);
       })
@@ -29,7 +34,7 @@ export function CodingProblemsList() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [company]);
 
   if (errored) {
     return (
@@ -50,7 +55,11 @@ export function CodingProblemsList() {
       <div className="rounded-2xl border border-slate-200/80 bg-white p-10 text-center shadow-sm">
         <Code2 className="mx-auto mb-3 size-8 text-slate-300" />
         <p className="text-sm font-semibold text-navy">No coding problems yet</p>
-        <p className="mt-1 text-sm text-slate-500">Check back soon — new problems are on the way.</p>
+        <p className="mt-1 text-sm text-slate-500">
+          {company
+            ? 'No coding problems tagged for this company yet — check back soon.'
+            : 'Check back soon — new problems are on the way.'}
+        </p>
       </div>
     );
   }

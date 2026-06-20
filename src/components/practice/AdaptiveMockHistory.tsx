@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowUpRight, Brain, Calendar, CheckCircle2, Clock, FileText, Loader2 } from 'lucide-react';
+import { ArrowUpRight, Target, Calendar, CheckCircle2, Clock, FileText, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Stagger, StaggerItem } from '@/components/motion/primitives';
 import { listAdaptiveSessions, type AdaptiveSessionSummary } from '@/lib/api/adaptive';
@@ -60,9 +60,9 @@ export function AdaptiveMockHistory() {
 
   if (!sessions) {
     return (
-      <div className="flex items-center gap-3 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm">
+      <div className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
         <Loader2 className="size-4 animate-spin text-orange" aria-hidden="true" />
-        <span className="text-sm text-slate-400">Loading adaptive history…</span>
+        <span className="text-sm text-slate-400">Loading mock quiz history…</span>
       </div>
     );
   }
@@ -72,11 +72,11 @@ export function AdaptiveMockHistory() {
   return (
     <section>
       <header className="mb-4">
-        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-[#5b3bf5]">
-          <Brain className="size-3.5" aria-hidden="true" /> AI Adaptive
+        <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-orange">
+          <Target className="size-3.5" aria-hidden="true" /> Mock quizzes
         </p>
         <h2 className="mt-1 text-xl font-extrabold tracking-tight text-navy">
-          Your Adaptive Sessions
+          Your mock quiz history
         </h2>
       </header>
 
@@ -94,18 +94,18 @@ export function AdaptiveMockHistory() {
                 <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_8px_30px_-20px_rgba(15,23,42,0.35)] transition-shadow duration-300 hover:shadow-[0_18px_50px_-24px_rgba(15,23,42,0.45)]">
                   <div
                     aria-hidden
-                    className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#6d3bf5]/[0.04] via-transparent to-transparent"
+                    className="pointer-events-none absolute inset-0 bg-gradient-to-br from-orange/[0.04] via-transparent to-transparent"
                   />
                   <div
                     aria-hidden
-                    className="pointer-events-none absolute -right-10 -top-12 size-32 rounded-full bg-[#6d3bf5] opacity-[0.06] blur-2xl transition-opacity duration-500 group-hover:opacity-20"
+                    className="pointer-events-none absolute -right-10 -top-12 size-32 rounded-full bg-orange opacity-[0.06] blur-2xl transition-opacity duration-500 group-hover:opacity-20"
                   />
                   <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-5">
-                    <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#7c6cf5] to-[#5b3bf5] text-white shadow-sm transition-transform duration-300 group-hover:scale-105">
-                      <Brain className="size-5" aria-hidden="true" />
+                    <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-sm transition-transform duration-300 group-hover:scale-105">
+                      <Target className="size-5" aria-hidden="true" />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-bold text-navy">Adaptive Session</p>
+                      <p className="truncate text-sm font-bold text-navy">Mock Quiz</p>
                       <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400">
                         <span className="flex items-center gap-1">
                           <FileText className="size-3.5" aria-hidden="true" />

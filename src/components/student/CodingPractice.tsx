@@ -74,10 +74,10 @@ export function CodingPractice() {
       </div>
 
       <Link
-        href="/coding"
+        href="/dashboard/company"
         className="relative mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-indigo-600 hover:text-indigo-700"
       >
-        Open coding workspace <ArrowRight className="size-4" />
+        Browse coding by company <ArrowRight className="size-4" />
       </Link>
     </section>
   );

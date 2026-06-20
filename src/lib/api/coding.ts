@@ -89,8 +89,9 @@ export async function getCodingLanguages(): Promise<{
   return res.data;
 }
 
-export async function listCodingProblems(): Promise<CodingProblemListItem[]> {
-  const res = await apiClient.get<CodingProblemListItem[]>('/api/v1/coding/problems');
+export async function listCodingProblems(company?: string): Promise<CodingProblemListItem[]> {
+  const qs = company ? `?company=${encodeURIComponent(company)}` : '';
+  const res = await apiClient.get<CodingProblemListItem[]>(`/api/v1/coding/problems${qs}`);
   return res.data;
 }
 

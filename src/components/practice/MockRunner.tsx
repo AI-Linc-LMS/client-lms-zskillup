@@ -234,20 +234,20 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
 
   if (loading) {
     return (
-      <div className="grid min-h-screen place-items-center bg-navy">
-        <Loader2 className="size-6 animate-spin text-white/60" aria-hidden="true" />
+      <div className="grid min-h-screen place-items-center bg-background">
+        <Loader2 className="size-6 animate-spin text-slate-400" aria-hidden="true" />
       </div>
     );
   }
 
   if (error && !mock) {
     return (
-      <div className="grid min-h-screen place-items-center bg-navy px-6">
-        <div className="max-w-md rounded-2xl border border-white/10 bg-white/5 p-8 text-center">
-          <span className="mx-auto grid size-12 place-items-center rounded-full bg-red-500/15 text-red-300">
+      <div className="grid min-h-screen place-items-center bg-background px-6">
+        <div className="max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+          <span className="mx-auto grid size-12 place-items-center rounded-full bg-red-50 text-red-600">
             <AlertTriangle className="size-6" aria-hidden="true" />
           </span>
-          <p className="mt-4 text-sm font-semibold text-white">{error}</p>
+          <p className="mt-4 text-sm font-semibold text-navy">{error}</p>
           <Button variant="outline" className="mt-5" asChild>
             <Link href="/mock-tests">Back to mock tests</Link>
           </Button>
@@ -291,34 +291,34 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
   ];
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-navy text-white">
+    <div className="relative min-h-screen overflow-hidden bg-background text-navy">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_-10%,rgba(243,112,33,0.15),transparent),radial-gradient(50%_50%_at_100%_100%,rgba(56,189,248,0.12),transparent)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_-10%,rgba(243,112,33,0.08),transparent),radial-gradient(50%_50%_at_100%_100%,rgba(56,189,248,0.07),transparent)]"
       />
       <div className="relative z-10 flex items-center justify-between px-8 py-6">
         <Link
           href="/mock-tests"
-          className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-semibold text-white/90 transition-colors hover:bg-white/10"
+          className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
         >
           <ArrowLeft className="size-3.5" aria-hidden="true" />
           Exit to mock tests
         </Link>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-white/70">
-          <Sparkles className="size-3" aria-hidden="true" /> Assessment mode
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-slate-500 shadow-sm">
+          <Sparkles className="size-3 text-orange" aria-hidden="true" /> Assessment mode
         </span>
       </div>
 
       <main className="relative z-10 mx-auto max-w-5xl px-8 pb-16 pt-4">
         <div className="grid gap-10 lg:grid-cols-[1.4fr_1fr]">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-white/50">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
               ZSkillup mock drive
             </p>
             <h1 className="mt-3 text-4xl font-extrabold leading-tight tracking-tight md:text-5xl">
               {m.title}
             </h1>
-            <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/70">
+            <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-slate-600">
               {m.totalQuestions} questions in {m.durationMinutes} minutes. The clock is enforced by
               the server — when time runs out the test submits automatically. Your answers are saved
               as you go.
@@ -326,12 +326,12 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
 
             <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {stats.map(({ icon: Icon, label, value }) => (
-                <div key={label} className="rounded-xl border border-white/10 bg-white/5 p-4">
-                  <Icon className="size-4 text-white/60" aria-hidden="true" />
-                  <p className="mt-3 text-[10px] font-semibold uppercase tracking-widest text-white/50">
+                <div key={label} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                  <Icon className="size-4 text-orange" aria-hidden="true" />
+                  <p className="mt-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                     {label}
                   </p>
-                  <p className="mt-1 text-xl font-extrabold text-white">{value}</p>
+                  <p className="mt-1 text-xl font-extrabold text-navy">{value}</p>
                 </div>
               ))}
             </div>
@@ -347,29 +347,29 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
               </Button>
               <Link
                 href="/mock-tests"
-                className="inline-flex h-12 items-center gap-1.5 rounded-full border border-white/20 px-6 text-[15px] font-semibold text-white/90 transition-colors hover:bg-white/10"
+                className="inline-flex h-12 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-6 text-[15px] font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
               >
                 Maybe later
               </Link>
             </div>
 
-            <p className="mt-3 flex items-center gap-1.5 text-[11px] text-white/40">
+            <p className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-400">
               <AlertTriangle className="size-3.5 shrink-0" aria-hidden="true" />
               Once started, the timer can&apos;t be paused. Final submit is one-way.
             </p>
             {error ? (
-              <p role="alert" className="mt-2 text-sm text-red-300">
+              <p role="alert" className="mt-2 text-sm text-red-600">
                 {error}
               </p>
             ) : null}
           </div>
 
           <aside className="space-y-4">
-            <div className="rounded-xl border border-white/10 bg-white/5 p-5">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">
+            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
                 What to expect
               </p>
-              <ul className="mt-3 space-y-3 text-[13px] leading-snug text-white/80">
+              <ul className="mt-3 space-y-3 text-[13px] leading-snug text-slate-600">
                 <li className="flex gap-3">
                   <Clock className="mt-0.5 size-4 shrink-0 text-orange" aria-hidden="true" />
                   <span>A single countdown for the whole test — pace yourself across all questions.</span>

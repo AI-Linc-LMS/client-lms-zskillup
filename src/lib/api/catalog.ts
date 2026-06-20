@@ -117,7 +117,7 @@ export async function getCompany(slug: string): Promise<ApiCompanyHub> {
 
 /** Aggregated prep stats for a company hub: topics (w/ counts), years, roles. */
 export interface ApiCompanyPrep {
-  topics: Array<{ slug: string; name: string; parentId: string | null; count: number }>;
+  topics: Array<{ slug: string; name: string; parentId: string | null; count: number; pyqCount: number }>;
   years: Array<{ year: number; count: number }>;
   roles: string[];
   totals: { total: number; verified: number; pyq: number };

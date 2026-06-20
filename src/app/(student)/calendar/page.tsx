@@ -352,6 +352,10 @@ export default function CalendarPage() {
                   const startMs = new Date(it.scheduledAt).getTime();
                   const endMs = startMs + it.durationMinutes * 60_000;
                   const live = Date.now() >= startMs && Date.now() <= endMs;
+                  // Leaderboard is only meaningful once the assessment window has
+                  // fully closed and submissions are in — hiding it for upcoming/
+                  // live drives (a ranking before anyone has finished is misleading).
+                  const ended = Date.now() > endMs;
                   return (
                     <StaggerItem key={it.id}>
                       <div
@@ -427,13 +431,15 @@ export default function CalendarPage() {
                             </Link>
                           </div>
                         )}
-                        <button
-                          type="button"
-                          onClick={() => openLeaderboard(it.id)}
-                          className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-[11px] font-bold text-slate-600 transition-colors hover:bg-slate-50"
-                        >
-                          <Trophy className="size-3.5 text-amber-500" /> Leaderboard
-                        </button>
+                        {ended ? (
+                          <button
+                            type="button"
+                            onClick={() => openLeaderboard(it.id)}
+                            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-[11px] font-bold text-slate-600 transition-colors hover:bg-slate-50"
+                          >
+                            <Trophy className="size-3.5 text-amber-500" /> Leaderboard
+                          </button>
+                        ) : null}
                       </div>
                     </StaggerItem>
                   );

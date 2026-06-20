@@ -51,19 +51,19 @@ export function DeviceCheck({
   }, []);
 
   return (
-    <div className="grid min-h-screen place-items-center bg-navy px-4 py-10 text-white">
-      <div className="w-full max-w-lg rounded-3xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl">
-        <span className="grid size-12 place-items-center rounded-2xl bg-white/[0.06] text-[#ffb877]">
+    <div className="grid min-h-screen place-items-center bg-background px-4 py-10 text-navy">
+      <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-6 shadow-lg">
+        <span className="grid size-12 place-items-center rounded-2xl bg-orange/10 text-orange">
           <ShieldCheck className="size-6" />
         </span>
         <h1 className="mt-4 text-xl font-extrabold">Device check</h1>
-        <p className="mt-1 text-sm text-white/60">
-          <span className="font-semibold text-white/80">{title}</span> is proctored. We&apos;ll show
+        <p className="mt-1 text-sm text-slate-500">
+          <span className="font-semibold text-navy">{title}</span> is proctored. We&apos;ll show
           your camera while you take it. Monitoring is lenient — switching tabs or leaving fullscreen
           is only logged, not blocked.
         </p>
 
-        <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-black">
+        <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-black">
           <div className="relative aspect-video">
             {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
             <video ref={videoRef} autoPlay muted playsInline className="size-full -scale-x-100 object-cover" />
@@ -91,7 +91,7 @@ export function DeviceCheck({
             <button
               type="button"
               onClick={onCancel}
-              className="flex-1 rounded-full border border-white/15 px-4 py-2.5 text-sm font-bold text-white/80 hover:bg-white/[0.06]"
+              className="flex-1 rounded-full border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50"
             >
               Cancel
             </button>
@@ -100,7 +100,7 @@ export function DeviceCheck({
             <button
               type="button"
               onClick={request}
-              className="flex-1 rounded-full border border-white/15 px-4 py-2.5 text-sm font-bold text-white/80 hover:bg-white/[0.06]"
+              className="flex-1 rounded-full border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50"
             >
               Retry camera
             </button>
@@ -129,13 +129,13 @@ function CheckChip({
   label: string;
 }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold">
+    <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600">
       <Icon className="size-3.5" />
       {label}
       {ok ? (
-        <Check className="size-3.5 text-emerald-400" />
+        <Check className="size-3.5 text-emerald-600" />
       ) : (
-        <X className="size-3.5 text-rose-400" />
+        <X className="size-3.5 text-rose-600" />
       )}
     </span>
   );

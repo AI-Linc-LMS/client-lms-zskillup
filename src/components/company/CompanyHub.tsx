@@ -8,6 +8,7 @@ import {
   BookOpen,
   CheckCircle2,
   ClipboardList,
+  Code2,
   Gauge,
   LayoutGrid,
   ListChecks,
@@ -25,11 +26,13 @@ import { AnimatedNumber, AuroraBackground, Reveal, Stagger, StaggerItem } from '
 import { CompanyPrepPanel } from './CompanyPrepPanel';
 import { OverviewTopicGrid } from './OverviewTopicGrid';
 import { CompanyMockTab as MockTab } from './CompanyMockTab';
+import { CodingProblemsList } from '@/components/coding/CodingProblemsList';
 
 const TAB_ICONS: Record<HubTab, typeof BookOpen> = {
   Overview: LayoutGrid,
   Syllabus: ClipboardList,
   'Practice Quiz': ListChecks,
+  Coding: Code2,
   'Full Mock Assessment': Trophy,
 };
 
@@ -148,6 +151,21 @@ export function CompanyHub({ content }: { content: HubContent }) {
                 companySlug={content.company.slug}
                 companyName={content.company.name}
               />
+            )}
+            {tab === 'Coding' && (
+              <div className="space-y-4">
+                <div>
+                  <SectionLabel icon={Code2}>Coding problems</SectionLabel>
+                  <h2 className="mt-2 text-xl font-extrabold tracking-tight text-navy">
+                    {content.company.name} coding questions
+                  </h2>
+                  <p className="mt-1 text-sm leading-relaxed text-slate-500">
+                    Problems this company has asked — solve in your language, run the samples, then
+                    submit to grade against the full test set and earn XP.
+                  </p>
+                </div>
+                <CodingProblemsList company={content.company.slug} />
+              </div>
             )}
             {tab === 'Full Mock Assessment' && <MockTab content={content} />}
           </motion.div>

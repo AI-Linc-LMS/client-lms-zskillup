@@ -32,7 +32,7 @@ import {
   type NarrationRemediationPath,
 } from '@/lib/api/adaptive';
 
-const AI_GRAD = 'linear-gradient(135deg,#6366f1 0%,#a855f7 55%,#ec4899 100%)';
+const BRAND_GRAD = 'linear-gradient(135deg,#f7a14e 0%,#f37021 100%)';
 
 type NarrationState<T> = { loading: boolean; data: T | null; error: string | null };
 function useNarrationSection<T>(
@@ -88,7 +88,7 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
     return (
       <div className="grid min-h-screen place-items-center bg-background text-slate-400">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="size-7 animate-spin" /> Loading your diagnostic…
+          <Loader2 className="size-7 animate-spin" /> Loading your results…
         </div>
       </div>
     );
@@ -118,8 +118,8 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
             <Link href="/mock-tests" className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-navy">
               <ArrowLeft className="size-3.5" /> Back to mock quizzes
             </Link>
-            <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-pink-600">
-              Results · Diagnostic
+            <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-orange">
+              Mock quiz results
             </span>
           </div>
 
@@ -128,8 +128,8 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
               <AccuracyDonut accuracy={results.accuracy} />
             </div>
             <div className="min-w-0 flex-1 text-center sm:text-left">
-              <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-white" style={{ background: AI_GRAD }}>
-                <Sparkles className="size-3" /> AI Tutor&apos;s read
+              <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-white" style={{ background: BRAND_GRAD }}>
+                <Sparkles className="size-3" /> Your results read
               </div>
               {headline.loading ? (
                 <p className="flex items-center justify-center gap-2 text-sm text-slate-400 sm:justify-start">
@@ -141,8 +141,7 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
                 </h1>
               ) : (
                 <h1 className="text-lg font-extrabold leading-snug sm:text-xl">
-                  {results.correct}/{results.total} correct across {results.questions.length} adaptive
-                  questions.
+                  {results.correct}/{results.total} correct across {results.questions.length} questions.
                 </h1>
               )}
             </div>
@@ -233,7 +232,7 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
         <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5">
           <div>
             <p className="text-sm font-bold text-navy">Ready to close the gap?</p>
-            <p className="mt-0.5 text-xs text-slate-500">Practise your weak skills or take another adaptive quiz.</p>
+            <p className="mt-0.5 text-xs text-slate-500">Practise your weak skills or take another mock quiz.</p>
           </div>
           <div className="flex gap-2">
             <Button variant="secondary" size="sm" asChild>
@@ -274,7 +273,7 @@ function Section({ title, icon: Icon, children }: { title: string; icon: typeof 
   return (
     <section>
       <h2 className="mb-3 flex items-center gap-2 text-sm font-extrabold uppercase tracking-widest text-navy">
-        <Icon className="size-4 text-indigo-500" /> {title}
+        <Icon className="size-4 text-orange" /> {title}
       </h2>
       {children}
     </section>
@@ -283,7 +282,7 @@ function Section({ title, icon: Icon, children }: { title: string; icon: typeof 
 function Loading({ text }: { text: string }) {
   return (
     <div className="flex items-center gap-2 py-4 text-sm text-slate-500">
-      <Loader2 className="size-4 animate-spin text-indigo-500" /> {text}
+      <Loader2 className="size-4 animate-spin text-orange" /> {text}
     </div>
   );
 }

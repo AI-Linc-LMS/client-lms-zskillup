@@ -18,7 +18,7 @@ export default async function CodingProblemPage({
         items={[
           { label: 'Home', href: '/' },
           { label: 'Dashboard', href: '/dashboard' },
-          { label: 'Coding', href: '/coding' },
+          { label: 'Coding' },
           { label: 'Solve' },
         ]}
       />

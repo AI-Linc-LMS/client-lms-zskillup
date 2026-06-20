@@ -50,7 +50,6 @@ export const STUDENT_NAV: NavSection[] = [
     heading: 'PRACTICE & ASSESSMENT',
     items: [
       { label: 'Topic Mastery', href: '/topic-mastery', icon: Target },
-      { label: 'Coding', href: '/coding', icon: Code2 },
       { label: 'Mock Quiz', href: '/mock-tests', icon: Brain },
       { label: 'Assessments', href: '/calendar', icon: FileCheck2 },
     ],
