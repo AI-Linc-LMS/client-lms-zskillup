@@ -25,6 +25,10 @@ export interface ApiCompany {
   difficulty: string | null;
   mcqs: string | null;
   rounds: number | null;
+  // REAL live counts from the question/coding banks (not seeded marketing copy).
+  questionCount?: number;
+  pyqCount?: number;
+  codingCount?: number;
 }
 
 /** The 7-tab hub body + quick stats (mirrors backend CompanyHubContentDto). */

@@ -51,12 +51,12 @@ export function CompaniesExplorer() {
             accent: c.accent,
             badge: c.badge,
             type: c.type,
+            logoUrl: c.logoUrl,
             difficulty: (c.difficulty as CompanyCardData['difficulty']) ?? undefined,
-            rating: c.rating ?? undefined,
-            enrolled: c.enrolled ?? undefined,
-            package: c.package ?? undefined,
-            mcqs: c.mcqs ?? undefined,
             rounds: c.rounds ?? undefined,
+            questionCount: c.questionCount,
+            pyqCount: c.pyqCount,
+            codingCount: c.codingCount,
           })),
         );
       })

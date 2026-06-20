@@ -61,6 +61,15 @@ function roleHome(role: string | undefined): string {
  */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Company hubs are PUBLICLY browsable — they're linked from the marketing/
+  // landing pages and their backend endpoints are @Public. Allow everyone
+  // (logged-out visitors, students, and admins) through without the auth gate
+  // or the role-mismatch redirect, so "Company Hub" never bounces to /login.
+  if (startsWithPrefix(pathname, '/dashboard/company')) {
+    return NextResponse.next();
+  }
+
   // Frontend and API are on different domains in prod, so the HttpOnly refresh
   // cookie (set on the API domain) is invisible to this middleware. Use the
   // first-party `role` hint cookie (set by the client on login, cleared on

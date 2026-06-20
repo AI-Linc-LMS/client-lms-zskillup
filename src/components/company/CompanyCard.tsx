@@ -1,14 +1,16 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowUpRight, Star, Users, Wallet } from 'lucide-react';
+import { ArrowUpRight, ClipboardList, Code2, History } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
  * Card display shape — accepts either a live API company (most fields nullable)
- * or a fully-hydrated demo company. Numeric/string metadata used by the lower
- * row falls back when the live API doesn't provide them.
+ * or a fully-hydrated demo company. The footer surfaces REAL counts from the
+ * question/coding banks (questionCount/pyqCount/codingCount) and renders the
+ * real company logo when available (monogram fallback on missing/broken image).
  */
 export interface CompanyCardData {
   slug: string;
@@ -17,11 +19,11 @@ export interface CompanyCardData {
   accent: string | null;
   badge?: string | null;
   difficulty?: string;
-  rating?: number;
-  enrolled?: string;
-  package?: string;
-  mcqs?: string;
+  logoUrl?: string | null;
   rounds?: number;
+  questionCount?: number;
+  pyqCount?: number;
+  codingCount?: number;
 }
 
 /** Two-letter monogram from the company name (e.g. "TCS" → "TC", "Capgemini" → "Ca"). */
@@ -29,6 +31,12 @@ function monogramOf(name: string): string {
   const words = name.trim().split(/\s+/);
   if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
   return name.trim().slice(0, 2).toUpperCase();
+}
+
+/** Compact integer formatting: 1240 → "1.2k", 320 → "320". */
+function compact(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, '')}k`;
+  return String(n);
 }
 
 /** Difficulty → tonal pill classes (emerald / amber / red). */
@@ -42,6 +50,8 @@ const DIFFICULTY_TONE: Record<string, string> = {
 export function CompanyCard({ company }: { company: CompanyCardData }) {
   const accent = company.accent ?? 'from-slate-700 to-slate-900';
   const monogram = monogramOf(company.name);
+  const [logoFailed, setLogoFailed] = useState(false);
+  const showLogo = Boolean(company.logoUrl) && !logoFailed;
   const difficultyTone =
     (company.difficulty && DIFFICULTY_TONE[company.difficulty]) ??
     'bg-slate-50 text-slate-600 ring-slate-200/70';
@@ -78,18 +88,28 @@ export function CompanyCard({ company }: { company: CompanyCardData }) {
         <div className="relative z-10 flex flex-1 flex-col">
           {/* header — monogram tile + name/tagline */}
           <div className="flex items-start gap-3.5">
-            <span
-              className={cn(
-                'relative grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br text-lg font-extrabold text-white shadow-[0_10px_24px_-10px_rgba(15,23,42,0.55)] ring-1 ring-inset ring-white/25 transition-transform duration-300 group-hover:scale-[1.06]',
-                accent,
-              )}
-            >
+            {showLogo ? (
+              <span className="relative grid size-14 shrink-0 place-items-center overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-2 shadow-[0_10px_24px_-12px_rgba(15,23,42,0.35)] transition-transform duration-300 group-hover:scale-[1.06]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={company.logoUrl as string}
+                  alt={`${company.name} logo`}
+                  className="size-full object-contain"
+                  loading="lazy"
+                  onError={() => setLogoFailed(true)}
+                />
+              </span>
+            ) : (
               <span
-                aria-hidden
-                className="absolute inset-x-2 top-0 h-px bg-white/40"
-              />
-              {monogram}
-            </span>
+                className={cn(
+                  'relative grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br text-lg font-extrabold text-white shadow-[0_10px_24px_-10px_rgba(15,23,42,0.55)] ring-1 ring-inset ring-white/25 transition-transform duration-300 group-hover:scale-[1.06]',
+                  accent,
+                )}
+              >
+                <span aria-hidden className="absolute inset-x-2 top-0 h-px bg-white/40" />
+                {monogram}
+              </span>
+            )}
 
             <div className="min-w-0 flex-1">
               <h3 className="truncate text-base font-extrabold leading-tight tracking-tight text-navy">
@@ -128,42 +148,43 @@ export function CompanyCard({ company }: { company: CompanyCardData }) {
                 {company.difficulty}
               </span>
             ) : null}
-            <span className="inline-flex items-center rounded-full bg-slate-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-500 ring-1 ring-inset ring-slate-200/70">
-              {company.mcqs ?? 'Live bank'}
-              {company.rounds ? ` · ${company.rounds} rounds` : ''}
-            </span>
+            {company.rounds ? (
+              <span className="inline-flex items-center rounded-full bg-slate-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-500 ring-1 ring-inset ring-slate-200/70">
+                {company.rounds} rounds
+              </span>
+            ) : null}
           </div>
 
           {/* spacer pushes the stat footer to the bottom for even card heights */}
           <div className="flex-1" />
 
-          {/* stat footer */}
+          {/* stat footer — REAL bank counts (live from the question/coding banks) */}
           <div className="mt-5 grid grid-cols-3 gap-2 border-t border-slate-100 pt-4">
             <div className="flex flex-col">
               <span className="flex items-center gap-1 text-[15px] font-extrabold leading-none tabular-nums text-navy">
-                <Star className="size-3.5 fill-amber-400 text-amber-400" aria-hidden="true" />
-                {company.rating ?? 4.6}
+                <ClipboardList className="size-3.5 text-slate-400" aria-hidden="true" />
+                {compact(company.questionCount ?? 0)}
               </span>
               <span className="mt-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                Rating
+                Questions
               </span>
             </div>
             <div className="flex flex-col border-l border-slate-100 pl-2">
               <span className="flex items-center gap-1 text-[15px] font-extrabold leading-none tabular-nums text-navy">
-                <Users className="size-3.5 text-slate-400" aria-hidden="true" />
-                {company.enrolled ?? '10k+'}
+                <History className="size-3.5 text-orange" aria-hidden="true" />
+                {compact(company.pyqCount ?? 0)}
               </span>
               <span className="mt-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                Enrolled
+                PYQs
               </span>
             </div>
             <div className="flex flex-col border-l border-slate-100 pl-2">
-              <span className="flex items-center gap-1 text-[13px] font-extrabold leading-none text-emerald-600">
-                <Wallet className="size-3.5 text-emerald-500" aria-hidden="true" />
-                {company.package ?? '3.5–9 LPA'}
+              <span className="flex items-center gap-1 text-[15px] font-extrabold leading-none tabular-nums text-emerald-600">
+                <Code2 className="size-3.5 text-emerald-500" aria-hidden="true" />
+                {compact(company.codingCount ?? 0)}
               </span>
               <span className="mt-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                Package
+                Coding
               </span>
             </div>
           </div>

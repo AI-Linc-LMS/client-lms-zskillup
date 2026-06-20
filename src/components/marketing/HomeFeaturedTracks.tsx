@@ -2,15 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Clock3, Star, Users } from 'lucide-react';
+import { ArrowRight, ClipboardList, Code2, History } from 'lucide-react';
 import { HOMEPAGE_FEATURED_TRACKS } from '@/lib/demo-data-extra';
 import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
 
+/** Compact integer formatting: 1240 → "1.2k". */
+function compact(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, '')}k`;
+  return String(n);
+}
+
 /**
- * Homepage featured tracks. The brand logo / accent / blurb are curated
- * presentation assets, but the metrics (rating, enrolled, #MCQs, rounds) and
- * the hub link now come live from GET /companies — no fabricated numbers. Falls
- * back to the curated values until the live catalog resolves.
+ * Homepage featured tracks. The accent / blurb are curated presentation assets,
+ * but the LOGO and ALL metrics (questions, PYQs, coding problems, rounds) now
+ * come live from GET /companies — real bank counts, no fabricated numbers. Falls
+ * back to the curated logo until the live catalog resolves.
  */
 export function HomeFeaturedTracks() {
   const [live, setLive] = useState<Map<string, ApiCompany> | null>(null);
@@ -34,9 +40,7 @@ export function HomeFeaturedTracks() {
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {tracks.map((t) => {
         const co = live?.get(t.slug);
-        const rating = co?.rating ?? t.rating;
-        const enrolled = co?.enrolled ?? t.enrolled;
-        const mcqs = co?.mcqs ?? `${t.mcqs} MCQs`;
+        const logoSrc = co?.logoUrl ?? t.logoSrc;
         const rounds = co?.rounds ?? t.rounds;
         return (
           <Link
@@ -55,7 +59,7 @@ export function HomeFeaturedTracks() {
                 </span>
               )}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={t.logoSrc} alt={t.logoAlt} className="h-auto max-h-12 w-full object-contain" />
+              <img src={logoSrc} alt={t.logoAlt} className="h-auto max-h-12 w-full object-contain" />
             </div>
 
             <div className="flex flex-1 flex-col p-5">
@@ -69,17 +73,15 @@ export function HomeFeaturedTracks() {
 
               <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-[var(--color-text-muted)]">
                 <span className="inline-flex items-center gap-1 font-medium">
-                  <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                  {rating}
+                  <ClipboardList className="h-3 w-3" /> {compact(co?.questionCount ?? 0)} questions
+                </span>
+                <span className="inline-flex items-center gap-1 font-medium text-[var(--color-brand-strong)]">
+                  <History className="h-3 w-3" /> {compact(co?.pyqCount ?? 0)} PYQs
                 </span>
                 <span className="inline-flex items-center gap-1">
-                  <Users className="h-3 w-3" /> {enrolled}
+                  <Code2 className="h-3 w-3" /> {compact(co?.codingCount ?? 0)} coding
                 </span>
-                <span className="inline-flex items-center gap-1">
-                  <Clock3 className="h-3 w-3" /> {t.hours}h
-                </span>
-                <span>{mcqs}</span>
-                <span>{rounds} rounds</span>
+                {rounds ? <span>{rounds} rounds</span> : null}
               </div>
 
               <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-[var(--color-brand)] transition-colors group-hover:text-[var(--color-brand-strong)]">
