@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowRight, Brain, Loader2, Sparkles, Trophy } from 'lucide-react';
+import { ArrowRight, Brain, Info, Loader2, Sparkles, Trophy, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { listAdaptiveSessions, getAdaptiveResults, type SkillMastery } from '@/lib/api/adaptive';
 import { AnimatedNumber } from '@/components/motion/primitives';
@@ -63,27 +63,40 @@ export function AdaptiveSkillProfile() {
     weakestSkill: null,
   });
 
+  const [showInfo, setShowInfo] = useState(false);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         const sessions = await listAdaptiveSessions();
-        const completed = sessions.filter((s) => s.status === 'completed');
+        const completed = sessions.filter((s) => s.status === 'completed'); // newest first
         if (completed.length === 0) {
           if (!cancelled) setState((s) => ({ ...s, loading: false, sessionCount: 0 }));
           return;
         }
-        // Most recent first
-        const latest = completed[0];
-        const results = await getAdaptiveResults(latest.sessionId);
+        // Aggregate skill mastery across ALL completed sessions (capped for cost),
+        // keeping each skill's most-recent estimate. The old code read only the
+        // latest session yet the footer said "based on N sessions" — so a profile
+        // could claim "1 skill tracked" while 6 sessions had been completed.
+        const recent = completed.slice(0, 15);
+        const results = await Promise.all(
+          recent.map((s) => getAdaptiveResults(s.sessionId).catch(() => null)),
+        );
         if (cancelled) return;
 
-        const skills = results.skillMastery;
-        const sorted = [...skills].sort((a, b) => b.masteryPct - a.masteryPct);
+        const bySkill = new Map<string, SkillMastery>();
+        for (const r of results) {
+          if (!r) continue;
+          for (const sm of r.skillMastery) {
+            if (!bySkill.has(sm.skill)) bySkill.set(sm.skill, sm); // first hit = most recent
+          }
+        }
+        const sorted = [...bySkill.values()].sort((a, b) => b.masteryPct - a.masteryPct);
         setState({
           loading: false,
           skills: sorted,
-          sessionId: latest.sessionId,
+          sessionId: completed[0].sessionId,
           sessionCount: completed.length,
           topSkill: sorted[0]?.skill ?? null,
           weakestSkill: sorted[sorted.length - 1]?.skill ?? null,
@@ -175,7 +188,18 @@ export function AdaptiveSkillProfile() {
               <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                 Adaptive
               </p>
-              <p className="text-sm font-bold text-navy">Your Skill Profile</p>
+              <p className="flex items-center gap-1.5 text-sm font-bold text-navy">
+                Your Skill Profile
+                <button
+                  type="button"
+                  onClick={() => setShowInfo((v) => !v)}
+                  aria-label="How is this calculated?"
+                  aria-expanded={showInfo}
+                  className="grid size-4 place-items-center rounded-full text-slate-300 transition-colors hover:bg-slate-100 hover:text-slate-500"
+                >
+                  <Info className="size-3.5" />
+                </button>
+              </p>
             </div>
           </div>
           <Link
@@ -186,6 +210,31 @@ export function AdaptiveSkillProfile() {
             <ArrowRight className="size-3 transition-transform group-hover/link:translate-x-0.5" />
           </Link>
         </div>
+
+        {/* How it's calculated */}
+        {showInfo ? (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/80 p-3.5 text-[11px] leading-relaxed text-slate-600"
+          >
+            <div className="mb-1 flex items-center justify-between">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">How this is calculated</p>
+              <button type="button" onClick={() => setShowInfo(false)} aria-label="Close" className="text-slate-300 hover:text-slate-500"><X className="size-3.5" /></button>
+            </div>
+            <p>
+              This is an <span className="font-semibold text-navy">adaptive (IRT) estimate</span>. Each
+              adaptive quiz updates a difficulty score (θ) per skill from <span className="font-semibold">which
+              questions you get right and how hard they are</span>, then maps it to 0–100% mastery. It reflects
+              the level you can <span className="font-semibold">reliably</span> answer — not your raw % correct.
+            </p>
+            <p className="mt-1.5">
+              That&apos;s why it differs from <span className="font-semibold text-navy">Topic Mastery</span>, which is
+              simply accuracy (correct ÷ attempted) on practice questions — a topic can read 100% there while its
+              adaptive mastery here is still building.
+            </p>
+          </motion.div>
+        ) : null}
 
         {/* Overall mastery */}
         <div className="mb-5 flex items-end justify-between rounded-2xl border border-slate-200/70 bg-slate-50/60 px-4 py-3">
