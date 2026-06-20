@@ -8,12 +8,9 @@ import {
   BookOpen,
   CheckCircle2,
   ClipboardList,
-  FileText,
   Gauge,
   LayoutGrid,
   ListChecks,
-  MessageSquare,
-  PlayCircle,
   Sparkles,
   Star,
   Target,
@@ -25,17 +22,15 @@ import { CompanyRegisterCard } from '@/components/company/CompanyRegisterCard';
 import { cn } from '@/lib/utils';
 import { HUB_TABS, type HubContent, type HubTab } from '@/lib/hub-data';
 import { AnimatedNumber, AuroraBackground, Reveal, Stagger, StaggerItem } from '@/components/motion/primitives';
-import { LockedRow } from './LockedRow';
 import { CompanyPrepPanel } from './CompanyPrepPanel';
+import { OverviewTopicGrid } from './OverviewTopicGrid';
+import { CompanyMockTab as MockTab } from './CompanyMockTab';
 
 const TAB_ICONS: Record<HubTab, typeof BookOpen> = {
   Overview: LayoutGrid,
   Syllabus: ClipboardList,
-  Material: BookOpen,
   'Practice Quiz': ListChecks,
   'Full Mock Assessment': Trophy,
-  'Formula Sheet': FileText,
-  'Interview Experience': MessageSquare,
 };
 
 /** Pull the leading integer out of a readiness string like "74%" → 74. */
@@ -61,10 +56,6 @@ export function CompanyHub({ content }: { content: HubContent }) {
   const [tab, setTab] = useState<HubTab>('Overview');
   const c = content.company;
   const reduce = useReducedMotion();
-
-  const onUnlock = () =>
-    // Production opens <PurchasePromptDrawer/> with an API-computed price. Demo stub.
-    window.alert('This unlocks with ZSkillup Plus. Pricing is computed server-side at checkout.');
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-6 sm:px-6">
@@ -130,48 +121,19 @@ export function CompanyHub({ content }: { content: HubContent }) {
           >
             {tab === 'Overview' && <OverviewTab content={content} />}
             {tab === 'Syllabus' && <SyllabusTab content={content} />}
-            {tab === 'Material' && <MaterialTab content={content} onUnlock={onUnlock} />}
             {tab === 'Practice Quiz' && (
               <CompanyPrepPanel
                 companySlug={content.company.slug}
                 companyName={content.company.name}
               />
             )}
-            {tab === 'Full Mock Assessment' && <MockTab content={content} onUnlock={onUnlock} />}
-            {tab === 'Formula Sheet' && <FormulaTab content={content} onUnlock={onUnlock} />}
-            {tab === 'Interview Experience' && <InterviewTab content={content} />}
+            {tab === 'Full Mock Assessment' && <MockTab content={content} />}
           </motion.div>
         </div>
 
         <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
           {/* Register for this drive (assessment lifecycle) */}
           <CompanyRegisterCard companySlug={c.slug} companyName={c.name} />
-
-          {/* Drive walkthrough — dark glass companion card */}
-          <div className="relative isolate overflow-hidden rounded-3xl p-5 text-white shadow-[0_24px_60px_-30px_rgba(11,18,32,0.8)]">
-            <AuroraBackground />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/10"
-            />
-            <div className="relative z-10">
-              <span className="flex size-10 items-center justify-center rounded-xl border border-white/15 bg-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur">
-                <PlayCircle className="size-5 text-[#ffb877]" />
-              </span>
-              <p className="mt-3 text-sm font-bold">Drive walkthrough</p>
-              <p className="mt-1 text-xs leading-relaxed text-white/65">
-                Company-specific overview for this hub.
-              </p>
-              <button
-                type="button"
-                disabled
-                title="Walkthrough videos arrive with the company-content release"
-                className="mt-4 w-full rounded-full bg-white px-3 py-2 text-sm font-extrabold text-navy shadow-[0_8px_22px_-10px_rgba(0,0,0,0.5)] transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                Watch overview
-              </button>
-            </div>
-          </div>
 
           {/* Quick stats — crisp white Aurora card */}
           <AuroraCard glow="#2563eb">
@@ -462,7 +424,6 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
 /* ────────────────────────────────────────────────────────────────────────── */
 
 function OverviewTab({ content }: { content: HubContent }) {
-  const GROUP_GLOWS = ['#f37021', '#6d3bf5', '#2563eb'];
   return (
     <div className="space-y-6">
       <Reveal>
@@ -494,34 +455,9 @@ function OverviewTab({ content }: { content: HubContent }) {
         </AuroraCard>
       </Reveal>
 
-      <div>
-        <Reveal>
-          <h3 className="mb-3 flex items-center gap-2 text-lg font-extrabold tracking-tight text-navy">
-            <Target className="size-4 text-orange" aria-hidden="true" /> Topic grid
-          </h3>
-        </Reveal>
-        <Stagger className="space-y-4">
-          {content.overview.topicGrid.map((g, gi) => (
-            <StaggerItem key={g.group}>
-              <AuroraCard glow={GROUP_GLOWS[gi % GROUP_GLOWS.length]}>
-                <SectionLabel>{g.group}</SectionLabel>
-                <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  {g.topics.map((t) => (
-                    <motion.span
-                      key={t}
-                      whileHover={{ y: -2 }}
-                      transition={{ duration: 0.2 }}
-                      className="rounded-xl border border-slate-200/80 bg-white px-3 py-2.5 text-sm font-medium text-navy shadow-sm transition-colors hover:border-orange/40 hover:bg-orange/[0.04]"
-                    >
-                      {t}
-                    </motion.span>
-                  ))}
-                </div>
-              </AuroraCard>
-            </StaggerItem>
-          ))}
-        </Stagger>
-      </div>
+      <Reveal>
+        <OverviewTopicGrid slug={content.company.slug} />
+      </Reveal>
     </div>
   );
 }
@@ -588,173 +524,6 @@ function SyllabusTab({ content }: { content: HubContent }) {
   );
 }
 
-function MaterialTab({ content, onUnlock }: { content: HubContent; onUnlock: () => void }) {
-  return (
-    <div className="space-y-4">
-      <TabIntro>
-        Concept + question-solving videos. The first topic is free; the rest unlock with Plus.
-      </TabIntro>
-      <Stagger className="space-y-3">
-        {content.material.map((m) => (
-          <StaggerItem key={m.topic}>
-            <LockedRow locked={m.locked} onUnlockClick={onUnlock}>
-              <div className="flex items-center gap-3">
-                <span
-                  className={cn(
-                    'grid size-10 shrink-0 place-items-center rounded-xl text-white shadow-sm',
-                    m.locked
-                      ? 'bg-gradient-to-br from-slate-400 to-slate-500'
-                      : 'bg-gradient-to-br from-[#f7a14e] to-[#f37021]',
-                  )}
-                >
-                  <PlayCircle className="size-5" aria-hidden="true" />
-                </span>
-                <div>
-                  <p className="font-bold text-navy">{m.topic}</p>
-                  <p className="text-xs text-slate-500">{m.videos} videos</p>
-                </div>
-              </div>
-              {!m.locked ? <FreeBadge /> : null}
-            </LockedRow>
-          </StaggerItem>
-        ))}
-      </Stagger>
-    </div>
-  );
-}
-
-function MockTab({ content, onUnlock }: { content: HubContent; onUnlock: () => void }) {
-  // The free mock launches the real timed mock engine (catalog → start → graded
-  // report). Locked mocks stay on the upsell path.
-  return (
-    <div className="space-y-4">
-      <TabIntro>
-        5 full mocks + 1 live contest. 1 mock is free; analytics unlock after upgrade.
-      </TabIntro>
-      <Stagger className="space-y-3">
-        {content.mocks.map((m) => {
-          const contest = m.kind === 'contest';
-          return (
-            <StaggerItem key={m.title}>
-              <LockedRow
-                locked={m.locked}
-                href={m.locked ? undefined : '/mock-tests'}
-                onUnlockClick={onUnlock}
-              >
-                <div className="flex items-center gap-3">
-                  <span
-                    className={cn(
-                      'grid size-10 shrink-0 place-items-center rounded-xl text-white shadow-sm',
-                      m.locked
-                        ? 'bg-gradient-to-br from-slate-400 to-slate-500'
-                        : contest
-                          ? 'bg-gradient-to-br from-[#ff8a4c] to-[#f5491e]'
-                          : 'bg-gradient-to-br from-[#7c6cf5] to-[#5b3bf5]',
-                    )}
-                  >
-                    <Trophy className="size-5" aria-hidden="true" />
-                  </span>
-                  <div>
-                    <p className="flex items-center gap-2 font-bold text-navy">
-                      {m.title}
-                      {contest ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-orange">
-                          <span className="relative flex size-1.5">
-                            <span className="absolute inline-flex size-full animate-ping rounded-full bg-orange opacity-70" />
-                            <span className="relative inline-flex size-1.5 rounded-full bg-orange" />
-                          </span>
-                          Live
-                        </span>
-                      ) : null}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      {m.questions} questions · {m.minutes} min · timed
-                    </p>
-                  </div>
-                </div>
-                {!m.locked ? <FreeBadge /> : null}
-              </LockedRow>
-            </StaggerItem>
-          );
-        })}
-      </Stagger>
-    </div>
-  );
-}
-
-function FormulaTab({ content, onUnlock }: { content: HubContent; onUnlock: () => void }) {
-  return (
-    <div className="space-y-4">
-      <TabIntro>Quick-revision cheat sheets. Partial free, full sheet with Plus.</TabIntro>
-      <Stagger className="space-y-3">
-        {content.formulaSheets.map((f) => (
-          <StaggerItem key={f.topic}>
-            <LockedRow locked={f.locked} onUnlockClick={onUnlock}>
-              <div className="flex items-center gap-3">
-                <span
-                  className={cn(
-                    'grid size-10 shrink-0 place-items-center rounded-xl text-white shadow-sm',
-                    f.locked
-                      ? 'bg-gradient-to-br from-slate-400 to-slate-500'
-                      : 'bg-gradient-to-br from-[#34d399] to-[#059669]',
-                  )}
-                >
-                  <FileText className="size-5" aria-hidden="true" />
-                </span>
-                <div>
-                  <p className="font-bold text-navy">{f.topic}</p>
-                  <p className="text-xs text-slate-500">Formula &amp; shortcut sheet</p>
-                </div>
-              </div>
-              {!f.locked ? <FreeBadge /> : null}
-            </LockedRow>
-          </StaggerItem>
-        ))}
-      </Stagger>
-    </div>
-  );
-}
-
-function InterviewTab({ content }: { content: HubContent }) {
-  return (
-    <div className="space-y-4">
-      <TabIntro>Real candidate experiences — fully free.</TabIntro>
-      <Stagger className="space-y-4">
-        {content.interviews.map((iv, i) => {
-          const selected = iv.verdict === 'Selected';
-          return (
-            <StaggerItem key={i}>
-              <AuroraCard glow={selected ? '#059669' : '#ef4444'}>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-extrabold text-navy">
-                      {iv.role} <span className="text-slate-400">· {iv.year}</span>
-                    </p>
-                    <p className="mt-0.5 text-xs text-slate-500">{iv.rounds} rounds</p>
-                  </div>
-                  <span
-                    className={cn(
-                      'inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1',
-                      selected
-                        ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                        : 'bg-red-50 text-red-700 ring-red-200',
-                    )}
-                  >
-                    <CheckCircle2 className="size-3" aria-hidden="true" />
-                    {iv.verdict}
-                  </span>
-                </div>
-                <p className="mt-3 border-l-2 border-slate-200 pl-3 text-sm leading-relaxed text-slate-700">
-                  {iv.excerpt}
-                </p>
-              </AuroraCard>
-            </StaggerItem>
-          );
-        })}
-      </Stagger>
-    </div>
-  );
-}
 
 function FreeBadge() {
   return (

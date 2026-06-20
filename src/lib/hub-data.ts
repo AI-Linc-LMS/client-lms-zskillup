@@ -9,11 +9,8 @@ import { DEMO_COMPANIES, type DemoCompany } from './demo-data';
 export const HUB_TABS = [
   'Overview',
   'Syllabus',
-  'Material',
   'Practice Quiz',
   'Full Mock Assessment',
-  'Formula Sheet',
-  'Interview Experience',
 ] as const;
 export type HubTab = (typeof HUB_TABS)[number];
 

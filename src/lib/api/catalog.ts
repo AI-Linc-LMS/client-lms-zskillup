@@ -123,6 +123,27 @@ export interface ApiCompanyPrep {
   totals: { total: number; verified: number; pyq: number };
 }
 
+export interface ApiCompanyPyq {
+  id: string;
+  stem: string;
+  difficulty: string;
+  solution: string | null;
+  hint: string | null;
+  yearTags: number[] | null;
+  sourceRef: string | null;
+  topicName: string;
+  options: Array<{ text: string; isCorrect: boolean; orderIndex: number }>;
+}
+
+/** A company's PYQs for a topic (or all topics). */
+export async function getCompanyPyqs(slug: string, topicSlug?: string): Promise<ApiCompanyPyq[]> {
+  const qs = topicSlug ? `?topic=${encodeURIComponent(topicSlug)}` : '';
+  const res = await apiClient.get<ApiCompanyPyq[]>(`/api/v1/companies/${slug}/pyqs${qs}`, {
+    auth: 'public',
+  });
+  return res.data;
+}
+
 export async function getCompanyPrep(slug: string): Promise<ApiCompanyPrep> {
   const res = await apiClient.get<ApiCompanyPrep>(`/api/v1/companies/${slug}/prep`, {
     auth: 'public',

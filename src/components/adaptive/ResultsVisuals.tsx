@@ -167,7 +167,10 @@ export function AccuracyDonut({ accuracy, size = 132 }: { accuracy: number; size
 const prettySkill = (s: string) =>
   (s || '').replace(/[-_]/g, ' ').replace(/section \d+\s*/i, '').replace(/\b\w/g, (m) => m.toUpperCase()).trim();
 
-export function SkillRadar({ skills, size = 300 }: { skills: SkillMastery[]; size?: number }) {
+export function SkillRadar({ skills: allSkills, size = 300 }: { skills: SkillMastery[]; size?: number }) {
+  // A radar is only legible up to ~8 spokes — show the strongest skills here;
+  // the full list lives in the mastery bars beside it.
+  const skills = [...allSkills].sort((a, b) => b.masteryPct - a.masteryPct).slice(0, 8);
   const n = skills.length;
   if (n < 3) return null;
   const cx = size / 2;
