@@ -259,7 +259,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
   }
 
   if (phase === 'report' && report) {
-    return <MockReportView report={report} reward={reward} />;
+    return <MockReportView report={report} reward={reward} kind={proctored ? 'assessment' : 'test'} />;
   }
 
   if (phase === 'running' && start) {
@@ -664,10 +664,15 @@ function MockRunningView({
 function MockReportView({
   report,
   reward = null,
+  kind = 'test',
 }: {
   report: ApiMockReport;
   reward?: GamificationSummary | null;
+  kind?: 'assessment' | 'test';
 }) {
+  const isAssessment = kind === 'assessment';
+  const backHref = isAssessment ? '/calendar' : '/mock-tests';
+  const backLabel = isAssessment ? 'Assessments' : 'Mock tests';
   const tone = report.passed ? 'emerald' : report.pct >= 40 ? 'amber' : 'red';
   // Show the reward reveal first (only when we actually awarded this submission).
   const [showReward, setShowReward] = useState<boolean>(!!reward);
@@ -678,11 +683,11 @@ function MockReportView({
       ) : null}
       <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-6 shadow-sm">
         <span className="flex items-center gap-1.5 text-sm font-bold text-navy">
-          <Trophy className="size-4 text-amber-500" aria-hidden="true" /> Mock report
+          <Trophy className="size-4 text-amber-500" aria-hidden="true" /> {isAssessment ? 'Assessment report' : 'Mock report'}
         </span>
         <Button variant="ghost" size="sm" asChild>
-          <Link href="/mock-tests">
-            <ArrowLeft className="size-3.5" aria-hidden="true" /> Mock tests
+          <Link href={backHref}>
+            <ArrowLeft className="size-3.5" aria-hidden="true" /> {backLabel}
           </Link>
         </Button>
       </header>
@@ -932,8 +937,8 @@ function MockReportView({
 
         <div className="flex flex-wrap items-center justify-center gap-3 pb-4">
           <Button asChild>
-            <Link href="/mock-tests">
-              <Timer className="size-4" aria-hidden="true" /> Take another mock
+            <Link href={backHref}>
+              <Timer className="size-4" aria-hidden="true" /> {isAssessment ? 'Back to assessments' : 'Take another mock'}
             </Link>
           </Button>
           <Button variant="outline" asChild>
