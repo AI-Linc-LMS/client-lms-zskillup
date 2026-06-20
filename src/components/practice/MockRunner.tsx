@@ -710,6 +710,35 @@ function MockReportView({
           </section>
         ) : null}
 
+        {/* Proctoring / integrity summary (proctored assessments only) */}
+        {report.proctoring?.proctored ? (
+          <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              Proctoring &amp; integrity
+            </p>
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {[
+                { label: 'Camera', value: report.proctoring.cameraGranted ? 'On' : 'Off', bad: !report.proctoring.cameraGranted },
+                { label: 'Microphone', value: report.proctoring.micGranted ? 'On' : 'Off', bad: !report.proctoring.micGranted },
+                { label: 'Tab switches', value: String(report.proctoring.tabSwitches), bad: report.proctoring.tabSwitches > 0 },
+                { label: 'Fullscreen exits', value: String(report.proctoring.fullscreenExits), bad: report.proctoring.fullscreenExits > 0 },
+              ].map((s) => (
+                <div key={s.label} className="rounded-lg border border-slate-100 bg-slate-50/60 p-3">
+                  <p className={cn('text-lg font-extrabold tabular-nums', s.bad ? 'text-amber-600' : 'text-emerald-600')}>
+                    {s.value}
+                  </p>
+                  <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">{s.label}</p>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-xs text-slate-500">
+              {report.proctoring.violations === 0
+                ? 'No integrity flags — this attempt was clean.'
+                : `${report.proctoring.violations} integrity event(s) logged (lenient — not penalised).`}
+            </p>
+          </section>
+        ) : null}
+
         {/* Question review */}
         <section>
           <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">

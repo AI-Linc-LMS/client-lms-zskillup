@@ -95,12 +95,23 @@ export interface ApiMockTopicBreakdown {
   total: number;
 }
 
+export interface ApiMockProctoring {
+  proctored: boolean;
+  tabSwitches: number;
+  fullscreenExits: number;
+  violations: number;
+  snapshotCount: number;
+  cameraGranted: boolean;
+  micGranted: boolean;
+}
+
 export interface ApiMockReport extends ApiMockResult {
   title: string;
   passingScore: number;
   submittedAt: string | null;
   topicBreakdown: ApiMockTopicBreakdown[];
   questions: ApiMockReviewQuestion[];
+  proctoring?: ApiMockProctoring | null;
 }
 
 export async function listMocks(): Promise<ApiMockSummary[]> {

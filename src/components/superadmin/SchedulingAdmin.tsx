@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { CalendarClock, Loader2, Plus, Trash2, Video } from 'lucide-react';
+import { BarChart3, Loader2, Plus, ShieldAlert, Trash2, Video, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ApiRequestError } from '@/lib/api/types';
 import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
@@ -9,9 +9,11 @@ import { listAdminMocks, type AdminMockRow } from '@/lib/api/admin';
 import {
   createScheduledAssessment,
   deleteScheduledAssessment,
+  getAssessmentResults,
   listScheduledAssessments,
   updateScheduledAssessment,
   type ApiScheduledAssessment,
+  type AssessmentResults,
 } from '@/lib/api/scheduling';
 
 /** Superadmin scheduler for company assessments (assessment lifecycle, Phase 2). */
@@ -30,6 +32,20 @@ export function SchedulingAdmin() {
   const [durationMinutes, setDurationMinutes] = useState(60);
   const [proctored, setProctored] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [results, setResults] = useState<AssessmentResults | null>(null);
+  const [resultsLoading, setResultsLoading] = useState(false);
+
+  const openResults = async (id: string) => {
+    setResultsLoading(true);
+    setResults(null);
+    try {
+      setResults(await getAssessmentResults(id));
+    } catch {
+      /* ignore */
+    } finally {
+      setResultsLoading(false);
+    }
+  };
 
   const load = () =>
     listScheduledAssessments()
@@ -243,14 +259,23 @@ export function SchedulingAdmin() {
                     </button>
                   </td>
                   <td className="px-4 py-3.5 text-right">
-                    <button
-                      type="button"
-                      disabled={busyId === r.id}
-                      onClick={() => remove(r.id)}
-                      className="grid size-8 place-items-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
-                    >
-                      <Trash2 className="size-4" />
-                    </button>
+                    <div className="flex items-center justify-end gap-1">
+                      <button
+                        type="button"
+                        onClick={() => openResults(r.id)}
+                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold text-indigo-600 hover:bg-indigo-50"
+                      >
+                        <BarChart3 className="size-3.5" /> Results
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busyId === r.id}
+                        onClick={() => remove(r.id)}
+                        className="grid size-8 place-items-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -258,6 +283,101 @@ export function SchedulingAdmin() {
           </tbody>
         </table>
       </div>
+
+      {/* Results modal */}
+      {resultsLoading || results ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={() => setResults(null)}
+            className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+          />
+          <div className="relative flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
+            {resultsLoading || !results ? (
+              <div className="grid h-64 place-items-center">
+                <Loader2 className="size-6 animate-spin text-slate-400" />
+              </div>
+            ) : (
+              <>
+                <div className="flex items-start justify-between border-b border-slate-100 px-6 py-4">
+                  <div>
+                    <h3 className="text-lg font-extrabold text-navy">{results.assessment.title}</h3>
+                    <p className="text-xs text-slate-500">
+                      {results.assessment.companyName} ·{' '}
+                      {new Date(results.assessment.scheduledAt).toLocaleString([], {
+                        month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+                      })}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setResults(null)}
+                    className="grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 px-6 py-4 sm:grid-cols-5">
+                  {[
+                    { label: 'Registered', value: results.stats.registered },
+                    { label: 'Attempted', value: results.stats.attempted },
+                    { label: 'Avg score', value: `${results.stats.avgScorePct}%` },
+                    { label: 'Top score', value: `${results.stats.topScorePct}%` },
+                    { label: 'Flagged', value: results.stats.flagged },
+                  ].map((s) => (
+                    <div key={s.label} className="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
+                      <p className="text-xl font-black text-navy tabular-nums">{s.value}</p>
+                      <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">{s.label}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6">
+                  {results.rows.length === 0 ? (
+                    <p className="py-8 text-center text-sm text-slate-500">No attempts yet.</p>
+                  ) : (
+                    <table className="w-full text-left text-sm">
+                      <thead className="sticky top-0 bg-white">
+                        <tr className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                          <th className="py-2">Student</th>
+                          <th className="py-2">Score</th>
+                          <th className="py-2">%ile</th>
+                          <th className="py-2">Integrity</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {results.rows.map((r) => (
+                          <tr key={r.userId} className="border-t border-slate-100">
+                            <td className="py-2.5">
+                              <span className="block font-semibold text-navy">{r.fullName ?? r.email}</span>
+                              <span className="text-[11px] text-slate-400">{r.email}</span>
+                            </td>
+                            <td className="py-2.5 font-semibold text-navy">
+                              {r.score}/{r.total} <span className="text-slate-400">({r.scorePct}%)</span>
+                            </td>
+                            <td className="py-2.5 text-slate-600">{r.percentile}th</td>
+                            <td className="py-2.5">
+                              {r.violations > 0 ? (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700">
+                                  <ShieldAlert className="size-3.5" /> {r.tabSwitches}⇄ {r.fullscreenExits}⤢
+                                </span>
+                              ) : (
+                                <span className="text-[11px] text-emerald-600">Clean</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -76,3 +76,46 @@ export async function updateScheduledAssessment(
 export async function deleteScheduledAssessment(id: string): Promise<void> {
   await apiClient.delete(`/api/v1/admin/scheduled-assessments/${id}`);
 }
+
+export interface AssessmentResultRow {
+  userId: string;
+  fullName: string | null;
+  email: string;
+  score: number;
+  total: number;
+  scorePct: number;
+  percentile: number;
+  timeTakenSec: number;
+  status: string;
+  submittedAt: string | null;
+  proctored: boolean;
+  tabSwitches: number;
+  fullscreenExits: number;
+  violations: number;
+}
+
+export interface AssessmentResults {
+  assessment: {
+    id: string;
+    title: string;
+    companyId: string;
+    companyName: string;
+    scheduledAt: string;
+    proctored: boolean;
+  };
+  stats: {
+    registered: number;
+    attempted: number;
+    avgScorePct: number;
+    topScorePct: number;
+    flagged: number;
+  };
+  rows: AssessmentResultRow[];
+}
+
+export async function getAssessmentResults(id: string): Promise<AssessmentResults> {
+  const res = await apiClient.get<AssessmentResults>(
+    `/api/v1/admin/scheduled-assessments/${id}/results`,
+  );
+  return res.data;
+}
