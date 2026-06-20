@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import {
   ArrowLeft,
   Brain,
@@ -22,6 +21,7 @@ import { SkillMasteryHeatmap } from '@/components/adaptive/SkillMasteryHeatmap';
 import { MisconceptionCallout } from '@/components/adaptive/MisconceptionCallout';
 import { RemediationPath } from '@/components/adaptive/RemediationPath';
 import { PerQuestionBreakdown } from '@/components/adaptive/PerQuestionBreakdown';
+import { AccuracyDonut, MagicLoader, SkillRadar, Typewriter } from '@/components/adaptive/ResultsVisuals';
 import {
   getAdaptiveResults,
   getNarrationSection,
@@ -53,22 +53,6 @@ function useNarrationSection<T>(
     };
   }, [sessionId, section, enabled]);
   return state;
-}
-
-function AccuracyRing({ accuracy }: { accuracy: number }) {
-  const r = 42;
-  const circ = 2 * Math.PI * r;
-  const dash = (accuracy / 100) * circ;
-  const color = accuracy >= 80 ? '#10b981' : accuracy >= 60 ? '#6366f1' : accuracy >= 40 ? '#f59e0b' : '#ef4444';
-  return (
-    <svg width={112} height={112} viewBox="0 0 112 112" className="-rotate-90">
-      <circle cx={56} cy={56} r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth={9} />
-      <circle
-        cx={56} cy={56} r={r} fill="none" stroke={color} strokeWidth={9}
-        strokeDasharray={`${dash} ${circ}`} strokeLinecap="round" className="transition-all duration-1000"
-      />
-    </svg>
-  );
 }
 
 function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
@@ -140,12 +124,8 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
           </div>
 
           <div className="mt-5 flex flex-col items-center gap-4 sm:flex-row sm:items-center">
-            <div className="relative shrink-0">
-              <AccuracyRing accuracy={results.accuracy} />
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-2xl font-black">{results.accuracy}%</span>
-                <span className="text-[10px] text-white/50">accuracy</span>
-              </div>
+            <div className="shrink-0">
+              <AccuracyDonut accuracy={results.accuracy} />
             </div>
             <div className="min-w-0 flex-1 text-center sm:text-left">
               <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-white" style={{ background: AI_GRAD }}>
@@ -155,10 +135,14 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
                 <p className="flex items-center justify-center gap-2 text-sm text-white/50 sm:justify-start">
                   <Loader2 className="size-4 animate-spin" /> Reading your accuracy curve…
                 </p>
+              ) : headline.data?.headline ? (
+                <h1 className="text-lg font-extrabold leading-snug sm:text-xl">
+                  <Typewriter text={headline.data.headline} />
+                </h1>
               ) : (
                 <h1 className="text-lg font-extrabold leading-snug sm:text-xl">
-                  {headline.data?.headline ??
-                    `${results.correct}/${results.total} correct across ${results.questions.length} adaptive questions.`}
+                  {results.correct}/{results.total} correct across {results.questions.length} adaptive
+                  questions.
                 </h1>
               )}
             </div>
@@ -175,51 +159,49 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
         </div>
       </div>
 
-      {/* ── Streaming composer ───────────────────────────────────────────── */}
-      <div className="mx-auto max-w-5xl px-5 pt-6 sm:px-6">
-        {ready < 4 ? (
-          <div className="overflow-hidden rounded-2xl border border-indigo-200 bg-white p-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <p className="flex items-center gap-2 text-sm font-bold text-navy">
-                <Loader2 className="size-4 animate-spin text-indigo-500" /> Composing your diagnostic
-              </p>
-              <span className="text-xs font-bold text-slate-400">{ready}/4 sections</span>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {SECTIONS.map(({ label, s }) => (
-                <span
-                  key={label}
-                  className={cn(
-                    'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset',
-                    s.data
-                      ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                      : s.error
-                        ? 'bg-rose-50 text-rose-700 ring-rose-200'
-                        : 'bg-slate-50 text-slate-500 ring-slate-200',
-                  )}
-                >
-                  {s.data ? <CheckCircle2 className="size-3.5" /> : s.loading ? <Loader2 className="size-3.5 animate-spin" /> : null}
-                  {label}
-                </span>
-              ))}
-            </div>
-            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
-              <motion.div
-                className="h-full rounded-full"
-                style={{ background: AI_GRAD }}
-                initial={false}
-                animate={{ width: `${(ready / 4) * 100}%` }}
-                transition={{ type: 'spring', stiffness: 120, damping: 22 }}
-              />
-            </div>
+      {/* ── Magic streaming composer ─────────────────────────────────────── */}
+      {ready < 4 ? (
+        <div className="mx-auto max-w-5xl space-y-3 px-5 pt-6 sm:px-6">
+          <MagicLoader />
+          <div className="flex flex-wrap gap-2">
+            {SECTIONS.map(({ label, s }) => (
+              <span
+                key={label}
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset',
+                  s.data
+                    ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                    : s.error
+                      ? 'bg-rose-50 text-rose-700 ring-rose-200'
+                      : 'bg-slate-50 text-slate-500 ring-slate-200',
+                )}
+              >
+                {s.data ? <CheckCircle2 className="size-3.5" /> : s.loading ? <Loader2 className="size-3.5 animate-spin" /> : null}
+                {label}
+              </span>
+            ))}
           </div>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
 
       {/* ── Single-scroll sections ───────────────────────────────────────── */}
       <div className="mx-auto max-w-5xl space-y-6 px-5 py-6 sm:px-6">
         <Section title="Skill mastery" icon={Brain}>
-          <SkillMasteryHeatmap skillMastery={results.skillMastery} />
+          {results.skillMastery.length >= 3 ? (
+            <div className="mb-4 grid gap-4 lg:grid-cols-[300px_1fr]">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                  Skill radar
+                </p>
+                <SkillRadar skills={results.skillMastery} />
+              </div>
+              <div className="min-w-0">
+                <SkillMasteryHeatmap skillMastery={results.skillMastery} />
+              </div>
+            </div>
+          ) : (
+            <SkillMasteryHeatmap skillMastery={results.skillMastery} />
+          )}
         </Section>
 
         <Section title="Your next 15 minutes" icon={TrendingUp}>
