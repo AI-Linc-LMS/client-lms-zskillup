@@ -190,6 +190,14 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
     return () => window.clearInterval(handle);
   }, [phase, finishAttempt]);
 
+  // Safety net: once the report is shown the assessment is over — release the
+  // camera/mic even if the submit-path stop() was somehow missed (so the laptop
+  // camera light never lingers after results). `stop` is a stable callback.
+  const stopProctor = proctor.stop;
+  useEffect(() => {
+    if (phase === 'report') stopProctor();
+  }, [phase, stopProctor]);
+
   const selectOption = useCallback(
     (questionId: string, optionId: string, multi: boolean) => {
       if (!start || submittedRef.current) return;

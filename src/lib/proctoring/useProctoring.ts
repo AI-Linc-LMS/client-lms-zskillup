@@ -131,7 +131,19 @@ export function useProctoring(enabled: boolean): ProctoringController {
     snapTimer.current = null;
     document.removeEventListener('visibilitychange', onVisibility);
     document.removeEventListener('fullscreenchange', onFullscreenChange);
-    streamRef.current?.getTracks().forEach((t) => t.stop());
+    // Stop EVERY acquired track — the hook's stream AND any globally-stashed one
+    // (opened by the device-check) which can diverge. Nulling the global alone
+    // does NOT release the device, so its tracks must be stopped explicitly or
+    // the laptop camera light stays on after the assessment.
+    const stopped = new Set<MediaStreamTrack>();
+    [streamRef.current, window.__assessmentStream].forEach((s) =>
+      s?.getTracks().forEach((t) => {
+        if (!stopped.has(t)) {
+          t.stop();
+          stopped.add(t);
+        }
+      }),
+    );
     streamRef.current = null;
     window.__assessmentStream = null;
     if (videoRef.current) videoRef.current.srcObject = null;
