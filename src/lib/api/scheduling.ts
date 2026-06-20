@@ -119,3 +119,26 @@ export async function getAssessmentResults(id: string): Promise<AssessmentResult
   );
   return res.data;
 }
+
+export interface AssessmentLeaderboardEntry {
+  rank: number;
+  name: string;
+  scorePct: number;
+  score: number;
+  total: number;
+  timeTakenSec: number;
+  isYou: boolean;
+}
+export interface AssessmentLeaderboard {
+  assessment: { id: string; title: string; companyName: string };
+  total: number;
+  myRank: number | null;
+  entries: AssessmentLeaderboardEntry[];
+}
+
+export async function getAssessmentLeaderboard(id: string): Promise<AssessmentLeaderboard> {
+  const res = await apiClient.get<AssessmentLeaderboard>(
+    `/api/v1/scheduled-assessments/${id}/leaderboard`,
+  );
+  return res.data;
+}
