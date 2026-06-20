@@ -1,9 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { formatDateIN } from '@/lib/format';
 import {
-  Activity,
   BookOpen,
   Brain,
   Briefcase,
@@ -20,12 +18,9 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react';
-import { StatusPill } from '@/components/student/StatusPill';
 import { apiClient } from '@/lib/api/client';
 import {
   getAdminStats,
-  listAdminColleges,
-  type AdminCollegeRow,
   type AdminPlatformStats,
 } from '@/lib/api/admin';
 import { AreaChart, Donut, MiniStat, Panel, ProgressRow, StatCard } from './dashboard-ui';
@@ -34,7 +29,6 @@ type Ready = { database: string; migrations: string } | null;
 
 export function PlatformOverviewLive() {
   const [stats, setStats] = useState<AdminPlatformStats | null>(null);
-  const [colleges, setColleges] = useState<AdminCollegeRow[] | null>(null);
   const [ready, setReady] = useState<Ready>(null);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -43,7 +37,6 @@ export function PlatformOverviewLive() {
     setRefreshing(true);
     const results = await Promise.allSettled([
       getAdminStats(),
-      listAdminColleges(),
       apiClient.get<{ ready: boolean; checks: { database: string; migrations: string } }>('/ready', {
         auth: 'public',
       }),
@@ -54,8 +47,7 @@ export function PlatformOverviewLive() {
     } else if (!stats) {
       setError('Could not load platform stats.');
     }
-    setColleges(results[1].status === 'fulfilled' ? results[1].value : []);
-    setReady(results[2].status === 'fulfilled' ? results[2].value.data.checks : null);
+    setReady(results[1].status === 'fulfilled' ? results[1].value.data.checks : null);
     setRefreshing(false);
   }, [stats]);
 
@@ -295,64 +287,6 @@ export function PlatformOverviewLive() {
         </Panel>
       </div>
 
-      {/* College register */}
-      <Panel
-        title="College register"
-        action={
-          <span className="text-xs text-slate-400">
-            {colleges?.length ?? 0} registered
-          </span>
-        }
-      >
-        <div className="-mx-5 -mb-5 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-y border-slate-100 bg-slate-50/60">
-                {['College name', 'State', 'City', 'Registered', 'Status'].map((col) => (
-                  <th
-                    key={col}
-                    className="px-5 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-400"
-                  >
-                    {col}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {colleges === null ? (
-                <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-sm text-slate-400">
-                    Loading…
-                  </td>
-                </tr>
-              ) : colleges.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-5 py-10 text-center text-sm text-slate-400">
-                    <Activity className="mx-auto mb-2 size-5 text-slate-300" />
-                    No colleges registered yet.
-                  </td>
-                </tr>
-              ) : (
-                colleges.slice(0, 8).map((college) => (
-                  <tr key={college.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/40">
-                    <td className="px-5 py-3 font-medium text-navy">{college.name}</td>
-                    <td className="px-5 py-3 text-slate-600">{college.state}</td>
-                    <td className="px-5 py-3 text-slate-600">{college.city}</td>
-                    <td className="px-5 py-3 text-xs text-slate-400">{formatDateIN(college.createdAt)}</td>
-                    <td className="px-5 py-3">
-                      {college.status === 'ACTIVE' ? (
-                        <StatusPill tone="positive" label="Active" />
-                      ) : (
-                        <StatusPill tone="neutral" label="Suspended" />
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </Panel>
     </div>
   );
 }
