@@ -177,9 +177,17 @@ export interface ApiTopic {
   slug: string;
   name: string;
   parentId: string | null;
+  /** PUBLISHED-question count — only present from listTopicsWithCounts(). */
+  questionCount?: number;
 }
 
 export async function listTopics(): Promise<ApiTopic[]> {
   const res = await apiClient.get<ApiTopic[]>('/api/v1/topics', { auth: 'public' });
+  return res.data;
+}
+
+/** Topics with their live question-bank counts (subtopics = direct, parents = rolled up). */
+export async function listTopicsWithCounts(): Promise<ApiTopic[]> {
+  const res = await apiClient.get<ApiTopic[]>('/api/v1/topics/with-counts', { auth: 'public' });
   return res.data;
 }

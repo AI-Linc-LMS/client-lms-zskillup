@@ -1,13 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { BadgeCheck, Check, Loader2, Mail, Building2 } from 'lucide-react';
+import { BadgeCheck, Check, GraduationCap, Loader2, Mail, Building2, Phone } from 'lucide-react';
 import { getMe, updateMe, type ApiMe } from '@/lib/api/me';
 import { getMyRegistrations, type ApiRegistration } from '@/lib/api/registrations';
 import { ApiRequestError } from '@/lib/api/types';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
-import { ReadinessPanel } from '@/components/student/ReadinessPanel';
 import { cn } from '@/lib/utils';
 
 const ROLE_OPTIONS = [
@@ -42,6 +41,22 @@ export default function ProfilePage() {
   const [passoutYear, setPassoutYear] = useState<number | ''>('');
   const [skillsInput, setSkillsInput] = useState('');
   const [roles, setRoles] = useState<string[]>([]);
+
+  // Live profile-completion score across the captured fields.
+  const completion = useMemo(() => {
+    const fields = [
+      fullName,
+      phone,
+      course,
+      String(yearOfStudy || ''),
+      collegeName,
+      String(passoutYear || ''),
+      skillsInput.trim(),
+      roles.length ? 'x' : '',
+    ];
+    const filled = fields.filter((f) => f && f.trim()).length;
+    return Math.round((filled / fields.length) * 100);
+  }, [fullName, phone, course, yearOfStudy, collegeName, passoutYear, skillsInput, roles]);
 
   useEffect(() => {
     let cancelled = false;
@@ -107,21 +122,37 @@ export default function ProfilePage() {
     <div className="mx-auto max-w-4xl">
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Profile' }]} />
 
-      <div className="mt-4 flex items-center gap-4">
-        <span className="grid size-16 place-items-center rounded-2xl bg-gradient-to-br from-[#1f2d4d] to-[#0b1220] text-xl font-extrabold text-white">
-          {(me?.fullName ?? me?.email ?? '?').slice(0, 2).toUpperCase()}
-        </span>
-        <div>
-          <h1 className="text-2xl font-black tracking-tight text-navy">{me?.fullName ?? 'Your profile'}</h1>
-          <p className="flex items-center gap-1.5 text-sm text-slate-500">
-            <Mail className="size-3.5" /> {me?.email}
-          </p>
+      {/* ── Hero header ──────────────────────────────────────────────────── */}
+      <section className="relative mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-[0_24px_60px_-30px_rgba(11,18,32,0.85)] sm:p-7">
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <div className="absolute -left-1/4 -top-1/2 size-[40vw] rounded-full bg-[#f37021]/20 blur-[110px]" />
+          <div className="absolute -right-1/4 -bottom-1/2 size-[36vw] rounded-full bg-[#2563eb]/20 blur-[110px]" />
         </div>
-      </div>
-
-      <div className="mt-6">
-        <ReadinessPanel />
-      </div>
+        <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center">
+          <Avatar src={me?.avatarUrl ?? null} name={me?.fullName ?? me?.email ?? '?'} />
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-2xl font-black tracking-tight sm:text-3xl">
+              {me?.fullName ?? 'Your profile'}
+            </h1>
+            <p className="mt-1 flex items-center gap-1.5 text-sm text-white/70">
+              <Mail className="size-3.5" /> {me?.email}
+            </p>
+            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+              {collegeName ? (
+                <Chip icon={GraduationCap}>{collegeName}</Chip>
+              ) : null}
+              {phone ? <Chip icon={Phone}>{phone}</Chip> : null}
+              {regs.length ? (
+                <Chip icon={Building2}>{regs.length} drive{regs.length === 1 ? '' : 's'}</Chip>
+              ) : null}
+            </div>
+          </div>
+          {/* Completion ring */}
+          <div className="flex shrink-0 items-center gap-3 sm:flex-col sm:items-end">
+            <CompletionRing pct={completion} />
+          </div>
+        </div>
+      </section>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_18rem]">
         {/* Edit form */}
@@ -279,6 +310,72 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     <div className="space-y-1.5">
       <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{label}</p>
       {children}
+    </div>
+  );
+}
+
+/** Profile avatar — Google photo (via avatarUrl) with an initials fallback. */
+function Avatar({ src, name }: { src: string | null; name: string }) {
+  const [failed, setFailed] = useState(false);
+  const initials = name.slice(0, 2).toUpperCase();
+  const showImg = src && !failed;
+  return (
+    <span className="grid size-20 shrink-0 place-items-center overflow-hidden rounded-3xl bg-white/10 text-2xl font-extrabold text-white ring-1 ring-inset ring-white/20 backdrop-blur">
+      {showImg ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src}
+          alt={name}
+          referrerPolicy="no-referrer"
+          onError={() => setFailed(true)}
+          className="size-full object-cover"
+        />
+      ) : (
+        initials
+      )}
+    </span>
+  );
+}
+
+function Chip({ icon: Icon, children }: { icon: typeof Mail; children: React.ReactNode }) {
+  return (
+    <span className="inline-flex max-w-[14rem] items-center gap-1.5 truncate rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white/85 backdrop-blur">
+      <Icon className="size-3 shrink-0" /> <span className="truncate">{children}</span>
+    </span>
+  );
+}
+
+/** Animated profile-completion ring. */
+function CompletionRing({ pct }: { pct: number }) {
+  const r = 26;
+  const circ = 2 * Math.PI * r;
+  return (
+    <div className="flex items-center gap-2.5">
+      <div className="relative size-[64px]">
+        <svg width={64} height={64} viewBox="0 0 64 64" className="-rotate-90">
+          <circle cx={32} cy={32} r={r} fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth={6} />
+          <circle
+            cx={32}
+            cy={32}
+            r={r}
+            fill="none"
+            stroke="#ffb877"
+            strokeWidth={6}
+            strokeLinecap="round"
+            strokeDasharray={circ}
+            strokeDashoffset={circ - (pct / 100) * circ}
+            style={{ transition: 'stroke-dashoffset 0.8s cubic-bezier(0.16,1,0.3,1)' }}
+          />
+        </svg>
+        <span className="absolute inset-0 grid place-items-center text-sm font-black tabular-nums text-white">
+          {pct}%
+        </span>
+      </div>
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-white/60 sm:text-right">
+        Profile
+        <br />
+        complete
+      </span>
     </div>
   );
 }

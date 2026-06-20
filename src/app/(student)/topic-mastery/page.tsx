@@ -11,7 +11,7 @@ import {
   Layers,
   Sparkles,
 } from 'lucide-react';
-import { listTopics, type ApiTopic } from '@/lib/api/catalog';
+import { listTopicsWithCounts, type ApiTopic } from '@/lib/api/catalog';
 import { TopicAccuracyPanels } from '@/components/practice/TopicAccuracyPanels';
 import { Reveal, Stagger, StaggerItem } from '@/components/motion/primitives';
 
@@ -55,25 +55,32 @@ interface RootTopic extends ApiTopic {
   accent: Accent;
 }
 
+const hasQuestions = (t: ApiTopic) => (t.questionCount ?? 0) > 0;
+
 function buildRoots(topics: ApiTopic[]): RootTopic[] {
-  const roots = topics.filter((t) => t.parentId === null);
-  return roots.map((r, i) => ({
-    ...r,
-    children: topics.filter((t) => t.parentId === r.id),
-    icon: CATEGORY_ICON[r.slug] ?? Layers,
-    accent: CATEGORY_ACCENT[r.slug] ?? ACCENT_CYCLE[i % ACCENT_CYCLE.length],
-  }));
+  // Only bank-backed topics — drop taxonomy entries with no published questions
+  // (e.g. the empty "Interview Preparation" section) so nothing reads as a placeholder.
+  const roots = topics.filter((t) => t.parentId === null && hasQuestions(t));
+  return roots
+    .map((r, i) => ({
+      ...r,
+      children: topics.filter((t) => t.parentId === r.id && hasQuestions(t)),
+      icon: CATEGORY_ICON[r.slug] ?? Layers,
+      accent: CATEGORY_ACCENT[r.slug] ?? ACCENT_CYCLE[i % ACCENT_CYCLE.length],
+    }))
+    .filter((r) => r.children.length > 0);
 }
 
 export default async function TopicMasteryPage() {
   let topics: ApiTopic[] = [];
   try {
-    topics = await listTopics();
+    topics = await listTopicsWithCounts();
   } catch {
     // Backend unreachable in preview — render empty root list with sensible CTAs.
   }
   const roots = buildRoots(topics);
   const subtopicCount = roots.reduce((s, r) => s + r.children.length, 0);
+  const questionTotal = roots.reduce((s, r) => s + (r.questionCount ?? 0), 0);
 
   return (
     <div className="space-y-8">
@@ -101,12 +108,17 @@ export default async function TopicMasteryPage() {
               </div>
             </div>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/60">
-              Pattern-matched questions across {topics.length > 0 ? `${topics.length} topics` : 'every topic'},
+              {questionTotal > 0
+                ? `${questionTotal.toLocaleString()} real questions across ${subtopicCount} bank-backed topics, `
+                : 'Pattern-matched questions across every topic, '}
               server-graded with step-by-step explanations and instant hints.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <HeroStat icon={Layers} value={String(roots.length)} label="Categories" />
-              <HeroStat icon={Sparkles} value={String(subtopicCount)} label="Subtopics" />
+              <HeroStat icon={Sparkles} value={String(subtopicCount)} label="Topics" />
+              {questionTotal > 0 ? (
+                <HeroStat icon={BookOpen} value={questionTotal.toLocaleString()} label="Questions" />
+              ) : null}
             </div>
           </div>
         </section>
@@ -134,7 +146,8 @@ export default async function TopicMasteryPage() {
                     </div>
                     <p className="mt-4 font-bold leading-snug text-navy">{root.name}</p>
                     <p className="mt-1 text-xs text-slate-500">
-                      {root.children.length} subtopic{root.children.length === 1 ? '' : 's'}
+                      {root.children.length} topic{root.children.length === 1 ? '' : 's'}
+                      {root.questionCount ? ` · ${root.questionCount.toLocaleString()} questions` : ''}
                     </p>
                     <span className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-orange opacity-0 transition-opacity group-hover:opacity-100">
                       Start practice →
@@ -170,9 +183,14 @@ export default async function TopicMasteryPage() {
                   <Link
                     key={child.id}
                     href={`/dashboard/quiz/adaptive?topic=${encodeURIComponent(child.slug)}`}
-                    className={`rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-navy transition-colors ${ACCENT_CLASS[root.accent].chip}`}
+                    className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-navy transition-colors ${ACCENT_CLASS[root.accent].chip}`}
                   >
                     {child.name}
+                    {child.questionCount ? (
+                      <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500">
+                        {child.questionCount}
+                      </span>
+                    ) : null}
                   </Link>
                 ))}
               </div>
