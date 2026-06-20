@@ -452,97 +452,91 @@ function MockRunningView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [start.questions, answers, codingResults],
   );
+
+  // NTA-style sections: MCQ → "Quiz", CODING → "Coding". Each holds its
+  // questions with their GLOBAL index so the palette + nav can jump correctly.
+  const sections = useMemo(() => {
+    const items = start.questions.map((q, i) => ({ q, i }));
+    const out: Array<{ key: 'quiz' | 'coding'; label: string; items: typeof items }> = [];
+    const quiz = items.filter((x) => x.q.type !== 'CODING');
+    const coding = items.filter((x) => x.q.type === 'CODING');
+    if (quiz.length) out.push({ key: 'quiz', label: 'Quiz', items: quiz });
+    if (coding.length) out.push({ key: 'coding', label: 'Coding', items: coding });
+    return out;
+  }, [start.questions]);
+
+  const activeKey: 'quiz' | 'coding' = question?.type === 'CODING' ? 'coding' : 'quiz';
+  const activeItems = sections.find((s) => s.key === activeKey)?.items ?? [];
+  const posInSec = activeItems.findIndex((x) => x.i === idx);
+
   const low = remaining <= 60;
   const mid = remaining <= 300 && remaining > 60;
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-6 shadow-sm">
-        <span className="flex items-center gap-1.5 text-sm font-bold text-navy">
-          <Sparkles className="size-4 text-orange" aria-hidden="true" /> {start.title}
+    <div className="flex min-h-screen flex-col bg-slate-50">
+      <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-sm sm:px-6">
+        <span className="flex min-w-0 items-center gap-1.5 truncate text-sm font-bold text-navy">
+          <Sparkles className="size-4 shrink-0 text-orange" aria-hidden="true" />
+          <span className="truncate">{start.title}</span>
         </span>
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-3">
           <span
             className={cn(
-              'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold ring-1 tabular-nums',
-              low
-                ? 'bg-red-50 text-red-600 ring-red-200'
-                : mid
-                  ? 'bg-amber-50 text-amber-700 ring-amber-200'
-                  : 'bg-slate-100 text-navy ring-slate-200',
+              'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-extrabold ring-1 tabular-nums',
+              low ? 'bg-red-50 text-red-600 ring-red-200' : mid ? 'bg-amber-50 text-amber-700 ring-amber-200' : 'bg-slate-100 text-navy ring-slate-200',
             )}
             role="timer"
             aria-live={low ? 'assertive' : 'off'}
           >
             <Clock className="size-3.5" aria-hidden="true" /> {formatClock(remaining)}
           </span>
-          <span className="text-[11px] font-semibold text-slate-500">
-            Q {idx + 1} / {total}
-          </span>
+          <span className="hidden text-[11px] font-semibold text-slate-500 sm:inline">Q {idx + 1} / {total}</span>
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 px-6 py-8">
-        {/* Question navigator — scrolls past ~3 rows so a 100-Q grid stays compact */}
-        <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-              Questions
-            </p>
-            <span className="text-[11px] font-semibold text-slate-500">
-              {answeredCount}/{total} answered
-            </span>
-          </div>
-          <div className="mt-2 flex max-h-[6.25rem] flex-wrap items-center gap-1.5 overflow-y-auto pr-1">
-            {start.questions.map((q, i) => {
-              const done = isAnswered(q);
-              return (
-                <button
-                  key={q.id}
-                  type="button"
-                  onClick={() => setIdx(() => i)}
-                  aria-label={`Go to question ${i + 1}${done ? ' (answered)' : ''}`}
-                  aria-current={i === idx}
-                  className={cn(
-                    'grid size-7 place-items-center rounded-lg text-[11px] font-bold transition-colors',
-                    i === idx
-                      ? 'bg-navy text-white'
-                      : done
-                        ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
-                        : 'bg-white text-slate-500 ring-1 ring-slate-200 hover:bg-slate-50',
-                  )}
-                >
-                  {i + 1}
-                </button>
-              );
-            })}
-          </div>
+      {/* Section tabs (NTA-style) */}
+      {sections.length > 1 ? (
+        <div className="sticky top-14 z-10 flex gap-1.5 border-b border-slate-200 bg-white px-4 py-2 sm:px-6">
+          {sections.map((s) => {
+            const done = s.items.filter((x) => isAnswered(x.q)).length;
+            const active = s.key === activeKey;
+            return (
+              <button
+                key={s.key}
+                type="button"
+                onClick={() => setIdx(() => s.items[0].i)}
+                className={cn(
+                  'flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-sm font-bold transition-colors',
+                  active ? 'bg-navy text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200',
+                )}
+              >
+                {s.label}
+                <span className={cn('rounded-full px-1.5 py-0.5 text-[10px] font-bold', active ? 'bg-white/20 text-white' : 'bg-white text-slate-500')}>
+                  {done}/{s.items.length}
+                </span>
+              </button>
+            );
+          })}
         </div>
+      ) : null}
 
-        {/* Question card */}
-        <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <main className="mx-auto grid w-full max-w-6xl flex-1 gap-5 px-4 py-6 sm:px-6 lg:grid-cols-[1fr_17rem]">
+        {/* Question card (left/main) */}
+        <article className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="flex items-center justify-between gap-3">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-              Question {idx + 1} of {total}
+              {sections.length > 1 ? `${activeKey === 'coding' ? 'Coding' : 'Quiz'} · ` : ''}
+              Question {posInSec + 1} of {activeItems.length}
             </p>
-            <span
-              className={cn(
-                'rounded-full px-2.5 py-0.5 text-[11px] font-semibold capitalize ring-1',
-                DIFFICULTY_RING[question.difficulty] ?? 'bg-slate-100 text-slate-600 ring-slate-200',
-              )}
-            >
+            <span className={cn('rounded-full px-2.5 py-0.5 text-[11px] font-semibold capitalize ring-1', DIFFICULTY_RING[question.difficulty] ?? 'bg-slate-100 text-slate-600 ring-slate-200')}>
               {question.difficulty.toLowerCase()}
             </span>
           </div>
-          <p className="mt-3 text-base font-semibold leading-relaxed text-navy">{question.stem}</p>
-          {question.type === 'MULTI_SELECT' ? (
-            <p className="mt-1 text-xs text-slate-400">Select all that apply.</p>
-          ) : null}
           {question.type === 'CODING' ? (
-            <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-bold text-indigo-600">
-              Coding problem
-            </p>
+            <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-bold text-indigo-600">Coding problem</p>
           ) : null}
+          <p className="mt-2 text-base font-semibold leading-relaxed text-navy">{question.stem}</p>
+          {question.type === 'MULTI_SELECT' ? <p className="mt-1 text-xs text-slate-400">Select all that apply.</p> : null}
 
           {question.type === 'CODING' && question.coding ? (
             <MockCodingPanel
@@ -563,23 +557,14 @@ function MockRunningView({
                     aria-pressed={isSelected}
                     className={cn(
                       'flex w-full items-center gap-3 rounded-lg border p-3 text-left text-sm transition-colors',
-                      isSelected
-                        ? 'border-orange bg-orange/5 text-navy'
-                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
+                      isSelected ? 'border-orange bg-orange/5 text-navy' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
                     )}
                   >
-                    <span
-                      className={cn(
-                        'grid size-7 shrink-0 place-items-center rounded-full text-xs font-bold',
-                        isSelected ? 'bg-orange text-white' : 'bg-slate-100 text-slate-500',
-                      )}
-                    >
+                    <span className={cn('grid size-7 shrink-0 place-items-center rounded-full text-xs font-bold', isSelected ? 'bg-orange text-white' : 'bg-slate-100 text-slate-500')}>
                       {String.fromCharCode(65 + i)}
                     </span>
                     <span className="flex-1">{opt.text}</span>
-                    {isSelected ? (
-                      <Check className="size-4 shrink-0 text-orange" aria-hidden="true" />
-                    ) : null}
+                    {isSelected ? <Check className="size-4 shrink-0 text-orange" aria-hidden="true" /> : null}
                   </button>
                 );
               })}
@@ -587,16 +572,11 @@ function MockRunningView({
           )}
 
           <div className="mt-6 flex items-center justify-between">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIdx((i) => Math.max(0, i - 1))}
-              disabled={idx === 0}
-            >
+            <Button variant="outline" size="sm" onClick={() => posInSec > 0 && setIdx(() => activeItems[posInSec - 1].i)} disabled={posInSec <= 0}>
               <ChevronLeft className="size-4" aria-hidden="true" /> Previous
             </Button>
-            {idx < total - 1 ? (
-              <Button size="sm" onClick={() => setIdx((i) => Math.min(total - 1, i + 1))}>
+            {posInSec < activeItems.length - 1 ? (
+              <Button size="sm" onClick={() => setIdx(() => activeItems[posInSec + 1].i)}>
                 Next <ChevronRight className="size-4" aria-hidden="true" />
               </Button>
             ) : (
@@ -605,24 +585,53 @@ function MockRunningView({
               </Button>
             )}
           </div>
+          {error ? <p role="alert" className="mt-3 text-sm text-red-600">{error}</p> : null}
         </article>
 
-        <div className="flex items-center justify-between">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/mock-tests">
-              <ArrowLeft className="size-3.5" aria-hidden="true" /> Exit
-            </Link>
-          </Button>
-          <Button variant="secondary" size="sm" onClick={() => setConfirming(true)} disabled={submitting}>
-            Submit {kind}
-          </Button>
-        </div>
-
-        {error ? (
-          <p role="alert" className="text-sm text-red-600">
-            {error}
-          </p>
-        ) : null}
+        {/* Question palette (right, NTA-style) */}
+        <aside className="lg:sticky lg:top-[7.5rem] lg:self-start">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                {sections.length > 1 ? (activeKey === 'coding' ? 'Coding' : 'Quiz') : 'Questions'}
+              </p>
+              <span className="text-[11px] font-bold text-slate-500">{answeredCount}/{total} answered</span>
+            </div>
+            <div className="mt-3 grid max-h-[14rem] grid-cols-5 gap-2 overflow-y-auto pr-1">
+              {activeItems.map(({ q, i }, local) => {
+                const done = isAnswered(q);
+                return (
+                  <button
+                    key={q.id}
+                    type="button"
+                    onClick={() => setIdx(() => i)}
+                    aria-current={i === idx}
+                    className={cn(
+                      'grid size-9 place-items-center rounded-lg text-[12px] font-bold transition-colors',
+                      i === idx ? 'bg-navy text-white ring-2 ring-orange ring-offset-1'
+                        : done ? 'bg-emerald-500 text-white'
+                        : 'bg-slate-100 text-slate-500 hover:bg-slate-200',
+                    )}
+                  >
+                    {local + 1}
+                  </button>
+                );
+              })}
+            </div>
+            {/* legend */}
+            <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-semibold text-slate-400">
+              <span className="flex items-center gap-1"><span className="size-2.5 rounded bg-emerald-500" /> Answered</span>
+              <span className="flex items-center gap-1"><span className="size-2.5 rounded bg-slate-200" /> Not yet</span>
+              <span className="flex items-center gap-1"><span className="size-2.5 rounded bg-navy" /> Current</span>
+            </div>
+            <Button className="mt-4 w-full" size="sm" onClick={() => setConfirming(true)} disabled={submitting}>
+              Submit {kind}
+            </Button>
+            <Button variant="ghost" size="sm" asChild className="mt-1.5 w-full">
+              <Link href="/mock-tests"><ArrowLeft className="size-3.5" aria-hidden="true" /> Exit</Link>
+            </Button>
+          </div>
+        </aside>
       </main>
 
       {/* Submit confirmation */}
@@ -864,7 +873,16 @@ function MockReportView({
                   </div>
                 ) : (
                   <>
-                    <div className="mt-3 space-y-2">
+                    {/* Your-answer summary */}
+                    <p className="mt-2 text-xs text-slate-500">
+                      <span className="font-bold text-navy">Your answer: </span>
+                      {q.yourOptionIds.length ? (
+                        q.options.filter((o) => q.yourOptionIds.includes(o.id)).map((o) => o.text).join(', ')
+                      ) : (
+                        <span className="font-semibold text-amber-600">Not answered</span>
+                      )}
+                    </p>
+                    <div className="mt-2 space-y-2">
                       {q.options.map((opt, i) => {
                         const chosen = q.yourOptionIds.includes(opt.id);
                         const correct = opt.isCorrect;

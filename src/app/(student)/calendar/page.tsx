@@ -173,9 +173,9 @@ export default function CalendarPage() {
           <Loader2 className="size-6 animate-spin text-slate-400" />
         </div>
       ) : (
-        <div className="mt-6 grid gap-6 lg:grid-cols-[23rem_1fr]">
+        <div className="mt-6 flex flex-col gap-6">
           {/* ── Month grid ──────────────────────────────────────────────── */}
-          <Reveal>
+          <Reveal className="order-2">
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div>
@@ -306,7 +306,7 @@ export default function CalendarPage() {
           </Reveal>
 
           {/* ── Upcoming timeline ───────────────────────────────────────── */}
-          <aside className="space-y-3">
+          <aside className="order-1 space-y-3">
             <h2 className="px-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
               {selectedDay ? fmtDate(`${selectedDay}T00:00:00`) : 'Upcoming drives'}
             </h2>
