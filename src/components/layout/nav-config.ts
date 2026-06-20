@@ -1,6 +1,5 @@
 import {
   BarChart3,
-  BookOpen,
   Brain,
   Building2,
   CalendarClock,
@@ -44,7 +43,6 @@ export const STUDENT_NAV: NavSection[] = [
     heading: 'WORKSPACE',
     items: [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { label: 'My Learning', href: '/my-learning', icon: BookOpen },
       { label: 'Performance', href: '/performance', icon: TrendingUp },
     ],
   },

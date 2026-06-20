@@ -1,20 +1,16 @@
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { CompaniesExplorer } from '@/components/company/CompaniesExplorer';
-import { listCompanies, listCourses, listTopics } from '@/lib/api/catalog';
+import { listCompanies, listTopics } from '@/lib/api/catalog';
 import { AnimatedNumber, AuroraBackground, Reveal } from '@/components/motion/primitives';
-import { Building2, Layers, ListChecks, Sparkles } from 'lucide-react';
+import { Building2, ListChecks, Sparkles } from 'lucide-react';
 
 export default async function CompaniesPage() {
   // Real catalog counts for the hero stat bar (public reads). If the backend is
   // unreachable we simply omit the bar rather than show fabricated numbers.
-  let stats: { companies: number; tracks: number; topics: number } | null = null;
+  let stats: { companies: number; topics: number } | null = null;
   try {
-    const [companies, courses, topics] = await Promise.all([
-      listCompanies(),
-      listCourses(),
-      listTopics(),
-    ]);
-    stats = { companies: companies.length, tracks: courses.length, topics: topics.length };
+    const [companies, topics] = await Promise.all([listCompanies(), listTopics()]);
+    stats = { companies: companies.length, topics: topics.length };
   } catch {
     stats = null;
   }
@@ -22,7 +18,6 @@ export default async function CompaniesPage() {
   const statTiles = stats
     ? [
         { label: 'Recruiting companies', value: stats.companies, icon: Building2 },
-        { label: 'Prep tracks', value: stats.tracks, icon: Layers },
         { label: 'Practice topics', value: stats.topics, icon: ListChecks },
       ]
     : [];
@@ -61,7 +56,7 @@ export default async function CompaniesPage() {
             </p>
 
             {stats ? (
-              <dl className="mt-8 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3">
+              <dl className="mt-8 grid max-w-md grid-cols-1 gap-3 sm:grid-cols-2">
                 {statTiles.map(({ label, value, icon: Icon }) => (
                   <div
                     key={label}

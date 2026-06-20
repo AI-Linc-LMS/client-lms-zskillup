@@ -7,8 +7,7 @@ import { DailyChallenge } from '@/components/student/DailyChallenge';
 import { CodingPractice } from '@/components/student/CodingPractice';
 import { Challenges } from '@/components/student/Challenges';
 import { DailyQuest } from '@/components/student/DailyQuest';
-import { ContinueLearning } from '@/components/student/ContinueLearning';
-import { CourseTable } from '@/components/student/CourseTable';
+import { DashboardCompanies } from '@/components/student/DashboardCompanies';
 import { PracticeHub } from '@/components/student/PracticeHub';
 import { DashboardRightRail } from '@/components/student/DashboardRightRail';
 import { AdaptiveSkillProfile } from '@/components/student/AdaptiveSkillProfile';
@@ -25,9 +24,7 @@ import { Reveal } from '@/components/motion/primitives';
 export default function StudentDashboardPage() {
   return (
     <div>
-      <Breadcrumb
-        items={[{ label: 'Home', href: '/' }, { label: 'Learning', href: '/my-learning' }, { label: 'Dashboard' }]}
-      />
+      <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Dashboard' }]} />
 
       <div className="grid gap-6 xl:grid-cols-[1fr_20rem]">
         <div className="space-y-6">
@@ -35,6 +32,9 @@ export default function StudentDashboardPage() {
           <AuroraStats />
           <Reveal>
             <ReadinessPanel />
+          </Reveal>
+          <Reveal>
+            <DashboardCompanies />
           </Reveal>
           <TodaysTip />
           <Reveal>
@@ -51,12 +51,6 @@ export default function StudentDashboardPage() {
           </Reveal>
           <Reveal>
             <Challenges />
-          </Reveal>
-          <Reveal>
-            <ContinueLearning />
-          </Reveal>
-          <Reveal>
-            <CourseTable />
           </Reveal>
           <Reveal>
             <PracticeHub />
