@@ -78,7 +78,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
       { label: 'Question Bank', href: '/superadmin/questions', icon: ClipboardList },
       { label: 'Coding Bank', href: '/superadmin/coding', icon: Code2 },
       { label: 'Mock Tests', href: '/superadmin/mocks', icon: FileCheck2 },
-      { label: 'Scheduled Assessments', href: '/superadmin/scheduled-assessments', icon: CalendarClock },
+      { label: 'Assessments', href: '/superadmin/scheduled-assessments', icon: CalendarClock },
       { label: 'Companies', href: '/superadmin/companies', icon: Building2 },
     ],
   },

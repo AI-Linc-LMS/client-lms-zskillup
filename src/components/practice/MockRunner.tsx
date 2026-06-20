@@ -12,11 +12,13 @@ import {
   ChevronRight,
   Clock,
   Loader2,
+  ShieldCheck,
   Sparkles,
   Star,
   Target,
   Timer,
   Trophy,
+  Video,
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -272,6 +274,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
           remaining={remaining ?? 0}
           submitting={submitting}
           error={error}
+          proctored={proctored}
           onSelect={selectOption}
           onCodeSubmitted={onCodeSubmitted}
           onSubmit={finishAttempt}
@@ -283,105 +286,120 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
 
   // ── intro ──────────────────────────────────────────────────────────────────
   const m = mock!;
+  const kind = proctored ? 'assessment' : 'test';
   const stats = [
     { icon: BookOpen, label: 'Questions', value: String(m.totalQuestions) },
     { icon: Timer, label: 'Duration', value: `${m.durationMinutes} min` },
     { icon: Star, label: 'Pass mark', value: `${m.passingScore}%` },
-    { icon: Sparkles, label: 'Format', value: 'Timed · Strict' },
+    {
+      icon: proctored ? ShieldCheck : Sparkles,
+      label: 'Format',
+      value: proctored ? 'Proctored' : 'Timed',
+    },
   ];
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background text-navy">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_-10%,rgba(243,112,33,0.08),transparent),radial-gradient(50%_50%_at_100%_100%,rgba(56,189,248,0.07),transparent)]"
-      />
-      <div className="relative z-10 flex items-center justify-between px-8 py-6">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] text-white">
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-1/4 -top-1/3 size-[55vw] rounded-full bg-[#f37021]/15 blur-[130px]" />
+        <div className="absolute -right-1/4 top-1/4 size-[45vw] rounded-full bg-[#2563eb]/15 blur-[130px]" />
+      </div>
+
+      <div className="relative z-10 flex items-center justify-between px-6 py-6 sm:px-10">
         <Link
           href="/mock-tests"
-          className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
+          className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-1.5 text-xs font-semibold text-white/85 backdrop-blur transition-colors hover:bg-white/[0.12]"
         >
-          <ArrowLeft className="size-3.5" aria-hidden="true" />
-          Exit to mock tests
+          <ArrowLeft className="size-3.5" aria-hidden="true" /> Exit
         </Link>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-slate-500 shadow-sm">
-          <Sparkles className="size-3 text-orange" aria-hidden="true" /> Assessment mode
+        <span
+          className={cn(
+            'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] ring-1 ring-inset',
+            proctored
+              ? 'bg-violet-500/15 text-violet-200 ring-violet-400/30'
+              : 'bg-white/[0.06] text-white/70 ring-white/15',
+          )}
+        >
+          {proctored ? <Video className="size-3" /> : <Sparkles className="size-3 text-[#ffb877]" />}
+          {proctored ? 'Proctored Assessment' : 'Mock Test'}
         </span>
       </div>
 
-      <main className="relative z-10 mx-auto max-w-5xl px-8 pb-16 pt-4">
-        <div className="grid gap-10 lg:grid-cols-[1.4fr_1fr]">
+      <main className="relative z-10 mx-auto max-w-5xl px-6 pb-16 pt-2 sm:px-10">
+        <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-              ZSkillup mock drive
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#ffb877]">
+              {proctored ? 'ZSkillup placement assessment' : 'ZSkillup mock drive'}
             </p>
-            <h1 className="mt-3 text-4xl font-extrabold leading-tight tracking-tight md:text-5xl">
+            <h1 className="mt-3 text-4xl font-black leading-[1.05] tracking-tight md:text-[52px]">
               {m.title}
             </h1>
-            <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-slate-600">
-              {m.totalQuestions} questions in {m.durationMinutes} minutes. The clock is enforced by
-              the server — when time runs out the test submits automatically. Your answers are saved
-              as you go.
+            <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-white/65">
+              {m.totalQuestions} questions · {m.durationMinutes} minutes.{' '}
+              {proctored
+                ? 'This is a strict, server-timed assessment with camera + microphone proctoring. '
+                : 'The clock is enforced by the server. '}
+              When time runs out it submits automatically — your answers are saved as you go.
             </p>
 
             <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {stats.map(({ icon: Icon, label, value }) => (
-                <div key={label} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                  <Icon className="size-4 text-orange" aria-hidden="true" />
-                  <p className="mt-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-                    {label}
-                  </p>
-                  <p className="mt-1 text-xl font-extrabold text-navy">{value}</p>
+                <div
+                  key={label}
+                  className="rounded-2xl border border-white/10 bg-white/[0.05] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur"
+                >
+                  <Icon className="size-4 text-[#ffb877]" aria-hidden="true" />
+                  <p className="mt-3 text-[10px] font-bold uppercase tracking-widest text-white/45">{label}</p>
+                  <p className="mt-1 text-xl font-black text-white">{value}</p>
                 </div>
               ))}
             </div>
 
-            <div className="mt-7 flex flex-wrap items-center gap-3">
-              <Button size="lg" onClick={beginAttempt} disabled={starting}>
-                {starting ? (
-                  <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-                ) : (
-                  <Timer className="size-4" aria-hidden="true" />
-                )}
-                Start mock test
-              </Button>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={beginAttempt}
+                disabled={starting}
+                className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-b from-[#f7a14e] to-[#f37021] px-7 py-3.5 text-[15px] font-extrabold text-white shadow-[0_18px_40px_-14px_rgba(243,112,33,0.9)] transition-transform hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-60"
+              >
+                <span aria-hidden className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+                {starting ? <Loader2 className="size-4 animate-spin" /> : proctored ? <ShieldCheck className="size-4" /> : <Timer className="size-4" />}
+                {starting ? 'Starting…' : proctored ? 'Start assessment' : 'Start test'}
+              </button>
               <Link
                 href="/mock-tests"
-                className="inline-flex h-12 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-6 text-[15px] font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
+                className="inline-flex h-[52px] items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.06] px-6 text-[15px] font-bold text-white/85 backdrop-blur transition-colors hover:bg-white/[0.12]"
               >
                 Maybe later
               </Link>
             </div>
 
-            <p className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-400">
+            <p className="mt-3 flex items-center gap-1.5 text-[11px] text-white/45">
               <AlertTriangle className="size-3.5 shrink-0" aria-hidden="true" />
               Once started, the timer can&apos;t be paused. Final submit is one-way.
             </p>
-            {error ? (
-              <p role="alert" className="mt-2 text-sm text-red-600">
-                {error}
-              </p>
-            ) : null}
+            {error ? <p role="alert" className="mt-2 text-sm text-rose-300">{error}</p> : null}
           </div>
 
           <aside className="space-y-4">
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                What to expect
-              </p>
-              <ul className="mt-3 space-y-3 text-[13px] leading-snug text-slate-600">
-                <li className="flex gap-3">
-                  <Clock className="mt-0.5 size-4 shrink-0 text-orange" aria-hidden="true" />
-                  <span>A single countdown for the whole test — pace yourself across all questions.</span>
-                </li>
-                <li className="flex gap-3">
-                  <Target className="mt-0.5 size-4 shrink-0 text-orange" aria-hidden="true" />
-                  <span>Jump between questions freely; revisit and change answers until you submit.</span>
-                </li>
-                <li className="flex gap-3">
-                  <BarChart3 className="mt-0.5 size-4 shrink-0 text-orange" aria-hidden="true" />
-                  <span>Get a percentile, a topic-by-topic breakdown, and a full answer review.</span>
-                </li>
+            {proctored ? (
+              <div className="rounded-2xl border border-violet-400/25 bg-violet-500/[0.08] p-5 backdrop-blur">
+                <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-violet-200">
+                  <Video className="size-3.5" /> Proctoring required
+                </p>
+                <ul className="mt-3 space-y-2.5 text-[13px] leading-snug text-white/75">
+                  <li className="flex gap-2.5"><Video className="mt-0.5 size-4 shrink-0 text-violet-300" /> Camera &amp; microphone stay on for the full {kind}.</li>
+                  <li className="flex gap-2.5"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-violet-300" /> Stay on this tab in fullscreen — switches are logged.</li>
+                </ul>
+                <p className="mt-3 text-[11px] text-white/45">You&apos;ll grant camera/mic access right after you start.</p>
+              </div>
+            ) : null}
+            <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-5 backdrop-blur">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/45">What to expect</p>
+              <ul className="mt-3 space-y-3 text-[13px] leading-snug text-white/75">
+                <li className="flex gap-3"><Clock className="mt-0.5 size-4 shrink-0 text-[#ffb877]" /> A single countdown for the whole {kind} — pace yourself.</li>
+                <li className="flex gap-3"><Target className="mt-0.5 size-4 shrink-0 text-[#ffb877]" /> Jump between questions freely; change answers until you submit.</li>
+                <li className="flex gap-3"><BarChart3 className="mt-0.5 size-4 shrink-0 text-[#ffb877]" /> Get a percentile, topic breakdown, and full answer review.</li>
               </ul>
             </div>
           </aside>
@@ -402,6 +420,7 @@ function MockRunningView({
   remaining,
   submitting,
   error,
+  proctored,
   onSelect,
   onCodeSubmitted,
   onSubmit,
@@ -414,6 +433,7 @@ function MockRunningView({
   remaining: number;
   submitting: boolean;
   error: string | null;
+  proctored: boolean;
   onSelect: (questionId: string, optionId: string, multi: boolean) => void;
   onCodeSubmitted: (
     problemId: string,
@@ -422,6 +442,7 @@ function MockRunningView({
   onSubmit: () => void;
 }) {
   const [confirming, setConfirming] = useState(false);
+  const kind = proctored ? 'assessment' : 'test';
   const question = start.questions[idx];
   const total = start.questions.length;
   const isAnswered = (q: ApiMockStart['questions'][number]) =>
@@ -593,7 +614,7 @@ function MockRunningView({
             </Link>
           </Button>
           <Button variant="secondary" size="sm" onClick={() => setConfirming(true)} disabled={submitting}>
-            Submit test
+            Submit {kind}
           </Button>
         </div>
 
@@ -608,7 +629,7 @@ function MockRunningView({
       {confirming ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-navy/40 px-6">
           <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-lg">
-            <h2 className="text-base font-bold text-navy">Submit this mock test?</h2>
+            <h2 className="text-base font-bold text-navy">Submit this {kind}?</h2>
             <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
               You&apos;ve answered <span className="font-semibold text-navy">{answeredCount}</span> of{' '}
               {total} questions. Submitting is final — you&apos;ll see your score and a full review

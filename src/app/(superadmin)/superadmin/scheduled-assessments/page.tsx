@@ -14,7 +14,7 @@ export default function AdminScheduledAssessmentsPage() {
         items={[
           { label: 'Home', href: '/' },
           { label: 'Super-admin', href: '/superadmin/dashboard' },
-          { label: 'Scheduled assessments' },
+          { label: 'Assessments' },
         ]}
       />
 
@@ -25,7 +25,7 @@ export default function AdminScheduledAssessmentsPage() {
             Assessments
           </p>
           <h1 className="mt-2 text-[28px] font-extrabold tracking-tight text-navy">
-            Scheduled assessments
+            Assessments
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
             Schedule a company drive&apos;s assessment. It blocks the calendar of every student
