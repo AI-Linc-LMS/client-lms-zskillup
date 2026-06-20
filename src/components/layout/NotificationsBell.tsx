@@ -1,45 +1,99 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { Award, Bell, BellRing, type LucideIcon, Sparkles, Target, Trophy } from 'lucide-react';
+import {
+  Award,
+  BadgeCheck,
+  Bell,
+  BellRing,
+  CalendarClock,
+  CheckCheck,
+  type LucideIcon,
+  Sparkles,
+  Target,
+  Trophy,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { hasRoleHint } from '@/lib/session-hints';
+import {
+  getNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
+  type ApiNotification,
+} from '@/lib/api/notifications';
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-/**
- * Shape of a single feed item. The live notifications feed (badges earned,
- * quest completed, mock drive opened) lands with Sprint 5 gamification; until
- * then `items` stays empty and we render the polished empty state — and we
- * never show a misleading unread badge.
- */
-type NotificationItem = {
-  id: string;
-  title: string;
-  body: string;
-  time: string;
-  unread: boolean;
-  icon: LucideIcon;
-  from: string;
-  to: string;
+/** Notification type → icon + gradient. */
+const TYPE_STYLE: Record<string, { icon: LucideIcon; from: string; to: string }> = {
+  REGISTRATION: { icon: BadgeCheck, from: '#34d399', to: '#059669' },
+  ASSESSMENT_SCHEDULED: { icon: CalendarClock, from: '#7c6cf5', to: '#5b3bf5' },
+  ASSESSMENT_REMINDER: { icon: BellRing, from: '#f7a14e', to: '#f37021' },
+  RESULT: { icon: Trophy, from: '#f5c451', to: '#e0a91b' },
+  GENERIC: { icon: Sparkles, from: '#94a3b8', to: '#64748b' },
 };
 
+function timeAgo(iso: string): string {
+  const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  return `${Math.floor(s / 86400)}d ago`;
+}
+
 /**
- * Top-bar notifications bell. The notifications feed lands with Sprint 5
- * gamification. For now the bell opens an Aurora popover with a crafted empty
- * state so the button feels alive instead of dead — and we don't render a
- * misleading unread badge. When `items` arrives, rows + the animated unread
- * badge light up automatically.
+ * Top-bar notifications bell — live feed (assessment lifecycle, Phase 3).
+ * Polls the feed for the unread count and renders rows with deep links; clicking
+ * a row marks it read and navigates. Guests (no session) see the empty state.
  */
 export function NotificationsBell() {
   const [open, setOpen] = useState(false);
+  const [items, setItems] = useState<ApiNotification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
-
-  // Placeholder for the Sprint 5 feed. Empty for now → empty state + no badge.
-  const items: NotificationItem[] = [];
-  const unreadCount = items.reduce((n, i) => n + (i.unread ? 1 : 0), 0);
+  const router = useRouter();
   const hasUnread = unreadCount > 0;
+
+  const refresh = useCallback(() => {
+    if (!hasRoleHint()) return;
+    getNotifications()
+      .then((feed) => {
+        setItems(feed.items);
+        setUnreadCount(feed.unreadCount);
+      })
+      .catch(() => {});
+  }, []);
+
+  // Poll the feed for the unread badge (and lazily materialise reminders).
+  useEffect(() => {
+    refresh();
+    const t = setInterval(refresh, 60_000);
+    return () => clearInterval(t);
+  }, [refresh]);
+
+  // Refresh when the popover opens.
+  useEffect(() => {
+    if (open) refresh();
+  }, [open, refresh]);
+
+  const onRowClick = (n: ApiNotification) => {
+    if (!n.read) {
+      markNotificationRead(n.id).catch(() => {});
+      setItems((prev) => prev.map((i) => (i.id === n.id ? { ...i, read: true } : i)));
+      setUnreadCount((c) => Math.max(0, c - 1));
+    }
+    setOpen(false);
+    if (n.link) router.push(n.link);
+  };
+
+  const onMarkAll = () => {
+    markAllNotificationsRead().catch(() => {});
+    setItems((prev) => prev.map((i) => ({ ...i, read: true })));
+    setUnreadCount(0);
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -150,15 +204,13 @@ export function NotificationsBell() {
                   </div>
                 </div>
                 {hasUnread ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#f37021]/10 px-2.5 py-1 text-[11px] font-semibold text-[#f37021]">
-                    <span className="relative flex size-1.5">
-                      {!reduce ? (
-                        <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#f37021] opacity-70" />
-                      ) : null}
-                      <span className="relative inline-flex size-1.5 rounded-full bg-[#f37021]" />
-                    </span>
-                    Live
-                  </span>
+                  <button
+                    type="button"
+                    onClick={onMarkAll}
+                    className="inline-flex items-center gap-1 rounded-full bg-[#f37021]/10 px-2.5 py-1 text-[11px] font-semibold text-[#f37021] transition-colors hover:bg-[#f37021]/20"
+                  >
+                    <CheckCheck className="size-3.5" /> Mark all read
+                  </button>
                 ) : null}
               </div>
             </div>
@@ -166,45 +218,54 @@ export function NotificationsBell() {
             {items.length > 0 ? (
               <ul className="max-h-[22rem] divide-y divide-slate-100 overflow-y-auto">
                 {items.map((n, i) => {
-                  const Icon = n.icon;
+                  const style = TYPE_STYLE[n.type] ?? TYPE_STYLE.GENERIC;
+                  const Icon = style.icon;
+                  const unread = !n.read;
                   return (
                     <motion.li
                       key={n.id}
                       initial={reduce ? false : { opacity: 0, x: 8 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.35, ease: EASE, delay: 0.04 * i }}
-                      className={cn(
-                        'group/row relative flex gap-3 px-4 py-3 transition-colors hover:bg-slate-50',
-                        n.unread && 'bg-[#f37021]/[0.03]',
-                      )}
                     >
-                      {n.unread ? (
-                        <span
-                          aria-hidden
-                          className="absolute inset-y-0 left-0 w-[3px] rounded-r-full bg-gradient-to-b from-[#ff8a4c] to-[#f5491e]"
-                        />
-                      ) : null}
-                      <span
-                        className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl text-white shadow-sm"
-                        style={{ background: `linear-gradient(135deg, ${n.from}, ${n.to})` }}
+                      <button
+                        type="button"
+                        onClick={() => onRowClick(n)}
+                        className={cn(
+                          'group/row relative flex w-full gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50',
+                          unread && 'bg-[#f37021]/[0.03]',
+                        )}
                       >
-                        <Icon className="size-[18px]" aria-hidden="true" />
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="truncate text-[13px] font-semibold text-navy">{n.title}</p>
-                          {n.unread ? (
-                            <span
-                              aria-hidden
-                              className="mt-1 size-2 shrink-0 rounded-full bg-[#f37021] ring-2 ring-[#f37021]/20"
-                            />
-                          ) : null}
+                        {unread ? (
+                          <span
+                            aria-hidden
+                            className="absolute inset-y-0 left-0 w-[3px] rounded-r-full bg-gradient-to-b from-[#ff8a4c] to-[#f5491e]"
+                          />
+                        ) : null}
+                        <span
+                          className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl text-white shadow-sm"
+                          style={{ background: `linear-gradient(135deg, ${style.from}, ${style.to})` }}
+                        >
+                          <Icon className="size-[18px]" aria-hidden="true" />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="truncate text-[13px] font-semibold text-navy">{n.title}</p>
+                            {unread ? (
+                              <span
+                                aria-hidden
+                                className="mt-1 size-2 shrink-0 rounded-full bg-[#f37021] ring-2 ring-[#f37021]/20"
+                              />
+                            ) : null}
+                          </div>
+                          <p className="mt-0.5 line-clamp-2 text-[12px] leading-snug text-slate-500">
+                            {n.body}
+                          </p>
+                          <p className="mt-1 text-[11px] font-medium text-slate-400">
+                            {timeAgo(n.createdAt)}
+                          </p>
                         </div>
-                        <p className="mt-0.5 line-clamp-2 text-[12px] leading-snug text-slate-500">
-                          {n.body}
-                        </p>
-                        <p className="mt-1 text-[11px] font-medium text-slate-400">{n.time}</p>
-                      </div>
+                      </button>
                     </motion.li>
                   );
                 })}
