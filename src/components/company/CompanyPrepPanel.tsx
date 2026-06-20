@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, BadgeCheck, CalendarClock, Layers, Loader2, UserRound } from 'lucide-react';
+import { ArrowRight, CalendarClock, Layers, Loader2, UserRound } from 'lucide-react';
 import { getCompanyPrep, type ApiCompanyPrep } from '@/lib/api/catalog';
 
 /**
@@ -51,7 +51,6 @@ export function CompanyPrepPanel({
       {/* Totals strip */}
       <div className="flex flex-wrap gap-3">
         <StatChip icon={Layers} label="Practice questions" value={prep.totals.total.toLocaleString()} />
-        <StatChip icon={BadgeCheck} label="Verified" value={prep.totals.verified.toLocaleString()} tone="emerald" />
         <StatChip icon={CalendarClock} label="Previous-year (PYQ)" value={prep.totals.pyq.toLocaleString()} tone="violet" />
       </div>
 
