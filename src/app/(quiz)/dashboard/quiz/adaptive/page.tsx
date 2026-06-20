@@ -2,11 +2,63 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Brain, HelpCircle, Loader2, Sparkles, X } from 'lucide-react';
+import { motion } from 'framer-motion';
+import {
+  ArrowLeft,
+  Brain,
+  Clock,
+  Lightbulb,
+  Loader2,
+  Sparkles,
+  Target,
+  TrendingUp,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAdaptiveSession } from '@/hooks/useAdaptiveSession';
 import type { AdaptiveOption } from '@/lib/api/adaptive';
+
+/* AI Linc adaptive palette — indigo → purple → pink glass. */
+const AI_GRAD = 'linear-gradient(135deg,#6366f1 0%,#a855f7 55%,#ec4899 100%)';
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+const masteryPct = (theta: number) => Math.round((1 / (1 + Math.exp(-1.3 * theta))) * 100);
+function band(pct: number): { label: string; color: string } {
+  if (pct >= 75) return { label: 'Mastered', color: '#10b981' };
+  if (pct >= 55) return { label: 'Proficient', color: '#6366f1' };
+  if (pct >= 35) return { label: 'Developing', color: '#f59e0b' };
+  return { label: 'Needs work', color: '#ef4444' };
+}
+function certaintyBand(answered: number): { label: string; color: string } {
+  if (answered < 2) return { label: 'Getting to know you', color: '#a855f7' };
+  if (answered < 5) return { label: 'Building a picture', color: '#6366f1' };
+  if (answered < 9) return { label: 'Getting clearer', color: '#10b981' };
+  return { label: 'Confident read', color: '#059669' };
+}
+
+const DIFF_TONE: Record<string, { text: string; ring: string; bg: string }> = {
+  EASY: { text: 'text-emerald-300', ring: 'ring-emerald-400/30', bg: 'bg-emerald-400/10' },
+  MEDIUM: { text: 'text-indigo-300', ring: 'ring-indigo-400/30', bg: 'bg-indigo-400/10' },
+  HARD: { text: 'text-rose-300', ring: 'ring-rose-400/30', bg: 'bg-rose-400/10' },
+};
+
+const CONFIDENCE = [
+  { value: 1, emoji: '🤷', label: 'Guessing' },
+  { value: 2, emoji: '🤔', label: 'Unsure' },
+  { value: 3, emoji: '🙂', label: 'Pretty sure' },
+  { value: 4, emoji: '💯', label: 'Certain' },
+];
+
+function AIBeacon({ size = 32 }: { size?: number }) {
+  return (
+    <span className="relative inline-flex" style={{ width: size, height: size }}>
+      <span className="absolute inset-0 animate-ping rounded-full opacity-40" style={{ background: AI_GRAD }} />
+      <span className="relative inline-flex size-full items-center justify-center rounded-full" style={{ background: AI_GRAD }}>
+        <Sparkles className="size-1/2 text-white" />
+      </span>
+    </span>
+  );
+}
 
 function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
   const router = useRouter();
@@ -17,7 +69,6 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
     currentQuestion,
     progress,
     abilityState,
-    lastAnswer,
     hintState,
     hintLoading,
     error,
@@ -30,291 +81,383 @@ function AdaptiveQuizRunner({ mockId }: { mockId: string }) {
 
   const [selected, setSelected] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
 
-  // Reset selection when question changes
   const prevQuestionId = useRef<string | null>(null);
   useEffect(() => {
     if (currentQuestion && currentQuestion.questionId !== prevQuestionId.current) {
       prevQuestionId.current = currentQuestion.questionId;
       setSelected(null);
       setConfidence(null);
-      setShowConfirm(false);
+      setElapsed(0);
     }
   }, [currentQuestion]);
 
-  // Navigate to results when complete
+  // Per-question elapsed timer.
+  useEffect(() => {
+    if (!currentQuestion) return;
+    const t = setInterval(() => setElapsed((e) => e + 1), 1000);
+    return () => clearInterval(t);
+  }, [currentQuestion]);
+
   useEffect(() => {
     if (phase === 'complete' && sessionId) {
       router.replace(`/dashboard/quiz/adaptive/results?session=${sessionId}`);
     }
   }, [phase, sessionId, router]);
 
-  const handleOptionClick = (optId: string) => {
-    if (submitting) return;
-    setSelected(optId);
-  };
-
-  const handleSubmit = async () => {
-    if (!selected || submitting) return;
-    const confidencePrompt = sessionMeta?.confidencePromptEnabled;
-    if (confidencePrompt && confidence === null) {
-      setShowConfirm(true);
-      return;
-    }
-    await submitAnswer(selected, confidence ?? undefined);
-    setShowConfirm(false);
-  };
-
   if (phase === 'loading' || phase === 'complete') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-navy">
-        <Loader2 className="size-8 animate-spin text-white/50" />
+      <div className="grid min-h-screen place-items-center bg-[#0a0a14]">
+        <div className="flex flex-col items-center gap-3 text-white/60">
+          <AIBeacon size={44} />
+          <p className="text-sm">{phase === 'complete' ? 'Composing your diagnostic…' : 'Starting your adaptive quiz…'}</p>
+        </div>
       </div>
     );
   }
-
   if (phase === 'error') {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-navy text-white">
-        <p className="text-red-300">{error ?? 'Something went wrong.'}</p>
-        <Button variant="secondary" onClick={() => router.replace('/mock-tests')}>
-          Back to mock tests
-        </Button>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#0a0a14] text-white">
+        <p className="text-rose-300">{error ?? 'Something went wrong.'}</p>
+        <Button variant="secondary" onClick={() => router.replace('/mock-tests')}>Back to mock quizzes</Button>
       </div>
     );
   }
+  if (!currentQuestion) return null;
 
-  const maxQ = sessionMeta?.maxQuestions ?? 20;
-  const minQ = sessionMeta?.minQuestions ?? 5;
+  const maxQ = sessionMeta?.maxQuestions ?? 15;
+  const minQ = sessionMeta?.minQuestions ?? 8;
   const answered = progress?.answered ?? answeredCount;
-  const progressPct = Math.min((answered / maxQ) * 100, 100);
-  const confidenceLevels = [
-    { value: 1, label: 'Guessing', color: 'text-red-400' },
-    { value: 2, label: 'Unsure', color: 'text-amber-400' },
-    { value: 3, label: 'Fairly sure', color: 'text-blue-400' },
-    { value: 4, label: 'Certain', color: 'text-emerald-400' },
-  ];
+  const q = currentQuestion;
+  const diff = DIFF_TONE[q.difficultyLabel] ?? DIFF_TONE.MEDIUM;
+  const cert = certaintyBand(answered);
+  const markerLeft = `${Math.round((1 - (q.predictedPCorrect ?? 0.5)) * 100)}%`;
+  const confidenceRequired = !!sessionMeta?.confidencePromptEnabled;
+  const canSubmit = !!selected && (!confidenceRequired || confidence !== null) && !submitting;
 
-  const difficultyColor = {
-    EASY: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
-    MEDIUM: 'text-amber-400 border-amber-500/30 bg-amber-500/10',
-    HARD: 'text-red-400 border-red-500/30 bg-red-500/10',
-  } as const;
+  const handleSubmit = async () => {
+    if (!canSubmit || !selected) return;
+    await submitAnswer(selected, confidence ?? undefined);
+  };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-navy text-white">
-      {/* Background gradient */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_50%_at_50%_-5%,rgba(243,112,33,0.10),transparent)]"
-      />
-
-      {/* Top bar */}
-      <header className="relative z-10 flex items-center justify-between px-6 py-4 border-b border-white/10">
-        <button
-          onClick={() => { setShowConfirm(false); void abandon().then(() => router.replace('/mock-tests')); }}
-          className="inline-flex items-center gap-1.5 text-xs text-white/60 hover:text-white transition-colors"
-        >
-          <ArrowLeft className="size-3.5" />
-          Exit quiz
-        </button>
-
-        <div className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-orange/30 bg-orange/10 px-3 py-1 text-[11px] font-semibold text-orange">
-            <Sparkles className="size-3" />
-            Adaptive AI
-          </span>
-          <span className="text-[11px] text-white/50">
-            {sessionMeta?.title}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-3 text-xs text-white/60">
-          <span>Q{answered + 1}</span>
-          <span className="text-white/30">min {minQ} / max {maxQ}</span>
-        </div>
-      </header>
-
-      {/* Progress bar */}
-      <div className="relative z-10 h-1 bg-white/10">
-        <div
-          className="h-full bg-orange transition-all duration-700"
-          style={{ width: `${progressPct}%` }}
-        />
+    <div className="relative min-h-screen overflow-hidden bg-[#0a0a14] text-white">
+      {/* radial mesh backdrop */}
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-1/4 -top-1/4 size-[60vw] rounded-full bg-indigo-600/20 blur-[120px]" />
+        <div className="absolute -right-1/4 -top-1/3 size-[55vw] rounded-full bg-pink-600/15 blur-[120px]" />
+        <div className="absolute bottom-0 left-1/3 size-[50vw] rounded-full bg-purple-600/15 blur-[120px]" />
       </div>
 
-      {/* Main content */}
-      <main className="relative z-10 mx-auto max-w-2xl px-6 pb-24 pt-10">
-        {currentQuestion && (
-          <>
-            {/* Skill + difficulty tags */}
-            <div className="mb-4 flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/70">
-                <Brain className="size-3" />
-                {currentQuestion.targetSkill}
-              </span>
-              <span
-                className={cn(
-                  'inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider',
-                  difficultyColor[currentQuestion.difficultyLabel] ?? 'text-white/50',
-                )}
-              >
-                {currentQuestion.difficultyLabel}
-              </span>
+      <div className="relative z-10 mx-auto max-w-[1200px] px-4 py-6 sm:px-6">
+        {/* header */}
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => void abandon().then(() => router.replace('/mock-tests'))}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white"
+          >
+            <ArrowLeft className="size-3.5" /> Exit quiz
+          </button>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
+            Mock Quiz · Adaptive
+          </span>
+        </div>
+
+        {/* hero */}
+        <div className="mt-4 flex items-center gap-3">
+          <span className="grid size-12 place-items-center rounded-2xl" style={{ background: AI_GRAD }}>
+            <Brain className="size-6 text-white" />
+          </span>
+          <div>
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-indigo-300">
+              Live · Adaptive engine
+            </p>
+            <h1 className="text-xl font-black tracking-tight">{sessionMeta?.title ?? 'Adaptive Mock Quiz'}</h1>
+          </div>
+        </div>
+
+        {/* meta strip */}
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 backdrop-blur">
+          <span className="text-sm">
+            Question <span className="font-extrabold">{answered + 1}</span>
+            <span className="text-white/40"> · ~{minQ}–{maxQ}</span>
+          </span>
+          <span className="flex items-center gap-1.5 text-xs">
+            <span className="text-white/40">AI&apos;s read:</span>
+            <span className="font-bold" style={{ color: cert.color }}>{cert.label}</span>
+          </span>
+        </div>
+
+        {/* difficulty pulse */}
+        <div className="mt-3 flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 backdrop-blur">
+          <AIBeacon size={34} />
+          <div className="min-w-0 flex-1">
+            <p className="text-[12px] text-white/70">
+              Testing{' '}
+              <span className="rounded-full bg-indigo-500/20 px-2 py-0.5 text-[11px] font-bold text-indigo-200">
+                {prettySkill(q.targetSkill)}
+              </span>{' '}
+              · <span className="font-semibold" style={{ color: cert.color }}>{cert.label}</span> · ~
+              {Math.round((q.predictedPCorrect ?? 0.5) * 100)}% chance you&apos;ll get this right
+            </p>
+            <div className="relative mt-2 h-2 rounded-full" style={{ background: 'linear-gradient(90deg,#10b981,#6366f1 50%,#ef4444)' }}>
+              <motion.span
+                className="absolute top-1/2 size-3.5 -translate-y-1/2 rounded-full bg-white shadow ring-2 ring-indigo-500"
+                initial={false}
+                animate={{ left: markerLeft }}
+                transition={{ type: 'spring', stiffness: 220, damping: 26 }}
+                style={{ marginLeft: -7 }}
+              />
+            </div>
+            <div className="mt-1 flex justify-between text-[9px] font-bold uppercase tracking-wider text-white/35">
+              <span>Easy</span><span>Hard</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 3-column work area */}
+        <div className="mt-5 grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)_300px]">
+          {/* LEFT — timer + skill confidence */}
+          <aside className="space-y-4">
+            <Glass>
+              <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/40">
+                <Clock className="size-3.5" /> On this question
+              </div>
+              <p className="mt-2 text-2xl font-black tabular-nums">
+                {Math.floor(elapsed / 60)}:{String(elapsed % 60).padStart(2, '0')}
+              </p>
+            </Glass>
+            <Glass>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">Skill confidence</p>
+              <div className="mt-3 space-y-3">
+                {Object.entries(abilityState).map(([skill, theta]) => {
+                  const pct = masteryPct(theta);
+                  const b = band(pct);
+                  const targeting = skill === q.targetSkill;
+                  return (
+                    <div key={skill}>
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className={cn('truncate', targeting ? 'font-bold text-indigo-300' : 'text-white/70')}>
+                          {prettySkill(skill)}{targeting ? ' · targeting' : ''}
+                        </span>
+                        <span className="font-bold" style={{ color: b.color }}>{pct}%</span>
+                      </div>
+                      <div className="mt-1 h-2 rounded-full bg-white/10">
+                        <motion.div
+                          className="h-full rounded-full"
+                          initial={false}
+                          animate={{ width: `${pct}%` }}
+                          transition={{ type: 'spring', stiffness: 180, damping: 24 }}
+                          style={{ background: b.color }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+                {Object.keys(abilityState).length === 0 ? (
+                  <p className="text-[11px] text-white/40">Building your skill profile…</p>
+                ) : null}
+              </div>
+            </Glass>
+          </aside>
+
+          {/* CENTER — question card */}
+          <motion.div
+            key={q.questionId}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: EASE }}
+            className="rounded-[1.75rem] border border-white/10 bg-white/[0.05] p-6 backdrop-blur-xl"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Chip>Q{answered + 1} / ~{maxQ}</Chip>
+                <span className={cn('rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ring-1 ring-inset', diff.text, diff.ring, diff.bg)}>
+                  {q.difficultyLabel}
+                </span>
+                <Chip>{prettySkill(q.targetSkill)}</Chip>
+              </div>
+              {q.hintTokensRemaining > 0 && !hintState ? (
+                <button
+                  onClick={askHint}
+                  disabled={hintLoading || submitting}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-purple-400/50 px-3 py-1.5 text-[11px] font-bold text-purple-200 hover:bg-purple-500/10 disabled:opacity-50"
+                >
+                  {hintLoading ? <Loader2 className="size-3.5 animate-spin" /> : <Lightbulb className="size-3.5" />}
+                  Ask for a hint · {q.hintTokensRemaining} left
+                </button>
+              ) : null}
             </div>
 
-            {/* Question stem */}
-            <h2 className="text-lg font-bold leading-snug text-white md:text-xl">
-              {currentQuestion.stem}
-            </h2>
+            <h2 className="mt-5 text-lg font-semibold leading-relaxed">{q.stem}</h2>
 
-            {/* Options */}
-            <div className="mt-6 space-y-3">
-              {currentQuestion.options.map((opt: AdaptiveOption) => {
-                const isSelected = selected === opt.id;
-                const isCorrect = lastAnswer !== null && opt.id === selected && lastAnswer.isCorrect;
-                const isWrong = lastAnswer !== null && opt.id === selected && !lastAnswer.isCorrect;
+            <div className="mt-5 space-y-2.5">
+              {q.options.map((opt: AdaptiveOption, i: number) => {
+                const isSel = selected === opt.id;
                 return (
                   <button
                     key={opt.id}
-                    onClick={() => handleOptionClick(opt.id)}
-                    disabled={submitting || lastAnswer !== null}
+                    onClick={() => !submitting && setSelected(opt.id)}
+                    disabled={submitting}
                     className={cn(
-                      'w-full rounded-xl border px-5 py-4 text-left text-sm transition-all',
-                      isCorrect && 'border-emerald-400 bg-emerald-500/15 text-emerald-200',
-                      isWrong && 'border-red-400 bg-red-500/15 text-red-200',
-                      !isCorrect && !isWrong && isSelected && 'border-orange bg-orange/15 text-white',
-                      !isSelected && !isCorrect && !isWrong &&
-                        'border-white/15 bg-white/5 text-white/85 hover:border-white/30 hover:bg-white/10',
+                      'flex w-full items-center gap-3 rounded-2xl border px-4 py-3.5 text-left text-sm transition-colors',
+                      isSel
+                        ? 'border-indigo-400 bg-indigo-500/10'
+                        : 'border-white/12 bg-white/[0.03] hover:border-white/25 hover:bg-white/[0.06]',
                     )}
                   >
-                    {opt.text}
+                    <span className={cn(
+                      'grid size-7 shrink-0 place-items-center rounded-full text-[11px] font-bold ring-1 ring-inset',
+                      isSel ? 'bg-indigo-500/20 text-indigo-200 ring-indigo-400/40' : 'text-white/60 ring-white/15',
+                    )}>
+                      {String.fromCharCode(65 + i)}
+                    </span>
+                    <span className="text-white/90">{opt.text}</span>
                   </button>
                 );
               })}
             </div>
 
-            {/* Hint section */}
-            {currentQuestion.hintTokensRemaining > 0 && !hintState && (
-              <button
-                onClick={askHint}
-                disabled={hintLoading || submitting}
-                className="mt-5 inline-flex items-center gap-2 text-xs text-white/50 hover:text-amber-400 transition-colors"
-              >
-                {hintLoading ? (
-                  <Loader2 className="size-3.5 animate-spin" />
-                ) : (
-                  <HelpCircle className="size-3.5" />
-                )}
-                Ask for a hint ({currentQuestion.hintTokensRemaining} remaining)
-              </button>
-            )}
-
-            {hintState && (
-              <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
-                <p className="text-xs font-semibold text-amber-400 mb-1">💡 Hint</p>
-                <p className="text-sm text-amber-100">{hintState.hint}</p>
-                <p className="mt-1 text-[10px] text-amber-400/70">{hintState.hintsRemaining} hint(s) remaining</p>
+            {hintState ? (
+              <div className="mt-4 rounded-2xl border border-purple-400/30 bg-purple-500/10 p-3.5">
+                <p className="mb-1 flex items-center gap-1.5 text-[11px] font-bold text-purple-200">
+                  <Lightbulb className="size-3.5" /> Hint
+                </p>
+                <p className="text-sm text-purple-100">{hintState.hint}</p>
               </div>
-            )}
+            ) : null}
 
-            {/* Confidence prompt */}
-            {showConfirm && sessionMeta?.confidencePromptEnabled && (
-              <div className="mt-6 rounded-xl border border-white/15 bg-white/5 p-4">
-                <p className="text-xs font-semibold text-white/70 mb-3">How confident are you?</p>
-                <div className="flex gap-2 flex-wrap">
-                  {confidenceLevels.map((c) => (
+            {confidenceRequired ? (
+              <div className="mt-5">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">
+                  How confident are you?
+                </p>
+                <div className="mt-2 grid grid-cols-4 gap-2">
+                  {CONFIDENCE.map((c) => (
                     <button
                       key={c.value}
-                      onClick={() => {
-                        setConfidence(c.value);
-                        void submitAnswer(selected!, c.value);
-                        setShowConfirm(false);
-                      }}
+                      onClick={() => setConfidence(c.value)}
                       className={cn(
-                        'flex-1 min-w-[80px] rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-xs font-semibold transition-colors hover:bg-white/10',
-                        c.color,
+                        'flex flex-col items-center gap-1 rounded-xl border px-2 py-2.5 text-[11px] font-semibold transition-colors',
+                        confidence === c.value
+                          ? 'border-indigo-400 bg-indigo-500/10 text-indigo-200'
+                          : 'border-white/12 bg-white/[0.03] text-white/60 hover:bg-white/[0.06]',
                       )}
                     >
+                      <span className="text-lg">{c.emoji}</span>
                       {c.label}
                     </button>
                   ))}
                 </div>
-                <button
-                  onClick={() => setShowConfirm(false)}
-                  className="mt-2 text-[10px] text-white/40 hover:text-white/60"
-                >
-                  Cancel
-                </button>
               </div>
-            )}
+            ) : null}
 
-            {/* Submit button */}
-            {!showConfirm && (
-              <div className="mt-8">
-                <Button
-                  size="lg"
-                  disabled={!selected || submitting}
-                  onClick={handleSubmit}
-                  className="w-full"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="size-4 animate-spin mr-2" />
-                      Processing…
-                    </>
-                  ) : (
-                    'Submit answer'
-                  )}
-                </Button>
-              </div>
-            )}
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={handleSubmit}
+                disabled={!canSubmit}
+                className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-extrabold text-white shadow-[0_12px_30px_-12px_rgba(99,102,241,0.9)] transition-transform enabled:hover:scale-[1.02] disabled:opacity-40"
+                style={{ background: 'linear-gradient(135deg,#6366f1,#4f46e5)' }}
+              >
+                {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
+                {submitting ? 'Scoring…' : 'Submit answer'}
+              </button>
+            </div>
+          </motion.div>
 
-            {/* Skill ability sidebar (compact) */}
-            {Object.keys(abilityState).length > 0 && (
-              <div className="mt-8 rounded-xl border border-white/10 bg-white/5 p-4">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mb-3">
-                  Live skill estimate
-                </p>
-                <div className="space-y-2">
-                  {Object.entries(abilityState).map(([skill, theta]) => {
-                    const pct = Math.round((1 / (1 + Math.exp(-1.3 * theta))) * 100);
-                    return (
-                      <div key={skill}>
-                        <div className="flex justify-between text-[10px] text-white/60 mb-1">
-                          <span>{skill}</span>
-                          <span>{pct}%</span>
-                        </div>
-                        <div className="h-1.5 rounded-full bg-white/10">
-                          <div
-                            className="h-full rounded-full bg-orange transition-all duration-700"
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
+          {/* RIGHT — AI tutor sidecar */}
+          <aside className="lg:sticky lg:top-6 lg:self-start">
+            <Glass>
+              <div className="flex items-center gap-2">
+                <AIBeacon size={28} />
+                <div>
+                  <p className="text-[9px] font-extrabold uppercase tracking-[0.18em] text-purple-300">AI Tutor</p>
+                  <p className="text-[11px] font-bold text-white/80">Coaching this question</p>
                 </div>
               </div>
-            )}
-          </>
-        )}
-      </main>
+
+              <Pill className="mt-4">Why you got this Q</Pill>
+              <p className="mt-1.5 text-[12px] leading-relaxed text-white/70">
+                Testing <span className="font-semibold text-indigo-200">{prettySkill(q.targetSkill)}</span> at the{' '}
+                <span className="font-semibold">{q.difficultyLabel.toLowerCase()}</span> level ·{' '}
+                ~{Math.round((q.predictedPCorrect ?? 0.5) * 100)}% predicted.
+              </p>
+
+              {q.selectorRationale ? (
+                <>
+                  <Pill className="mt-4">What comes next</Pill>
+                  <p className="mt-1.5 flex items-start gap-1.5 text-[12px] leading-relaxed text-white/70">
+                    <TrendingUp className="mt-0.5 size-3.5 shrink-0 text-emerald-300" />
+                    {q.selectorRationale}
+                  </p>
+                </>
+              ) : null}
+
+              {q.hintTokensRemaining > 0 && !hintState ? (
+                <>
+                  <Pill className="mt-4">Hint</Pill>
+                  <button
+                    onClick={askHint}
+                    disabled={hintLoading || submitting}
+                    className="mt-1.5 w-full rounded-xl border border-dashed border-purple-400/40 px-3 py-2 text-[11px] font-bold text-purple-200 hover:bg-purple-500/10 disabled:opacity-50"
+                    style={{ background: 'transparent' }}
+                  >
+                    {hintLoading ? 'Thinking…' : `Spend 1 hint · ${q.hintTokensRemaining} left`}
+                  </button>
+                </>
+              ) : null}
+
+              <p className="mt-4 text-center text-[10px] italic text-white/30">
+                Powered by the ZSkillup Adaptive Engine
+              </p>
+            </Glass>
+          </aside>
+        </div>
+      </div>
     </div>
+  );
+}
+
+function prettySkill(s: string): string {
+  return (s || '')
+    .replace(/[-_]/g, ' ')
+    .replace(/\b\w/g, (m) => m.toUpperCase())
+    .replace(/Section \d+\s*/i, '')
+    .trim();
+}
+
+function Glass({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-4 backdrop-blur-xl">{children}</div>
+  );
+}
+function Chip({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="rounded-full bg-indigo-500/15 px-2.5 py-1 text-[10px] font-bold text-indigo-200">{children}</span>
+  );
+}
+function Pill({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <span
+      className={cn('inline-block rounded-full px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-white', className)}
+      style={{ background: AI_GRAD }}
+    >
+      {children}
+    </span>
   );
 }
 
 function AdaptiveQuizLanding() {
   const router = useRouter();
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-navy text-white text-center px-6">
-      <Sparkles className="size-10 text-orange" />
-      <h1 className="text-2xl font-extrabold">Adaptive Mock Quiz</h1>
-      <p className="text-sm text-white/60 max-w-sm">
-        No mock test selected. Please pick an adaptive mock from the catalog.
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-[#0a0a14] px-6 text-center text-white">
+      <AIBeacon size={48} />
+      <h1 className="text-2xl font-black">Adaptive Mock Quiz</h1>
+      <p className="max-w-sm text-sm text-white/60">
+        No mock quiz selected. Pick an adaptive mock quiz from the catalog.
       </p>
-      <Button onClick={() => router.replace('/mock-tests')}>Browse mock tests</Button>
+      <Button onClick={() => router.replace('/mock-tests')}>Browse mock quizzes</Button>
     </div>
   );
 }
@@ -330,8 +473,8 @@ export default function AdaptiveQuizPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-navy">
-          <Loader2 className="size-8 animate-spin text-white/50" />
+        <div className="grid min-h-screen place-items-center bg-[#0a0a14]">
+          <Loader2 className="size-8 animate-spin text-white/40" />
         </div>
       }
     >

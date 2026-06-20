@@ -1,17 +1,20 @@
 'use client';
 
-import { Suspense, useCallback, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import {
   ArrowLeft,
   Brain,
   CheckCircle2,
+  Clock,
   Loader2,
   RefreshCw,
   Sparkles,
   Target,
   TrendingUp,
+  XCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -29,243 +32,233 @@ import {
   type NarrationRemediationPath,
 } from '@/lib/api/adaptive';
 
-// ── Section loader ─────────────────────────────────────────────────────────────
+const AI_GRAD = 'linear-gradient(135deg,#6366f1 0%,#a855f7 55%,#ec4899 100%)';
 
 type NarrationState<T> = { loading: boolean; data: T | null; error: string | null };
-
 function useNarrationSection<T>(
   sessionId: string | null,
   section: 'headline' | 'per_question' | 'misconceptions' | 'remediation_path',
   enabled: boolean,
 ): NarrationState<T> {
   const [state, setState] = useState<NarrationState<T>>({ loading: false, data: null, error: null });
-
   useEffect(() => {
     if (!sessionId || !enabled) return;
     let cancelled = false;
     setState({ loading: true, data: null, error: null });
     getNarrationSection(sessionId, section)
-      .then((raw) => {
-        if (!cancelled) setState({ loading: false, data: raw as T, error: null });
-      })
-      .catch((err: Error) => {
-        if (!cancelled) setState({ loading: false, data: null, error: err.message });
-      });
-    return () => { cancelled = true; };
+      .then((raw) => !cancelled && setState({ loading: false, data: raw as T, error: null }))
+      .catch((err: Error) => !cancelled && setState({ loading: false, data: null, error: err.message }));
+    return () => {
+      cancelled = true;
+    };
   }, [sessionId, section, enabled]);
-
   return state;
 }
 
-// ── Accuracy ring ──────────────────────────────────────────────────────────────
-
 function AccuracyRing({ accuracy }: { accuracy: number }) {
-  const r = 36;
+  const r = 42;
   const circ = 2 * Math.PI * r;
   const dash = (accuracy / 100) * circ;
+  const color = accuracy >= 80 ? '#10b981' : accuracy >= 60 ? '#6366f1' : accuracy >= 40 ? '#f59e0b' : '#ef4444';
   return (
-    <svg width={96} height={96} viewBox="0 0 96 96" className="rotate-[-90deg]">
-      <circle cx={48} cy={48} r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={8} />
+    <svg width={112} height={112} viewBox="0 0 112 112" className="-rotate-90">
+      <circle cx={56} cy={56} r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth={9} />
       <circle
-        cx={48} cy={48} r={r} fill="none"
-        stroke={accuracy >= 70 ? '#10b981' : accuracy >= 50 ? '#f59e0b' : '#ef4444'}
-        strokeWidth={8} strokeDasharray={`${dash} ${circ}`}
-        strokeLinecap="round" className="transition-all duration-1000"
+        cx={56} cy={56} r={r} fill="none" stroke={color} strokeWidth={9}
+        strokeDasharray={`${dash} ${circ}`} strokeLinecap="round" className="transition-all duration-1000"
       />
     </svg>
   );
 }
 
-// ── Main results view ─────────────────────────────────────────────────────────
-
 function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
   const router = useRouter();
   const [results, setResults] = useState<AdaptiveResults | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'skills' | 'questions' | 'insights' | 'plan'>('skills');
 
   useEffect(() => {
     let cancelled = false;
     getAdaptiveResults(sessionId)
-      .then((r) => { if (!cancelled) setResults(r); })
-      .catch((e: Error) => { if (!cancelled) setLoadError(e.message); });
-    return () => { cancelled = true; };
+      .then((r) => !cancelled && setResults(r))
+      .catch((e: Error) => !cancelled && setLoadError(e.message));
+    return () => {
+      cancelled = true;
+    };
   }, [sessionId]);
 
+  // Fire all four sections in parallel (AI Linc streams them in).
   const headline = useNarrationSection<NarrationHeadline>(sessionId, 'headline', !!results);
-  const perQuestion = useNarrationSection<NarrationPerQuestion>(sessionId, 'per_question', activeTab === 'questions' && !!results);
-  const misconceptions = useNarrationSection<NarrationMisconceptions>(sessionId, 'misconceptions', activeTab === 'insights' && !!results);
-  const remediation = useNarrationSection<NarrationRemediationPath>(sessionId, 'remediation_path', activeTab === 'plan' && !!results);
+  const perQuestion = useNarrationSection<NarrationPerQuestion>(sessionId, 'per_question', !!results);
+  const misconceptions = useNarrationSection<NarrationMisconceptions>(sessionId, 'misconceptions', !!results);
+  const remediation = useNarrationSection<NarrationRemediationPath>(sessionId, 'remediation_path', !!results);
 
   if (loadError) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-navy text-white">
-        <p className="text-red-300">{loadError}</p>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#0a0a14] text-white">
+        <p className="text-rose-300">{loadError}</p>
         <Button variant="secondary" onClick={() => router.replace('/mock-tests')}>Back</Button>
       </div>
     );
   }
-
   if (!results) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-navy">
-        <Loader2 className="size-8 animate-spin text-white/50" />
+      <div className="grid min-h-screen place-items-center bg-[#0a0a14] text-white/60">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="size-7 animate-spin" /> Loading your diagnostic…
+        </div>
       </div>
     );
   }
 
-  const TABS = [
-    { key: 'skills', label: 'Skills', icon: Brain },
-    { key: 'questions', label: 'Questions', icon: CheckCircle2 },
-    { key: 'insights', label: 'Insights', icon: Target },
-    { key: 'plan', label: 'Study plan', icon: TrendingUp },
-  ] as const;
+  const incorrect = results.total - results.correct;
+  const timeMin = Math.max(1, Math.round(results.questions.reduce((s, q) => s + (q.timeMs ?? 0), 0) / 60000));
+  const ready = [headline, perQuestion, misconceptions, remediation].filter((s) => s.data).length;
+  const SECTIONS = [
+    { label: 'Headline read', s: headline },
+    { label: 'Per-question rationale', s: perQuestion },
+    { label: 'Misconception patterns', s: misconceptions },
+    { label: 'Next 15 minutes', s: remediation },
+  ];
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Hero header */}
-      <div className="bg-navy text-white">
-        <div className="mx-auto max-w-3xl px-6 pt-6 pb-10">
-          <div className="flex items-center justify-between mb-6">
-            <Link
-              href="/mock-tests"
-              className="inline-flex items-center gap-1.5 text-xs text-white/60 hover:text-white transition-colors"
-            >
-              <ArrowLeft className="size-3.5" />
-              Back to mock tests
+      {/* ── Diagnostic hero (dark glass) ─────────────────────────────────── */}
+      <div className="relative overflow-hidden bg-[#0a0a14] text-white">
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <div className="absolute -left-1/4 -top-1/3 size-[55vw] rounded-full bg-indigo-600/25 blur-[120px]" />
+          <div className="absolute -right-1/4 -top-1/4 size-[50vw] rounded-full bg-pink-600/20 blur-[120px]" />
+          <div className="absolute bottom-0 left-1/3 size-[45vw] rounded-full bg-purple-600/20 blur-[120px]" />
+        </div>
+        <div className="relative z-10 mx-auto max-w-5xl px-5 pb-8 pt-6 sm:px-6">
+          <div className="flex items-center justify-between">
+            <Link href="/mock-tests" className="inline-flex items-center gap-1.5 text-xs text-white/60 hover:text-white">
+              <ArrowLeft className="size-3.5" /> Back to mock quizzes
             </Link>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-orange/30 bg-orange/10 px-3 py-1 text-[11px] font-semibold text-orange">
-              <Sparkles className="size-3" /> AI Report
+            <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-pink-300">
+              Results · Diagnostic
             </span>
           </div>
 
-          {/* Headline */}
-          <div className="flex flex-col items-center text-center">
-            <div className="relative mb-4">
+          <div className="mt-5 flex flex-col items-center gap-4 sm:flex-row sm:items-center">
+            <div className="relative shrink-0">
               <AccuracyRing accuracy={results.accuracy} />
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-2xl font-extrabold">{results.accuracy}%</span>
+                <span className="text-2xl font-black">{results.accuracy}%</span>
                 <span className="text-[10px] text-white/50">accuracy</span>
               </div>
             </div>
-
-            {headline.loading ? (
-              <div className="flex items-center gap-2 text-white/50 text-sm">
-                <Loader2 className="size-4 animate-spin" /> Generating AI summary…
+            <div className="min-w-0 flex-1 text-center sm:text-left">
+              <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-white" style={{ background: AI_GRAD }}>
+                <Sparkles className="size-3" /> AI Tutor&apos;s read
               </div>
-            ) : headline.data ? (
-              <h1 className="text-lg font-bold leading-snug max-w-lg">
-                {headline.data.headline}
-              </h1>
-            ) : (
-              <h1 className="text-lg font-bold leading-snug">
-                {results.correct}/{results.total} correct · {results.questions.length} questions answered
-              </h1>
-            )}
-
-            <div className="mt-4 flex flex-wrap justify-center gap-4 text-[11px] text-white/60">
-              <span>{results.correct}/{results.total} correct</span>
-              <span>{results.questions.length} questions answered</span>
+              {headline.loading ? (
+                <p className="flex items-center justify-center gap-2 text-sm text-white/50 sm:justify-start">
+                  <Loader2 className="size-4 animate-spin" /> Reading your accuracy curve…
+                </p>
+              ) : (
+                <h1 className="text-lg font-extrabold leading-snug sm:text-xl">
+                  {headline.data?.headline ??
+                    `${results.correct}/${results.total} correct across ${results.questions.length} adaptive questions.`}
+                </h1>
+              )}
             </div>
           </div>
-        </div>
 
-        {/* Tab bar */}
-        <div className="border-t border-white/10">
-          <div className="mx-auto max-w-3xl px-6 flex gap-0">
-            {TABS.map(({ key, label, icon: Icon }) => (
-              <button
-                key={key}
-                onClick={() => setActiveTab(key as typeof activeTab)}
-                className={cn(
-                  'flex items-center gap-1.5 px-4 py-3 text-xs font-semibold border-b-2 transition-colors',
-                  activeTab === key
-                    ? 'border-orange text-orange'
-                    : 'border-transparent text-white/50 hover:text-white/80',
-                )}
-              >
-                <Icon className="size-3.5" />
-                {label}
-              </button>
-            ))}
+          {/* KPI rail */}
+          <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] sm:grid-cols-4 lg:grid-cols-5">
+            <Kpi icon={Target} label="Accuracy" value={`${results.accuracy}%`} tone="#10b981" />
+            <Kpi icon={CheckCircle2} label="Correct" value={results.correct} tone="#10b981" />
+            <Kpi icon={XCircle} label="Incorrect" value={incorrect} tone="#ef4444" />
+            <Kpi icon={Brain} label="Questions" value={results.questions.length} tone="#6366f1" />
+            <Kpi icon={Clock} label="Time" value={`${timeMin}m`} tone="#a855f7" />
           </div>
         </div>
       </div>
 
-      {/* Tab content */}
-      <div className="mx-auto max-w-3xl px-6 py-6">
-        {activeTab === 'skills' && (
-          <div className="space-y-4">
-            <h2 className="text-sm font-bold text-navy uppercase tracking-widest">Skill Mastery Profile</h2>
-            <SkillMasteryHeatmap skillMastery={results.skillMastery} />
+      {/* ── Streaming composer ───────────────────────────────────────────── */}
+      <div className="mx-auto max-w-5xl px-5 pt-6 sm:px-6">
+        {ready < 4 ? (
+          <div className="overflow-hidden rounded-2xl border border-indigo-200 bg-white p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <p className="flex items-center gap-2 text-sm font-bold text-navy">
+                <Loader2 className="size-4 animate-spin text-indigo-500" /> Composing your diagnostic
+              </p>
+              <span className="text-xs font-bold text-slate-400">{ready}/4 sections</span>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {SECTIONS.map(({ label, s }) => (
+                <span
+                  key={label}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset',
+                    s.data
+                      ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                      : s.error
+                        ? 'bg-rose-50 text-rose-700 ring-rose-200'
+                        : 'bg-slate-50 text-slate-500 ring-slate-200',
+                  )}
+                >
+                  {s.data ? <CheckCircle2 className="size-3.5" /> : s.loading ? <Loader2 className="size-3.5 animate-spin" /> : null}
+                  {label}
+                </span>
+              ))}
+            </div>
+            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
+              <motion.div
+                className="h-full rounded-full"
+                style={{ background: AI_GRAD }}
+                initial={false}
+                animate={{ width: `${(ready / 4) * 100}%` }}
+                transition={{ type: 'spring', stiffness: 120, damping: 22 }}
+              />
+            </div>
           </div>
-        )}
-
-        {activeTab === 'questions' && (
-          <div className="space-y-4">
-            <h2 className="text-sm font-bold text-navy uppercase tracking-widest">Question Breakdown</h2>
-            {perQuestion.loading && (
-              <div className="flex items-center gap-2 text-sm text-slate-500 py-4">
-                <Loader2 className="size-4 animate-spin text-orange" />
-                Loading AI analysis…
-              </div>
-            )}
-            <PerQuestionBreakdown
-              questions={results.questions}
-              perQuestionNarration={perQuestion.data?.per_question}
-            />
-          </div>
-        )}
-
-        {activeTab === 'insights' && (
-          <div className="space-y-4">
-            <h2 className="text-sm font-bold text-navy uppercase tracking-widest">Misconception Analysis</h2>
-            {misconceptions.loading ? (
-              <div className="flex items-center gap-2 text-sm text-slate-500 py-4">
-                <Loader2 className="size-4 animate-spin text-orange" />
-                Analysing your error patterns…
-              </div>
-            ) : misconceptions.data ? (
-              <MisconceptionCallout misconceptions={misconceptions.data.misconceptions} />
-            ) : misconceptions.error ? (
-              <p className="text-sm text-red-500">{misconceptions.error}</p>
-            ) : null}
-          </div>
-        )}
-
-        {activeTab === 'plan' && (
-          <div className="space-y-4">
-            <h2 className="text-sm font-bold text-navy uppercase tracking-widest">Personalised Study Plan</h2>
-            {remediation.loading ? (
-              <div className="flex items-center gap-2 text-sm text-slate-500 py-4">
-                <Loader2 className="size-4 animate-spin text-orange" />
-                Building your study plan…
-              </div>
-            ) : remediation.data ? (
-              <RemediationPath steps={remediation.data.remediation_path} />
-            ) : remediation.error ? (
-              <p className="text-sm text-red-500">{remediation.error}</p>
-            ) : null}
-          </div>
-        )}
+        ) : null}
       </div>
 
-      {/* Bottom CTA */}
-      <div className="mx-auto max-w-3xl px-6 pb-10">
-        <div className="rounded-xl border bg-white p-5 flex items-center justify-between gap-4">
+      {/* ── Single-scroll sections ───────────────────────────────────────── */}
+      <div className="mx-auto max-w-5xl space-y-6 px-5 py-6 sm:px-6">
+        <Section title="Skill mastery" icon={Brain}>
+          <SkillMasteryHeatmap skillMastery={results.skillMastery} />
+        </Section>
+
+        <Section title="Your next 15 minutes" icon={TrendingUp}>
+          {remediation.loading ? (
+            <Loading text="Plotting a path forward…" />
+          ) : remediation.data ? (
+            <RemediationPath steps={remediation.data.remediation_path} />
+          ) : remediation.error ? (
+            <RetryNote msg={remediation.error} />
+          ) : null}
+        </Section>
+
+        {misconceptions.data && misconceptions.data.misconceptions.length > 0 ? (
+          <Section title="Misconception patterns" icon={Target}>
+            <MisconceptionCallout misconceptions={misconceptions.data.misconceptions} />
+          </Section>
+        ) : misconceptions.loading ? (
+          <Section title="Misconception patterns" icon={Target}>
+            <Loading text="Clustering wrong answers…" />
+          </Section>
+        ) : null}
+
+        <Section title="Question by question" icon={CheckCircle2}>
+          {perQuestion.loading ? <Loading text="Annotating each answer…" /> : null}
+          <PerQuestionBreakdown questions={results.questions} perQuestionNarration={perQuestion.data?.per_question} />
+        </Section>
+
+        {/* CTA */}
+        <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5">
           <div>
-            <p className="text-sm font-semibold text-navy">Ready to improve?</p>
-            <p className="text-xs text-slate-500 mt-0.5">Retake the quiz or practice your weak skills.</p>
+            <p className="text-sm font-bold text-navy">Ready to close the gap?</p>
+            <p className="mt-0.5 text-xs text-slate-500">Practise your weak skills or take another adaptive quiz.</p>
           </div>
           <div className="flex gap-2">
             <Button variant="secondary" size="sm" asChild>
-              <Link href="/practice">Practice skills</Link>
+              <Link href="/practice">Practise skills</Link>
             </Button>
             <Button size="sm" asChild>
-              <Link href="/mock-tests">
-                <RefreshCw className="size-3.5 mr-1" />
-                Retake
-              </Link>
+              <Link href="/mock-tests"><RefreshCw className="mr-1 size-3.5" /> Retake</Link>
             </Button>
           </div>
         </div>
@@ -274,16 +267,56 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
   );
 }
 
+function Kpi({
+  icon: Icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: typeof Target;
+  label: string;
+  value: string | number;
+  tone: string;
+}) {
+  return (
+    <div className="bg-[#0a0a14]/40 px-4 py-3.5">
+      <span className="flex items-center gap-1.5 text-2xl font-black tabular-nums" style={{ color: tone }}>
+        <Icon className="size-4" /> {value}
+      </span>
+      <span className="mt-1 block text-[10px] font-semibold uppercase tracking-wider text-white/45">{label}</span>
+    </div>
+  );
+}
+
+function Section({ title, icon: Icon, children }: { title: string; icon: typeof Brain; children: React.ReactNode }) {
+  return (
+    <section>
+      <h2 className="mb-3 flex items-center gap-2 text-sm font-extrabold uppercase tracking-widest text-navy">
+        <Icon className="size-4 text-indigo-500" /> {title}
+      </h2>
+      {children}
+    </section>
+  );
+}
+function Loading({ text }: { text: string }) {
+  return (
+    <div className="flex items-center gap-2 py-4 text-sm text-slate-500">
+      <Loader2 className="size-4 animate-spin text-indigo-500" /> {text}
+    </div>
+  );
+}
+function RetryNote({ msg }: { msg: string }) {
+  return <p className="py-4 text-sm text-rose-500">{msg}</p>;
+}
+
 function ResultsPage() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session');
   if (!sessionId) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-navy text-white">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#0a0a14] text-white">
         <p className="text-white/60">No session specified.</p>
-        <Button asChild variant="secondary">
-          <Link href="/mock-tests">Back to mock tests</Link>
-        </Button>
+        <Button asChild variant="secondary"><Link href="/mock-tests">Back to mock quizzes</Link></Button>
       </div>
     );
   }
@@ -294,8 +327,8 @@ export default function AdaptiveResultsPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-navy">
-          <Loader2 className="size-8 animate-spin text-white/50" />
+        <div className="grid min-h-screen place-items-center bg-[#0a0a14]">
+          <Loader2 className="size-8 animate-spin text-white/40" />
         </div>
       }
     >
