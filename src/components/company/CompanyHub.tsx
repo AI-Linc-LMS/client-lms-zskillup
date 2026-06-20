@@ -24,7 +24,6 @@ import { cn } from '@/lib/utils';
 import { HUB_TABS, type HubContent, type HubTab } from '@/lib/hub-data';
 import { AnimatedNumber, AuroraBackground, Reveal, Stagger, StaggerItem } from '@/components/motion/primitives';
 import { CompanyPrepPanel } from './CompanyPrepPanel';
-import { OverviewTopicGrid } from './OverviewTopicGrid';
 import { CompanyMockTab as MockTab } from './CompanyMockTab';
 import { CodingProblemsList } from '@/components/coding/CodingProblemsList';
 
@@ -493,10 +492,6 @@ function OverviewTab({ content }: { content: HubContent }) {
             ))}
           </ol>
         </AuroraCard>
-      </Reveal>
-
-      <Reveal>
-        <OverviewTopicGrid slug={content.company.slug} />
       </Reveal>
     </div>
   );

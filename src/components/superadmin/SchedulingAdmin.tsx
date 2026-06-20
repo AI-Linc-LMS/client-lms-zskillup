@@ -36,9 +36,7 @@ export function SchedulingAdmin() {
   const [results, setResults] = useState<AssessmentResults | null>(null);
   const [resultsLoading, setResultsLoading] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
-  const [editRow, setEditRow] = useState<ApiScheduledAssessment | null>(null);
-  const [edit, setEdit] = useState({ title: '', scheduledAt: '', durationMinutes: 60, proctored: true });
-  const [savingEdit, setSavingEdit] = useState(false);
+  const [editWizardId, setEditWizardId] = useState<string | null>(null);
 
   // filters
   const [fCompany, setFCompany] = useState('');
@@ -62,34 +60,6 @@ export function SchedulingAdmin() {
       return true;
     });
   }, [rows, fCompany, fStatus, fDuration]);
-
-  const toLocalInput = (iso: string) => {
-    const d = new Date(iso);
-    const off = d.getTimezoneOffset();
-    return new Date(d.getTime() - off * 60000).toISOString().slice(0, 16);
-  };
-  const openEdit = (r: ApiScheduledAssessment) => {
-    setEditRow(r);
-    setEdit({ title: r.title, scheduledAt: toLocalInput(r.scheduledAt), durationMinutes: r.durationMinutes, proctored: r.proctored });
-  };
-  const saveEdit = async () => {
-    if (!editRow) return;
-    setSavingEdit(true);
-    try {
-      await updateScheduledAssessment(editRow.id, {
-        title: edit.title.trim(),
-        scheduledAt: new Date(edit.scheduledAt).toISOString(),
-        durationMinutes: edit.durationMinutes,
-        proctored: edit.proctored,
-      });
-      setEditRow(null);
-      await load();
-    } catch {
-      /* ignore */
-    } finally {
-      setSavingEdit(false);
-    }
-  };
 
   const openResults = async (id: string) => {
     setResultsLoading(true);
@@ -172,41 +142,8 @@ export function SchedulingAdmin() {
       {wizardOpen ? (
         <AssessmentWizard onClose={() => setWizardOpen(false)} onCreated={load} />
       ) : null}
-
-      {editRow ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <button type="button" aria-label="Close" onClick={() => setEditRow(null)} className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" />
-          <div className="relative w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-extrabold text-navy">Edit assessment</h3>
-              <button type="button" onClick={() => setEditRow(null)} className="grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100"><X className="size-4" /></button>
-            </div>
-            <div className="mt-4 space-y-3">
-              <label className="space-y-1 block">
-                <span className={labelCls}>Title</span>
-                <input value={edit.title} onChange={(e) => setEdit({ ...edit, title: e.target.value })} className={inputCls} />
-              </label>
-              <label className="space-y-1 block">
-                <span className={labelCls}>Date &amp; time</span>
-                <input type="datetime-local" value={edit.scheduledAt} onChange={(e) => setEdit({ ...edit, scheduledAt: e.target.value })} className={inputCls} />
-              </label>
-              <label className="space-y-1 block">
-                <span className={labelCls}>Duration (min)</span>
-                <input type="number" min={5} max={600} value={edit.durationMinutes} onChange={(e) => setEdit({ ...edit, durationMinutes: Number(e.target.value) })} className={inputCls} />
-              </label>
-              <label className="flex items-center gap-2">
-                <input type="checkbox" checked={edit.proctored} onChange={(e) => setEdit({ ...edit, proctored: e.target.checked })} className="size-4 accent-orange" />
-                <span className="text-sm font-medium text-slate-600">Proctored</span>
-              </label>
-            </div>
-            <div className="mt-5 flex gap-2">
-              <button type="button" onClick={() => setEditRow(null)} className="flex-1 rounded-full border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50">Cancel</button>
-              <button type="button" onClick={saveEdit} disabled={savingEdit} className="flex-[1.4] rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-4 py-2.5 text-sm font-extrabold text-white disabled:opacity-60">
-                {savingEdit ? 'Saving…' : 'Save changes'}
-              </button>
-            </div>
-          </div>
-        </div>
+      {editWizardId ? (
+        <AssessmentWizard editId={editWizardId} onClose={() => setEditWizardId(null)} onCreated={load} />
       ) : null}
 
       {/* Build assessment (auto from question bank) */}
@@ -408,7 +345,7 @@ export function SchedulingAdmin() {
                     <div className="flex items-center justify-end gap-1">
                       <button
                         type="button"
-                        onClick={() => openEdit(r)}
+                        onClick={() => setEditWizardId(r.id)}
                         className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-100"
                       >
                         <Pencil className="size-3.5" /> Edit

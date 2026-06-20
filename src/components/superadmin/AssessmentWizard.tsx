@@ -22,9 +22,12 @@ import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
 import {
   createAssessment,
   generateOne,
+  getEditableAssessment,
   sourceTopic,
+  updateAssessment,
   type AssessmentItemType,
   type CreatedAssessment,
+  type EditableAssessment,
 } from '@/lib/api/assessment-builder';
 
 const STEPS = ['Details', 'Questions', 'Review'];
@@ -58,10 +61,21 @@ const labelCls = 'block text-[11px] font-bold uppercase tracking-widest text-sla
 const inputCls =
   'mt-1 h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30';
 
-/** AI-assisted assessment builder wizard. */
-export function AssessmentWizard({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
+const PLATFORM = '__platform__';
+
+/** AI-assisted assessment builder wizard. Pass `editId` to edit an existing one. */
+export function AssessmentWizard({
+  onClose,
+  onCreated,
+  editId,
+}: {
+  onClose: () => void;
+  onCreated: () => void;
+  editId?: string;
+}) {
   const [step, setStep] = useState(0);
   const [companies, setCompanies] = useState<ApiCompany[]>([]);
+  const [existing, setExisting] = useState<EditableAssessment | null>(null);
 
   // details
   const [companyId, setCompanyId] = useState('');
@@ -83,6 +97,27 @@ export function AssessmentWizard({ onClose, onCreated }: { onClose: () => void; 
   useEffect(() => {
     listCompanies().then(setCompanies).catch(() => {});
   }, []);
+
+  // Edit mode: prefill from the existing assessment.
+  useEffect(() => {
+    if (!editId) return;
+    const toLocal = (iso: string) => {
+      const d = new Date(iso);
+      return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    };
+    getEditableAssessment(editId)
+      .then((e) => {
+        setExisting(e);
+        setTitle(e.title);
+        setCompanyId(e.companyId ?? PLATFORM);
+        setStartAt(toLocal(e.scheduledAt));
+        if (e.endsAt) setEndAt(toLocal(e.endsAt));
+        setDurationMinutes(e.durationMinutes);
+        setProctored(e.proctored);
+        setPassingScore(e.passingScore);
+      })
+      .catch(() => {});
+  }, [editId]);
 
   const totals = useMemo(() => {
     let mcq = 0;
@@ -161,19 +196,43 @@ export function AssessmentWizard({ onClose, onCreated }: { onClose: () => void; 
           questionIds: s.items.filter((i) => i.type === 'MCQ').flatMap((i) => i.ids),
           codingProblemIds: s.items.filter((i) => i.type === 'CODING').flatMap((i) => i.ids),
         }));
-      const result = await createAssessment({
-        companyId,
-        title: title.trim(),
-        scheduledAt: new Date(startAt).toISOString(),
-        endsAt: new Date(endAt).toISOString(),
-        durationMinutes,
-        proctored,
-        passingScore,
-        sections: payloadSections,
-      });
-      setCreated(result);
+      const isPlatform = companyId === PLATFORM;
+      const companyArg = isPlatform || !companyId ? undefined : companyId;
+      if (editId) {
+        const e = await updateAssessment(editId, {
+          title: title.trim(),
+          companyId: companyArg,
+          platform: isPlatform,
+          scheduledAt: new Date(startAt).toISOString(),
+          endsAt: new Date(endAt).toISOString(),
+          durationMinutes,
+          proctored,
+          passingScore,
+          addSections: payloadSections,
+        });
+        setCreated({
+          mockTestId: e.mockTestId ?? '',
+          scheduledAssessmentId: e.id,
+          totalQuestions: e.mcqCount + e.codingCount,
+          mcqCount: e.mcqCount,
+          codingCount: e.codingCount,
+          companyName: isPlatform ? 'Platform-wide' : companies.find((c) => c.id === companyId)?.name ?? '',
+        });
+      } else {
+        const result = await createAssessment({
+          companyId: companyArg,
+          title: title.trim(),
+          scheduledAt: new Date(startAt).toISOString(),
+          endsAt: new Date(endAt).toISOString(),
+          durationMinutes,
+          proctored,
+          passingScore,
+          sections: payloadSections,
+        });
+        setCreated(result);
+      }
     } catch (e) {
-      setErr(e instanceof ApiRequestError ? e.message : 'Could not create the assessment.');
+      setErr(e instanceof ApiRequestError ? e.message : 'Could not save the assessment.');
     } finally {
       setCreating(false);
     }
@@ -190,8 +249,10 @@ export function AssessmentWizard({ onClose, onCreated }: { onClose: () => void; 
               <Wand2 className="size-5" />
             </span>
             <div>
-              <h2 className="text-base font-black text-navy">Build an assessment</h2>
-              <p className="text-[11px] text-slate-400">AI-sourced from your bank · generates the rest</p>
+              <h2 className="text-base font-black text-navy">{editId ? 'Edit assessment' : 'Build an assessment'}</h2>
+              <p className="text-[11px] text-slate-400">
+                {editId ? 'Edit details + append question sections (pre-submission only)' : 'AI-sourced from your bank · generates the rest'}
+              </p>
             </div>
           </div>
           <button type="button" onClick={onClose} className="grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100">
@@ -237,10 +298,11 @@ export function AssessmentWizard({ onClose, onCreated }: { onClose: () => void; 
                 <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="TCS NQT — Round 1" className={inputCls} />
               </label>
               <label className="block">
-                <span className={labelCls}>Company</span>
+                <span className={labelCls}>Audience</span>
                 <select value={companyId} onChange={(e) => setCompanyId(e.target.value)} className={inputCls}>
-                  <option value="">Select a company</option>
-                  {companies.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  <option value="">Select audience</option>
+                  <option value={PLATFORM}>🌐 Platform-wide (all students)</option>
+                  {companies.map((c) => <option key={c.id} value={c.id}>{c.name} drive</option>)}
                 </select>
               </label>
               <div className="grid gap-4 sm:grid-cols-3">
@@ -273,6 +335,17 @@ export function AssessmentWizard({ onClose, onCreated }: { onClose: () => void; 
             </div>
           ) : step === 1 ? (
             <div className="space-y-5">
+              {existing ? (
+                existing.editable ? (
+                  <div className="rounded-xl border border-sky-200 bg-sky-50/60 px-4 py-2.5 text-xs text-sky-800">
+                    This assessment has <b>{existing.mcqCount + existing.codingCount}</b> question(s) ({existing.mcqCount} MCQ · {existing.codingCount} coding). New sections you add below are <b>appended</b>.
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-rose-200 bg-rose-50/60 px-4 py-2.5 text-xs font-semibold text-rose-700">
+                    🔒 This assessment already has {existing.attempts} submission(s) — questions can no longer be changed. You can still cancel.
+                  </div>
+                )
+              ) : null}
               {sections.map((sec, si) => (
                 <SectionEditor
                   key={si}
@@ -342,12 +415,12 @@ export function AssessmentWizard({ onClose, onCreated }: { onClose: () => void; 
                 Next <ArrowRight className="size-4" />
               </button>
             ) : step === 1 ? (
-              <button type="button" disabled={totals.total === 0} onClick={() => setStep(2)} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white disabled:opacity-50">
-                Review ({totals.total}) <ArrowRight className="size-4" />
+              <button type="button" disabled={!editId && totals.total === 0} onClick={() => setStep(2)} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white disabled:opacity-50">
+                {editId ? 'Review changes' : `Review (${totals.total})`} <ArrowRight className="size-4" />
               </button>
             ) : (
-              <button type="button" disabled={creating || totals.total === 0} onClick={create} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white disabled:opacity-50">
-                {creating ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />} Publish assessment
+              <button type="button" disabled={creating || (!editId && totals.total === 0) || (!!existing && !existing.editable)} onClick={create} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white disabled:opacity-50">
+                {creating ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />} {editId ? 'Save changes' : 'Publish assessment'}
               </button>
             )}
           </div>

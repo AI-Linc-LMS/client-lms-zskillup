@@ -14,7 +14,8 @@ export interface BuilderSection {
 }
 
 export interface CreateAssessmentPayload {
-  companyId: string;
+  /** Omit for a platform-wide assessment (all students). */
+  companyId?: string;
   title: string;
   scheduledAt: string;
   endsAt?: string;
@@ -81,6 +82,50 @@ export async function generateOne(body: {
 export async function createAssessment(payload: CreateAssessmentPayload): Promise<CreatedAssessment> {
   const res = await apiClient.post<CreatedAssessment>(
     '/api/v1/admin/assessment-builder/create',
+    payload,
+  );
+  return res.data;
+}
+
+/** Editable snapshot of an assessment (locked once it has submissions). */
+export interface EditableAssessment {
+  id: string;
+  companyId: string | null;
+  mockTestId: string | null;
+  title: string;
+  scheduledAt: string;
+  endsAt: string | null;
+  durationMinutes: number;
+  proctored: boolean;
+  passingScore: number;
+  attempts: number;
+  mcqCount: number;
+  codingCount: number;
+  editable: boolean;
+}
+
+export async function getEditableAssessment(id: string): Promise<EditableAssessment> {
+  const res = await apiClient.get<EditableAssessment>(
+    `/api/v1/admin/assessment-builder/${id}/editable`,
+  );
+  return res.data;
+}
+
+export interface EditAssessmentPayload {
+  title?: string;
+  companyId?: string;
+  platform?: boolean;
+  scheduledAt?: string;
+  endsAt?: string;
+  durationMinutes?: number;
+  proctored?: boolean;
+  passingScore?: number;
+  addSections?: BuilderSection[];
+}
+
+export async function updateAssessment(id: string, payload: EditAssessmentPayload): Promise<EditableAssessment> {
+  const res = await apiClient.patch<EditableAssessment>(
+    `/api/v1/admin/assessment-builder/${id}`,
     payload,
   );
   return res.data;
