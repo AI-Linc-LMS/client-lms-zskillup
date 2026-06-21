@@ -8,6 +8,7 @@ import {
   FileCheck2,
   GraduationCap,
   LayoutDashboard,
+  ListChecks,
   type LucideIcon,
   Mail,
   Target,
@@ -43,6 +44,7 @@ export const STUDENT_NAV: NavSection[] = [
     heading: 'WORKSPACE',
     items: [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+      { label: 'Study Plan', href: '/study-plan', icon: ListChecks },
       { label: 'Performance', href: '/performance', icon: TrendingUp },
     ],
   },
