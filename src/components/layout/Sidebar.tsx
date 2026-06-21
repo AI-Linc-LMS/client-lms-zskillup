@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { motion, useReducedMotion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { navForPath } from './nav-config';
+import { SidebarUpcoming } from './SidebarUpcoming';
 
 /**
  * Workspace sidebar — route-aware (student / super-admin / TPO). Pure
@@ -21,6 +22,8 @@ export function Sidebar() {
   const pathname = usePathname();
   const sections = navForPath(pathname);
   const reduce = useReducedMotion();
+  // Student context (not admin/TPO) — the upcoming-drives widget is student-only.
+  const isStudent = !pathname.startsWith('/superadmin') && !pathname.startsWith('/tpo');
 
   return (
     <aside className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-60 shrink-0 flex-col self-start border-r border-[var(--color-line)] bg-white md:flex">
@@ -113,6 +116,9 @@ export function Sidebar() {
             </ul>
           </div>
         ))}
+
+        {/* Upcoming drives — fills the space below the menu (students only). */}
+        {isStudent ? <SidebarUpcoming /> : null}
       </nav>
     </aside>
   );
