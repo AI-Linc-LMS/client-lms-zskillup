@@ -49,7 +49,7 @@ export function SidebarUpcoming() {
   if (!items || items.length === 0) return null;
 
   return (
-    <div className="mt-2 border-t border-[var(--color-line)] px-1 pt-4">
+    <div className="relative z-10 max-h-[60%] shrink-0 overflow-y-auto border-t border-[var(--color-line)] bg-white px-3 pb-4 pt-4">
       <div className="mb-2 flex items-center justify-between px-2">
         <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
           <CalendarClock className="size-3.5 text-orange" /> Upcoming

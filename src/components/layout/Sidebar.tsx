@@ -116,10 +116,11 @@ export function Sidebar() {
             </ul>
           </div>
         ))}
-
-        {/* Upcoming drives — fills the space below the menu (students only). */}
-        {isStudent ? <SidebarUpcoming /> : null}
       </nav>
+
+      {/* Upcoming drives — pinned to the bottom of the rail (students only). The
+          nav above flexes/scrolls; this stays anchored at the bottom. */}
+      {isStudent ? <SidebarUpcoming /> : null}
     </aside>
   );
 }
