@@ -112,6 +112,8 @@ export function MockTestsCatalog({
  *  a confident gradient Start CTA, and a hover lift with an intensifying glow. */
 function MockCard({ mock }: { mock: ApiMockSummary }) {
   const adaptive = mock.isAdaptive;
+  // Never render a blank card name — some mock rows have an empty title in data.
+  const title = mock.title?.trim() || (adaptive ? 'Adaptive Mock Quiz' : 'Mock Assessment');
   const from = '#f7a14e';
   const to = '#f37021';
   const glow = '#f37021';
@@ -153,7 +155,7 @@ function MockCard({ mock }: { mock: ApiMockSummary }) {
                 {adaptive ? <Sparkles className="size-2.5" /> : <Timer className="size-2.5" />}
                 {adaptive ? 'Mock Quiz' : 'Assessment'}
               </span>
-              <p className="mt-1.5 line-clamp-2 text-base font-bold leading-snug text-navy">{mock.title}</p>
+              <p className="mt-1.5 line-clamp-2 text-base font-bold leading-snug text-navy">{title}</p>
             </div>
           </div>
 
@@ -172,7 +174,7 @@ function MockCard({ mock }: { mock: ApiMockSummary }) {
           <div className="mt-auto pt-4">
             <Link
               href={href}
-              aria-label={`Start ${mock.title}`}
+              aria-label={`Start ${title}`}
               className="group/cta relative inline-flex w-full items-center justify-center gap-1.5 overflow-hidden rounded-xl px-4 py-3 text-sm font-extrabold text-white shadow-[0_12px_28px_-14px_rgba(243,112,33,0.9)] transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
               style={{ background: `linear-gradient(180deg, ${from}, ${to})` }}
             >
