@@ -31,8 +31,8 @@ function useCountUp(target: number, ms = 1100) {
 }
 
 /* Big hero gauge with gradient stroke + glow — tuned for a dark navy hero. */
-function HeroGauge({ score, size = 156 }: { score: number; size?: number }) {
-  const r = size / 2 - 14;
+function HeroGauge({ score, size = 188 }: { score: number; size?: number }) {
+  const r = size / 2 - 16;
   const circ = 2 * Math.PI * r;
   const c = tone(score);
   const n = useCountUp(score);
@@ -41,59 +41,59 @@ function HeroGauge({ score, size = 156 }: { score: number; size?: number }) {
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
         <defs>
           <linearGradient id="rdyGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor={c} stopOpacity="0.6" />
+            <stop offset="0%" stopColor={c} stopOpacity="0.55" />
             <stop offset="100%" stopColor={c} />
           </linearGradient>
         </defs>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={12} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={14} />
         <motion.circle
           cx={size / 2}
           cy={size / 2}
           r={r}
           fill="none"
           stroke="url(#rdyGrad)"
-          strokeWidth={12}
+          strokeWidth={14}
           strokeLinecap="round"
           strokeDasharray={circ}
           initial={{ strokeDashoffset: circ }}
           animate={{ strokeDashoffset: circ - (score / 100) * circ }}
           transition={{ duration: 1.1, ease: EASE }}
-          style={{ filter: `drop-shadow(0 0 8px ${c}77)` }}
+          style={{ filter: `drop-shadow(0 0 10px ${c}88)` }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-[44px] font-black leading-none tabular-nums text-white">{n}</span>
-        <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">readiness</span>
+        <span className="text-[64px] font-black leading-none tabular-nums text-white">{n}</span>
+        <span className="mt-2 text-[11px] font-bold uppercase tracking-[0.28em] text-white/45">readiness</span>
       </div>
     </div>
   );
 }
 
-/* Small labelled ring for a component score — dark-hero variant. */
-function MiniRing({ label, pct, icon: Icon, active }: { label: string; pct: number; icon: LucideIcon; active: boolean }) {
-  const size = 66;
-  const r = size / 2 - 6;
-  const circ = 2 * Math.PI * r;
-  const c = active ? tone(pct) : 'rgba(255,255,255,0.25)';
+/* Bold horizontal stat bar for a component score — dark-hero variant. */
+function StatBar({ label, pct, icon: Icon, active, delay = 0 }: { label: string; pct: number; icon: LucideIcon; active: boolean; delay?: number }) {
+  const c = active ? tone(pct) : 'rgba(255,255,255,0.28)';
+  const n = useCountUp(pct);
   return (
-    <div className={cn('flex flex-col items-center gap-1.5', !active && 'opacity-60')}>
-      <div className="relative" style={{ width: size, height: size }}>
-        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
-          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={6} />
-          <motion.circle
-            cx={size / 2} cy={size / 2} r={r} fill="none" stroke={c} strokeWidth={6} strokeLinecap="round"
-            strokeDasharray={circ}
-            initial={{ strokeDashoffset: circ }}
-            animate={{ strokeDashoffset: circ - (pct / 100) * circ }}
-            transition={{ duration: 0.9, ease: EASE }}
-          />
-        </svg>
-        <span className="absolute inset-0 grid place-items-center">
-          <Icon className="size-4" style={{ color: active ? c : 'rgba(255,255,255,0.4)' }} />
+    <div className={cn('select-none', !active && 'opacity-60')}>
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="flex items-center gap-2 text-[13px] font-bold tracking-tight text-white/85">
+          <Icon className="size-4 shrink-0" style={{ color: c }} aria-hidden />
+          {label}
+        </span>
+        <span className="font-black leading-none tabular-nums" style={{ color: active ? '#ffffff' : 'rgba(255,255,255,0.45)' }}>
+          <span className="text-[26px]">{n}</span>
+          <span className="text-base text-white/40">%</span>
         </span>
       </div>
-      <span className="text-xs font-extrabold tabular-nums" style={{ color: active ? '#ffffff' : 'rgba(255,255,255,0.45)' }}>{pct}%</span>
-      <span className="text-[10px] font-semibold uppercase tracking-wide text-white/40">{label}</span>
+      <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-white/10">
+        <motion.div
+          className="h-full rounded-full"
+          style={{ background: c, boxShadow: active ? `0 0 12px ${c}66` : 'none' }}
+          initial={{ width: 0 }}
+          animate={{ width: `${active ? pct : Math.max(pct, 2)}%` }}
+          transition={{ duration: 1, ease: EASE, delay }}
+        />
+      </div>
     </div>
   );
 }
@@ -177,16 +177,17 @@ export function ReadinessPanel({ compact = false }: { compact?: boolean }) {
             </p>
           </motion.div>
         ) : null}
-        <div className="relative mt-5 flex flex-col items-center gap-7 sm:flex-row sm:items-center">
-          <div className="flex flex-col items-center">
+        <div className="relative mt-6 flex flex-col items-center gap-8 sm:flex-row sm:items-center sm:gap-10">
+          <div className="flex shrink-0 flex-col items-center gap-3.5">
             <HeroGauge score={data.overall.score} />
-            <span className="mt-3 rounded-full px-3 py-1 text-xs font-extrabold ring-1" style={{ background: `${c}22`, color: c, boxShadow: `inset 0 0 0 1px ${c}33` }}>
+            <span className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[13px] font-extrabold" style={{ background: `${c}1f`, color: c, boxShadow: `inset 0 0 0 1px ${c}3d` }}>
+              <span className="size-1.5 rounded-full" style={{ background: c }} />
               {data.overall.level}
             </span>
           </div>
-          <div className="grid flex-1 grid-cols-2 gap-5 sm:grid-cols-4">
-            {data.overall.components.map((comp) => (
-              <MiniRing key={comp.label} label={comp.label} pct={comp.score} active={comp.active} icon={COMP_ICON[comp.label] ?? Compass} />
+          <div className="grid w-full flex-1 gap-4 sm:gap-[18px]">
+            {data.overall.components.map((comp, i) => (
+              <StatBar key={comp.label} label={comp.label} pct={comp.score} active={comp.active} icon={COMP_ICON[comp.label] ?? Compass} delay={0.15 + i * 0.08} />
             ))}
           </div>
         </div>
