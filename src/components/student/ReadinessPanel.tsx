@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ClipboardList, Code2, Compass, FileCheck2, Target, type LucideIcon } from 'lucide-react';
+import { ClipboardList, Code2, Compass, FileCheck2, Info, Target, X, type LucideIcon } from 'lucide-react';
 import { getReadiness, type Readiness } from '@/lib/api/readiness';
 import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
 import { cn } from '@/lib/utils';
@@ -109,6 +109,7 @@ export function ReadinessPanel({ compact = false }: { compact?: boolean }) {
   const [data, setData] = useState<Readiness | null>(null);
   const [companies, setCompanies] = useState<ApiCompany[]>([]);
   const [err, setErr] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
 
   useEffect(() => {
     getReadiness().then(setData).catch(() => setErr(true));
@@ -133,9 +134,49 @@ export function ReadinessPanel({ compact = false }: { compact?: boolean }) {
       <div className="relative overflow-hidden bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 sm:p-8">
         <span aria-hidden className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full opacity-25 blur-3xl" style={{ background: c }} />
         <span aria-hidden className="pointer-events-none absolute -bottom-20 left-1/4 size-56 rounded-full bg-[#2563eb]/20 blur-3xl" />
-        <div className="relative flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-white/50">
-          <Target className="size-4 text-[#ffb877]" /> Placement readiness
+        <div className="relative flex items-center justify-between gap-2">
+          <span className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-white/50">
+            <Target className="size-4 text-[#ffb877]" /> Placement readiness
+          </span>
+          <button
+            type="button"
+            onClick={() => setShowInfo((v) => !v)}
+            aria-label="How readiness is calculated"
+            aria-expanded={showInfo}
+            className="grid size-6 place-items-center rounded-full text-white/45 transition-colors hover:bg-white/10 hover:text-white/90"
+          >
+            <Info className="size-4" />
+          </button>
         </div>
+
+        {/* How readiness is calculated */}
+        {showInfo ? (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="relative mt-4 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.05] p-4 text-[11px] leading-relaxed text-white/70 backdrop-blur"
+          >
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#ffb877]">How readiness is calculated</p>
+              <button type="button" onClick={() => setShowInfo(false)} aria-label="Close" className="text-white/40 hover:text-white/80"><X className="size-3.5" /></button>
+            </div>
+            <ul className="mt-3 grid gap-2.5 sm:grid-cols-2">
+              <li className="flex gap-2"><ClipboardList className="mt-0.5 size-3.5 shrink-0 text-[#ffb877]" /><span><b className="text-white">Practice · 35%</b><br />Accuracy on practice questions — correct ÷ attempted.</span></li>
+              <li className="flex gap-2"><FileCheck2 className="mt-0.5 size-3.5 shrink-0 text-[#ffb877]" /><span><b className="text-white">Mock tests · 30%</b><br />Your average score across finished mock quizzes &amp; assessments (mean of score ÷ total per attempt).</span></li>
+              <li className="flex gap-2"><Code2 className="mt-0.5 size-3.5 shrink-0 text-[#ffb877]" /><span><b className="text-white">Coding · 20%</b><br />Solve rate — distinct problems solved ÷ distinct problems attempted.</span></li>
+              <li className="flex gap-2"><Compass className="mt-0.5 size-3.5 shrink-0 text-[#ffb877]" /><span><b className="text-white">Coverage · 15%</b><br />Breadth — distinct topics you&apos;ve practised ÷ all topics on the platform.</span></li>
+            </ul>
+            <p className="mt-3 border-t border-white/10 pt-3">
+              <b className="text-white">Overall readiness</b> is a weighted blend of the four
+              (Practice&nbsp;35% · Mock&nbsp;30% · Coding&nbsp;20% · Coverage&nbsp;15%), counting only the parts you have
+              data for — Coverage always counts. So your weakest area drags the score down the most by its weight.
+            </p>
+            <p className="mt-2">
+              Bands: <b className="text-rose-300">Needs work</b> &lt;40 · <b className="text-amber-300">Developing</b> 40–59 ·{' '}
+              <b className="text-indigo-300">Proficient</b> 60–79 · <b className="text-emerald-300">Strong</b> 80+.
+            </p>
+          </motion.div>
+        ) : null}
         <div className="relative mt-5 flex flex-col items-center gap-7 sm:flex-row sm:items-center">
           <div className="flex flex-col items-center">
             <HeroGauge score={data.overall.score} />
