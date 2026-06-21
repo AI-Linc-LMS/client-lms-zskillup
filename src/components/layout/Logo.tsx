@@ -26,10 +26,10 @@ export function Logo({
       <Image
         src="/images/Zskillup Black.png"
         alt="ZSkillup"
-        width={120}
-        height={38}
+        width={124}
+        height={40}
         priority
-        className="h-7 w-auto transition-transform duration-300 group-hover:-translate-y-0.5 sm:h-8"
+        className="h-7 w-auto object-contain transition-transform duration-300 group-hover:-translate-y-0.5 sm:h-8"
       />
       {workspaceLabel ? (
         <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">

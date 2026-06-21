@@ -184,6 +184,7 @@ export function CompanyRegisterCard({
                   day: 'numeric',
                   hour: 'numeric',
                   minute: '2-digit',
+                  hour12: true,
                 })}{' '}
                 · {nextAssessment.durationMinutes}m{nextAssessment.proctored ? ' · proctored' : ''}
               </p>

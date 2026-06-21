@@ -69,7 +69,7 @@ export function CompanyMockTab({ content }: { content: HubContent }) {
                   <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] font-medium text-slate-500">
                     <span className="flex items-center gap-1">
                       <CalendarClock className="size-3" />
-                      {new Date(s.scheduledAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                      {new Date(s.scheduledAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}
                     </span>
                     <span className="flex items-center gap-1"><Clock className="size-3" /> {s.durationMinutes}m</span>
                     {s.proctored ? <span className="flex items-center gap-1 text-violet-600"><Video className="size-3" /> Proctored</span> : null}

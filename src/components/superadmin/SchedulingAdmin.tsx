@@ -314,6 +314,7 @@ export function SchedulingAdmin() {
                       day: 'numeric',
                       hour: 'numeric',
                       minute: '2-digit',
+                      hour12: true,
                     })}
                   </td>
                   <td className="px-4 py-3.5 text-slate-600">{r.durationMinutes}m</td>
@@ -396,7 +397,7 @@ export function SchedulingAdmin() {
                     <p className="text-xs text-slate-500">
                       {results.assessment.companyName} ·{' '}
                       {new Date(results.assessment.scheduledAt).toLocaleString([], {
-                        month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+                        month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true,
                       })}
                     </p>
                   </div>

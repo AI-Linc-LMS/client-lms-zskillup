@@ -23,7 +23,7 @@ export function Sidebar() {
   const reduce = useReducedMotion();
 
   return (
-    <aside className="relative hidden w-60 shrink-0 flex-col border-r border-[var(--color-line)] bg-white md:flex">
+    <aside className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-60 shrink-0 flex-col self-start border-r border-[var(--color-line)] bg-white md:flex">
       {/* faint brand wash anchoring the rail */}
       <div
         aria-hidden

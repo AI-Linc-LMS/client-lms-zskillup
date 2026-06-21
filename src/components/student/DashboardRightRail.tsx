@@ -204,7 +204,7 @@ export function DashboardRightRail() {
                       <span className={cn('text-[11px] font-extrabold', tone.text)}>
                         {live ? 'Live now' : `Due ${countdownTo(a.scheduledAt)}`}
                         <span className="ml-1 font-semibold text-slate-400">
-                          · {new Date(a.scheduledAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                          · {new Date(a.scheduledAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}
                         </span>
                       </span>
                       {live && a.mockTestId ? (
