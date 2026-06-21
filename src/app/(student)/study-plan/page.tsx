@@ -145,29 +145,48 @@ function TrendChart({ trends }: { trends: Trends }) {
     return d.trim();
   };
 
-  const hasAny = pts.some((p) => p.practicePct != null || p.mockPct != null);
-  if (!hasAny) {
+  const weeksWithData = pts.filter((p) => p.practicePct != null || p.mockPct != null).length;
+  if (weeksWithData === 0) {
     return <p className="grid h-40 place-items-center text-center text-xs text-slate-400">No activity yet — practice and take a mock to start your trend.</p>;
   }
 
+  const lastIdx = (key: 'practicePct' | 'mockPct') => {
+    for (let i = pts.length - 1; i >= 0; i--) if (pts[i][key] != null) return i;
+    return -1;
+  };
+  const pLast = lastIdx('practicePct');
+  const mLast = lastIdx('mockPct');
+
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="w-full" role="img" aria-label="Weekly practice accuracy and mock score">
-      {[0, 25, 50, 75, 100].map((g) => (
-        <g key={g}>
-          <line x1={pad.l} x2={w - pad.r} y1={y(g)} y2={y(g)} stroke="#eef2f7" strokeWidth={1} />
-          <text x={pad.l - 6} y={y(g) + 3} textAnchor="end" className="fill-slate-300" style={{ fontSize: 8 }}>{g}</text>
-        </g>
-      ))}
-      {/* mock score */}
-      <path d={path('mockPct')} fill="none" stroke="#f37021" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-      {pts.map((p, i) => p.mockPct != null ? <circle key={`m${i}`} cx={x(i)} cy={y(p.mockPct)} r={2.5} fill="#f37021" /> : null)}
-      {/* practice accuracy */}
-      <path d={path('practicePct')} fill="none" stroke="#6366f1" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-      {pts.map((p, i) => p.practicePct != null ? <circle key={`p${i}`} cx={x(i)} cy={y(p.practicePct)} r={2.5} fill="#6366f1" /> : null)}
-      {/* sparse x labels (first / last) */}
-      {n > 0 ? <text x={x(0)} y={h - 4} textAnchor="start" className="fill-slate-300" style={{ fontSize: 8 }}>{label(pts[0].weekStart)}</text> : null}
-      {n > 1 ? <text x={x(n - 1)} y={h - 4} textAnchor="end" className="fill-slate-300" style={{ fontSize: 8 }}>{label(pts[n - 1].weekStart)}</text> : null}
-    </svg>
+    <>
+      <svg viewBox={`0 0 ${w} ${h}`} className="w-full" role="img" aria-label="Weekly practice accuracy and mock score">
+        {[0, 25, 50, 75, 100].map((g) => (
+          <g key={g}>
+            <line x1={pad.l} x2={w - pad.r} y1={y(g)} y2={y(g)} stroke="#eef2f7" strokeWidth={1} />
+            <text x={pad.l - 6} y={y(g) + 3} textAnchor="end" className="fill-slate-300" style={{ fontSize: 8 }}>{g}</text>
+          </g>
+        ))}
+        {/* mock score */}
+        <path d={path('mockPct')} fill="none" stroke="#f37021" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+        {pts.map((p, i) => p.mockPct != null ? <circle key={`m${i}`} cx={x(i)} cy={y(p.mockPct)} r={2.5} fill="#f37021" /> : null)}
+        {/* practice accuracy */}
+        <path d={path('practicePct')} fill="none" stroke="#6366f1" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+        {pts.map((p, i) => p.practicePct != null ? <circle key={`p${i}`} cx={x(i)} cy={y(p.practicePct)} r={2.5} fill="#6366f1" /> : null)}
+        {/* value labels on the latest point of each series */}
+        {pLast >= 0 ? (
+          <text x={x(pLast) - 6} y={y(pts[pLast].practicePct as number) - 5} textAnchor="end" className="fill-indigo-500" style={{ fontSize: 9, fontWeight: 700 }}>{pts[pLast].practicePct}%</text>
+        ) : null}
+        {mLast >= 0 ? (
+          <text x={x(mLast) - 6} y={y(pts[mLast].mockPct as number) + 11} textAnchor="end" className="fill-[#f37021]" style={{ fontSize: 9, fontWeight: 700 }}>{pts[mLast].mockPct}%</text>
+        ) : null}
+        {/* sparse x labels (first / last) */}
+        {n > 0 ? <text x={x(0)} y={h - 4} textAnchor="start" className="fill-slate-300" style={{ fontSize: 8 }}>{label(pts[0].weekStart)}</text> : null}
+        {n > 1 ? <text x={x(n - 1)} y={h - 4} textAnchor="end" className="fill-slate-300" style={{ fontSize: 8 }}>{label(pts[n - 1].weekStart)}</text> : null}
+      </svg>
+      {weeksWithData < 2 ? (
+        <p className="mt-1 text-center text-[11px] text-slate-400">Your trend line fills in as you practise across more weeks.</p>
+      ) : null}
+    </>
   );
 }
 
