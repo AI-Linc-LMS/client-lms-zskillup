@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, CalendarDays, ShieldCheck, Sparkles, Target } from 'lucide-react';
+import { ArrowRight, CalendarDays, Rocket, ShieldCheck, Sparkles, Target } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { MockTestsCatalog } from '@/components/practice/MockTestsCatalog';
 import { MockHistory } from '@/components/practice/MockHistory';
@@ -48,8 +48,10 @@ export default function MockQuizPage() {
         <Reveal>
           <section>
             <header className="mb-5">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Practice</p>
-              <h2 className="mt-1 flex items-center gap-2 text-xl font-extrabold tracking-tight text-navy sm:text-2xl">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-orange-600 ring-1 ring-inset ring-orange-100">
+                <Rocket className="size-3.5" /> Practice
+              </span>
+              <h2 className="mt-2 flex items-center gap-2 text-xl font-extrabold tracking-tight text-navy sm:text-2xl">
                 <Target className="size-5 text-orange" /> Mock quizzes
               </h2>
             </header>
@@ -65,8 +67,10 @@ export default function MockQuizPage() {
         <Reveal>
           <section>
             <header className="mb-5">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Proctored</p>
-              <h2 className="mt-1 flex items-center gap-2 text-xl font-extrabold tracking-tight text-navy sm:text-2xl">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-orange-600 ring-1 ring-inset ring-orange-100">
+                <ShieldCheck className="size-3.5" /> Proctored
+              </span>
+              <h2 className="mt-2 flex items-center gap-2 text-xl font-extrabold tracking-tight text-navy sm:text-2xl">
                 <ShieldCheck className="size-5 text-orange" /> Company assessments
               </h2>
             </header>

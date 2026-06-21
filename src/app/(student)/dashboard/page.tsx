@@ -29,8 +29,8 @@ export default function StudentDashboardPage() {
 
       <div className="grid gap-6 xl:grid-cols-[1fr_20rem]">
         <div className="space-y-6">
-          <LiveAssessmentBanner />
           <AiBriefingHero />
+          <LiveAssessmentBanner />
           <AuroraStats />
           <Reveal>
             <ReadinessPanel />

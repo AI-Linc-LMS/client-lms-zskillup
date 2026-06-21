@@ -6,7 +6,6 @@ import { motion, useReducedMotion } from 'framer-motion';
 import {
   ArrowRight,
   BookOpen,
-  CheckCircle2,
   ClipboardList,
   Code2,
   Gauge,
@@ -155,10 +154,10 @@ export function CompanyHub({ content }: { content: HubContent }) {
               <div className="space-y-4">
                 <div>
                   <SectionLabel icon={Code2}>Coding problems</SectionLabel>
-                  <h2 className="mt-2 text-xl font-extrabold tracking-tight text-navy">
+                  <h2 className="mt-3 text-lg font-extrabold tracking-tight text-navy sm:text-xl">
                     {content.company.name} coding questions
                   </h2>
-                  <p className="mt-1 text-sm leading-relaxed text-slate-500">
+                  <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
                     Problems this company has asked — solve in your language, run the samples, then
                     submit to grade against the full test set and earn XP.
                   </p>
@@ -174,10 +173,10 @@ export function CompanyHub({ content }: { content: HubContent }) {
           {/* Register for this drive (assessment lifecycle) */}
           <CompanyRegisterCard companySlug={c.slug} companyName={c.name} />
 
-          {/* Quick stats — crisp white Aurora card */}
-          <AuroraCard glow="#2563eb">
+          {/* Quick stats — standout violet Aurora card */}
+          <AuroraCard glow="#7c3aed">
             <SectionLabel icon={Gauge}>Quick stats</SectionLabel>
-            <div className="mt-3 divide-y divide-slate-100">
+            <div className="mt-4 grid grid-cols-2 gap-3">
               <Stat label="Total rounds" value={String(roundCounts(content).totalRounds)} />
               <Stat label="Type of exam" value={content.quickStats.examType} />
               <Stat label="Negative marking" value={content.quickStats.negativeMarking} />
@@ -393,17 +392,17 @@ function ReadinessRing({ pct, raw, reduce }: { pct: number | null; raw: string; 
 /* Shared building blocks                                                       */
 /* ────────────────────────────────────────────────────────────────────────── */
 
-/** Tiny uppercase section eyebrow. */
+/** Violet eyebrow pill — shared section label for the employer hub. */
 function SectionLabel({ icon: Icon, children }: { icon?: typeof Gauge; children: React.ReactNode }) {
   return (
-    <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-violet-600 ring-1 ring-inset ring-violet-100">
       {Icon ? <Icon className="size-3.5" aria-hidden="true" /> : null}
       {children}
-    </p>
+    </span>
   );
 }
 
-/** Crisp white Aurora card — gradient wash + colored glow on hover-lift. */
+/** Standout white Aurora card — violet-tinted shadow + colored glow on hover-lift. */
 function AuroraCard({
   glow,
   className,
@@ -416,17 +415,22 @@ function AuroraCard({
   return (
     <section
       className={cn(
-        'group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_8px_30px_-18px_rgba(15,23,42,0.35)] transition-shadow hover:shadow-[0_18px_50px_-24px_rgba(15,23,42,0.45)] sm:p-6',
+        'group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(124,58,237,0.22)] transition-shadow hover:shadow-[0_24px_60px_-28px_rgba(124,58,237,0.35)] sm:p-7',
         className,
       )}
     >
+      {/* violet accent rail */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-50/70 via-transparent to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500/0 via-violet-500/70 to-violet-500/0"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-10 -top-12 size-32 rounded-full opacity-[0.08] blur-2xl transition-opacity duration-500 group-hover:opacity-20"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-br from-violet-50/60 via-transparent to-transparent"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-10 -top-12 size-36 rounded-full opacity-[0.1] blur-2xl transition-opacity duration-500 group-hover:opacity-25"
         style={{ background: glow }}
       />
       <div className="relative z-10">{children}</div>
@@ -434,26 +438,25 @@ function AuroraCard({
   );
 }
 
-/** Intro line shared by the freemium tabs. */
-function TabIntro({ children }: { children: React.ReactNode }) {
-  return (
-    <Reveal>
-      <p className="text-sm leading-relaxed text-slate-500">{children}</p>
-    </Reveal>
-  );
-}
-
 function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className="flex items-center justify-between gap-3 py-2.5 text-sm">
-      <span className="text-slate-500">{label}</span>
-      {accent ? (
-        <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-extrabold text-emerald-600 ring-1 ring-emerald-200">
-          {value}
-        </span>
-      ) : (
-        <span className="text-right font-semibold text-navy">{value}</span>
+    <div
+      className={cn(
+        'flex flex-col gap-1 rounded-2xl border p-3.5',
+        accent
+          ? 'border-violet-200 bg-violet-50/70'
+          : 'border-slate-200/80 bg-slate-50/60',
       )}
+    >
+      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</span>
+      <span
+        className={cn(
+          'text-2xl font-black leading-none tracking-tight tabular-nums',
+          accent ? 'text-violet-600' : 'text-navy',
+        )}
+      >
+        {value}
+      </span>
     </div>
   );
 }
@@ -466,27 +469,27 @@ function OverviewTab({ content }: { content: HubContent }) {
   return (
     <div className="space-y-6">
       <Reveal>
-        <AuroraCard glow="#f37021">
+        <AuroraCard glow="#7c3aed">
           <SectionLabel icon={Sparkles}>Hiring process 2026</SectionLabel>
-          <h2 className="mt-2 text-xl font-extrabold tracking-tight text-navy">
+          <h2 className="mt-3 text-lg font-extrabold tracking-tight text-navy sm:text-xl">
             {content.company.name} hiring process
           </h2>
-          <p className="mt-2 text-sm leading-relaxed text-slate-500">{content.overview.summary}</p>
+          <p className="mt-2 text-sm leading-relaxed text-slate-500 sm:text-base">{content.overview.summary}</p>
 
           {/* Process timeline */}
           <ol className="relative mt-6 space-y-5">
             <span
               aria-hidden
-              className="absolute left-[15px] top-2 bottom-2 w-px bg-gradient-to-b from-orange/40 via-slate-200 to-transparent"
+              className="absolute left-[15px] top-2 bottom-2 w-px bg-gradient-to-b from-violet-400/50 via-slate-200 to-transparent"
             />
             {content.overview.process.map((p, i) => (
               <li key={p.stage} className="relative flex gap-4">
-                <span className="relative z-10 grid size-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-xs font-extrabold text-white shadow-[0_8px_18px_-8px_rgba(243,112,33,0.8)] ring-4 ring-white">
+                <span className="relative z-10 grid size-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-violet-500 to-violet-600 text-xs font-extrabold text-white shadow-[0_8px_18px_-8px_rgba(124,58,237,0.8)] ring-4 ring-white">
                   {i + 1}
                 </span>
                 <div className="pt-0.5">
-                  <p className="text-sm font-bold text-navy">{p.stage}</p>
-                  <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{p.detail}</p>
+                  <p className="text-sm font-bold text-navy sm:text-base">{p.stage}</p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-slate-500 sm:text-sm">{p.detail}</p>
                 </div>
               </li>
             ))}
@@ -500,12 +503,12 @@ function OverviewTab({ content }: { content: HubContent }) {
 function SyllabusTab({ content }: { content: HubContent }) {
   return (
     <Reveal>
-      <AuroraCard glow="#6d3bf5">
+      <AuroraCard glow="#7c3aed">
         <SectionLabel icon={ClipboardList}>Syllabus 2026</SectionLabel>
-        <h2 className="mt-2 text-xl font-extrabold tracking-tight text-navy">
+        <h2 className="mt-3 text-lg font-extrabold tracking-tight text-navy sm:text-xl">
           {content.company.name} syllabus
         </h2>
-        <p className="mt-1 text-sm leading-relaxed text-slate-500">
+        <p className="mt-2 text-sm leading-relaxed text-slate-500 sm:text-base">
           The drive is usually structured in {roundCounts(content).onlineStages} online stages before
           interviews, then a final interview round.
         </p>
@@ -520,24 +523,24 @@ function SyllabusTab({ content }: { content: HubContent }) {
                   whileHover={{ y: -2 }}
                   transition={{ duration: 0.2 }}
                   className={cn(
-                    'group/row relative flex items-center gap-4 overflow-hidden rounded-2xl border p-3.5 transition-colors',
+                    'group/row relative flex items-center gap-4 overflow-hidden rounded-2xl border p-4 transition-colors',
                     final
                       ? 'border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50'
-                      : 'border-slate-200/80 bg-white hover:border-slate-300',
+                      : 'border-slate-200/80 bg-white hover:border-violet-300 hover:bg-violet-50/40',
                   )}
                 >
                   <span
                     className={cn(
-                      'grid size-9 shrink-0 place-items-center rounded-xl text-xs font-extrabold text-white shadow-sm',
+                      'grid size-10 shrink-0 place-items-center rounded-xl text-sm font-extrabold text-white shadow-sm',
                       final
                         ? 'bg-gradient-to-br from-emerald-500 to-emerald-600'
-                        : 'bg-gradient-to-br from-[#7c6cf5] to-[#5b3bf5]',
+                        : 'bg-gradient-to-br from-violet-500 to-violet-600',
                     )}
                   >
                     {i + 1}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-navy">{r.round}</p>
+                    <p className="text-sm font-bold text-navy sm:text-base">{r.round}</p>
                     <p className="mt-0.5 text-xs text-slate-500">{r.info}</p>
                   </div>
                   <span
@@ -545,7 +548,7 @@ function SyllabusTab({ content }: { content: HubContent }) {
                       'shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1',
                       final
                         ? 'bg-emerald-100 text-emerald-700 ring-emerald-200'
-                        : 'bg-slate-100 text-slate-600 ring-slate-200',
+                        : 'bg-violet-100 text-violet-700 ring-violet-200',
                     )}
                   >
                     {r.type}
@@ -557,14 +560,5 @@ function SyllabusTab({ content }: { content: HubContent }) {
         </Stagger>
       </AuroraCard>
     </Reveal>
-  );
-}
-
-
-function FreeBadge() {
-  return (
-    <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-600 ring-1 ring-emerald-200">
-      Free
-    </span>
   );
 }

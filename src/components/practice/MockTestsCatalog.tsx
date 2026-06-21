@@ -50,11 +50,11 @@ export function MockTestsCatalog({
 
   if (loading) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {[0, 1, 2].map((k) => (
           <div
             key={k}
-            className="h-44 animate-pulse rounded-2xl border border-slate-200/80 bg-white shadow-sm"
+            className="h-44 animate-pulse rounded-3xl border border-slate-200/80 bg-white shadow-sm"
           >
             <div className="flex items-start gap-3 p-6">
               <div className="size-12 rounded-2xl bg-slate-100" />
@@ -98,7 +98,7 @@ export function MockTestsCatalog({
   }
 
   return (
-    <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <Stagger className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {mocks.map((mock) => (
         <StaggerItem key={mock.id} className="h-full">
           <MockCard mock={mock} />
@@ -122,7 +122,12 @@ function MockCard({ mock }: { mock: ApiMockSummary }) {
 
   return (
     <motion.div whileHover={{ y: -3 }} transition={{ duration: 0.25 }} className="h-full">
-      <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition-shadow duration-300 hover:shadow-[0_18px_44px_-24px_rgba(15,23,42,0.5)]">
+      <div className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_-30px_rgba(243,112,33,0.25)] transition-all hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-md">
+        {/* orange accent top-bar */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#f7a14e] to-[#f37021]"
+        />
         {/* colored glow blob — intensifies on hover */}
         <div
           aria-hidden
@@ -148,7 +153,7 @@ function MockCard({ mock }: { mock: ApiMockSummary }) {
                 {adaptive ? <Sparkles className="size-2.5" /> : <Timer className="size-2.5" />}
                 {adaptive ? 'Mock Quiz' : 'Assessment'}
               </span>
-              <p className="mt-1.5 line-clamp-2 text-[15px] font-bold leading-snug text-navy">{mock.title}</p>
+              <p className="mt-1.5 line-clamp-2 text-base font-bold leading-snug text-navy">{mock.title}</p>
             </div>
           </div>
 
@@ -191,7 +196,7 @@ function MiniStat({ icon: Icon, value, label }: { icon: typeof FileText; value: 
   return (
     <div className="rounded-xl border border-slate-200/70 bg-slate-50/70 px-2 py-2.5 text-center">
       <Icon className="mx-auto size-4 text-slate-400" aria-hidden="true" />
-      <p className="mt-1 text-base font-extrabold leading-none tabular-nums text-navy">{value}</p>
+      <p className="mt-1 text-lg font-extrabold leading-none tabular-nums text-navy">{value}</p>
       <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
     </div>
   );

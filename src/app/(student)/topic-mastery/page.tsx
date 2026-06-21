@@ -6,9 +6,11 @@ import {
   Brain,
   Calculator,
   Code2,
+  Compass,
   Cpu,
   GraduationCap,
   Layers,
+  ListTree,
   Sparkles,
 } from 'lucide-react';
 import { listTopics, listTopicsWithCounts, type ApiTopic } from '@/lib/api/catalog';
@@ -115,8 +117,10 @@ export default async function TopicMasteryPage() {
                 <GraduationCap className="size-5" />
               </span>
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-white/50">Topic mastery</p>
-                <h1 className="text-2xl font-black tracking-tight sm:text-[28px]">Drill any topic, any time</h1>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-white/70 ring-1 ring-inset ring-white/15">
+                  <Compass className="size-3.5" /> Topic mastery
+                </span>
+                <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Drill any topic, any time</h1>
               </div>
             </div>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/60">
@@ -139,8 +143,11 @@ export default async function TopicMasteryPage() {
       {/* ── Category cards ────────────────────────────────────────────────── */}
       {roots.length > 0 ? (
         <div>
-          <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Browse by category</p>
-          <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-emerald-600 ring-1 ring-inset ring-emerald-100">
+            <Compass className="size-3.5" /> Explore the catalog
+          </span>
+          <h2 className="mb-5 mt-2 text-lg font-extrabold tracking-tight text-navy sm:text-xl">Browse by category</h2>
+          <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {roots.map((root) => {
               const Icon = root.icon;
               const a = ACCENT_CLASS[root.accent];
@@ -148,20 +155,24 @@ export default async function TopicMasteryPage() {
                 <StaggerItem key={root.id} className="h-full">
                   <Link
                     href={`/dashboard/quiz/adaptive?topic=${encodeURIComponent(root.slug)}`}
-                    className="group flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+                    className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(16,185,129,0.25)] transition-all hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md"
                   >
-                    <div className="flex items-center justify-between">
-                      <span className={`grid size-11 place-items-center rounded-xl ring-1 ${a.tile}`}>
-                        <Icon className="size-5" aria-hidden="true" />
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute -right-10 -top-12 size-32 rounded-full bg-emerald-400/10 blur-2xl transition-opacity duration-500 group-hover:opacity-60"
+                    />
+                    <div className="relative flex items-center justify-between">
+                      <span className={`grid size-12 place-items-center rounded-2xl ring-1 ${a.tile}`}>
+                        <Icon className="size-6" aria-hidden="true" />
                       </span>
-                      <ArrowRight className="size-4 text-slate-300 transition-all group-hover:translate-x-0.5 group-hover:text-navy" />
+                      <ArrowRight className="size-4 text-slate-300 transition-all group-hover:translate-x-0.5 group-hover:text-emerald-600" />
                     </div>
-                    <p className="mt-4 font-bold leading-snug text-navy">{root.name}</p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="relative mt-4 text-base font-bold leading-snug text-navy">{root.name}</p>
+                    <p className="relative mt-1 text-xs text-slate-500">
                       {root.children.length} topic{root.children.length === 1 ? '' : 's'}
                       {root.questionCount ? ` · ${root.questionCount.toLocaleString()} questions` : ''}
                     </p>
-                    <span className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-orange opacity-0 transition-opacity group-hover:opacity-100">
+                    <span className="relative mt-4 inline-flex items-center gap-1 text-xs font-bold text-emerald-600 opacity-0 transition-opacity group-hover:opacity-100">
                       Start practice →
                     </span>
                   </Link>
@@ -171,45 +182,61 @@ export default async function TopicMasteryPage() {
           </Stagger>
         </div>
       ) : (
-        <div className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm">
+        <div className="rounded-3xl border border-slate-200/80 bg-white p-6 text-sm text-slate-500 shadow-[0_18px_50px_-30px_rgba(16,185,129,0.25)]">
           Topic catalog is not available right now. Try refreshing — the backend may be warming up.
         </div>
       )}
 
       {/* ── Subtopic groups (one structured card per category) ────────────── */}
-      {roots.map((root) =>
-        root.children.length > 0 ? (
-          <Reveal key={root.id}>
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-              <div className="mb-4 flex items-center gap-3">
-                <span className={`grid size-9 place-items-center rounded-lg ring-1 ${ACCENT_CLASS[root.accent].tile}`}>
-                  <root.icon className="size-4" aria-hidden="true" />
-                </span>
-                <div>
-                  <p className="text-sm font-bold text-navy">{root.name}</p>
-                  <p className="text-[11px] text-slate-400">Pick a subtopic to drill</p>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {root.children.map((child) => (
-                  <Link
-                    key={child.id}
-                    href={`/dashboard/quiz/adaptive?topic=${encodeURIComponent(child.slug)}`}
-                    className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-navy transition-colors ${ACCENT_CLASS[root.accent].chip}`}
-                  >
-                    {child.name}
-                    {child.questionCount ? (
-                      <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500">
-                        {child.questionCount}
+      {roots.length > 0 ? (
+        <div className="space-y-5">
+          <div>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-emerald-600 ring-1 ring-inset ring-emerald-100">
+              <ListTree className="size-3.5" /> Drill down
+            </span>
+            <h2 className="mt-2 text-lg font-extrabold tracking-tight text-navy sm:text-xl">Pick a subtopic</h2>
+          </div>
+          <div className="grid gap-4 lg:grid-cols-2">
+            {roots.map((root) =>
+              root.children.length > 0 ? (
+                <Reveal key={root.id} className="h-full">
+                  <div className="relative h-full overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(16,185,129,0.25)]">
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute -right-12 -top-14 size-40 rounded-full bg-emerald-400/10 blur-2xl"
+                    />
+                    <div className="relative mb-4 flex items-center gap-3">
+                      <span className={`grid size-11 place-items-center rounded-2xl ring-1 ${ACCENT_CLASS[root.accent].tile}`}>
+                        <root.icon className="size-5" aria-hidden="true" />
                       </span>
-                    ) : null}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </Reveal>
-        ) : null,
-      )}
+                      <div>
+                        <p className="text-base font-bold text-navy">{root.name}</p>
+                        <p className="text-[11px] text-slate-400">Pick a subtopic to drill</p>
+                      </div>
+                    </div>
+                    <div className="relative flex flex-wrap gap-2">
+                      {root.children.map((child) => (
+                        <Link
+                          key={child.id}
+                          href={`/dashboard/quiz/adaptive?topic=${encodeURIComponent(child.slug)}`}
+                          className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors ${ACCENT_CLASS[root.accent].chip}`}
+                        >
+                          {child.name}
+                          {child.questionCount ? (
+                            <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500">
+                              {child.questionCount}
+                            </span>
+                          ) : null}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </Reveal>
+              ) : null,
+            )}
+          </div>
+        </div>
+      ) : null}
 
       {/* Live per-topic accuracy (weak + recently practised) */}
       <TopicAccuracyPanels />

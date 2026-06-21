@@ -75,19 +75,24 @@ function bandOf(pct: number): Band {
   return 'weak';
 }
 
-/** Tiny uppercase section eyebrow shared by both panels. */
+/** Emerald eyebrow pill + bold section heading shared by both panels. */
 function SectionLabel({
   icon: Icon,
+  eyebrow,
   children,
 }: {
   icon: typeof Target;
+  eyebrow: string;
   children: React.ReactNode;
 }) {
   return (
-    <p className="mb-4 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-      <Icon className="size-3.5" aria-hidden="true" />
-      {children}
-    </p>
+    <div className="mb-5">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-emerald-600 ring-1 ring-inset ring-emerald-100">
+        <Icon className="size-3.5" aria-hidden="true" />
+        {eyebrow}
+      </span>
+      <h2 className="mt-2 text-lg font-extrabold tracking-tight text-navy sm:text-xl">{children}</h2>
+    </div>
   );
 }
 
@@ -155,7 +160,7 @@ function TopicCard({
     <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }} className="h-full">
       <div
         className={cn(
-          'group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-white p-5 shadow-[0_8px_30px_-18px_rgba(15,23,42,0.35)] transition-shadow duration-300 hover:shadow-[0_22px_55px_-26px_rgba(15,23,42,0.5)]',
+          'group relative flex h-full flex-col overflow-hidden rounded-3xl border bg-white p-6 shadow-[0_18px_50px_-30px_rgba(16,185,129,0.25)] transition-shadow duration-300 hover:shadow-[0_22px_55px_-26px_rgba(15,23,42,0.5)]',
           theme.ring,
         )}
       >
@@ -252,7 +257,7 @@ export function TopicAccuracyPanels() {
         {[0, 1, 2].map((k) => (
           <div
             key={k}
-            className="h-44 animate-pulse rounded-2xl border border-slate-200/80 bg-white shadow-[0_8px_30px_-18px_rgba(15,23,42,0.35)]"
+            className="h-48 animate-pulse rounded-3xl border border-slate-200/80 bg-white shadow-[0_18px_50px_-30px_rgba(16,185,129,0.25)]"
           />
         ))}
       </div>
@@ -266,10 +271,10 @@ export function TopicAccuracyPanels() {
     <>
       {/* Weak topics */}
       <div>
-        <SectionLabel icon={TrendingDown}>Your Weak Topics</SectionLabel>
+        <SectionLabel icon={TrendingDown} eyebrow="Focus here">Your weak topics</SectionLabel>
         {weak.length === 0 ? (
           <Reveal>
-            <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-7 shadow-[0_8px_30px_-18px_rgba(15,23,42,0.35)]">
+            <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-7 shadow-[0_18px_50px_-30px_rgba(16,185,129,0.25)]">
               {/* layered depth even in the empty state */}
               <div
                 aria-hidden
@@ -320,7 +325,7 @@ export function TopicAccuracyPanels() {
       {/* Recently practised */}
       {recent.length > 0 ? (
         <div>
-          <SectionLabel icon={Target}>Continue Where You Left Off</SectionLabel>
+          <SectionLabel icon={Target} eyebrow="Keep going">Continue where you left off</SectionLabel>
           <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {recent.map((topic) => (
               <StaggerItem key={topic.topicSlug} className="h-full">
