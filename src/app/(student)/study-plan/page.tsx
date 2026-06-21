@@ -26,7 +26,7 @@ export default function StudyPlanPage() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="w-full">
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Study Plan' }]} />
 
       {/* Hero */}
