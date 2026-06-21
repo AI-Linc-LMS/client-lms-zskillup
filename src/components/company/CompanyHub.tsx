@@ -176,7 +176,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
           {/* Quick stats — standout violet Aurora card */}
           <AuroraCard glow="#7c3aed">
             <SectionLabel icon={Gauge}>Quick stats</SectionLabel>
-            <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="mt-4 space-y-2.5">
               <Stat label="Total rounds" value={String(roundCounts(content).totalRounds)} />
               <Stat label="Type of exam" value={content.quickStats.examType} />
               <Stat label="Negative marking" value={content.quickStats.negativeMarking} />
@@ -450,17 +450,17 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
   return (
     <div
       className={cn(
-        'flex min-w-0 flex-col gap-1.5 rounded-2xl border p-3.5',
+        'flex items-center justify-between gap-4 rounded-2xl border p-4',
         accent ? 'border-violet-200 bg-violet-50/70' : 'border-slate-200/80 bg-slate-50/60',
       )}
     >
-      <span className="flex min-h-[1.75rem] items-start text-[10px] font-bold uppercase leading-tight tracking-wider text-slate-400">
+      <span className="w-28 shrink-0 text-[11px] font-bold uppercase leading-tight tracking-wider text-slate-400">
         {label}
       </span>
       <span
         className={cn(
-          'break-words leading-snug',
-          isShort ? 'text-2xl font-black tracking-tight tabular-nums' : 'text-base font-extrabold',
+          'min-w-0 flex-1 break-words text-right leading-snug',
+          isShort ? 'text-2xl font-black tracking-tight tabular-nums' : 'text-[15px] font-bold',
           accent ? 'text-violet-600' : 'text-navy',
         )}
       >
