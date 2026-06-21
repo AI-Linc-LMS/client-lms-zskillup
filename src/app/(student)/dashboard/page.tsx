@@ -36,21 +36,31 @@ export default function StudentDashboardPage() {
             <ReadinessPanel />
           </Reveal>
           <Reveal>
-            <DashboardCompanies />
-          </Reveal>
-          <TodaysTip />
-          <Reveal>
-            <DailyChallenge />
-          </Reveal>
-          <Reveal>
             <DailyQuest />
           </Reveal>
           <Reveal>
-            <QuickAptitude />
+            <DashboardCompanies />
           </Reveal>
-          <Reveal>
-            <CodingPractice />
-          </Reveal>
+
+          {/* Two independent vertical columns (masonry feel) so the activity
+              cards read as columns, not one long horizontal stack. */}
+          <div className="grid items-start gap-6 lg:grid-cols-2">
+            <div className="space-y-6">
+              <TodaysTip />
+              <Reveal>
+                <QuickAptitude />
+              </Reveal>
+            </div>
+            <div className="space-y-6">
+              <Reveal>
+                <DailyChallenge />
+              </Reveal>
+              <Reveal>
+                <CodingPractice />
+              </Reveal>
+            </div>
+          </div>
+
           <Reveal>
             <Challenges />
           </Reveal>
