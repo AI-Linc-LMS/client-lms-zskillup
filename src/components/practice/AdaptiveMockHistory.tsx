@@ -105,7 +105,7 @@ export function AdaptiveMockHistory() {
                       <Target className="size-5" aria-hidden="true" />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-bold text-navy">Mock Quiz</p>
+                      <p className="truncate text-sm font-bold text-navy">{s.title}</p>
                       <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400">
                         <span className="flex items-center gap-1">
                           <FileText className="size-3.5" aria-hidden="true" />

@@ -167,15 +167,20 @@ export function AccuracyDonut({ accuracy, size = 132 }: { accuracy: number; size
 const prettySkill = (s: string) =>
   (s || '').replace(/[-_]/g, ' ').replace(/section \d+\s*/i, '').replace(/\b\w/g, (m) => m.toUpperCase()).trim();
 
-export function SkillRadar({ skills: allSkills, size = 260 }: { skills: SkillMastery[]; size?: number }) {
+export function SkillRadar({ skills: allSkills, size = 360 }: { skills: SkillMastery[]; size?: number }) {
   // A radar is only legible up to ~8 spokes — show the strongest skills here;
-  // the full list lives in the mastery bars beside it.
+  // the full list lives in the mastery bars below it.
   const skills = [...allSkills].sort((a, b) => b.masteryPct - a.masteryPct).slice(0, 8);
   const n = skills.length;
   if (n < 3) return null;
-  const cx = size / 2;
-  const cy = size / 2;
-  const R = size / 2 - 56;
+  // Generous side/vertical padding so FULL skill names render untruncated.
+  const padX = 116;
+  const padY = 48;
+  const vbW = size + padX * 2;
+  const vbH = size + padY * 2;
+  const cx = vbW / 2;
+  const cy = vbH / 2;
+  const R = size / 2 - 6;
   const angle = (i: number) => -Math.PI / 2 + (i * 2 * Math.PI) / n;
   const pt = (i: number, radius: number) => ({
     x: cx + radius * Math.cos(angle(i)),
@@ -191,7 +196,7 @@ export function SkillRadar({ skills: allSkills, size = 260 }: { skills: SkillMas
   const dataPolygon = dataPoints.map((p) => `${p.x},${p.y}`).join(' ');
 
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="mx-auto overflow-visible">
+    <svg viewBox={`0 0 ${vbW} ${vbH}`} className="mx-auto w-full max-w-[600px] overflow-visible">
       <defs>
         <linearGradient id="radarFill" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#6366f1" stopOpacity="0.45" />
@@ -224,21 +229,21 @@ export function SkillRadar({ skills: allSkills, size = 260 }: { skills: SkillMas
           key={i}
           cx={p.x}
           cy={p.y}
-          r={4}
+          r={5}
           fill="#fff"
           stroke="#6366f1"
-          strokeWidth={2}
+          strokeWidth={2.5}
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.3 + i * 0.06, type: 'spring', stiffness: 300 }}
         />
       ))}
-      {/* labels — name on top, % beneath, so long skill names don't overflow */}
+      {/* labels — FULL skill name on top, % beneath; the side padding gives
+          room so long names ("Boats & Streams") are never truncated. */}
       {skills.map((s, i) => {
-        const p = pt(i, R + 14);
-        const anchor = Math.abs(p.x - cx) < 8 ? 'middle' : p.x > cx ? 'start' : 'end';
+        const p = pt(i, R + 20);
+        const anchor = Math.abs(p.x - cx) < 10 ? 'middle' : p.x > cx ? 'start' : 'end';
         const name = prettySkill(s.skill);
-        const short = name.length > 11 ? `${name.slice(0, 10)}…` : name;
         return (
           <text
             key={s.skill}
@@ -246,10 +251,10 @@ export function SkillRadar({ skills: allSkills, size = 260 }: { skills: SkillMas
             y={p.y}
             textAnchor={anchor}
             dominantBaseline="middle"
-            className="fill-slate-500 text-[8px] font-semibold"
+            className="fill-slate-600 text-[11px] font-semibold"
           >
-            <tspan x={p.x} dy="-0.3em">{short}</tspan>
-            <tspan x={p.x} dy="1.05em" className="fill-navy font-bold">
+            <tspan x={p.x} dy="-0.35em">{name}</tspan>
+            <tspan x={p.x} dy="1.15em" className="fill-navy text-[12px] font-extrabold">
               {s.masteryPct}%
             </tspan>
           </text>

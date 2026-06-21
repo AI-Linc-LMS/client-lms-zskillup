@@ -204,16 +204,16 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
       <div className="mx-auto max-w-5xl space-y-6 px-5 py-6 sm:px-6">
         <Section title="Skill mastery" icon={Brain}>
           {results.skillMastery.length >= 3 ? (
-            <div className="mb-4 grid gap-4 lg:grid-cols-[300px_1fr]">
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            <div className="mb-4 space-y-4">
+              {/* Skill radar — its own prominent card so every skill + score is
+                  clearly visible (full names, no truncation). */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+                <p className="mb-2 text-center text-[11px] font-bold uppercase tracking-widest text-slate-400">
                   Skill radar
                 </p>
-                <SkillRadar skills={results.skillMastery} />
+                <SkillRadar skills={results.skillMastery} size={380} />
               </div>
-              <div className="min-w-0">
-                <SkillMasteryHeatmap skillMastery={results.skillMastery} />
-              </div>
+              <SkillMasteryHeatmap skillMastery={results.skillMastery} />
             </div>
           ) : (
             <SkillMasteryHeatmap skillMastery={results.skillMastery} />

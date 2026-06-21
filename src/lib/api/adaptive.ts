@@ -99,7 +99,8 @@ export interface AdaptiveHint {
 
 export interface AdaptiveSessionSummary {
   sessionId: string;
-  mockTestId: string;
+  mockTestId: string | null;
+  title: string;
   status: string;
   questionCount: number;
   startedAt: string;

@@ -119,7 +119,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="w-full">
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Profile' }]} />
 
       {/* ── Hero header ──────────────────────────────────────────────────── */}
