@@ -450,22 +450,20 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
   return (
     <div
       className={cn(
-        'flex items-center justify-between gap-4 rounded-2xl border p-4',
+        'rounded-2xl border p-4',
         accent ? 'border-violet-200 bg-violet-50/70' : 'border-slate-200/80 bg-slate-50/60',
       )}
     >
-      <span className="w-28 shrink-0 text-[11px] font-bold uppercase leading-tight tracking-wider text-slate-400">
-        {label}
-      </span>
-      <span
+      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
+      <p
         className={cn(
-          'min-w-0 flex-1 break-words text-right leading-snug',
+          'mt-1.5 break-words leading-snug',
           isShort ? 'text-2xl font-black tracking-tight tabular-nums' : 'text-[15px] font-bold',
           accent ? 'text-violet-600' : 'text-navy',
         )}
       >
         {value}
-      </span>
+      </p>
     </div>
   );
 }

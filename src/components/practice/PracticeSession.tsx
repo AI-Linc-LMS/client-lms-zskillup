@@ -15,6 +15,7 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PyqTag } from '@/components/practice/PyqTag';
 import { formatDuration } from '@/lib/format';
 import { DIFFICULTY_RING } from '@/lib/ui-maps';
 import { Button } from '@/components/ui/button';
@@ -310,6 +311,7 @@ export function PracticeSession({
 
       {/* Question card */}
       <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <PyqTag companyIds={current.companyTags.map((t) => t.companyId)} years={current.yearTags ?? []} className="mb-2" />
         <p className="text-base font-semibold leading-relaxed text-navy">{current.stem}</p>
 
         <div className="mt-5 space-y-2.5">

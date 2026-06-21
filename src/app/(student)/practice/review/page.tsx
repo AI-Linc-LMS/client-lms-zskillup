@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Check, Loader2, RefreshCw, Sparkles, X } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { cn } from '@/lib/utils';
+import { PyqTag } from '@/components/practice/PyqTag';
 import { submitPracticeAttempt, type ApiAttemptResult, type ApiQuestion } from '@/lib/api/practice';
 import { getReviewDue } from '@/lib/api/study';
 
@@ -117,7 +118,8 @@ export default function ReviewPage() {
               </span>
               <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold tabular-nums text-slate-500">{idx + 1} / {questions.length}</span>
             </div>
-            <p className="mt-3 text-lg font-bold leading-relaxed text-navy">{q.stem}</p>
+            <PyqTag companyIds={q.companyTags.map((t) => t.companyId)} years={q.yearTags ?? []} className="mt-3" />
+            <p className="mt-2 text-lg font-bold leading-relaxed text-navy">{q.stem}</p>
             {multi ? <p className="mt-1 text-xs text-slate-400">Select all that apply.</p> : null}
 
             <div className="mt-4 space-y-2.5">

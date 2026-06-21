@@ -26,6 +26,8 @@ export interface ApiQuestion {
    *  topicId/companyId, which never matched the wire shape. */
   subtopicId: string;
   companyTags: ApiQuestionCompanyTag[];
+  /** Years this question appeared as a PYQ (for the "asked in … · year" tag). */
+  yearTags?: number[];
   options: ApiQuestionOption[];
 }
 
