@@ -22,7 +22,7 @@ const ICONS = [Building2, ClipboardList, Brain];
 export function PracticeHub() {
   return (
     <section>
-      <h2 className="mb-4 text-lg font-bold text-navy">Practice hub</h2>
+      <h2 className="mb-4 text-lg font-extrabold tracking-tight text-navy sm:text-xl">Practice hub</h2>
       <div className="grid gap-4 md:grid-cols-3">
         {PRACTICE_HUB.map((card, i) => {
           const Icon = ICONS[i];
@@ -31,11 +31,11 @@ export function PracticeHub() {
             <article
               key={card.title}
               className={cn(
-                'flex flex-col rounded-xl border bg-white p-6 shadow-sm transition-shadow hover:shadow-md',
+                'flex flex-col rounded-3xl border bg-white p-6 shadow-[0_18px_50px_-30px_rgba(15,23,42,0.18)] transition-all hover:-translate-y-0.5 hover:shadow-md',
                 a.card,
               )}
             >
-              <span className={cn('grid size-11 place-items-center rounded-xl', a.tile)}>
+              <span className={cn('grid size-12 place-items-center rounded-2xl', a.tile)}>
                 <Icon className="size-5" aria-hidden="true" />
               </span>
               <h3 className="mt-4 text-base font-bold text-navy">{card.title}</h3>

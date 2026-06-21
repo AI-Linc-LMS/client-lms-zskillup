@@ -41,16 +41,17 @@ export function CodingPractice() {
     .slice(0, 3);
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+    <section className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(99,102,241,0.3)]">
+      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-400" />
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-12 -top-12 size-36 rounded-full bg-indigo-300/20 blur-2xl"
+        className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-indigo-300/25 blur-3xl"
       />
-      <div className="relative mb-3 flex items-center justify-between">
-        <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-indigo-500">
+      <div className="relative mb-4 flex items-center justify-between">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-indigo-600 ring-1 ring-inset ring-indigo-100">
           <Code2 className="size-3.5" /> Coding practice
-        </p>
-        <span className="text-[11px] font-semibold text-slate-400">
+        </span>
+        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold tabular-nums text-slate-500">
           {solved} / {problems.length} solved
         </span>
       </div>

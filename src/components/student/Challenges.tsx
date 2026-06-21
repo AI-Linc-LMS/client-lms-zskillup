@@ -38,15 +38,16 @@ export function Challenges() {
   if (list && list.length === 0) return null; // nothing authored yet
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+    <section className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(244,63,94,0.3)]">
       {reward ? <RewardOverlay summary={reward} onClose={() => setReward(null)} passed /> : null}
+      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-400" />
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-12 -top-12 size-36 rounded-full bg-rose-300/20 blur-2xl"
+        className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-rose-300/25 blur-3xl"
       />
-      <p className="relative mb-4 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-rose-500">
+      <span className="relative mb-4 inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-rose-600 ring-1 ring-inset ring-rose-100">
         <Swords className="size-3.5" /> Challenges
-      </p>
+      </span>
 
       {!list ? (
         <div className="flex items-center justify-center py-8">
