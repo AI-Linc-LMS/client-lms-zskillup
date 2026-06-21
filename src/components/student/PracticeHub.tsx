@@ -22,7 +22,7 @@ const ICONS = [Building2, ClipboardList, Brain];
 export function PracticeHub() {
   return (
     <section>
-      <h2 className="mb-4 text-lg font-extrabold tracking-tight text-navy sm:text-xl">Practice hub</h2>
+      <h2 className="mb-4 text-2xl font-black tracking-tight text-navy">Practice hub</h2>
       <div className="grid gap-4 md:grid-cols-3">
         {PRACTICE_HUB.map((card, i) => {
           const Icon = ICONS[i];

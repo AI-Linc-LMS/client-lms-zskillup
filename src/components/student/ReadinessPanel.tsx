@@ -135,9 +135,9 @@ export function ReadinessPanel({ compact = false }: { compact?: boolean }) {
         <span aria-hidden className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full opacity-25 blur-3xl" style={{ background: c }} />
         <span aria-hidden className="pointer-events-none absolute -bottom-20 left-1/4 size-56 rounded-full bg-[#2563eb]/20 blur-3xl" />
         <div className="relative flex items-center justify-between gap-2">
-          <span className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-white/50">
-            <Target className="size-4 text-[#ffb877]" /> Placement readiness
-          </span>
+          <h2 className="flex items-center gap-2 text-2xl font-black tracking-tight text-white">
+            <Target className="size-5 text-[#ffb877]" /> Placement readiness
+          </h2>
           <button
             type="button"
             onClick={() => setShowInfo((v) => !v)}
@@ -197,7 +197,7 @@ export function ReadinessPanel({ compact = false }: { compact?: boolean }) {
           {/* company readiness — one card per PUBLISHED company (logo + score) */}
           {companies.length ? (
             <div>
-              <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Company readiness</p>
+              <h3 className="mb-3 text-2xl font-black tracking-tight text-navy">Company readiness</h3>
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                 {companies.map((co) => {
                   const r = rdyBySlug.get(co.slug);

@@ -88,9 +88,9 @@ export function QuickAptitude() {
         className="pointer-events-none absolute -right-10 -top-10 size-36 rounded-full bg-violet-300/25 blur-3xl"
       />
       <div className="relative mb-5 flex items-center justify-between">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-violet-600 ring-1 ring-inset ring-violet-100">
-          <Zap className="size-3.5" /> Quick aptitude
-        </span>
+        <h3 className="flex items-center gap-2 text-2xl font-black tracking-tight text-navy">
+          <Zap className="size-5 text-violet-500" /> Quick aptitude
+        </h3>
         {questions && questions.length > 0 && !done ? (
           <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold tabular-nums text-slate-500">
             {idx + 1} / {questions.length}

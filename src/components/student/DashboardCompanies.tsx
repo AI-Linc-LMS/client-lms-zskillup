@@ -55,8 +55,8 @@ export function DashboardCompanies() {
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between">
-        <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-400">
-          <Building2 className="size-4 text-orange" /> Company drives
+        <h3 className="flex items-center gap-2 text-2xl font-black tracking-tight text-navy">
+          <Building2 className="size-5 text-orange" /> Company drives
         </h3>
         <Link href="/dashboard/company" className="flex items-center gap-1 text-xs font-bold text-orange hover:underline">
           All companies <ArrowUpRight className="size-3.5" />

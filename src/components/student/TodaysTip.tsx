@@ -89,11 +89,13 @@ export function TodaysTip() {
             <Icon className="size-6" />
           </motion.span>
           <div className="min-w-0 flex-1">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100/70 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-amber-700 ring-1 ring-inset ring-amber-200/70">
-              <Sparkles className="size-3" /> Today&apos;s tip
-              {tip.category ? <span className="text-amber-500">· {tip.category}</span> : null}
-            </span>
-            <h3 className="mt-2 text-xl font-black leading-snug text-navy">{tip.title}</h3>
+            <h3 className="flex items-center gap-2 text-2xl font-black tracking-tight text-navy">
+              <Sparkles className="size-5 text-amber-500" /> Today&apos;s tip
+            </h3>
+            <p className="mt-2 text-base font-bold leading-snug text-navy">
+              {tip.title}
+              {tip.category ? <span className="ml-2 align-middle text-[11px] font-bold uppercase tracking-wider text-amber-600">· {tip.category}</span> : null}
+            </p>
             <p className="mt-1.5 text-[15px] leading-relaxed text-slate-600">{tip.body}</p>
             {tip.ctaLabel && tip.ctaHref ? (
               <Link

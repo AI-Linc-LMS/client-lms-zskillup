@@ -45,9 +45,9 @@ export function Challenges() {
         aria-hidden
         className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-rose-300/25 blur-3xl"
       />
-      <span className="relative mb-4 inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-rose-600 ring-1 ring-inset ring-rose-100">
-        <Swords className="size-3.5" /> Challenges
-      </span>
+      <h3 className="relative mb-4 flex items-center gap-2 text-2xl font-black tracking-tight text-navy">
+        <Swords className="size-5 text-rose-500" /> Challenges
+      </h3>
 
       {!list ? (
         <div className="flex items-center justify-center py-8">

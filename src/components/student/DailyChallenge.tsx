@@ -110,9 +110,9 @@ export function DailyChallenge() {
         className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-sky-300/25 blur-3xl"
       />
       <div className="relative mb-4 flex items-center justify-between">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-sky-600 ring-1 ring-inset ring-sky-100">
-          <Calendar className="size-3.5" /> Today&apos;s challenge
-        </span>
+        <h3 className="flex items-center gap-2 text-2xl font-black tracking-tight text-navy">
+          <Calendar className="size-5 text-sky-500" /> Today&apos;s challenge
+        </h3>
         {started && !completed ? (
           <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold tabular-nums text-slate-500">
             {idx + 1} / {total}
