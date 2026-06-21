@@ -176,7 +176,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
           {/* Quick stats — standout violet Aurora card */}
           <AuroraCard glow="#7c3aed">
             <SectionLabel icon={Gauge}>Quick stats</SectionLabel>
-            <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="mt-4 grid grid-cols-2 items-start gap-3">
               <Stat label="Total rounds" value={String(roundCounts(content).totalRounds)} />
               <Stat label="Type of exam" value={content.quickStats.examType} />
               <Stat label="Negative marking" value={content.quickStats.negativeMarking} />
@@ -439,19 +439,25 @@ function AuroraCard({
 }
 
 function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  // Values range from short numbers ("6", "No", "60%") to long phrases
+  // ("InfyTQ / SE assessment + SP/DSE coding"). Scale the type to the content so
+  // short values read big & bold while long ones wrap cleanly instead of
+  // overflowing/clipping the tile.
+  const len = value.trim().length;
+  const isShort = len <= 6;
+  const sizeClass = isShort ? 'text-2xl font-black tracking-tight tabular-nums' : len <= 18 ? 'text-base font-extrabold' : 'text-sm font-bold';
   return (
     <div
       className={cn(
-        'flex flex-col gap-1 rounded-2xl border p-3.5',
-        accent
-          ? 'border-violet-200 bg-violet-50/70'
-          : 'border-slate-200/80 bg-slate-50/60',
+        'flex min-w-0 flex-col gap-1.5 rounded-2xl border p-3.5',
+        accent ? 'border-violet-200 bg-violet-50/70' : 'border-slate-200/80 bg-slate-50/60',
       )}
     >
       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</span>
       <span
         className={cn(
-          'text-2xl font-black leading-none tracking-tight tabular-nums',
+          'break-words leading-snug',
+          sizeClass,
           accent ? 'text-violet-600' : 'text-navy',
         )}
       >
