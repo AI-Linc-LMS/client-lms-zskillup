@@ -165,7 +165,8 @@ export function CompanyRegisterCard({
                 {phase === 'loading' ? (
                   <Loader2 className="size-4 animate-spin" />
                 ) : (
-                  <>Register now</>
+                  <>Register</>
+
                 )}
               </button>
             </>

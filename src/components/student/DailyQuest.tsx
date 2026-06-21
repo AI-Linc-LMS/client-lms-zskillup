@@ -41,10 +41,10 @@ export function DailyQuest() {
               TODAY&apos;S FOCUS
             </span>
             <div>
-              <p className="text-sm font-semibold text-[var(--color-ink)]">
+              <p className="text-lg font-extrabold text-[var(--color-ink)]">
                 Sharpen percentages — the most-tested NQT quant topic
               </p>
-              <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
+              <p className="mt-0.5 text-sm text-[var(--color-text-muted)]">
                 Server-graded questions with instant hints and step-by-step explanations.
               </p>
             </div>
@@ -77,8 +77,8 @@ export function DailyQuest() {
           </span>
 
           <div>
-            <p className="text-sm font-semibold text-[var(--color-ink)]">{quest.title}</p>
-            <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
+            <p className="text-lg font-extrabold text-[var(--color-ink)]">{quest.title}</p>
+            <p className="mt-0.5 text-sm text-[var(--color-text-muted)]">
               {isCompleted
                 ? `Earned +${quest.xpReward} XP · +${quest.coinReward} coins`
                 : isMissed

@@ -127,7 +127,7 @@ export function DashboardCompanies() {
                     disabled={busy === c.slug}
                     className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#f7a14e] to-[#f37021] py-2.5 text-sm font-extrabold text-white shadow-[0_10px_24px_-12px_rgba(243,112,33,0.9)] transition-transform hover:brightness-105 active:scale-[0.99] disabled:opacity-50"
                   >
-                    {busy === c.slug ? <Loader2 className="size-4 animate-spin" /> : 'Register for drive'}
+                    {busy === c.slug ? <Loader2 className="size-4 animate-spin" /> : 'Register'}
                   </button>
                 )}
               </div>

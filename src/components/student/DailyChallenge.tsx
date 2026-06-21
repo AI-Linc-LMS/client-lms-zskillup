@@ -100,39 +100,40 @@ export function DailyChallenge() {
   };
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+    <section className="relative overflow-hidden rounded-3xl border border-sky-200/70 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(14,165,233,0.45)] sm:p-7">
       {reward ? (
         <RewardOverlay summary={reward} onClose={() => setReward(null)} passed />
       ) : null}
+      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-sky-500 via-cyan-500 to-sky-400" />
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-12 -top-12 size-36 rounded-full bg-sky-300/20 blur-2xl"
+        className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-sky-300/25 blur-3xl"
       />
-      <div className="relative mb-3 flex items-center justify-between">
-        <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-sky-500">
+      <div className="relative mb-4 flex items-center justify-between">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-sky-600 ring-1 ring-inset ring-sky-100">
           <Calendar className="size-3.5" /> Today&apos;s challenge
-        </p>
+        </span>
         {started && !completed ? (
-          <span className="text-[11px] font-semibold text-slate-400">
+          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold tabular-nums text-slate-500">
             {idx + 1} / {total}
           </span>
         ) : null}
       </div>
 
       {completed ? (
-        <div className="relative flex items-center gap-3 py-2">
-          <span className="flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-white">
-            <Trophy className="size-5" />
+        <div className="relative flex items-center gap-3.5 py-2">
+          <span className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-[0_10px_24px_-10px_rgba(16,185,129,0.8)]">
+            <Trophy className="size-6" />
           </span>
           <div>
-            <p className="text-sm font-bold text-navy">Challenge complete! 🎉</p>
-            <p className="text-xs text-slate-500">Come back tomorrow for a fresh set.</p>
+            <p className="text-lg font-black text-navy">Challenge complete! 🎉</p>
+            <p className="text-sm text-slate-500">Come back tomorrow for a fresh set.</p>
           </div>
         </div>
       ) : !started ? (
         <div className="relative flex items-center justify-between gap-4">
           <div>
-            <p className="text-[15px] font-extrabold text-navy">
+            <p className="text-lg font-black text-navy">
               {total} questions · +{ch.xpReward} XP bonus
             </p>
             <p className="mt-0.5 text-sm text-slate-500">
@@ -144,14 +145,14 @@ export function DailyChallenge() {
               setStarted(true);
               setStartedAt(Date.now());
             }}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-sky-600 px-4 py-2 text-sm font-bold text-white hover:bg-sky-700"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-sky-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_10px_24px_-12px_rgba(2,132,199,0.9)] hover:bg-sky-700"
           >
             Start <ArrowRight className="size-4" />
           </button>
         </div>
       ) : q ? (
         <div className="relative">
-          <p className="text-[15px] font-semibold leading-relaxed text-navy">{q.stem}</p>
+          <p className="text-lg font-bold leading-relaxed text-navy">{q.stem}</p>
           {multi ? <p className="mt-1 text-xs text-slate-400">Select all that apply.</p> : null}
           <div className="mt-3 space-y-2">
             {q.options.map((opt, i) => {
@@ -173,13 +174,13 @@ export function DailyChallenge() {
                   disabled={!!result}
                   onClick={() => toggle(opt.id)}
                   className={cn(
-                    'flex w-full items-center gap-2.5 rounded-xl border p-2.5 text-left text-sm transition-colors',
+                    'flex w-full items-center gap-3 rounded-xl border p-3.5 text-left text-[15px] font-medium transition-colors',
                     tone,
                   )}
                 >
                   <span
                     className={cn(
-                      'grid size-6 shrink-0 place-items-center rounded-full text-[11px] font-bold',
+                      'grid size-7 shrink-0 place-items-center rounded-lg text-xs font-bold',
                       result && isCorrect
                         ? 'bg-emerald-500 text-white'
                         : result && isSel
@@ -207,7 +208,7 @@ export function DailyChallenge() {
               <button
                 onClick={next}
                 disabled={busy}
-                className="inline-flex items-center gap-1.5 rounded-full bg-sky-600 px-4 py-1.5 text-sm font-bold text-white hover:bg-sky-700 disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 rounded-full bg-sky-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-sky-700 disabled:opacity-60"
               >
                 {busy ? <Loader2 className="size-3.5 animate-spin" /> : null}
                 {idx + 1 < total ? 'Next' : 'Finish'}
@@ -217,7 +218,7 @@ export function DailyChallenge() {
               <button
                 onClick={check}
                 disabled={selected.length === 0 || busy}
-                className="inline-flex items-center gap-1.5 rounded-full bg-sky-600 px-4 py-1.5 text-sm font-bold text-white hover:bg-sky-700 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-full bg-sky-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-sky-700 disabled:opacity-50"
               >
                 {busy ? <Loader2 className="size-3.5 animate-spin" /> : null} Check
               </button>

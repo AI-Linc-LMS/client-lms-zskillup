@@ -1,5 +1,6 @@
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { AiBriefingHero } from '@/components/student/AiBriefingHero';
+import { LiveAssessmentBanner } from '@/components/student/LiveAssessmentBanner';
 import { AuroraStats } from '@/components/student/AuroraStats';
 import { TodaysTip } from '@/components/student/TodaysTip';
 import { QuickAptitude } from '@/components/student/QuickAptitude';
@@ -28,6 +29,7 @@ export default function StudentDashboardPage() {
 
       <div className="grid gap-6 xl:grid-cols-[1fr_20rem]">
         <div className="space-y-6">
+          <LiveAssessmentBanner />
           <AiBriefingHero />
           <AuroraStats />
           <Reveal>
