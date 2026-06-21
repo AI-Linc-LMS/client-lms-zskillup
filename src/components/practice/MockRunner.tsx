@@ -450,6 +450,9 @@ function MockRunningView({
   onSubmit: () => void;
 }) {
   const [confirming, setConfirming] = useState(false);
+  // Per-problem unsaved editor drafts, kept across question navigation so the
+  // coding panel can remount (resetting run/submit results) without losing code.
+  const codeDraftsRef = useRef<Record<string, { source: string; language: string }>>({});
   const kind = proctored ? 'assessment' : 'test';
   const question = start.questions[idx];
   const total = start.questions.length;
@@ -558,10 +561,17 @@ function MockRunningView({
           {question.type === 'MULTI_SELECT' ? <p className="mt-1 text-xs text-slate-400">Select all that apply.</p> : null}
 
           {question.type === 'CODING' && question.coding ? (
+            // key={question.id} remounts per problem so run/submit results never
+            // leak between problems; codeDraftsRef preserves unsaved code.
             <MockCodingPanel
+              key={question.id}
               attemptId={start.attemptId}
               question={question}
               saved={codingResults[question.id]}
+              draft={codeDraftsRef.current[question.id]}
+              onDraftChange={(d) => {
+                codeDraftsRef.current[question.id] = d;
+              }}
               onSubmitted={(r) => onCodeSubmitted(question.id, r)}
             />
           ) : (

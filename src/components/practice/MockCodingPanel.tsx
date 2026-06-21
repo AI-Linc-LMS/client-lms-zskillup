@@ -16,18 +16,24 @@ export function MockCodingPanel({
   attemptId,
   question,
   saved,
+  draft,
+  onDraftChange,
   onSubmitted,
 }: {
   attemptId: string;
   question: ApiMockQuestion;
   saved?: ApiMockSavedCoding;
+  /** Per-problem unsaved editor draft, preserved across navigation by the parent. */
+  draft?: { source: string; language: string };
+  onDraftChange?: (d: { source: string; language: string }) => void;
   onSubmitted: (r: { verdict: string; passed: number; total: number; isCorrect: boolean }) => void;
 }) {
   const coding = question.coding!;
   const [languages, setLanguages] = useState<CodingLanguage[]>([]);
-  const initialLang = saved?.language ?? Object.keys(coding.starterCode)[0] ?? 'python';
+  // Priority: live draft (unsaved edits) → last submitted solution → starter.
+  const initialLang = draft?.language ?? saved?.language ?? Object.keys(coding.starterCode)[0] ?? 'python';
   const [language, setLanguage] = useState(initialLang);
-  const [source, setSource] = useState(saved?.sourceCode ?? coding.starterCode[initialLang] ?? '');
+  const [source, setSource] = useState(draft?.source ?? saved?.sourceCode ?? coding.starterCode[initialLang] ?? '');
   const [running, setRunning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<ApiMockCodeResult | null>(null);
@@ -43,12 +49,22 @@ export function MockCodingPanel({
     [languages, language],
   );
 
+  // Mirror editor edits into the parent-held draft so unsaved code survives
+  // navigating to another problem and back.
+  const updateSource = (next: string) => {
+    setSource(next);
+    onDraftChange?.({ source: next, language });
+  };
+
   const onLangChange = (next: string) => {
     setLanguage(next);
     // Swap to that language's starter only if the user hasn't typed their own.
+    let nextSource = source;
     if (!source.trim() || source === coding.starterCode[language]) {
-      setSource(coding.starterCode[next] ?? '');
+      nextSource = coding.starterCode[next] ?? '';
+      setSource(nextSource);
     }
+    onDraftChange?.({ source: nextSource, language: next });
   };
 
   const run = async () => {
@@ -127,7 +143,7 @@ export function MockCodingPanel({
           ) : null}
         </div>
         <div className="h-[320px] bg-navy">
-          <CodeEditor language={monaco} value={source} onChange={setSource} height="320px" />
+          <CodeEditor language={monaco} value={source} onChange={updateSource} height="320px" />
         </div>
       </div>
 
