@@ -23,7 +23,7 @@ export default async function CompaniesPage() {
     : [];
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-6">
+    <div className="w-full">
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Companies' }]} />
 
       {/* Hero — deep navy aurora canvas with glass stat cards */}

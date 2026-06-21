@@ -17,6 +17,9 @@ export interface AdaptivePendingQuestion {
   selectorRationale: string;
   predictedPCorrect: number;
   hintTokensRemaining: number;
+  /** PYQ tag — company tag ids + years this question was asked in. */
+  companyIds?: string[];
+  yearTags?: number[];
 }
 
 export interface AdaptiveSessionStart {

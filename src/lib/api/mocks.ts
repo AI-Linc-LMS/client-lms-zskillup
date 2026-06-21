@@ -43,6 +43,9 @@ export interface ApiMockQuestion {
   type: 'MCQ' | 'MULTI_SELECT' | 'NUMERIC' | 'CODING';
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   stem: string;
+  /** PYQ tag — company tag ids + years this question was asked in. */
+  companyIds?: string[];
+  yearTags?: number[];
   options: ApiMockOption[];
   coding?: ApiMockCodingPayload;
 }

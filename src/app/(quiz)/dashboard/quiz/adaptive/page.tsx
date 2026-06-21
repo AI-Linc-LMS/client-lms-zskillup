@@ -15,6 +15,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PyqTag } from '@/components/practice/PyqTag';
 import { cn } from '@/lib/utils';
 import { useAdaptiveSession } from '@/hooks/useAdaptiveSession';
 import type { AdaptiveOption } from '@/lib/api/adaptive';
@@ -310,7 +311,8 @@ function AdaptiveQuizRunner({
               ) : null}
             </div>
 
-            <h2 className="mt-5 text-lg font-semibold leading-relaxed text-navy">{q.stem}</h2>
+            <PyqTag companyIds={q.companyIds ?? []} years={q.yearTags ?? []} className="mt-5" />
+            <h2 className="mt-2 text-lg font-semibold leading-relaxed text-navy">{q.stem}</h2>
 
             <div className="mt-5 space-y-2.5">
               {q.options.map((opt: AdaptiveOption, i: number) => {
