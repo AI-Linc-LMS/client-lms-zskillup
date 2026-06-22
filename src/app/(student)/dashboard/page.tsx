@@ -28,7 +28,7 @@ export default function StudentDashboardPage() {
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Dashboard' }]} />
 
       <div className="grid gap-6 xl:grid-cols-[1fr_20rem]">
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <AiBriefingHero />
           <LiveAssessmentBanner />
           <AuroraStats />
@@ -45,13 +45,13 @@ export default function StudentDashboardPage() {
           {/* Two independent vertical columns (masonry feel) so the activity
               cards read as columns, not one long horizontal stack. */}
           <div className="grid items-start gap-6 lg:grid-cols-2">
-            <div className="space-y-6">
+            <div className="min-w-0 space-y-6">
               <TodaysTip />
               <Reveal>
                 <QuickAptitude />
               </Reveal>
             </div>
-            <div className="space-y-6">
+            <div className="min-w-0 space-y-6">
               <Reveal>
                 <DailyChallenge />
               </Reveal>
@@ -69,7 +69,7 @@ export default function StudentDashboardPage() {
           </Reveal>
         </div>
 
-        <aside className="space-y-6">
+        <aside className="min-w-0 space-y-6">
           <Reveal delay={0.05}>
             <AdaptiveSkillProfile />
           </Reveal>
