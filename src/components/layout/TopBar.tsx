@@ -33,7 +33,7 @@ export function TopBar() {
       initial={{ opacity: 0, y: -12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      className="sticky top-0 z-30 flex h-14 items-center gap-5 border-b border-slate-200/70 glass px-4 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6),0_8px_24px_-18px_rgba(11,18,32,0.45)] sm:px-6"
+      className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-slate-200/70 glass px-4 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6),0_8px_24px_-18px_rgba(11,18,32,0.45)] sm:gap-5 sm:px-6"
     >
       {/* faint top-to-bottom wash for glass depth */}
       <div
@@ -70,12 +70,13 @@ export function TopBar() {
         </>
       ) : null}
 
-      {/* Right cluster */}
+      {/* Right cluster — pushed right on mobile/tablet (search is hidden < lg, so
+          it can't provide the spacer); on lg+ the flex-1 search handles spacing. */}
       <div
         className={
           isStudentZone
-            ? 'relative z-10 flex items-center gap-2'
-            : 'relative z-10 ml-auto flex items-center gap-2'
+            ? 'relative z-10 ml-auto flex items-center gap-1.5 sm:gap-2 lg:ml-0'
+            : 'relative z-10 ml-auto flex items-center gap-1.5 sm:gap-2'
         }
       >
         <StreakPill />

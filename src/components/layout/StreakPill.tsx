@@ -163,7 +163,7 @@ export function StreakPill() {
 
       <span className="relative inline-flex items-baseline gap-1 tabular-nums">
         <AnimatedNumber value={streak} format={(n) => `${n}`} />
-        <span className="text-[10px] font-semibold tracking-widest text-white/85">
+        <span className="hidden text-[10px] font-semibold tracking-widest text-white/85 sm:inline">
           DAY STREAK
         </span>
       </span>
