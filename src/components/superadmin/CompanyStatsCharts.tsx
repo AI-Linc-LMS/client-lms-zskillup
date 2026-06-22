@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Building2, CalendarClock, ClipboardList, Code2, Loader2, Users } from 'lucide-react';
+import { Building2, CalendarClock, ClipboardList, Loader2, Users } from 'lucide-react';
 import { getAdminCompanyStats, type AdminCompanyStat } from '@/lib/api/admin';
 
 const BAR_GRAD = 'linear-gradient(90deg,#f7a14e,#f37021)';

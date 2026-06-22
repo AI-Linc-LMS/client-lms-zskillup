@@ -240,7 +240,7 @@ function AdaptiveQuizRunner({
         {/* 3-column work area */}
         <div className="mt-5 grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)_300px]">
           {/* LEFT — timer + skill confidence */}
-          <aside className="space-y-4">
+          <aside className="order-2 space-y-4 lg:order-none">
             <Panel>
               <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
                 <Clock className="size-3.5" /> On this question
@@ -289,7 +289,7 @@ function AdaptiveQuizRunner({
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: EASE }}
-            className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+            className="order-1 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:order-none"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center gap-1.5">
@@ -389,7 +389,7 @@ function AdaptiveQuizRunner({
           </motion.div>
 
           {/* RIGHT — coaching sidecar */}
-          <aside className="lg:sticky lg:top-6 lg:self-start">
+          <aside className="order-3 lg:order-none lg:sticky lg:top-6 lg:self-start">
             <Panel>
               <div className="flex items-center gap-2">
                 <span className="grid size-8 place-items-center rounded-lg bg-orange/10 text-orange">

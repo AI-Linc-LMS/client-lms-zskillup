@@ -181,7 +181,7 @@ export function AvatarMenu({ initials = '··' }: { initials?: string }) {
             exit={{ opacity: 0, y: -6, scale: 0.97 }}
             transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
             style={{ transformOrigin: 'top right' }}
-            className="absolute right-0 z-50 mt-3 w-64 overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-[0_24px_60px_-24px_rgba(11,18,32,0.5)] ring-1 ring-black/[0.02]"
+            className="absolute right-0 z-50 mt-3 w-64 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-[0_24px_60px_-24px_rgba(11,18,32,0.5)] ring-1 ring-black/[0.02]"
           >
             {/* header — gradient-washed account card */}
             <div className="relative overflow-hidden rounded-xl border border-slate-100 bg-gradient-to-br from-slate-50 to-white p-3">

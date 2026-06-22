@@ -176,7 +176,7 @@ export default function AssessmentLeaderboardPage({ params }: { params: Promise<
                 <span className="hidden items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-600 sm:inline-flex" title="Streak"><Flame className="size-3" /> {e.currentStreakDays}d</span>
                 <span className="hidden items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-bold text-violet-600 sm:inline-flex" title="Badges"><Award className="size-3" /> {e.badgesEarned}</span>
                 <span className="hidden items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-600 sm:inline-flex" title="Level"><Star className="size-3 text-amber-400" /> Lv {e.level}</span>
-                <span className="w-14 shrink-0 text-right text-[11px] font-semibold text-slate-400" title="Percentile">{e.percentile}th pct</span>
+                <span className="hidden w-14 shrink-0 text-right text-[11px] font-semibold text-slate-400 sm:inline-block" title="Percentile">{e.percentile}th pct</span>
                 <span className="w-12 shrink-0 text-right text-base font-black tabular-nums" style={{ color: toneFor(e.scorePct) }}>{e.scorePct}%</span>
               </li>
             ))}

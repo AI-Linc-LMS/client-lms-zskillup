@@ -80,7 +80,8 @@ export default function AdminAdaptiveSessionsPage() {
 
       {sessions && sessions.length > 0 && (
         <div className="rounded-xl border bg-white overflow-hidden">
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[720px] text-sm">
             <thead className="border-b bg-slate-50">
               <tr>
                 {['Student ID', 'Mock Test', 'Status', 'Questions', 'Accuracy', 'Started', ''].map((h) => (
@@ -128,6 +129,7 @@ export default function AdminAdaptiveSessionsPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

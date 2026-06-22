@@ -76,20 +76,20 @@ export default function MockQuizPage() {
             </header>
             <Link
               href="/calendar"
-              className="group flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+              className="group flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md sm:gap-4 sm:p-5"
             >
-              <div className="flex items-center gap-3">
-                <span className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-[#1f2d4d] to-[#0b1220] text-white">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#1f2d4d] to-[#0b1220] text-white">
                   <CalendarDays className="size-5 text-[#ffb877]" />
                 </span>
-                <div>
+                <div className="min-w-0">
                   <p className="text-sm font-bold text-navy">Proctored assessments are scheduled</p>
                   <p className="text-xs text-slate-500">
                     Register for a company, then take its assessment in your window — see your calendar.
                   </p>
                 </div>
               </div>
-              <span className="flex items-center gap-1 text-sm font-bold text-orange">
+              <span className="flex shrink-0 items-center gap-1 text-sm font-bold text-orange">
                 Calendar <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
               </span>
             </Link>

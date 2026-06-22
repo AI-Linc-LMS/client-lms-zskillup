@@ -44,12 +44,12 @@ export default function RoadmapPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Public navbar */}
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white px-6">
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-1 text-xl font-extrabold">
           <span className="text-orange">Z</span>
           <span className="text-foreground">Skillup</span>
         </Link>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Button variant="ghost" asChild>
             <Link href="/login">Log in</Link>
           </Button>
@@ -65,7 +65,7 @@ export default function RoadmapPage() {
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_100%_0%,rgba(243,112,33,0.18),transparent),radial-gradient(50%_50%_at_0%_100%,rgba(56,189,248,0.12),transparent)]"
         />
-        <div className="relative mx-auto max-w-3xl px-6 py-16 text-center sm:py-20">
+        <div className="relative mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 sm:py-20">
           <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-orange">
             Your placement roadmap
           </span>
@@ -79,9 +79,9 @@ export default function RoadmapPage() {
         </div>
       </section>
 
-      <main className="mx-auto max-w-3xl px-6 py-10">
+      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
         {/* Progress summary */}
-        <div className="mb-8 rounded-2xl border bg-white p-6 shadow-sm">
+        <div className="mb-8 rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div className="text-center">
               <p className="text-2xl font-extrabold text-navy">{pct}%</p>
@@ -238,7 +238,7 @@ export default function RoadmapPage() {
         </div>
       </main>
 
-      <footer className="mt-16 border-t px-6 py-8 text-center text-xs text-muted-foreground">
+      <footer className="mt-16 border-t px-4 py-8 text-center text-xs text-muted-foreground sm:px-6">
         © 2026 ZSkillup · Future-ready graduates, future-strong institutions
       </footer>
     </div>

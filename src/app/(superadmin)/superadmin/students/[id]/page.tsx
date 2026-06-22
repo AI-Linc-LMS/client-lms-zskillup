@@ -20,7 +20,6 @@ import {
   Target,
   Timer,
   Trophy,
-  XCircle,
 } from 'lucide-react';
 
 function pctTone(pct: number | null): string {
@@ -210,7 +209,7 @@ export default function StudentReportPage() {
           </div>
         ) : (
           <div className="-mx-5 -mb-5 overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[720px] text-sm">
               <thead className="border-y border-slate-100 bg-slate-50/60 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                 <tr>
                   <th className="px-5 py-3">Quiz</th>

@@ -22,7 +22,6 @@ export function ProctorOverlay({ controller }: { controller: ProctoringControlle
         <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white/95 p-1.5 pr-3.5 shadow-[0_12px_34px_-12px_rgba(15,23,42,0.45)] backdrop-blur">
           {/* live self-view — larger landscape thumbnail */}
           <span className="relative h-[6rem] w-[8rem] shrink-0 overflow-hidden rounded-xl bg-black ring-1 ring-slate-200">
-            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
             <video ref={videoRef} autoPlay muted playsInline className="size-full -scale-x-100 object-cover" />
             <span className="absolute left-1 top-1 inline-flex items-center gap-0.5 rounded bg-black/55 px-1 py-0.5 text-[8px] font-extrabold uppercase tracking-wider text-white backdrop-blur">
               <span className="relative flex size-1"><span className="absolute inline-flex size-full animate-ping rounded-full bg-rose-400 opacity-80" /><span className="relative inline-flex size-1 rounded-full bg-rose-500" /></span>

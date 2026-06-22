@@ -96,16 +96,16 @@ export function PerQuestionBreakdown({ questions, perQuestionNarration }: PerQue
           </span>
         </div>
 
-        <p className="mt-3 text-sm font-semibold leading-relaxed text-navy">{q.stem}</p>
+        <p className="mt-3 text-sm font-semibold leading-relaxed text-navy break-words">{q.stem}</p>
 
         <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-          <div className={cn('rounded-lg p-2.5 text-xs', q.isCorrect ? 'bg-emerald-100/70' : 'bg-rose-100/70')}>
+          <div className={cn('min-w-0 rounded-lg p-2.5 text-xs', q.isCorrect ? 'bg-emerald-100/70' : 'bg-rose-100/70')}>
             <p className="mb-0.5 font-bold text-slate-500">Your answer</p>
-            <p className={q.isCorrect ? 'text-emerald-800' : 'text-rose-700'}>{q.selectedOption || '—'}</p>
+            <p className={cn('break-words', q.isCorrect ? 'text-emerald-800' : 'text-rose-700')}>{q.selectedOption || '—'}</p>
           </div>
-          <div className="rounded-lg bg-emerald-100/70 p-2.5 text-xs">
+          <div className="min-w-0 rounded-lg bg-emerald-100/70 p-2.5 text-xs">
             <p className="mb-0.5 font-bold text-slate-500">Correct answer</p>
-            <p className="text-emerald-800">{q.correctOption}</p>
+            <p className="text-emerald-800 break-words">{q.correctOption}</p>
           </div>
         </div>
 

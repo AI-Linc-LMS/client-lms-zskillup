@@ -34,9 +34,9 @@ export function SkillMasteryHeatmap({ skillMastery }: SkillMasteryHeatmapProps) 
             key={s.skill}
             className={cn('rounded-xl border p-4', cfg.bg, cfg.border)}
           >
-            <div className="flex items-center justify-between mb-2">
-              <div>
-                <span className="font-semibold text-navy text-sm">{s.skill}</span>
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+              <div className="min-w-0">
+                <span className="text-sm font-semibold text-navy break-words">{s.skill}</span>
                 {s.deltaPct !== null && (
                   <span
                     className={cn(
@@ -48,7 +48,7 @@ export function SkillMasteryHeatmap({ skillMastery }: SkillMasteryHeatmapProps) 
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex shrink-0 items-center gap-2">
                 <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full border', cfg.bg, cfg.text, cfg.border)}>
                   {cfg.label}
                 </span>

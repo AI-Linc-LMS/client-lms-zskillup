@@ -39,17 +39,17 @@ export default async function CompanyPrepPage({
       />
 
       <div className="flex items-center justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
             Practice workspace
           </p>
-          <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">
+          <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-navy sm:text-[28px]">
             {company.name} — Prep
           </h1>
         </div>
         <Link
           href={`/dashboard/company/${slug}`}
-          className="inline-flex items-center gap-1 text-sm font-semibold text-slate-500 hover:text-navy"
+          className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-slate-500 hover:text-navy"
         >
           <ChevronLeft className="size-4" /> Back to hub
         </Link>

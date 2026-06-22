@@ -181,12 +181,12 @@ export function CodingWorkspace({ slug }: { slug: string }) {
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
         {/* ── Statement ───────────────────────────────────────────── */}
-        <section className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+        <section className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:p-6">
           <div
             aria-hidden
             className="pointer-events-none absolute -right-12 -top-12 size-36 rounded-full bg-indigo-300/20 blur-2xl"
           />
-          <h1 className="relative text-[22px] font-extrabold leading-tight tracking-tight text-navy">
+          <h1 className="relative text-[19px] font-extrabold leading-tight tracking-tight text-navy sm:text-[22px]">
             {problem.title}
           </h1>
           {problem.tags.length ? (
@@ -260,7 +260,7 @@ export function CodingWorkspace({ slug }: { slug: string }) {
                 onChange={(v) => setCodeByLang((prev) => ({ ...prev, [lang]: v }))}
               />
             </div>
-            <div className="flex items-center justify-end gap-2.5 border-t border-white/5 px-3 py-2.5">
+            <div className="flex flex-wrap items-center justify-end gap-2.5 border-t border-white/5 px-3 py-2.5">
               <button
                 onClick={() => run('run')}
                 disabled={running !== null || code.trim().length === 0}
@@ -303,7 +303,7 @@ function ResultPanel({ result }: { result: CodingResult }) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
-      className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm"
+      className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:p-5"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">

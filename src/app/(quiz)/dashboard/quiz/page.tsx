@@ -36,7 +36,7 @@ function QuizLanding() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_-10%,rgba(243,112,33,0.08),transparent),radial-gradient(50%_50%_at_100%_100%,rgba(56,189,248,0.07),transparent)]"
       />
-      <div className="relative z-10 flex items-center justify-between px-8 py-6">
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 px-5 py-6 sm:px-8">
         <Link
           href="/dashboard"
           className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
@@ -49,8 +49,8 @@ function QuizLanding() {
         </span>
       </div>
 
-      <main className="relative z-10 mx-auto flex max-w-3xl flex-col items-center px-8 pb-16 pt-12 text-center">
-        <h1 className="text-4xl font-extrabold leading-tight tracking-tight md:text-5xl">
+      <main className="relative z-10 mx-auto flex max-w-3xl flex-col items-center px-5 pb-16 pt-12 text-center sm:px-8">
+        <h1 className="text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl md:text-5xl">
           Timed mock tests
         </h1>
         <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-slate-600">

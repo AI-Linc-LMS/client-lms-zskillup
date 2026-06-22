@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Logo } from './Logo';
+import { MobileNav } from './MobileNav';
 import { AvatarMenu } from './AvatarMenu';
 import { ExploreMenu } from './ExploreMenu';
 import { StreakPill } from './StreakPill';
@@ -45,6 +46,7 @@ export function TopBar() {
         className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#f37021]/40 to-transparent"
       />
 
+      <MobileNav />
       <Logo workspaceLabel={workspaceLabelForPath(pathname)} className="relative z-10" />
 
       {isStudentZone ? (

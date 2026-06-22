@@ -314,7 +314,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
         <div className="absolute -right-1/4 top-1/4 size-[45vw] rounded-full bg-[#2563eb]/15 blur-[130px]" />
       </div>
 
-      <div className="relative z-10 flex items-center justify-between px-6 py-6 sm:px-10">
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 px-5 py-6 sm:px-10">
         <Link
           href="/mock-tests"
           className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-1.5 text-xs font-semibold text-white/85 backdrop-blur transition-colors hover:bg-white/[0.12]"
@@ -334,13 +334,13 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
         </span>
       </div>
 
-      <main className="relative z-10 mx-auto max-w-5xl px-6 pb-16 pt-2 sm:px-10">
+      <main className="relative z-10 mx-auto max-w-5xl px-5 pb-16 pt-2 sm:px-10">
         <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#ffb877]">
               {proctored ? 'ZSkillup placement assessment' : 'ZSkillup mock drive'}
             </p>
-            <h1 className="mt-3 text-4xl font-black leading-[1.05] tracking-tight md:text-[52px]">
+            <h1 className="mt-3 text-3xl font-black leading-[1.08] tracking-tight sm:text-4xl sm:leading-[1.05] md:text-[52px]">
               {m.title}
             </h1>
             <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-white/65">
@@ -461,7 +461,6 @@ function MockRunningView({
     q.type === 'CODING' ? !!codingResults[q.id] : (answers[q.id]?.length ?? 0) > 0;
   const answeredCount = useMemo(
     () => start.questions.filter((q) => isAnswered(q)).length,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [start.questions, answers, codingResults],
   );
 
@@ -718,9 +717,9 @@ function MockReportView({
       {showReward && reward ? (
         <RewardOverlay summary={reward} passed={report.passed} onClose={() => setShowReward(false)} />
       ) : null}
-      <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-6 shadow-sm">
-        <span className="flex items-center gap-1.5 text-sm font-bold text-navy">
-          <Trophy className="size-4 text-amber-500" aria-hidden="true" /> {isAssessment ? 'Assessment report' : 'Mock report'}
+      <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-sm sm:px-6">
+        <span className="flex min-w-0 items-center gap-1.5 truncate text-sm font-bold text-navy">
+          <Trophy className="size-4 shrink-0 text-amber-500" aria-hidden="true" /> {isAssessment ? 'Assessment report' : 'Mock report'}
         </span>
         <Button variant="ghost" size="sm" asChild>
           <Link href={backHref}>
@@ -729,9 +728,9 @@ function MockReportView({
         </Button>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl flex-1 space-y-6 px-6 py-8">
+      <main className="mx-auto w-full max-w-3xl flex-1 space-y-6 px-4 py-6 sm:px-6 sm:py-8">
         {/* Score hero */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm sm:p-8">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
             {report.title}
           </p>

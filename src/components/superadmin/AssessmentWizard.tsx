@@ -128,7 +128,10 @@ export function AssessmentWizard({
     let mcq = 0;
     let coding = 0;
     for (const s of sections)
-      for (const it of s.items) (it.type === 'MCQ' ? (mcq += it.ids.length) : (coding += it.ids.length));
+      for (const it of s.items) {
+        if (it.type === 'MCQ') mcq += it.ids.length;
+        else coding += it.ids.length;
+      }
     return { mcq, coding, total: mcq + coding };
   }, [sections]);
 

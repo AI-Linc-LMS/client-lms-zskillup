@@ -48,7 +48,7 @@ export default async function CompanyTopicPracticePage({
         <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
           {company.name} practice
         </p>
-        <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">
+        <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-navy sm:text-[28px]">
           {formatSlug(topicSlug)}
         </h1>
         <p className="mt-1 text-sm text-slate-500">

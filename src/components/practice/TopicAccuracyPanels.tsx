@@ -178,7 +178,7 @@ function TopicCard({
 
         <div className="relative z-10 flex h-full flex-col">
           <div className="mb-4 flex items-start justify-between gap-2">
-            <p className="font-bold leading-snug text-navy">{topic.topicName}</p>
+            <p className="min-w-0 break-words font-bold leading-snug text-navy">{topic.topicName}</p>
             <span
               className={cn(
                 'shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1',

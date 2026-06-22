@@ -107,7 +107,7 @@ export default function AdminStudentsReportPage() {
           <div className="py-16 text-center text-sm text-slate-400">No students found.</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[760px] text-sm">
               <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-400">
                 <tr>
                   <th className="px-4 py-3">Student</th>

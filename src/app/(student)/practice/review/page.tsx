@@ -89,7 +89,7 @@ export default function ReviewPage() {
         {!questions ? (
           <div className="grid h-60 place-items-center"><Loader2 className="size-6 animate-spin text-slate-400" /></div>
         ) : done ? (
-          <div className="rounded-3xl border border-slate-200/80 bg-white p-10 text-center shadow-sm">
+          <div className="rounded-3xl border border-slate-200/80 bg-white p-7 text-center shadow-sm sm:p-10">
             <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
               <Sparkles className="size-7" />
             </span>

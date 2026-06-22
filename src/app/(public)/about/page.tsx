@@ -65,7 +65,7 @@ export default function AboutPage() {
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_100%_0%,rgba(243,112,33,0.18),transparent),radial-gradient(50%_50%_at_0%_100%,rgba(56,189,248,0.12),transparent)]"
         />
-        <div className="relative mx-auto max-w-5xl px-6 py-20 sm:py-28">
+        <div className="relative mx-auto max-w-5xl px-4 py-20 sm:px-6 sm:py-28">
           <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/60">
             About ZSkillup
           </p>
@@ -99,7 +99,7 @@ export default function AboutPage() {
 
       {/* Stats strip */}
       <section className="border-y border-slate-200 bg-white">
-        <div className="mx-auto grid max-w-5xl grid-cols-2 gap-6 px-6 py-10 sm:grid-cols-4">
+        <div className="mx-auto grid max-w-5xl grid-cols-2 gap-6 px-4 py-10 sm:grid-cols-4 sm:px-6">
           {STATS.map((s) => (
             <div key={s.label}>
               <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">

@@ -47,7 +47,6 @@ export function DeviceCheck({
 
   useEffect(() => {
     void request();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -65,7 +64,6 @@ export function DeviceCheck({
 
         <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-black">
           <div className="relative aspect-video">
-            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
             <video ref={videoRef} autoPlay muted playsInline className="size-full -scale-x-100 object-cover" />
             {state !== 'ready' ? (
               <div className="absolute inset-0 grid place-items-center text-white/50">

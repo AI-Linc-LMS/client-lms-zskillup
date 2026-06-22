@@ -246,12 +246,12 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
         </Section>
 
         {/* CTA */}
-        <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5">
+        <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-bold text-navy">Ready to close the gap?</p>
             <p className="mt-0.5 text-xs text-slate-500">Practise your weak skills or take another mock quiz.</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button variant="secondary" size="sm" asChild>
               <Link href={practiseHref}>
                 {weakSkills[0] ? `Practise ${prettySkill(weakSkills[0].skill)}` : 'Practise skills'}

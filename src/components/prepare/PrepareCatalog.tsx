@@ -227,7 +227,7 @@ export function PrepareCatalog() {
 
         {/* Results */}
         <div>
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs text-slate-500">
               Showing <span className="font-semibold text-navy">{filtered.length}</span> of {courses?.length ?? 0} tracks
             </p>
@@ -308,7 +308,7 @@ function TrackCard({ course }: { course: ApiCourseSummary }) {
         {course.summary ? (
           <p className="mt-1 text-xs leading-relaxed text-slate-500 line-clamp-2">{course.summary}</p>
         ) : null}
-        <div className="mt-auto flex items-center justify-between pt-4 text-xs text-slate-500">
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 pt-4 text-xs text-slate-500">
           <span className="flex items-center gap-1">
             <Star className="size-3 fill-amber-400 text-amber-400" aria-hidden="true" />
             <span className="font-semibold text-navy">4.7</span>

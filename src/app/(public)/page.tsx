@@ -17,6 +17,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { HOMEPAGE_COMPANY_LOGOS } from '@/lib/demo-data-extra';
+import { PublicMobileMenu } from '@/components/marketing/PublicMobileMenu';
 import { HomeFeaturedTracks } from '@/components/marketing/HomeFeaturedTracks';
 import { HomeTopCohort } from '@/components/marketing/HomeTopCohort';
 
@@ -127,6 +128,7 @@ export default function HomePage() {
           >
             Get started free
           </Link>
+          <PublicMobileMenu />
         </div>
       </header>
 
@@ -195,7 +197,7 @@ export default function HomePage() {
               ))}
             </div>
 
-            <div className="mt-10 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-4">
+            <div className="mt-10 grid max-w-2xl grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4 sm:gap-x-8">
               {HERO_STATS.map((s) => (
                 <div key={s.label}>
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-white/55">

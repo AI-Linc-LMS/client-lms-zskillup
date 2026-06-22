@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 import { ArrowRight, Calendar, Check, Loader2, Trophy, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PyqTag } from '@/components/practice/PyqTag';

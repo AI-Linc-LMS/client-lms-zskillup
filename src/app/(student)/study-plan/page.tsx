@@ -73,7 +73,7 @@ export default function StudyPlanPage() {
                     className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_-30px_rgba(15,23,42,0.2)]"
                   >
                     <span aria-hidden className={cn('pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b', k.bar)} />
-                    <div className="flex items-start gap-4 pl-1.5">
+                    <div className="flex flex-wrap items-start gap-x-4 gap-y-3 pl-1.5">
                       <span className="grid size-7 shrink-0 place-items-center rounded-full bg-navy text-xs font-black text-white">{i + 1}</span>
                       <span className={cn('grid size-11 shrink-0 place-items-center rounded-2xl ring-1 ring-inset', k.bg, k.text, k.ring)}>
                         <Icon className="size-5" />
@@ -85,7 +85,7 @@ export default function StudyPlanPage() {
                       </div>
                       <Link
                         href={a.href}
-                        className={cn('inline-flex shrink-0 items-center gap-1.5 self-center rounded-full bg-gradient-to-r px-4 py-2.5 text-sm font-extrabold text-white shadow-sm transition-transform hover:-translate-y-0.5', k.btn)}
+                        className={cn('inline-flex w-full shrink-0 items-center justify-center gap-1.5 self-center rounded-full bg-gradient-to-r px-4 py-2.5 text-sm font-extrabold text-white shadow-sm transition-transform hover:-translate-y-0.5 sm:w-auto', k.btn)}
                       >
                         {a.cta} <ArrowRight className="size-4" />
                       </Link>

@@ -37,7 +37,6 @@ export function Typewriter({
       clearTimeout(start);
       clearTimeout(timer);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text, wordMs, startDelay]);
 
   const done = shown >= words.length;

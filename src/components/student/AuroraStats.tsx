@@ -83,7 +83,7 @@ export function AuroraStats() {
                 style={{ background: t.to }}
               />
               <div className="relative">
-                <p className="text-[34px] font-black leading-none tracking-tight text-navy">
+                <p className="text-[28px] font-black leading-none tracking-tight text-navy sm:text-[34px]">
                   <AnimatedNumber value={t.value} />
                 </p>
                 <p className="mt-2 text-[11px] font-bold uppercase tracking-widest text-slate-500">

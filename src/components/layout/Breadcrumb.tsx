@@ -9,7 +9,7 @@ interface Crumb {
 /** Breadcrumb / position reinforcement (FEATURE_BACKLOG; STUDENT_JOURNEY_SPEC §6). */
 export function Breadcrumb({ items }: { items: Crumb[] }) {
   return (
-    <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+    <nav aria-label="Breadcrumb" className="mb-4 flex flex-wrap items-center gap-y-1 gap-x-1.5 text-xs text-muted-foreground">
       {items.map((c, i) => (
         <span key={`${c.label}-${i}`} className="flex items-center gap-1.5">
           {i > 0 ? <ChevronRight className="size-3" aria-hidden="true" /> : null}

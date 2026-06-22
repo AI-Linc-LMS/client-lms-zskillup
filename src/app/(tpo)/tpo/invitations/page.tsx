@@ -151,8 +151,8 @@ export default function TpoInvitationsPage() {
               <p className="text-xs text-slate-500">First 10 rows shown.</p>
             </div>
           </div>
-          <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
-            <table className="w-full text-sm">
+          <div className="mt-4 overflow-x-auto rounded-lg border border-slate-200">
+            <table className="w-full min-w-[480px] text-sm">
               <thead className="bg-slate-50 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                 <tr>
                   <th className="px-3 py-2 text-left">Email</th>
@@ -204,8 +204,8 @@ export default function TpoInvitationsPage() {
             </div>
           </div>
 
-          <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
-            <table className="w-full text-sm">
+          <div className="mt-4 overflow-x-auto rounded-lg border border-slate-200">
+            <table className="w-full min-w-[480px] text-sm">
               <thead className="bg-slate-50 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                 <tr>
                   <th className="px-3 py-2 text-left">Email</th>

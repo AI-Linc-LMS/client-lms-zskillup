@@ -183,7 +183,7 @@ export function DashboardRightRail() {
                 </span>
                 <span
                   className={cn(
-                    'relative grid size-9 place-items-center rounded-xl text-[13px] font-bold tabular-nums transition-colors',
+                    'relative grid size-8 place-items-center rounded-xl text-[13px] font-bold tabular-nums transition-colors sm:size-9',
                     day.today
                       ? 'bg-gradient-to-b from-[#1f2d4d] to-[#0b1220] text-white shadow-[0_8px_18px_-8px_rgba(11,18,32,0.7)]'
                       : 'text-slate-600 hover:bg-slate-100',

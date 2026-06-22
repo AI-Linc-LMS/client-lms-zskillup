@@ -201,7 +201,6 @@ function ChallengeSolveModal({
     getChallenge(id)
       .then(setDetail)
       .catch(() => onClose());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const q = detail?.question;

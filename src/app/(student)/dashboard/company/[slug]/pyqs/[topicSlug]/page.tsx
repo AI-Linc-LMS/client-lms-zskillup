@@ -36,15 +36,15 @@ export default function CompanyTopicPyqsPage({
       />
 
       <div className="mt-4 flex items-center justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-orange">
             <History className="size-3.5" /> Previous-year questions
           </p>
-          <h1 className="mt-1 text-2xl font-black tracking-tight text-navy">
+          <h1 className="mt-1 text-xl font-black tracking-tight text-navy sm:text-2xl">
             {topicName} <span className="text-slate-400">· {companyName}</span>
           </h1>
         </div>
-        <Link href={`/dashboard/company/${slug}`} className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-500 hover:text-orange">
+        <Link href={`/dashboard/company/${slug}`} className="inline-flex shrink-0 items-center gap-1.5 text-sm font-bold text-slate-500 hover:text-orange">
           <ArrowLeft className="size-4" /> Hub
         </Link>
       </div>

@@ -99,7 +99,8 @@ export function CollegesAdmin() {
       ) : null}
 
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[680px] text-left text-sm">
           <thead className="bg-slate-50">
             <tr className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
               <th className="px-4 py-3">Name</th>
@@ -153,6 +154,7 @@ export function CollegesAdmin() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       <p className="text-xs text-slate-400">

@@ -177,7 +177,7 @@ export function NotificationsBell() {
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.97 }}
             transition={{ duration: 0.22, ease: EASE }}
             style={{ transformOrigin: 'top right' }}
-            className="absolute right-0 z-50 mt-3 w-[20rem] overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_24px_60px_-24px_rgba(11,18,32,0.45)]"
+            className="absolute right-0 z-50 mt-3 w-[20rem] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_24px_60px_-24px_rgba(11,18,32,0.45)]"
           >
             {/* header — subtle aurora wash + gradient icon chip */}
             <div className="relative overflow-hidden border-b border-slate-100 px-4 py-3.5">

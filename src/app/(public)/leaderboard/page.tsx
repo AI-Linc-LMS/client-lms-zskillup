@@ -37,12 +37,12 @@ export default function LeaderboardPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Navbar */}
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white px-6">
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-1 text-xl font-extrabold">
           <span className="text-orange">Z</span>
           <span className="text-foreground">Skillup</span>
         </Link>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Button variant="ghost" asChild><Link href="/login">Log in</Link></Button>
           <Button asChild><Link href="/signup">Create account</Link></Button>
         </div>
@@ -54,7 +54,7 @@ export default function LeaderboardPage() {
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_100%_0%,rgba(243,112,33,0.18),transparent),radial-gradient(50%_50%_at_0%_100%,rgba(56,189,248,0.12),transparent)]"
         />
-        <div className="relative mx-auto max-w-5xl px-6 py-16 text-center sm:py-20">
+        <div className="relative mx-auto max-w-5xl px-4 py-16 text-center sm:px-6 sm:py-20">
           <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-orange">
             Compete · Climb · Earn rewards
           </span>
@@ -68,7 +68,7 @@ export default function LeaderboardPage() {
         </div>
       </section>
 
-      <main className="mx-auto max-w-5xl px-6 py-10">
+      <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
         {/* Global stats */}
         <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
           {[
@@ -136,22 +136,22 @@ export default function LeaderboardPage() {
           <>
             {/* Podium — top 3 */}
             {podium.length >= 3 && (
-              <div className="mb-8 flex items-end justify-center gap-4 rounded-2xl bg-gradient-to-b from-navy/5 to-transparent px-6 pb-8 pt-4">
+              <div className="mb-8 flex items-end justify-center gap-2 rounded-2xl bg-gradient-to-b from-navy/5 to-transparent px-2 pb-8 pt-4 sm:gap-4 sm:px-6">
                 {podium.map((entry, i) => (
-                  <div key={entry.userId} className={cn('flex flex-col items-center', PODIUM_HEIGHTS[i])}>
-                    <LbAvatar src={entry.avatarUrl} initials={entry.initials} className={cn('size-12 text-sm', entry.isYou ? 'bg-orange' : 'bg-navy')} />
-                    <p className="mt-2 text-center text-sm font-semibold text-navy">{entry.fullName ?? 'Student'}</p>
-                    <p className="text-center text-xs text-muted-foreground">{entry.collegeName}</p>
+                  <div key={entry.userId} className={cn('flex min-w-0 flex-1 flex-col items-center sm:flex-none', PODIUM_HEIGHTS[i])}>
+                    <LbAvatar src={entry.avatarUrl} initials={entry.initials} className={cn('size-10 text-sm sm:size-12', entry.isYou ? 'bg-orange' : 'bg-navy')} />
+                    <p className="mt-2 w-full truncate text-center text-xs font-semibold text-navy sm:text-sm">{entry.fullName ?? 'Student'}</p>
+                    <p className="w-full truncate text-center text-xs text-muted-foreground">{entry.collegeName}</p>
                     <div
                       className={cn(
-                        'mt-3 grid place-items-center rounded-t-lg px-6 py-3 text-white',
+                        'mt-3 grid w-full place-items-center rounded-t-lg px-2 py-3 text-white sm:px-6',
                         PODIUM_BG[i],
-                        i === 0 ? 'h-24 w-28' : i === 1 ? 'h-20 w-24' : 'h-16 w-20',
+                        i === 0 ? 'h-24 sm:w-28' : i === 1 ? 'h-20 sm:w-24' : 'h-16 sm:w-20',
                       )}
                     >
-                      <span className="text-2xl font-extrabold">#{entry.rank}</span>
+                      <span className="text-xl font-extrabold sm:text-2xl">#{entry.rank}</span>
                     </div>
-                    <div className="w-full rounded-b-lg bg-slate-100 px-3 py-2 text-center">
+                    <div className="w-full rounded-b-lg bg-slate-100 px-2 py-2 text-center sm:px-3">
                       <p className="text-xs font-semibold text-navy">{entry.totalXp.toLocaleString()} XP</p>
                       <p className="text-[10px] text-muted-foreground">
                         Lv {entry.level} · {entry.currentStreakDays}d streak
@@ -213,7 +213,7 @@ export default function LeaderboardPage() {
         </div>
       </main>
 
-      <footer className="mt-16 border-t px-6 py-8 text-center text-xs text-muted-foreground">
+      <footer className="mt-16 border-t px-4 py-8 text-center text-xs text-muted-foreground sm:px-6">
         © 2026 ZSkillup · Future-ready graduates, future-strong institutions
       </footer>
     </div>

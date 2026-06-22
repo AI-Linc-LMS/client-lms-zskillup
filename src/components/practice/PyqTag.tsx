@@ -35,7 +35,6 @@ export function PyqTag({
     return () => {
       on = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idKey]);
 
   const hasCompanies = names.length > 0;

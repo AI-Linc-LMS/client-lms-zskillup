@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   ClipboardList,
   Database,
-  GraduationCap,
   Layers,
   RefreshCw,
   Server,
@@ -53,7 +52,6 @@ export function PlatformOverviewLive() {
 
   useEffect(() => {
     void load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (error && !stats) {

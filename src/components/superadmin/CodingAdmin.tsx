@@ -146,7 +146,7 @@ export function CodingAdmin() {
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full min-w-[860px] text-left text-sm">
             <thead className="bg-slate-50/90">
               <tr className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
                 <th className="px-4 py-4">Problem</th>

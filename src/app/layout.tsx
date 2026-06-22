@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans, Sora } from 'next/font/google';
 import './globals.css';
 
@@ -24,6 +24,12 @@ export const metadata: Metadata = {
     shortcut: '/images/Zskillup Black.png',
     apple: '/images/Zskillup Black.png',
   },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({

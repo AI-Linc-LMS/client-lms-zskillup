@@ -42,18 +42,18 @@ export function CompanyMockTab({ content }: { content: HubContent }) {
       {/* Adaptive mock quiz — standout violet card */}
       <Link
         href="/mock-tests"
-        className="group relative flex items-center justify-between gap-4 overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(124,58,237,0.22)] transition-shadow hover:shadow-[0_24px_60px_-28px_rgba(124,58,237,0.35)]"
+        className="group relative flex items-center justify-between gap-3 overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_-30px_rgba(124,58,237,0.22)] transition-shadow hover:shadow-[0_24px_60px_-28px_rgba(124,58,237,0.35)] sm:gap-4 sm:p-6"
       >
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-gradient-to-br from-violet-50/70 via-transparent to-transparent"
         />
-        <div className="relative flex items-center gap-4">
-          <span className="grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-violet-500 to-violet-600 text-white shadow-[0_12px_30px_-10px_rgba(124,58,237,0.7)]">
-            <Brain className="size-6" />
+        <div className="relative flex min-w-0 items-center gap-3 sm:gap-4">
+          <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-violet-500 to-violet-600 text-white shadow-[0_12px_30px_-10px_rgba(124,58,237,0.7)] sm:size-14">
+            <Brain className="size-5 sm:size-6" />
           </span>
-          <div>
-            <p className="flex items-center gap-2 text-base font-extrabold tracking-tight text-navy sm:text-lg">
+          <div className="min-w-0">
+            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-base font-extrabold tracking-tight text-navy sm:text-lg">
               Adaptive Mock Quiz
               <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-violet-600 ring-1 ring-inset ring-violet-100">
                 <Sparkles className="size-3" /> AI
@@ -68,7 +68,7 @@ export function CompanyMockTab({ content }: { content: HubContent }) {
       </Link>
 
       {/* Scheduled proctored assessments for this company — standout violet card */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(124,58,237,0.22)]">
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_-30px_rgba(124,58,237,0.22)] sm:p-6">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500/0 via-violet-500/70 to-violet-500/0"
