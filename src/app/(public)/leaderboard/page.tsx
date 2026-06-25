@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { BrandLogo } from '@/components/layout/BrandLogo';
 import { Flame, Trophy, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -38,10 +39,7 @@ export default function LeaderboardPage() {
     <div className="min-h-screen bg-background">
       {/* Navbar */}
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-1 text-xl font-extrabold">
-          <span className="text-orange">Z</span>
-          <span className="text-foreground">Skillup</span>
-        </Link>
+        <BrandLogo variant="dark" className="h-7" />
         <div className="flex items-center gap-2 sm:gap-3">
           <Button variant="ghost" asChild><Link href="/login">Log in</Link></Button>
           <Button asChild><Link href="/signup">Create account</Link></Button>

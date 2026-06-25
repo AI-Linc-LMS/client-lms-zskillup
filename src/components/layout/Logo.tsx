@@ -24,12 +24,12 @@ export function Logo({
       aria-label="ZSkillup home"
     >
       <Image
-        src="/images/Zskillup Black.png"
-        alt="ZSkillup"
-        width={124}
-        height={40}
+        src="/images/prephasz-logo-dark.png"
+        alt="prephasz — powered by ZSkillup"
+        width={293}
+        height={80}
         priority
-        className="h-7 w-auto object-contain transition-transform duration-300 group-hover:-translate-y-0.5 sm:h-8"
+        className="h-8 w-auto object-contain transition-transform duration-300 group-hover:-translate-y-0.5 sm:h-9"
       />
       {workspaceLabel ? (
         <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">

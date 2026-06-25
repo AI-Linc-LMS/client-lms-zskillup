@@ -2,6 +2,7 @@
 
 import { Suspense, useCallback, useState } from 'react';
 import Link from 'next/link';
+import { BrandLogo } from '@/components/layout/BrandLogo';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import {
@@ -247,10 +248,7 @@ export default function LoginPage() {
 
         {/* Logo */}
         <div className="relative">
-          <Link href="/" className="flex items-center gap-1.5 text-2xl font-extrabold">
-            <span className="text-[#f37021]">Z</span>
-            <span>Skillup</span>
-          </Link>
+          <BrandLogo variant="light" className="h-9" />
           <p className="mt-1 text-sm text-white/60">Placement preparation, simplified</p>
         </div>
 
@@ -325,10 +323,7 @@ export default function LoginPage() {
       <main className="flex flex-1 flex-col">
         {/* Mobile header */}
         <header className="flex h-14 items-center border-b border-[var(--color-line)] bg-white px-6 lg:hidden">
-          <Link href="/" className="flex items-center gap-0.5 text-xl font-extrabold">
-            <span className="text-[#f37021]">Z</span>
-            <span className="text-[var(--color-ink)]">Skillup</span>
-          </Link>
+          <BrandLogo variant="dark" className="h-7" />
         </header>
 
         <div className="flex flex-1 items-center justify-center bg-[var(--color-bg)] px-6 py-12">

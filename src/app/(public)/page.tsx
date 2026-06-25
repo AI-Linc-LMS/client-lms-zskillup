@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { HOMEPAGE_COMPANY_LOGOS } from '@/lib/demo-data-extra';
 import { PublicMobileMenu } from '@/components/marketing/PublicMobileMenu';
+import { BrandLogo } from '@/components/layout/BrandLogo';
 import { HomeFeaturedTracks } from '@/components/marketing/HomeFeaturedTracks';
 import { HomeTopCohort } from '@/components/marketing/HomeTopCohort';
 
@@ -96,10 +97,7 @@ export default function HomePage() {
 
       {/* ── Public Navbar ─────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-white/10 bg-gradient-to-r from-[#0b1220] to-[#1e3a8a] px-5 md:px-8">
-        <Link href="/" className="flex items-center gap-1.5 text-xl font-extrabold text-white">
-          <span className="text-[#f37021]">Z</span>
-          <span>Skillup</span>
-        </Link>
+        <BrandLogo variant="light" priority className="h-8" />
         <nav className="hidden items-center gap-6 lg:flex" aria-label="Primary">
           {[
             { label: 'Companies', href: '/dashboard/company' },
@@ -593,10 +591,7 @@ export default function HomePage() {
       <footer className="border-t border-[var(--color-line)] bg-white px-5 py-12 md:px-8">
         <div className="mx-auto grid max-w-[1400px] gap-8 sm:grid-cols-4">
           <div className="sm:col-span-1">
-            <Link href="/" className="flex items-center gap-1 text-xl font-extrabold">
-              <span className="text-[#f37021]">Z</span>
-              <span>Skillup</span>
-            </Link>
+            <BrandLogo variant="dark" className="h-7" />
             <p className="mt-2 text-sm text-[var(--color-text-muted)]">
               Company-wise prep, timed mocks, and cohort analytics — all in one platform.
             </p>

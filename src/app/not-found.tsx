@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { BrandLogo } from '@/components/layout/BrandLogo';
 
 /**
  * Global 404 (Implementation Plan §5). Zone-C light surface, brand wordmark,
@@ -8,10 +9,7 @@ import { Button } from '@/components/ui/button';
 export default function NotFound() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background px-6 text-center">
-      <Link href="/" className="flex items-center gap-1 text-xl font-extrabold">
-        <span className="text-orange">Z</span>
-        <span className="text-foreground">Skillup</span>
-      </Link>
+      <BrandLogo variant="dark" className="h-7" />
       <span className="mt-10 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
         Error 404
       </span>
