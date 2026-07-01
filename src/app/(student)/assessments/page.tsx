@@ -21,6 +21,8 @@ import {
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { Reveal, Stagger, StaggerItem } from '@/components/motion/primitives';
 import { cn } from '@/lib/utils';
+import { MockHistory } from '@/components/practice/MockHistory';
+import { MyRankingPanel } from '@/components/student/MyRankingPanel';
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -436,6 +438,17 @@ export default function AssessmentsPage() {
           </aside>
         </div>
       )}
+
+      {/* ── Past assessments + your ranking ──────────────────────────────── */}
+      <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_20rem]">
+        <div className="min-w-0">
+          <MockHistory scope="assessment" />
+        </div>
+        <aside className="min-w-0">
+          <h2 className="mb-3 text-lg font-extrabold tracking-tight text-navy">Your ranking</h2>
+          <MyRankingPanel />
+        </aside>
+      </div>
     </div>
   );
 }

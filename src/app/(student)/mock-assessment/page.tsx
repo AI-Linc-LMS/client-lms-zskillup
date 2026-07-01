@@ -45,8 +45,8 @@ export default function MockAssessmentPage() {
       <CustomMockBuilder />
 
       <section>
-        <h2 className="mb-3 text-lg font-extrabold tracking-tight text-navy sm:text-xl">Your past attempts</h2>
-        <MockHistory />
+        <h2 className="mb-3 text-lg font-extrabold tracking-tight text-navy sm:text-xl">Your past mock attempts</h2>
+        <MockHistory scope="custom" />
       </section>
     </div>
   );

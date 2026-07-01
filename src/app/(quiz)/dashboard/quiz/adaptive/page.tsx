@@ -98,7 +98,6 @@ function AdaptiveQuizRunner({
     submitting,
     submitAnswer,
     askHint,
-    abandon,
     finish,
     sessionPoints,
     lastPoints,
@@ -203,10 +202,11 @@ function AdaptiveQuizRunner({
         {/* header */}
         <div className="flex items-center justify-between gap-3">
           <button
-            onClick={() => void abandon().then(() => router.replace(exitHref))}
+            onClick={() => router.replace(exitHref)}
+            title="Your progress is saved — resume this quiz any time from where you left off."
             className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 transition-colors hover:text-navy"
           >
-            <ArrowLeft className="size-3.5" /> Exit
+            <ArrowLeft className="size-3.5" /> Save &amp; exit
           </button>
           <div className="flex items-center gap-2">
             {/* running session points */}

@@ -24,13 +24,13 @@ import { getMockStats } from '@/lib/mock-stats';
  * /mock-assessment, computed from the student's real finalized attempts
  * (`GET /mocks/attempts/mine`). Each row deep-links to its persisted report.
  */
-export function MockHistory() {
+export function MockHistory({ scope = 'all' }: { scope?: 'all' | 'custom' | 'assessment' } = {}) {
   const [rows, setRows] = useState<ApiMockAttemptHistory[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    getMockHistory()
+    getMockHistory(scope)
       .then((r) => {
         if (!cancelled) setRows(r);
       })
@@ -40,7 +40,7 @@ export function MockHistory() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [scope]);
 
   if (error) {
     return (

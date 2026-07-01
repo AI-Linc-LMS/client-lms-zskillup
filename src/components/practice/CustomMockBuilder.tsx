@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AlertTriangle, Check, Clock, Layers, ListChecks, Loader2, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, Check, Clock, Code2, Layers, ListChecks, Loader2, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { listTopicsWithCounts, type ApiTopic } from '@/lib/api/catalog';
-import { createCustomMock } from '@/lib/api/mocks';
+import { createCustomMock, listCodingTopics, type CodingTopic } from '@/lib/api/mocks';
 
 /**
  * Mode 3 — self-serve Mock Assessment builder. Pick whole sections and/or single
@@ -15,11 +15,13 @@ import { createCustomMock } from '@/lib/api/mocks';
 export function CustomMockBuilder() {
   const router = useRouter();
   const [topics, setTopics] = useState<ApiTopic[] | null>(null);
+  const [codingTopicList, setCodingTopicList] = useState<CodingTopic[]>([]);
   const [sections, setSections] = useState<Set<string>>(new Set());
   const [chosenTopics, setChosenTopics] = useState<Set<string>>(new Set());
+  const [codingTopics, setCodingTopics] = useState<Set<string>>(new Set());
   const [count, setCount] = useState(20);
+  const [codingCount, setCodingCount] = useState(3);
   const [duration, setDuration] = useState(30);
-  const [includeCoding, setIncludeCoding] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,6 +29,9 @@ export function CustomMockBuilder() {
     listTopicsWithCounts()
       .then((t) => setTopics(t))
       .catch(() => setTopics([]));
+    listCodingTopics()
+      .then((t) => setCodingTopicList(t))
+      .catch(() => setCodingTopicList([]));
   }, []);
 
   const roots = useMemo(() => {
@@ -44,7 +49,8 @@ export function CustomMockBuilder() {
     setter(next);
   };
 
-  const hasScope = sections.size + chosenTopics.size > 0;
+  const hasQuiz = sections.size + chosenTopics.size > 0;
+  const hasScope = hasQuiz || codingTopics.size > 0;
 
   const start = async () => {
     if (!hasScope || busy) return;
@@ -56,7 +62,8 @@ export function CustomMockBuilder() {
         topicSlugs: [...chosenTopics],
         questionCount: count,
         durationMinutes: duration,
-        includeCoding,
+        codingTopics: [...codingTopics],
+        codingCount: codingTopics.size ? codingCount : undefined,
       });
       router.push(`/dashboard/quiz?mock=${mockId}&proctored=1`);
     } catch (e) {
@@ -127,28 +134,52 @@ export function CustomMockBuilder() {
         </div>
       )}
 
+      {/* Coding topics (optional) — pick the coding topics to mix in */}
+      {codingTopicList.length ? (
+        <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
+          <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <Code2 className="size-3.5" /> Coding topics
+            <span className="font-medium normal-case tracking-normal text-slate-400">(optional)</span>
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {codingTopicList.map((c) => {
+              const on = codingTopics.has(c.topic);
+              return (
+                <button
+                  key={c.topic}
+                  onClick={() => toggle(codingTopics, setCodingTopics, c.topic)}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors',
+                    on ? 'border-orange bg-orange/10 text-navy' : 'border-slate-200 text-slate-600 hover:bg-slate-50',
+                  )}
+                >
+                  {on ? <Check className="size-3" /> : <Code2 className="size-3 text-slate-400" />}
+                  {c.topic}
+                  <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500">
+                    {c.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+
       {/* config bar */}
       <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
         <div className="grid gap-5 sm:grid-cols-3">
-          <Stepper label="Questions" icon={ListChecks} value={count} min={5} max={100} step={5} onChange={setCount} />
+          <Stepper label="MCQ questions" icon={ListChecks} value={count} min={5} max={100} step={5} onChange={setCount} />
           <Stepper label="Duration (min)" icon={Clock} value={duration} min={5} max={180} step={5} onChange={setDuration} />
-          <div>
-            <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              <ShieldCheck className="size-3.5" /> Coding
-            </p>
-            <button
-              onClick={() => setIncludeCoding((v) => !v)}
-              className={cn(
-                'mt-2 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold transition-colors',
-                includeCoding ? 'border-orange bg-orange/10 text-navy' : 'border-slate-200 text-slate-600 hover:bg-slate-50',
-              )}
-            >
-              <span className={cn('grid size-4 place-items-center rounded border', includeCoding ? 'border-orange bg-orange text-white' : 'border-slate-300')}>
-                {includeCoding ? <Check className="size-3" /> : null}
-              </span>
-              Include coding problems
-            </button>
-          </div>
+          {codingTopics.size ? (
+            <Stepper label="Coding problems" icon={Code2} value={codingCount} min={1} max={20} step={1} onChange={setCodingCount} />
+          ) : (
+            <div>
+              <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                <Code2 className="size-3.5" /> Coding problems
+              </p>
+              <p className="mt-2 text-xs text-slate-400">Pick coding topics above to add coding.</p>
+            </div>
+          )}
         </div>
 
         {error ? (

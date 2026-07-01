@@ -177,13 +177,29 @@ export interface CreateCustomMockBody {
   topicSlugs?: string[];
   questionCount: number;
   durationMinutes: number;
-  includeCoding?: boolean;
+  /** Coding topics (primary tags) to draw coding problems from. */
+  codingTopics?: string[];
+  codingCount?: number;
   title?: string;
 }
 
 /** Build a self-serve Mock Assessment (Mode 3) and get its id to run proctored. */
 export async function createCustomMock(body: CreateCustomMockBody): Promise<{ mockId: string }> {
   const res = await apiClient.post<{ mockId: string }>('/api/v1/mocks/custom', body);
+  return res.data;
+}
+
+export interface CodingTopic {
+  topic: string;
+  count: number;
+}
+
+/** Distinct coding topics (primary tags) for the custom-mock builder. */
+export async function listCodingTopics(company?: string): Promise<CodingTopic[]> {
+  const url = company
+    ? `/api/v1/mocks/coding-topics?company=${encodeURIComponent(company)}`
+    : '/api/v1/mocks/coding-topics';
+  const res = await apiClient.get<CodingTopic[]>(url);
   return res.data;
 }
 
@@ -238,8 +254,15 @@ export async function getMockReport(attemptId: string): Promise<ApiMockReport> {
   return res.data;
 }
 
-/** The student's finalized attempts, newest first — powers the /mock-assessment history. */
-export async function getMockHistory(): Promise<ApiMockAttemptHistory[]> {
-  const res = await apiClient.get<ApiMockAttemptHistory[]>('/api/v1/mocks/attempts/mine');
+/**
+ * The student's finalized attempts, newest first. `scope` separates the surfaces:
+ * 'custom' = Mock Assessment history, 'assessment' = Main-Assessment history.
+ */
+export async function getMockHistory(
+  scope: 'all' | 'custom' | 'assessment' = 'all',
+): Promise<ApiMockAttemptHistory[]> {
+  const url =
+    scope === 'all' ? '/api/v1/mocks/attempts/mine' : `/api/v1/mocks/attempts/mine?scope=${scope}`;
+  const res = await apiClient.get<ApiMockAttemptHistory[]>(url);
   return res.data;
 }
