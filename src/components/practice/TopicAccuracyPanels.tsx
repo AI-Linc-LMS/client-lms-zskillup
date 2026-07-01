@@ -17,10 +17,11 @@ import { getTopicAccuracy, type ApiTopicAccuracy } from '@/lib/api/practice';
 
 /**
  * Live per-topic accuracy panels (Sprint 3 exit — "reports show accuracy").
- * "Weak topics" = accuracy under 60% with at least 3 attempts; "Continue
- * where you left off" = the most recently practised topics. Both read
- * `GET /practice/accuracy/topics`; with no attempts yet the panels render
- * an honest empty state instead of invented numbers.
+ * "Weak topics" = accuracy under 60% with at least 3 attempts (weakest first);
+ * "Continue where you left off" = the most recently practised topics that
+ * AREN'T already flagged weak (deduped, so the two panels never show the same
+ * cards twice). Both read `GET /practice/accuracy/topics`; with no attempts yet
+ * the panels render an honest empty state instead of invented numbers.
  */
 
 /** Mastery band derived purely from a topic's accuracy — drives all coloring. */
@@ -264,8 +265,22 @@ export function TopicAccuracyPanels() {
     );
   }
 
-  const weak = rows.filter((r) => r.total >= 3 && r.accuracyPct < 60).slice(0, 3);
-  const recent = rows.slice(0, 3);
+  // Weak = below 60% on a meaningful sample (≥3 attempts), WEAKEST FIRST so
+  // "Focus here" leads with the worst topic (rows arrive in recency order, not
+  // accuracy order, so we must re-sort).
+  const weak = rows
+    .filter((r) => r.total >= 3 && r.accuracyPct < 60)
+    .sort((a, b) => a.accuracyPct - b.accuracyPct)
+    .slice(0, 3);
+
+  // "Continue where you left off" = most recently practised (rows already arrive
+  // ordered by last-attempt DESC), but EXCLUDING topics already surfaced in the
+  // weak panel above. Without this dedupe a student whose recent practice is all
+  // on weak topics sees the exact same three cards twice — the two panels only
+  // differed by CTA label. Now they're complementary; if nothing distinct
+  // remains the section hides itself (guard below).
+  const weakSlugs = new Set(weak.map((r) => r.topicSlug));
+  const recent = rows.filter((r) => !weakSlugs.has(r.topicSlug)).slice(0, 3);
 
   return (
     <>
