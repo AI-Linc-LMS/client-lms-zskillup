@@ -2,67 +2,25 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import {
-  ArrowRight,
-  BookOpen,
-  Brain,
-  Building2,
-  Calculator,
-  Code2,
-  Cpu,
-  Layers,
-  ListTree,
-  Search,
-} from 'lucide-react';
+import { ArrowRight, Building2, Layers, ListTree, Search } from 'lucide-react';
 import type { ApiTopic } from '@/lib/api/catalog';
+import { ACCENT_CLASS, CODING_META, HIDDEN_ROOT_SLUGS, sectionMetaFor, type Accent } from './section-meta';
 
 /**
- * Client-side Practice picker (Mode 1): company / section / topic selection with a
- * live search bar and higher-level category grouping. Server passes raw topics +
- * companies; all grouping/filtering happens here (icons can't cross the RSC
- * boundary, so they're mapped by slug in the client).
+ * Client-side Practice picker (Mode 1). Content is segregated into the five
+ * sections (Numerical / Logical / Verbal / Technical + Coding). A student can
+ * practise a WHOLE SECTION (the section button) or a SINGLE TOPIC (the chips).
+ * Server passes raw topics + companies; icon/colour/order come from the shared
+ * section-meta map (icons can't cross the RSC boundary). Coding is a separate
+ * Judge0 system, so it links out to the Company Hub browse rather than the
+ * adaptive MCQ runner.
  */
-
-type Accent = 'sky' | 'violet' | 'orange' | 'emerald' | 'indigo' | 'amber';
-const ACCENT_CYCLE: Accent[] = ['sky', 'violet', 'orange', 'emerald', 'indigo', 'amber'];
-const ACCENT_CLASS: Record<Accent, { tile: string; chip: string }> = {
-  sky: { tile: 'bg-sky-50 text-sky-600 ring-sky-100', chip: 'hover:border-sky-300 hover:bg-sky-50/70' },
-  violet: { tile: 'bg-violet-50 text-violet-600 ring-violet-100', chip: 'hover:border-violet-300 hover:bg-violet-50/70' },
-  orange: { tile: 'bg-orange-50 text-orange-600 ring-orange-100', chip: 'hover:border-orange-300 hover:bg-orange-50/70' },
-  emerald: { tile: 'bg-emerald-50 text-emerald-600 ring-emerald-100', chip: 'hover:border-emerald-300 hover:bg-emerald-50/70' },
-  indigo: { tile: 'bg-indigo-50 text-indigo-600 ring-indigo-100', chip: 'hover:border-indigo-300 hover:bg-indigo-50/70' },
-  amber: { tile: 'bg-amber-50 text-amber-600 ring-amber-100', chip: 'hover:border-amber-300 hover:bg-amber-50/70' },
-};
-const CATEGORY_ICON: Record<string, typeof Calculator> = {
-  'quantitative-aptitude': Calculator,
-  'verbal-ability': BookOpen,
-  'logical-reasoning': Brain,
-  'programming-dsa': Code2,
-  'cs-fundamentals': Cpu,
-};
-const CATEGORY_ACCENT: Record<string, Accent> = {
-  'quantitative-aptitude': 'sky',
-  'verbal-ability': 'violet',
-  'logical-reasoning': 'orange',
-  'programming-dsa': 'indigo',
-  'cs-fundamentals': 'emerald',
-};
-
-/** Higher-level category each root section belongs to. */
-const CATEGORY_OF: Record<string, string> = {
-  'quantitative-aptitude': 'Aptitude',
-  'logical-reasoning': 'Reasoning',
-  'verbal-ability': 'Verbal',
-  'cs-fundamentals': 'Technical',
-  'programming-dsa': 'Coding',
-};
-const CATEGORY_ORDER = ['Aptitude', 'Reasoning', 'Verbal', 'Technical', 'Coding', 'More'];
 
 interface RootTopic extends ApiTopic {
   children: ApiTopic[];
-  icon: typeof Calculator;
+  icon: typeof Layers;
   accent: Accent;
-  category: string;
+  order: number;
 }
 
 export interface PickerCompany {
@@ -89,28 +47,32 @@ export function PracticePicker({
 
   const roots = useMemo<RootTopic[]>(() => {
     return topics
-      .filter((t) => t.parentId === null && (t.questionCount ?? 0) > 0)
-      .map((r, i) => ({
-        ...r,
-        children: topics.filter((c) => c.parentId === r.id && (c.questionCount ?? 0) > 0),
-        icon: CATEGORY_ICON[r.slug] ?? Layers,
-        accent: CATEGORY_ACCENT[r.slug] ?? ACCENT_CYCLE[i % ACCENT_CYCLE.length],
-        category: CATEGORY_OF[r.slug] ?? 'More',
-      }))
-      .filter((r) => r.children.length > 0);
+      .filter((t) => t.parentId === null && !HIDDEN_ROOT_SLUGS.has(t.slug) && (t.questionCount ?? 0) > 0)
+      .map((r, i) => {
+        const meta = sectionMetaFor(r.slug, i);
+        return {
+          ...r,
+          children: topics.filter((c) => c.parentId === r.id && (c.questionCount ?? 0) > 0),
+          icon: meta.icon,
+          accent: meta.accent,
+          order: meta.order,
+        };
+      })
+      .filter((r) => r.children.length > 0)
+      .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
   }, [topics]);
 
-  // Search: keep a section if its name matches OR any child matches; keep matching
-  // children. Empty query → everything.
+  // Search: keep a section if its name matches OR any topic matches; keep matching
+  // topics. Empty query → everything.
   const filteredRoots = useMemo<RootTopic[]>(() => {
     if (!q) return roots;
     return roots
       .map((r) => {
-        const rootMatch = r.name.toLowerCase().includes(q) || r.category.toLowerCase().includes(q);
+        const rootMatch = r.name.toLowerCase().includes(q);
         const children = rootMatch ? r.children : r.children.filter((c) => c.name.toLowerCase().includes(q));
         return { ...r, children };
       })
-      .filter((r) => r.name.toLowerCase().includes(q) || r.category.toLowerCase().includes(q) || r.children.length > 0);
+      .filter((r) => r.name.toLowerCase().includes(q) || r.children.length > 0);
   }, [roots, q]);
 
   const filteredCompanies = useMemo(
@@ -118,12 +80,8 @@ export function PracticePicker({
     [companies, q],
   );
 
-  const categories = useMemo(() => {
-    const present = new Set(filteredRoots.map((r) => r.category));
-    return CATEGORY_ORDER.filter((cat) => present.has(cat));
-  }, [filteredRoots]);
-
-  const nothing = filteredRoots.length === 0 && filteredCompanies.length === 0;
+  const codingVisible = !q || 'coding'.includes(q);
+  const nothing = filteredRoots.length === 0 && filteredCompanies.length === 0 && !codingVisible;
 
   return (
     <div className="space-y-8">
@@ -140,7 +98,7 @@ export function PracticePicker({
 
       {nothing ? (
         <div className="rounded-3xl border border-slate-200/80 bg-white p-6 text-sm text-slate-500">
-          No companies or topics match &ldquo;{query.trim()}&rdquo;.
+          No companies, sections or topics match &ldquo;{query.trim()}&rdquo;.
         </div>
       ) : null}
 
@@ -173,87 +131,110 @@ export function PracticePicker({
         </div>
       ) : null}
 
-      {/* By category → sections → topics */}
-      {categories.map((cat) => {
-        const catRoots = filteredRoots.filter((r) => r.category === cat);
-        if (catRoots.length === 0) return null;
-        return (
-          <div key={cat} className="space-y-4">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-emerald-600 ring-1 ring-inset ring-emerald-100">
-                <ListTree className="size-3.5" /> {cat}
-              </span>
-              <span className="h-px flex-1 bg-slate-100" />
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {catRoots.map((root) => {
-                const Icon = root.icon;
-                const a = ACCENT_CLASS[root.accent];
-                return (
-                  <Link
-                    key={root.id}
-                    href={adaptiveTopicHref(root.slug)}
-                    className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(16,185,129,0.25)] transition-all hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md"
-                  >
-                    <span aria-hidden className="pointer-events-none absolute -right-10 -top-12 size-32 rounded-full bg-emerald-400/10 blur-2xl transition-opacity duration-500 group-hover:opacity-60" />
-                    <div className="relative flex items-center justify-between">
-                      <span className={`grid size-12 place-items-center rounded-2xl ring-1 ${a.tile}`}>
-                        <Icon className="size-6" aria-hidden="true" />
-                      </span>
-                      <ArrowRight className="size-4 text-slate-300 transition-all group-hover:translate-x-0.5 group-hover:text-emerald-600" />
-                    </div>
-                    <p className="relative mt-4 text-base font-bold leading-snug text-navy">{root.name}</p>
-                    <p className="relative mt-1 text-xs text-slate-500">
-                      {root.children.length} topic{root.children.length === 1 ? '' : 's'}
-                      {root.questionCount ? ` · ${root.questionCount.toLocaleString()} questions` : ''}
-                    </p>
-                    <span className="relative mt-4 inline-flex items-center gap-1 text-xs font-bold text-emerald-600 opacity-0 transition-opacity group-hover:opacity-100">
-                      Start section practice →
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-
-            {/* topic chips per section in this category */}
-            <div className="grid gap-4 lg:grid-cols-2">
-              {catRoots.map((root) => (
-                <div
-                  key={`${root.id}-chips`}
-                  className="relative h-full overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(16,185,129,0.25)]"
-                >
-                  <div className="relative mb-4 flex items-center gap-3">
-                    <span className={`grid size-11 place-items-center rounded-2xl ring-1 ${ACCENT_CLASS[root.accent].tile}`}>
-                      <root.icon className="size-5" aria-hidden="true" />
-                    </span>
-                    <div>
-                      <p className="text-base font-bold text-navy">{root.name}</p>
-                      <p className="text-[11px] text-slate-400">Pick a topic to practice</p>
-                    </div>
-                  </div>
-                  <div className="relative flex flex-wrap gap-2">
-                    {root.children.map((child) => (
-                      <Link
-                        key={child.id}
-                        href={adaptiveTopicHref(child.slug)}
-                        className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors ${ACCENT_CLASS[root.accent].chip}`}
-                      >
-                        {child.name}
-                        {child.questionCount ? (
-                          <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500">
-                            {child.questionCount}
-                          </span>
-                        ) : null}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+      {/* By section → topics */}
+      {filteredRoots.length > 0 || codingVisible ? (
+        <div>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-emerald-600 ring-1 ring-inset ring-emerald-100">
+            <ListTree className="size-3.5" /> By section
+          </span>
+          <h2 className="mb-4 mt-2 text-lg font-extrabold tracking-tight text-navy sm:text-xl">
+            Practice a whole section or a single topic
+          </h2>
+          <div className="space-y-4">
+            {filteredRoots.map((root) => (
+              <SectionBlock key={root.id} root={root} topicHref={adaptiveTopicHref} />
+            ))}
+            {codingVisible ? <CodingBlock /> : null}
           </div>
-        );
-      })}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/** One MCQ section: a section-wide CTA plus a chip per topic. */
+function SectionBlock({
+  root,
+  topicHref,
+}: {
+  root: RootTopic;
+  topicHref: (slug: string) => string;
+}) {
+  const Icon = root.icon;
+  const a = ACCENT_CLASS[root.accent];
+  return (
+    <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(16,185,129,0.25)]">
+      <span aria-hidden className="pointer-events-none absolute -right-10 -top-12 size-32 rounded-full bg-emerald-400/10 blur-2xl" />
+      <div className="relative flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className={`grid size-12 place-items-center rounded-2xl ring-1 ${a.tile}`}>
+            <Icon className="size-6" aria-hidden="true" />
+          </span>
+          <div>
+            <p className="text-base font-bold leading-snug text-navy">{root.name}</p>
+            <p className="mt-0.5 text-xs text-slate-500">
+              {root.children.length} topic{root.children.length === 1 ? '' : 's'}
+              {root.questionCount ? ` · ${root.questionCount.toLocaleString()} questions` : ''}
+            </p>
+          </div>
+        </div>
+        <Link
+          href={topicHref(root.slug)}
+          className="inline-flex items-center gap-1.5 rounded-full bg-navy px-4 py-2 text-xs font-extrabold text-white transition-transform hover:-translate-y-0.5"
+        >
+          Practice whole section <ArrowRight className="size-3.5" />
+        </Link>
+      </div>
+
+      <div className="relative mt-4 flex flex-wrap gap-2">
+        {root.children.map((child) => (
+          <Link
+            key={child.id}
+            href={topicHref(child.slug)}
+            className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors ${a.chip}`}
+          >
+            {child.name}
+            {child.questionCount ? (
+              <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500">
+                {child.questionCount}
+              </span>
+            ) : null}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Section 5 — Coding. Separate Judge0 system, so it links to the Company Hub browse. */
+function CodingBlock() {
+  const Icon = CODING_META.icon;
+  const a = ACCENT_CLASS[CODING_META.accent];
+  return (
+    <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(99,102,241,0.25)]">
+      <span aria-hidden className="pointer-events-none absolute -right-10 -top-12 size-32 rounded-full bg-indigo-400/10 blur-2xl" />
+      <div className="relative flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className={`grid size-12 place-items-center rounded-2xl ring-1 ${a.tile}`}>
+            <Icon className="size-6" aria-hidden="true" />
+          </span>
+          <div>
+            <p className="text-base font-bold leading-snug text-navy">Coding</p>
+            <p className="mt-0.5 text-xs text-slate-500">
+              DSA problems — Judge0-evaluated, grouped by topic &amp; company
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/dashboard/company"
+          className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-4 py-2 text-xs font-extrabold text-white transition-transform hover:-translate-y-0.5"
+        >
+          Browse coding <ArrowRight className="size-3.5" />
+        </Link>
+      </div>
+      <p className="relative mt-3 text-xs text-slate-500">
+        Arrays, Strings, Searching &amp; Sorting, Trees, Graphs, DP and more — pick a topic in the Company Hub.
+      </p>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { AlertTriangle, Check, Clock, Code2, Layers, ListChecks, Loader2, Shield
 import { cn } from '@/lib/utils';
 import { listTopicsWithCounts, type ApiTopic } from '@/lib/api/catalog';
 import { createCustomMock, listCodingTopics, type CodingTopic } from '@/lib/api/mocks';
+import { HIDDEN_ROOT_SLUGS, sectionMetaFor } from './section-meta';
 
 /**
  * Mode 3 — self-serve Mock Assessment builder. Pick whole sections and/or single
@@ -37,9 +38,14 @@ export function CustomMockBuilder() {
   const roots = useMemo(() => {
     if (!topics) return [];
     return topics
-      .filter((t) => t.parentId === null && (t.questionCount ?? 0) > 0)
-      .map((r) => ({ ...r, children: topics.filter((c) => c.parentId === r.id && (c.questionCount ?? 0) > 0) }))
-      .filter((r) => r.children.length > 0);
+      .filter((t) => t.parentId === null && !HIDDEN_ROOT_SLUGS.has(t.slug) && (t.questionCount ?? 0) > 0)
+      .map((r, i) => ({
+        ...r,
+        children: topics.filter((c) => c.parentId === r.id && (c.questionCount ?? 0) > 0),
+        order: sectionMetaFor(r.slug, i).order,
+      }))
+      .filter((r) => r.children.length > 0)
+      .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
   }, [topics]);
 
   const toggle = (set: Set<string>, setter: (s: Set<string>) => void, slug: string) => {

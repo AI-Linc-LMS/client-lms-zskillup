@@ -44,9 +44,19 @@ export default async function PracticePage({ searchParams }: PageProps) {
     /* optional */
   }
 
-  const rootsWithQ = topics.filter((t) => t.parentId === null && (t.questionCount ?? 0) > 0);
-  const subtopicCount = topics.filter((t) => t.parentId !== null && (t.questionCount ?? 0) > 0).length;
-  const questionTotal = rootsWithQ.reduce((s, r) => s + (r.questionCount ?? 0), 0);
+  // Match the picker: real section roots only (drop the leftover AI-experiment root
+  // and flat roots with no populated topics). Coding is the synthetic 5th section.
+  const sectionRoots = topics.filter(
+    (t) =>
+      t.parentId === null &&
+      t.slug !== 'ai-practice-topics' &&
+      topics.some((c) => c.parentId === t.id && (c.questionCount ?? 0) > 0),
+  );
+  const sectionCount = sectionRoots.length + 1; // + Coding
+  const subtopicCount = topics.filter(
+    (t) => t.parentId !== null && (t.questionCount ?? 0) > 0 && sectionRoots.some((r) => r.id === t.parentId),
+  ).length;
+  const questionTotal = sectionRoots.reduce((s, r) => s + (r.questionCount ?? 0), 0);
   const activeCompany = company ? companies.find((c) => c.slug === company) ?? null : null;
   const pickerCompanies = companies.map((c) => ({
     id: c.id,
@@ -98,7 +108,7 @@ export default async function PracticePage({ searchParams }: PageProps) {
               </div>
             ) : (
               <div className="mt-6 flex flex-wrap gap-3">
-                <HeroStat icon={Layers} value={String(rootsWithQ.length)} label="Sections" />
+                <HeroStat icon={Layers} value={String(sectionCount)} label="Sections" />
                 <HeroStat icon={Sparkles} value={String(subtopicCount)} label="Topics" />
                 {questionTotal > 0 ? (
                   <HeroStat icon={BookOpen} value={questionTotal.toLocaleString()} label="Questions" />
