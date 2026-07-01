@@ -1,9 +1,10 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Building2, Layers, ListTree, Search } from 'lucide-react';
 import type { ApiTopic } from '@/lib/api/catalog';
+import { listCodingTopics, type CodingTopic } from '@/lib/api/mocks';
 import { ACCENT_CLASS, CODING_META, HIDDEN_ROOT_SLUGS, sectionMetaFor, type Accent } from './section-meta';
 
 /**
@@ -41,6 +42,20 @@ export function PracticePicker({
 }) {
   const [query, setQuery] = useState('');
   const q = query.trim().toLowerCase();
+
+  // Coding topics come from the coding bank (Judge0 problems), a separate system
+  // from the MCQ taxonomy — fetched client-side (guaranteed auth token) like the
+  // custom-mock builder does.
+  const [codingTopics, setCodingTopics] = useState<CodingTopic[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    listCodingTopics()
+      .then((t) => !cancelled && setCodingTopics(t))
+      .catch(() => !cancelled && setCodingTopics([]));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const adaptiveTopicHref = (slug: string) =>
     `/dashboard/quiz/adaptive?topic=${encodeURIComponent(slug)}${companyParam}`;
@@ -80,7 +95,11 @@ export function PracticePicker({
     [companies, q],
   );
 
-  const codingVisible = !q || 'coding'.includes(q);
+  const filteredCodingTopics = useMemo(
+    () => (q ? codingTopics.filter((t) => t.topic.toLowerCase().includes(q)) : codingTopics),
+    [codingTopics, q],
+  );
+  const codingVisible = !q || 'coding'.includes(q) || filteredCodingTopics.length > 0;
   const nothing = filteredRoots.length === 0 && filteredCompanies.length === 0 && !codingVisible;
 
   return (
@@ -144,7 +163,7 @@ export function PracticePicker({
             {filteredRoots.map((root) => (
               <SectionBlock key={root.id} root={root} topicHref={adaptiveTopicHref} />
             ))}
-            {codingVisible ? <CodingBlock /> : null}
+            {codingVisible ? <CodingBlock topics={filteredCodingTopics} /> : null}
           </div>
         </div>
       ) : null}
@@ -206,8 +225,13 @@ function SectionBlock({
   );
 }
 
-/** Section 5 — Coding. Separate Judge0 system, so it links to the Company Hub browse. */
-function CodingBlock() {
+/**
+ * Section 5 — Coding (a separate Judge0 system). A section-wide CTA to practise
+ * all coding, plus a chip per coding topic that deep-links into the
+ * topic-filtered coding catalogue (/coding?topic=…) so students practise
+ * topic-wise just like the MCQ sections.
+ */
+function CodingBlock({ topics }: { topics: CodingTopic[] }) {
   const Icon = CODING_META.icon;
   const a = ACCENT_CLASS[CODING_META.accent];
   return (
@@ -221,20 +245,42 @@ function CodingBlock() {
           <div>
             <p className="text-base font-bold leading-snug text-navy">Coding</p>
             <p className="mt-0.5 text-xs text-slate-500">
-              DSA problems — Judge0-evaluated, grouped by topic &amp; company
+              {topics.length
+                ? `${topics.length} topic${topics.length === 1 ? '' : 's'} · Judge0-evaluated DSA problems`
+                : 'DSA problems — Judge0-evaluated'}
             </p>
           </div>
         </div>
         <Link
-          href="/dashboard/company"
+          href="/coding"
           className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-4 py-2 text-xs font-extrabold text-white transition-transform hover:-translate-y-0.5"
         >
-          Browse coding <ArrowRight className="size-3.5" />
+          Practice all coding <ArrowRight className="size-3.5" />
         </Link>
       </div>
-      <p className="relative mt-3 text-xs text-slate-500">
-        Arrays, Strings, Searching &amp; Sorting, Trees, Graphs, DP and more — pick a topic in the Company Hub.
-      </p>
+
+      {topics.length ? (
+        <div className="relative mt-4 flex flex-wrap gap-2">
+          {topics.map((t) => (
+            <Link
+              key={t.topic}
+              href={`/coding?topic=${encodeURIComponent(t.topic)}`}
+              className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors ${a.chip}`}
+            >
+              {t.topic}
+              {t.count ? (
+                <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500">
+                  {t.count}
+                </span>
+              ) : null}
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <p className="relative mt-3 text-xs text-slate-500">
+          Coding problems are on the way — check back soon.
+        </p>
+      )}
     </div>
   );
 }

@@ -16,9 +16,10 @@ const DIFF_TONE: Record<string, string> = {
 /**
  * Coding problem catalogue. With a `company` slug it scopes to the problems that
  * company has asked (used inside the company hub's Coding tab); without one it
- * lists the full active bank.
+ * lists the full active bank. With a `topic` it narrows to a single coding topic
+ * (used by the Practice → Coding section's topic chips).
  */
-export function CodingProblemsList({ company }: { company?: string } = {}) {
+export function CodingProblemsList({ company, topic }: { company?: string; topic?: string } = {}) {
   const [problems, setProblems] = useState<CodingProblemListItem[] | null>(null);
   const [errored, setErrored] = useState(false);
 
@@ -36,18 +37,27 @@ export function CodingProblemsList({ company }: { company?: string } = {}) {
     };
   }, [company]);
 
+  // When a topic is selected, keep only problems carrying that tag (case-insensitive,
+  // any position — a problem tagged [Arrays, Hashing] shows for both).
+  const filtered = useMemo(() => {
+    const all = problems ?? [];
+    if (!topic) return all;
+    const t = topic.trim().toLowerCase();
+    return all.filter((p) => p.tags?.some((tag) => tag.trim().toLowerCase() === t));
+  }, [problems, topic]);
+
   // Group problems by their primary tag (the topic) so the catalogue reads
   // topic-wise, matching the Practice Quiz tab. Ordered by size, then name.
   const groups = useMemo(() => {
     const map = new Map<string, CodingProblemListItem[]>();
-    for (const p of problems ?? []) {
-      const topic = (p.tags?.[0] ?? '').trim() || 'General';
-      const list = map.get(topic) ?? [];
+    for (const p of filtered) {
+      const primary = (p.tags?.[0] ?? '').trim() || 'General';
+      const list = map.get(primary) ?? [];
       list.push(p);
-      map.set(topic, list);
+      map.set(primary, list);
     }
     return [...map.entries()].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]));
-  }, [problems]);
+  }, [filtered]);
 
   if (errored) {
     return (
@@ -63,21 +73,23 @@ export function CodingProblemsList({ company }: { company?: string } = {}) {
       </div>
     );
   }
-  if (problems.length === 0) {
+  if (filtered.length === 0) {
     return (
       <div className="rounded-2xl border border-slate-200/80 bg-white p-10 text-center shadow-sm">
         <Code2 className="mx-auto mb-3 size-8 text-slate-300" />
         <p className="text-sm font-semibold text-navy">No coding problems yet</p>
         <p className="mt-1 text-sm text-slate-500">
-          {company
-            ? 'No coding problems tagged for this company yet — check back soon.'
-            : 'Check back soon — new problems are on the way.'}
+          {topic
+            ? `No coding problems tagged “${topic}” yet — check back soon.`
+            : company
+              ? 'No coding problems tagged for this company yet — check back soon.'
+              : 'Check back soon — new problems are on the way.'}
         </p>
       </div>
     );
   }
 
-  const solvedCount = problems.filter((p) => p.solved).length;
+  const solvedCount = filtered.filter((p) => p.solved).length;
 
   return (
     <div className="space-y-5">
@@ -93,7 +105,7 @@ export function CodingProblemsList({ company }: { company?: string } = {}) {
             </span>
             <div>
               <p className="text-sm font-bold text-navy">
-                {solvedCount} / {problems.length} solved
+                {solvedCount} / {filtered.length} solved
               </p>
               <p className="text-xs text-slate-500">
                 Earn XP for every problem you solve for the first time.

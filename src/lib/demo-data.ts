@@ -63,6 +63,6 @@ export const EXPLORE_TRACKS = [
 
 export const PRACTICE_HUB = [
   { title: 'Company prep', body: 'Target TCS, Infosys, Capgemini, and more with pattern-matched papers and hubs.', cta: 'Browse companies', href: '/dashboard/company' },
-  { title: 'Mock quiz', body: 'Server-timed assessments with instant percentile, topic breakdown, and full answer review.', cta: 'Start mock quiz', href: '/mock-assessment' },
-  { title: 'Topic mastery', body: 'Drill quant, logical, verbal, and coding by sub-topic with adaptive difficulty.', cta: 'Open topic mode', href: '/practice' },
+  { title: 'Practice', body: 'Adaptive, non-proctored practice — pick a section, a single topic, or a company, and resume any time.', cta: 'Start practicing', href: '/practice' },
+  { title: 'Mock assessment', body: 'Build a proctored, server-timed mock from any sections, topics, or coding — instant percentile and full review.', cta: 'Build mock assessment', href: '/mock-assessment' },
 ];

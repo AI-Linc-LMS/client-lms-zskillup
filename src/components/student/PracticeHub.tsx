@@ -1,14 +1,13 @@
 import Link from 'next/link';
-import { Building2, ClipboardList, Brain, ArrowRight } from 'lucide-react';
+import { Building2, Target, Brain, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PRACTICE_HUB } from '@/lib/demo-data';
 
 /**
  * Practice hub — 3-card grid below the course table on the student dashboard.
- * Matches the approved reference: each card has a colored icon tile, a heading,
- * a 2-line body, and an "Open / Start / Browse →" link. The middle card (Mock
- * quiz) is the active accent — ring + soft orange tint — so the user's eye
- * lands there first.
+ * Each card has a colored icon tile, a heading, a 2-line body, and a "Start /
+ * Build / Browse →" link. The middle card (Practice) is the active accent —
+ * ring + soft orange tint — so the user's eye lands there first.
  */
 
 const ACCENTS = [
@@ -17,7 +16,7 @@ const ACCENTS = [
   { tile: 'bg-violet-50 text-violet-600 ring-1 ring-violet-100', card: 'border-slate-200' },
 ] as const;
 
-const ICONS = [Building2, ClipboardList, Brain];
+const ICONS = [Building2, Target, Brain];
 
 export function PracticeHub() {
   return (
