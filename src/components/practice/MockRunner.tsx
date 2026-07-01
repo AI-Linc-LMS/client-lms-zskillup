@@ -11,6 +11,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
+  Eraser,
+  Flag,
   Loader2,
   ShieldCheck,
   Sparkles,
@@ -223,6 +225,24 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
     [start],
   );
 
+  /** NTA-style "Clear Response": drop the current MCQ answer (persisted as empty). */
+  const clearResponse = useCallback(
+    (questionId: string) => {
+      if (!start || submittedRef.current) return;
+      setAnswers((prev) => {
+        if (!(prev[questionId]?.length)) return prev;
+        saveQueueRef.current = saveQueueRef.current
+          .then(() => answerMock(start.attemptId, { questionId, selectedOptionIds: [] }))
+          .then(() => {
+            ackedRef.current.set(questionId, JSON.stringify([]));
+          })
+          .catch(() => {});
+        return { ...prev, [questionId]: [] };
+      });
+    },
+    [start],
+  );
+
   const onCodeSubmitted = useCallback(
     (problemId: string, r: { verdict: string; passed: number; total: number; isCorrect: boolean }) => {
       setCodingResults((prev) => ({
@@ -285,6 +305,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
           error={error}
           proctored={proctored}
           onSelect={selectOption}
+          onClear={clearResponse}
           onCodeSubmitted={onCodeSubmitted}
           onSubmit={finishAttempt}
         />
@@ -418,6 +439,47 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
   );
 }
 
+// ── NTA-style question status model ─────────────────────────────────────────
+
+type QStatus = 'answered' | 'answeredMarked' | 'marked' | 'notAnswered' | 'notVisited';
+
+const STATUS_META: Record<QStatus, { label: string; cell: string; swatch: string }> = {
+  answered: { label: 'Answered', cell: 'bg-emerald-500 text-white', swatch: 'bg-emerald-500' },
+  answeredMarked: { label: 'Answered & marked', cell: 'bg-violet-600 text-white', swatch: 'bg-violet-600' },
+  marked: { label: 'Marked for review', cell: 'bg-violet-500 text-white', swatch: 'bg-violet-500' },
+  notAnswered: { label: 'Not answered', cell: 'bg-rose-500 text-white', swatch: 'bg-rose-500' },
+  notVisited: {
+    label: 'Not visited',
+    cell: 'bg-slate-100 text-slate-500 ring-1 ring-inset ring-slate-200',
+    swatch: 'bg-slate-200',
+  },
+};
+/** Legend / summary order (NTA convention). */
+const STATUS_ORDER: QStatus[] = ['answered', 'notAnswered', 'notVisited', 'marked', 'answeredMarked'];
+
+function statusOf(answered: boolean, visited: boolean, marked: boolean): QStatus {
+  if (answered && marked) return 'answeredMarked';
+  if (marked) return 'marked';
+  if (answered) return 'answered';
+  if (visited) return 'notAnswered';
+  return 'notVisited';
+}
+
+/** Mark-for-review + visited state persists per attempt so resume keeps the palette. */
+function loadReview(attemptId: string): { marked: string[]; visited: string[] } {
+  if (typeof window === 'undefined') return { marked: [], visited: [] };
+  try {
+    const raw = window.localStorage.getItem(`mock-review:${attemptId}`);
+    if (raw) {
+      const p = JSON.parse(raw) as { marked?: string[]; visited?: string[] };
+      return { marked: p.marked ?? [], visited: p.visited ?? [] };
+    }
+  } catch {
+    /* ignore malformed cache */
+  }
+  return { marked: [], visited: [] };
+}
+
 // ── Running view ──────────────────────────────────────────────────────────────
 
 function MockRunningView({
@@ -431,6 +493,7 @@ function MockRunningView({
   error,
   proctored,
   onSelect,
+  onClear,
   onCodeSubmitted,
   onSubmit,
 }: {
@@ -444,6 +507,7 @@ function MockRunningView({
   error: string | null;
   proctored: boolean;
   onSelect: (questionId: string, optionId: string, multi: boolean) => void;
+  onClear: (questionId: string) => void;
   onCodeSubmitted: (
     problemId: string,
     r: { verdict: string; passed: number; total: number; isCorrect: boolean },
@@ -462,6 +526,69 @@ function MockRunningView({
   const answeredCount = useMemo(
     () => start.questions.filter((q) => isAnswered(q)).length,
     [start.questions, answers, codingResults],
+  );
+
+  // NTA question-status model: `visited` + `marked` persist per attempt so a
+  // resumed run restores the palette exactly.
+  const [marked, setMarked] = useState<Set<string>>(() => new Set(loadReview(start.attemptId).marked));
+  const [visited, setVisited] = useState<Set<string>>(() => new Set(loadReview(start.attemptId).visited));
+
+  useEffect(() => {
+    const qid = start.questions[idx]?.id;
+    if (!qid) return;
+    setVisited((prev) => (prev.has(qid) ? prev : new Set(prev).add(qid)));
+  }, [idx, start.questions]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        `mock-review:${start.attemptId}`,
+        JSON.stringify({ marked: [...marked], visited: [...visited] }),
+      );
+    } catch {
+      /* storage disabled/full — non-fatal, palette just won't survive a reload */
+    }
+  }, [marked, visited, start.attemptId]);
+
+  const questionStatus = useCallback(
+    (q: ApiMockStart['questions'][number]): QStatus =>
+      statusOf(isAnswered(q), visited.has(q.id), marked.has(q.id)),
+    // isAnswered closes over answers/codingResults; list them so status recomputes.
+    [visited, marked, answers, codingResults], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  const counts = useMemo(() => {
+    const c: Record<QStatus, number> = {
+      answered: 0,
+      answeredMarked: 0,
+      marked: 0,
+      notAnswered: 0,
+      notVisited: 0,
+    };
+    for (const q of start.questions) c[questionStatus(q)] += 1;
+    return c;
+  }, [start.questions, questionStatus]);
+
+  const toggleMark = useCallback(() => {
+    const qid = start.questions[idx]?.id;
+    if (!qid) return;
+    setMarked((prev) => {
+      const n = new Set(prev);
+      if (n.has(qid)) n.delete(qid);
+      else n.add(qid);
+      return n;
+    });
+  }, [idx, start.questions]);
+
+  const jumpToStatus = useCallback(
+    (target: QStatus) => {
+      const found = start.questions.findIndex((q) => questionStatus(q) === target);
+      if (found >= 0) {
+        setIdx(() => found);
+        setConfirming(false);
+      }
+    },
+    [start.questions, questionStatus, setIdx],
   );
 
   // NTA-style sections: MCQ → "Quiz", CODING → "Coding". Each holds its
@@ -550,9 +677,25 @@ function MockRunningView({
               {sections.length > 1 ? `${activeKey === 'coding' ? 'Coding' : 'Quiz'} · ` : ''}
               Question {posInSec + 1} of {activeItems.length}
             </p>
-            <span className={cn('rounded-full px-2.5 py-0.5 text-[11px] font-semibold capitalize ring-1', DIFFICULTY_RING[question.difficulty] ?? 'bg-slate-100 text-slate-600 ring-slate-200')}>
-              {question.difficulty.toLowerCase()}
-            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={toggleMark}
+                aria-pressed={marked.has(question.id)}
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1 ring-inset transition-colors',
+                  marked.has(question.id)
+                    ? 'bg-violet-100 text-violet-700 ring-violet-300'
+                    : 'bg-white text-slate-500 ring-slate-200 hover:bg-slate-50',
+                )}
+              >
+                <Flag className={cn('size-3', marked.has(question.id) && 'fill-violet-500 text-violet-600')} aria-hidden="true" />
+                {marked.has(question.id) ? 'Marked' : 'Mark for review'}
+              </button>
+              <span className={cn('rounded-full px-2.5 py-0.5 text-[11px] font-semibold capitalize ring-1', DIFFICULTY_RING[question.difficulty] ?? 'bg-slate-100 text-slate-600 ring-slate-200')}>
+                {question.difficulty.toLowerCase()}
+              </span>
+            </div>
           </div>
           {question.type === 'CODING' ? (
             <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-bold text-indigo-600">Coding problem</p>
@@ -601,13 +744,25 @@ function MockRunningView({
             </div>
           )}
 
-          <div className="mt-6 flex items-center justify-between">
-            <Button variant="outline" size="sm" onClick={() => posInSec > 0 && setIdx(() => activeItems[posInSec - 1].i)} disabled={posInSec <= 0}>
-              <ChevronLeft className="size-4" aria-hidden="true" /> Previous
-            </Button>
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => posInSec > 0 && setIdx(() => activeItems[posInSec - 1].i)} disabled={posInSec <= 0}>
+                <ChevronLeft className="size-4" aria-hidden="true" /> Previous
+              </Button>
+              {question.type !== 'CODING' ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onClear(question.id)}
+                  disabled={!(answers[question.id]?.length)}
+                >
+                  <Eraser className="size-4" aria-hidden="true" /> Clear
+                </Button>
+              ) : null}
+            </div>
             {!isLastInSection ? (
               <Button size="sm" onClick={() => setIdx(() => activeItems[posInSec + 1].i)}>
-                Next <ChevronRight className="size-4" aria-hidden="true" />
+                Save &amp; Next <ChevronRight className="size-4" aria-hidden="true" />
               </Button>
             ) : nextSection ? (
               // End of a non-final section → advance to the next section instead
@@ -635,30 +790,40 @@ function MockRunningView({
             </div>
             <div className="mt-3 grid max-h-[14rem] grid-cols-5 gap-2 overflow-y-auto pr-1">
               {activeItems.map(({ q, i }, local) => {
-                const done = isAnswered(q);
+                const s = questionStatus(q);
                 return (
                   <button
                     key={q.id}
                     type="button"
                     onClick={() => setIdx(() => i)}
                     aria-current={i === idx}
+                    aria-label={`Question ${local + 1} — ${STATUS_META[s].label}`}
                     className={cn(
-                      'grid size-9 place-items-center rounded-lg text-[12px] font-bold transition-colors',
-                      i === idx ? 'bg-navy text-white ring-2 ring-orange ring-offset-1'
-                        : done ? 'bg-emerald-500 text-white'
-                        : 'bg-slate-100 text-slate-500 hover:bg-slate-200',
+                      'relative grid size-9 place-items-center rounded-lg text-[12px] font-bold transition-colors',
+                      STATUS_META[s].cell,
+                      i === idx && 'ring-2 ring-orange ring-offset-1',
                     )}
                   >
                     {local + 1}
+                    {s === 'answeredMarked' ? (
+                      <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-emerald-400 ring-1 ring-white" aria-hidden="true" />
+                    ) : null}
                   </button>
                 );
               })}
             </div>
-            {/* legend */}
-            <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-semibold text-slate-400">
-              <span className="flex items-center gap-1"><span className="size-2.5 rounded bg-emerald-500" /> Answered</span>
-              <span className="flex items-center gap-1"><span className="size-2.5 rounded bg-slate-200" /> Not yet</span>
-              <span className="flex items-center gap-1"><span className="size-2.5 rounded bg-navy" /> Current</span>
+            {/* legend — full NTA status set with live counts */}
+            <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-[10px] font-semibold text-slate-500">
+              {STATUS_ORDER.map((s) => (
+                <span key={s} className="flex items-center gap-1.5">
+                  <span className={cn('relative size-2.5 shrink-0 rounded', STATUS_META[s].swatch)}>
+                    {s === 'answeredMarked' ? (
+                      <span className="absolute -right-1 -top-1 size-1.5 rounded-full bg-emerald-400 ring-1 ring-white" />
+                    ) : null}
+                  </span>
+                  {STATUS_META[s].label} ({counts[s]})
+                </span>
+              ))}
             </div>
             <Button className="mt-4 w-full" size="sm" onClick={() => setConfirming(true)} disabled={submitting}>
               Submit {kind}
@@ -670,22 +835,52 @@ function MockRunningView({
         </aside>
       </main>
 
-      {/* Submit confirmation */}
+      {/* Review summary before submit (NTA-style) — tap a status to revisit */}
       {confirming ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-navy/40 px-6">
           <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-lg">
-            <h2 className="text-base font-bold text-navy">Submit this {kind}?</h2>
+            <h2 className="text-base font-bold text-navy">Review before you submit</h2>
             <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
-              You&apos;ve answered <span className="font-semibold text-navy">{answeredCount}</span> of{' '}
-              {total} questions. Submitting is final — you&apos;ll see your score and a full review
-              right after.
+              You&apos;ve answered{' '}
+              <span className="font-semibold text-navy">{counts.answered + counts.answeredMarked}</span> of{' '}
+              {total}. Tap a status to jump back and revisit those questions — submitting is final.
             </p>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              {STATUS_ORDER.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => jumpToStatus(s)}
+                  disabled={counts[s] === 0}
+                  className={cn(
+                    'flex items-center justify-between gap-2 rounded-xl border border-slate-200 px-3 py-2 text-left text-xs font-semibold transition-colors',
+                    counts[s] > 0 ? 'hover:border-slate-300 hover:bg-slate-50' : 'cursor-default opacity-50',
+                  )}
+                >
+                  <span className="flex items-center gap-1.5 text-slate-600">
+                    <span className={cn('relative size-2.5 shrink-0 rounded', STATUS_META[s].swatch)}>
+                      {s === 'answeredMarked' ? (
+                        <span className="absolute -right-1 -top-1 size-1.5 rounded-full bg-emerald-400 ring-1 ring-white" />
+                      ) : null}
+                    </span>
+                    {STATUS_META[s].label}
+                  </span>
+                  <span className="tabular-nums text-navy">{counts[s]}</span>
+                </button>
+              ))}
+            </div>
+            {counts.notAnswered + counts.notVisited > 0 ? (
+              <p className="mt-3 flex items-center gap-1.5 text-[12px] font-medium text-amber-600">
+                <AlertTriangle className="size-3.5 shrink-0" aria-hidden="true" />
+                {counts.notAnswered + counts.notVisited} question(s) still unanswered.
+              </p>
+            ) : null}
             <div className="mt-5 flex items-center justify-end gap-3">
               <Button variant="outline" size="sm" onClick={() => setConfirming(false)} disabled={submitting}>
                 Keep going
               </Button>
               <Button size="sm" onClick={onSubmit} disabled={submitting}>
-                {submitting ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : 'Submit now'}
+                {submitting ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : `Submit ${kind}`}
               </Button>
             </div>
           </div>
