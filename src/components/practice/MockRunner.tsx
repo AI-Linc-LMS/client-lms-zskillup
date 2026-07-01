@@ -260,7 +260,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
           </span>
           <p className="mt-4 text-sm font-semibold text-navy">{error}</p>
           <Button variant="outline" className="mt-5" asChild>
-            <Link href="/mock-tests">Back to mock tests</Link>
+            <Link href="/mock-assessment">Back to mock tests</Link>
           </Button>
         </div>
       </div>
@@ -316,7 +316,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
 
       <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 px-5 py-6 sm:px-10">
         <Link
-          href="/mock-tests"
+          href="/mock-assessment"
           className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-1.5 text-xs font-semibold text-white/85 backdrop-blur transition-colors hover:bg-white/[0.12]"
         >
           <ArrowLeft className="size-3.5" aria-hidden="true" /> Exit
@@ -376,7 +376,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
                 {starting ? 'Starting…' : proctored ? 'Start assessment' : 'Start test'}
               </button>
               <Link
-                href="/mock-tests"
+                href="/mock-assessment"
                 className="inline-flex h-[52px] items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.06] px-6 text-[15px] font-bold text-white/85 backdrop-blur transition-colors hover:bg-white/[0.12]"
               >
                 Maybe later
@@ -664,7 +664,7 @@ function MockRunningView({
               Submit {kind}
             </Button>
             <Button variant="ghost" size="sm" asChild className="mt-1.5 w-full">
-              <Link href="/mock-tests"><ArrowLeft className="size-3.5" aria-hidden="true" /> Exit</Link>
+              <Link href="/mock-assessment"><ArrowLeft className="size-3.5" aria-hidden="true" /> Exit</Link>
             </Button>
           </div>
         </aside>
@@ -707,7 +707,7 @@ function MockReportView({
   kind?: 'assessment' | 'test';
 }) {
   const isAssessment = kind === 'assessment';
-  const backHref = isAssessment ? '/calendar' : '/mock-tests';
+  const backHref = isAssessment ? '/assessments' : '/mock-assessment';
   const backLabel = isAssessment ? 'Assessments' : 'Mock tests';
   const tone = report.passed ? 'emerald' : report.pct >= 40 ? 'amber' : 'red';
   // Show the reward reveal first (only when we actually awarded this submission).
@@ -988,7 +988,7 @@ function MockReportView({
 
 /**
  * Standalone report view for the `/dashboard/quiz?report=<attemptId>` deep-link
- * (the "View report" action on /mock-tests history). Fetches the persisted
+ * (the "View report" action on /mock-assessment history). Fetches the persisted
  * server-graded report for a finalized attempt.
  */
 export function MockReportLoader({ attemptId }: { attemptId: string }) {
@@ -1018,7 +1018,7 @@ export function MockReportLoader({ attemptId }: { attemptId: string }) {
           </span>
           <p className="mt-4 text-sm font-semibold text-navy">{error}</p>
           <Button variant="outline" className="mt-5" asChild>
-            <Link href="/mock-tests">Back to mock tests</Link>
+            <Link href="/mock-assessment">Back to mock tests</Link>
           </Button>
         </div>
       </div>

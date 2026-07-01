@@ -172,6 +172,21 @@ export interface ApiMockReport extends ApiMockResult {
   proctoring?: ApiMockProctoring | null;
 }
 
+export interface CreateCustomMockBody {
+  sectionSlugs?: string[];
+  topicSlugs?: string[];
+  questionCount: number;
+  durationMinutes: number;
+  includeCoding?: boolean;
+  title?: string;
+}
+
+/** Build a self-serve Mock Assessment (Mode 3) and get its id to run proctored. */
+export async function createCustomMock(body: CreateCustomMockBody): Promise<{ mockId: string }> {
+  const res = await apiClient.post<{ mockId: string }>('/api/v1/mocks/custom', body);
+  return res.data;
+}
+
 export async function listMocks(): Promise<ApiMockSummary[]> {
   const res = await apiClient.get<ApiMockSummary[]>('/api/v1/mocks');
   return res.data;
@@ -223,7 +238,7 @@ export async function getMockReport(attemptId: string): Promise<ApiMockReport> {
   return res.data;
 }
 
-/** The student's finalized attempts, newest first — powers the /mock-tests history. */
+/** The student's finalized attempts, newest first — powers the /mock-assessment history. */
 export async function getMockHistory(): Promise<ApiMockAttemptHistory[]> {
   const res = await apiClient.get<ApiMockAttemptHistory[]>('/api/v1/mocks/attempts/mine');
   return res.data;

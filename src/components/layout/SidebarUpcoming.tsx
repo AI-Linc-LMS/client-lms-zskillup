@@ -54,7 +54,7 @@ export function SidebarUpcoming() {
         <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
           <CalendarClock className="size-3.5 text-orange" /> Upcoming
         </p>
-        <Link href="/calendar" className="text-[10px] font-bold text-orange hover:underline">
+        <Link href="/assessments" className="text-[10px] font-bold text-orange hover:underline">
           All
         </Link>
       </div>
@@ -68,7 +68,7 @@ export function SidebarUpcoming() {
                 href={
                   live && a.mockTestId
                     ? `/dashboard/quiz?mock=${a.mockTestId}${a.proctored ? '&proctored=1' : ''}`
-                    : '/calendar'
+                    : '/assessments'
                 }
                 className={cn(
                   'block rounded-xl border p-2.5 transition-colors',

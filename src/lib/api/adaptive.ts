@@ -8,6 +8,16 @@ export interface AdaptiveOption {
   orderIndex: number;
 }
 
+/** Live time-decay params for one pinned question (mirrors the server scorer). */
+export interface DecayParams {
+  base: number;
+  grace: number;
+  dec: number;
+  iv: number;
+  floor: number;
+  hintPenalty: number;
+}
+
 export interface AdaptivePendingQuestion {
   questionId: string;
   stem: string;
@@ -20,16 +30,26 @@ export interface AdaptivePendingQuestion {
   /** PYQ tag — company tag ids + years this question was asked in. */
   companyIds?: string[];
   yearTags?: number[];
+  /** Server ISO timestamp the question was pinned; the per-question clock runs off this. */
+  servedAt: string;
+  /** Time-decay knobs for the live points meter. */
+  points: DecayParams;
 }
+
+export type AdaptiveMode = 'MOCK' | 'PRACTICE' | 'AS_WISH';
 
 export interface AdaptiveSessionStart {
   sessionId: string;
   mockTestId: string | null;
   title: string;
   minQuestions: number;
-  maxQuestions: number;
+  /** null for unbounded (as-wish) sessions. */
+  maxQuestions: number | null;
   confidencePromptEnabled: boolean;
   hintTokens: number;
+  sessionPoints: number;
+  resumed: boolean;
+  mode: AdaptiveMode;
   firstQuestion: AdaptivePendingQuestion;
 }
 
@@ -47,11 +67,14 @@ export interface AdaptiveAnswerResult {
   progress: {
     answered: number;
     minQuestions: number;
-    maxQuestions: number;
+    maxQuestions: number | null;
     avgSe: number;
   };
   abilityState: Record<string, number>;
   seState: Record<string, number>;
+  pointsEarned: number;
+  pointsBase: number;
+  sessionPoints: number;
 }
 
 export interface SkillMastery {
@@ -76,6 +99,8 @@ export interface AdaptiveQuestionRecord {
   confidence: number | null;
   timeMs: number | null;
   thetaAfter: Record<string, number>;
+  pointsEarned?: number;
+  pointsBase?: number;
 }
 
 export interface AdaptiveResults {
@@ -85,6 +110,7 @@ export interface AdaptiveResults {
   correct: number;
   total: number;
   accuracy: number;
+  pointsTotal?: number;
   skillMastery: SkillMastery[];
   questions: AdaptiveQuestionRecord[];
   abilityState: Record<string, number>;
@@ -164,6 +190,47 @@ export async function startAdaptiveSessionByTopic(
   const res = await apiClient.post<AdaptiveSessionStart>(
     '/api/v1/adaptive-mocks/sessions/start-by-topic',
     { topicSlug, companySlug },
+  );
+  return res.data;
+}
+
+/** Start (or resume) an adaptive Practice session across ALL of a company's tagged questions. */
+export async function startAdaptiveSessionByCompany(
+  companySlug: string,
+): Promise<AdaptiveSessionStart> {
+  const res = await apiClient.post<AdaptiveSessionStart>(
+    '/api/v1/adaptive-mocks/sessions/start-by-company',
+    { companySlug },
+  );
+  return res.data;
+}
+
+/** Start (or resume) an unbounded, generate-on-demand "Practice as-wish" session. */
+export async function startAdaptiveAsWish(
+  topic: string,
+  companySlug?: string,
+): Promise<AdaptiveSessionStart> {
+  const res = await apiClient.post<AdaptiveSessionStart>(
+    '/api/v1/adaptive-mocks/sessions/start-as-wish',
+    { topic, companySlug },
+  );
+  return res.data;
+}
+
+/** End an as-wish session and compute results. */
+export async function finishAdaptiveSession(sessionId: string): Promise<AdaptiveResults> {
+  const res = await apiClient.post<AdaptiveResults>(
+    `/api/v1/adaptive-mocks/sessions/${sessionId}/finish`,
+    {},
+  );
+  return res.data;
+}
+
+/** Spawn a targeted re-quiz seeded from the weakest skill of a completed session. */
+export async function requizSession(sessionId: string): Promise<AdaptiveSessionStart> {
+  const res = await apiClient.post<AdaptiveSessionStart>(
+    `/api/v1/adaptive-mocks/sessions/${sessionId}/requiz`,
+    {},
   );
   return res.data;
 }

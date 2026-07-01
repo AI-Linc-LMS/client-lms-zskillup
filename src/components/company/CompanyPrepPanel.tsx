@@ -76,7 +76,7 @@ export function CompanyPrepPanel({
             {prep.years.map((y) => (
               <Link
                 key={y.year}
-                href={`/practice?company=${companySlug}&year=${y.year}`}
+                href={`/dashboard/quiz/adaptive?company=${companySlug}`}
                 className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_-30px_rgba(124,58,237,0.22)] transition-all hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-[0_22px_50px_-26px_rgba(124,58,237,0.45)]"
               >
                 <div

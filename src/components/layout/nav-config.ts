@@ -11,6 +11,7 @@ import {
   ListChecks,
   type LucideIcon,
   Mail,
+  Sparkles,
   Target,
   TrendingUp,
   Users,
@@ -49,11 +50,17 @@ export const STUDENT_NAV: NavSection[] = [
     ],
   },
   {
-    heading: 'PRACTICE & ASSESSMENT',
+    heading: 'PRACTICE',
     items: [
-      { label: 'Topic Mastery', href: '/topic-mastery', icon: Target },
-      { label: 'Mock Quiz', href: '/mock-tests', icon: Brain },
-      { label: 'Assessments', href: '/calendar', icon: FileCheck2 },
+      { label: 'Practice', href: '/practice', icon: Target },
+      { label: 'Practice as Wish', href: '/practice-wish', icon: Sparkles },
+    ],
+  },
+  {
+    heading: 'ASSESSMENT',
+    items: [
+      { label: 'Mock Assessment', href: '/mock-assessment', icon: Brain },
+      { label: 'Assessments', href: '/assessments', icon: FileCheck2 },
     ],
   },
   {

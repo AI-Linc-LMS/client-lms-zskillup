@@ -4,6 +4,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   startAdaptiveSession,
   startAdaptiveSessionByTopic,
+  startAdaptiveSessionByCompany,
+  startAdaptiveAsWish,
+  finishAdaptiveSession,
+  requizSession,
   submitAdaptiveAnswer,
   requestHint,
   abandonSession,
@@ -29,14 +33,25 @@ interface AdaptiveSessionState {
   error: string | null;
   /** Track answered question count for progress bar. */
   answeredCount: number;
-  /** Per-question timer: ms elapsed since question was shown. */
+  /**
+   * Per-question timer anchor (epoch ms). Derived from the pinned question's
+   * server `servedAt` so the clock (and points decay) keep running across a
+   * leave/return — this is what makes resume feel continuous.
+   */
   questionStartMs: number;
+  /** Running banked points this session (ai-linc parity). */
+  sessionPoints: number;
+  /** Last per-answer award, for the points-burst animation. `nonce` re-fires equal values. */
+  lastPoints: { earned: number; base: number; nonce: number } | null;
+  /** True when an in-progress session was resumed on load. */
+  resumed: boolean;
 }
 
 interface UseAdaptiveSessionReturn extends AdaptiveSessionState {
   submitAnswer: (optionId: string, confidence?: number) => Promise<void>;
   askHint: () => Promise<void>;
   abandon: () => Promise<void>;
+  finish: () => Promise<void>;
   submitting: boolean;
 }
 
@@ -44,10 +59,26 @@ export interface AdaptiveSessionParams {
   mockTestId?: string | null;
   topicSlug?: string | null;
   companySlug?: string | null;
+  /** Free-text topic for an unbounded "Practice as-wish" session. */
+  asWishTopic?: string | null;
+  /** Source session id to spawn a targeted re-quiz from (weakest skill). */
+  requizSourceId?: string | null;
+}
+
+/** Anchor the question timer on the server `servedAt` so resume is continuous. */
+function anchorFrom(q: AdaptivePendingQuestion | null): number {
+  const t = q?.servedAt ? Date.parse(q.servedAt) : NaN;
+  return Number.isFinite(t) ? t : Date.now();
 }
 
 export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSessionReturn {
-  const { mockTestId = null, topicSlug = null, companySlug = null } = params;
+  const {
+    mockTestId = null,
+    topicSlug = null,
+    companySlug = null,
+    asWishTopic = null,
+    requizSourceId = null,
+  } = params;
   const [state, setState] = useState<AdaptiveSessionState>({
     phase: 'loading',
     sessionId: null,
@@ -62,42 +93,51 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
     error: null,
     answeredCount: 0,
     questionStartMs: Date.now(),
+    sessionPoints: 0,
+    lastPoints: null,
+    resumed: false,
   });
 
   const [submitting, setSubmitting] = useState(false);
   const sessionIdRef = useRef<string | null>(null);
+  const nonceRef = useRef(0);
+  // Guard against React double-invoke creating a duplicate re-quiz session.
+  const startedRef = useRef(false);
 
   // Start session on mount
   useEffect(() => {
+    if (startedRef.current) return;
+    startedRef.current = true;
     let cancelled = false;
     (async () => {
       try {
-        const data = mockTestId
-          ? await startAdaptiveSession(mockTestId)
-          : topicSlug
-            ? await startAdaptiveSessionByTopic(topicSlug, companySlug ?? undefined)
-            : null;
+        const data = requizSourceId
+          ? await requizSession(requizSourceId)
+          : mockTestId
+            ? await startAdaptiveSession(mockTestId)
+            : asWishTopic
+              ? await startAdaptiveAsWish(asWishTopic, companySlug ?? undefined)
+              : topicSlug
+                ? await startAdaptiveSessionByTopic(topicSlug, companySlug ?? undefined)
+                : companySlug
+                  ? await startAdaptiveSessionByCompany(companySlug)
+                  : null;
         if (cancelled) return;
         if (!data) {
-          setState((s) => ({ ...s, phase: 'error', error: 'No mock quiz selected' }));
+          setState((s) => ({ ...s, phase: 'error', error: 'No practice scope selected' }));
           return;
         }
         sessionIdRef.current = data.sessionId;
+        const { firstQuestion, ...meta } = data;
         setState((s) => ({
           ...s,
           phase: 'active',
           sessionId: data.sessionId,
-          sessionMeta: {
-            sessionId: data.sessionId,
-            mockTestId: data.mockTestId,
-            title: data.title,
-            minQuestions: data.minQuestions,
-            maxQuestions: data.maxQuestions,
-            confidencePromptEnabled: data.confidencePromptEnabled,
-            hintTokens: data.hintTokens,
-          },
-          currentQuestion: data.firstQuestion,
-          questionStartMs: Date.now(),
+          sessionMeta: meta,
+          currentQuestion: firstQuestion,
+          questionStartMs: anchorFrom(firstQuestion),
+          sessionPoints: data.sessionPoints ?? 0,
+          resumed: !!data.resumed,
         }));
       } catch (err) {
         if (cancelled) return;
@@ -109,7 +149,7 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
       }
     })();
     return () => { cancelled = true; };
-  }, [mockTestId, topicSlug, companySlug]);
+  }, [mockTestId, topicSlug, companySlug, asWishTopic, requizSourceId]);
 
   const submitAnswer = useCallback(
     async (optionId: string, confidence?: number) => {
@@ -124,6 +164,7 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
           confidence,
           timeMs,
         );
+        nonceRef.current += 1;
         setState((s) => ({
           ...s,
           lastAnswer: { isCorrect: result.isCorrect, thetaDelta: result.thetaDelta },
@@ -135,7 +176,9 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
           // nextQuestion set when continuing, null on complete
           currentQuestion: result.nextQuestion,
           phase: result.sessionComplete ? 'complete' : 'active',
-          questionStartMs: Date.now(),
+          questionStartMs: anchorFrom(result.nextQuestion),
+          sessionPoints: result.sessionPoints ?? s.sessionPoints,
+          lastPoints: { earned: result.pointsEarned, base: result.pointsBase, nonce: nonceRef.current },
         }));
       } catch (err) {
         setState((s) => ({
@@ -166,5 +209,11 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
     setState((s) => ({ ...s, phase: 'complete' }));
   }, []);
 
-  return { ...state, submitAnswer, askHint, abandon, submitting };
+  const finish = useCallback(async () => {
+    if (!sessionIdRef.current) return;
+    await finishAdaptiveSession(sessionIdRef.current).catch(() => {});
+    setState((s) => ({ ...s, phase: 'complete', currentQuestion: null }));
+  }, []);
+
+  return { ...state, submitAnswer, askHint, abandon, finish, submitting };
 }

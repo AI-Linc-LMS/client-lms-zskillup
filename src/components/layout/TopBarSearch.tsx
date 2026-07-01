@@ -31,7 +31,7 @@ export function TopBarSearch() {
     if (KNOWN_COMPANIES.has(term)) {
       router.push(`/dashboard/company/${term}`);
     } else if (term.startsWith('topic:')) {
-      router.push(`/practice?topic=${encodeURIComponent(term.slice(6))}`);
+      router.push(`/dashboard/quiz/adaptive?topic=${encodeURIComponent(term.slice(6))}`);
     } else {
       router.push(`/dashboard/company`);
     }

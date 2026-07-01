@@ -82,7 +82,7 @@ export function LiveAssessmentBanner() {
 
         <div className="flex shrink-0 items-center gap-3">
           {live.length > 1 ? (
-            <Link href="/calendar" className="text-xs font-bold text-slate-500 hover:text-navy">
+            <Link href="/assessments" className="text-xs font-bold text-slate-500 hover:text-navy">
               +{live.length - 1} more live
             </Link>
           ) : null}

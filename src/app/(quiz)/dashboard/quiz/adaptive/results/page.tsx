@@ -14,6 +14,7 @@ import {
   Target,
   TrendingUp,
   XCircle,
+  Zap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -89,7 +90,7 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background text-navy">
         <p className="text-rose-600">{loadError}</p>
-        <Button variant="secondary" onClick={() => router.replace('/mock-tests')}>Back</Button>
+        <Button variant="secondary" onClick={() => router.replace('/practice')}>Back</Button>
       </div>
     );
   }
@@ -105,11 +106,10 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
 
   const incorrect = results.total - results.correct;
   const timeMin = Math.max(1, Math.round(results.questions.reduce((s, q) => s + (q.timeMs ?? 0), 0) / 60000));
-  // Weakest skills (lowest mastery) — power the "practise weak skills" deep-link.
+  // Weakest skills (lowest mastery) — labels the re-quiz CTA. The weak skill is
+  // resolved to a topic server-side by the requiz endpoint (skill name → slug).
   const weakSkills = [...results.skillMastery].sort((a, b) => a.masteryPct - b.masteryPct);
-  const practiseHref = weakSkills[0]
-    ? `/practice?topic=${encodeURIComponent(weakSkills[0].skill)}`
-    : '/practice';
+  const requizHref = `/dashboard/quiz/adaptive?requiz=${sessionId}`;
   // A section is "settled" once it resolves to data OR an error — gating the
   // composer on data alone hangs the loader forever if any section errors.
   const settled = [headline, perQuestion, misconceptions, remediation].filter(
@@ -132,11 +132,11 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
         </div>
         <div className="relative z-10 mx-auto max-w-5xl px-5 pb-8 pt-6 sm:px-6">
           <div className="flex items-center justify-between">
-            <Link href="/mock-tests" className="inline-flex items-center gap-1.5 text-xs text-white/60 transition-colors hover:text-white">
-              <ArrowLeft className="size-3.5" /> Back to mock quizzes
+            <Link href="/practice" className="inline-flex items-center gap-1.5 text-xs text-white/60 transition-colors hover:text-white">
+              <ArrowLeft className="size-3.5" /> Back to Practice
             </Link>
             <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#ffb877]">
-              Mock quiz results
+              Session results
             </span>
           </div>
 
@@ -165,8 +165,9 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
           </div>
 
           {/* KPI rail */}
-          <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 shadow-sm sm:grid-cols-4 lg:grid-cols-5">
+          <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 shadow-sm sm:grid-cols-3 lg:grid-cols-6">
             <Kpi icon={Target} label="Accuracy" value={`${results.accuracy}%`} tone="#10b981" />
+            <Kpi icon={Zap} label="Points" value={results.pointsTotal ?? 0} tone="#f59e0b" />
             <Kpi icon={CheckCircle2} label="Correct" value={results.correct} tone="#10b981" />
             <Kpi icon={XCircle} label="Incorrect" value={incorrect} tone="#ef4444" />
             <Kpi icon={Brain} label="Questions" value={results.questions.length} tone="#6366f1" />
@@ -249,16 +250,18 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
         <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-bold text-navy">Ready to close the gap?</p>
-            <p className="mt-0.5 text-xs text-slate-500">Practise your weak skills or take another mock quiz.</p>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Re-quiz your weakest skill{weakSkills[0] ? ` (${prettySkill(weakSkills[0].skill)})` : ''} or head back to Practice.
+            </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" size="sm" asChild>
-              <Link href={practiseHref}>
-                {weakSkills[0] ? `Practise ${prettySkill(weakSkills[0].skill)}` : 'Practise skills'}
-              </Link>
+              <Link href="/practice">Back to Practice</Link>
             </Button>
             <Button size="sm" asChild>
-              <Link href="/mock-tests"><RefreshCw className="mr-1 size-3.5" /> Retake</Link>
+              <Link href={requizHref}>
+                <RefreshCw className="mr-1 size-3.5" /> Re-quiz weakest skill
+              </Link>
             </Button>
           </div>
         </div>
@@ -316,7 +319,7 @@ function ResultsPage() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background text-navy">
         <p className="text-slate-400">No session specified.</p>
-        <Button asChild variant="secondary"><Link href="/mock-tests">Back to mock quizzes</Link></Button>
+        <Button asChild variant="secondary"><Link href="/practice">Back to Practice</Link></Button>
       </div>
     );
   }

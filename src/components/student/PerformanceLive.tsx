@@ -139,7 +139,7 @@ export function PerformanceLive() {
             <EmptyState
               title="No practice data yet."
               detail="Attempt a few questions and your per-topic accuracy appears here."
-              href="/topic-mastery"
+              href="/practice"
               cta="Start practising"
             />
           ) : (
@@ -209,7 +209,7 @@ export function PerformanceLive() {
                       {t.correct} of {t.total} correct — drill this topic to pull the average up.
                     </p>
                     <Button asChild size="sm" variant="outline" className="mt-4 w-fit">
-                      <Link href={`/practice?topic=${encodeURIComponent(t.topicSlug)}`}>Drill now</Link>
+                      <Link href={`/dashboard/quiz/adaptive?topic=${encodeURIComponent(t.topicSlug)}`}>Drill now</Link>
                     </Button>
                   </div>
                 </motion.div>
@@ -231,7 +231,7 @@ export function PerformanceLive() {
             <EmptyState
               title="No mock tests taken yet."
               detail="Finish a timed mock and your score, percentile, and review land here."
-              href="/mock-tests"
+              href="/mock-assessment"
               cta="Browse mock tests"
             />
           ) : (

@@ -34,7 +34,7 @@ export function ContinueLearning() {
           <p className="text-xs text-[var(--color-text-muted)]">Your latest assessment and practice signals</p>
         </div>
         <Link
-          href="/mock-tests"
+          href="/mock-assessment"
           className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-brand)] hover:underline"
         >
           View all <ArrowRight className="h-3 w-3" />
@@ -107,7 +107,7 @@ export function ContinueLearning() {
             </Link>
           ) : (
             <Link
-              href="/mock-tests"
+              href="/mock-assessment"
               className="btn-brand inline-flex rounded-full px-5 py-2 text-sm"
             >
               <Play className="h-4 w-4 fill-white" aria-hidden />

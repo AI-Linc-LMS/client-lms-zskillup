@@ -56,7 +56,7 @@ export default function AssessmentLeaderboardPage({ params }: { params: Promise<
       <Breadcrumb
         items={[
           { label: 'Dashboard', href: '/dashboard' },
-          { label: 'Calendar', href: '/calendar' },
+          { label: 'Assessments', href: '/assessments' },
           { label: 'Leaderboard' },
         ]}
       />
@@ -142,7 +142,7 @@ export default function AssessmentLeaderboardPage({ params }: { params: Promise<
       <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Rankings</p>
-          <Link href="/calendar" className="inline-flex items-center gap-1 text-xs font-bold text-orange hover:underline">
+          <Link href="/assessments" className="inline-flex items-center gap-1 text-xs font-bold text-orange hover:underline">
             <ArrowLeft className="size-3.5" /> Calendar
           </Link>
         </div>

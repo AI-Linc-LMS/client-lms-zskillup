@@ -6,7 +6,7 @@ import { CheckCircle2, Clock, Sparkles, Zap } from 'lucide-react';
 import { getDailyQuest, type ApiDailyQuest } from '@/lib/api/gamification';
 
 function questHref(quest: ApiDailyQuest): string {
-  if (quest.kind === 'MOCK') return `/mock-tests`;
+  if (quest.kind === 'MOCK') return `/mock-assessment`;
   return `/practice`;
 }
 
@@ -49,7 +49,7 @@ export function DailyQuest() {
               </p>
             </div>
           </div>
-          <Link href="/practice?topic=percentages" className="btn-brand inline-flex shrink-0 rounded-full px-5 py-2 text-sm">
+          <Link href="/dashboard/quiz/adaptive?topic=percentages" className="btn-brand inline-flex shrink-0 rounded-full px-5 py-2 text-sm">
             <Zap className="h-4 w-4" aria-hidden />
             Start practising
           </Link>

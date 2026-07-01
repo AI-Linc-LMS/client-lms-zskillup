@@ -601,7 +601,7 @@ export default function HomePage() {
             <ul className="space-y-2">
               {[
                 { label: 'Prepare', href: '/prepare' },
-                { label: 'Mock tests', href: '/mock-tests' },
+                { label: 'Mock tests', href: '/mock-assessment' },
                 { label: 'Companies', href: '/dashboard/company' },
                 { label: 'Leaderboard', href: '/leaderboard' },
               ].map((l) => (

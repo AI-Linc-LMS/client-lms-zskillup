@@ -71,7 +71,7 @@ function QuizLanding() {
         </ul>
 
         <Button size="lg" className="mt-9" asChild>
-          <Link href="/mock-tests">
+          <Link href="/mock-assessment">
             Browse mock tests <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
         </Button>

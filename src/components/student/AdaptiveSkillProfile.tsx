@@ -144,7 +144,7 @@ export function AdaptiveSkillProfile() {
               Take an AI adaptive quiz to get a personalised skill profile and study plan.
             </p>
             <Link
-              href="/mock-tests"
+              href="/mock-assessment"
               className="group/cta mt-3 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-[#f7a14e] to-[#f37021] px-3.5 py-2 text-xs font-bold text-white shadow-[0_10px_24px_-12px_rgba(243,112,33,0.9)] transition-transform active:scale-[0.98]"
             >
               Take your first adaptive test

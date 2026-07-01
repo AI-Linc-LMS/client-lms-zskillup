@@ -8,16 +8,21 @@ import {
   CheckCircle2,
   Clock,
   Compass,
+  Flag,
   Lightbulb,
   Loader2,
   RotateCcw,
+  Sparkles,
   Target,
   TrendingUp,
+  Zap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PyqTag } from '@/components/practice/PyqTag';
 import { cn } from '@/lib/utils';
 import { useAdaptiveSession } from '@/hooks/useAdaptiveSession';
+import { LivePointsMeter } from '@/components/adaptive/LivePointsMeter';
+import { PointsBurst } from '@/components/adaptive/PointsBurst';
 import type { AdaptiveOption } from '@/lib/api/adaptive';
 
 /* Brand quiz palette — light surface with an orange accent. */
@@ -67,10 +72,14 @@ function AdaptiveQuizRunner({
   mockId,
   topicSlug,
   companySlug,
+  asWishTopic,
+  requizSourceId,
 }: {
   mockId: string | null;
   topicSlug: string | null;
   companySlug: string | null;
+  asWishTopic: string | null;
+  requizSourceId: string | null;
 }) {
   const router = useRouter();
   const {
@@ -88,7 +97,11 @@ function AdaptiveQuizRunner({
     submitAnswer,
     askHint,
     abandon,
-  } = useAdaptiveSession({ mockTestId: mockId, topicSlug, companySlug });
+    finish,
+    sessionPoints,
+    lastPoints,
+    resumed,
+  } = useAdaptiveSession({ mockTestId: mockId, topicSlug, companySlug, asWishTopic, requizSourceId });
 
   const [selected, setSelected] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
@@ -122,7 +135,7 @@ function AdaptiveQuizRunner({
       <div className="grid min-h-screen place-items-center bg-background">
         <div className="flex flex-col items-center gap-3 text-slate-500">
           <QuizMark size={44} />
-          <p className="text-sm">{phase === 'complete' ? 'Composing your results…' : 'Starting your mock quiz…'}</p>
+          <p className="text-sm">{phase === 'complete' ? 'Composing your results…' : 'Starting your practice…'}</p>
         </div>
       </div>
     );
@@ -131,12 +144,16 @@ function AdaptiveQuizRunner({
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background text-navy">
         <p className="text-rose-600">{error ?? 'Something went wrong.'}</p>
-        <Button variant="secondary" onClick={() => router.replace('/mock-tests')}>Back to mock quizzes</Button>
+        <Button variant="secondary" onClick={() => router.replace('/practice')}>Back to Practice</Button>
       </div>
     );
   }
   if (!currentQuestion) return null;
 
+  const mode = sessionMeta?.mode ?? (mockId ? 'MOCK' : 'PRACTICE');
+  const unbounded = sessionMeta?.maxQuestions == null || mode === 'AS_WISH';
+  const modeLabel = mode === 'AS_WISH' ? 'Practice as-wish' : mode === 'MOCK' ? 'Mock Quiz' : 'Practice';
+  const exitHref = mode === 'AS_WISH' ? '/practice-wish' : '/practice';
   const maxQ = sessionMeta?.maxQuestions ?? 15;
   const minQ = sessionMeta?.minQuestions ?? 8;
   const answered = progress?.answered ?? answeredCount;
@@ -146,7 +163,9 @@ function AdaptiveQuizRunner({
   const markerLeft = `${Math.round((1 - (q.predictedPCorrect ?? 0.5)) * 100)}%`;
   const confidenceRequired = !!sessionMeta?.confidencePromptEnabled;
   const canSubmit = !!selected && (!confidenceRequired || confidence !== null) && !submitting;
-  const progressPct = Math.min(100, Math.round((answered / maxQ) * 100));
+  const progressPct = unbounded
+    ? Math.min(95, 15 + answered * 6)
+    : Math.min(100, Math.round((answered / maxQ) * 100));
 
   const handleSubmit = async () => {
     if (!canSubmit || !selected) return;
@@ -161,30 +180,54 @@ function AdaptiveQuizRunner({
         <div className="absolute -right-1/4 -top-1/3 size-[55vw] rounded-full bg-[#2563eb]/[0.05] blur-[120px]" />
       </div>
 
+      {/* points earned burst — stays mounted across questions so it fires on submit */}
+      <PointsBurst earned={lastPoints?.earned} nonce={lastPoints?.nonce ?? 0} />
+
       <div className="relative z-10 mx-auto max-w-[1200px] px-4 py-6 sm:px-6">
         {/* header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <button
-            onClick={() => void abandon().then(() => router.replace('/mock-tests'))}
+            onClick={() => void abandon().then(() => router.replace(exitHref))}
             className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 transition-colors hover:text-navy"
           >
-            <ArrowLeft className="size-3.5" /> Exit quiz
+            <ArrowLeft className="size-3.5" /> Exit
           </button>
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-            Mock Quiz
-          </span>
+          <div className="flex items-center gap-2">
+            {/* running session points */}
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-black text-amber-600 ring-1 ring-inset ring-amber-200 tabular-nums">
+              <Zap className="size-3.5 fill-amber-400 text-amber-500" /> {sessionPoints} pts
+            </span>
+            {unbounded ? (
+              <button
+                onClick={() => void finish().then(() => sessionId && router.replace(`/dashboard/quiz/adaptive/results?session=${sessionId}`))}
+                className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-emerald-700"
+              >
+                <Flag className="size-3.5" /> I&apos;m done
+              </button>
+            ) : (
+              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">{modeLabel}</span>
+            )}
+          </div>
         </div>
+
+        {/* resume banner */}
+        {resumed ? (
+          <div className="mt-3 flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2 text-[12px] font-medium text-indigo-700">
+            <RotateCcw className="size-4 shrink-0" />
+            Picking up where you left off — the clock&apos;s been running.
+          </div>
+        ) : null}
 
         {/* hero */}
         <div className="mt-4 flex items-center gap-3">
           <span className="grid size-12 place-items-center rounded-2xl" style={{ background: BRAND_GRAD }}>
-            <Target className="size-6 text-white" />
+            {mode === 'AS_WISH' ? <Sparkles className="size-6 text-white" /> : <Target className="size-6 text-white" />}
           </span>
           <div>
             <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-orange">
-              <span className="size-1.5 animate-pulse rounded-full bg-orange" /> Live mock quiz
+              <span className="size-1.5 animate-pulse rounded-full bg-orange" /> Live · {modeLabel}
             </p>
-            <h1 className="text-xl font-black tracking-tight">{sessionMeta?.title ?? 'Mock Quiz'}</h1>
+            <h1 className="text-xl font-black tracking-tight">{sessionMeta?.title ?? modeLabel}</h1>
           </div>
         </div>
 
@@ -193,7 +236,7 @@ function AdaptiveQuizRunner({
           <div className="flex items-center justify-between text-[11px]">
             <span className="text-slate-600">
               Question <span className="font-extrabold text-navy">{answered + 1}</span>
-              <span className="text-slate-400"> · ~{minQ}–{maxQ}</span>
+              <span className="text-slate-400"> · {unbounded ? 'unlimited' : `~${minQ}–${maxQ}`}</span>
             </span>
             <span className="flex items-center gap-1.5">
               <span className="text-slate-400">Difficulty read:</span>
@@ -239,8 +282,9 @@ function AdaptiveQuizRunner({
 
         {/* 3-column work area */}
         <div className="mt-5 grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)_300px]">
-          {/* LEFT — timer + skill confidence */}
+          {/* LEFT — live points + timer + skill confidence */}
           <aside className="order-2 space-y-4 lg:order-none">
+            <LivePointsMeter points={q.points} servedAt={q.servedAt} hinted={!!hintState} />
             <Panel>
               <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
                 <Clock className="size-3.5" /> On this question
@@ -293,7 +337,7 @@ function AdaptiveQuizRunner({
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center gap-1.5">
-                <Chip>Q{answered + 1} / ~{maxQ}</Chip>
+                <Chip>{unbounded ? `Q${answered + 1}` : `Q${answered + 1} / ~${maxQ}`}</Chip>
                 <span className={cn('rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ring-1 ring-inset', diff.text, diff.ring, diff.bg)}>
                   {q.difficultyLabel}
                 </span>
@@ -494,11 +538,11 @@ function AdaptiveQuizLanding() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background px-6 text-center text-navy">
       <QuizMark size={48} />
-      <h1 className="text-2xl font-black">Mock Quiz</h1>
+      <h1 className="text-2xl font-black">Practice</h1>
       <p className="max-w-sm text-sm text-slate-500">
-        No mock quiz selected. Pick one from the catalog to begin.
+        No practice scope selected. Choose a company, topic or section to begin.
       </p>
-      <Button onClick={() => router.replace('/mock-tests')}>Browse mock quizzes</Button>
+      <Button onClick={() => router.replace('/practice')}>Choose what to practice</Button>
     </div>
   );
 }
@@ -508,8 +552,19 @@ function AdaptivePage() {
   const mockId = searchParams.get('mock');
   const topicSlug = searchParams.get('topic');
   const companySlug = searchParams.get('company');
-  if (!mockId && !topicSlug) return <AdaptiveQuizLanding />;
-  return <AdaptiveQuizRunner mockId={mockId} topicSlug={topicSlug} companySlug={companySlug} />;
+  const asWishTopic = searchParams.get('aswish');
+  const requizSourceId = searchParams.get('requiz');
+  if (!mockId && !topicSlug && !companySlug && !asWishTopic && !requizSourceId)
+    return <AdaptiveQuizLanding />;
+  return (
+    <AdaptiveQuizRunner
+      mockId={mockId}
+      topicSlug={topicSlug}
+      companySlug={companySlug}
+      asWishTopic={asWishTopic}
+      requizSourceId={requizSourceId}
+    />
+  );
 }
 
 export default function AdaptiveQuizPage() {

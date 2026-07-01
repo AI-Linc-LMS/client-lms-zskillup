@@ -53,8 +53,8 @@ export const ASSESSMENT_PLATFORMS = [
 
 export const EXPLORE_TRACKS = [
   { label: 'Company hubs', href: '/dashboard/company' },
-  { label: 'Topic mastery', href: '/topic-mastery' },
-  { label: 'Full mock quiz', href: '/mock-tests' },
+  { label: 'Topic mastery', href: '/practice' },
+  { label: 'Full mock quiz', href: '/mock-assessment' },
   { label: 'Leaderboard', href: '/leaderboard' },
 ];
 
@@ -62,6 +62,6 @@ export const EXPLORE_TRACKS = [
 
 export const PRACTICE_HUB = [
   { title: 'Company prep', body: 'Target TCS, Infosys, Capgemini, and more with pattern-matched papers and hubs.', cta: 'Browse companies', href: '/dashboard/company' },
-  { title: 'Mock quiz', body: 'Server-timed assessments with instant percentile, topic breakdown, and full answer review.', cta: 'Start mock quiz', href: '/mock-tests' },
-  { title: 'Topic mastery', body: 'Drill quant, logical, verbal, and coding by sub-topic with adaptive difficulty.', cta: 'Open topic mode', href: '/topic-mastery' },
+  { title: 'Mock quiz', body: 'Server-timed assessments with instant percentile, topic breakdown, and full answer review.', cta: 'Start mock quiz', href: '/mock-assessment' },
+  { title: 'Topic mastery', body: 'Drill quant, logical, verbal, and coding by sub-topic with adaptive difficulty.', cta: 'Open topic mode', href: '/practice' },
 ];

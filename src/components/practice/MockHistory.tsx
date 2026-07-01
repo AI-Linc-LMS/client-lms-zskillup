@@ -21,7 +21,7 @@ import { getMockStats } from '@/lib/mock-stats';
 
 /**
  * Live mock history (Sprint 4): the KPI row and past-results list on
- * /mock-tests, computed from the student's real finalized attempts
+ * /mock-assessment, computed from the student's real finalized attempts
  * (`GET /mocks/attempts/mine`). Each row deep-links to its persisted report.
  */
 export function MockHistory() {

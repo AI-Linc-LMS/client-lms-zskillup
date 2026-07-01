@@ -310,7 +310,7 @@ function CompanyHero({ content, reduce }: { content: HubContent; reduce: boolean
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
-              href="/mock-tests"
+              href="/mock-assessment"
               className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-5 py-2.5 text-sm font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur transition-colors hover:bg-white/[0.14]"
             >
               <Trophy className="size-4" aria-hidden="true" /> Timed assessment

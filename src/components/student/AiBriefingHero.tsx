@@ -45,7 +45,7 @@ const DEFAULT_FOCUS: FocusArea[] = [
   { title: 'Sharpen your fundamentals', detail: 'Targeted practice on weak topics' },
   { title: 'Simulate the real thing', detail: 'A timed full-length mock test' },
 ];
-const DEFAULT_ACTION: NextAction = { label: 'Take a mock', kind: 'mock', href: '/mock-tests' };
+const DEFAULT_ACTION: NextAction = { label: 'Take a mock', kind: 'mock', href: '/mock-assessment' };
 
 function firstNameOf(fullName: string | null | undefined): string {
   const trimmed = fullName?.trim();

@@ -23,6 +23,15 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Required for Amplify Hosting SSR (compute) deployments
   output: 'standalone',
+  // Legacy test-surface routes fold into the 4 consolidated modes. Permanent so
+  // old bookmarks/deep-links (and any stale in-app links) land on the new home.
+  async redirects() {
+    return [
+      { source: '/topic-mastery', destination: '/practice', permanent: true },
+      { source: '/mock-tests', destination: '/mock-assessment', permanent: true },
+      { source: '/calendar', destination: '/assessments', permanent: true },
+    ];
+  },
   async rewrites() {
     if (!BACKEND_ORIGIN) return [];
     return {

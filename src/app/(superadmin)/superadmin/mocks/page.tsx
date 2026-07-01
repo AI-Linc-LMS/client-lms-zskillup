@@ -4,7 +4,7 @@ import { MocksAdmin } from '@/components/superadmin/MocksAdmin';
 /**
  * Super-admin: Mock-test console (Sprint 4 — "Mock test definitions"). Author
  * timed mock tests from the published question bank; the student-facing engine
- * (`/mock-tests` → `/dashboard/quiz`) serves and grades them.
+ * (`/mock-assessment` → `/dashboard/quiz`) serves and grades them.
  *
  * Endpoint surface (backend):
  *   GET    /api/v1/admin/mocks       — list all mocks

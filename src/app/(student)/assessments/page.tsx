@@ -52,7 +52,7 @@ function countdown(iso: string): string {
 /** Student assessment calendar (assessment lifecycle, Phase 2). Scheduled drives
  *  for the companies the student registered for — a premium navy hero with live
  *  stats, an interactive month grid, and a timeline of upcoming drives. */
-export default function CalendarPage() {
+export default function AssessmentsPage() {
   const [items, setItems] = useState<ApiScheduledAssessment[] | null>(null);
   const [cursor, setCursor] = useState(() => {
     const n = new Date();
@@ -113,7 +113,7 @@ export default function CalendarPage() {
 
   return (
     <div className="w-full">
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Calendar' }]} />
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Assessments' }]} />
 
       {/* ── Premium navy hero with live stats ─────────────────────────────── */}
       <Reveal>

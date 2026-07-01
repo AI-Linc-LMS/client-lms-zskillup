@@ -260,7 +260,7 @@ export function CompanyReadiness() {
               .
             </p>
             <Link
-              href="/mock-tests"
+              href="/mock-assessment"
               className="group/cta inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-[#f7a14e] to-[#f37021] px-4 py-2 text-xs font-bold text-white shadow-[0_10px_24px_-12px_rgba(243,112,33,0.9)] transition-transform active:scale-[0.98]"
             >
               Retake adaptive test
@@ -377,7 +377,7 @@ function EmptyState() {
         </p>
 
         <Link
-          href="/mock-tests"
+          href="/mock-assessment"
           className="group/cta mt-4 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-xs font-bold text-white shadow-[0_12px_28px_-12px_rgba(243,112,33,0.9)] transition-transform active:scale-[0.98]"
         >
           Take adaptive test

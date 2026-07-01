@@ -105,7 +105,7 @@ export function PerformanceDashboard() {
               <div className="mt-6 grid place-items-center rounded-2xl border border-dashed border-slate-200 py-10 text-center">
                 <p className="text-sm text-slate-500">
                   No mock/assessment attempts yet.{' '}
-                  <Link href="/mock-tests" className="font-semibold text-indigo-600 hover:underline">Take a mock quiz →</Link>
+                  <Link href="/mock-assessment" className="font-semibold text-indigo-600 hover:underline">Take a mock quiz →</Link>
                 </p>
               </div>
             ) : (
@@ -167,7 +167,7 @@ export function PerformanceDashboard() {
               {weak.slice(0, 12).map((t) => (
                 <Link
                   key={t.topicSlug}
-                  href={`/practice?topic=${t.topicSlug}`}
+                  href={`/dashboard/quiz/adaptive?topic=${t.topicSlug}`}
                   className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-white px-3.5 py-2 text-sm font-semibold text-navy shadow-sm transition-colors hover:bg-amber-50"
                 >
                   {t.topicName}

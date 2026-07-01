@@ -41,7 +41,7 @@ export function CompanyMockTab({ content }: { content: HubContent }) {
 
       {/* Adaptive mock quiz — standout violet card */}
       <Link
-        href="/mock-tests"
+        href="/mock-assessment"
         className="group relative flex items-center justify-between gap-3 overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_-30px_rgba(124,58,237,0.22)] transition-shadow hover:shadow-[0_24px_60px_-28px_rgba(124,58,237,0.35)] sm:gap-4 sm:p-6"
       >
         <div
@@ -104,7 +104,7 @@ export function CompanyMockTab({ content }: { content: HubContent }) {
                     {s.proctored ? <span className="flex items-center gap-1 text-violet-600"><Video className="size-3" /> Proctored</span> : null}
                   </p>
                 </div>
-                <Link href="/calendar" className="shrink-0 text-xs font-bold text-violet-600 hover:underline">
+                <Link href="/assessments" className="shrink-0 text-xs font-bold text-violet-600 hover:underline">
                   Calendar →
                 </Link>
               </li>
