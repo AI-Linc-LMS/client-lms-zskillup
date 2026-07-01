@@ -117,10 +117,15 @@ function AdaptiveQuizRunner({
     }
   }, [currentQuestion]);
 
-  // Per-question elapsed timer.
+  // Per-question elapsed timer — anchored to the server `servedAt` so a resumed
+  // question shows the real elapsed time (matches the live points meter), not 0.
   useEffect(() => {
     if (!currentQuestion) return;
-    const t = setInterval(() => setElapsed((e) => e + 1), 1000);
+    const anchor = Date.parse(currentQuestion.servedAt);
+    const base = Number.isFinite(anchor) ? anchor : Date.now();
+    const tick = () => setElapsed(Math.max(0, Math.floor((Date.now() - base) / 1000)));
+    tick();
+    const t = setInterval(tick, 1000);
     return () => clearInterval(t);
   }, [currentQuestion]);
 
@@ -160,7 +165,16 @@ function AdaptiveQuizRunner({
   const q = currentQuestion;
   const diff = DIFF_TONE[q.difficultyLabel] ?? DIFF_TONE.MEDIUM;
   const cert = certaintyBand(answered);
-  const markerLeft = `${Math.round((1 - (q.predictedPCorrect ?? 0.5)) * 100)}%`;
+  // Difficulty-meter marker: driven by the QUESTION'S difficulty band (which
+  // visibly adapts EASY↔MEDIUM↔HARD), nudged slightly by predicted correctness.
+  // (The selector targets p≈0.5 by design, so predictedPCorrect alone would keep
+  // the marker glued to the centre — the band is what actually moves.)
+  const DIFF_POS: Record<string, number> = { EASY: 0.16, MEDIUM: 0.5, HARD: 0.84 };
+  const markerFrac = Math.min(
+    0.94,
+    Math.max(0.06, (DIFF_POS[q.difficultyLabel] ?? 0.5) + (0.5 - (q.predictedPCorrect ?? 0.5)) * 0.18),
+  );
+  const markerLeft = `${Math.round(markerFrac * 100)}%`;
   const confidenceRequired = !!sessionMeta?.confidencePromptEnabled;
   const canSubmit = !!selected && (!confidenceRequired || confidence !== null) && !submitting;
   const progressPct = unbounded

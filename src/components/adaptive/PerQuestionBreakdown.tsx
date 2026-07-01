@@ -30,7 +30,7 @@ export function PerQuestionBreakdown({ questions, perQuestionNarration }: PerQue
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       {/* number pills */}
-      <p className="mb-2 text-[11px] text-slate-400">Tap a question to see the AI&apos;s read on it.</p>
+      <p className="mb-2 text-[11px] text-slate-400">Tap a question to see the explanation.</p>
       <div className="flex flex-wrap gap-2">
         {questions.map((qq, i) => {
           const active = i === sel;
@@ -136,7 +136,7 @@ export function PerQuestionBreakdown({ questions, perQuestionNarration }: PerQue
             {q.explanation}
           </div>
         ) : (
-          <p className="mt-3 text-xs text-slate-400">AI rationale is still composing…</p>
+          <p className="mt-3 text-xs text-slate-400">No explanation was authored for this question.</p>
         )}
       </motion.div>
     </div>
