@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { HOMEPAGE_COMPANY_LOGOS } from '@/lib/demo-data-extra';
 import { PublicMobileMenu } from '@/components/marketing/PublicMobileMenu';
+import { PublicAuthCta } from '@/components/marketing/PublicAuthCta';
 import { BrandLogo } from '@/components/layout/BrandLogo';
 import { HomeFeaturedTracks } from '@/components/marketing/HomeFeaturedTracks';
 import { HomeTopCohort } from '@/components/marketing/HomeTopCohort';
@@ -114,18 +115,7 @@ export default function HomePage() {
           ))}
         </nav>
         <div className="flex items-center gap-3">
-          <Link
-            href="/login"
-            className="hidden text-sm font-semibold text-white/80 transition-colors hover:text-white sm:block"
-          >
-            Log in
-          </Link>
-          <Link
-            href="/signup"
-            className="btn-brand rounded-full px-5 py-2 text-sm"
-          >
-            Get started free
-          </Link>
+          <PublicAuthCta />
           <PublicMobileMenu />
         </div>
       </header>

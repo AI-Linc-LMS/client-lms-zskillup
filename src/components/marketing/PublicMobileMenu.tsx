@@ -3,6 +3,13 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
+import { roleHint } from '@/lib/session-hints';
+
+function roleHome(role: string | null): string {
+  if (role === 'SUPER_ADMIN') return '/superadmin/dashboard';
+  if (role === 'COLLEGE_ADMIN') return '/tpo/dashboard';
+  return '/dashboard';
+}
 
 /**
  * Mobile menu for the PUBLIC (logged-out) navbar. The public landing header's
@@ -20,6 +27,8 @@ const LINKS = [
 
 export function PublicMobileMenu() {
   const [open, setOpen] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
+  useEffect(() => setRole(roleHint()), []);
 
   useEffect(() => {
     if (!open) return;
@@ -62,11 +71,11 @@ export function PublicMobileMenu() {
                 </Link>
               ))}
               <Link
-                href="/login"
+                href={role ? roleHome(role) : '/login'}
                 onClick={() => setOpen(false)}
                 className="rounded-lg px-3 py-2.5 text-sm font-semibold text-white/85 transition-colors hover:bg-white/10 hover:text-white"
               >
-                Log in
+                {role ? 'Go to dashboard' : 'Log in'}
               </Link>
             </nav>
           </div>
