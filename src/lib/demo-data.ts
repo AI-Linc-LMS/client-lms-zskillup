@@ -28,6 +28,8 @@ export interface DemoCompany {
   enrolled: string;
   package: string;
   mcqs: string;
+  /** Real live count of published questions tagged to this company (from the API). */
+  questionCount?: number;
   rounds: number;
   badge?: string;
   accent: string; // tailwind gradient classes

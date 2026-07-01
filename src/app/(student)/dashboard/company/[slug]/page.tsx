@@ -44,6 +44,7 @@ export default async function CompanyHubPage({
     enrolled: live.enrolled ?? fallback.company.enrolled,
     package: live.package ?? fallback.company.package,
     mcqs: live.mcqs ?? fallback.company.mcqs,
+    questionCount: live.questionCount,
     rounds: live.rounds ?? fallback.company.rounds,
     badge: live.badge ?? fallback.company.badge,
     accent: live.accent ?? fallback.company.accent,

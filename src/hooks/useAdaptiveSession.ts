@@ -63,6 +63,8 @@ export interface AdaptiveSessionParams {
   asWishTopic?: string | null;
   /** Source session id to spawn a targeted re-quiz from (weakest skill). */
   requizSourceId?: string | null;
+  /** Optional PYQ year scope for topic/company practice. */
+  year?: number | null;
 }
 
 /** Anchor the question timer on the server `servedAt` so resume is continuous. */
@@ -78,6 +80,7 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
     companySlug = null,
     asWishTopic = null,
     requizSourceId = null,
+    year = null,
   } = params;
   const [state, setState] = useState<AdaptiveSessionState>({
     phase: 'loading',
@@ -111,6 +114,7 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
     let cancelled = false;
     (async () => {
       try {
+        const yr = year ?? undefined;
         const data = requizSourceId
           ? await requizSession(requizSourceId)
           : mockTestId
@@ -118,9 +122,9 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
             : asWishTopic
               ? await startAdaptiveAsWish(asWishTopic, companySlug ?? undefined)
               : topicSlug
-                ? await startAdaptiveSessionByTopic(topicSlug, companySlug ?? undefined)
+                ? await startAdaptiveSessionByTopic(topicSlug, companySlug ?? undefined, yr)
                 : companySlug
-                  ? await startAdaptiveSessionByCompany(companySlug)
+                  ? await startAdaptiveSessionByCompany(companySlug, yr)
                   : null;
         if (cancelled) return;
         if (!data) {
@@ -149,7 +153,7 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
       }
     })();
     return () => { cancelled = true; };
-  }, [mockTestId, topicSlug, companySlug, asWishTopic, requizSourceId]);
+  }, [mockTestId, topicSlug, companySlug, asWishTopic, requizSourceId, year]);
 
   const submitAnswer = useCallback(
     async (optionId: string, confidence?: number) => {

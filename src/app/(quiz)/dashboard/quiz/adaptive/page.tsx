@@ -74,12 +74,14 @@ function AdaptiveQuizRunner({
   companySlug,
   asWishTopic,
   requizSourceId,
+  year,
 }: {
   mockId: string | null;
   topicSlug: string | null;
   companySlug: string | null;
   asWishTopic: string | null;
   requizSourceId: string | null;
+  year: number | null;
 }) {
   const router = useRouter();
   const {
@@ -101,7 +103,7 @@ function AdaptiveQuizRunner({
     sessionPoints,
     lastPoints,
     resumed,
-  } = useAdaptiveSession({ mockTestId: mockId, topicSlug, companySlug, asWishTopic, requizSourceId });
+  } = useAdaptiveSession({ mockTestId: mockId, topicSlug, companySlug, asWishTopic, requizSourceId, year });
 
   const [selected, setSelected] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
@@ -276,6 +278,9 @@ function AdaptiveQuizRunner({
               Testing{' '}
               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-navy">
                 {prettySkill(q.targetSkill)}
+              </span>{' '}
+              <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ring-1 ring-inset', diff.text, diff.ring, diff.bg)}>
+                {q.difficultyLabel}
               </span>{' '}
               · ~{Math.round((q.predictedPCorrect ?? 0.5) * 100)}% chance you&apos;ll get this right
             </p>
@@ -568,6 +573,8 @@ function AdaptivePage() {
   const companySlug = searchParams.get('company');
   const asWishTopic = searchParams.get('aswish');
   const requizSourceId = searchParams.get('requiz');
+  const yearParam = searchParams.get('year');
+  const year = yearParam ? parseInt(yearParam, 10) || null : null;
   if (!mockId && !topicSlug && !companySlug && !asWishTopic && !requizSourceId)
     return <AdaptiveQuizLanding />;
   return (
@@ -577,6 +584,7 @@ function AdaptivePage() {
       companySlug={companySlug}
       asWishTopic={asWishTopic}
       requizSourceId={requizSourceId}
+      year={year}
     />
   );
 }

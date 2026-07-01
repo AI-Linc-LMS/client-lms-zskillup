@@ -182,14 +182,15 @@ export async function startAdaptiveSession(mockTestId: string): Promise<Adaptive
   return res.data;
 }
 
-/** Start (or resume) an adaptive mock quiz drawn from a topic (+ optional company). */
+/** Start (or resume) an adaptive mock quiz drawn from a topic (+ optional company/year). */
 export async function startAdaptiveSessionByTopic(
   topicSlug: string,
   companySlug?: string,
+  year?: number,
 ): Promise<AdaptiveSessionStart> {
   const res = await apiClient.post<AdaptiveSessionStart>(
     '/api/v1/adaptive-mocks/sessions/start-by-topic',
-    { topicSlug, companySlug },
+    { topicSlug, companySlug, year },
   );
   return res.data;
 }
@@ -197,10 +198,11 @@ export async function startAdaptiveSessionByTopic(
 /** Start (or resume) an adaptive Practice session across ALL of a company's tagged questions. */
 export async function startAdaptiveSessionByCompany(
   companySlug: string,
+  year?: number,
 ): Promise<AdaptiveSessionStart> {
   const res = await apiClient.post<AdaptiveSessionStart>(
     '/api/v1/adaptive-mocks/sessions/start-by-company',
-    { companySlug },
+    { companySlug, year },
   );
   return res.data;
 }

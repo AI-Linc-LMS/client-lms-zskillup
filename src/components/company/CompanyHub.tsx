@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
   ArrowRight,
@@ -76,7 +77,25 @@ function roundCounts(content: HubContent): { totalRounds: number; onlineStages: 
  * Aurora cards (layered glow + gradient washes) with scroll reveals.
  */
 export function CompanyHub({ content }: { content: HubContent }) {
-  const [tab, setTab] = useState<HubTab>('Overview');
+  // Persist the active tab in the URL so returning from an in-tab link (e.g. a PYQ
+  // card that opens the adaptive runner) restores the tab instead of snapping to
+  // Overview. Initialise from ?tab= if it names a valid tab.
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const urlTab = searchParams.get('tab');
+  const [tab, setTab] = useState<HubTab>(
+    urlTab && (HUB_TABS as readonly string[]).includes(urlTab) ? (urlTab as HubTab) : 'Overview',
+  );
+  const selectTab = useCallback(
+    (t: HubTab) => {
+      setTab(t);
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('tab', t);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [router, pathname, searchParams],
+  );
   const c = content.company;
   const reduce = useReducedMotion();
 
@@ -108,7 +127,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
                 key={t}
                 role="tab"
                 aria-selected={active}
-                onClick={() => setTab(t)}
+                onClick={() => selectTab(t)}
                 className={cn(
                   'relative flex shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-semibold transition-colors',
                   active ? 'text-white' : 'text-slate-500 hover:text-navy',
@@ -204,7 +223,12 @@ function CompanyHero({ content, reduce }: { content: HubContent; reduce: boolean
     { icon: Star, label: 'Rating', value: c.rating.toFixed(1) },
     { icon: Users, label: 'Enrolled', value: c.enrolled },
     { icon: Target, label: 'Difficulty', value: c.difficulty },
-    { icon: ListChecks, label: 'Question bank', value: c.mcqs },
+    {
+      icon: ListChecks,
+      label: 'Question bank',
+      // Real live count (falls back to the legacy display string only if absent).
+      value: c.questionCount != null ? c.questionCount.toLocaleString() : (c.mcqs ?? '—'),
+    },
   ];
 
   return (
