@@ -14,6 +14,7 @@ import {
   Sparkles,
   Target,
   TrendingUp,
+  Trophy,
   Users,
 } from 'lucide-react';
 
@@ -47,6 +48,7 @@ export const STUDENT_NAV: NavSection[] = [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
       { label: 'Study Plan', href: '/study-plan', icon: ListChecks },
       { label: 'Performance', href: '/performance', icon: TrendingUp },
+      { label: 'Leaderboard', href: '/leaderboard', icon: Trophy },
     ],
   },
   {

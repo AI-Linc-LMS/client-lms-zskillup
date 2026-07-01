@@ -57,7 +57,6 @@ export const EXPLORE_TRACKS = [
   { label: 'Company hubs', href: '/dashboard/company' },
   { label: 'Topic mastery', href: '/practice' },
   { label: 'Full mock quiz', href: '/mock-assessment' },
-  { label: 'Leaderboard', href: '/leaderboard' },
 ];
 
 // ── Practice hub (dashboard) ─────────────────────────────────────────────────
