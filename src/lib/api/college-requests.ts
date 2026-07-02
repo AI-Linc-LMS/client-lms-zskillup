@@ -58,3 +58,18 @@ export async function rejectCollegeRequest(id: string, reason: string): Promise<
   });
   return res.data;
 }
+
+/** Activate the subscription for an approved request → provisions the college admin. */
+export async function activateCollegeRequest(id: string): Promise<CollegeRequestDetail> {
+  const res = await apiClient.post<CollegeRequestDetail>(`/api/v1/college-requests/${id}/activate`, {});
+  return res.data;
+}
+
+/** Re-send the college admin's set-password link. */
+export async function resendCollegeCredentials(id: string): Promise<CollegeRequestDetail> {
+  const res = await apiClient.post<CollegeRequestDetail>(
+    `/api/v1/college-requests/${id}/resend-credentials`,
+    {},
+  );
+  return res.data;
+}

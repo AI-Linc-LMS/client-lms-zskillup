@@ -5,14 +5,16 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react';
+import { AlertCircle, ArrowLeft, CheckCircle2, KeyRound, Loader2, Mail } from 'lucide-react';
 import {
   CollegeRequestForm,
   toCreateBody,
   type CollegeRequestFormValue,
 } from '@/components/admin/CollegeRequestForm';
 import {
+  activateCollegeRequest,
   getCollegeRequest,
+  resendCollegeCredentials,
   submitCollegeRequest,
   updateCollegeRequest,
   type CollegeRequestDetail,
@@ -89,11 +91,7 @@ export default function CollegeRequestDetailPage({ params }: { params: Promise<{
             </p>
           ) : null}
 
-          {req.status === 'APPROVED' ? (
-            <p className="flex items-center gap-2 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700 ring-1 ring-emerald-200">
-              <CheckCircle2 className="size-4 shrink-0" /> Approved — the college has been created. Subscription activation is the next step.
-            </p>
-          ) : null}
+          {req.status === 'APPROVED' ? <ActivationPanel req={req} onChange={setReq} /> : null}
 
           {editable ? (
             <CollegeRequestForm
@@ -125,6 +123,82 @@ export default function CollegeRequestDetailPage({ params }: { params: Promise<{
         </>
       )}
     </div>
+  );
+}
+
+function ActivationPanel({
+  req,
+  onChange,
+}: {
+  req: CollegeRequestDetail;
+  onChange: (r: CollegeRequestDetail) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
+  const activated = Boolean(req.activatedAt);
+
+  async function run(fn: () => Promise<CollegeRequestDetail>, okMsg: string) {
+    setBusy(true);
+    setErr(null);
+    setMsg(null);
+    try {
+      onChange(await fn());
+      setMsg(okMsg);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : 'Action failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-6">
+      <div className="flex items-start gap-3">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-emerald-100 text-emerald-700">
+          <CheckCircle2 className="size-5" />
+        </span>
+        <div className="flex-1">
+          <p className="text-sm font-bold text-navy">Approved — college created</p>
+          {activated ? (
+            <p className="mt-0.5 text-xs text-slate-600">
+              Subscription activated
+              {req.activatedAt ? ` on ${new Date(req.activatedAt).toLocaleDateString()}` : ''} · set-password
+              link emailed to <span className="font-semibold">{req.contactEmail}</span>.
+            </p>
+          ) : (
+            <p className="mt-0.5 text-xs text-slate-600">
+              Activate the subscription to provision the college admin ({req.contactEmail}) and email their
+              secure set-password link.
+            </p>
+          )}
+
+          {msg ? <p className="mt-2 text-xs font-semibold text-emerald-700">{msg}</p> : null}
+          {err ? <p className="mt-2 text-xs font-semibold text-red-600">{err}</p> : null}
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {!activated ? (
+              <Button
+                disabled={busy}
+                onClick={() => run(() => activateCollegeRequest(req.id), 'Activated — credentials emailed.')}
+              >
+                {busy ? <Loader2 className="mr-1.5 size-4 animate-spin" /> : <KeyRound className="mr-1.5 size-4" />}
+                Activate subscription
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                disabled={busy}
+                onClick={() => run(() => resendCollegeCredentials(req.id), 'Set-password link re-sent.')}
+              >
+                {busy ? <Loader2 className="mr-1.5 size-4 animate-spin" /> : <Mail className="mr-1.5 size-4" />}
+                Resend credentials
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 

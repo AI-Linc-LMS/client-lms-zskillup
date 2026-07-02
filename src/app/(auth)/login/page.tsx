@@ -116,6 +116,15 @@ function LoginForm() {
         </p>
       </div>
 
+      {/* Post-action success (set-password / reset) */}
+      {searchParams.get('welcome') || searchParams.get('reset') ? (
+        <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm font-medium text-emerald-700">
+          {searchParams.get('welcome')
+            ? 'Your password is set — welcome to ZSkillup! Sign in to continue.'
+            : 'Password updated. Sign in with your new password.'}
+        </div>
+      ) : null}
+
       {/* Form */}
       <div className="rounded-2xl border border-[var(--color-line)] bg-white p-6 shadow-[var(--shadow-card-lg)]">
         {/* Google first — the primary, one-tap path */}

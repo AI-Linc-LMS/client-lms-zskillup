@@ -44,6 +44,13 @@ export enum CollegeRequestStatus {
   REJECTED = 'REJECTED',
 }
 
+/** College subscription lifecycle (lightweight — no billing). */
+export enum SubscriptionStatus {
+  ACTIVE = 'ACTIVE',
+  EXPIRED = 'EXPIRED',
+  CANCELLED = 'CANCELLED',
+}
+
 /** Student branch / stream (Implementation Plan §3.1). */
 export enum Branch {
   CSE = 'CSE',
