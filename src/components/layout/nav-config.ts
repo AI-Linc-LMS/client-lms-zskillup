@@ -121,6 +121,17 @@ export const ADMIN_NAV: NavSection[] = [
       { label: 'College Requests', href: '/admin/college-requests', icon: ClipboardCheck },
     ],
   },
+  {
+    heading: 'CATALOG',
+    items: [
+      { label: 'Companies', href: '/admin/companies', icon: Building2 },
+      { label: 'Question Bank', href: '/admin/questions', icon: ClipboardList },
+      { label: 'Coding Bank', href: '/admin/coding', icon: Code2 },
+      { label: 'Mock Tests', href: '/admin/mocks', icon: FileCheck2 },
+      { label: 'Assessments', href: '/admin/scheduled-assessments', icon: CalendarClock },
+      { label: 'Courses', href: '/admin/courses', icon: GraduationCap },
+    ],
+  },
 ];
 
 /** Pick the nav for the current route group. */
