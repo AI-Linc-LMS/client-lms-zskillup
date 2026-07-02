@@ -11,6 +11,7 @@ import {
   CalendarClock,
   CheckCheck,
   type LucideIcon,
+  Megaphone,
   Sparkles,
   Target,
   Trophy,
@@ -32,6 +33,7 @@ const TYPE_STYLE: Record<string, { icon: LucideIcon; from: string; to: string }>
   ASSESSMENT_SCHEDULED: { icon: CalendarClock, from: '#7c6cf5', to: '#5b3bf5' },
   ASSESSMENT_REMINDER: { icon: BellRing, from: '#f7a14e', to: '#f37021' },
   RESULT: { icon: Trophy, from: '#f5c451', to: '#e0a91b' },
+  BROADCAST: { icon: Megaphone, from: '#f7a14e', to: '#f37021' },
   GENERIC: { icon: Sparkles, from: '#94a3b8', to: '#64748b' },
 };
 

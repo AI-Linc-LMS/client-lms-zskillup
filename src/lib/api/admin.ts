@@ -663,3 +663,17 @@ export async function getAdminCollegeDetail(id: string): Promise<AdminCollegeDet
   const res = await apiClient.get<AdminCollegeDetail>(`/api/v1/admin/reports/colleges/${id}`);
   return res.data;
 }
+
+export interface AdminCohortRow {
+  id: string;
+  name: string;
+  year: number | null;
+  studentCount: number;
+}
+
+export async function listAdminCollegeCohorts(collegeId: string): Promise<AdminCohortRow[]> {
+  const res = await apiClient.get<AdminCohortRow[]>(
+    `/api/v1/admin/reports/colleges/${collegeId}/cohorts`,
+  );
+  return res.data;
+}

@@ -12,7 +12,9 @@ import {
   ListChecks,
   type LucideIcon,
   Mail,
+  Megaphone,
   School,
+  ScrollText,
   Sparkles,
   Target,
   TrendingUp,
@@ -96,6 +98,13 @@ export const SUPERADMIN_NAV: NavSection[] = [
       { label: 'Companies', href: '/superadmin/companies', icon: Building2 },
     ],
   },
+  {
+    heading: 'OPERATIONS',
+    items: [
+      { label: 'Broadcasts', href: '/superadmin/broadcasts', icon: Megaphone },
+      { label: 'Audit Log', href: '/superadmin/audit-logs', icon: ScrollText },
+    ],
+  },
 ];
 
 export const TPO_NAV: NavSection[] = [
@@ -128,6 +137,10 @@ export const ADMIN_NAV: NavSection[] = [
       { label: 'Student Reports', href: '/admin/students', icon: BarChart3 },
       { label: 'Colleges', href: '/admin/colleges', icon: School },
     ],
+  },
+  {
+    heading: 'ENGAGEMENT',
+    items: [{ label: 'Broadcasts', href: '/admin/broadcasts', icon: Megaphone }],
   },
   {
     heading: 'CATALOG',
