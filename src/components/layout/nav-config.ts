@@ -10,6 +10,7 @@ import {
   FileCheck2,
   GraduationCap,
   LayoutDashboard,
+  LifeBuoy,
   ListChecks,
   type LucideIcon,
   Mail,
@@ -74,7 +75,10 @@ export const STUDENT_NAV: NavSection[] = [
   },
   {
     heading: 'EXPLORE',
-    items: [{ label: 'Company Hubs', href: '/dashboard/company', icon: Building2 }],
+    items: [
+      { label: 'Company Hubs', href: '/dashboard/company', icon: Building2 },
+      { label: 'Help & Support', href: '/support', icon: LifeBuoy },
+    ],
   },
 ];
 
@@ -113,6 +117,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
     items: [
       { label: 'Subscriptions', href: '/superadmin/subscriptions', icon: CreditCard },
       { label: 'Broadcasts', href: '/superadmin/broadcasts', icon: Megaphone },
+      { label: 'Support', href: '/superadmin/support', icon: LifeBuoy },
       { label: 'Audit Log', href: '/superadmin/audit-logs', icon: ScrollText },
     ],
   },
@@ -154,6 +159,7 @@ export const ADMIN_NAV: NavSection[] = [
     items: [
       { label: 'Broadcasts', href: '/admin/broadcasts', icon: Megaphone },
       { label: 'Subscriptions', href: '/admin/subscriptions', icon: CreditCard },
+      { label: 'Support', href: '/admin/support', icon: LifeBuoy },
     ],
   },
   {

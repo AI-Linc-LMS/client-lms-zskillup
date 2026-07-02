@@ -26,3 +26,4 @@ export * from './dto/admin-users.dto';
 export * from './dto/broadcast.dto';
 export * from './dto/subscription.dto';
 export * from './dto/content.dto';
+export * from './dto/support.dto';
