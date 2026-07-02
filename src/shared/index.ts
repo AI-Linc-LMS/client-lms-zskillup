@@ -20,3 +20,4 @@ export * from './dto/me.dto';
 export * from './dto/tpo.dto';
 export * from './dto/college-request.dto';
 export * from './dto/cohort.dto';
+export * from './dto/tpo-analytics.dto';
