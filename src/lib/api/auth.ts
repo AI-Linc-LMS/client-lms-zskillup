@@ -26,7 +26,7 @@ import type {
 export interface AuthUser {
   id: string;
   name: string | null;
-  role: 'STUDENT' | 'COLLEGE_ADMIN' | 'SUPER_ADMIN';
+  role: 'STUDENT' | 'COLLEGE_ADMIN' | 'ADMIN' | 'SUPER_ADMIN';
   isOnboarded: boolean;
 }
 

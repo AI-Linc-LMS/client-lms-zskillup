@@ -136,7 +136,8 @@ function previewRestorePending(path: string): boolean {
   if (!hasPreviewHint() || roleHint() !== 'SUPER_ADMIN') return false;
   // Only student-area pages run as the student; consoles keep the admin token.
   const page = window.location.pathname;
-  if (page.startsWith('/superadmin') || page.startsWith('/tpo')) return false;
+  if (page.startsWith('/superadmin') || page.startsWith('/admin') || page.startsWith('/tpo'))
+    return false;
   return true;
 }
 

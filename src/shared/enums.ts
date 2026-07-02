@@ -4,10 +4,18 @@
  * (backend-repo/src/shared & frontend-repo/src/shared). Change both together.
  */
 
-/** Three roles (SYSTEM_OVERVIEW / ADR-002 / Implementation Plan §2). */
+/**
+ * Four roles (SYSTEM_OVERVIEW / ADR-002 / Implementation Plan §2).
+ * - STUDENT: end user.
+ * - COLLEGE_ADMIN: college placement officer (TPO) — college-scoped.
+ * - ADMIN: internal platform operator — creates college registration requests,
+ *   activates subscriptions, seeds imports. Below SUPER_ADMIN.
+ * - SUPER_ADMIN: platform owner — approves colleges, full catalog + role mgmt.
+ */
 export enum UserRole {
   STUDENT = 'STUDENT',
   COLLEGE_ADMIN = 'COLLEGE_ADMIN',
+  ADMIN = 'ADMIN',
   SUPER_ADMIN = 'SUPER_ADMIN',
 }
 

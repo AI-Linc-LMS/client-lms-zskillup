@@ -6,7 +6,7 @@ export interface AdminUserRow {
   id: string;
   email: string;
   fullName: string | null;
-  role: 'STUDENT' | 'COLLEGE_ADMIN' | 'SUPER_ADMIN';
+  role: 'STUDENT' | 'COLLEGE_ADMIN' | 'ADMIN' | 'SUPER_ADMIN';
   status: 'ACTIVE' | 'INVITED' | 'SUSPENDED';
   isEmailVerified: boolean;
   createdAt: string;
@@ -34,7 +34,7 @@ export async function listAdminUsers(params: {
 
 export async function updateAdminUserRole(
   id: string,
-  role: 'STUDENT' | 'COLLEGE_ADMIN' | 'SUPER_ADMIN',
+  role: 'STUDENT' | 'COLLEGE_ADMIN' | 'ADMIN' | 'SUPER_ADMIN',
 ): Promise<{ id: string }> {
   const res = await apiClient.patch<{ id: string }>(`/api/v1/admin/users/${id}/role`, { role });
   return res.data;
@@ -268,7 +268,7 @@ export interface ImpersonatePreview {
   user: {
     id: string;
     name: string | null;
-    role: 'STUDENT' | 'COLLEGE_ADMIN' | 'SUPER_ADMIN';
+    role: 'STUDENT' | 'COLLEGE_ADMIN' | 'ADMIN' | 'SUPER_ADMIN';
     isOnboarded: boolean;
   };
 }

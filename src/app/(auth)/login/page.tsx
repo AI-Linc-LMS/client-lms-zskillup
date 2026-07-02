@@ -83,6 +83,7 @@ function LoginForm() {
       const redirect = searchParams.get('redirect');
       if (redirect && redirect.startsWith('/')) target = redirect;
       else if (result.user.role === 'SUPER_ADMIN') target = '/superadmin/dashboard';
+      else if (result.user.role === 'ADMIN') target = '/admin/dashboard';
       else if (result.user.role === 'COLLEGE_ADMIN') target = '/tpo/dashboard';
     }
     // replace() so Back doesn't return to the login page; the in-memory access

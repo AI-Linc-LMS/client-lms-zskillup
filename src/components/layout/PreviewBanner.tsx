@@ -22,7 +22,10 @@ export function PreviewBanner() {
   const previewUser = useAuthStore((s) => s.previewUser);
 
   useEffect(() => {
-    const onConsole = pathname.startsWith('/superadmin') || pathname.startsWith('/tpo');
+    const onConsole =
+      pathname.startsWith('/superadmin') ||
+      pathname.startsWith('/admin') ||
+      pathname.startsWith('/tpo');
     if (onConsole && !previewUser && hasPreviewHint()) {
       exitStudentPreview();
     }

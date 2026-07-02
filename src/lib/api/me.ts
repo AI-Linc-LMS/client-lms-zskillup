@@ -58,7 +58,7 @@ export interface ApiMe {
   id: string;
   email: string;
   fullName: string | null;
-  role: 'STUDENT' | 'COLLEGE_ADMIN' | 'SUPER_ADMIN';
+  role: 'STUDENT' | 'COLLEGE_ADMIN' | 'ADMIN' | 'SUPER_ADMIN';
   status: 'INVITED' | 'ACTIVE' | 'SUSPENDED';
   isEmailVerified: boolean;
   collegeId: string | null;

@@ -26,7 +26,10 @@ import { workspaceLabelForPath } from './nav-config';
  */
 export function TopBar() {
   const pathname = usePathname();
-  const isStudentZone = !pathname.startsWith('/superadmin') && !pathname.startsWith('/tpo');
+  const isStudentZone =
+    !pathname.startsWith('/superadmin') &&
+    !pathname.startsWith('/admin') &&
+    !pathname.startsWith('/tpo');
 
   return (
     <motion.header

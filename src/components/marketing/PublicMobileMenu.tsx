@@ -7,6 +7,7 @@ import { roleHint } from '@/lib/session-hints';
 
 function roleHome(role: string | null): string {
   if (role === 'SUPER_ADMIN') return '/superadmin/dashboard';
+  if (role === 'ADMIN') return '/admin/dashboard';
   if (role === 'COLLEGE_ADMIN') return '/tpo/dashboard';
   return '/dashboard';
 }

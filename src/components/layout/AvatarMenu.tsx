@@ -118,6 +118,8 @@ export function AvatarMenu({ initials = '··' }: { initials?: string }) {
       router.push('/dashboard');
     } else if (sessionRole === 'SUPER_ADMIN') {
       router.push('/superadmin/dashboard');
+    } else if (sessionRole === 'ADMIN') {
+      router.push('/admin/dashboard');
     } else if (sessionRole === 'COLLEGE_ADMIN') {
       router.push('/tpo/dashboard');
     } else {

@@ -105,16 +105,30 @@ export const TPO_NAV: NavSection[] = [
   },
 ];
 
+/**
+ * Platform Admin (internal operator, below Super Admin). Owns college
+ * onboarding — registration requests, subscription activation, seeding imports.
+ * More items land as those batches ship; only wired pages appear here.
+ */
+export const ADMIN_NAV: NavSection[] = [
+  {
+    heading: 'PLATFORM ADMIN',
+    items: [{ label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard }],
+  },
+];
+
 /** Pick the nav for the current route group. */
 export function navForPath(pathname: string): NavSection[] {
   if (pathname.startsWith('/superadmin')) return SUPERADMIN_NAV;
+  if (pathname.startsWith('/admin')) return ADMIN_NAV;
   if (pathname.startsWith('/tpo')) return TPO_NAV;
   return STUDENT_NAV;
 }
 
 /** Workspace label shown under the logo, by route group. */
 export function workspaceLabelForPath(pathname: string): string {
-  if (pathname.startsWith('/superadmin')) return 'Admin Workspace';
+  if (pathname.startsWith('/superadmin')) return 'Super Admin Workspace';
+  if (pathname.startsWith('/admin')) return 'Platform Admin';
   if (pathname.startsWith('/tpo')) return 'Placement Office';
   return 'Student Workspace';
 }

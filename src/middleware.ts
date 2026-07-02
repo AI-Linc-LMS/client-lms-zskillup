@@ -24,6 +24,7 @@ const PROTECTED_PREFIXES = [
   '/calendar',
   '/coding',
   '/tpo',
+  '/admin',
   '/superadmin',
 ];
 
@@ -44,6 +45,7 @@ function isStudentArea(pathname: string): boolean {
   return (
     isProtected(pathname) &&
     !startsWithPrefix(pathname, '/superadmin') &&
+    !startsWithPrefix(pathname, '/admin') &&
     !startsWithPrefix(pathname, '/tpo')
   );
 }
@@ -51,6 +53,7 @@ function isStudentArea(pathname: string): boolean {
 /** Role-appropriate landing page for already-authenticated users. */
 function roleHome(role: string | undefined): string {
   if (role === 'SUPER_ADMIN') return '/superadmin/dashboard';
+  if (role === 'ADMIN') return '/admin/dashboard';
   if (role === 'COLLEGE_ADMIN') return '/tpo/dashboard';
   return '/dashboard';
 }
@@ -106,6 +109,7 @@ export function middleware(request: NextRequest) {
 
     const mismatch =
       (startsWithPrefix(pathname, '/superadmin') && role !== 'SUPER_ADMIN') ||
+      (startsWithPrefix(pathname, '/admin') && role !== 'ADMIN') ||
       (startsWithPrefix(pathname, '/tpo') && role !== 'COLLEGE_ADMIN') ||
       (isStudentArea(pathname) && role !== 'STUDENT' && !previewingStudent);
 

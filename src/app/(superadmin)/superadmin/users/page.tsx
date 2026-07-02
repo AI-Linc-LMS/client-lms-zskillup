@@ -20,12 +20,14 @@ type Role = AdminUserRow['role'];
 const ROLE_LABELS: Record<Role, string> = {
   STUDENT: 'Student',
   COLLEGE_ADMIN: 'College Admin',
+  ADMIN: 'Admin',
   SUPER_ADMIN: 'Super Admin',
 };
 
 const ROLE_COLORS: Record<Role, string> = {
   STUDENT: 'bg-slate-100 text-slate-700',
   COLLEGE_ADMIN: 'bg-blue-100 text-blue-700',
+  ADMIN: 'bg-indigo-100 text-indigo-700',
   SUPER_ADMIN: 'bg-orange-100 text-orange-700',
 };
 
@@ -141,6 +143,7 @@ export default function AdminUsersPage() {
             <option value="">All roles</option>
             <option value="STUDENT">Student</option>
             <option value="COLLEGE_ADMIN">College Admin</option>
+            <option value="ADMIN">Admin</option>
             <option value="SUPER_ADMIN">Super Admin</option>
           </select>
           <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
@@ -270,7 +273,7 @@ function RoleChanger({
   promoting: boolean;
   onChangeRole: (id: string, role: Role) => void;
 }) {
-  const otherRoles = (['STUDENT', 'COLLEGE_ADMIN', 'SUPER_ADMIN'] as Role[]).filter(
+  const otherRoles = (['STUDENT', 'COLLEGE_ADMIN', 'ADMIN', 'SUPER_ADMIN'] as Role[]).filter(
     (r) => r !== currentRole,
   );
 
@@ -287,12 +290,14 @@ function RoleChanger({
               'flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold transition-colors',
               role === 'SUPER_ADMIN'
                 ? 'border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100'
-                : role === 'COLLEGE_ADMIN'
-                  ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100'
-                  : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100',
+                : role === 'ADMIN'
+                  ? 'border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
+                  : role === 'COLLEGE_ADMIN'
+                    ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100',
             )}
           >
-            {role === 'SUPER_ADMIN' ? (
+            {role === 'SUPER_ADMIN' || role === 'ADMIN' ? (
               <ShieldCheck className="size-3" />
             ) : (
               <UserCheck className="size-3" />
