@@ -8,6 +8,7 @@ import {
   Code2,
   CreditCard,
   FileCheck2,
+  FileText,
   GraduationCap,
   LayoutDashboard,
   IndianRupee,
@@ -73,6 +74,10 @@ export const STUDENT_NAV: NavSection[] = [
       { label: 'Mock Assessment', href: '/mock-assessment', icon: Brain },
       { label: 'Assessments', href: '/assessments', icon: FileCheck2 },
     ],
+  },
+  {
+    heading: 'CAREER',
+    items: [{ label: 'Resume Builder', href: '/resume-builder', icon: FileText }],
   },
   {
     heading: 'EXPLORE',

@@ -23,6 +23,7 @@ const PROTECTED_PREFIXES = [
   '/assessments',
   '/calendar',
   '/coding',
+  '/resume-builder',
   '/tpo',
   '/admin',
   '/superadmin',
