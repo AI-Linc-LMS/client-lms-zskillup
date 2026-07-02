@@ -32,6 +32,18 @@ export enum CollegeStatus {
   SUSPENDED = 'SUSPENDED',
 }
 
+/**
+ * College onboarding request lifecycle (college/TPO onboarding).
+ * Admin drafts → submits; Super Admin approves (creates the College) or rejects
+ * (with a reason); Admin corrects a rejected request and resubmits.
+ */
+export enum CollegeRequestStatus {
+  DRAFT = 'DRAFT',
+  SUBMITTED = 'SUBMITTED',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+}
+
 /** Student branch / stream (Implementation Plan §3.1). */
 export enum Branch {
   CSE = 'CSE',

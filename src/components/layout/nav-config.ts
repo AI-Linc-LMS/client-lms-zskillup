@@ -3,6 +3,7 @@ import {
   Brain,
   Building2,
   CalendarClock,
+  ClipboardCheck,
   ClipboardList,
   Code2,
   FileCheck2,
@@ -81,6 +82,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
     items: [
       { label: 'Student Reports', href: '/superadmin/students', icon: BarChart3 },
       { label: 'Users', href: '/superadmin/users', icon: Users },
+      { label: 'College Requests', href: '/superadmin/college-requests', icon: ClipboardCheck },
     ],
   },
   {
@@ -113,7 +115,10 @@ export const TPO_NAV: NavSection[] = [
 export const ADMIN_NAV: NavSection[] = [
   {
     heading: 'PLATFORM ADMIN',
-    items: [{ label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard }],
+    items: [
+      { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+      { label: 'College Requests', href: '/admin/college-requests', icon: ClipboardCheck },
+    ],
   },
 ];
 
