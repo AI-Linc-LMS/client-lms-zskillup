@@ -7,6 +7,7 @@ import { SAMPLE_RESUME } from './sample-data';
 import { TEMPLATES } from './templates';
 import { ResumeForm } from './ResumeForm';
 import { ResumePreview } from './ResumePreview';
+import { AtsPanel } from './AtsPanel';
 import { resumeToPdfBlob, downloadBlob } from './pdf';
 import {
   createResume,
@@ -17,7 +18,7 @@ import {
 } from '@/lib/api/resumes';
 import type { ResumeSummaryDto } from '@/shared/dto/resume.dto';
 import { describeError } from '@/lib/api/errors';
-import { Download, FileText, FolderOpen, Loader2, RotateCcw, Save, Sparkles, Trash2, X } from 'lucide-react';
+import { Download, FileText, FolderOpen, Gauge, Loader2, RotateCcw, Save, Sparkles, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const DRAFT_KEY = 'zskillup_resume_draft';
@@ -33,6 +34,7 @@ export function ResumeBuilder() {
   const [hydrated, setHydrated] = useState(false);
   const [toast, setToast] = useState<{ msg: string; kind: 'info' | 'error' } | null>(null);
   const [showResumes, setShowResumes] = useState(false);
+  const [showAts, setShowAts] = useState(false);
   const [resumes, setResumes] = useState<ResumeSummaryDto[]>([]);
   const [listLoading, setListLoading] = useState(false);
   const pageRef = useRef<HTMLDivElement>(null);
@@ -190,6 +192,9 @@ export function ResumeBuilder() {
           ))}
         </div>
         <div className="flex items-center gap-2">
+          <button onClick={() => setShowAts(true)} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">
+            <Gauge className="size-4" /> ATS Score
+          </button>
           <button onClick={() => { setData(SAMPLE_RESUME); flash('Sample loaded.'); }} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">
             <Sparkles className="size-4" /> Sample
           </button>
@@ -213,6 +218,8 @@ export function ResumeBuilder() {
           <ResumePreview ref={pageRef} data={data} templateKey={template} />
         </div>
       </div>
+
+      {showAts && <AtsPanel data={data} onClose={() => setShowAts(false)} />}
 
       {/* My Resumes drawer */}
       {showResumes && (
