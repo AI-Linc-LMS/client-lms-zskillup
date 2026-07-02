@@ -10,6 +10,7 @@ import {
   FileCheck2,
   GraduationCap,
   LayoutDashboard,
+  IndianRupee,
   LifeBuoy,
   ListChecks,
   type LucideIcon,
@@ -116,6 +117,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
     heading: 'OPERATIONS',
     items: [
       { label: 'Subscriptions', href: '/superadmin/subscriptions', icon: CreditCard },
+      { label: 'Financials', href: '/superadmin/financials', icon: IndianRupee },
       { label: 'Broadcasts', href: '/superadmin/broadcasts', icon: Megaphone },
       { label: 'Support', href: '/superadmin/support', icon: LifeBuoy },
       { label: 'Audit Log', href: '/superadmin/audit-logs', icon: ScrollText },
@@ -159,6 +161,7 @@ export const ADMIN_NAV: NavSection[] = [
     items: [
       { label: 'Broadcasts', href: '/admin/broadcasts', icon: Megaphone },
       { label: 'Subscriptions', href: '/admin/subscriptions', icon: CreditCard },
+      { label: 'Financials', href: '/admin/financials', icon: IndianRupee },
       { label: 'Support', href: '/admin/support', icon: LifeBuoy },
     ],
   },
