@@ -1,0 +1,51 @@
+SCENARIO: localStorage TEMPLATE_KEY = 'invalid_template'
+
+1. Line 47 in ResumeBuilder.tsx:
+   const t = localStorage.getItem(TEMPLATE_KEY) as TemplateKey | null;
+   
+   This casts the string from localStorage directly as TemplateKey without validation.
+   If localStorage contains 'invalid_template', TypeScript assumes it's valid due to the cast.
+
+2. Line 48:
+   if (t) setTemplate(t);
+   
+   template state is set to 'invalid_template' (a string that's NOT in the union type TemplateKey)
+
+3. Line 47 in templates/index.tsx:
+   export function templateByKey(key: TemplateKey): TemplateMeta {
+     return TEMPLATES.find((t) => t.key === key) ?? TEMPLATES[0];
+   }
+   
+   If templateByKey('invalid_template') is called:
+   - TEMPLATES.find() returns undefined (no match)
+   - Fallback to TEMPLATES[0] which is 'modern'
+   - Returns { key: 'modern', ... }
+
+4. ResumePreview.tsx line 47:
+   const Template = templateByKey(templateKey).component;
+   
+   Gets the 'modern' template component even though templateKey='invalid_template'
+
+5. Problem area - ResumeBuilder.tsx lines 182-193:
+   TEMPLATES.map((t) => (
+     <button
+       key={t.key}
+       onClick={() => setTemplate(t.key)}
+       className={cn(
+         'rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors',
+         template === t.key ? 'bg-navy text-white' : 'border border-slate-200 text-slate-600 hover:bg-slate-50',
+       )}
+     >
+       {t.name}
+     </button>
+   ))
+   
+   The condition "template === t.key" will NEVER be true because:
+   - template = 'invalid_template'
+   - t.key loops through ['modern', 'classic', 'minimal', ...]
+   - 'invalid_template' !== 'modern' !== 'classic' etc.
+   
+   Result: NO button gets the highlighted state (bg-navy text-white).
+   All buttons show as unhighlighted even though 'modern' is actually rendering.
+
+VERDICT: Finding is REAL. The button highlight mismatch is a visible UI bug.

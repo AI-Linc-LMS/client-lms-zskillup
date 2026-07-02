@@ -140,3 +140,51 @@ export function dateRange(start: string, end: string, current?: boolean): string
 export function fullName(b: BasicInfo): string {
   return [b.firstName, b.lastName].filter(Boolean).join(' ').trim();
 }
+
+const TEMPLATE_KEYS: TemplateKey[] = [
+  'modern', 'classic', 'minimal', 'creative', 'executive', 'technical',
+  'twocolumn', 'accentbar', 'rightsidebar', 'western', 'luxsleek', 'bubble',
+];
+
+export function isTemplateKey(v: unknown): v is TemplateKey {
+  return typeof v === 'string' && (TEMPLATE_KEYS as string[]).includes(v);
+}
+
+/**
+ * Coerce arbitrary (possibly stale/partial) input — a localStorage draft or a
+ * loaded record — into a complete ResumeData so templates never crash on a
+ * missing section or field.
+ */
+export function normalizeResume(raw: unknown): ResumeData {
+  const base = emptyResume();
+  if (!raw || typeof raw !== 'object') return base;
+  const r = raw as Partial<ResumeData>;
+  const bi = (r.basicInfo ?? {}) as Partial<BasicInfo>;
+  const arr = <T>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : []);
+  return {
+    basicInfo: {
+      ...base.basicInfo,
+      ...bi,
+      firstName: bi.firstName ?? '',
+      lastName: bi.lastName ?? '',
+      professionalTitle: bi.professionalTitle ?? '',
+      email: bi.email ?? '',
+      phone: bi.phone ?? '',
+      location: bi.location ?? '',
+      summary: bi.summary ?? '',
+    },
+    workExperience: arr<WorkExperience>(r.workExperience).map((w) => ({
+      ...w,
+      id: w.id ?? newId(),
+      description: Array.isArray(w.description) ? w.description : [],
+    })),
+    education: arr<Education>(r.education).map((e) => ({ ...e, id: e.id ?? newId() })),
+    skills: arr<Skill>(r.skills).map((s) => ({ ...s, id: s.id ?? newId() })),
+    projects: arr<Project>(r.projects).map((p) => ({
+      ...p,
+      id: p.id ?? newId(),
+      technologies: Array.isArray(p.technologies) ? p.technologies : [],
+    })),
+    certifications: arr<Certification>(r.certifications).map((c) => ({ ...c, id: c.id ?? newId() })),
+  };
+}

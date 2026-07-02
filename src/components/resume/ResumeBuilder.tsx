@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ResumeData, TemplateKey } from './types';
-import { emptyResume, fullName } from './types';
+import { emptyResume, fullName, isTemplateKey, normalizeResume } from './types';
 import { SAMPLE_RESUME } from './sample-data';
 import { TEMPLATES } from './templates';
 import { ResumeForm } from './ResumeForm';
 import { ResumePreview } from './ResumePreview';
 import { AtsPanel } from './AtsPanel';
+import { SectionTailorButton } from './SectionTailorButton';
 import { resumeToPdfBlob, downloadBlob } from './pdf';
 import {
   createResume,
@@ -42,9 +43,9 @@ export function ResumeBuilder() {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(DRAFT_KEY);
-      if (raw) setData(JSON.parse(raw) as ResumeData);
-      const t = localStorage.getItem(TEMPLATE_KEY) as TemplateKey | null;
-      if (t) setTemplate(t);
+      if (raw) setData(normalizeResume(JSON.parse(raw)));
+      const t = localStorage.getItem(TEMPLATE_KEY);
+      if (isTemplateKey(t)) setTemplate(t);
     } catch {
       /* ignore corrupt draft */
     }
@@ -124,8 +125,8 @@ export function ResumeBuilder() {
   const load = async (id: string) => {
     try {
       const r = await getResume(id);
-      setData(r.data);
-      setTemplate(r.template);
+      setData(normalizeResume(r.data));
+      setTemplate(isTemplateKey(r.template) ? r.template : 'modern');
       setTitle(r.title);
       setCurrentId(r.id);
       setShowResumes(false);
@@ -212,7 +213,13 @@ export function ResumeBuilder() {
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,420px)_1fr]">
         <div className="lg:max-h-[calc(100vh-13rem)] lg:overflow-y-auto lg:pr-1">
-          <ResumeForm data={data} onChange={setData} />
+          <ResumeForm
+            data={data}
+            onChange={setData}
+            sectionAction={(section) => (
+              <SectionTailorButton section={section} data={data} onChange={setData} />
+            )}
+          />
         </div>
         <div className="lg:sticky lg:top-4 lg:self-start">
           <ResumePreview ref={pageRef} data={data} templateKey={template} />

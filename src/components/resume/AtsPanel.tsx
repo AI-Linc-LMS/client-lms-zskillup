@@ -1,9 +1,12 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ResumeData } from './types';
 import { computeAtsScore, type AtsBreakdown } from './ats';
-import { CheckCircle2, Gauge, Lightbulb, X } from 'lucide-react';
+import { aiStatus, atsAnalyze } from '@/lib/api/resume-ai';
+import type { AtsAnalyzeResult } from '@/shared/dto/resume-ai.dto';
+import { describeError } from '@/lib/api/errors';
+import { CheckCircle2, Gauge, Lightbulb, Loader2, Sparkles, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const DIM_LABELS: Record<keyof AtsBreakdown, string> = {
@@ -30,6 +33,31 @@ export function AtsPanel({ data, onClose }: { data: ResumeData; onClose: () => v
   const [jd, setJd] = useState('');
   const result = useMemo(() => computeAtsScore(data, jd), [data, jd]);
   const dims = Object.keys(result.breakdown) as (keyof AtsBreakdown)[];
+
+  const [aiOk, setAiOk] = useState(false);
+  const [ai, setAi] = useState<AtsAnalyzeResult | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    aiStatus().then((ok) => alive && setAiOk(ok));
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const runAi = async () => {
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      setAi(await atsAnalyze(data, jd.trim().length >= 15 ? jd.trim() : undefined));
+    } catch (err) {
+      setAiError(describeError(err, 'AI analysis failed. Please retry.'));
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -105,6 +133,36 @@ export function AtsPanel({ data, onClose }: { data: ResumeData; onClose: () => v
               </div>
             )}
           </div>
+
+          {/* AI analysis */}
+          {aiOk && (
+            <div className="rounded-xl border border-[#6d3bf5]/20 bg-[#6d3bf5]/5 p-4">
+              <div className="flex items-center justify-between">
+                <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-[#6d3bf5]">
+                  <Sparkles className="size-3.5" /> AI analysis
+                </p>
+                <button onClick={runAi} disabled={aiLoading} className="inline-flex items-center gap-1.5 rounded-lg bg-[#6d3bf5] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#5b2fd6] disabled:opacity-50">
+                  {aiLoading ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5" />} {ai ? 'Re-analyze' : 'Analyze with AI'}
+                </button>
+              </div>
+              {aiError && <p className="mt-2 text-xs text-red-600">{aiError}</p>}
+              {ai && (
+                <div className="mt-3 space-y-2 text-sm">
+                  <p><span className={cn('text-2xl font-black', scoreColor(ai.overallScore))}>{ai.overallScore}</span> <span className="text-xs text-slate-500">/ 100 (AI)</span></p>
+                  <p className="text-slate-700">{ai.summary}</p>
+                  {ai.strengths.length > 0 && (
+                    <div><p className="text-[11px] font-semibold text-green-700">Strengths</p><ul className="list-disc pl-4 text-xs text-slate-700">{ai.strengths.map((s, i) => <li key={i}>{s}</li>)}</ul></div>
+                  )}
+                  {ai.improvements.length > 0 && (
+                    <div><p className="text-[11px] font-semibold text-amber-700">Improvements</p><ul className="list-disc pl-4 text-xs text-slate-700">{ai.improvements.map((s, i) => <li key={i}>{s}</li>)}</ul></div>
+                  )}
+                  {ai.missingKeywords.length > 0 && (
+                    <p className="text-xs text-slate-600"><span className="font-semibold text-red-500">Missing keywords:</span> {ai.missingKeywords.join(', ')}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Suggestions */}
           <div>

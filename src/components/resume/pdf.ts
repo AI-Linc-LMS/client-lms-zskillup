@@ -20,6 +20,7 @@ export async function resumeToPdfBlob(pageNode: HTMLElement): Promise<Blob> {
   });
 
   const img = await loadImage(dataUrl);
+  if (!img.width || !img.height) throw new Error('Resume capture failed — nothing to export.');
   const pdf = new jsPDF('p', 'mm', 'a4');
   const pageWmm = 210;
   const pageHmm = 297;

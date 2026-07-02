@@ -2,6 +2,14 @@ import type { ComponentType } from 'react';
 import type { ResumeData, TemplateKey, TemplateProps } from '../types';
 import { dateRange, fullName } from '../types';
 import { groupSkills, socialList } from './parts';
+import {
+  AccentBarTemplate,
+  BubbleTemplate,
+  LuxSleekTemplate,
+  RightSidebarTemplate,
+  TechnicalTemplate,
+  WesternTemplate,
+} from './more';
 
 /*
  * Resume templates. Each is a pure component taking { data } and rendering an
@@ -392,6 +400,12 @@ export const TEMPLATES: TemplateMeta[] = [
   { key: 'creative', name: 'Creative', component: CreativeTemplate },
   { key: 'executive', name: 'Executive', component: ExecutiveTemplate },
   { key: 'twocolumn', name: 'Two Column', component: TwoColumnTemplate },
+  { key: 'technical', name: 'Technical', component: TechnicalTemplate },
+  { key: 'accentbar', name: 'Accent Bar', component: AccentBarTemplate },
+  { key: 'rightsidebar', name: 'Right Sidebar', component: RightSidebarTemplate },
+  { key: 'western', name: 'Western', component: WesternTemplate },
+  { key: 'luxsleek', name: 'Lux Sleek', component: LuxSleekTemplate },
+  { key: 'bubble', name: 'Bubble', component: BubbleTemplate },
 ];
 
 export function templateByKey(key: TemplateKey): TemplateMeta {
