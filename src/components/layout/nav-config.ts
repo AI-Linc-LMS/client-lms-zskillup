@@ -6,6 +6,7 @@ import {
   ClipboardCheck,
   ClipboardList,
   Code2,
+  CreditCard,
   FileCheck2,
   GraduationCap,
   LayoutDashboard,
@@ -101,6 +102,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
   {
     heading: 'OPERATIONS',
     items: [
+      { label: 'Subscriptions', href: '/superadmin/subscriptions', icon: CreditCard },
       { label: 'Broadcasts', href: '/superadmin/broadcasts', icon: Megaphone },
       { label: 'Audit Log', href: '/superadmin/audit-logs', icon: ScrollText },
     ],
@@ -140,7 +142,10 @@ export const ADMIN_NAV: NavSection[] = [
   },
   {
     heading: 'ENGAGEMENT',
-    items: [{ label: 'Broadcasts', href: '/admin/broadcasts', icon: Megaphone }],
+    items: [
+      { label: 'Broadcasts', href: '/admin/broadcasts', icon: Megaphone },
+      { label: 'Subscriptions', href: '/admin/subscriptions', icon: CreditCard },
+    ],
   },
   {
     heading: 'CATALOG',
