@@ -10,6 +10,7 @@
  * constraints.
  */
 export * from './enums';
+export * from './admin-capabilities';
 export * from './api';
 export * from './dto/auth.dto';
 export * from './dto/onboarding.dto';
@@ -21,3 +22,4 @@ export * from './dto/tpo.dto';
 export * from './dto/college-request.dto';
 export * from './dto/cohort.dto';
 export * from './dto/tpo-analytics.dto';
+export * from './dto/admin-users.dto';

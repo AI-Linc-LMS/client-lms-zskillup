@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { listAdminUsers, updateAdminUserRole, type AdminUserRow } from '@/lib/api/admin';
+import { UserDetailDrawer } from '@/components/superadmin/UserDetailDrawer';
 import {
   BadgeCheck,
   ChevronDown,
@@ -47,11 +48,13 @@ export default function AdminUsersPage() {
 
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(0);
 
   const [promoting, setPromoting] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -60,6 +63,7 @@ export default function AdminUsersPage() {
       const data = await listAdminUsers({
         search: search || undefined,
         role: roleFilter || undefined,
+        status: statusFilter || undefined,
         limit: PAGE_SIZE,
         offset: page * PAGE_SIZE,
       });
@@ -70,7 +74,7 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [search, roleFilter, page]);
+  }, [search, roleFilter, statusFilter, page]);
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
@@ -148,6 +152,19 @@ export default function AdminUsersPage() {
           </select>
           <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
         </div>
+        <div className="relative">
+          <select
+            value={statusFilter}
+            onChange={(e) => { setStatusFilter(e.target.value); setPage(0); }}
+            className="appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-4 pr-8 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+          >
+            <option value="">All statuses</option>
+            <option value="ACTIVE">Active</option>
+            <option value="INVITED">Invited</option>
+            <option value="SUSPENDED">Suspended</option>
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+        </div>
       </div>
 
       {/* Feedback */}
@@ -183,8 +200,9 @@ export default function AdminUsersPage() {
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Role</th>
                 <th className="px-4 py-3">Verified</th>
-                <th className="px-4 py-3">Joined</th>
+                <th className="px-4 py-3">Last login</th>
                 <th className="px-4 py-3">Change role</th>
+                <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -212,11 +230,13 @@ export default function AdminUsersPage() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-400">
-                    {new Date(user.createdAt).toLocaleDateString('en-IN', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
+                    {user.lastLoginAt
+                      ? new Date(user.lastLoginAt).toLocaleDateString('en-IN', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                        })
+                      : '—'}
                   </td>
                   <td className="px-4 py-3">
                     <RoleChanger
@@ -225,6 +245,14 @@ export default function AdminUsersPage() {
                       promoting={promoting === user.id}
                       onChangeRole={handleRoleChange}
                     />
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      onClick={() => setSelectedId(user.id)}
+                      className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50"
+                    >
+                      Manage
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -258,6 +286,14 @@ export default function AdminUsersPage() {
           </div>
         )}
       </div>
+
+      {selectedId && (
+        <UserDetailDrawer
+          userId={selectedId}
+          onClose={() => setSelectedId(null)}
+          onChanged={fetchUsers}
+        />
+      )}
     </div>
   );
 }

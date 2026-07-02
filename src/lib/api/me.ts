@@ -1,5 +1,6 @@
 import { apiClient } from './client';
 import { hasRoleHint } from '@/lib/session-hints';
+import type { AdminCapabilities } from '@/shared/admin-capabilities';
 
 /**
  * Identity API client (`GET /api/v1/me`). Returns the authenticated user with
@@ -64,6 +65,9 @@ export interface ApiMe {
   collegeId: string | null;
   studentProfile: ApiStudentProfile | null;
   avatarUrl?: string | null;
+  /** Effective admin capability flags (SUPER_ADMIN → all; ADMIN → per-account;
+   *  others → all false). Present from Phase 2; optional for backward-safety. */
+  capabilities?: AdminCapabilities;
 }
 
 /** Module-scope dedup. Cleared on resolve/reject so the next mount re-fetches. */

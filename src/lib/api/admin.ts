@@ -1,15 +1,45 @@
 import { apiClient } from './client';
+import type { AdminCapabilities } from '@/shared/admin-capabilities';
 
 // ─── User management (super-admin) ──────────────────────────────────────────
+
+export type AdminRole = 'STUDENT' | 'COLLEGE_ADMIN' | 'ADMIN' | 'SUPER_ADMIN';
+export type AdminUserStatus = 'ACTIVE' | 'INVITED' | 'SUSPENDED';
 
 export interface AdminUserRow {
   id: string;
   email: string;
   fullName: string | null;
-  role: 'STUDENT' | 'COLLEGE_ADMIN' | 'ADMIN' | 'SUPER_ADMIN';
-  status: 'ACTIVE' | 'INVITED' | 'SUSPENDED';
+  role: AdminRole;
+  status: AdminUserStatus;
   isEmailVerified: boolean;
+  lastLoginAt: string | null;
+  capabilities: AdminCapabilities;
   createdAt: string;
+}
+
+/** Richer projection returned by the single-user endpoints (detail drawer). */
+export interface AdminUserDetail {
+  id: string;
+  email: string;
+  fullName: string | null;
+  role: AdminRole;
+  status: AdminUserStatus;
+  isEmailVerified: boolean;
+  collegeId: string | null;
+  cohortId: string | null;
+  avatarUrl: string | null;
+  lastLoginAt: string | null;
+  createdAt: string;
+  capabilities: AdminCapabilities;
+}
+
+export interface AdminLoginHistoryRow {
+  id: string;
+  at: string;
+  method: string | null;
+  ip: string | null;
+  userAgent: string | null;
 }
 
 export async function listAdminUsers(params: {
@@ -34,10 +64,73 @@ export async function listAdminUsers(params: {
 
 export async function updateAdminUserRole(
   id: string,
-  role: 'STUDENT' | 'COLLEGE_ADMIN' | 'ADMIN' | 'SUPER_ADMIN',
+  role: AdminRole,
 ): Promise<{ id: string }> {
   const res = await apiClient.patch<{ id: string }>(`/api/v1/admin/users/${id}/role`, { role });
   return res.data;
+}
+
+// ─── Account operations (super-admin) ───────────────────────────────────────
+
+export async function getAdminUser(id: string): Promise<AdminUserDetail> {
+  const res = await apiClient.get<AdminUserDetail>(`/api/v1/admin/users/${id}`);
+  return res.data;
+}
+
+export async function updateAdminUser(
+  id: string,
+  patch: { fullName?: string | null; collegeId?: string | null; cohortId?: string | null },
+): Promise<AdminUserDetail> {
+  const res = await apiClient.patch<AdminUserDetail>(`/api/v1/admin/users/${id}`, patch);
+  return res.data;
+}
+
+export async function suspendAdminUser(id: string): Promise<AdminUserDetail> {
+  const res = await apiClient.post<AdminUserDetail>(`/api/v1/admin/users/${id}/suspend`, {});
+  return res.data;
+}
+
+export async function activateAdminUser(id: string): Promise<AdminUserDetail> {
+  const res = await apiClient.post<AdminUserDetail>(`/api/v1/admin/users/${id}/activate`, {});
+  return res.data;
+}
+
+export async function verifyAdminUserEmail(id: string): Promise<AdminUserDetail> {
+  const res = await apiClient.post<AdminUserDetail>(`/api/v1/admin/users/${id}/verify-email`, {});
+  return res.data;
+}
+
+export async function sendAdminUserResetLink(id: string): Promise<{ message: string }> {
+  const res = await apiClient.post<{ message: string }>(
+    `/api/v1/admin/users/${id}/send-reset-link`,
+    {},
+  );
+  return res.data;
+}
+
+export async function getAdminUserLoginHistory(
+  id: string,
+  limit = 50,
+): Promise<AdminLoginHistoryRow[]> {
+  const res = await apiClient.get<AdminLoginHistoryRow[]>(
+    `/api/v1/admin/users/${id}/login-history?limit=${limit}`,
+  );
+  return res.data;
+}
+
+export async function updateAdminUserCapabilities(
+  id: string,
+  flags: Partial<AdminCapabilities>,
+): Promise<AdminUserDetail> {
+  const res = await apiClient.patch<AdminUserDetail>(
+    `/api/v1/admin/users/${id}/capabilities`,
+    flags,
+  );
+  return res.data;
+}
+
+export async function deleteAdminStudent(id: string): Promise<void> {
+  await apiClient.delete(`/api/v1/admin/students/${id}`);
 }
 import type {
   AdminCreateCollegeDto,
@@ -526,10 +619,11 @@ export interface AdminStudentFullReport {
 }
 
 export async function listStudentReports(
-  params: { search?: string; limit?: number; offset?: number } = {},
+  params: { search?: string; collegeId?: string; limit?: number; offset?: number } = {},
 ): Promise<{ rows: AdminStudentReportRow[]; total: number }> {
   const qs = new URLSearchParams();
   if (params.search) qs.set('search', params.search);
+  if (params.collegeId) qs.set('collegeId', params.collegeId);
   if (params.limit) qs.set('limit', String(params.limit));
   if (params.offset) qs.set('offset', String(params.offset));
   const suffix = qs.toString() ? `?${qs.toString()}` : '';
@@ -541,5 +635,31 @@ export async function listStudentReports(
 
 export async function getStudentReport(id: string): Promise<AdminStudentFullReport> {
   const res = await apiClient.get<AdminStudentFullReport>(`/api/v1/admin/reports/students/${id}`);
+  return res.data;
+}
+
+// ─── College detail (admin + super-admin) ───────────────────────────────────
+
+export interface AdminCollegeDetail {
+  college: {
+    id: string;
+    name: string;
+    slug: string;
+    city: string | null;
+    state: string | null;
+    status: string;
+    createdAt: string;
+  };
+  studentCount: number;
+  activeStudentCount: number;
+  invitedStudentCount: number;
+  cohortCount: number;
+  mockAttempts: number;
+  avgScorePct: number | null;
+  lastActivityAt: string | null;
+}
+
+export async function getAdminCollegeDetail(id: string): Promise<AdminCollegeDetail> {
+  const res = await apiClient.get<AdminCollegeDetail>(`/api/v1/admin/reports/colleges/${id}`);
   return res.data;
 }

@@ -12,6 +12,7 @@ import {
   ListChecks,
   type LucideIcon,
   Mail,
+  School,
   Sparkles,
   Target,
   TrendingUp,
@@ -119,6 +120,13 @@ export const ADMIN_NAV: NavSection[] = [
     items: [
       { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
       { label: 'College Requests', href: '/admin/college-requests', icon: ClipboardCheck },
+    ],
+  },
+  {
+    heading: 'INSIGHTS',
+    items: [
+      { label: 'Student Reports', href: '/admin/students', icon: BarChart3 },
+      { label: 'Colleges', href: '/admin/colleges', icon: School },
     ],
   },
   {
