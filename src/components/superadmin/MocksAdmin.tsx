@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Clock, FileText, Loader2, Plus, Search, Trash2, X } from 'lucide-react';
+import { Clock, Download, FileText, Loader2, Plus, Search, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DIFFICULTY_TONE } from '@/lib/ui-maps';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import { listTopics } from '@/lib/api/catalog';
 import {
   createAdminMock,
   deleteAdminMock,
+  exportMocks,
   getAdminMock,
   listAdminMocks,
   listAdminQuestions,
@@ -40,6 +41,7 @@ export function MocksAdmin() {
   const [mocks, setMocks] = useState<AdminMockRow[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const [mode, setMode] = useState<'list' | 'create' | 'edit'>('list');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -333,9 +335,28 @@ export function MocksAdmin() {
         <p className="text-sm text-slate-500">
           {mocks ? `${mocks.length} mock test${mocks.length === 1 ? '' : 's'}` : 'Loading…'}
         </p>
-        <Button onClick={openCreate} size="sm">
-          <Plus className="size-4" aria-hidden="true" /> New mock test
-        </Button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={async () => {
+              setExporting(true);
+              try {
+                await exportMocks();
+              } catch {
+                /* download simply won't start */
+              } finally {
+                setExporting(false);
+              }
+            }}
+            disabled={exporting || !mocks || mocks.length === 0}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-navy shadow-sm hover:bg-slate-50 disabled:opacity-50"
+          >
+            {exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+            Export JSON
+          </button>
+          <Button onClick={openCreate} size="sm">
+            <Plus className="size-4" aria-hidden="true" /> New mock test
+          </Button>
+        </div>
       </div>
 
       {loadError ? (

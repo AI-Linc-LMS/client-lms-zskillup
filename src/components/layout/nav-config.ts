@@ -14,6 +14,8 @@ import {
   type LucideIcon,
   Mail,
   Megaphone,
+  Newspaper,
+  Quote,
   School,
   ScrollText,
   Sparkles,
@@ -100,6 +102,13 @@ export const SUPERADMIN_NAV: NavSection[] = [
     ],
   },
   {
+    heading: 'MARKETING',
+    items: [
+      { label: 'Blog', href: '/superadmin/blogs', icon: Newspaper },
+      { label: 'Testimonials', href: '/superadmin/testimonials', icon: Quote },
+    ],
+  },
+  {
     heading: 'OPERATIONS',
     items: [
       { label: 'Subscriptions', href: '/superadmin/subscriptions', icon: CreditCard },
@@ -145,6 +154,13 @@ export const ADMIN_NAV: NavSection[] = [
     items: [
       { label: 'Broadcasts', href: '/admin/broadcasts', icon: Megaphone },
       { label: 'Subscriptions', href: '/admin/subscriptions', icon: CreditCard },
+    ],
+  },
+  {
+    heading: 'MARKETING',
+    items: [
+      { label: 'Blog', href: '/admin/blogs', icon: Newspaper },
+      { label: 'Testimonials', href: '/admin/testimonials', icon: Quote },
     ],
   },
   {

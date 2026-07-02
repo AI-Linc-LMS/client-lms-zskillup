@@ -638,6 +638,50 @@ export async function getStudentReport(id: string): Promise<AdminStudentFullRepo
   return res.data;
 }
 
+// ─── Exports (question bank + mocks) ────────────────────────────────────────
+
+/** Trigger a browser download of a JSON payload. */
+export function downloadJson(filename: string, data: unknown): void {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+export interface QuestionsExport {
+  exportedAt: string;
+  total: number;
+  exported: number;
+  truncated: boolean;
+  questions: unknown[];
+}
+export interface MocksExport {
+  exportedAt: string;
+  count: number;
+  truncated: boolean;
+  mocks: unknown[];
+}
+
+/** Fetch the question-bank export (auth via apiClient) and download it. */
+export async function exportQuestions(company?: string): Promise<QuestionsExport> {
+  const qs = company ? `?company=${encodeURIComponent(company)}` : '';
+  const res = await apiClient.get<QuestionsExport>(`/api/v1/admin/questions/export${qs}`);
+  downloadJson(`questions-export${company ? `-${company}` : ''}.json`, res.data);
+  return res.data;
+}
+
+/** Fetch the mocks export (auth via apiClient) and download it. */
+export async function exportMocks(): Promise<MocksExport> {
+  const res = await apiClient.get<MocksExport>('/api/v1/admin/mocks/export');
+  downloadJson('mocks-export.json', res.data);
+  return res.data;
+}
+
 // ─── College detail (admin + super-admin) ───────────────────────────────────
 
 export interface AdminCollegeDetail {

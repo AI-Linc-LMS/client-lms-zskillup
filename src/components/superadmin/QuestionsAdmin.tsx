@@ -6,6 +6,7 @@ import {
   BadgeCheck,
   ChevronLeft,
   ChevronRight,
+  Download,
   ExternalLink,
   History,
   Loader2,
@@ -21,6 +22,7 @@ import { listTopics, listCompanies } from '@/lib/api/catalog';
 import {
   archiveAdminQuestion,
   createAdminQuestion,
+  exportQuestions,
   getAdminQuestion,
   listAdminQuestions,
   updateAdminQuestion,
@@ -86,6 +88,7 @@ const PAGE_SIZE = 15;
 export function QuestionsAdmin() {
   const [rows, setRows] = useState<AdminQuestionRow[] | null>(null);
   const [total, setTotal] = useState(0);
+  const [exporting, setExporting] = useState(false);
   const [counts, setCounts] = useState({ all: 0, published: 0, draft: 0, archived: 0 });
   const [loadError, setLoadError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState('');
@@ -212,8 +215,29 @@ export function QuestionsAdmin() {
     [loadPage, loadCounts],
   );
 
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      await exportQuestions(companyFilter || undefined);
+    } catch {
+      /* surfaced by the download not starting; keep the console quiet */
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-5">
+      <div className="flex items-center justify-end">
+        <button
+          onClick={handleExport}
+          disabled={exporting}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-navy shadow-sm hover:bg-slate-50 disabled:opacity-50"
+        >
+          {exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+          Export JSON{companyFilter ? ` (${companyFilter})` : ''}
+        </button>
+      </div>
       {/* Header + metrics + filters */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="bg-[radial-gradient(circle_at_top_right,_rgba(249,115,22,0.10),_transparent_28%),linear-gradient(135deg,_rgba(15,23,42,0.03),_rgba(248,250,252,1))] px-5 py-5 sm:px-6">

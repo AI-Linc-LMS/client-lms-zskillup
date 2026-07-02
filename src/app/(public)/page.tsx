@@ -22,6 +22,7 @@ import { PublicAuthCta } from '@/components/marketing/PublicAuthCta';
 import { BrandLogo } from '@/components/layout/BrandLogo';
 import { HomeFeaturedTracks } from '@/components/marketing/HomeFeaturedTracks';
 import { HomeTopCohort } from '@/components/marketing/HomeTopCohort';
+import { getPublicTestimonials } from '@/lib/server/public-content';
 
 const HERO_STATS = [
   { label: 'Students enrolled', value: '240,000+' },
@@ -92,7 +93,27 @@ const TESTIMONIALS = [
   },
 ];
 
-export default function HomePage() {
+function initialsOf(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? '')
+    .join('');
+}
+
+export default async function HomePage() {
+  // Prefer admin-curated testimonials (Phase 5 CMS); fall back to built-in copy.
+  const cms = await getPublicTestimonials();
+  const testimonials =
+    cms.length > 0
+      ? cms.map((t) => ({
+          quote: t.quote,
+          name: t.authorName,
+          meta: t.authorTitle ?? '',
+          initials: initialsOf(t.authorName),
+        }))
+      : TESTIMONIALS;
   return (
     <main className="min-h-screen overflow-x-hidden bg-white text-[var(--color-text)]">
 
@@ -520,7 +541,7 @@ export default function HomePage() {
             </h2>
           </div>
           <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-            {TESTIMONIALS.map((t) => (
+            {testimonials.map((t) => (
               <figure
                 key={t.name}
                 className="hover-lift flex h-full flex-col rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6"
