@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, ArrowLeft, CheckCircle2, KeyRound, Loader2, Mail } from 'lucide-react';
+import { AlertCircle, ArrowLeft, CheckCircle2, KeyRound, Loader2, Mail, Users } from 'lucide-react';
 import {
   CollegeRequestForm,
   toCreateBody,
@@ -14,6 +14,7 @@ import {
 import {
   activateCollegeRequest,
   getCollegeRequest,
+  importRequestStudents,
   resendCollegeCredentials,
   submitCollegeRequest,
   updateCollegeRequest,
@@ -92,6 +93,9 @@ export default function CollegeRequestDetailPage({ params }: { params: Promise<{
           ) : null}
 
           {req.status === 'APPROVED' ? <ActivationPanel req={req} onChange={setReq} /> : null}
+          {req.status === 'APPROVED' && req.activatedAt ? (
+            <StudentImportPanel req={req} onChange={setReq} />
+          ) : null}
 
           {editable ? (
             <CollegeRequestForm
@@ -196,6 +200,83 @@ function ActivationPanel({
               </Button>
             )}
           </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function StudentImportPanel({
+  req,
+  onChange,
+}: {
+  req: CollegeRequestDetail;
+  onChange: (r: CollegeRequestDetail) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [result, setResult] = useState<{ created: number; skipped: number } | null>(null);
+  const [cohortName, setCohortName] = useState('');
+  const imported = Boolean(req.studentsImportedAt);
+
+  async function onImport() {
+    setBusy(true);
+    setErr(null);
+    try {
+      const res = await importRequestStudents(req.id, { cohortName: cohortName.trim() || undefined });
+      onChange(res.request);
+      setResult({ created: res.result.created, skipped: res.result.skipped });
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : 'Import failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="flex items-start gap-3">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-600 ring-1 ring-indigo-100">
+          <Users className="size-5" />
+        </span>
+        <div className="flex-1">
+          <p className="text-sm font-bold text-navy">Import students</p>
+          {imported ? (
+            <p className="mt-0.5 text-xs text-slate-600">
+              Seeded on {req.studentsImportedAt ? new Date(req.studentsImportedAt).toLocaleDateString() : ''} —
+              {' '}students were created and emailed their set-password links.
+            </p>
+          ) : (
+            <p className="mt-0.5 text-xs text-slate-600">
+              One-time: create a cohort from this request&apos;s {req.studentCount} students and email each a
+              secure set-password link. The college can import more later from their console.
+            </p>
+          )}
+
+          {result ? (
+            <p className="mt-2 text-xs font-semibold text-emerald-700">
+              {result.created} invited · {result.skipped} skipped (already registered).
+            </p>
+          ) : null}
+          {err ? <p className="mt-2 text-xs font-semibold text-red-600">{err}</p> : null}
+
+          {!imported ? (
+            <div className="mt-3 flex flex-wrap items-end gap-2">
+              <label className="block">
+                <span className="text-[11px] font-semibold text-slate-500">Cohort name (optional)</span>
+                <input
+                  value={cohortName}
+                  onChange={(e) => setCohortName(e.target.value)}
+                  placeholder={`${req.collegeName} — ${new Date().getFullYear()}`}
+                  className="mt-1 block w-64 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+                />
+              </label>
+              <Button disabled={busy || req.studentCount === 0} onClick={onImport}>
+                {busy ? <Loader2 className="mr-1.5 size-4 animate-spin" /> : <Users className="mr-1.5 size-4" />}
+                Import {req.studentCount} students
+              </Button>
+            </div>
+          ) : null}
         </div>
       </div>
     </section>

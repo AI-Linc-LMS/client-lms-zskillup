@@ -141,6 +141,7 @@ export interface CollegeRequestSummaryDto {
   collegeId: string | null;
   activatedAt: string | null;
   subscriptionId: string | null;
+  studentsImportedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }

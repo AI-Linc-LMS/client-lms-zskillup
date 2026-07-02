@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { CheckCircle2, Upload, AlertCircle, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { bulkInviteStudents } from '@/lib/api/tpo';
+import { listCohorts, type Cohort } from '@/lib/api/cohorts';
 import type { TpoBulkInviteResult } from '@/shared';
 
 /**
@@ -57,6 +58,14 @@ export default function TpoInvitationsPage() {
   const [result, setResult] = useState<TpoBulkInviteResult | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [cohorts, setCohorts] = useState<Cohort[]>([]);
+  const [cohortId, setCohortId] = useState('');
+
+  useEffect(() => {
+    listCohorts()
+      .then(setCohorts)
+      .catch(() => setCohorts([]));
+  }, []);
 
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     setServerError(null);
@@ -74,7 +83,7 @@ export default function TpoInvitationsPage() {
     setSubmitting(true);
     setServerError(null);
     try {
-      const res = await bulkInviteStudents({ invitations: parsed });
+      const res = await bulkInviteStudents({ invitations: parsed, cohortId: cohortId || undefined });
       setResult(res);
     } catch (err) {
       setServerError(err instanceof Error ? err.message : 'Could not send invitations');
@@ -125,6 +134,24 @@ export default function TpoInvitationsPage() {
             className="block w-full rounded-lg border border-slate-200 bg-white p-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-navy file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-white"
           />
         </label>
+        {cohorts.length > 0 ? (
+          <label className="mt-4 block text-sm">
+            <span className="text-xs font-semibold text-slate-600">Import into cohort (optional)</span>
+            <select
+              value={cohortId}
+              onChange={(e) => setCohortId(e.target.value)}
+              className="mt-1 block w-64 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+            >
+              <option value="">No cohort</option>
+              {cohorts.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                  {c.year ? ` (${c.year})` : ''}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
         {parseErrors.length > 0 ? (
           <ul className="mt-3 rounded-md bg-amber-50 p-3 text-sm text-amber-700 ring-1 ring-amber-200">
             {parseErrors.map((e) => (

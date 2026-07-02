@@ -16,6 +16,7 @@ import {
   IsArray,
   IsOptional,
   IsString,
+  IsUUID,
   MaxLength,
   MinLength,
   ValidateNested,
@@ -57,6 +58,11 @@ export class TpoBulkInviteDto {
   @ValidateNested({ each: true })
   @Type(() => TpoInvitationRowDto)
   invitations!: TpoInvitationRowDto[];
+
+  /** Optional cohort to import these students into (must belong to the caller's college). */
+  @IsOptional()
+  @IsUUID()
+  cohortId?: string;
 }
 
 export interface TpoBulkInviteResult {

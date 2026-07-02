@@ -102,6 +102,7 @@ export const TPO_NAV: NavSection[] = [
     heading: 'PLACEMENT OFFICE',
     items: [
       { label: 'Dashboard', href: '/tpo/dashboard', icon: LayoutDashboard },
+      { label: 'Cohorts', href: '/tpo/cohorts', icon: Users },
       { label: 'Invitations', href: '/tpo/invitations', icon: Mail },
     ],
   },

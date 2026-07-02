@@ -4,6 +4,8 @@ import type {
   CollegeRequestDetailDto,
   CreateCollegeRequestDto,
   UpdateCollegeRequestDto,
+  ImportRequestStudentsDto,
+  TpoBulkInviteResult,
 } from '@/shared';
 
 /**
@@ -70,6 +72,18 @@ export async function resendCollegeCredentials(id: string): Promise<CollegeReque
   const res = await apiClient.post<CollegeRequestDetail>(
     `/api/v1/college-requests/${id}/resend-credentials`,
     {},
+  );
+  return res.data;
+}
+
+/** One-time: seed a cohort from the approved student list and invite them. */
+export async function importRequestStudents(
+  id: string,
+  body: ImportRequestStudentsDto,
+): Promise<{ request: CollegeRequestDetail; result: TpoBulkInviteResult }> {
+  const res = await apiClient.post<{ request: CollegeRequestDetail; result: TpoBulkInviteResult }>(
+    `/api/v1/college-requests/${id}/import-students`,
+    body,
   );
   return res.data;
 }
