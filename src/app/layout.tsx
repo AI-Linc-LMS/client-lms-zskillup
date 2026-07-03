@@ -1,18 +1,28 @@
 import type { Metadata, Viewport } from 'next';
-import { Plus_Jakarta_Sans, Sora } from 'next/font/google';
+import { Bricolage_Grotesque, Instrument_Serif, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 
-// Body — Plus Jakarta Sans: clean, modern, friendly. Headings — Sora: a crisp
-// geometric display face for a fresh, distinctive hierarchy.
+// Design direction "Night Lab + Blueprint" (see memory/design-direction.md).
+// Body — Plus Jakarta Sans: clean, modern, friendly. Headings — Bricolage
+// Grotesque: a characterful grotesque that keeps the brand out of generic-SaaS
+// territory. Instrument Serif (italic) is the sparing editorial garnish for
+// hero headlines only.
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-jakarta',
 });
-const sora = Sora({
+const bricolage = Bricolage_Grotesque({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-sora',
+  variable: '--font-bricolage',
+});
+const instrument = Instrument_Serif({
+  subsets: ['latin'],
+  weight: '400',
+  style: ['normal', 'italic'],
+  display: 'swap',
+  variable: '--font-instrument',
 });
 
 export const metadata: Metadata = {
@@ -36,7 +46,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${jakarta.variable} ${sora.variable}`}>
+    <html lang="en" className={`${jakarta.variable} ${bricolage.variable} ${instrument.variable}`}>
       <body className="min-h-screen bg-background font-sans text-foreground antialiased">
         {children}
       </body>

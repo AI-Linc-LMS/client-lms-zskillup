@@ -13,10 +13,8 @@ export default function SupportPage() {
       <Breadcrumb items={[{ label: 'Home', href: '/dashboard' }, { label: 'Help & Support' }]} />
 
       {/* Hero */}
-      <header className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#101a30] via-navy to-[#1c2b4a] p-6 text-white shadow-sm sm:p-8">
-        <span aria-hidden className="pointer-events-none absolute -right-10 -top-10 size-48 rounded-full bg-orange/20 blur-3xl" />
-        <span aria-hidden className="pointer-events-none absolute -bottom-16 left-1/3 size-48 rounded-full bg-orange/10 blur-3xl" />
-        <div className="relative">
+      <header className="night-hero rounded-2xl p-6 shadow-sm sm:p-8">
+        <div className="relative z-[1]">
           <div className="flex items-center gap-3">
             <div className="grid size-11 place-items-center rounded-xl bg-white/10 ring-1 ring-white/20 backdrop-blur">
               <Headset className="size-6 text-orange" />
