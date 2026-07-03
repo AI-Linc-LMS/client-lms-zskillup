@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { TopBar } from './TopBar';
 import { Sidebar } from './Sidebar';
 import { PreviewBanner } from './PreviewBanner';
+import { CommandPalette } from './CommandPalette';
 
 /**
  * Persistent authenticated chrome (frontend/CLAUDE §4): top bar + left sidebar +
@@ -15,6 +16,7 @@ import { PreviewBanner } from './PreviewBanner';
 export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <CommandPalette />
       <TopBar />
       {/* Full-width super-admin "view as student" banner (renders only while previewing). */}
       <PreviewBanner />

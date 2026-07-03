@@ -741,6 +741,25 @@
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.6);
 }
 
+/* ── Shimmer skeleton (replaces plain animate-pulse blocks) ── */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.65) 50%, transparent);
+  animation: skeleton-shimmer 1.6s var(--ease-brand) infinite;
+}
+@keyframes skeleton-shimmer {
+  100% { transform: translateX(100%); }
+}
+
 /* ── Soft scrollbars ───────────────────────────────────────── */
 @supports (scrollbar-width: thin) {
   .scroll-soft { scrollbar-width: thin; scrollbar-color: var(--color-surface-3) transparent; }
