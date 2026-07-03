@@ -5,6 +5,7 @@ import { getPracticeAccuracy } from '@/lib/api/practice';
 import { getMockHistory } from '@/lib/api/mocks';
 import { getStudentStats, type ApiStudentStats } from '@/lib/api/gamification';
 import { getMockStats } from '@/lib/mock-stats';
+import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
 
 export function KpiRow() {
   const [accuracy, setAccuracy] = useState<{ total: number; accuracyPct: number } | null>(null);
@@ -29,10 +30,11 @@ export function KpiRow() {
     return () => { cancelled = true; };
   }, []);
 
-  const kpis = [
+  const kpis: { label: string; value: number | null; suffix?: string; sub: string; accent: string }[] = [
     {
       label: 'Practice accuracy',
-      value: accuracy ? `${accuracy.accuracyPct}%` : '—',
+      value: accuracy ? accuracy.accuracyPct : null,
+      suffix: '%',
       sub:
         accuracy && accuracy.total > 0
           ? `${accuracy.total} question${accuracy.total === 1 ? '' : 's'} attempted`
@@ -41,19 +43,19 @@ export function KpiRow() {
     },
     {
       label: 'XP earned',
-      value: stats ? stats.totalXp.toLocaleString() : '—',
+      value: stats ? stats.totalXp : null,
       sub: stats ? `Level ${stats.level} · ${stats.badgesEarned} badge${stats.badgesEarned === 1 ? '' : 's'}` : 'Complete quests to earn XP',
       accent: '#1e3a8a',
     },
     {
       label: 'Day streak',
-      value: stats ? String(stats.currentStreakDays) : '—',
+      value: stats ? stats.currentStreakDays : null,
       sub: stats && stats.longestStreakDays > 0 ? `Best: ${stats.longestStreakDays} day${stats.longestStreakDays === 1 ? '' : 's'}` : 'Practice daily to build a streak',
       accent: '#f97316',
     },
     {
       label: 'Mock tests taken',
-      value: mocks ? String(mocks.taken) : '—',
+      value: mocks ? mocks.taken : null,
       sub:
         mocks && mocks.taken > 0
           ? `Best score ${mocks.best}%`
@@ -72,7 +74,9 @@ export function KpiRow() {
             style={{ background: kpi.accent }}
           />
           <p className="stat-label mt-1">{kpi.label}</p>
-          <p className="stat-value num-tab">{kpi.value}</p>
+          <p className="stat-value num-tab">
+            {kpi.value === null ? '—' : <AnimatedNumber value={kpi.value} suffix={kpi.suffix} />}
+          </p>
           <p className="stat-meta">{kpi.sub}</p>
         </div>
       ))}

@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { deleteInterview, listInterviews } from '@/lib/api/mock-interviews';
 import type { MockInterviewSummaryDto } from '@/shared/dto/mock-interview.dto';
 import { QuickStart } from './QuickStart';
+import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
 import { Award, CheckCircle2, ClipboardList, Loader2, MessagesSquare, Play, Sparkles, Target, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -70,7 +71,7 @@ export function MockInterviewHome() {
       <div className="grid grid-cols-3 gap-3">
         <Stat icon={ClipboardList} label="Total" value={rows.length} tint="text-navy" />
         <Stat icon={CheckCircle2} label="Completed" value={completed.length} tint="text-green-600" />
-        <Stat icon={Award} label="Avg score" value={avg === null ? '—' : `${avg}%`} tint="text-orange" />
+        <Stat icon={Award} label="Avg score" value={avg} suffix="%" tint="text-orange" />
       </div>
 
       {/* Tabs */}
@@ -166,11 +167,13 @@ export function MockInterviewHome() {
   );
 }
 
-function Stat({ icon: Icon, label, value, tint }: { icon: typeof Award; label: string; value: string | number; tint: string }) {
+function Stat({ icon: Icon, label, value, suffix, tint }: { icon: typeof Award; label: string; value: number | null; suffix?: string; tint: string }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
       <Icon className={cn('mx-auto mb-1 size-4', tint)} />
-      <p className={cn('text-center text-2xl font-black tabular-nums', tint)}>{value}</p>
+      <p className={cn('text-center text-2xl font-black tabular-nums', tint)}>
+        {value === null ? '—' : <AnimatedNumber value={value} suffix={suffix} />}
+      </p>
       <p className="text-center text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
     </div>
   );

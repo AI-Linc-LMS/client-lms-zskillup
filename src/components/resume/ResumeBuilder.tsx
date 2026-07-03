@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { toast } from 'sonner';
 import type { ResumeData, TemplateKey } from './types';
 import { emptyResume, fullName, isTemplateKey, normalizeResume } from './types';
 import { SAMPLE_RESUME } from './sample-data';
@@ -21,7 +22,7 @@ import {
 } from '@/lib/api/resumes';
 import type { ResumeSummaryDto } from '@/shared/dto/resume.dto';
 import { describeError } from '@/lib/api/errors';
-import { CheckCircle2, Download, FileText, FolderOpen, Gauge, LayoutTemplate, Loader2, RotateCcw, Save, Sparkles, Trash2, X } from 'lucide-react';
+import { Download, FileText, FolderOpen, Gauge, LayoutTemplate, Loader2, RotateCcw, Save, Sparkles, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const DRAFT_KEY = 'zskillup_resume_draft';
@@ -41,7 +42,6 @@ export function ResumeBuilder() {
   const [downloading, setDownloading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [hydrated, setHydrated] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; kind: 'info' | 'error' } | null>(null);
   const [showResumes, setShowResumes] = useState(false);
   const [showAts, setShowAts] = useState(false);
   const [resumes, setResumes] = useState<ResumeSummaryDto[]>([]);
@@ -77,8 +77,8 @@ export function ResumeBuilder() {
   }, [template, hydrated]);
 
   const flash = (msg: string, kind: 'info' | 'error' = 'info') => {
-    setToast({ msg, kind });
-    setTimeout(() => setToast(null), 3000);
+    if (kind === 'error') toast.error(msg);
+    else toast.success(msg);
   };
 
   const refreshList = useCallback(async () => {
@@ -285,19 +285,6 @@ export function ResumeBuilder() {
         )}
       </AnimatePresence>
 
-      {/* Toast */}
-      <AnimatePresence>
-        {toast && (
-          <motion.div
-            initial={{ opacity: 0, y: 16, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 16, scale: 0.97 }}
-            className={cn('fixed bottom-5 left-1/2 z-[60] flex -translate-x-1/2 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium shadow-lg', toast.kind === 'error' ? 'bg-red-600 text-white' : 'bg-navy text-white')}
-          >
-            {toast.kind === 'error' ? <X className="size-4" /> : <CheckCircle2 className="size-4" />} {toast.msg}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

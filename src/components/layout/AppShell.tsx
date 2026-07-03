@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Toaster } from 'sonner';
 import { TopBar } from './TopBar';
 import { Sidebar } from './Sidebar';
 import { PreviewBanner } from './PreviewBanner';
@@ -17,6 +18,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <CommandPalette />
+      <Toaster
+        position="bottom-center"
+        toastOptions={{
+          style: { borderRadius: '12px', fontFamily: 'var(--font-sans)' },
+        }}
+        richColors
+      />
       <TopBar />
       {/* Full-width super-admin "view as student" banner (renders only while previewing). */}
       <PreviewBanner />
