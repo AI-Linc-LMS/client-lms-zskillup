@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import type {
   Certification,
   Education,
@@ -218,21 +219,33 @@ function Section({
 }) {
   const [open, setOpen] = useState(defaultOpen ?? false);
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between px-4 py-3">
-        <button onClick={() => setOpen((o) => !o)} className="flex flex-1 items-center gap-2 text-left">
-          <span className="text-slate-500">{icon}</span>
+    <div className={cn('overflow-hidden rounded-xl border bg-white shadow-sm transition-colors', open ? 'border-orange/30' : 'border-slate-200')}>
+      <div className="flex items-center justify-between px-3 py-2.5">
+        <button onClick={() => setOpen((o) => !o)} className="flex flex-1 items-center gap-2.5 text-left">
+          <span className={cn('grid size-7 shrink-0 place-items-center rounded-lg transition-colors', open ? 'bg-orange/10 text-orange' : 'bg-slate-100 text-slate-500')}>{icon}</span>
           <span className="text-sm font-bold text-navy">{title}</span>
           {count !== undefined && count > 0 && <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">{count}</span>}
         </button>
         <div className="flex items-center gap-2">
           {action}
-          <button onClick={() => setOpen((o) => !o)}>
+          <button onClick={() => setOpen((o) => !o)} className="rounded-lg p-1 hover:bg-slate-50">
             <ChevronDown className={cn('size-4 text-slate-400 transition-transform', open && 'rotate-180')} />
           </button>
         </div>
       </div>
-      {open && <div className="border-t border-slate-100 p-4">{children}</div>}
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: 'easeInOut' }}
+            className="overflow-hidden"
+          >
+            <div className="border-t border-slate-100 p-4">{children}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -391,21 +391,23 @@ export interface TemplateMeta {
   key: TemplateKey;
   name: string;
   component: ComponentType<TemplateProps>;
+  /** Representative accent colour, shown as a swatch in the template picker. */
+  accent: string;
 }
 
 export const TEMPLATES: TemplateMeta[] = [
-  { key: 'modern', name: 'Modern', component: ModernTemplate },
-  { key: 'classic', name: 'Classic', component: ClassicTemplate },
-  { key: 'minimal', name: 'Minimal', component: MinimalTemplate },
-  { key: 'creative', name: 'Creative', component: CreativeTemplate },
-  { key: 'executive', name: 'Executive', component: ExecutiveTemplate },
-  { key: 'twocolumn', name: 'Two Column', component: TwoColumnTemplate },
-  { key: 'technical', name: 'Technical', component: TechnicalTemplate },
-  { key: 'accentbar', name: 'Accent Bar', component: AccentBarTemplate },
-  { key: 'rightsidebar', name: 'Right Sidebar', component: RightSidebarTemplate },
-  { key: 'western', name: 'Western', component: WesternTemplate },
-  { key: 'luxsleek', name: 'Lux Sleek', component: LuxSleekTemplate },
-  { key: 'bubble', name: 'Bubble', component: BubbleTemplate },
+  { key: 'modern', name: 'Modern', component: ModernTemplate, accent: '#0f2544' },
+  { key: 'classic', name: 'Classic', component: ClassicTemplate, accent: '#0f172a' },
+  { key: 'minimal', name: 'Minimal', component: MinimalTemplate, accent: '#64748b' },
+  { key: 'creative', name: 'Creative', component: CreativeTemplate, accent: '#6d3bf5' },
+  { key: 'executive', name: 'Executive', component: ExecutiveTemplate, accent: '#1e293b' },
+  { key: 'twocolumn', name: 'Two Column', component: TwoColumnTemplate, accent: '#0f766e' },
+  { key: 'technical', name: 'Technical', component: TechnicalTemplate, accent: '#0891b2' },
+  { key: 'accentbar', name: 'Accent Bar', component: AccentBarTemplate, accent: '#f37021' },
+  { key: 'rightsidebar', name: 'Right Sidebar', component: RightSidebarTemplate, accent: '#7c3aed' },
+  { key: 'western', name: 'Western', component: WesternTemplate, accent: '#b45309' },
+  { key: 'luxsleek', name: 'Lux Sleek', component: LuxSleekTemplate, accent: '#111827' },
+  { key: 'bubble', name: 'Bubble', component: BubbleTemplate, accent: '#db2777' },
 ];
 
 export function templateByKey(key: TemplateKey): TemplateMeta {

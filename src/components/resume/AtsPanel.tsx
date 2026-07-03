@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import type { ResumeData } from './types';
 import { computeAtsScore, type AtsBreakdown } from './ats';
 import { aiStatus, atsAnalyze } from '@/lib/api/resume-ai';
@@ -61,8 +62,8 @@ export function AtsPanel({ data, onClose }: { data: ResumeData; onClose: () => v
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
-      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} aria-hidden />
-      <div className="relative flex h-full w-full max-w-md flex-col overflow-y-auto bg-white shadow-2xl">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} aria-hidden />
+      <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} transition={{ type: 'tween', duration: 0.25 }} className="relative flex h-full w-full max-w-md flex-col overflow-y-auto bg-white shadow-2xl">
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-5 py-4">
           <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-400">
             <Gauge className="size-4" /> ATS Score
@@ -179,7 +180,7 @@ export function AtsPanel({ data, onClose }: { data: ResumeData; onClose: () => v
             </ul>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

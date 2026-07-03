@@ -1,10 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import type { ResumeData, TemplateKey } from './types';
 import { emptyResume, fullName, isTemplateKey, normalizeResume } from './types';
 import { SAMPLE_RESUME } from './sample-data';
 import { TEMPLATES } from './templates';
+import { computeAtsScore } from './ats';
 import { ResumeForm } from './ResumeForm';
 import { ResumePreview } from './ResumePreview';
 import { AtsPanel } from './AtsPanel';
@@ -19,11 +21,17 @@ import {
 } from '@/lib/api/resumes';
 import type { ResumeSummaryDto } from '@/shared/dto/resume.dto';
 import { describeError } from '@/lib/api/errors';
-import { Download, FileText, FolderOpen, Gauge, Loader2, RotateCcw, Save, Sparkles, Trash2, X } from 'lucide-react';
+import { CheckCircle2, Download, FileText, FolderOpen, Gauge, LayoutTemplate, Loader2, RotateCcw, Save, Sparkles, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const DRAFT_KEY = 'zskillup_resume_draft';
 const TEMPLATE_KEY = 'zskillup_resume_template';
+
+function atsColor(n: number): string {
+  if (n >= 75) return 'text-green-600';
+  if (n >= 50) return 'text-amber-600';
+  return 'text-red-500';
+}
 
 export function ResumeBuilder() {
   const [data, setData] = useState<ResumeData>(emptyResume);
@@ -39,6 +47,8 @@ export function ResumeBuilder() {
   const [resumes, setResumes] = useState<ResumeSummaryDto[]>([]);
   const [listLoading, setListLoading] = useState(false);
   const pageRef = useRef<HTMLDivElement>(null);
+
+  const ats = useMemo(() => computeAtsScore(data, '').overall, [data]);
 
   useEffect(() => {
     try {
@@ -150,52 +160,65 @@ export function ResumeBuilder() {
 
   return (
     <div className="space-y-4">
-      {/* Row 1: title + save/load/download */}
+      {/* Row 1: title + primary actions */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="min-w-[180px] flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-navy focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
-          placeholder="Resume name"
-        />
+        <div className="flex min-w-[200px] flex-1 items-center gap-2 rounded-lg border border-slate-200 px-3 focus-within:border-orange focus-within:ring-1 focus-within:ring-orange">
+          <FileText className="size-4 shrink-0 text-slate-400" />
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full bg-transparent py-2 text-sm font-semibold text-navy focus:outline-none"
+            placeholder="Resume name"
+          />
+          {currentId && <span className="hidden shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700 sm:inline">Saved</span>}
+        </div>
         <div className="flex items-center gap-2">
+          <button onClick={() => setShowAts(true)} className={cn('inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold hover:bg-slate-50', atsColor(ats))}>
+            <Gauge className="size-4" /> ATS {ats}
+          </button>
           <button onClick={openResumes} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">
-            <FolderOpen className="size-4" /> My Resumes
+            <FolderOpen className="size-4" /> <span className="hidden sm:inline">My Resumes</span>
           </button>
           <button onClick={() => save(false)} disabled={saving} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-navy hover:bg-slate-50 disabled:opacity-50">
-            {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} {currentId ? 'Save' : 'Save'}
+            {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} Save
           </button>
           {currentId && (
-            <button onClick={() => save(true)} disabled={saving} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50">
+            <button onClick={() => save(true)} disabled={saving} className="hidden rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 sm:inline-flex">
               Save as new
             </button>
           )}
-          <button onClick={download} disabled={downloading} className="inline-flex items-center gap-1.5 rounded-lg bg-orange px-4 py-2 text-sm font-semibold text-white hover:bg-orange/90 disabled:opacity-50">
+          <button onClick={download} disabled={downloading} className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-orange to-[#f5872f] px-4 py-2 text-sm font-bold text-white shadow-sm transition-all hover:shadow disabled:opacity-50">
             {downloading ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />} PDF
           </button>
         </div>
       </div>
 
-      {/* Row 2: templates + sample/clear */}
+      {/* Row 2: template picker + sample/clear */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-        <div className="flex flex-wrap items-center gap-1.5">
-          {TEMPLATES.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTemplate(t.key)}
-              className={cn(
-                'rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors',
-                template === t.key ? 'bg-navy text-white' : 'border border-slate-200 text-slate-600 hover:bg-slate-50',
-              )}
-            >
-              {t.name}
-            </button>
-          ))}
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <span className="inline-flex shrink-0 items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+            <LayoutTemplate className="size-3.5" /> Template
+          </span>
+          <div className="flex flex-1 gap-1.5 overflow-x-auto pb-1 [scrollbar-width:thin]">
+            {TEMPLATES.map((t) => {
+              const active = template === t.key;
+              return (
+                <button
+                  key={t.key}
+                  onClick={() => setTemplate(t.key)}
+                  className={cn(
+                    'inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-all',
+                    active ? 'border-navy bg-navy text-white shadow-sm' : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50',
+                  )}
+                >
+                  <span className="size-2.5 rounded-full ring-1 ring-black/10" style={{ background: t.accent }} />
+                  {t.name}
+                </button>
+              );
+            })}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => setShowAts(true)} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">
-            <Gauge className="size-4" /> ATS Score
-          </button>
+        <div className="flex shrink-0 items-center gap-2">
           <button onClick={() => { setData(SAMPLE_RESUME); flash('Sample loaded.'); }} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">
             <Sparkles className="size-4" /> Sample
           </button>
@@ -204,12 +227,6 @@ export function ResumeBuilder() {
           </button>
         </div>
       </div>
-
-      {toast && (
-        <div className={cn('flex items-center gap-2 rounded-lg px-3 py-2 text-sm', toast.kind === 'error' ? 'border border-red-200 bg-red-50 text-red-700' : 'border border-navy/15 bg-navy/5 text-navy')}>
-          <FileText className="size-4" /> {toast.msg}
-        </div>
-      )}
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,420px)_1fr]">
         <div className="lg:max-h-[calc(100vh-13rem)] lg:overflow-y-auto lg:pr-1">
@@ -229,36 +246,58 @@ export function ResumeBuilder() {
       {showAts && <AtsPanel data={data} onClose={() => setShowAts(false)} />}
 
       {/* My Resumes drawer */}
-      {showResumes && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowResumes(false)} aria-hidden />
-          <div className="relative flex h-full w-full max-w-sm flex-col bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400">My Resumes</h2>
-              <button onClick={() => setShowResumes(false)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"><X className="size-5" /></button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4">
-              {listLoading ? (
-                <div className="flex justify-center py-10"><Loader2 className="size-6 animate-spin text-slate-400" /></div>
-              ) : resumes.length === 0 ? (
-                <p className="py-10 text-center text-sm text-slate-400">No saved resumes yet. Click Save to store one.</p>
-              ) : (
-                <ul className="space-y-2">
-                  {resumes.map((r) => (
-                    <li key={r.id} className={cn('flex items-center justify-between gap-2 rounded-lg border p-3', currentId === r.id ? 'border-orange bg-orange/5' : 'border-slate-200')}>
-                      <button onClick={() => load(r.id)} className="min-w-0 flex-1 text-left">
-                        <p className="truncate text-sm font-semibold text-navy">{r.title}</p>
-                        <p className="text-xs text-slate-400">{TEMPLATES.find((t) => t.key === r.template)?.name ?? r.template} · {new Date(r.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
-                      </button>
-                      <button onClick={() => remove(r.id, r.title)} className="rounded-lg border border-red-200 p-1.5 text-red-500 hover:bg-red-50"><Trash2 className="size-4" /></button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+      <AnimatePresence>
+        {showResumes && (
+          <div className="fixed inset-0 z-50 flex justify-end">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowResumes(false)} aria-hidden />
+            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'tween', duration: 0.25 }} className="relative flex h-full w-full max-w-sm flex-col bg-white shadow-2xl">
+              <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+                <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-400"><FolderOpen className="size-4" /> My Resumes</h2>
+                <button onClick={() => setShowResumes(false)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"><X className="size-5" /></button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4">
+                {listLoading ? (
+                  <div className="flex justify-center py-10"><Loader2 className="size-6 animate-spin text-slate-400" /></div>
+                ) : resumes.length === 0 ? (
+                  <div className="flex flex-col items-center gap-2 py-12 text-center">
+                    <FolderOpen className="size-8 text-slate-300" />
+                    <p className="text-sm text-slate-400">No saved resumes yet.<br />Click Save to store one.</p>
+                  </div>
+                ) : (
+                  <ul className="space-y-2">
+                    {resumes.map((r) => (
+                      <li key={r.id} className={cn('flex items-center justify-between gap-2 rounded-lg border p-3 transition-colors', currentId === r.id ? 'border-orange bg-orange/5' : 'border-slate-200 hover:bg-slate-50')}>
+                        <button onClick={() => load(r.id)} className="flex min-w-0 flex-1 items-center gap-2.5 text-left">
+                          <span className="size-2.5 shrink-0 rounded-full ring-1 ring-black/10" style={{ background: TEMPLATES.find((t) => t.key === r.template)?.accent ?? '#64748b' }} />
+                          <span className="min-w-0">
+                            <span className="block truncate text-sm font-semibold text-navy">{r.title}</span>
+                            <span className="block text-xs text-slate-400">{TEMPLATES.find((t) => t.key === r.template)?.name ?? r.template} · {new Date(r.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                          </span>
+                        </button>
+                        <button onClick={() => remove(r.id, r.title)} className="rounded-lg border border-slate-200 p-1.5 text-slate-400 hover:border-red-200 hover:bg-red-50 hover:text-red-500"><Trash2 className="size-4" /></button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
+
+      {/* Toast */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 16, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.97 }}
+            className={cn('fixed bottom-5 left-1/2 z-[60] flex -translate-x-1/2 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium shadow-lg', toast.kind === 'error' ? 'bg-red-600 text-white' : 'bg-navy text-white')}
+          >
+            {toast.kind === 'error' ? <X className="size-4" /> : <CheckCircle2 className="size-4" />} {toast.msg}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
