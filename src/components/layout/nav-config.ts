@@ -17,6 +17,7 @@ import {
   type LucideIcon,
   Mail,
   Megaphone,
+  MessageSquare,
   Newspaper,
   Quote,
   School,
@@ -77,7 +78,10 @@ export const STUDENT_NAV: NavSection[] = [
   },
   {
     heading: 'CAREER',
-    items: [{ label: 'Resume Builder', href: '/resume-builder', icon: FileText }],
+    items: [
+      { label: 'Resume Builder', href: '/resume-builder', icon: FileText },
+      { label: 'Mock Interview', href: '/mock-interview', icon: MessageSquare },
+    ],
   },
   {
     heading: 'EXPLORE',

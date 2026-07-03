@@ -24,6 +24,7 @@ const PROTECTED_PREFIXES = [
   '/calendar',
   '/coding',
   '/resume-builder',
+  '/mock-interview',
   '/tpo',
   '/admin',
   '/superadmin',

@@ -30,3 +30,4 @@ export * from './dto/support.dto';
 export * from './dto/financials.dto';
 export * from './dto/resume.dto';
 export * from './dto/resume-ai.dto';
+export * from './dto/mock-interview.dto';
