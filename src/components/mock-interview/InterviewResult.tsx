@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { animate, motion } from 'framer-motion';
 import { getInterview } from '@/lib/api/mock-interviews';
 import type { MockInterviewDetailDto } from '@/shared/dto/mock-interview.dto';
-import { ArrowLeft, CheckCircle2, Loader2, Target, TrendingUp } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Loader2, RotateCcw, Target, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 function scoreColor(n: number): string {
@@ -13,9 +14,33 @@ function scoreColor(n: number): string {
   return 'text-red-500';
 }
 
+function scoreChip(n: number): string {
+  if (n >= 70) return 'bg-green-100 text-green-700';
+  if (n >= 45) return 'bg-amber-100 text-amber-700';
+  return 'bg-red-100 text-red-600';
+}
+
+function scoreBorder(n: number): string {
+  if (n >= 70) return 'border-l-green-400';
+  if (n >= 45) return 'border-l-amber-400';
+  return 'border-l-red-400';
+}
+
+function band(n: number): { label: string; sub: string } {
+  if (n >= 80) return { label: 'Strong', sub: 'Interview-ready — polish the edges.' };
+  if (n >= 65) return { label: 'Solid', sub: 'A good showing — keep sharpening.' };
+  if (n >= 45) return { label: 'Developing', sub: 'Good foundation to build on.' };
+  return { label: 'Early days', sub: 'Keep practising — you improve fast here.' };
+}
+
+function ringStroke(n: number): string {
+  return n >= 70 ? '#16a34a' : n >= 45 ? '#d97706' : '#ef4444';
+}
+
 export function InterviewResult({ id }: { id: string }) {
   const [data, setData] = useState<MockInterviewDetailDto | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [display, setDisplay] = useState(0);
 
   useEffect(() => {
     let alive = true;
@@ -39,6 +64,14 @@ export function InterviewResult({ id }: { id: string }) {
       alive = false;
     };
   }, [id]);
+
+  // Animated count-up + ring fill once the score lands.
+  const target = data?.evaluation?.overall_percentage ?? null;
+  useEffect(() => {
+    if (target === null) return;
+    const controls = animate(0, target, { duration: 1.1, ease: 'easeOut', onUpdate: (v) => setDisplay(Math.round(v)) });
+    return () => controls.stop();
+  }, [target]);
 
   if (error) return <div className="py-24 text-center text-sm text-red-500">{error}</div>;
   if (!data) return <div className="flex items-center justify-center py-24"><Loader2 className="size-7 animate-spin text-slate-400" /></div>;
@@ -64,6 +97,9 @@ export function InterviewResult({ id }: { id: string }) {
     );
   }
 
+  const b = band(evalv.overall_percentage);
+  const dash = (display / 100) * 100.5;
+
   return (
     <div className="space-y-6">
       <Link href="/mock-interview" className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-navy">
@@ -71,20 +107,33 @@ export function InterviewResult({ id }: { id: string }) {
       </Link>
 
       {/* Overall */}
-      <section className="flex flex-col items-center gap-5 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm sm:flex-row sm:text-left">
-        <div className="relative grid size-28 place-items-center">
-          <svg viewBox="0 0 36 36" className="size-28 -rotate-90">
+      <motion.section
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="relative flex flex-col items-center gap-6 overflow-hidden rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm sm:flex-row sm:text-left"
+      >
+        <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-52 rounded-full bg-orange/5 blur-3xl" />
+        <div className="relative grid size-32 shrink-0 place-items-center">
+          <svg viewBox="0 0 36 36" className="size-32 -rotate-90">
             <circle cx="18" cy="18" r="16" fill="none" stroke="#e2e8f0" strokeWidth="3" />
-            <circle cx="18" cy="18" r="16" fill="none" strokeWidth="3" strokeLinecap="round" stroke={evalv.overall_percentage >= 70 ? '#16a34a' : evalv.overall_percentage >= 45 ? '#d97706' : '#ef4444'} strokeDasharray={`${(evalv.overall_percentage / 100) * 100.5} 100.5`} />
+            <circle cx="18" cy="18" r="16" fill="none" strokeWidth="3" strokeLinecap="round" stroke={ringStroke(evalv.overall_percentage)} strokeDasharray={`${dash} 100.5`} />
           </svg>
-          <span className={cn('absolute text-3xl font-black', scoreColor(evalv.overall_percentage))}>{evalv.overall_percentage}</span>
+          <div className="absolute flex flex-col items-center">
+            <span className={cn('text-4xl font-black tabular-nums', scoreColor(evalv.overall_percentage))}>{display}</span>
+            <span className="-mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">out of 100</span>
+          </div>
         </div>
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">{data.topic} · {data.difficulty}</p>
-          <h2 className="mt-1 text-xl font-black text-navy">Interview complete</h2>
-          <p className="mt-1 max-w-xl text-sm text-slate-600">{evalv.overall_feedback}</p>
+        <div className="relative">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">{data.topic} · {data.difficulty} · {data.interviewType}</p>
+          <div className="mt-1 flex items-center justify-center gap-2 sm:justify-start">
+            <h2 className="text-xl font-black text-navy">Interview complete</h2>
+            <span className={cn('rounded-full px-2.5 py-0.5 text-[11px] font-bold', scoreChip(evalv.overall_percentage))}>{b.label}</span>
+          </div>
+          <p className="mt-0.5 text-xs text-slate-400">{b.sub}</p>
+          <p className="mt-2 max-w-xl text-sm text-slate-600">{evalv.overall_feedback}</p>
         </div>
-      </section>
+      </motion.section>
 
       {/* Strengths / improvements */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -101,14 +150,20 @@ export function InterviewResult({ id }: { id: string }) {
       {/* Per-question */}
       <section className="space-y-3">
         <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400">Question breakdown</h3>
-        {data.questions.map((q) => {
+        {data.questions.map((q, i) => {
           const qs = evalv.question_scores[String(q.id)];
           const ans = answersById.get(q.id) ?? '';
           return (
-            <div key={q.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <motion.div
+              key={q.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: Math.min(i * 0.04, 0.3) }}
+              className={cn('rounded-xl border border-l-4 border-slate-200 bg-white p-4 shadow-sm', qs ? scoreBorder(qs.percentage) : 'border-l-slate-200')}
+            >
               <div className="flex items-start justify-between gap-3">
                 <p className="text-sm font-semibold text-navy">{q.id}. {q.question_text}</p>
-                {qs && <span className={cn('shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold', scoreColor(qs.percentage))}>{qs.percentage}%</span>}
+                {qs && <span className={cn('shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold', scoreChip(qs.percentage))}>{qs.percentage}%</span>}
               </div>
               <p className="mt-2 whitespace-pre-wrap rounded-lg bg-slate-50 p-2.5 text-[13px] text-slate-600">{ans || <span className="italic text-slate-400">No answer</span>}</p>
               {qs?.feedback && <p className="mt-2 text-sm text-slate-700">{qs.feedback}</p>}
@@ -118,14 +173,14 @@ export function InterviewResult({ id }: { id: string }) {
                   {qs.improvements.length > 0 && <div className="text-xs text-slate-600"><span className="font-semibold text-amber-700">△ </span>{qs.improvements.join('; ')}</div>}
                 </div>
               )}
-            </div>
+            </motion.div>
           );
         })}
       </section>
 
       <div className="flex justify-center">
-        <Link href="/mock-interview" className="inline-flex items-center gap-2 rounded-lg bg-navy px-5 py-2.5 text-sm font-bold text-white hover:bg-navy/90">
-          <CheckCircle2 className="size-4" /> Practise another
+        <Link href="/mock-interview" className="inline-flex items-center gap-2 rounded-xl bg-navy px-6 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-navy/90 hover:shadow">
+          <RotateCcw className="size-4" /> Practise another
         </Link>
       </div>
     </div>
