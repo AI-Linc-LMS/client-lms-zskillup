@@ -200,14 +200,17 @@ export const ADMIN_NAV: NavSection[] = [
     heading: 'PLATFORM ADMIN',
     items: [
       { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+      { label: 'User Management', href: '/admin/users', icon: Users },
       { label: 'College Requests', href: '/admin/college-requests', icon: ClipboardCheck },
     ],
   },
   {
     heading: 'INSIGHTS',
     items: [
+      { label: 'Platform Analytics', href: '/admin/analytics', icon: TrendingUp },
       { label: 'Student Reports', href: '/admin/students', icon: BarChart3 },
       { label: 'Colleges', href: '/admin/colleges', icon: School },
+      { label: 'Reports', href: '/admin/reports', icon: FileText },
     ],
   },
   {
