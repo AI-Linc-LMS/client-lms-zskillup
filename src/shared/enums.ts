@@ -132,3 +132,73 @@ export enum MockAttemptStatus {
   SUBMITTED = 'SUBMITTED',
   EXPIRED = 'EXPIRED',
 }
+
+// ─── Billing & entitlements (Razorpay program) ───────────────────────────────
+
+/**
+ * What a purchase / grant unlocks — the entitlement scope.
+ * - PLATFORM: everything (the "Upgrade Subscription" / full-generic plan).
+ * - SECTION:  a whole practice section (scopeRef = section root slug, or 'coding').
+ * - TOPIC:    a single topic (scopeRef = topic slug; coding topics use 'coding:<tag>').
+ * - COMPANY:  one recruiter company's hub / PYQ bank (scopeRef = company slug).
+ */
+export enum EntitlementScope {
+  PLATFORM = 'PLATFORM',
+  SECTION = 'SECTION',
+  TOPIC = 'TOPIC',
+  COMPANY = 'COMPANY',
+}
+
+/** Billing period a price maps to. Duration in days is stored per price row. */
+export enum BillingPeriod {
+  MONTHLY = 'MONTHLY',
+  QUARTERLY = 'QUARTERLY',
+  ANNUAL = 'ANNUAL',
+}
+
+/**
+ * Price tier. Only COMPANY scope is dual-tier today (Retail vs B2B); PLATFORM /
+ * SECTION / TOPIC are priced at RETAIL only. The tier is decided by who pays:
+ * an individual student → RETAIL, a college buying in bulk → B2B.
+ */
+export enum PriceTier {
+  RETAIL = 'RETAIL',
+  B2B = 'B2B',
+}
+
+/** Who a purchase / entitlement belongs to. */
+export enum EntitlementSubject {
+  USER = 'USER',
+  COLLEGE = 'COLLEGE',
+}
+
+/** How an entitlement was created. */
+export enum EntitlementSource {
+  PURCHASE = 'PURCHASE',
+  ADMIN_GRANT = 'ADMIN_GRANT',
+  TRIAL = 'TRIAL',
+  COLLEGE_INHERITED = 'COLLEGE_INHERITED',
+}
+
+/** Entitlement lifecycle. EXPIRED is derived at read time (expires_at < now),
+ *  never persisted — mirrors the college-subscription lazy-expiry convention. */
+export enum EntitlementStatus {
+  ACTIVE = 'ACTIVE',
+  CANCELLED = 'CANCELLED',
+}
+
+/** A Razorpay order (one purchasable line) lifecycle. */
+export enum PaymentOrderStatus {
+  CREATED = 'CREATED',
+  PAID = 'PAID',
+  FAILED = 'FAILED',
+  REFUNDED = 'REFUNDED',
+}
+
+/** A captured Razorpay payment lifecycle. */
+export enum PaymentStatus {
+  CREATED = 'CREATED',
+  CAPTURED = 'CAPTURED',
+  FAILED = 'FAILED',
+  REFUNDED = 'REFUNDED',
+}

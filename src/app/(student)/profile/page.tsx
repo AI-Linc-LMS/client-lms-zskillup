@@ -7,6 +7,7 @@ import { getMe, updateMe, type ApiMe } from '@/lib/api/me';
 import { getMyRegistrations, type ApiRegistration } from '@/lib/api/registrations';
 import { ApiRequestError } from '@/lib/api/types';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { MySubscriptionCard } from '@/components/billing/MySubscriptionCard';
 import { cn } from '@/lib/utils';
 
 const ROLE_OPTIONS = [
@@ -253,8 +254,9 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* My registrations */}
+        {/* Subscription + registrations */}
         <aside className="space-y-4">
+          <MySubscriptionCard />
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="flex items-center gap-1.5 text-sm font-bold text-navy">
               <Building2 className="size-4 text-orange" /> My drives

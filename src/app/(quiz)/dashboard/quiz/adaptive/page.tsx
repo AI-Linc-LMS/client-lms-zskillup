@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { PyqTag } from '@/components/practice/PyqTag';
 import { cn } from '@/lib/utils';
 import { useAdaptiveSession } from '@/hooks/useAdaptiveSession';
+import { PaywallCard } from '@/components/billing/PaywallCard';
 import { LivePointsMeter } from '@/components/adaptive/LivePointsMeter';
 import { PointsBurst } from '@/components/adaptive/PointsBurst';
 import type { AdaptiveOption } from '@/lib/api/adaptive';
@@ -102,6 +103,8 @@ function AdaptiveQuizRunner({
     sessionPoints,
     lastPoints,
     resumed,
+    paywall,
+    continueAfterUnlock,
   } = useAdaptiveSession({ mockTestId: mockId, topicSlug, companySlug, asWishTopic, requizSourceId, year });
 
   const [selected, setSelected] = useState<string | null>(null);
@@ -151,6 +154,23 @@ function AdaptiveQuizRunner({
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background text-navy">
         <p className="text-rose-600">{error ?? 'Something went wrong.'}</p>
         <Button variant="secondary" onClick={() => router.replace('/practice')}>Back to Practice</Button>
+      </div>
+    );
+  }
+  if (phase === 'paywalled' && paywall) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background px-4 py-10">
+        <div className="w-full">
+          <div className="mx-auto mb-5 flex max-w-lg justify-end">
+            <Button
+              variant="secondary"
+              onClick={() => router.replace(asWishTopic ? '/practice-wish' : '/practice')}
+            >
+              Exit
+            </Button>
+          </div>
+          <PaywallCard paywall={paywall} onUnlocked={() => void continueAfterUnlock()} />
+        </div>
       </div>
     );
   }

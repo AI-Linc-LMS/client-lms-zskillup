@@ -38,6 +38,15 @@ export interface AdaptivePendingQuestion {
 
 export type AdaptiveMode = 'MOCK' | 'PRACTICE' | 'AS_WISH';
 
+/** Freemium paywall marker — present when the free question limit is hit and the
+ *  scope isn't owned. The runner shows a Buy card for `scope`/`scopeRef`. */
+export interface AdaptivePaywall {
+  scope: 'PLATFORM' | 'SECTION' | 'TOPIC' | 'COMPANY';
+  scopeRef: string | null;
+  freeUsed: number;
+  freeLimit: number;
+}
+
 export interface AdaptiveSessionStart {
   sessionId: string;
   mockTestId: string | null;
@@ -50,7 +59,9 @@ export interface AdaptiveSessionStart {
   sessionPoints: number;
   resumed: boolean;
   mode: AdaptiveMode;
-  firstQuestion: AdaptivePendingQuestion;
+  /** null when paywalled at start (free limit already reached). */
+  firstQuestion: AdaptivePendingQuestion | null;
+  paywall?: AdaptivePaywall | null;
 }
 
 export interface SkillDelta {
@@ -75,6 +86,8 @@ export interface AdaptiveAnswerResult {
   pointsEarned: number;
   pointsBase: number;
   sessionPoints: number;
+  /** Present when the NEXT question is locked behind the paywall. */
+  paywall?: AdaptivePaywall | null;
 }
 
 export interface SkillMastery {

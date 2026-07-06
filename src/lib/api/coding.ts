@@ -41,6 +41,8 @@ export interface CodingProblem extends CodingProblemListItem {
   starterCode: Record<string, string>;
   sampleCases: CodingSampleCase[];
   timeLimitMs: number;
+  /** Languages this problem offers (SQL-only for SQL problems, else Core-5). */
+  languages?: CodingLanguage[];
 }
 
 export interface CodingCaseResult {

@@ -20,6 +20,7 @@ const PROTECTED_PREFIXES = [
   '/topic-mastery',
   '/practice',
   '/practice-wish',
+  '/upgrade',
   '/assessments',
   '/calendar',
   '/coding',
