@@ -356,6 +356,9 @@ export interface AdminPlatformStats {
   activeStudents?: number;
   activeColleges?: number;
   assessmentsConducted?: number;
+  // Product engagement (admin gap-fill): accepted coding submissions + AI-interview sessions.
+  codingSolved?: number;
+  interviewSessions?: number;
 }
 
 export async function getAdminStats(): Promise<AdminPlatformStats> {

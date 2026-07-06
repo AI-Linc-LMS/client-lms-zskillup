@@ -3,19 +3,27 @@
 import { useEffect, useState } from 'react';
 import { use } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
-import { getStudentReport, type AdminStudentFullReport } from '@/lib/api/admin';
-import { ArrowLeft, BadgeCheck, Loader2, XCircle } from 'lucide-react';
+import { deleteAdminStudent, getStudentReport, type AdminStudentFullReport } from '@/lib/api/admin';
+import { getMe } from '@/lib/api/me';
+import { ArrowLeft, BadgeCheck, Loader2, Trash2, XCircle } from 'lucide-react';
 
 /** Admin console — read-only per-student report (Phase 2 insights). */
 export default function AdminStudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const router = useRouter();
   const [report, setReport] = useState<AdminStudentFullReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [canDelete, setCanDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     let alive = true;
+    getMe()
+      .then((m) => alive && setCanDelete(!!m.capabilities?.canDeleteStudents))
+      .catch(() => {});
     (async () => {
       setLoading(true);
       try {
@@ -87,6 +95,26 @@ export default function AdminStudentDetailPage({ params }: { params: Promise<{ i
                   )}
                 </div>
               </div>
+              {canDelete && (
+                <button
+                  type="button"
+                  disabled={deleting}
+                  onClick={async () => {
+                    if (!window.confirm(`Delete ${report.student.fullName ?? report.student.email}? This cannot be undone.`)) return;
+                    setDeleting(true);
+                    try {
+                      await deleteAdminStudent(id);
+                      router.push('/admin/students');
+                    } catch (e) {
+                      window.alert(e instanceof Error ? e.message : 'Could not delete student.');
+                      setDeleting(false);
+                    }
+                  }}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50"
+                >
+                  <Trash2 className="size-3.5" /> {deleting ? 'Deleting…' : 'Delete student'}
+                </button>
+              )}
             </div>
             <dl className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
               <Kpi label="Quizzes" value={report.summary.totalAttempts} />
