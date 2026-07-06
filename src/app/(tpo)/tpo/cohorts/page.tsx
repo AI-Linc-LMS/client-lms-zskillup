@@ -36,12 +36,17 @@ export default function TpoCohortsPage() {
 
   async function onCreate() {
     if (name.trim().length < 2) return;
+    const parsedYear = year ? Number(year) : undefined;
+    if (parsedYear !== undefined && (!Number.isInteger(parsedYear) || parsedYear < 1900 || parsedYear > 2100)) {
+      setFormErr('Year must be a whole number between 1900 and 2100');
+      return;
+    }
     setBusy(true);
     setFormErr(null);
     try {
       await createCohort({
         name: name.trim(),
-        year: year ? Number(year) : undefined,
+        year: parsedYear,
         branch: branch.trim() || undefined,
       });
       setName('');

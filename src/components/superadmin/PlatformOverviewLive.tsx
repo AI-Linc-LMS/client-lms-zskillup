@@ -117,6 +117,20 @@ export function PlatformOverviewLive() {
   ];
 
   const coverage = [
+    { label: 'DAU (today)', value: stats.dau ?? 0, icon: <Timer className="size-4" />, color: '#059669' },
+    {
+      label: `Active students (14d)`,
+      value: stats.activeStudents ?? 0,
+      icon: <Layers className="size-4" />,
+      color: '#2563eb',
+    },
+    {
+      label: 'Active colleges (14d)',
+      value: stats.activeColleges ?? 0,
+      icon: <Building2 className="size-4" />,
+      color: '#f37021',
+    },
+    { label: 'Assessments run', value: stats.assessmentsConducted ?? 0, icon: <ClipboardList className="size-4" />, color: '#7c3aed' },
     { label: 'Colleges', value: stats.colleges, icon: <Building2 className="size-4" />, color: '#2563eb' },
     { label: 'Companies', value: stats.companies, icon: <Briefcase className="size-4" />, color: '#f37021' },
     { label: 'Courses', value: stats.courses, icon: <BookOpen className="size-4" />, color: '#7c3aed' },

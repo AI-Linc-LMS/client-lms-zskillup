@@ -14,10 +14,11 @@ import {
   type AdaptiveSessionStart,
   type AdaptivePendingQuestion,
   type AdaptiveAnswerResult,
+  type AdaptivePaywall,
   type AdaptiveHint,
 } from '@/lib/api/adaptive';
 
-export type SessionPhase = 'loading' | 'active' | 'complete' | 'error';
+export type SessionPhase = 'loading' | 'active' | 'complete' | 'error' | 'paywalled';
 
 interface AdaptiveSessionState {
   phase: SessionPhase;
@@ -45,6 +46,8 @@ interface AdaptiveSessionState {
   lastPoints: { earned: number; base: number; nonce: number } | null;
   /** True when an in-progress session was resumed on load. */
   resumed: boolean;
+  /** Set when the free question limit is reached and the scope isn't owned. */
+  paywall: AdaptivePaywall | null;
 }
 
 interface UseAdaptiveSessionReturn extends AdaptiveSessionState {
@@ -52,6 +55,8 @@ interface UseAdaptiveSessionReturn extends AdaptiveSessionState {
   askHint: () => Promise<void>;
   abandon: () => Promise<void>;
   finish: () => Promise<void>;
+  /** Re-enter the session after a purchase — resumes and pins the next question. */
+  continueAfterUnlock: () => Promise<void>;
   submitting: boolean;
 }
 
@@ -99,6 +104,7 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
     sessionPoints: 0,
     lastPoints: null,
     resumed: false,
+    paywall: null,
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -107,53 +113,67 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
   // Guard against React double-invoke creating a duplicate re-quiz session.
   const startedRef = useRef(false);
 
-  // Start session on mount
+  /** Start (or resume) the session. Also reused to re-enter after a paywall unlock:
+   *  the backend resumes the same-scope session and re-pins the next question. */
+  const beginSession = useCallback(async () => {
+    setState((s) => ({ ...s, phase: 'loading', error: null }));
+    try {
+      const yr = year ?? undefined;
+      const data = requizSourceId
+        ? await requizSession(requizSourceId)
+        : mockTestId
+          ? await startAdaptiveSession(mockTestId)
+          : asWishTopic
+            ? await startAdaptiveAsWish(asWishTopic, companySlug ?? undefined)
+            : topicSlug
+              ? await startAdaptiveSessionByTopic(topicSlug, companySlug ?? undefined, yr)
+              : companySlug
+                ? await startAdaptiveSessionByCompany(companySlug, yr)
+                : null;
+      if (!data) {
+        setState((s) => ({ ...s, phase: 'error', error: 'No practice scope selected' }));
+        return;
+      }
+      sessionIdRef.current = data.sessionId;
+      const { firstQuestion, paywall, ...meta } = data;
+      if (!firstQuestion && paywall) {
+        setState((s) => ({
+          ...s,
+          phase: 'paywalled',
+          sessionId: data.sessionId,
+          sessionMeta: meta,
+          currentQuestion: null,
+          paywall,
+          resumed: !!data.resumed,
+        }));
+        return;
+      }
+      setState((s) => ({
+        ...s,
+        phase: 'active',
+        sessionId: data.sessionId,
+        sessionMeta: meta,
+        currentQuestion: firstQuestion,
+        paywall: null,
+        questionStartMs: anchorFrom(firstQuestion),
+        sessionPoints: data.sessionPoints ?? 0,
+        resumed: !!data.resumed,
+      }));
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        phase: 'error',
+        error: err instanceof Error ? err.message : 'Failed to start session',
+      }));
+    }
+  }, [mockTestId, topicSlug, companySlug, asWishTopic, requizSourceId, year]);
+
+  // Start session on mount (guarded against React double-invoke).
   useEffect(() => {
     if (startedRef.current) return;
     startedRef.current = true;
-    let cancelled = false;
-    (async () => {
-      try {
-        const yr = year ?? undefined;
-        const data = requizSourceId
-          ? await requizSession(requizSourceId)
-          : mockTestId
-            ? await startAdaptiveSession(mockTestId)
-            : asWishTopic
-              ? await startAdaptiveAsWish(asWishTopic, companySlug ?? undefined)
-              : topicSlug
-                ? await startAdaptiveSessionByTopic(topicSlug, companySlug ?? undefined, yr)
-                : companySlug
-                  ? await startAdaptiveSessionByCompany(companySlug, yr)
-                  : null;
-        if (cancelled) return;
-        if (!data) {
-          setState((s) => ({ ...s, phase: 'error', error: 'No practice scope selected' }));
-          return;
-        }
-        sessionIdRef.current = data.sessionId;
-        const { firstQuestion, ...meta } = data;
-        setState((s) => ({
-          ...s,
-          phase: 'active',
-          sessionId: data.sessionId,
-          sessionMeta: meta,
-          currentQuestion: firstQuestion,
-          questionStartMs: anchorFrom(firstQuestion),
-          sessionPoints: data.sessionPoints ?? 0,
-          resumed: !!data.resumed,
-        }));
-      } catch (err) {
-        if (cancelled) return;
-        setState((s) => ({
-          ...s,
-          phase: 'error',
-          error: err instanceof Error ? err.message : 'Failed to start session',
-        }));
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [mockTestId, topicSlug, companySlug, asWishTopic, requizSourceId, year]);
+    void beginSession();
+  }, [beginSession]);
 
   const submitAnswer = useCallback(
     async (optionId: string, confidence?: number) => {
@@ -177,9 +197,10 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
           progress: result.progress,
           answeredCount: (s.answeredCount ?? 0) + 1,
           hintState: null,
-          // nextQuestion set when continuing, null on complete
+          // nextQuestion set when continuing, null on complete or paywalled
           currentQuestion: result.nextQuestion,
-          phase: result.sessionComplete ? 'complete' : 'active',
+          phase: result.paywall ? 'paywalled' : result.sessionComplete ? 'complete' : 'active',
+          paywall: result.paywall ?? null,
           questionStartMs: anchorFrom(result.nextQuestion),
           sessionPoints: result.sessionPoints ?? s.sessionPoints,
           lastPoints: { earned: result.pointsEarned, base: result.pointsBase, nonce: nonceRef.current },
@@ -219,5 +240,5 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
     setState((s) => ({ ...s, phase: 'complete', currentQuestion: null }));
   }, []);
 
-  return { ...state, submitAnswer, askHint, abandon, finish, submitting };
+  return { ...state, submitAnswer, askHint, abandon, finish, continueAfterUnlock: beginSession, submitting };
 }

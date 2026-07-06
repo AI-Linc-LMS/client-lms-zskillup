@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Loader2, Plus, Search } from 'lucide-react';
+import { Loader2, Plus, Search, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/ui/form-field';
 import { ApiRequestError } from '@/lib/api/types';
 import {
   createAdminCompany,
+  deleteAdminCompany,
   listAdminCompanies,
   updateAdminCompany,
   type AdminCompanyRow,
@@ -55,6 +56,22 @@ export function CompaniesAdmin() {
         await refresh();
       } catch (err) {
         window.alert(err instanceof ApiRequestError ? err.message : 'Could not update company.');
+      } finally {
+        setBusyId(null);
+      }
+    },
+    [refresh],
+  );
+
+  const removeCompany = useCallback(
+    async (row: AdminCompanyRow) => {
+      if (!window.confirm(`Remove "${row.name}"? It will be hidden from the console and public hubs.`)) return;
+      setBusyId(row.id);
+      try {
+        await deleteAdminCompany(row.id);
+        await refresh();
+      } catch (err) {
+        window.alert(err instanceof ApiRequestError ? err.message : 'Could not remove company.');
       } finally {
         setBusyId(null);
       }
@@ -133,14 +150,25 @@ export function CompaniesAdmin() {
                     <StatusPill published={c.isPublished} />
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button
-                      type="button"
-                      disabled={busyId === c.id}
-                      onClick={() => togglePublish(c)}
-                      className="text-xs font-semibold text-navy transition-colors hover:text-orange disabled:opacity-50"
-                    >
-                      {c.isPublished ? 'Unpublish' : 'Publish'}
-                    </button>
+                    <div className="flex items-center justify-end gap-3">
+                      <button
+                        type="button"
+                        disabled={busyId === c.id}
+                        onClick={() => togglePublish(c)}
+                        className="text-xs font-semibold text-navy transition-colors hover:text-orange disabled:opacity-50"
+                      >
+                        {c.isPublished ? 'Unpublish' : 'Publish'}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busyId === c.id}
+                        onClick={() => removeCompany(c)}
+                        aria-label={`Remove ${c.name}`}
+                        className="text-slate-300 transition-colors hover:text-red-500 disabled:opacity-50"
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))

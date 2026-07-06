@@ -1,0 +1,173 @@
+/**
+ * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * Mirrored byte-for-byte at the same path in the other repo. Change both together.
+ *
+ * Razorpay payments + entitlements (billing program). Student purchase endpoints
+ * are JWT-gated; admin price-book / grant endpoints are gated server-side by
+ * @RequireCapability('canManageSubscriptions'). The frontend imports these with
+ * `import type` so the class-validator runtime never fires client-side.
+ */
+import {
+  IsBoolean,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
+import {
+  BillingPeriod,
+  EntitlementScope,
+  EntitlementSubject,
+  PriceTier,
+} from '../enums';
+
+// ─── Student purchase ────────────────────────────────────────────────────────
+
+/** Start a purchase: create a Razorpay order for one scope + period. The amount
+ *  is computed server-side from the price book — never sent by the client. */
+export class CreateOrderDto {
+  @IsEnum(EntitlementScope)
+  scope!: EntitlementScope;
+
+  /** Required for SECTION/TOPIC/COMPANY (the section/topic/company slug); omit for PLATFORM. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  scopeRef?: string;
+
+  @IsEnum(BillingPeriod)
+  period!: BillingPeriod;
+}
+
+/** Confirm a checkout from the Razorpay handler callback. The server re-verifies
+ *  the HMAC signature before minting anything (the webhook is the other, primary
+ *  path — both converge idempotently on the same order). */
+export class VerifyPaymentDto {
+  @IsString()
+  @MaxLength(64)
+  razorpayOrderId!: string;
+
+  @IsString()
+  @MaxLength(64)
+  razorpayPaymentId!: string;
+
+  @IsString()
+  @MaxLength(256)
+  razorpaySignature!: string;
+}
+
+// ─── Admin: entitlement grant + price-book edit ──────────────────────────────
+
+/** Admin-grant an entitlement out-of-band (comp, support, migration). */
+export class GrantEntitlementDto {
+  @IsEnum(EntitlementSubject)
+  subjectType!: EntitlementSubject;
+
+  @IsOptional()
+  @IsUUID()
+  userId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  collegeId?: string;
+
+  @IsEnum(EntitlementScope)
+  scope!: EntitlementScope;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  scopeRef?: string;
+
+  /** Validity in days. Omit / null = perpetual. */
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(3650)
+  durationDays?: number | null;
+}
+
+/** Edit a price-book row (configurable pricing). */
+export class UpdatePriceBookDto {
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(1_000_000_00)
+  amountCents?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(3650)
+  durationDays?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+}
+
+// ─── Read shapes ─────────────────────────────────────────────────────────────
+
+export interface PriceBookEntryDto {
+  id: string;
+  scopeType: EntitlementScope;
+  tier: PriceTier;
+  period: BillingPeriod;
+  amountCents: number;
+  currency: string;
+  durationDays: number;
+  isActive: boolean;
+}
+
+/** Returned by create-order — everything the Razorpay Checkout widget needs. */
+export interface CreateOrderResultDto {
+  orderId: string;
+  razorpayOrderId: string;
+  razorpayKeyId: string;
+  amountCents: number;
+  currency: string;
+  scopeType: EntitlementScope;
+  scopeRef: string | null;
+  tier: PriceTier;
+  period: BillingPeriod;
+}
+
+export interface EntitlementDto {
+  id: string;
+  subjectType: EntitlementSubject;
+  userId: string | null;
+  collegeId: string | null;
+  scopeType: EntitlementScope;
+  scopeRef: string | null;
+  source: string;
+  /** Effective status — EXPIRED is computed when expiresAt has passed. */
+  status: string;
+  startsAt: string;
+  expiresAt: string | null;
+  /** Whole days until expiry (0 if expired/expiring today; null if perpetual). */
+  daysRemaining: number | null;
+}
+
+/** One line of the student's purchase history. */
+export interface PurchaseHistoryItemDto {
+  orderId: string;
+  scopeType: EntitlementScope;
+  scopeRef: string | null;
+  period: BillingPeriod;
+  tier: PriceTier;
+  amountCents: number;
+  currency: string;
+  status: string;
+  createdAt: string;
+}
+
+/** The "My Subscription" surface for a student. */
+export interface MySubscriptionDto {
+  hasPlatform: boolean;
+  entitlements: EntitlementDto[];
+  history: PurchaseHistoryItemDto[];
+}

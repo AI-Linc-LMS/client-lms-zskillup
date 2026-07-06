@@ -25,6 +25,9 @@ import {
   type CodingResult,
 } from '@/lib/api/coding';
 import type { GamificationSummary } from '@/lib/api/gamification-types';
+import { ApiRequestError } from '@/lib/api/types';
+import { PaywallCard } from '@/components/billing/PaywallCard';
+import type { AdaptivePaywall } from '@/lib/api/adaptive';
 import { RewardOverlay } from '@/components/gamification/RewardOverlay';
 import { notifyXpUpdated } from '@/lib/xp-events';
 import { CodeEditor } from './CodeEditor';
@@ -61,6 +64,7 @@ export function CodingWorkspace({ slug }: { slug: string }) {
   const [codeByLang, setCodeByLang] = useState<Record<string, string>>({});
   const [running, setRunning] = useState<'run' | 'submit' | null>(null);
   const [result, setResult] = useState<CodingResult | null>(null);
+  const [paywall, setPaywall] = useState<AdaptivePaywall | null>(null);
   const [reward, setReward] = useState<GamificationSummary | null>(null);
   const [solved, setSolved] = useState(false);
 
@@ -72,10 +76,18 @@ export function CodingWorkspace({ slug }: { slug: string }) {
         setProblem(p);
         setSolved(p.solved);
         setCodeByLang(p.starterCode ?? {});
-        // Prefer a language that ships starter code; else first supported.
-        const starterLangs = Object.keys(p.starterCode ?? {});
-        const supported = l.languages.length ? l.languages : FALLBACK_LANGS;
+        // The problem tells us which languages it offers (SQL-only for SQL
+        // problems, else Core-5). Fall back to the global list, then a hardcoded
+        // set, only if an older backend doesn't send per-problem languages.
+        const supported =
+          p.languages && p.languages.length
+            ? p.languages
+            : l.languages.length
+              ? l.languages
+              : FALLBACK_LANGS;
         setLanguages(supported);
+        // Prefer a language that ships starter code; else first offered.
+        const starterLangs = Object.keys(p.starterCode ?? {});
         const initial =
           starterLangs.find((s) => supported.some((x) => x.name === s)) ??
           supported[0]?.name ??
@@ -118,6 +130,7 @@ export function CodingWorkspace({ slug }: { slug: string }) {
   const run = async (mode: 'run' | 'submit') => {
     setRunning(mode);
     setResult(null);
+    setPaywall(null);
     try {
       const r =
         mode === 'run'
@@ -131,16 +144,27 @@ export function CodingWorkspace({ slug }: { slug: string }) {
           notifyXpUpdated();
         }
       }
-    } catch {
-      setResult({
-        ok: false,
-        error: 'Could not reach the code runner. Please try again.',
-        verdict: 'ERROR',
-        passed: 0,
-        total: 0,
-        compileOutput: null,
-        cases: [],
-      });
+    } catch (err) {
+      // Free coding limit hit → show a Buy card instead of an error.
+      if (err instanceof ApiRequestError && err.code === 'PAYWALL') {
+        const d = (err.details ?? {}) as { scope?: string; scopeRef?: string | null; freeLimit?: number };
+        setPaywall({
+          scope: (d.scope as AdaptivePaywall['scope']) ?? 'TOPIC',
+          scopeRef: d.scopeRef ?? null,
+          freeUsed: d.freeLimit ?? 5,
+          freeLimit: d.freeLimit ?? 5,
+        });
+      } else {
+        setResult({
+          ok: false,
+          error: 'Could not reach the code runner. Please try again.',
+          verdict: 'ERROR',
+          passed: 0,
+          total: 0,
+          compileOutput: null,
+          cases: [],
+        });
+      }
     } finally {
       setRunning(null);
     }
@@ -288,7 +312,19 @@ export function CodingWorkspace({ slug }: { slug: string }) {
             </div>
           </div>
 
-          {result ? <ResultPanel result={result} /> : null}
+          {paywall ? (
+            <div className="mt-4">
+              <PaywallCard
+                paywall={paywall}
+                onUnlocked={() => {
+                  setPaywall(null);
+                  void run('submit');
+                }}
+              />
+            </div>
+          ) : result ? (
+            <ResultPanel result={result} />
+          ) : null}
         </section>
       </div>
     </div>

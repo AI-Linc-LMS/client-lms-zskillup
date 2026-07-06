@@ -20,6 +20,7 @@ interface ParsedRow {
   email: string;
   fullName?: string;
   rollNumber?: string;
+  branch?: string;
 }
 
 function parseCsv(raw: string): { rows: ParsedRow[]; errors: string[] } {
@@ -38,7 +39,7 @@ function parseCsv(raw: string): { rows: ParsedRow[]; errors: string[] } {
   const rows: ParsedRow[] = [];
   const errors: string[] = [];
   dataLines.forEach((line, i) => {
-    const [email, fullName, rollNumber] = line.split(',').map((c) => c.trim());
+    const [email, fullName, rollNumber, branch] = line.split(',').map((c) => c.trim());
     if (!email) {
       errors.push(`Row ${i + 1}: missing email`);
       return;
@@ -47,6 +48,7 @@ function parseCsv(raw: string): { rows: ParsedRow[]; errors: string[] } {
       email,
       fullName: fullName || undefined,
       rollNumber: rollNumber || undefined,
+      branch: branch || undefined,
     });
   });
   return { rows, errors };
@@ -110,7 +112,7 @@ export default function TpoInvitationsPage() {
           Bulk-invite students
         </h1>
         <p className="mt-1 text-sm text-slate-500">
-          Upload a CSV with columns: <code className="rounded bg-slate-100 px-1 text-xs">email,fullName,rollNumber</code>.
+          Upload a CSV with columns: <code className="rounded bg-slate-100 px-1 text-xs">email,fullName,rollNumber,branch</code>.
           We&apos;ll email each student a signup link and skip emails that already exist.
         </p>
       </div>
@@ -185,6 +187,7 @@ export default function TpoInvitationsPage() {
                   <th className="px-3 py-2 text-left">Email</th>
                   <th className="px-3 py-2 text-left">Name</th>
                   <th className="px-3 py-2 text-left">Roll number</th>
+                  <th className="px-3 py-2 text-left">Branch</th>
                 </tr>
               </thead>
               <tbody>
@@ -193,6 +196,7 @@ export default function TpoInvitationsPage() {
                     <td className="px-3 py-2 font-medium text-navy">{r.email}</td>
                     <td className="px-3 py-2 text-slate-600">{r.fullName ?? '—'}</td>
                     <td className="px-3 py-2 text-slate-500">{r.rollNumber ?? '—'}</td>
+                    <td className="px-3 py-2 text-slate-500">{r.branch ?? '—'}</td>
                   </tr>
                 ))}
               </tbody>

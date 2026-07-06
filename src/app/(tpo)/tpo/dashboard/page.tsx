@@ -5,45 +5,43 @@ import Link from 'next/link';
 import {
   Activity,
   AlertTriangle,
+  ArrowRight,
   BarChart3,
-  ChevronDown,
+  ClipboardCheck,
   GraduationCap,
   Loader2,
   Mail,
-  Search,
-  ShieldCheck,
+  Plus,
   TrendingUp,
   Upload,
   Users,
 } from 'lucide-react';
-import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { Button } from '@/components/ui/button';
+import { Donut } from '@/components/superadmin/dashboard-ui';
 import { getTpoAnalytics } from '@/lib/api/tpo';
-import { listCohorts, type Cohort } from '@/lib/api/cohorts';
-import type { ReadinessBand, TpoDashboard } from '@/shared';
+import type { TpoDashboard } from '@/shared';
+import { useTpoConsole } from '@/components/tpo/TpoConsole';
+import {
+  BentoCard,
+  KpiCard,
+  ProvenanceChip,
+  Quad,
+  ReadinessBadge,
+} from '@/components/tpo/ui';
 
-const BAND_STYLE: Record<ReadinessBand, string> = {
-  READY: 'bg-emerald-100 text-emerald-700',
-  IN_TRAINING: 'bg-amber-100 text-amber-700',
-  AT_RISK: 'bg-red-100 text-red-700',
-};
-const BAND_LABEL: Record<ReadinessBand, string> = {
-  READY: 'Ready',
-  IN_TRAINING: 'In training',
-  AT_RISK: 'At risk',
-};
+/** 4-band readiness distribution for the Overall Placement Readiness donut. */
+const READINESS_BANDS = [
+  { key: 'ready', label: 'Ready (70+)', color: '#059669', test: (r: number) => r >= 70 },
+  { key: 'near', label: 'Near ready (55–69)', color: '#0284c7', test: (r: number) => r >= 55 && r < 70 },
+  { key: 'developing', label: 'Developing (40–54)', color: '#f59e0b', test: (r: number) => r >= 40 && r < 55 },
+  { key: 'atrisk', label: 'At risk (<40)', color: '#dc2626', test: (r: number) => r < 40 },
+] as const;
 
-export default function TpoDashboardPage() {
+export default function TpoExecutiveDashboard() {
+  const { cohortId, cohorts } = useTpoConsole();
   const [data, setData] = useState<TpoDashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [cohorts, setCohorts] = useState<Cohort[]>([]);
-  const [cohortId, setCohortId] = useState('');
-  const [query, setQuery] = useState('');
-
-  useEffect(() => {
-    listCohorts().then(setCohorts).catch(() => setCohorts([]));
-  }, []);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -58,228 +56,214 @@ export default function TpoDashboardPage() {
     load();
   }, [load]);
 
-  const roster = useMemo(() => {
-    if (!data) return [];
-    const q = query.trim().toLowerCase();
-    const rows = q
-      ? data.students.filter(
-          (s) => (s.name ?? '').toLowerCase().includes(q) || s.email.toLowerCase().includes(q),
-        )
-      : data.students;
-    return [...rows].sort((a, b) => b.readiness - a.readiness);
-  }, [data, query]);
+  const topStudents = useMemo(
+    () => (data ? [...data.students].sort((a, b) => b.readiness - a.readiness).slice(0, 6) : []),
+    [data],
+  );
+
+  const donutSegments = useMemo(() => {
+    const students = data?.students ?? [];
+    return READINESS_BANDS.map((b) => ({
+      label: b.label,
+      color: b.color,
+      value: students.filter((s) => b.test(s.readiness)).length,
+    }));
+  }, [data]);
+
+  const cohortLabel = cohortId ? cohorts.find((c) => c.id === cohortId)?.name ?? 'Batch' : 'All batches';
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="size-7 animate-spin text-slate-400" />
+      </div>
+    );
+  }
+  if (error) {
+    return <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">{error}</div>;
+  }
+  if (!data || data.overview.totalStudents === 0) {
+    return <EmptyState />;
+  }
+
+  const o = data.overview;
 
   return (
     <div className="space-y-6">
-      <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Placement Office' }]} />
-
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Placement Office</p>
-          <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Cohort readiness</h1>
-          <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-400">
-            <ShieldCheck className="size-3.5" /> Scoped to your college
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <select
-              value={cohortId}
-              onChange={(e) => setCohortId(e.target.value)}
-              className="w-48 appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-3 pr-8 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
-            >
-              <option value="">All cohorts</option>
-              {cohorts.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-            <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-          </div>
-          <Button asChild>
-            <Link href="/tpo/invitations"><Mail className="size-4" /> Invite</Link>
-          </Button>
-        </div>
+      {/* Contextual header */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm font-semibold text-slate-500">
+          Campus overview · <span className="text-navy">{cohortLabel}</span>
+        </p>
+        <Button asChild size="sm">
+          <Link href="/tpo/invitations">
+            <Mail className="size-4" /> Invite students
+          </Link>
+        </Button>
       </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center py-24"><Loader2 className="size-7 animate-spin text-slate-400" /></div>
-      ) : error ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">{error}</div>
-      ) : !data || data.overview.totalStudents === 0 ? (
-        <EmptyState />
-      ) : (
-        <>
-          {/* Executive stats */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            <Stat icon={Users} label="Students" value={data.overview.totalStudents} tone="slate" />
-            <Stat icon={Activity} label="Active (14d)" value={data.overview.activeStudents} tone="sky" />
-            <Stat icon={GraduationCap} label="Placement-ready" value={data.overview.placementReady} tone="emerald" />
-            <Stat icon={TrendingUp} label="Avg readiness" value={`${data.overview.avgReadiness}%`} tone="violet" />
-            <Stat icon={AlertTriangle} label="At risk" value={data.overview.atRisk} tone="red" />
+      {/* KPI row */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <KpiCard icon={Users} label="Total Students" value={o.totalStudents} tone="slate" source="Registrations" />
+        <KpiCard icon={Activity} label="Active Students" value={o.activeStudents} tone="sky" source="Login activity (14d)" />
+        <KpiCard icon={GraduationCap} label="Placement Ready" value={o.placementReady} tone="emerald" source="Readiness ≥ 70" />
+        <KpiCard icon={TrendingUp} label="Avg Readiness" value={`${o.avgReadiness}%`} tone="violet" source="Aptitude + Coding + Mock" />
+        <KpiCard icon={AlertTriangle} label="At-Risk" value={o.atRisk} tone="red" source="Readiness < 40%" />
+      </div>
+
+      {/* Bento row A: Participation×performance + Student snapshot */}
+      <div className="grid gap-5 lg:grid-cols-3">
+        <BentoCard
+          n={1}
+          title="Performance & Participation"
+          subtitle="Where your students sit — target high-effort, under-performing."
+          source="Assessment scores + platform activity"
+        >
+          <div className="grid grid-cols-2 gap-3">
+            <Quad label="High effort · High performance" value={data.quadrants.highPartHighPerf} tone="emerald" />
+            <Quad label="High effort · Needs support" value={data.quadrants.highPartLowPerf} tone="amber" />
+            <Quad label="Low effort · High performance" value={data.quadrants.lowPartHighPerf} tone="sky" />
+            <Quad label="Low effort · Low performance" value={data.quadrants.lowPartLowPerf} tone="red" />
           </div>
+        </BentoCard>
 
-          {/* Quadrants + skill gaps */}
-          <div className="grid gap-6 lg:grid-cols-2">
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-sm font-bold text-navy">Participation × performance</h2>
-              <p className="mt-0.5 text-xs text-slate-400">Where your students sit — target the top-left (engaged but under-performing).</p>
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <Quad label="High effort · High performance" value={data.quadrants.highPartHighPerf} tone="emerald" />
-                <Quad label="High effort · Needs support" value={data.quadrants.highPartLowPerf} tone="amber" />
-                <Quad label="Low effort · High performance" value={data.quadrants.lowPartHighPerf} tone="sky" />
-                <Quad label="Low effort · Low performance" value={data.quadrants.lowPartLowPerf} tone="red" />
-              </div>
-            </section>
-
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-sm font-bold text-navy">Campus skill gaps</h2>
-              <p className="mt-0.5 text-xs text-slate-400">Weakest aptitude topics by accuracy (min 10 attempts).</p>
-              <div className="mt-4 space-y-2.5">
-                {data.skillGaps.length === 0 ? (
-                  <p className="text-sm text-slate-400">Not enough practice data yet.</p>
-                ) : (
-                  data.skillGaps.map((g) => (
-                    <div key={g.slug} className="flex items-center gap-3">
-                      <span className="w-40 shrink-0 truncate text-sm text-navy">{g.topic}</span>
-                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
-                        <div className="h-full rounded-full bg-gradient-to-r from-amber-400 to-red-500" style={{ width: `${g.accuracy}%` }} />
-                      </div>
-                      <span className="w-10 text-right text-xs font-semibold tabular-nums text-slate-500">{g.accuracy}%</span>
-                    </div>
-                  ))
-                )}
-              </div>
-            </section>
-          </div>
-
-          {/* Company readiness */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-sm font-bold text-navy">Company readiness</h2>
-            <p className="mt-0.5 text-xs text-slate-400">Average accuracy on each company&apos;s tagged questions across your students.</p>
-            {data.companyReadiness.length === 0 ? (
-              <p className="mt-3 text-sm text-slate-400">No company-tagged practice yet.</p>
-            ) : (
-              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {data.companyReadiness.map((c) => (
-                  <div key={c.slug} className="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
-                    <div className="flex items-center justify-between">
-                      <span className="truncate text-sm font-semibold text-navy">{c.name}</span>
-                      <span className="text-sm font-bold tabular-nums text-navy">{c.readiness}%</span>
-                    </div>
-                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200">
-                      <div className="h-full rounded-full bg-navy" style={{ width: `${c.readiness}%` }} />
-                    </div>
-                    <p className="mt-1 text-[11px] text-slate-400">{c.attempted} attempts</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-
-          {/* Roster */}
-          <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 p-4">
-              <h2 className="text-sm font-bold text-navy">Students <span className="text-slate-400">({roster.length})</span></h2>
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search name or email…"
-                  className="w-64 rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
-                />
-              </div>
-            </div>
-            <div className="max-h-[28rem] overflow-auto">
-              <table className="w-full min-w-[720px] text-sm">
-                <thead className="sticky top-0 border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-                  <tr>
-                    <th className="px-4 py-2.5">Student</th>
-                    <th className="px-4 py-2.5">Branch</th>
-                    <th className="px-4 py-2.5">Readiness</th>
-                    <th className="px-4 py-2.5">Participation</th>
-                    <th className="px-4 py-2.5">Status</th>
-                    <th className="px-4 py-2.5">Last active</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {roster.map((s) => (
-                    <tr key={s.id} className="hover:bg-slate-50">
-                      <td className="px-4 py-2.5">
-                        <p className="font-semibold text-navy">{s.name ?? '—'}</p>
-                        <p className="text-xs text-slate-400">{s.email}</p>
-                      </td>
-                      <td className="px-4 py-2.5 text-slate-600">{s.branch ?? '—'}</td>
-                      <td className="px-4 py-2.5">
-                        <div className="flex items-center gap-2">
-                          <div className="h-1.5 w-16 overflow-hidden rounded-full bg-slate-100">
-                            <div className="h-full rounded-full bg-navy" style={{ width: `${s.readiness}%` }} />
-                          </div>
-                          <span className="tabular-nums text-slate-600">{s.readiness}%</span>
+        <BentoCard
+          n={2}
+          title="Student Management Snapshot"
+          subtitle="Top students by readiness."
+          source="Student profiles + activity"
+          className="lg:col-span-2"
+          action={
+            <Link
+              href="/tpo/students"
+              className="inline-flex items-center gap-1 text-xs font-bold text-orange hover:underline"
+            >
+              View all <ArrowRight className="size-3.5" />
+            </Link>
+          }
+        >
+          <div className="-mx-1 overflow-x-auto">
+            <table className="w-full min-w-[520px] text-sm">
+              <thead className="text-left text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+                <tr>
+                  <th className="px-1 pb-2">Student</th>
+                  <th className="px-1 pb-2">Branch</th>
+                  <th className="px-1 pb-2">Readiness</th>
+                  <th className="px-1 pb-2">Status</th>
+                  <th className="px-1 pb-2">Last active</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {topStudents.map((s) => (
+                  <tr key={s.id}>
+                    <td className="px-1 py-2">
+                      <p className="font-semibold text-navy">{s.name ?? '—'}</p>
+                      <p className="truncate text-xs text-slate-400">{s.email}</p>
+                    </td>
+                    <td className="px-1 py-2 text-slate-600">{s.branch ?? '—'}</td>
+                    <td className="px-1 py-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-1.5 w-14 overflow-hidden rounded-full bg-slate-100">
+                          <div className="h-full rounded-full bg-navy" style={{ width: `${s.readiness}%` }} />
                         </div>
-                      </td>
-                      <td className="px-4 py-2.5 tabular-nums text-slate-500">{s.participation}</td>
-                      <td className="px-4 py-2.5">
-                        <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${BAND_STYLE[s.band]}`}>{BAND_LABEL[s.band]}</span>
-                      </td>
-                      <td className="px-4 py-2.5 text-xs text-slate-400">
-                        {s.lastActiveDate ? new Date(s.lastActiveDate).toLocaleDateString() : 'Never'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        <span className="tabular-nums text-slate-600">{s.readiness}%</span>
+                      </div>
+                    </td>
+                    <td className="px-1 py-2">
+                      <ReadinessBadge band={s.band} />
+                    </td>
+                    <td className="px-1 py-2 text-xs text-slate-400">
+                      {s.lastActiveDate ? new Date(s.lastActiveDate).toLocaleDateString('en-IN') : 'Never'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </BentoCard>
+      </div>
+
+      {/* Bento row B: Placement readiness donut + Company readiness */}
+      <div className="grid gap-5 lg:grid-cols-3">
+        <BentoCard
+          n={3}
+          title="Overall Placement Readiness"
+          subtitle="Distribution across readiness bands."
+          source="Readiness composite"
+        >
+          <div className="pt-1">
+            <Donut
+              segments={donutSegments}
+              centerTop={o.totalStudents.toLocaleString('en-IN')}
+              centerBottom="Students"
+            />
+          </div>
+        </BentoCard>
+
+        <BentoCard
+          n={4}
+          title="Company Readiness"
+          subtitle="Average accuracy on each company's tagged questions."
+          source="Company-tagged practice"
+          className="lg:col-span-2"
+          action={
+            <Link
+              href="/tpo/company-readiness"
+              className="inline-flex items-center gap-1 text-xs font-bold text-orange hover:underline"
+            >
+              Heatmap <ArrowRight className="size-3.5" />
+            </Link>
+          }
+        >
+          {data.companyReadiness.length === 0 ? (
+            <p className="text-sm text-slate-400">No company-tagged practice yet.</p>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {data.companyReadiness.slice(0, 6).map((c) => (
+                <div key={c.slug} className="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate text-sm font-semibold text-navy">{c.name}</span>
+                    <span className="shrink-0 text-sm font-bold tabular-nums text-navy">{c.readiness}%</span>
+                  </div>
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200">
+                    <div className="h-full rounded-full bg-navy" style={{ width: `${c.readiness}%` }} />
+                  </div>
+                  <p className="mt-1 text-[11px] text-slate-400">{c.attempted} attempts</p>
+                </div>
+              ))}
             </div>
-            {data.truncated ? (
-              <p className="border-t border-slate-100 px-4 py-2 text-[11px] text-slate-400">Showing the first 5,000 students.</p>
-            ) : null}
-          </section>
-        </>
-      )}
-    </div>
-  );
-}
+          )}
+        </BentoCard>
+      </div>
 
-function Stat({
-  icon: Icon,
-  label,
-  value,
-  tone,
-}: {
-  icon: typeof Users;
-  label: string;
-  value: number | string;
-  tone: 'slate' | 'sky' | 'emerald' | 'violet' | 'red';
-}) {
-  const tint: Record<string, string> = {
-    slate: 'bg-slate-100 text-slate-600',
-    sky: 'bg-sky-50 text-sky-600',
-    emerald: 'bg-emerald-50 text-emerald-600',
-    violet: 'bg-violet-50 text-violet-600',
-    red: 'bg-red-50 text-red-600',
-  };
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <span className={`grid size-9 place-items-center rounded-xl ${tint[tone]}`}>
-        <Icon className="size-5" aria-hidden="true" />
-      </span>
-      <p className="mt-3 text-2xl font-black tabular-nums text-navy">{value}</p>
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
-    </div>
-  );
-}
-
-function Quad({ label, value, tone }: { label: string; value: number; tone: 'emerald' | 'amber' | 'sky' | 'red' }) {
-  const tint: Record<string, string> = {
-    emerald: 'border-emerald-200 bg-emerald-50/60',
-    amber: 'border-amber-200 bg-amber-50/60',
-    sky: 'border-sky-200 bg-sky-50/60',
-    red: 'border-red-200 bg-red-50/60',
-  };
-  return (
-    <div className={`rounded-xl border p-3 ${tint[tone]}`}>
-      <p className="text-2xl font-black tabular-nums text-navy">{value}</p>
-      <p className="mt-0.5 text-[11px] font-medium leading-tight text-slate-500">{label}</p>
+      {/* Assessment Center strip (wired in the Assessment Center module) */}
+      <BentoCard
+        n={5}
+        title="Assessment Center"
+        subtitle="Create sectional or company drives, schedule them, and track attendance & results."
+        action={
+          <Button asChild size="sm">
+            <Link href="/tpo/assessments">
+              <Plus className="size-4" /> Create Assessment
+            </Link>
+          </Button>
+        }
+      >
+        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {['Total', 'Upcoming', 'Live', 'Completed', 'Students Assigned'].map((label) => (
+            <div key={label} className="rounded-xl border border-dashed border-slate-200 bg-slate-50/40 p-3">
+              <p className="text-2xl font-black tabular-nums text-slate-300">—</p>
+              <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-3 flex items-center gap-1.5 text-xs text-slate-400">
+          <ClipboardCheck className="size-3.5" /> Live counts appear once you create your first assessment.
+        </p>
+        <div className="mt-3">
+          <ProvenanceChip source="Assessment records + participation" />
+        </div>
+      </BentoCard>
     </div>
   );
 }
@@ -292,19 +276,23 @@ function EmptyState() {
       </span>
       <h2 className="mt-4 text-lg font-extrabold text-navy">Invite your cohort to get started</h2>
       <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">
-        Once students join and start practising, cohort readiness, participation quadrants, company
-        readiness, and skill gaps appear here automatically.
+        Once students join and start practising, campus readiness, participation quadrants, company
+        readiness, and skill gaps populate this console automatically.
       </p>
       <div className="mt-5 flex flex-wrap justify-center gap-3">
         <Button asChild>
-          <Link href="/tpo/invitations"><Mail className="size-4" /> Invite students</Link>
+          <Link href="/tpo/invitations">
+            <Mail className="size-4" /> Invite students
+          </Link>
         </Button>
         <Button variant="outline" asChild>
-          <Link href="/tpo/cohorts"><Users className="size-4" /> Manage cohorts</Link>
+          <Link href="/tpo/cohorts">
+            <Users className="size-4" /> Manage cohorts
+          </Link>
         </Button>
       </div>
       <p className="mt-6 inline-flex items-center gap-1.5 text-xs text-slate-400">
-        <BarChart3 className="size-3.5" /> Interview & communication analytics arrive once that module ships.
+        <BarChart3 className="size-3.5" /> Interview, coding & placement modules populate as students engage.
       </p>
     </section>
   );

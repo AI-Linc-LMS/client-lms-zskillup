@@ -14,10 +14,16 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
+  IsBoolean,
+  IsDateString,
+  IsIn,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
+  Max,
   MaxLength,
+  Min,
   MinLength,
   ValidateNested,
 } from 'class-validator';
@@ -49,6 +55,14 @@ export class TpoInvitationRowDto {
   @IsString()
   @MaxLength(50)
   rollNumber?: string;
+
+  /** Free-form branch (e.g. "CSE", "Computer Science"); mapped to the branch
+   *  enum server-side so department analytics have coverage pre-onboarding. */
+  @IsOptional()
+  @Transform(trimString)
+  @IsString()
+  @MaxLength(40)
+  branch?: string;
 }
 
 export class TpoBulkInviteDto {
@@ -76,4 +90,87 @@ export interface TpoBulkInviteResult {
     status: 'created' | 'skipped' | 'invalid';
     reason?: string;
   }>;
+}
+
+/** Record a real placement outcome for a student (TPO). */
+export class CreateTpoPlacementDto {
+  @IsUUID()
+  studentId!: string;
+
+  @Transform(trimString)
+  @IsString()
+  @MinLength(1)
+  @MaxLength(160)
+  companyName!: string;
+
+  @IsOptional()
+  @Transform(trimString)
+  @IsString()
+  @MaxLength(160)
+  role?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(9999)
+  ctcLpa?: number;
+
+  @IsOptional()
+  @IsIn(['FULL_TIME', 'INTERNSHIP', 'PPO'])
+  offerType?: string;
+
+  @IsOptional()
+  @IsIn(['OFFERED', 'ACCEPTED', 'DECLINED'])
+  status?: string;
+
+  @IsOptional()
+  @IsDateString()
+  offerDate?: string;
+}
+
+/** Create a college assessment (TPO Assessment Center). Content is sampled from
+ *  the bank by mode: SECTIONAL (broad MCQ + coding) or COMPANY (that company's
+ *  tagged questions). */
+export class CreateTpoAssessmentDto {
+  @IsIn(['SECTIONAL', 'COMPANY'])
+  mode!: string;
+
+  @IsOptional()
+  @Transform(trimString)
+  @IsString()
+  @MaxLength(120)
+  companySlug?: string;
+
+  @Transform(trimString)
+  @IsString()
+  @MinLength(2)
+  @MaxLength(200)
+  title!: string;
+
+  @IsDateString()
+  scheduledAt!: string;
+
+  @IsNumber()
+  @Min(5)
+  @Max(300)
+  durationMinutes!: number;
+
+  @IsNumber()
+  @Min(1)
+  @Max(100)
+  mcqCount!: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(20)
+  codingCount?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  proctored?: boolean;
+
+  @IsOptional()
+  @IsUUID()
+  cohortId?: string;
 }

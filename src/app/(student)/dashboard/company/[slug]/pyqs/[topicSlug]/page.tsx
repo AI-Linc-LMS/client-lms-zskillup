@@ -2,9 +2,10 @@
 
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle2, ExternalLink, History, Lightbulb, Loader2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, ExternalLink, History, Lightbulb, Loader2, Lock } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
-import { getCompanyPyqs, type ApiCompanyPyq } from '@/lib/api/catalog';
+import { getCompanyPyqs, type ApiCompanyPyq, type ApiCompanyPyqsResult } from '@/lib/api/catalog';
+import { PaywallCard } from '@/components/billing/PaywallCard';
 import { cn } from '@/lib/utils';
 
 const titleCase = (s: string) =>
@@ -16,14 +17,27 @@ export default function CompanyTopicPyqsPage({
   params: Promise<{ slug: string; topicSlug: string }>;
 }) {
   const { slug, topicSlug } = use(params);
-  const [pyqs, setPyqs] = useState<ApiCompanyPyq[] | null>(null);
+  const [result, setResult] = useState<ApiCompanyPyqsResult | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  const load = () =>
+    getCompanyPyqs(slug, topicSlug)
+      .then((r) => {
+        setResult(r);
+        setFailed(false);
+      })
+      .catch(() => setFailed(true));
 
   useEffect(() => {
-    getCompanyPyqs(slug, topicSlug).then(setPyqs).catch(() => setPyqs([]));
+    void load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug, topicSlug]);
 
+  const pyqs = result?.items ?? [];
+  const lockedCount = result?.lockedCount ?? 0;
+  const paywall = result?.paywall ?? null;
   const companyName = titleCase(slug);
-  const topicName = pyqs?.[0]?.topicName ?? titleCase(topicSlug);
+  const topicName = pyqs[0]?.topicName ?? titleCase(topicSlug);
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -49,20 +63,45 @@ export default function CompanyTopicPyqsPage({
         </Link>
       </div>
 
-      {pyqs === null ? (
+      {result === null && !failed ? (
         <div className="grid h-64 place-items-center"><Loader2 className="size-6 animate-spin text-slate-400" /></div>
+      ) : failed ? (
+        <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
+          Please sign in to view previous-year questions.
+        </div>
       ) : pyqs.length === 0 ? (
         <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
           No previous-year questions tagged for {companyName} in this topic yet.
         </div>
       ) : (
         <>
-          <p className="mt-4 text-sm text-slate-500">{pyqs.length} previous-year question{pyqs.length === 1 ? '' : 's'} asked by {companyName}.</p>
+          <p className="mt-4 text-sm text-slate-500">
+            {result?.total ?? pyqs.length} previous-year question
+            {(result?.total ?? pyqs.length) === 1 ? '' : 's'} asked by {companyName}
+            {lockedCount > 0 ? ` — showing your first ${pyqs.length} free.` : '.'}
+          </p>
           <div className="mt-4 space-y-4">
             {pyqs.map((q, i) => (
               <PyqCard key={q.id} q={q} index={i + 1} />
             ))}
           </div>
+          {lockedCount > 0 && paywall ? (
+            <div className="mt-8">
+              <p className="mb-4 flex items-center justify-center gap-2 text-sm font-semibold text-slate-500">
+                <Lock className="size-4 text-orange" /> {lockedCount} more previous-year question
+                {lockedCount === 1 ? '' : 's'} locked
+              </p>
+              <PaywallCard
+                paywall={{
+                  scope: paywall.scope,
+                  scopeRef: paywall.scopeRef,
+                  freeUsed: result?.freeLimit ?? 5,
+                  freeLimit: result?.freeLimit ?? 5,
+                }}
+                onUnlocked={() => void load()}
+              />
+            </div>
+          ) : null}
         </>
       )}
     </div>

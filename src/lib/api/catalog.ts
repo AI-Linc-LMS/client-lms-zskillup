@@ -135,12 +135,21 @@ export interface ApiCompanyPyq {
   options: Array<{ text: string; isCorrect: boolean; orderIndex: number }>;
 }
 
-/** A company's PYQs for a topic (or all topics). */
-export async function getCompanyPyqs(slug: string, topicSlug?: string): Promise<ApiCompanyPyq[]> {
+/** PYQ list result — metered: a non-entitled student gets `items` (the first
+ *  `freeLimit`) with `lockedCount` more behind the paywall. */
+export interface ApiCompanyPyqsResult {
+  items: ApiCompanyPyq[];
+  total: number;
+  lockedCount: number;
+  freeLimit: number;
+  paywall: { scope: 'COMPANY' | 'PLATFORM'; scopeRef: string | null } | null;
+}
+
+/** A company's PYQs for a topic (or all topics). Requires auth (answers are
+ *  gated); non-entitled students see the first few with the rest locked. */
+export async function getCompanyPyqs(slug: string, topicSlug?: string): Promise<ApiCompanyPyqsResult> {
   const qs = topicSlug ? `?topic=${encodeURIComponent(topicSlug)}` : '';
-  const res = await apiClient.get<ApiCompanyPyq[]>(`/api/v1/companies/${slug}/pyqs${qs}`, {
-    auth: 'public',
-  });
+  const res = await apiClient.get<ApiCompanyPyqsResult>(`/api/v1/companies/${slug}/pyqs${qs}`);
   return res.data;
 }
 

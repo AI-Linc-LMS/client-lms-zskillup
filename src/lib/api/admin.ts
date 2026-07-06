@@ -237,6 +237,11 @@ export async function updateAdminCompany(
   return res.data;
 }
 
+/** Soft-delete a company (removed from console + public hubs). */
+export async function deleteAdminCompany(id: string): Promise<void> {
+  await apiClient.delete(`/api/v1/admin/companies/${id}`);
+}
+
 // ─── Questions (Sprint 3 — superadmin question-bank CRUD) ───────────────────
 
 export interface AdminQuestionRow {
@@ -346,6 +351,11 @@ export interface AdminPlatformStats {
   adaptiveSessions?: number;
   questionsByDifficulty?: { easy: number; medium: number; hard: number };
   signups?: Array<{ date: string; count: number }>;
+  // Engagement (super-admin gap-fill): login-based DAU + 14-day active splits.
+  dau?: number;
+  activeStudents?: number;
+  activeColleges?: number;
+  assessmentsConducted?: number;
 }
 
 export async function getAdminStats(): Promise<AdminPlatformStats> {

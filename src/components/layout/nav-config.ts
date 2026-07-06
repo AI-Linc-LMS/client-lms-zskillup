@@ -22,11 +22,13 @@ import {
   Quote,
   School,
   ScrollText,
+  Settings,
   Sparkles,
   Target,
   TrendingUp,
   Trophy,
   Users,
+  Wallet,
 } from 'lucide-react';
 
 /**
@@ -87,6 +89,7 @@ export const STUDENT_NAV: NavSection[] = [
     heading: 'EXPLORE',
     items: [
       { label: 'Company Hubs', href: '/dashboard/company', icon: Building2 },
+      { label: 'Upgrade', href: '/upgrade', icon: Sparkles },
       { label: 'Help & Support', href: '/support', icon: LifeBuoy },
     ],
   },
@@ -95,13 +98,18 @@ export const STUDENT_NAV: NavSection[] = [
 export const SUPERADMIN_NAV: NavSection[] = [
   {
     heading: 'OVERVIEW',
-    items: [{ label: 'Dashboard', href: '/superadmin/dashboard', icon: LayoutDashboard }],
+    items: [
+      { label: 'Dashboard', href: '/superadmin/dashboard', icon: LayoutDashboard },
+      { label: 'Platform Analytics', href: '/superadmin/analytics', icon: BarChart3 },
+      { label: 'Adaptive Sessions', href: '/superadmin/adaptive-sessions', icon: Brain },
+    ],
   },
   {
     heading: 'PEOPLE',
     items: [
       { label: 'Student Reports', href: '/superadmin/students', icon: BarChart3 },
       { label: 'Users', href: '/superadmin/users', icon: Users },
+      { label: 'Colleges', href: '/superadmin/colleges', icon: School },
       { label: 'College Requests', href: '/superadmin/college-requests', icon: ClipboardCheck },
     ],
   },
@@ -113,6 +121,9 @@ export const SUPERADMIN_NAV: NavSection[] = [
       { label: 'Mock Tests', href: '/superadmin/mocks', icon: FileCheck2 },
       { label: 'Assessments', href: '/superadmin/scheduled-assessments', icon: CalendarClock },
       { label: 'Companies', href: '/superadmin/companies', icon: Building2 },
+      { label: 'Courses', href: '/superadmin/courses', icon: GraduationCap },
+      { label: 'Daily Challenges', href: '/superadmin/challenges', icon: Trophy },
+      { label: 'Tips', href: '/superadmin/tips', icon: Sparkles },
     ],
   },
   {
@@ -126,7 +137,9 @@ export const SUPERADMIN_NAV: NavSection[] = [
     heading: 'OPERATIONS',
     items: [
       { label: 'Subscriptions', href: '/superadmin/subscriptions', icon: CreditCard },
+      { label: 'Billing & Revenue', href: '/superadmin/billing', icon: Wallet },
       { label: 'Financials', href: '/superadmin/financials', icon: IndianRupee },
+      { label: 'Reports', href: '/superadmin/reports', icon: FileText },
       { label: 'Broadcasts', href: '/superadmin/broadcasts', icon: Megaphone },
       { label: 'Support', href: '/superadmin/support', icon: LifeBuoy },
       { label: 'Audit Log', href: '/superadmin/audit-logs', icon: ScrollText },
@@ -134,13 +147,45 @@ export const SUPERADMIN_NAV: NavSection[] = [
   },
 ];
 
+/**
+ * TPO / Placement Office console nav — the 11-module console (redesign). Rendered
+ * by the dedicated `TpoShell` (not the shared Sidebar). Modules not yet built ship
+ * as labeled scaffolds, so every link resolves — no 404s in the rail.
+ */
 export const TPO_NAV: NavSection[] = [
   {
-    heading: 'PLACEMENT OFFICE',
+    heading: 'OVERVIEW',
     items: [
-      { label: 'Dashboard', href: '/tpo/dashboard', icon: LayoutDashboard },
-      { label: 'Cohorts', href: '/tpo/cohorts', icon: Users },
+      { label: 'Executive Dashboard', href: '/tpo/dashboard', icon: LayoutDashboard },
+    ],
+  },
+  {
+    heading: 'ANALYTICS',
+    items: [
+      { label: 'Student Analytics', href: '/tpo/analytics', icon: BarChart3 },
+      { label: 'Placement Readiness', href: '/tpo/placement-readiness', icon: Target },
+      { label: 'Company Readiness', href: '/tpo/company-readiness', icon: Building2 },
+      { label: 'Skill Gap Analytics', href: '/tpo/skill-gaps', icon: TrendingUp },
+      { label: 'Coding Analytics', href: '/tpo/coding-analytics', icon: Code2 },
+      { label: 'Interview Analytics', href: '/tpo/interview-analytics', icon: MessageSquare },
+    ],
+  },
+  {
+    heading: 'MANAGE',
+    items: [
+      { label: 'Student Management', href: '/tpo/students', icon: Users },
+      { label: 'Assessment Center', href: '/tpo/assessments', icon: ClipboardCheck },
+      { label: 'Cohorts', href: '/tpo/cohorts', icon: GraduationCap },
       { label: 'Invitations', href: '/tpo/invitations', icon: Mail },
+    ],
+  },
+  {
+    heading: 'ACCOUNT',
+    items: [
+      { label: 'Reports & Exports', href: '/tpo/reports', icon: FileText },
+      { label: 'Subscription', href: '/tpo/subscription', icon: CreditCard },
+      { label: 'Cohort Access', href: '/tpo/billing', icon: Wallet },
+      { label: 'Settings', href: '/tpo/settings', icon: Settings },
     ],
   },
 ];

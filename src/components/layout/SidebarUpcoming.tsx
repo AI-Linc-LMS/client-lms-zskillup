@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { CalendarClock, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getMySchedule, type ApiScheduledAssessment } from '@/lib/api/scheduling';
+import { getMockHistory } from '@/lib/api/mocks';
 
 function dueLabel(iso: string): string {
   const ms = new Date(iso).getTime() - Date.now();
@@ -23,9 +24,15 @@ function dueLabel(iso: string): string {
  */
 export function SidebarUpcoming() {
   const [items, setItems] = useState<ApiScheduledAssessment[] | null>(null);
+  // mockTestIds the student has already finalized — a completed live drive drops
+  // its one-tap Start (the backend rejects a second attempt) and reads "Done".
+  const [done, setDone] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
+    getMockHistory('assessment')
+      .then((rows) => !cancelled && setDone(new Set(rows.map((r) => r.mockTestId))))
+      .catch(() => {});
     getMySchedule()
       .then((s) => {
         if (cancelled) return;
@@ -62,17 +69,19 @@ export function SidebarUpcoming() {
         {items.map((a) => {
           const startMs = new Date(a.scheduledAt).getTime();
           const live = Date.now() >= startMs && Date.now() <= startMs + a.durationMinutes * 60_000;
+          const completed = !!a.mockTestId && done.has(a.mockTestId);
+          const liveOpen = live && !completed;
           return (
             <li key={a.id}>
               <Link
                 href={
-                  live && a.mockTestId
+                  liveOpen && a.mockTestId
                     ? `/dashboard/quiz?mock=${a.mockTestId}${a.proctored ? '&proctored=1' : ''}`
                     : '/assessments'
                 }
                 className={cn(
                   'block rounded-xl border p-2.5 transition-colors',
-                  live
+                  liveOpen
                     ? 'border-emerald-300 bg-emerald-50/60 hover:bg-emerald-50'
                     : 'border-slate-200 bg-white hover:border-orange/40 hover:bg-orange/[0.04]',
                 )}
@@ -83,8 +92,13 @@ export function SidebarUpcoming() {
                 </p>
                 <p className="mt-0.5 flex items-center justify-between gap-2 text-[10px] font-semibold">
                   <span className="truncate text-slate-400">{a.companyName}</span>
-                  <span className={cn('shrink-0', live ? 'text-emerald-600' : 'text-slate-500')}>
-                    {live ? '● Live' : `Due ${dueLabel(a.scheduledAt)}`}
+                  <span
+                    className={cn(
+                      'shrink-0',
+                      completed ? 'text-emerald-600' : liveOpen ? 'text-emerald-600' : 'text-slate-500',
+                    )}
+                  >
+                    {completed ? '✓ Done' : liveOpen ? '● Live' : `Due ${dueLabel(a.scheduledAt)}`}
                   </span>
                 </p>
               </Link>

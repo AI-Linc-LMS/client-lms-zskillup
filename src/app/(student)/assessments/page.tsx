@@ -18,6 +18,7 @@ import {
   getMySchedule,
   type ApiScheduledAssessment,
 } from '@/lib/api/scheduling';
+import { getMockHistory } from '@/lib/api/mocks';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { Reveal, Stagger, StaggerItem } from '@/components/motion/primitives';
 import { cn } from '@/lib/utils';
@@ -61,11 +62,21 @@ export default function AssessmentsPage() {
     return { year: n.getFullYear(), month: n.getMonth() };
   });
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  // mockTestId → finalized attemptId, so a completed drive shows "View result"
+  // instead of "Start" (only one attempt per assessment is allowed server-side).
+  const [attempts, setAttempts] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
     getMySchedule()
       .then(setItems)
       .catch(() => setItems([]));
+    getMockHistory('assessment')
+      .then((rows) => {
+        const map = new Map<string, string>();
+        for (const r of rows) if (!map.has(r.mockTestId)) map.set(r.mockTestId, r.attemptId);
+        setAttempts(map);
+      })
+      .catch(() => {});
   }, []);
 
   const byDay = useMemo(() => {
@@ -388,7 +399,14 @@ export default function AssessmentsPage() {
                             </span>
                           ) : null}
                         </div>
-                        {live && it.mockTestId ? (
+                        {live && it.mockTestId && attempts.has(it.mockTestId) ? (
+                          <Link
+                            href={`/dashboard/quiz?report=${attempts.get(it.mockTestId)}`}
+                            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-extrabold text-emerald-700 transition-colors hover:bg-emerald-100"
+                          >
+                            <ShieldCheck className="size-4" /> Completed · View result
+                          </Link>
+                        ) : live && it.mockTestId ? (
                           <Link
                             href={`/dashboard/quiz?mock=${it.mockTestId}${it.proctored ? '&proctored=1' : ''}`}
                             className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-3 py-2 text-xs font-extrabold text-white transition-transform hover:brightness-105"

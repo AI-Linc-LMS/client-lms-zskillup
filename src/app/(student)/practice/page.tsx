@@ -10,6 +10,7 @@ import {
 } from '@/lib/api/catalog';
 import { TopicAccuracyPanels } from '@/components/practice/TopicAccuracyPanels';
 import { PracticePicker } from '@/components/practice/PracticePicker';
+import { UpgradeBanner } from '@/components/billing/UpgradeBanner';
 import { Reveal } from '@/components/motion/primitives';
 
 /**
@@ -118,6 +119,8 @@ export default async function PracticePage({ searchParams }: PageProps) {
           </div>
         </section>
       </Reveal>
+
+      <UpgradeBanner />
 
       <PracticePicker topics={topics} companies={pickerCompanies} companyParam={companyParam} />
 
