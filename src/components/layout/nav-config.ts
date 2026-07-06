@@ -100,6 +100,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
     heading: 'OVERVIEW',
     items: [
       { label: 'Dashboard', href: '/superadmin/dashboard', icon: LayoutDashboard },
+      { label: 'Platform Analytics', href: '/superadmin/analytics', icon: BarChart3 },
       { label: 'Adaptive Sessions', href: '/superadmin/adaptive-sessions', icon: Brain },
     ],
   },
@@ -138,6 +139,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
       { label: 'Subscriptions', href: '/superadmin/subscriptions', icon: CreditCard },
       { label: 'Billing & Revenue', href: '/superadmin/billing', icon: Wallet },
       { label: 'Financials', href: '/superadmin/financials', icon: IndianRupee },
+      { label: 'Reports', href: '/superadmin/reports', icon: FileText },
       { label: 'Broadcasts', href: '/superadmin/broadcasts', icon: Megaphone },
       { label: 'Support', href: '/superadmin/support', icon: LifeBuoy },
       { label: 'Audit Log', href: '/superadmin/audit-logs', icon: ScrollText },
