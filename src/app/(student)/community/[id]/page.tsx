@@ -117,7 +117,7 @@ export default function CommunityPostPage({ params }: { params: Promise<{ id: st
   const canPin = post.canPin;
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div>
       <Breadcrumb
         items={[
           { label: 'Home', href: '/' },

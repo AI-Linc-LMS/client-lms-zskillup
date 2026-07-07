@@ -28,7 +28,7 @@ export const metadata: Metadata = {
  */
 export default function HowXpWorksPage() {
   return (
-    <div className="mx-auto max-w-4xl pb-16">
+    <div className="pb-16">
       <Link
         href="/dashboard"
         className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-navy"
