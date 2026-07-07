@@ -18,29 +18,51 @@ export function ProfileCompletionBanner() {
   const [missing, setMissing] = useState<string[]>([]);
 
   useEffect(() => {
-    getMe()
-      .then((me) => {
-        if (me.role !== 'STUDENT') return;
-        const p = me.studentProfile;
-        const fields: Array<[string, boolean]> = [
-          ['name', !!me.fullName?.trim()],
-          ['phone', !!p?.phone],
-          ['course', !!p?.course],
-          ['year of study', !!p?.yearOfStudy],
-          ['college', !!p?.collegeName],
-          ['passout year', !!p?.passoutYear],
-          ['skills', !!p?.skills?.length],
-          ['target roles', !!p?.rolesInterested?.length],
-        ];
-        const filled = fields.filter(([, ok]) => ok).length;
-        const percent = Math.round((filled / fields.length) * 100);
-        if (percent >= 100) return; // fully complete → nothing to nudge
-        setPct(percent);
-        setMissing(fields.filter(([, ok]) => !ok).map(([label]) => label));
-      })
-      .catch(() => {
-        /* not signed in / transient — render nothing */
-      });
+    let cancelled = false;
+    const check = () => {
+      getMe()
+        .then((me) => {
+          if (cancelled) return;
+          if (me.role !== 'STUDENT') {
+            setPct(null);
+            return;
+          }
+          const p = me.studentProfile;
+          const fields: Array<[string, boolean]> = [
+            ['name', !!me.fullName?.trim()],
+            ['phone', !!p?.phone],
+            ['course', !!p?.course],
+            ['year of study', !!p?.yearOfStudy],
+            ['college', !!p?.collegeName],
+            ['passout year', !!p?.passoutYear],
+            ['skills', !!p?.skills?.length],
+            ['target roles', !!p?.rolesInterested?.length],
+          ];
+          const filled = fields.filter(([, ok]) => ok).length;
+          const percent = Math.round((filled / fields.length) * 100);
+          if (percent >= 100) {
+            setPct(null); // 100% → hide (also fires when it's completed while mounted)
+            return;
+          }
+          setPct(percent);
+          setMissing(fields.filter(([, ok]) => !ok).map(([label]) => label));
+        })
+        .catch(() => {
+          /* not signed in / transient — render nothing */
+        });
+    };
+    check();
+    // Re-check whenever the student returns to the dashboard, so editing (or
+    // CLEARING) a field on the profile page flips the banner without a hard reload.
+    const onFocus = () => check();
+    const onVis = () => document.visibilityState === 'visible' && check();
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVis);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVis);
+    };
   }, []);
 
   if (pct === null) return null; // hidden until we know the profile is incomplete
