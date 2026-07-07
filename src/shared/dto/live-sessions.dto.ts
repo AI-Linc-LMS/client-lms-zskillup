@@ -35,6 +35,12 @@ export class CreateLiveSessionDto {
   @MaxLength(1000)
   meetingUrl!: string;
 
+  /** Optional playback link (add after the session so students can watch back). */
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  recordingUrl?: string | null;
+
   /** ISO timestamp for when the session starts. */
   @IsDateString()
   scheduledAt!: string;
@@ -71,6 +77,11 @@ export class UpdateLiveSessionDto {
   meetingUrl?: string;
 
   @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  recordingUrl?: string | null;
+
+  @IsOptional()
   @IsDateString()
   scheduledAt?: string;
 
@@ -98,6 +109,7 @@ export interface LiveSessionDto {
   title: string;
   description: string;
   meetingUrl: string;
+  recordingUrl: string | null;
   scheduledAt: string;
   durationMinutes: number;
   audience: LiveSessionAudience;
