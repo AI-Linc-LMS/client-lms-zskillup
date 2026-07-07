@@ -23,13 +23,16 @@ import { BrandLogo } from '@/components/layout/BrandLogo';
 import { HomeFeaturedTracks } from '@/components/marketing/HomeFeaturedTracks';
 import { HomeTopCohort } from '@/components/marketing/HomeTopCohort';
 import { getPublicTestimonials } from '@/lib/server/public-content';
+import {
+  LANDING_COVERAGE_TOPICS,
+  LANDING_FOOTER,
+  LANDING_HERO_STATS,
+  LANDING_HREFS,
+  LANDING_STREAK_DEMO,
+  LANDING_TODAYS_FOCUS,
+} from '@/lib/landing-config';
 
-const HERO_STATS = [
-  { label: 'Students enrolled', value: '240,000+' },
-  { label: 'Partner colleges', value: '1,200+' },
-  { label: 'Average rating', value: '4.7★' },
-  { label: 'Placement success', value: '82%' },
-];
+const HERO_STATS = LANDING_HERO_STATS;
 
 const FEATURES = [
   {
@@ -54,20 +57,7 @@ const FEATURES = [
   },
 ];
 
-const TOPIC_PILLS = [
-  'Quantitative Aptitude',
-  'Logical Reasoning',
-  'Verbal Ability',
-  'Programming Fundamentals',
-  'Data Structures',
-  'OOPS',
-  'DBMS · SQL',
-  'Operating Systems',
-  'Computer Networks',
-  'HR Interview',
-  'Group Discussion',
-  'Resume & LinkedIn',
-];
+const TOPIC_PILLS = LANDING_COVERAGE_TOPICS;
 
 const TESTIMONIALS = [
   {
@@ -122,8 +112,8 @@ export default async function HomePage() {
         <BrandLogo variant="light" priority className="h-8" />
         <nav className="hidden items-center gap-6 lg:flex" aria-label="Primary">
           {[
-            { label: 'Companies', href: '/dashboard/company' },
-            { label: 'Prepare', href: '/prepare' },
+            { label: 'Companies', href: LANDING_HREFS.companies },
+            { label: 'Prepare', href: LANDING_HREFS.prepare },
             { label: 'Leaderboard', href: '/leaderboard' },
           ].map((l) => (
             <Link
@@ -372,7 +362,7 @@ export default async function HomePage() {
               </p>
             </div>
             <Link
-              href="/prepare"
+              href={LANDING_HREFS.prepare}
               className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-line)] bg-white px-4 py-2 text-sm font-semibold text-[var(--color-text)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-primary)]"
             >
               View all tracks <ArrowRight className="h-4 w-4" />
@@ -461,16 +451,12 @@ export default async function HomePage() {
           <div className="relative grid gap-4 sm:grid-cols-2">
             <div className="lms-card p-5">
               <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-subtle)]">
-                Today&apos;s focus
+                {LANDING_TODAYS_FOCUS.eyebrow}
               </p>
-              <p className="mt-1 text-base font-bold tracking-tight">
-                Probability &amp; permutations
-              </p>
-              <p className="mt-1 text-xs text-[var(--color-text-muted)]">
-                20-min drill · High weight for TCS &amp; Infosys
-              </p>
-              <Link href="/prepare" className="btn-brand mt-3 inline-flex text-xs">
-                <PlayCircle className="h-3.5 w-3.5" /> Start session
+              <p className="mt-1 text-base font-bold tracking-tight">{LANDING_TODAYS_FOCUS.topic}</p>
+              <p className="mt-1 text-xs text-[var(--color-text-muted)]">{LANDING_TODAYS_FOCUS.meta}</p>
+              <Link href={LANDING_TODAYS_FOCUS.ctaHref} className="btn-brand mt-3 inline-flex text-xs">
+                <PlayCircle className="h-3.5 w-3.5" /> {LANDING_TODAYS_FOCUS.ctaLabel}
               </Link>
             </div>
 
@@ -480,18 +466,19 @@ export default async function HomePage() {
                   Active streak
                 </p>
                 <span className="streak-flame" style={{ padding: '0.25rem 0.6rem', fontSize: '0.66rem' }}>
-                  <Flame className="h-3 w-3" />14d
+                  <Flame className="h-3 w-3" />
+                  {LANDING_STREAK_DEMO.days}d
                 </span>
               </div>
               <div className="mt-3 flex h-12 items-end gap-1.5">
-                {[42, 60, 38, 72, 88, 65, 90].map((h, i) => (
+                {LANDING_STREAK_DEMO.week.map((h, i) => (
                   <div key={i} className="flex flex-1 flex-col items-center gap-1">
                     <div
                       className="w-full rounded-md bg-[var(--color-primary-highlight)]"
                       style={{ height: `${(h / 100) * 36}px` }}
                     />
                     <span className="text-[9px] font-semibold text-[var(--color-text-subtle)]">
-                      {['M', 'T', 'W', 'T', 'F', 'S', 'S'][i]}
+                      {LANDING_STREAK_DEMO.labels[i]}
                     </span>
                   </div>
                 ))}
@@ -513,7 +500,7 @@ export default async function HomePage() {
                 Every section the recruiters ask
               </h2>
             </div>
-            <Link href="/prepare" className="text-sm font-bold text-[var(--color-primary)] hover:underline">
+            <Link href={LANDING_HREFS.catalog} className="text-sm font-bold text-[var(--color-primary)] hover:underline">
               Browse the catalog →
             </Link>
           </div>
@@ -610,13 +597,8 @@ export default async function HomePage() {
           <div>
             <p className="group-label mb-3">Product</p>
             <ul className="space-y-2">
-              {[
-                { label: 'Prepare', href: '/prepare' },
-                { label: 'Mock tests', href: '/mock-assessment' },
-                { label: 'Companies', href: '/dashboard/company' },
-                { label: 'Leaderboard', href: '/leaderboard' },
-              ].map((l) => (
-                <li key={l.href}>
+              {LANDING_FOOTER.product.map((l) => (
+                <li key={l.label}>
                   <Link href={l.href} className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
                     {l.label}
                   </Link>
@@ -627,13 +609,8 @@ export default async function HomePage() {
           <div>
             <p className="group-label mb-3">Account</p>
             <ul className="space-y-2">
-              {[
-                { label: 'Log in', href: '/login' },
-                { label: 'Create account', href: '/signup' },
-                { label: 'Dashboard', href: '/dashboard' },
-                { label: 'Roadmap', href: '/roadmap' },
-              ].map((l) => (
-                <li key={l.href}>
+              {LANDING_FOOTER.account.map((l) => (
+                <li key={l.label}>
                   <Link href={l.href} className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
                     {l.label}
                   </Link>
@@ -644,9 +621,11 @@ export default async function HomePage() {
           <div>
             <p className="group-label mb-3">Coverage</p>
             <ul className="space-y-2">
-              {['Aptitude & Reasoning', 'Coding & DSA', 'Interview Prep', 'Company Tracks'].map((a) => (
-                <li key={a}>
-                  <span className="text-sm text-[var(--color-text-muted)]">{a}</span>
+              {LANDING_FOOTER.coverage.map((l) => (
+                <li key={l.label}>
+                  <Link href={l.href} className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
+                    {l.label}
+                  </Link>
                 </li>
               ))}
             </ul>

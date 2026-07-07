@@ -73,14 +73,21 @@ export function HomeFeaturedTracks() {
 
               <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-[var(--color-text-muted)]">
                 <span className="inline-flex items-center gap-1 font-medium">
-                  <ClipboardList className="h-3 w-3" /> {compact(co?.questionCount ?? 0)} questions
+                  {/* Live count when the catalog resolves; else the curated figure —
+                      never a bare "0" when /companies is slow/unavailable. */}
+                  <ClipboardList className="h-3 w-3" /> {co?.questionCount ? compact(co.questionCount) : t.mcqs}{' '}
+                  questions
                 </span>
-                <span className="inline-flex items-center gap-1 font-medium text-[var(--color-brand-strong)]">
-                  <History className="h-3 w-3" /> {compact(co?.pyqCount ?? 0)} PYQs
-                </span>
-                <span className="inline-flex items-center gap-1">
-                  <Code2 className="h-3 w-3" /> {compact(co?.codingCount ?? 0)} coding
-                </span>
+                {co?.pyqCount ? (
+                  <span className="inline-flex items-center gap-1 font-medium text-[var(--color-brand-strong)]">
+                    <History className="h-3 w-3" /> {compact(co.pyqCount)} PYQs
+                  </span>
+                ) : null}
+                {co?.codingCount ? (
+                  <span className="inline-flex items-center gap-1">
+                    <Code2 className="h-3 w-3" /> {compact(co.codingCount)} coding
+                  </span>
+                ) : null}
                 {rounds ? <span>{rounds} rounds</span> : null}
               </div>
 
