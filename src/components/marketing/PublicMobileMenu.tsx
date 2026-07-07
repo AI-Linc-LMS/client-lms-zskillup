@@ -22,7 +22,7 @@ function roleHome(role: string | null): string {
  */
 const LINKS = [
   { label: 'Companies', href: '/dashboard/company' },
-  { label: 'Prepare', href: '/prepare' },
+  { label: 'Prepare', href: '/dashboard/company' },
   { label: 'Leaderboard', href: '/leaderboard' },
 ];
 

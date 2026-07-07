@@ -236,7 +236,7 @@ export function ExploreMenu() {
                         practice like the real drive.
                       </p>
                       <Link
-                        href="/prepare"
+                        href="/dashboard/company"
                         onClick={closeNow}
                         className="group/cta mt-4 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-b from-[#f7a14e] to-[#f37021] px-4 py-2 text-sm font-bold text-white shadow-[0_12px_28px_-12px_rgba(243,112,33,0.9)] transition-transform active:scale-[0.98]"
                       >

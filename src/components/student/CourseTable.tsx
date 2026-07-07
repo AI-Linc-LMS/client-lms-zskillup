@@ -86,7 +86,7 @@ export function CourseTable() {
           })}
         </div>
         <Link
-          href="/prepare"
+          href="/dashboard/company"
           className="mb-3 text-[11px] font-semibold text-orange hover:underline"
         >
           Browse full catalog →
