@@ -1,5 +1,7 @@
 import { apiClient } from './client';
 import type {
+  CartCheckoutDto,
+  CartOrderResultDto,
   CreateOrderDto,
   CreateOrderResultDto,
   EntitlementDto,
@@ -26,6 +28,12 @@ export async function getMySubscription(): Promise<MySubscriptionDto> {
 
 export async function createOrder(dto: CreateOrderDto): Promise<CreateOrderResultDto> {
   const res = await apiClient.post<CreateOrderResultDto>('/api/v1/payments/orders', dto);
+  return res.data;
+}
+
+/** Cart: create ONE Razorpay order for multiple items (server prices + de-dupes). */
+export async function createCartOrder(dto: CartCheckoutDto): Promise<CartOrderResultDto> {
+  const res = await apiClient.post<CartOrderResultDto>('/api/v1/payments/cart/orders', dto);
   return res.data;
 }
 

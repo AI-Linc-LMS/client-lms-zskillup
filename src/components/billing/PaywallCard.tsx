@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Loader2, Lock, Sparkles } from 'lucide-react';
+import { ArrowRight, Check, Loader2, Lock, ShoppingCart, Sparkles } from 'lucide-react';
 import { getPricing } from '@/lib/api/payments';
 import { getMe } from '@/lib/api/me';
 import { formatPrice } from '@/lib/api/subscriptions';
 import { buildPriceMap, PERIODS, retailPrice } from '@/lib/payments/pricing';
 import { usePurchase } from './usePurchase';
+import { useCartOptional } from './CartProvider';
 import { BillingPeriod, EntitlementScope } from '@/shared/enums';
 import type { PriceBookEntryDto } from '@/shared/dto/payments.dto';
 import type { AdaptivePaywall } from '@/lib/api/adaptive';
@@ -51,6 +52,7 @@ export function PaywallCard({
   const [pricing, setPricing] = useState<PriceBookEntryDto[]>([]);
   const [prefill, setPrefill] = useState<{ name?: string | null; email?: string | null }>({});
   const { buy, busyKey } = usePurchase();
+  const cart = useCartOptional();
 
   useEffect(() => {
     getPricing().then(setPricing).catch(() => {});
@@ -131,6 +133,30 @@ export function PaywallCard({
           );
         })}
       </div>
+
+      {/* Add to cart — accumulate several unlocks and pay once */}
+      {cart && scope !== EntitlementScope.PLATFORM && (
+        <div className="mt-3">
+          {cart.has(scope, paywall.scopeRef) ? (
+            <Link
+              href="/cart"
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-orange/40 bg-orange/5 px-5 py-2.5 text-sm font-bold text-orange"
+            >
+              <Check className="size-4" /> In cart — view cart
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={() =>
+                cart.add({ scope, scopeRef: paywall.scopeRef, period: BillingPeriod.ANNUAL, label: name })
+              }
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 px-5 py-2.5 text-sm font-bold text-navy transition-colors hover:border-orange/50"
+            >
+              <ShoppingCart className="size-4" /> Add to cart &amp; keep browsing
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Platform upsell */}
       <div className="mt-5 flex items-center gap-2">

@@ -21,6 +21,7 @@ const PROTECTED_PREFIXES = [
   '/practice',
   '/practice-wish',
   '/upgrade',
+  '/cart',
   '/assessments',
   '/calendar',
   '/coding',

@@ -8,6 +8,9 @@
  * `import type` so the class-validator runtime never fires client-side.
  */
 import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
   IsBoolean,
   IsEnum,
   IsInt,
@@ -17,7 +20,9 @@ import {
   Max,
   MaxLength,
   Min,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import {
   BillingPeriod,
   EntitlementScope,
@@ -58,6 +63,31 @@ export class VerifyPaymentDto {
   @IsString()
   @MaxLength(256)
   razorpaySignature!: string;
+}
+
+/** One line of a cart (same shape as a single order: scope + period). */
+export class CartItemDto {
+  @IsEnum(EntitlementScope)
+  scope!: EntitlementScope;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  scopeRef?: string;
+
+  @IsEnum(BillingPeriod)
+  period!: BillingPeriod;
+}
+
+/** Check out a whole cart as ONE Razorpay order. Each line is validated + priced
+ *  server-side; already-owned lines are dropped before an order is created. */
+export class CartCheckoutDto {
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(50)
+  @ValidateNested({ each: true })
+  @Type(() => CartItemDto)
+  items!: CartItemDto[];
 }
 
 // ─── Admin: entitlement grant + price-book edit ──────────────────────────────
@@ -152,17 +182,40 @@ export interface EntitlementDto {
   daysRemaining: number | null;
 }
 
-/** One line of the student's purchase history. */
-export interface PurchaseHistoryItemDto {
-  orderId: string;
+/** One priced line of a cart order (read shape). */
+export interface CartLineDto {
   scopeType: EntitlementScope;
   scopeRef: string | null;
   period: BillingPeriod;
+  amountCents: number;
+  durationDays: number;
+}
+
+/** Returned by cart-checkout — one order for the whole cart + its priced lines. */
+export interface CartOrderResultDto {
+  orderId: string;
+  razorpayOrderId: string;
+  razorpayKeyId: string;
+  amountCents: number;
+  currency: string;
+  lines: CartLineDto[];
+  /** Lines dropped because the buyer already owns them (nothing charged for these). */
+  skipped: CartLineDto[];
+}
+
+/** One line of the student's purchase history. scopeType/period are null for a
+ *  multi-item cart order — read `items` for its lines instead. */
+export interface PurchaseHistoryItemDto {
+  orderId: string;
+  scopeType: EntitlementScope | null;
+  scopeRef: string | null;
+  period: BillingPeriod | null;
   tier: PriceTier;
   amountCents: number;
   currency: string;
   status: string;
   createdAt: string;
+  items?: CartLineDto[];
 }
 
 /** The "My Subscription" surface for a student. */

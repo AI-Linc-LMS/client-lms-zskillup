@@ -187,12 +187,14 @@ export enum EntitlementStatus {
   CANCELLED = 'CANCELLED',
 }
 
-/** A Razorpay order (one purchasable line) lifecycle. */
+/** A Razorpay order (one purchasable line) lifecycle. EXPIRED is an abandoned
+ *  checkout (CREATED but never paid), swept lazily so 'pending' stays bounded. */
 export enum PaymentOrderStatus {
   CREATED = 'CREATED',
   PAID = 'PAID',
   FAILED = 'FAILED',
   REFUNDED = 'REFUNDED',
+  EXPIRED = 'EXPIRED',
 }
 
 /** A captured Razorpay payment lifecycle. */

@@ -287,9 +287,13 @@ export default function UpgradePage() {
                 {sub.history.map((h) => (
                   <tr key={h.orderId}>
                     <td className="py-2.5 font-semibold text-navy">
-                      {h.scopeType === EntitlementScope.PLATFORM ? 'Full platform' : prettyRef(h.scopeRef) || h.scopeType}
+                      {h.items && h.items.length > 0
+                        ? `Cart · ${h.items.length} item${h.items.length === 1 ? '' : 's'}`
+                        : h.scopeType === EntitlementScope.PLATFORM
+                          ? 'Full platform'
+                          : prettyRef(h.scopeRef) || h.scopeType}
                     </td>
-                    <td className="py-2.5 capitalize text-slate-500">{h.period.toLowerCase()}</td>
+                    <td className="py-2.5 capitalize text-slate-500">{h.period ? h.period.toLowerCase() : '—'}</td>
                     <td className="py-2.5 text-right tabular-nums text-navy">{formatPrice(h.amountCents, h.currency)}</td>
                     <td className="py-2.5 text-right">
                       <StatusPill status={h.status} />
@@ -390,6 +394,7 @@ function StatusPill({ status }: { status: string }) {
     CREATED: 'bg-amber-50 text-amber-700',
     FAILED: 'bg-rose-50 text-rose-700',
     REFUNDED: 'bg-slate-100 text-slate-600',
+    EXPIRED: 'bg-slate-100 text-slate-500',
   };
   return (
     <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-bold', map[status] ?? 'bg-slate-100 text-slate-600')}>
