@@ -13,6 +13,7 @@ import { DashboardCompanies } from '@/components/student/DashboardCompanies';
 import { PracticeHub } from '@/components/student/PracticeHub';
 import { DashboardRightRail } from '@/components/student/DashboardRightRail';
 import { AdaptiveSkillProfile } from '@/components/student/AdaptiveSkillProfile';
+import { SubscriptionValidity } from '@/components/student/SubscriptionValidity';
 import { SidebarUpcoming } from '@/components/layout/SidebarUpcoming';
 import { ReadinessPanel } from '@/components/student/ReadinessPanel';
 import { CompanyReadiness } from '@/components/student/CompanyReadiness';
@@ -73,6 +74,9 @@ export default function StudentDashboardPage() {
         </div>
 
         <aside className="min-w-0 space-y-6">
+          <Reveal delay={0.03}>
+            <SubscriptionValidity />
+          </Reveal>
           <Reveal delay={0.05}>
             <AdaptiveSkillProfile />
           </Reveal>
