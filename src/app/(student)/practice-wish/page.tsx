@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ArrowRight, ChevronDown, Layers, Loader2, Search, Sparkles, Wand2 } from 'lucide-react';
 import { listTopicsWithCounts, type ApiTopic } from '@/lib/api/catalog';
+import { listCodingTopics, type CodingTopic } from '@/lib/api/mocks';
 import { HIDDEN_ROOT_SLUGS } from '@/components/practice/section-meta';
+import { CodingBlock } from '@/components/practice/CodingBlock';
 
 /** Section → topics tree: hide junk roots, drop 0-question leaves, and dedupe
  *  same-named topics keeping the richest copy (mirrors the shop). */
@@ -53,6 +55,7 @@ function buildSectionTree(topics: ApiTopic[]) {
 export default function PracticeWishPage() {
   const router = useRouter();
   const [topics, setTopics] = useState<ApiTopic[] | null>(null);
+  const [codingTopics, setCodingTopics] = useState<CodingTopic[]>([]);
   const [query, setQuery] = useState('');
   const [launching, setLaunching] = useState('');
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
@@ -61,11 +64,19 @@ export default function PracticeWishPage() {
     listTopicsWithCounts()
       .then(setTopics)
       .catch(() => setTopics([]));
+    listCodingTopics()
+      .then(setCodingTopics)
+      .catch(() => setCodingTopics([]));
   }, []);
 
   const q = query.trim().toLowerCase();
   const sections = useMemo(() => (topics ? buildSectionTree(topics) : []), [topics]);
   const totalTopics = useMemo(() => sections.reduce((n, s) => n + s.topics.length, 0), [sections]);
+  const filteredCodingTopics = useMemo(
+    () => (q ? codingTopics.filter((t) => t.topic.toLowerCase().includes(q)) : codingTopics),
+    [codingTopics, q],
+  );
+  const codingVisible = !q || 'coding'.includes(q) || filteredCodingTopics.length > 0;
 
   const visible = useMemo(() => {
     if (!q) return sections;
@@ -149,6 +160,9 @@ export default function PracticeWishPage() {
           ) : null}
         </div>
       </section>
+
+      {/* Coding — practise any coding topic on the go (Judge0-evaluated) */}
+      {codingVisible && codingTopics.length > 0 ? <CodingBlock topics={filteredCodingTopics} /> : null}
 
       {/* browse all topics, grouped by section */}
       <div>
