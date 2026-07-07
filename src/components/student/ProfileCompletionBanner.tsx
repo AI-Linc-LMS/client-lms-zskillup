@@ -3,30 +3,21 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getMe } from '@/lib/api/me';
-import { ArrowRight, UserRoundPen, X } from 'lucide-react';
-
-/** Session-scoped dismissal — a fresh session re-nudges if still incomplete,
- *  and completing the profile removes the banner entirely. */
-const DISMISS_KEY = 'zskillup_profile_prompt_dismissed';
+import { ArrowRight, UserRoundPen } from 'lucide-react';
 
 /**
  * Dashboard nudge for students whose profile isn't fully filled in. Mirrors the
  * 8-field completion score on the Profile page (name, phone, course, year,
- * college, passout year, skills, target roles) — shows only when < 100% and not
- * dismissed this session. A complete profile powers better recommendations and
- * auto-fills the resume builder, so it's worth prompting.
+ * college, passout year, skills, target roles). It is NOT dismissible — the
+ * banner stays on every visit until the profile is actually complete (100%), at
+ * which point it disappears on its own. A complete profile powers better
+ * recommendations and auto-fills the resume builder.
  */
 export function ProfileCompletionBanner() {
   const [pct, setPct] = useState<number | null>(null);
   const [missing, setMissing] = useState<string[]>([]);
-  const [dismissed, setDismissed] = useState(true); // hidden until we know the score
 
   useEffect(() => {
-    try {
-      if (sessionStorage.getItem(DISMISS_KEY) === '1') return;
-    } catch {
-      /* storage unavailable — proceed */
-    }
     getMe()
       .then((me) => {
         if (me.role !== 'STUDENT') return;
@@ -46,23 +37,13 @@ export function ProfileCompletionBanner() {
         if (percent >= 100) return; // fully complete → nothing to nudge
         setPct(percent);
         setMissing(fields.filter(([, ok]) => !ok).map(([label]) => label));
-        setDismissed(false);
       })
       .catch(() => {
         /* not signed in / transient — render nothing */
       });
   }, []);
 
-  if (dismissed || pct === null) return null;
-
-  const dismiss = () => {
-    setDismissed(true);
-    try {
-      sessionStorage.setItem(DISMISS_KEY, '1');
-    } catch {
-      /* non-fatal */
-    }
-  };
+  if (pct === null) return null; // hidden until we know the profile is incomplete
 
   const missingText =
     missing.length <= 3
@@ -71,13 +52,6 @@ export function ProfileCompletionBanner() {
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-orange/30 bg-gradient-to-r from-orange/10 via-orange/[0.06] to-transparent p-4 shadow-sm sm:p-5">
-      <button
-        onClick={dismiss}
-        aria-label="Dismiss"
-        className="absolute right-3 top-3 rounded-lg p-1 text-slate-400 transition-colors hover:bg-white/60 hover:text-slate-600"
-      >
-        <X className="size-4" />
-      </button>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-sm">
           <UserRoundPen className="size-5" />
