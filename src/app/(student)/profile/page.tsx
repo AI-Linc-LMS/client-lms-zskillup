@@ -8,6 +8,7 @@ import { getMyRegistrations, type ApiRegistration } from '@/lib/api/registration
 import { ApiRequestError } from '@/lib/api/types';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { MySubscriptionCard } from '@/components/billing/MySubscriptionCard';
+import { ActiveSubscriptions } from '@/components/billing/ActiveSubscriptions';
 import { cn } from '@/lib/utils';
 
 const ROLE_OPTIONS = [
@@ -257,6 +258,7 @@ export default function ProfilePage() {
         {/* Subscription + registrations */}
         <aside className="space-y-4">
           <MySubscriptionCard />
+          <ActiveSubscriptions className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm" />
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="flex items-center gap-1.5 text-sm font-bold text-navy">
               <Building2 className="size-4 text-orange" /> My drives

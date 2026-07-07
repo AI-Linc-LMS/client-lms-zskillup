@@ -18,6 +18,7 @@ import { getMe, type ApiMe } from '@/lib/api/me';
 import { getMySubscription, getPricing } from '@/lib/api/payments';
 import { formatPrice } from '@/lib/api/subscriptions';
 import { buildPriceMap, PERIODS, retailPrice } from '@/lib/payments/pricing';
+import { practiceLinkForEntitlement } from '@/lib/payments/entitlement-links';
 import { usePurchase } from '@/components/billing/usePurchase';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { BillingPeriod, EntitlementScope } from '@/shared/enums';
@@ -46,6 +47,17 @@ function scopeIcon(scope: EntitlementScope) {
     default:
       return Target;
   }
+}
+
+/** Plan/period label for a history row. Cart orders have no single period, so show
+ *  the shared one when every line matches, else "Mixed". */
+function historyPlanLabel(h: { period: BillingPeriod | null; items?: { period: BillingPeriod }[] }): string {
+  if (h.period) return h.period.toLowerCase();
+  if (h.items && h.items.length > 0) {
+    const distinct = new Set(h.items.map((i) => i.period));
+    return distinct.size === 1 ? [...distinct][0].toLowerCase() : 'mixed';
+  }
+  return '—';
 }
 
 export default function UpgradePage() {
@@ -146,6 +158,12 @@ export default function UpgradePage() {
                     : 'Active'}
                 </p>
               </div>
+              <Link
+                href="/practice"
+                className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-full bg-navy px-4 py-2 text-xs font-bold text-white transition hover:brightness-110"
+              >
+                Start practising <ArrowRight className="size-3.5" />
+              </Link>
             </div>
           ) : (
             <ul className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -293,7 +311,7 @@ export default function UpgradePage() {
                           ? 'Full platform'
                           : prettyRef(h.scopeRef) || h.scopeType}
                     </td>
-                    <td className="py-2.5 capitalize text-slate-500">{h.period ? h.period.toLowerCase() : '—'}</td>
+                    <td className="py-2.5 capitalize text-slate-500">{historyPlanLabel(h)}</td>
                     <td className="py-2.5 text-right tabular-nums text-navy">{formatPrice(h.amountCents, h.currency)}</td>
                     <td className="py-2.5 text-right">
                       <StatusPill status={h.status} />
@@ -322,6 +340,7 @@ function AccessRow({ ent }: { ent: EntitlementDto }) {
     ent.scopeType === EntitlementScope.PLATFORM
       ? 'Full platform'
       : `${ent.scopeType.charAt(0) + ent.scopeType.slice(1).toLowerCase()}: ${slugToLabel(ent.scopeRef)}`;
+  const link = practiceLinkForEntitlement(ent.scopeType, ent.scopeRef);
   return (
     <li className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-3">
       <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white text-orange ring-1 ring-slate-200">
@@ -333,6 +352,12 @@ function AccessRow({ ent }: { ent: EntitlementDto }) {
           {ent.daysRemaining != null ? `${ent.daysRemaining} days left` : 'Lifetime'}
         </span>
       </span>
+      <Link
+        href={link.href}
+        className="inline-flex shrink-0 items-center gap-1 rounded-full bg-navy px-3 py-1.5 text-xs font-bold text-white transition hover:brightness-110"
+      >
+        {link.cta} <ArrowRight className="size-3.5" />
+      </Link>
     </li>
   );
 }

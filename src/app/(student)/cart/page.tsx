@@ -69,7 +69,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
+    <div className="mx-auto max-w-4xl px-4 py-8">
       <Breadcrumb items={[{ label: 'Upgrade', href: '/upgrade' }, { label: 'Cart' }]} />
       <h1 className="mt-4 flex items-center gap-2 text-2xl font-black tracking-tight text-navy">
         <ShoppingCart className="size-6 text-orange" /> Your cart
