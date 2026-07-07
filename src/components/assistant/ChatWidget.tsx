@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import Link from 'next/link';
 import { Loader2, MessageCircle, Send, Sparkles, X } from 'lucide-react';
 import { askAssistant } from '@/lib/api/assistant';
 import type { AssistantRole } from '@/shared/dto/assistant.dto';
@@ -129,10 +130,10 @@ export function ChatWidget() {
                   className={
                     m.role === 'user'
                       ? 'max-w-[82%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-orange px-3.5 py-2 text-sm font-medium text-white'
-                      : 'max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-bl-md border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-700 shadow-sm'
+                      : 'max-w-[85%] rounded-2xl rounded-bl-md border border-slate-200 bg-white px-3.5 py-2 text-sm leading-relaxed text-slate-700 shadow-sm'
                   }
                 >
-                  {m.content}
+                  {m.role === 'user' ? m.content : renderMarkdown(m.content)}
                 </div>
               </div>
             ))}
@@ -201,4 +202,103 @@ export function ChatWidget() {
       )}
     </>
   );
+}
+
+/** Inline markdown → JSX: **bold**, `code`, [text](url), and bare /route links.
+ *  JSX-only (no dangerouslySetInnerHTML), so assistant text can't inject HTML. */
+function renderInline(text: string, keyBase: string): ReactNode[] {
+  const nodes: ReactNode[] = [];
+  const re = /(\*\*([^*]+)\*\*)|(`([^`]+)`)|(\[([^\]]+)\]\(([^)]+)\))|((?:^|\s)(\/[a-z][a-z0-9/-]{1,40}))/gi;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let i = 0;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) nodes.push(text.slice(last, m.index));
+    if (m[1]) {
+      nodes.push(<strong key={`${keyBase}b${i}`}>{m[2]}</strong>);
+    } else if (m[3]) {
+      nodes.push(
+        <code key={`${keyBase}c${i}`} className="rounded bg-slate-100 px-1 py-0.5 text-[0.85em] text-navy">
+          {m[4]}
+        </code>,
+      );
+    } else if (m[5]) {
+      nodes.push(
+        <Link key={`${keyBase}l${i}`} href={m[7]} className="font-semibold text-orange hover:underline">
+          {m[6]}
+        </Link>,
+      );
+    } else if (m[8]) {
+      // Keep any leading whitespace the token captured, then link the /route.
+      const lead = m[8].slice(0, m[8].indexOf('/'));
+      if (lead) nodes.push(lead);
+      nodes.push(
+        <Link key={`${keyBase}r${i}`} href={m[9]} className="font-semibold text-orange hover:underline">
+          {m[9]}
+        </Link>,
+      );
+    }
+    last = m.index + m[0].length;
+    i++;
+  }
+  if (last < text.length) nodes.push(text.slice(last));
+  return nodes;
+}
+
+/** Block markdown → JSX: groups consecutive `-`/`*`/`1.` lines into lists and the
+ *  rest into paragraphs (so LLM replies render with real bold, bullets, and links). */
+function renderMarkdown(text: string): ReactNode {
+  const lines = text.replace(/\r/g, '').split('\n');
+  const out: ReactNode[] = [];
+  let i = 0;
+  let key = 0;
+  const bullet = /^\s*[-*•]\s+/;
+  const numbered = /^\s*\d+[.)]\s+/;
+  while (i < lines.length) {
+    if (bullet.test(lines[i])) {
+      const items: string[] = [];
+      while (i < lines.length && bullet.test(lines[i])) items.push(lines[i++].replace(bullet, ''));
+      const k = key++;
+      out.push(
+        <ul key={k} className="my-1.5 space-y-1">
+          {items.map((it, ii) => (
+            <li key={ii} className="flex gap-2">
+              <span className="mt-[0.4rem] size-1 shrink-0 rounded-full bg-orange" aria-hidden />
+              <span>{renderInline(it, `u${k}_${ii}_`)}</span>
+            </li>
+          ))}
+        </ul>,
+      );
+    } else if (numbered.test(lines[i])) {
+      const items: string[] = [];
+      while (i < lines.length && numbered.test(lines[i])) items.push(lines[i++].replace(numbered, ''));
+      const k = key++;
+      out.push(
+        <ol key={k} className="my-1.5 ml-4 list-decimal space-y-1">
+          {items.map((it, ii) => (
+            <li key={ii}>{renderInline(it, `o${k}_${ii}_`)}</li>
+          ))}
+        </ol>,
+      );
+    } else if (lines[i].trim() === '') {
+      i++;
+    } else {
+      const para: string[] = [];
+      while (i < lines.length && lines[i].trim() !== '' && !bullet.test(lines[i]) && !numbered.test(lines[i])) {
+        para.push(lines[i++]);
+      }
+      const k = key++;
+      out.push(
+        <p key={k} className={k > 0 ? 'mt-2' : undefined}>
+          {para.map((l, li) => (
+            <span key={li}>
+              {li > 0 && <br />}
+              {renderInline(l, `p${k}_${li}_`)}
+            </span>
+          ))}
+        </p>,
+      );
+    }
+  }
+  return out;
 }
