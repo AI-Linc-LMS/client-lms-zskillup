@@ -14,6 +14,7 @@ import {
   Gauge,
   Lightbulb,
   Loader2,
+  PlayCircle,
   RotateCcw,
   Sparkles,
   Target,
@@ -29,6 +30,7 @@ import { PaywallCard } from '@/components/billing/PaywallCard';
 import { LivePointsMeter } from '@/components/adaptive/LivePointsMeter';
 import { PointsBurst } from '@/components/adaptive/PointsBurst';
 import type { AdaptiveOption } from '@/lib/api/adaptive';
+import { getQuestionSolution, type QuestionSolutionDto } from '@/lib/api/question-solutions';
 
 /* Brand quiz palette — light surface with an orange accent. */
 const BRAND_GRAD = 'linear-gradient(135deg,#f7a14e 0%,#f37021 100%)';
@@ -491,7 +493,7 @@ function AdaptiveQuizRunner({
             ) : null}
 
             {/* Instant inline solution — revealed the moment you submit. */}
-            {revealed && lastAnswer ? <SolutionReveal result={lastAnswer} /> : null}
+            {revealed && lastAnswer ? <SolutionReveal result={lastAnswer} questionId={q.questionId} /> : null}
 
             {!revealed && (
             <div className="mt-5">
@@ -641,9 +643,14 @@ function adaptNote(correct: boolean, speed: 'fast' | 'on_par' | 'slow'): string 
   return 'We ease the difficulty on the next question.';
 }
 
-/** The instant inline solution shown below the question the moment you answer. */
+type SolTab = 'detailed' | 'shortcut' | 'video';
+
+/** The instant inline solution shown below the question the moment you answer.
+ *  Three sections: Detailed (bank/AI), Shortcut (AI, platform-cached), and a
+ *  Concept Video placeholder (coming soon). */
 function SolutionReveal({
   result,
+  questionId,
 }: {
   result: {
     isCorrect: boolean;
@@ -652,8 +659,34 @@ function SolutionReveal({
     speedLabel: 'fast' | 'on_par' | 'slow';
     pointsEarned: number;
   };
+  questionId: string;
 }) {
   const ok = result.isCorrect;
+  const [tab, setTab] = useState<SolTab>('detailed');
+  const [sol, setSol] = useState<QuestionSolutionDto | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    setSol(null);
+    setLoading(true);
+    setTab('detailed');
+    getQuestionSolution(questionId)
+      .then((s) => alive && setSol(s))
+      .catch(() => {})
+      .finally(() => alive && setLoading(false));
+    return () => {
+      alive = false;
+    };
+  }, [questionId]);
+
+  const detailed = sol?.detailed || result.explanation || '';
+  const TABS: { key: SolTab; label: string; icon: typeof BookOpen }[] = [
+    { key: 'detailed', label: 'Detailed', icon: BookOpen },
+    { key: 'shortcut', label: 'Shortcut', icon: Zap },
+    { key: 'video', label: 'Concept Video', icon: PlayCircle },
+  ];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -686,27 +719,84 @@ function SolutionReveal({
         </div>
       </div>
 
-      <div className="border-t border-white/60 bg-white/70 px-4 py-3">
-        {result.explanation ? (
-          <>
-            <p className="mb-1 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-slate-400">
-              <BookOpen className="size-3.5" /> Solution
+      <div className="border-t border-white/60 bg-white/80 px-4 py-3">
+        {/* Section tabs */}
+        <div className="mb-3 flex gap-1.5">
+          {TABS.map((t) => {
+            const Icon = t.icon;
+            const active = tab === t.key;
+            return (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-colors',
+                  active ? 'bg-navy text-white shadow-sm' : 'bg-white text-slate-500 ring-1 ring-inset ring-slate-200 hover:text-navy',
+                )}
+              >
+                <Icon className="size-3.5" /> {t.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Detailed */}
+        {tab === 'detailed' &&
+          (detailed ? (
+            <p className="whitespace-pre-wrap text-[13.5px] leading-relaxed text-slate-700">{detailed}</p>
+          ) : loading ? (
+            <SolLoading label="Working out the solution…" />
+          ) : (
+            <p className="text-[13px] text-slate-500">
+              {ok ? 'Nicely done — that was the correct option.' : 'The correct option is highlighted in green above.'}
             </p>
-            <p className="whitespace-pre-wrap text-[13.5px] leading-relaxed text-slate-700">{result.explanation}</p>
-          </>
-        ) : (
-          <p className="text-[13px] text-slate-500">
-            {ok
-              ? 'Nicely done — that was the correct option.'
-              : 'The correct option is highlighted in green above.'}
-          </p>
+          ))}
+
+        {/* Shortcut */}
+        {tab === 'shortcut' &&
+          (loading && !sol ? (
+            <SolLoading label="Finding a faster trick…" />
+          ) : sol?.shortcut ? (
+            <div>
+              <p className="mb-1 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-amber-600">
+                <Zap className="size-3.5 fill-amber-400" /> Exam-time shortcut
+              </p>
+              <p className="whitespace-pre-wrap text-[13.5px] leading-relaxed text-slate-700">{sol.shortcut}</p>
+            </div>
+          ) : (
+            <p className="text-[13px] text-slate-500">
+              No quicker route than the detailed method for this one — solve it step by step.
+            </p>
+          ))}
+
+        {/* Concept video — coming soon */}
+        {tab === 'video' && (
+          <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-slate-200 bg-white/60 py-7 text-center">
+            <span className="grid size-11 place-items-center rounded-full bg-navy/5 text-navy">
+              <PlayCircle className="size-6" />
+            </span>
+            <p className="text-sm font-bold text-navy">Concept video — coming soon</p>
+            <p className="max-w-xs text-xs text-slate-500">
+              We&apos;re adding short concept videos for each topic. You&apos;ll be able to watch the idea behind this
+              question right here.
+            </p>
+          </div>
         )}
-        <p className="mt-2.5 flex items-center gap-1.5 text-[11.5px] font-medium text-slate-500">
+
+        <p className="mt-3 flex items-center gap-1.5 border-t border-slate-100 pt-2.5 text-[11.5px] font-medium text-slate-500">
           <TrendingUp className="size-3.5 shrink-0 text-slate-400" />
           {adaptNote(ok, result.speedLabel)}
         </p>
       </div>
     </motion.div>
+  );
+}
+
+function SolLoading({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-2 py-4 text-[13px] text-slate-500">
+      <Loader2 className="size-4 animate-spin text-slate-400" /> {label}
+    </div>
   );
 }
 
