@@ -64,12 +64,15 @@ export interface ApiLeaderboardEntry {
   initials: string;
   avatarUrl: string | null;
   collegeName: string | null;
+  city: string | null;
   branch: string | null;
   passoutYear: number | null;
   totalXp: number;
   level: number;
   currentStreakDays: number;
   badgesEarned: number;
+  /** Rank change vs. last week (positive = climbed). null = no prior data. */
+  trend: number | null;
   isYou: boolean;
 }
 
@@ -82,19 +85,26 @@ export interface ApiLeaderboard {
   topStreak: number;
 }
 
-export type LeaderboardScope = 'national' | 'college' | 'company';
+export type LeaderboardScope = 'national' | 'college' | 'company' | 'city';
 
 export async function getLeaderboard(
   scope: LeaderboardScope = 'national',
   limit = 50,
-  companyId?: string,
+  opts?: { companyId?: string; city?: string },
 ): Promise<ApiLeaderboard> {
   // Default posture (NOT 'public'): a signed-in caller's token is attached (with
   // the pre-emptive refresh on a cold load) so the backend can resolve "your
   // rank". The route is @Public, so a logged-out visitor still gets the board
   // (no 401, no redirect) — they just have no personal rank.
   const params = new URLSearchParams({ scope, limit: String(limit) });
-  if (scope === 'company' && companyId) params.set('companyId', companyId);
+  if (scope === 'company' && opts?.companyId) params.set('companyId', opts.companyId);
+  if (scope === 'city' && opts?.city) params.set('city', opts.city);
   const res = await apiClient.get<ApiLeaderboard>(`/api/v1/students/leaderboard?${params.toString()}`);
+  return res.data;
+}
+
+/** Cities that have ranked students — options for the leaderboard City filter. */
+export async function getLeaderboardCities(): Promise<string[]> {
+  const res = await apiClient.get<string[]>('/api/v1/students/leaderboard/cities');
   return res.data;
 }

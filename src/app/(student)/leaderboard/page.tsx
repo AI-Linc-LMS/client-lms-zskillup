@@ -11,10 +11,13 @@ import {
   Loader2,
   MapPin,
   Minus,
+  TrendingDown,
+  TrendingUp,
   Trophy,
 } from 'lucide-react';
 import {
   getLeaderboard,
+  getLeaderboardCities,
   type ApiLeaderboard,
   type ApiLeaderboardEntry,
   type LeaderboardScope,
@@ -70,6 +73,7 @@ const SCOPE_TABS: { key: LeaderboardScope; label: string; icon: typeof Globe2 }[
   { key: 'national', label: 'National', icon: Globe2 },
   { key: 'college', label: 'My College', icon: GraduationCap },
   { key: 'company', label: 'Company', icon: Building2 },
+  { key: 'city', label: 'City', icon: MapPin },
 ];
 
 // Podium visual config by finishing position (0=first … 2=third).
@@ -83,6 +87,8 @@ export default function LeaderboardPage() {
   const [scope, setScope] = useState<LeaderboardScope>('national');
   const [companyId, setCompanyId] = useState('');
   const [companies, setCompanies] = useState<ApiCompany[]>([]);
+  const [cities, setCities] = useState<string[]>([]);
+  const [city, setCity] = useState('');
   const [data, setData] = useState<ApiLeaderboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [me, setMe] = useState<ApiMe | null>(null);
@@ -92,26 +98,28 @@ export default function LeaderboardPage() {
   useEffect(() => {
     getMe().then(setMe).catch(() => setMe(null));
     listCompanies().then(setCompanies).catch(() => {});
+    getLeaderboardCities().then(setCities).catch(() => {});
   }, []);
 
   useEffect(() => {
     if (scope === 'company' && !companyId && companies.length) setCompanyId(companies[0].id);
-  }, [scope, companyId, companies]);
+    if (scope === 'city' && !city && cities.length) setCity(cities[0]);
+  }, [scope, companyId, companies, city, cities]);
 
   useEffect(() => {
-    if (scope === 'company' && !companyId) {
+    if ((scope === 'company' && !companyId) || (scope === 'city' && !city)) {
       setData(null);
       return;
     }
     let alive = true;
     setLoading(true);
-    getLeaderboard(scope, 50, scope === 'company' ? companyId : undefined)
+    getLeaderboard(scope, 50, { companyId: scope === 'company' ? companyId : undefined, city: scope === 'city' ? city : undefined })
       .then((d) => alive && (setData(d), setLoading(false)))
       .catch(() => alive && setLoading(false));
     return () => {
       alive = false;
     };
-  }, [scope, companyId]);
+  }, [scope, companyId, city]);
 
   const entries = data?.entries ?? [];
   const podium = entries.slice(0, 3);
@@ -210,7 +218,7 @@ export default function LeaderboardPage() {
               }`}
             >
               <Icon className="size-4" /> {label}
-              {key === 'company' && scope === 'company' && <ChevronDown className="size-3.5" />}
+              {(key === 'company' || key === 'city') && scope === key && <ChevronDown className="size-3.5" />}
             </button>
           ))}
           {scope === 'company' && companies.length > 0 && (
@@ -224,12 +232,20 @@ export default function LeaderboardPage() {
               ))}
             </select>
           )}
-          <span
-            className="inline-flex cursor-not-allowed items-center gap-2 rounded-full border border-dashed border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-300"
-            title="City filter — coming soon"
-          >
-            <MapPin className="size-4" /> City
-          </span>
+          {scope === 'city' &&
+            (cities.length > 0 ? (
+              <select
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-navy shadow-sm outline-none focus:border-orange"
+              >
+                {cities.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            ) : (
+              <span className="text-sm text-slate-400">No cities yet</span>
+            ))}
         </div>
         <span className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500">
           <GraduationCap className="size-4 text-slate-400" /> {fmt(data?.totalStudents ?? 0)} learners
@@ -342,8 +358,20 @@ export default function LeaderboardPage() {
                           <span className="text-sm text-slate-400">0 day</span>
                         )}
                       </td>
-                      <td className="px-5 py-3 text-right text-slate-300">
-                        <Minus className="ml-auto size-4" />
+                      <td className="px-5 py-3">
+                        <div className="flex items-center justify-end">
+                          {e.trend == null || e.trend === 0 ? (
+                            <Minus className="size-4 text-slate-300" />
+                          ) : e.trend > 0 ? (
+                            <span className="inline-flex items-center gap-0.5 text-sm font-bold text-emerald-600">
+                              <TrendingUp className="size-4" /> {e.trend}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-0.5 text-sm font-bold text-rose-500">
+                              <TrendingDown className="size-4" /> {Math.abs(e.trend)}
+                            </span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
