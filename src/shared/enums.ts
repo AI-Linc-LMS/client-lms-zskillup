@@ -204,3 +204,11 @@ export enum PaymentStatus {
   FAILED = 'FAILED',
   REFUNDED = 'REFUNDED',
 }
+
+/** Kinds of community post (smaller subset of the AI-LINC forum). */
+export enum CommunityPostType {
+  DISCUSSION = 'DISCUSSION',
+  QUESTION = 'QUESTION',
+  RESOURCE = 'RESOURCE',
+  ANNOUNCEMENT = 'ANNOUNCEMENT',
+}

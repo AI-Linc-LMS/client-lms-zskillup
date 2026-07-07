@@ -16,6 +16,7 @@ import {
   ListChecks,
   type LucideIcon,
   Mail,
+  MessagesSquare,
   Megaphone,
   MessageSquare,
   Newspaper,
@@ -62,6 +63,7 @@ export const STUDENT_NAV: NavSection[] = [
       { label: 'Study Plan', href: '/study-plan', icon: ListChecks },
       { label: 'Performance', href: '/performance', icon: TrendingUp },
       { label: 'Leaderboard', href: '/leaderboard', icon: Trophy },
+      { label: 'Community', href: '/community', icon: MessagesSquare },
     ],
   },
   {
