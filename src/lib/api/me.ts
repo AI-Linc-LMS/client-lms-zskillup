@@ -45,14 +45,14 @@ export interface ApiStudentProfile {
 
 /** Patchable profile fields (PATCH /me). */
 export interface UpdateMePayload {
-  fullName?: string;
-  phone?: string;
-  course?: string;
-  yearOfStudy?: number;
+  fullName?: string | null;
+  phone?: string | null;
+  course?: string | null;
+  yearOfStudy?: number | null;
   skills?: string[];
   rolesInterested?: string[];
-  collegeName?: string;
-  passoutYear?: number;
+  collegeName?: string | null;
+  passoutYear?: number | null;
 }
 
 export interface ApiMe {
