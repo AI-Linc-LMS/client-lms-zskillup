@@ -5,16 +5,20 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
+  ArrowRight,
+  BookOpen,
   CheckCircle2,
   Clock,
   Compass,
   Flag,
+  Gauge,
   Lightbulb,
   Loader2,
   RotateCcw,
   Sparkles,
   Target,
   TrendingUp,
+  XCircle,
   Zap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -98,6 +102,11 @@ function AdaptiveQuizRunner({
     answeredCount,
     submitting,
     submitAnswer,
+    advance,
+    lastAnswer,
+    revealed,
+    pendingComplete,
+    pendingPaywall,
     askHint,
     finish,
     sessionPoints,
@@ -124,14 +133,14 @@ function AdaptiveQuizRunner({
   // Per-question elapsed timer — anchored to the server `servedAt` so a resumed
   // question shows the real elapsed time (matches the live points meter), not 0.
   useEffect(() => {
-    if (!currentQuestion) return;
+    if (!currentQuestion || revealed) return; // freeze the clock once answered
     const anchor = Date.parse(currentQuestion.servedAt);
     const base = Number.isFinite(anchor) ? anchor : Date.now();
     const tick = () => setElapsed(Math.max(0, Math.floor((Date.now() - base) / 1000)));
     tick();
     const t = setInterval(tick, 1000);
     return () => clearInterval(t);
-  }, [currentQuestion]);
+  }, [currentQuestion, revealed]);
 
   useEffect(() => {
     if (phase === 'complete' && sessionId) {
@@ -183,6 +192,11 @@ function AdaptiveQuizRunner({
   const maxQ = sessionMeta?.maxQuestions ?? 15;
   const minQ = sessionMeta?.minQuestions ?? 8;
   const answered = progress?.answered ?? answeredCount;
+  // During the reveal step `answered` is already incremented, so the number we
+  // display for the on-screen (just-answered) question is `answered`; otherwise
+  // it's the next question to attempt, `answered + 1`.
+  const questionNumber = revealed ? answered : answered + 1;
+  const shownElapsed = revealed && lastAnswer ? Math.round(lastAnswer.timeMs / 1000) : elapsed;
   const q = currentQuestion;
   const diff = DIFF_TONE[q.difficultyLabel] ?? DIFF_TONE.MEDIUM;
   const cert = certaintyBand(answered);
@@ -206,6 +220,11 @@ function AdaptiveQuizRunner({
     if (!canSubmit || !selected) return;
     await submitAnswer(selected, confidence ?? undefined);
   };
+
+  // "Next" during the reveal step. When the session just finished, advance() flips
+  // the phase to 'complete' and the effect above routes to the results page.
+  const nextCta = pendingPaywall ? 'Continue' : pendingComplete ? 'See results' : 'Next question';
+  const handleAdvance = () => advance();
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-navy">
@@ -271,7 +290,7 @@ function AdaptiveQuizRunner({
         <div className="mt-4">
           <div className="flex items-center justify-between text-[11px]">
             <span className="text-slate-600">
-              Question <span className="font-extrabold text-navy">{answered + 1}</span>
+              Question <span className="font-extrabold text-navy">{questionNumber}</span>
               <span className="text-slate-400"> · {unbounded ? 'unlimited' : `~${minQ}–${maxQ}`}</span>
             </span>
             <span className="flex items-center gap-1.5">
@@ -323,13 +342,17 @@ function AdaptiveQuizRunner({
         <div className="mt-5 grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)_300px]">
           {/* LEFT — live points + timer + skill confidence */}
           <aside className="order-2 space-y-4 lg:order-none">
-            <LivePointsMeter points={q.points} servedAt={q.servedAt} hinted={!!hintState} />
+            {revealed && lastAnswer ? (
+              <EarnedCard earned={lastAnswer.pointsEarned} base={lastAnswer.pointsBase} correct={lastAnswer.isCorrect} />
+            ) : (
+              <LivePointsMeter points={q.points} servedAt={q.servedAt} hinted={!!hintState} />
+            )}
             <Panel>
               <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                <Clock className="size-3.5" /> On this question
+                <Clock className="size-3.5" /> {revealed ? 'Time on this question' : 'On this question'}
               </div>
               <p className="mt-2 text-2xl font-black tabular-nums">
-                {Math.floor(elapsed / 60)}:{String(elapsed % 60).padStart(2, '0')}
+                {Math.floor(shownElapsed / 60)}:{String(shownElapsed % 60).padStart(2, '0')}
               </p>
             </Panel>
             <Panel>
@@ -376,13 +399,13 @@ function AdaptiveQuizRunner({
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center gap-1.5">
-                <Chip>{unbounded ? `Q${answered + 1}` : `Q${answered + 1} / ~${maxQ}`}</Chip>
+                <Chip>{unbounded ? `Q${questionNumber}` : `Q${questionNumber} / ~${maxQ}`}</Chip>
                 <span className={cn('rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ring-1 ring-inset', diff.text, diff.ring, diff.bg)}>
                   {q.difficultyLabel}
                 </span>
                 <Chip>{prettySkill(q.targetSkill)}</Chip>
               </div>
-              {q.hintTokensRemaining > 0 && !hintState ? (
+              {!revealed && q.hintTokensRemaining > 0 && !hintState ? (
                 <button
                   onClick={askHint}
                   disabled={hintLoading || submitting}
@@ -400,25 +423,59 @@ function AdaptiveQuizRunner({
             <div className="mt-5 space-y-2.5">
               {q.options.map((opt: AdaptiveOption, i: number) => {
                 const isSel = selected === opt.id;
+                // Reveal coloring: the correct option greens; a wrong pick reds.
+                const isCorrectOpt = revealed && lastAnswer?.correctOptionId === opt.id;
+                const isChosenWrong =
+                  revealed && lastAnswer?.selectedOptionId === opt.id && !isCorrectOpt;
+                const locked = submitting || revealed;
                 return (
                   <button
                     key={opt.id}
-                    onClick={() => !submitting && setSelected(opt.id)}
-                    disabled={submitting}
+                    onClick={() => !locked && setSelected(opt.id)}
+                    disabled={locked}
                     className={cn(
                       'flex w-full items-center gap-3 rounded-2xl border px-4 py-3.5 text-left text-sm transition-colors',
-                      isSel
-                        ? 'border-orange bg-orange/10'
-                        : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
+                      isCorrectOpt
+                        ? 'border-emerald-300 bg-emerald-50'
+                        : isChosenWrong
+                          ? 'border-rose-300 bg-rose-50'
+                          : isSel && !revealed
+                            ? 'border-orange bg-orange/10'
+                            : revealed
+                              ? 'border-slate-200 bg-white opacity-70'
+                              : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
+                      revealed && 'cursor-default',
                     )}
                   >
                     <span className={cn(
                       'grid size-7 shrink-0 place-items-center rounded-full text-[11px] font-bold ring-1 ring-inset',
-                      isSel ? 'bg-orange/15 text-orange ring-orange/40' : 'text-slate-400 ring-slate-200',
+                      isCorrectOpt
+                        ? 'bg-emerald-100 text-emerald-700 ring-emerald-300'
+                        : isChosenWrong
+                          ? 'bg-rose-100 text-rose-700 ring-rose-300'
+                          : isSel && !revealed
+                            ? 'bg-orange/15 text-orange ring-orange/40'
+                            : 'text-slate-400 ring-slate-200',
                     )}>
-                      {String.fromCharCode(65 + i)}
+                      {isCorrectOpt ? (
+                        <CheckCircle2 className="size-4" />
+                      ) : isChosenWrong ? (
+                        <XCircle className="size-4" />
+                      ) : (
+                        String.fromCharCode(65 + i)
+                      )}
                     </span>
-                    <span className={cn(isSel ? 'text-navy' : 'text-slate-700')}>{opt.text}</span>
+                    <span className={cn(
+                      isCorrectOpt
+                        ? 'font-semibold text-emerald-900'
+                        : isChosenWrong
+                          ? 'text-rose-900'
+                          : isSel && !revealed
+                            ? 'text-navy'
+                            : 'text-slate-700',
+                    )}>
+                      {opt.text}
+                    </span>
                   </button>
                 );
               })}
@@ -433,6 +490,10 @@ function AdaptiveQuizRunner({
               </div>
             ) : null}
 
+            {/* Instant inline solution — revealed the moment you submit. */}
+            {revealed && lastAnswer ? <SolutionReveal result={lastAnswer} /> : null}
+
+            {!revealed && (
             <div className="mt-5">
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
                 How confident are you before submitting?
@@ -457,17 +518,28 @@ function AdaptiveQuizRunner({
                 ))}
               </div>
             </div>
+            )}
 
             <div className="mt-6 flex justify-end">
-              <button
-                onClick={handleSubmit}
-                disabled={!canSubmit}
-                className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-extrabold text-white transition-[filter] enabled:hover:brightness-105 disabled:opacity-40"
-                style={{ background: BRAND_GRAD }}
-              >
-                {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
-                {submitting ? 'Scoring…' : 'Submit answer'}
-              </button>
+              {revealed ? (
+                <button
+                  onClick={handleAdvance}
+                  className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-extrabold text-white transition-[filter] hover:brightness-105"
+                  style={{ background: BRAND_GRAD }}
+                >
+                  {nextCta} <ArrowRight className="size-4" />
+                </button>
+              ) : (
+                <button
+                  onClick={handleSubmit}
+                  disabled={!canSubmit}
+                  className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-extrabold text-white transition-[filter] enabled:hover:brightness-105 disabled:opacity-40"
+                  style={{ background: BRAND_GRAD }}
+                >
+                  {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
+                  {submitting ? 'Scoring…' : 'Submit answer'}
+                </button>
+              )}
             </div>
           </motion.div>
 
@@ -541,6 +613,115 @@ function AdaptiveQuizRunner({
           </aside>
         </div>
       </div>
+    </div>
+  );
+}
+
+function fmtSecs(totalSec: number): string {
+  const s = Math.max(0, Math.round(totalSec));
+  if (s < 60) return `${s}s`;
+  return `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, '0')}s`;
+}
+
+const SPEED_LABEL: Record<'fast' | 'on_par' | 'slow', string> = {
+  fast: 'Fast',
+  on_par: 'On pace',
+  slow: 'Took your time',
+};
+
+/** One-line note tying the outcome + speed back to how the engine just adapted. */
+function adaptNote(correct: boolean, speed: 'fast' | 'on_par' | 'slow'): string {
+  if (correct) {
+    if (speed === 'fast') return 'Quick and correct — the engine nudges your level up.';
+    if (speed === 'slow') return 'Correct, but it took a while — we hold the level steady.';
+    return 'Correct — your level ticks up.';
+  }
+  if (speed === 'fast') return 'A fast miss reads as a slip, so it barely moves your level.';
+  if (speed === 'slow') return 'A tricky one — the engine eases the difficulty next.';
+  return 'We ease the difficulty on the next question.';
+}
+
+/** The instant inline solution shown below the question the moment you answer. */
+function SolutionReveal({
+  result,
+}: {
+  result: {
+    isCorrect: boolean;
+    explanation: string;
+    timeMs: number;
+    speedLabel: 'fast' | 'on_par' | 'slow';
+    pointsEarned: number;
+  };
+}) {
+  const ok = result.isCorrect;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: EASE }}
+      className={cn(
+        'mt-5 overflow-hidden rounded-2xl border shadow-sm',
+        ok ? 'border-emerald-200 bg-emerald-50/60' : 'border-rose-200 bg-rose-50/60',
+      )}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+        <div className="flex items-center gap-2">
+          {ok ? <CheckCircle2 className="size-5 text-emerald-600" /> : <XCircle className="size-5 text-rose-500" />}
+          <span className={cn('text-sm font-black', ok ? 'text-emerald-700' : 'text-rose-600')}>
+            {ok ? 'Correct!' : 'Not quite'}
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-0.5 text-[11px] font-bold text-slate-600 ring-1 ring-inset ring-slate-200 tabular-nums">
+            <Clock className="size-3" /> {fmtSecs(result.timeMs / 1000)}
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-0.5 text-[11px] font-bold text-slate-600 ring-1 ring-inset ring-slate-200">
+            <Gauge className="size-3" /> {SPEED_LABEL[result.speedLabel] ?? SPEED_LABEL.on_par}
+          </span>
+          {ok && result.pointsEarned > 0 ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-black text-amber-600 ring-1 ring-inset ring-amber-200 tabular-nums">
+              <Zap className="size-3 fill-amber-400 text-amber-500" /> +{result.pointsEarned}
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="border-t border-white/60 bg-white/70 px-4 py-3">
+        {result.explanation ? (
+          <>
+            <p className="mb-1 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-slate-400">
+              <BookOpen className="size-3.5" /> Solution
+            </p>
+            <p className="whitespace-pre-wrap text-[13.5px] leading-relaxed text-slate-700">{result.explanation}</p>
+          </>
+        ) : (
+          <p className="text-[13px] text-slate-500">
+            {ok
+              ? 'Nicely done — that was the correct option.'
+              : 'The correct option is highlighted in green above.'}
+          </p>
+        )}
+        <p className="mt-2.5 flex items-center gap-1.5 text-[11.5px] font-medium text-slate-500">
+          <TrendingUp className="size-3.5 shrink-0 text-slate-400" />
+          {adaptNote(ok, result.speedLabel)}
+        </p>
+      </div>
+    </motion.div>
+  );
+}
+
+/** Left-rail replacement for the live meter once a question is answered. */
+function EarnedCard({ earned, base, correct }: { earned: number; base: number; correct: boolean }) {
+  return (
+    <div className={cn('rounded-2xl border p-4 shadow-sm', correct ? 'border-emerald-200 bg-emerald-50/70' : 'border-slate-200 bg-white')}>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Earned this question</p>
+      <p className={cn('mt-1 text-3xl font-black tabular-nums', correct ? 'text-emerald-600' : 'text-slate-400')}>
+        {correct ? `+${earned}` : '0'}
+        <span className="ml-1 text-sm font-bold text-slate-400">/ {base} pts</span>
+      </p>
+      <p className="mt-1 text-[11px] text-slate-400">
+        {correct ? 'Answer faster to bank more next time.' : 'No points this time — keep going.'}
+      </p>
     </div>
   );
 }

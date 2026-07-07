@@ -28,7 +28,24 @@ interface AdaptiveSessionState {
   progress: AdaptiveAnswerResult['progress'] | null;
   abilityState: Record<string, number>;
   seState: Record<string, number>;
-  lastAnswer: { isCorrect: boolean; thetaDelta: AdaptiveAnswerResult['thetaDelta'] } | null;
+  /** Post-submit reveal payload for the just-answered question (drives the inline solution). */
+  lastAnswer: {
+    isCorrect: boolean;
+    thetaDelta: AdaptiveAnswerResult['thetaDelta'];
+    correctOptionId: string | null;
+    explanation: string;
+    selectedOptionId: string;
+    timeMs: number;
+    speedLabel: 'fast' | 'on_par' | 'slow';
+    pointsEarned: number;
+    pointsBase: number;
+  } | null;
+  /** True while the answered question + its solution are shown, before advancing. */
+  revealed: boolean;
+  /** Next-question / completion / paywall transition, held until the student taps Next. */
+  pendingNext: AdaptivePendingQuestion | null;
+  pendingComplete: boolean;
+  pendingPaywall: AdaptivePaywall | null;
   hintState: { teaser: string; hint: string; hintsRemaining: number } | null;
   hintLoading: boolean;
   error: string | null;
@@ -52,6 +69,8 @@ interface AdaptiveSessionState {
 
 interface UseAdaptiveSessionReturn extends AdaptiveSessionState {
   submitAnswer: (optionId: string, confidence?: number) => Promise<void>;
+  /** Move past the reveal step to the next question, results, or paywall. */
+  advance: () => void;
   askHint: () => Promise<void>;
   abandon: () => Promise<void>;
   finish: () => Promise<void>;
@@ -96,6 +115,10 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
     abilityState: {},
     seState: {},
     lastAnswer: null,
+    revealed: false,
+    pendingNext: null,
+    pendingComplete: false,
+    pendingPaywall: null,
     hintState: null,
     hintLoading: false,
     error: null,
@@ -191,17 +214,31 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
         nonceRef.current += 1;
         setState((s) => ({
           ...s,
-          lastAnswer: { isCorrect: result.isCorrect, thetaDelta: result.thetaDelta },
+          // Reveal the solution IN PLACE — keep the answered question mounted and
+          // hold the next-question / completion / paywall transition until the
+          // student taps Next (advance()).
+          lastAnswer: {
+            isCorrect: result.isCorrect,
+            thetaDelta: result.thetaDelta,
+            correctOptionId: result.correctOptionId,
+            explanation: result.explanation,
+            selectedOptionId: optionId,
+            timeMs: result.timeMs,
+            speedLabel: result.speedLabel,
+            pointsEarned: result.pointsEarned,
+            pointsBase: result.pointsBase,
+          },
+          revealed: true,
+          pendingNext: result.nextQuestion,
+          pendingComplete: result.sessionComplete,
+          pendingPaywall: result.paywall ?? null,
+          // θ / points update immediately so the skill sidebar reflects the impact
+          // while the solution is on screen.
           abilityState: result.abilityState,
           seState: result.seState,
           progress: result.progress,
           answeredCount: (s.answeredCount ?? 0) + 1,
           hintState: null,
-          // nextQuestion set when continuing, null on complete or paywalled
-          currentQuestion: result.nextQuestion,
-          phase: result.paywall ? 'paywalled' : result.sessionComplete ? 'complete' : 'active',
-          paywall: result.paywall ?? null,
-          questionStartMs: anchorFrom(result.nextQuestion),
           sessionPoints: result.sessionPoints ?? s.sessionPoints,
           lastPoints: { earned: result.pointsEarned, base: result.pointsBase, nonce: nonceRef.current },
         }));
@@ -216,6 +253,34 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
     },
     [state.currentQuestion, state.questionStartMs, submitting],
   );
+
+  /** Leave the reveal step: show the held next question, or finish / paywall. */
+  const advance = useCallback(() => {
+    setState((s) => {
+      if (!s.revealed) return s;
+      const cleared = {
+        revealed: false,
+        lastAnswer: null,
+        pendingNext: null,
+        pendingComplete: false,
+        pendingPaywall: null,
+      } as const;
+      if (s.pendingPaywall) {
+        return { ...s, ...cleared, phase: 'paywalled', paywall: s.pendingPaywall, currentQuestion: null };
+      }
+      if (s.pendingComplete || !s.pendingNext) {
+        return { ...s, ...cleared, phase: 'complete', currentQuestion: null };
+      }
+      return {
+        ...s,
+        ...cleared,
+        phase: 'active',
+        currentQuestion: s.pendingNext,
+        hintState: null,
+        questionStartMs: anchorFrom(s.pendingNext),
+      };
+    });
+  }, []);
 
   const askHint = useCallback(async () => {
     if (!sessionIdRef.current || state.hintLoading) return;
@@ -240,5 +305,5 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
     setState((s) => ({ ...s, phase: 'complete', currentQuestion: null }));
   }, []);
 
-  return { ...state, submitAnswer, askHint, abandon, finish, continueAfterUnlock: beginSession, submitting };
+  return { ...state, submitAnswer, advance, askHint, abandon, finish, continueAfterUnlock: beginSession, submitting };
 }

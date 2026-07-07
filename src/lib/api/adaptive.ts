@@ -72,6 +72,14 @@ export interface SkillDelta {
 
 export interface AdaptiveAnswerResult {
   isCorrect: boolean;
+  /** Id of the correct option — for the instant inline review below the question. */
+  correctOptionId: string | null;
+  /** Worked solution / explanation for the answered question (may be empty). */
+  explanation: string;
+  /** Server-truth time spent on this question (ms). */
+  timeMs: number;
+  /** Speed vs the question's par time — the engine weighted θ by this. */
+  speedLabel: 'fast' | 'on_par' | 'slow';
   thetaDelta: Record<string, SkillDelta>;
   nextQuestion: AdaptivePendingQuestion | null;
   sessionComplete: boolean;
