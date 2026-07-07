@@ -82,11 +82,19 @@ export interface ApiLeaderboard {
   topStreak: number;
 }
 
-export async function getLeaderboard(scope: 'national' | 'college' = 'national', limit = 50): Promise<ApiLeaderboard> {
+export type LeaderboardScope = 'national' | 'college' | 'company';
+
+export async function getLeaderboard(
+  scope: LeaderboardScope = 'national',
+  limit = 50,
+  companyId?: string,
+): Promise<ApiLeaderboard> {
   // Default posture (NOT 'public'): a signed-in caller's token is attached (with
   // the pre-emptive refresh on a cold load) so the backend can resolve "your
   // rank". The route is @Public, so a logged-out visitor still gets the board
   // (no 401, no redirect) — they just have no personal rank.
-  const res = await apiClient.get<ApiLeaderboard>(`/api/v1/students/leaderboard?scope=${scope}&limit=${limit}`);
+  const params = new URLSearchParams({ scope, limit: String(limit) });
+  if (scope === 'company' && companyId) params.set('companyId', companyId);
+  const res = await apiClient.get<ApiLeaderboard>(`/api/v1/students/leaderboard?${params.toString()}`);
   return res.data;
 }
