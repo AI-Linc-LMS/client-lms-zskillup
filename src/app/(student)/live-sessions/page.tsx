@@ -19,7 +19,7 @@ export default function StudentLiveSessionsPage() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="space-y-6">
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Live Sessions' }]} />
 
       <header>
@@ -41,13 +41,17 @@ export default function StudentLiveSessionsPage() {
           {data.upcoming.length > 0 && (
             <section className="space-y-3">
               <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400">Upcoming</h2>
-              {data.upcoming.map((s) => <StudentCard key={s.id} s={s} />)}
+              <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
+                {data.upcoming.map((s) => <StudentCard key={s.id} s={s} />)}
+              </div>
             </section>
           )}
           {data.past.length > 0 && (
             <section className="space-y-3">
               <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400">Past</h2>
-              {data.past.map((s) => <StudentCard key={s.id} s={s} past />)}
+              <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
+                {data.past.map((s) => <StudentCard key={s.id} s={s} past />)}
+              </div>
             </section>
           )}
         </>
