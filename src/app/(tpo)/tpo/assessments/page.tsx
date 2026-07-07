@@ -27,6 +27,7 @@ import type { AssessmentResults } from '@/lib/api/scheduling';
 import type { TpoAssessment, TpoAssessmentList, TpoAssessmentStatus } from '@/shared';
 import { useTpoConsole } from '@/components/tpo/TpoConsole';
 import { KpiCard } from '@/components/tpo/ui';
+import { SectionTopicPicker } from '@/components/tpo/SectionTopicPicker';
 import { Button } from '@/components/ui/button';
 
 const STATUS_STYLE: Record<TpoAssessmentStatus, string> = {
@@ -64,6 +65,7 @@ export default function AssessmentCenterPage() {
     proctored: true,
     cohortId: '',
   });
+  const [topicSel, setTopicSel] = useState<Set<string>>(new Set());
 
   const load = useCallback(() => {
     setLoading(true);
@@ -113,6 +115,7 @@ export default function AssessmentCenterPage() {
         codingCount: Number(form.codingCount) || undefined,
         proctored: form.proctored,
         cohortId: form.cohortId || undefined,
+        topicIds: form.mode === 'SECTIONAL' && topicSel.size > 0 ? [...topicSel] : undefined,
       });
       toast.success('Assessment created');
       setShowForm(false);
@@ -196,6 +199,9 @@ export default function AssessmentCenterPage() {
                 ))}
               </datalist>
             </label>
+          )}
+          {form.mode === 'SECTIONAL' && (
+            <SectionTopicPicker selected={topicSel} onChange={setTopicSel} />
           )}
           <label className="text-xs font-semibold text-slate-600 sm:col-span-2 lg:col-span-1">
             Title

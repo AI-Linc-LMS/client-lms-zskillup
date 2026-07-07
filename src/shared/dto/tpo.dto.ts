@@ -173,4 +173,12 @@ export class CreateTpoAssessmentDto {
   @IsOptional()
   @IsUUID()
   cohortId?: string;
+
+  /** SECTIONAL mode: restrict MCQ sampling to these sections/topics (their whole
+   *  subtree is included). Empty = sample across every section. */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(100)
+  @IsUUID('all', { each: true })
+  topicIds?: string[];
 }
