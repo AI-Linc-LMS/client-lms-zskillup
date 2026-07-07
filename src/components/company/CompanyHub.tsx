@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { CompanyRegisterCard } from '@/components/company/CompanyRegisterCard';
+import { VideoPlaceholder } from '@/components/media/VideoPlaceholder';
 import { cn } from '@/lib/utils';
 import { HUB_TABS, type HubContent, type HubTab } from '@/lib/hub-data';
 import { AnimatedNumber, AuroraBackground, Reveal, Stagger, StaggerItem } from '@/components/motion/primitives';
@@ -499,6 +500,13 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
 function OverviewTab({ content }: { content: HubContent }) {
   return (
     <div className="space-y-6">
+      <Reveal>
+        <VideoPlaceholder
+          eyebrow="Company intro"
+          title={`Inside the ${content.company.name} drive`}
+          subtitle="A short walkthrough of the hiring rounds, cut-offs and what to expect — video coming soon."
+        />
+      </Reveal>
       <Reveal>
         <AuroraCard glow="#7c3aed">
           <SectionLabel icon={Sparkles}>Hiring process 2026</SectionLabel>

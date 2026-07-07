@@ -17,15 +17,17 @@ import {
   Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Donut } from '@/components/superadmin/dashboard-ui';
 import { getTpoAnalytics } from '@/lib/api/tpo';
 import type { TpoDashboard } from '@/shared';
 import { useTpoConsole } from '@/components/tpo/TpoConsole';
+import { ParticipationScatter } from '@/components/charts/ParticipationScatter';
+import { ReadinessDonut } from '@/components/charts/ReadinessDonut';
+import { CompanyHeatmap } from '@/components/charts/CompanyHeatmap';
+import { SkillGapBars } from '@/components/charts/SkillGapBars';
 import {
   BentoCard,
   KpiCard,
   ProvenanceChip,
-  Quad,
   ReadinessBadge,
 } from '@/components/tpo/ui';
 
@@ -115,16 +117,11 @@ export default function TpoExecutiveDashboard() {
       <div className="grid gap-5 lg:grid-cols-3">
         <BentoCard
           n={1}
-          title="Performance & Participation"
-          subtitle="Where your students sit — target high-effort, under-performing."
+          title="Performance & Participation Map"
+          subtitle="Each dot is a student — target the high-effort, under-performing quadrant."
           source="Assessment scores + platform activity"
         >
-          <div className="grid grid-cols-2 gap-3">
-            <Quad label="High effort · High performance" value={data.quadrants.highPartHighPerf} tone="emerald" />
-            <Quad label="High effort · Needs support" value={data.quadrants.highPartLowPerf} tone="amber" />
-            <Quad label="Low effort · High performance" value={data.quadrants.lowPartHighPerf} tone="sky" />
-            <Quad label="Low effort · Low performance" value={data.quadrants.lowPartLowPerf} tone="red" />
-          </div>
+          <ParticipationScatter students={data.students} />
         </BentoCard>
 
         <BentoCard
@@ -192,18 +189,18 @@ export default function TpoExecutiveDashboard() {
           source="Readiness composite"
         >
           <div className="pt-1">
-            <Donut
+            <ReadinessDonut
               segments={donutSegments}
-              centerTop={o.totalStudents.toLocaleString('en-IN')}
-              centerBottom="Students"
+              centerValue={o.totalStudents.toLocaleString('en-IN')}
+              centerLabel="Students"
             />
           </div>
         </BentoCard>
 
         <BentoCard
           n={4}
-          title="Company Readiness"
-          subtitle="Average accuracy on each company's tagged questions."
+          title="Company Readiness Heatmap"
+          subtitle="Students in each accuracy band, per company."
           source="Company-tagged practice"
           className="lg:col-span-2"
           action={
@@ -211,34 +208,35 @@ export default function TpoExecutiveDashboard() {
               href="/tpo/company-readiness"
               className="inline-flex items-center gap-1 text-xs font-bold text-orange hover:underline"
             >
-              Heatmap <ArrowRight className="size-3.5" />
+              Full view <ArrowRight className="size-3.5" />
             </Link>
           }
         >
-          {data.companyReadiness.length === 0 ? (
-            <p className="text-sm text-slate-400">No company-tagged practice yet.</p>
-          ) : (
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {data.companyReadiness.slice(0, 6).map((c) => (
-                <div key={c.slug} className="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="truncate text-sm font-semibold text-navy">{c.name}</span>
-                    <span className="shrink-0 text-sm font-bold tabular-nums text-navy">{c.readiness}%</span>
-                  </div>
-                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200">
-                    <div className="h-full rounded-full bg-navy" style={{ width: `${c.readiness}%` }} />
-                  </div>
-                  <p className="mt-1 text-[11px] text-slate-400">{c.attempted} attempts</p>
-                </div>
-              ))}
-            </div>
-          )}
+          <CompanyHeatmap cohortId={cohortId || undefined} />
         </BentoCard>
       </div>
 
-      {/* Assessment Center strip (wired in the Assessment Center module) */}
+      {/* Bento row C: Skill gaps */}
       <BentoCard
         n={5}
+        title="Skill Gaps"
+        subtitle="Weakest topics across your campus — where to focus training."
+        source="Topic-level practice accuracy"
+        action={
+          <Link
+            href="/tpo/skill-gaps"
+            className="inline-flex items-center gap-1 text-xs font-bold text-orange hover:underline"
+          >
+            All topics <ArrowRight className="size-3.5" />
+          </Link>
+        }
+      >
+        <SkillGapBars gaps={data.skillGaps} />
+      </BentoCard>
+
+      {/* Assessment Center strip (wired in the Assessment Center module) */}
+      <BentoCard
+        n={6}
         title="Assessment Center"
         subtitle="Create sectional or company drives, schedule them, and track attendance & results."
         action={

@@ -22,6 +22,7 @@ import { PublicAuthCta } from '@/components/marketing/PublicAuthCta';
 import { BrandLogo } from '@/components/layout/BrandLogo';
 import { HomeFeaturedTracks } from '@/components/marketing/HomeFeaturedTracks';
 import { HomeTopCohort } from '@/components/marketing/HomeTopCohort';
+import { VideoPlaceholder } from '@/components/media/VideoPlaceholder';
 import { getPublicTestimonials } from '@/lib/server/public-content';
 import {
   LANDING_COVERAGE_TOPICS,
@@ -343,6 +344,28 @@ export default async function HomePage() {
                 </Link>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Platform intro video ──────────────────────────────────────────── */}
+      <section className="relative bg-[var(--color-bg)] pt-16 lg:pt-20">
+        <div className="mx-auto max-w-[1400px] px-5 md:px-8">
+          <div className="mb-8 text-center">
+            <p className="section-tag">See it in action</p>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
+              A quick tour of the platform
+            </h2>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-[var(--color-text-muted)] sm:text-base">
+              How adaptive practice, company drives, mock assessments and placement readiness fit together.
+            </p>
+          </div>
+          <div className="mx-auto max-w-4xl">
+            <VideoPlaceholder
+              eyebrow="Platform tour"
+              title="See how ZSkillup works"
+              subtitle="From your first practice question to placement-ready — the full journey. Video coming soon."
+            />
           </div>
         </div>
       </section>

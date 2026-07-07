@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { PlatformOverviewLive } from '@/components/superadmin/PlatformOverviewLive';
 import { CompanyStatsCharts } from '@/components/superadmin/CompanyStatsCharts';
+import { RevenueCharts } from '@/components/superadmin/RevenueCharts';
 
 /**
  * Super-admin dashboard — a live, comprehensive platform overview. Counts and
@@ -79,6 +80,11 @@ export default function SuperAdminDashboardPage() {
       </div>
 
       <PlatformOverviewLive />
+
+      <div>
+        <h2 className="mb-4 text-lg font-extrabold tracking-tight text-navy">Revenue & subscriptions</h2>
+        <RevenueCharts />
+      </div>
 
       <div>
         <h2 className="mb-4 text-lg font-extrabold tracking-tight text-navy">Company drives & coverage</h2>
