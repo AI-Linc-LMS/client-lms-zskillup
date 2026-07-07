@@ -4,8 +4,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 import type { ResumeData, TemplateKey } from './types';
-import { emptyResume, fullName, isTemplateKey, normalizeResume } from './types';
+import { emptyResume, fullName, isTemplateKey, newId, normalizeResume } from './types';
 import { SAMPLE_RESUME } from './sample-data';
+import { getMe, type ApiMe } from '@/lib/api/me';
 import { TEMPLATES } from './templates';
 import { computeAtsScore } from './ats';
 import { ResumeForm } from './ResumeForm';
@@ -22,7 +23,7 @@ import {
 } from '@/lib/api/resumes';
 import type { ResumeSummaryDto } from '@/shared/dto/resume.dto';
 import { describeError } from '@/lib/api/errors';
-import { Download, FileText, FolderOpen, Gauge, LayoutTemplate, Loader2, RotateCcw, Save, Sparkles, Trash2, X } from 'lucide-react';
+import { Download, FileText, FolderOpen, Gauge, LayoutTemplate, Loader2, RotateCcw, Save, Sparkles, Trash2, UserRound, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const DRAFT_KEY = 'zskillup_resume_draft';
@@ -32,6 +33,63 @@ function atsColor(n: number): string {
   if (n >= 75) return 'text-green-600';
   if (n >= 50) return 'text-amber-600';
   return 'text-red-500';
+}
+
+const BRANCH_LABEL: Record<string, string> = {
+  CSE: 'Computer Science Engineering',
+  IT: 'Information Technology',
+  ECE: 'Electronics & Communication Engineering',
+  EEE: 'Electrical & Electronics Engineering',
+  MECH: 'Mechanical Engineering',
+  CIVIL: 'Civil Engineering',
+  OTHER: '',
+};
+
+/** True when the editor is still a blank slate (no identity + no sections), so
+ *  it's safe to seed from the profile without clobbering anything the user typed. */
+function isResumeEmpty(d: ResumeData): boolean {
+  const b = d.basicInfo;
+  const noBasics =
+    !b.firstName && !b.lastName && !b.email && !b.phone && !b.summary && !b.professionalTitle;
+  const noSections =
+    d.workExperience.length === 0 &&
+    d.education.length === 0 &&
+    d.skills.length === 0 &&
+    d.projects.length === 0 &&
+    d.certifications.length === 0;
+  return noBasics && noSections;
+}
+
+/** Seed a resume from the student's profile — name, contact, education, skills —
+ *  so the builder opens pre-filled instead of blank. Leaves summary/experience/
+ *  projects for the student (or the AI tailor) to complete. */
+function resumeFromProfile(me: ApiMe): ResumeData {
+  const r = emptyResume();
+  const p = me.studentProfile;
+  const parts = (me.fullName ?? '').trim().split(/\s+/).filter(Boolean);
+  r.basicInfo.firstName = parts[0] ?? '';
+  r.basicInfo.lastName = parts.slice(1).join(' ');
+  r.basicInfo.email = me.email ?? '';
+  r.basicInfo.phone = p?.phone ?? '';
+  if (p?.rolesInterested?.length) r.basicInfo.professionalTitle = p.rolesInterested[0];
+  if (p?.collegeName || p?.course || p?.branch || p?.passoutYear) {
+    r.education = [
+      {
+        id: newId(),
+        degree: p?.course || (p?.branch ? BRANCH_LABEL[p.branch] ?? '' : '') || '',
+        institution: p?.collegeName ?? '',
+        location: '',
+        startDate: p?.passoutYear ? `${p.passoutYear - 4}-08` : '',
+        endDate: p?.passoutYear ? `${p.passoutYear}-06` : '',
+        gpa: '',
+        description: '',
+      },
+    ];
+  }
+  if (p?.skills?.length) {
+    r.skills = p.skills.map((name) => ({ id: newId(), name }));
+  }
+  return r;
 }
 
 export function ResumeBuilder() {
@@ -51,15 +109,28 @@ export function ResumeBuilder() {
   const ats = useMemo(() => computeAtsScore(data, '').overall, [data]);
 
   useEffect(() => {
+    let hasDraft = false;
     try {
       const raw = localStorage.getItem(DRAFT_KEY);
-      if (raw) setData(normalizeResume(JSON.parse(raw)));
+      if (raw) {
+        setData(normalizeResume(JSON.parse(raw)));
+        hasDraft = true;
+      }
       const t = localStorage.getItem(TEMPLATE_KEY);
       if (isTemplateKey(t)) setTemplate(t);
     } catch {
       /* ignore corrupt draft */
     }
     setHydrated(true);
+    // First open (no saved draft) → seed the editor from the student's profile
+    // so contact + education + skills are prefilled instead of a blank page.
+    if (!hasDraft) {
+      getMe()
+        .then((me) => setData((prev) => (isResumeEmpty(prev) ? resumeFromProfile(me) : prev)))
+        .catch(() => {
+          /* not a student / offline — leave the empty resume */
+        });
+    }
   }, []);
 
   useEffect(() => {
@@ -146,6 +217,17 @@ export function ResumeBuilder() {
     }
   };
 
+  const fillFromProfile = async () => {
+    try {
+      const me = await getMe();
+      setData(resumeFromProfile(me));
+      setCurrentId(null);
+      flash('Filled from your profile.');
+    } catch {
+      flash('Could not load your profile.', 'error');
+    }
+  };
+
   const remove = async (id: string, name: string) => {
     if (!window.confirm(`Delete "${name}"?`)) return;
     try {
@@ -219,6 +301,9 @@ export function ResumeBuilder() {
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
+          <button onClick={fillFromProfile} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">
+            <UserRound className="size-4" /> From profile
+          </button>
           <button onClick={() => { setData(SAMPLE_RESUME); flash('Sample loaded.'); }} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">
             <Sparkles className="size-4" /> Sample
           </button>
