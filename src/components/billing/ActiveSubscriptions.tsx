@@ -68,24 +68,26 @@ export function ActiveSubscriptions({ className }: { className?: string }) {
             return (
               <li
                 key={e.id}
-                className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-white p-3 shadow-sm"
+                className="rounded-2xl border border-slate-100 bg-white p-3 shadow-sm transition hover:border-slate-200"
               >
-                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-orange/10 text-orange">
-                  <Icon className="size-4" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-semibold text-navy">
-                    {entitlementLabel(e.scopeType, e.scopeRef)}
+                <div className="flex items-center gap-2.5">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-orange/10 text-orange">
+                    <Icon className="size-4" />
                   </span>
-                  <span className="text-xs text-slate-500">
-                    {e.daysRemaining != null ? `${e.daysRemaining} days left` : 'Lifetime'}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold text-navy">
+                      {entitlementLabel(e.scopeType, e.scopeRef)}
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      {e.daysRemaining != null ? `${e.daysRemaining} days left` : 'Lifetime access'}
+                    </span>
                   </span>
-                </span>
+                </div>
                 <Link
                   href={link.href}
-                  className="inline-flex shrink-0 items-center gap-1 rounded-full bg-navy px-3 py-1.5 text-xs font-bold text-white transition hover:brightness-110"
+                  className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-full bg-navy px-3 py-2 text-xs font-bold text-white transition hover:brightness-110"
                 >
-                  {link.cta} <ArrowRight className="size-3" />
+                  {link.cta} <ArrowRight className="size-3.5" />
                 </Link>
               </li>
             );
