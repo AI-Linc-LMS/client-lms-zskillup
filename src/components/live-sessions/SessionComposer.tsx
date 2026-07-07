@@ -35,6 +35,7 @@ export function SessionComposer({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [meetingUrl, setMeetingUrl] = useState('');
+  const [recordingUrl, setRecordingUrl] = useState('');
   const [when, setWhen] = useState(toLocalInput());
   const [duration, setDuration] = useState(60);
   const [audience, setAudience] = useState<LiveSessionAudience>(LiveSessionAudience.PLATFORM);
@@ -53,6 +54,7 @@ export function SessionComposer({
       setTitle(editing.title);
       setDescription(editing.description);
       setMeetingUrl(editing.meetingUrl);
+      setRecordingUrl(editing.recordingUrl ?? '');
       setWhen(toLocalInput(editing.scheduledAt));
       setDuration(editing.durationMinutes);
       setAudience(editing.audience);
@@ -61,6 +63,7 @@ export function SessionComposer({
       setTitle('');
       setDescription('');
       setMeetingUrl('');
+      setRecordingUrl('');
       setWhen(toLocalInput());
       setDuration(60);
       setAudience(LiveSessionAudience.PLATFORM);
@@ -71,6 +74,8 @@ export function SessionComposer({
   const submit = async () => {
     if (title.trim().length < 3) return toast.error('Add a title (min 3 chars).');
     if (!/^https?:\/\//i.test(meetingUrl.trim())) return toast.error('Add a valid http(s) meeting link.');
+    if (recordingUrl.trim() && !/^https?:\/\//i.test(recordingUrl.trim()))
+      return toast.error('The recording link must be a valid http(s) URL.');
     if (audience === LiveSessionAudience.COMPANY && !companyId) return toast.error('Pick a company.');
     setSaving(true);
     try {
@@ -78,6 +83,7 @@ export function SessionComposer({
         title: title.trim(),
         description: description.trim(),
         meetingUrl: meetingUrl.trim(),
+        recordingUrl: recordingUrl.trim() || null,
         scheduledAt: new Date(when).toISOString(),
         durationMinutes: duration,
         audience,
@@ -124,6 +130,9 @@ export function SessionComposer({
               </Field>
               <Field label="Meeting link (Zoom / Google Meet)">
                 <input value={meetingUrl} onChange={(e) => setMeetingUrl(e.target.value)} maxLength={1000} placeholder="https://zoom.us/j/…  or  https://meet.google.com/…" className={input} />
+              </Field>
+              <Field label="Recording link (optional — add after the session for playback)">
+                <input value={recordingUrl} onChange={(e) => setRecordingUrl(e.target.value)} maxLength={1000} placeholder="https://…/recording  (students can watch this back)" className={input} />
               </Field>
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Date & time">

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
-import { CalendarClock, Clock, Loader2, Video } from 'lucide-react';
+import { CalendarClock, Clock, Loader2, PlayCircle, Video } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { listMyLiveSessions, type LiveSessionDto, type LiveSessionListDto } from '@/lib/api/live-sessions';
 import { AudiencePill, fmtWhen, relWhen, safeHttpUrl, StatusBadge } from '@/components/live-sessions/ui';
@@ -62,6 +62,7 @@ export default function StudentLiveSessionsPage() {
 
 function StudentCard({ s, past }: { s: LiveSessionDto; past?: boolean }) {
   const link = safeHttpUrl(s.meetingUrl);
+  const recording = safeHttpUrl(s.recordingUrl);
   const isLive = s.status === 'LIVE';
   return (
     <div className={cn('rounded-2xl border bg-white p-5 shadow-sm', isLive ? 'border-red-200 ring-1 ring-red-100' : 'border-slate-200')}>
@@ -78,9 +79,8 @@ function StudentCard({ s, past }: { s: LiveSessionDto; past?: boolean }) {
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
           <span className="inline-flex items-center gap-1"><Clock className="size-3.5" /> {fmtWhen(s.scheduledAt)}</span>
           <span>{s.durationMinutes} min</span>
-          <span className="text-slate-400">by {s.hostName}</span>
         </div>
-        {link && !past ? (
+        {!past && link ? (
           <a
             href={link}
             target="_blank"
@@ -92,7 +92,16 @@ function StudentCard({ s, past }: { s: LiveSessionDto; past?: boolean }) {
           >
             <Video className="size-4" /> {isLive ? 'Join now' : 'Join'}
           </a>
-        ) : past && link ? (
+        ) : past && recording ? (
+          <a
+            href={recording}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full bg-navy px-5 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-navy/90"
+          >
+            <PlayCircle className="size-4" /> Watch recording
+          </a>
+        ) : past ? (
           <span className="text-xs font-semibold text-slate-400">Session ended</span>
         ) : null}
       </div>

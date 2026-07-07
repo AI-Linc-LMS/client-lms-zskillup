@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
-import { Clock, ExternalLink, Loader2, Pencil, PlusCircle, Trash2, Users, Video } from 'lucide-react';
+import { Clock, ExternalLink, Loader2, Pencil, PlayCircle, PlusCircle, Trash2, Users, Video } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   deleteLiveSession,
@@ -111,6 +111,7 @@ function AdminRow({
   onDelete: (s: LiveSessionDto) => void;
 }) {
   const link = safeHttpUrl(s.meetingUrl);
+  const recording = safeHttpUrl(s.recordingUrl);
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -124,6 +125,11 @@ function AdminRow({
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
             <span className="inline-flex items-center gap-1"><Clock className="size-3.5" /> {fmtWhen(s.scheduledAt)} · {s.durationMinutes}m</span>
             {s.reachCount != null && <span className="inline-flex items-center gap-1"><Users className="size-3.5" /> {s.reachCount.toLocaleString()} students</span>}
+            {recording && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700">
+                <PlayCircle className="size-3" /> Recording
+              </span>
+            )}
             <span className="text-slate-400">by {s.hostName}</span>
           </div>
         </div>
