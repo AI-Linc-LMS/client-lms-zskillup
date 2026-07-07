@@ -114,26 +114,6 @@ export const SUPERADMIN_NAV: NavSection[] = [
     ],
   },
   {
-    heading: 'CONTENT',
-    items: [
-      { label: 'Question Bank', href: '/superadmin/questions', icon: ClipboardList },
-      { label: 'Coding Bank', href: '/superadmin/coding', icon: Code2 },
-      { label: 'Mock Tests', href: '/superadmin/mocks', icon: FileCheck2 },
-      { label: 'Assessments', href: '/superadmin/scheduled-assessments', icon: CalendarClock },
-      { label: 'Companies', href: '/superadmin/companies', icon: Building2 },
-      { label: 'Courses', href: '/superadmin/courses', icon: GraduationCap },
-      { label: 'Daily Challenges', href: '/superadmin/challenges', icon: Trophy },
-      { label: 'Tips', href: '/superadmin/tips', icon: Sparkles },
-    ],
-  },
-  {
-    heading: 'MARKETING',
-    items: [
-      { label: 'Blog', href: '/superadmin/blogs', icon: Newspaper },
-      { label: 'Testimonials', href: '/superadmin/testimonials', icon: Quote },
-    ],
-  },
-  {
     heading: 'OPERATIONS',
     items: [
       { label: 'Subscriptions', href: '/superadmin/subscriptions', icon: CreditCard },
