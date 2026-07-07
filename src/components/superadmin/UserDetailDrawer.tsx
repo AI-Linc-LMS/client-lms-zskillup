@@ -6,11 +6,13 @@ import {
   deleteAdminStudent,
   getAdminUser,
   getAdminUserLoginHistory,
+  listAdminColleges,
   sendAdminUserResetLink,
   suspendAdminUser,
   updateAdminUser,
   updateAdminUserCapabilities,
   verifyAdminUserEmail,
+  type AdminCollegeRow,
   type AdminLoginHistoryRow,
   type AdminUserDetail,
 } from '@/lib/api/admin';
@@ -29,6 +31,7 @@ import {
   Loader2,
   LogIn,
   Pencil,
+  School,
   ShieldCheck,
   Trash2,
   X,
@@ -77,6 +80,7 @@ export function UserDetailDrawer({
 }) {
   const [user, setUser] = useState<AdminUserDetail | null>(null);
   const [history, setHistory] = useState<AdminLoginHistoryRow[]>([]);
+  const [colleges, setColleges] = useState<AdminCollegeRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -89,12 +93,14 @@ export function UserDetailDrawer({
     setLoading(true);
     setError(null);
     try {
-      const [detail, hist] = await Promise.all([
+      const [detail, hist, cols] = await Promise.all([
         getAdminUser(userId),
         getAdminUserLoginHistory(userId, 20).catch(() => [] as AdminLoginHistoryRow[]),
+        listAdminColleges().catch(() => [] as AdminCollegeRow[]),
       ]);
       setUser(detail);
       setHistory(hist);
+      setColleges(cols);
     } catch (err) {
       setError(describeError(err, 'Failed to load the user.'));
     } finally {
@@ -137,6 +143,14 @@ export function UserDetailDrawer({
       'Name updated.',
     );
     if (ok) setEditingName(false);
+  };
+
+  const changeCollege = async (collegeId: string) => {
+    await run(
+      'college',
+      () => updateAdminUser(userId, { collegeId: collegeId || null }),
+      collegeId ? 'College linked.' : 'College unlinked.',
+    );
   };
 
   const toggleCapability = async (key: AdminCapabilityKey) => {
@@ -270,6 +284,41 @@ export function UserDetailDrawer({
                   {user.isEmailVerified ? 'Verified' : 'Unverified'}
                 </span>
               </div>
+
+              {/* College link — the tenant boundary for STUDENT + COLLEGE_ADMIN.
+                  A TPO with no college can't open the placement console. */}
+              {(user.role === 'STUDENT' || user.role === 'COLLEGE_ADMIN') && (
+                <div className="mt-4">
+                  <label className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+                    <School className="size-3.5" /> College
+                    {!user.collegeId && (
+                      <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-amber-700">
+                        Not linked
+                      </span>
+                    )}
+                  </label>
+                  <select
+                    value={user.collegeId ?? ''}
+                    onChange={(e) => changeCollege(e.target.value)}
+                    disabled={busy === 'college'}
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange disabled:opacity-60"
+                  >
+                    <option value="">— No college —</option>
+                    {colleges.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                        {c.status !== 'ACTIVE' ? ` (${c.status})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                  {user.role === 'COLLEGE_ADMIN' && !user.collegeId && (
+                    <p className="mt-1 text-[11px] text-amber-600">
+                      A TPO can&apos;t open the placement console until a college is linked.
+                    </p>
+                  )}
+                </div>
+              )}
+
               <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
                 <div>
                   <dt className="text-slate-400">Joined</dt>
