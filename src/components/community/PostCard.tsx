@@ -10,7 +10,7 @@ import {
   likeCommunityPost,
   type CommunityPostDto,
 } from '@/lib/api/community';
-import { AuthorMeta, CommunityAvatar, LikeButton, TypeBadge } from './ui';
+import { AuthorMeta, CommunityAvatar, LikeButton, safeHttpUrl, TypeBadge } from './ui';
 
 /** One post in the feed. Title/body link to the detail thread; like + delete are inline. */
 export function PostCard({
@@ -85,9 +85,9 @@ export function PostCard({
         )}
       </Link>
 
-      {post.linkUrl && (
+      {safeHttpUrl(post.linkUrl) && (
         <a
-          href={post.linkUrl}
+          href={safeHttpUrl(post.linkUrl)!}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-2 inline-flex max-w-full items-center gap-1.5 truncate rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"

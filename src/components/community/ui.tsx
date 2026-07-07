@@ -38,6 +38,13 @@ export const POST_TYPES: Record<
 
 export const POST_TYPE_LIST = Object.values(CommunityPostType);
 
+/** Render-time guard: only http(s) links are safe to use as an <a href>
+ *  (belt-and-suspenders with the server-side `safeLink` check). */
+export function safeHttpUrl(url: string | null | undefined): string | null {
+  const t = (url ?? '').trim();
+  return /^https?:\/\//i.test(t) ? t : null;
+}
+
 /** Compact relative time — "just now", "3h", "2d", or a date. */
 export function timeAgo(iso: string): string {
   const then = new Date(iso).getTime();
