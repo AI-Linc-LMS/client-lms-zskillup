@@ -1,4 +1,7 @@
 import { apiClient } from './client';
+import type { PerformanceParticipationDto } from '@/shared/dto/me-analytics.dto';
+
+export type { PerformanceParticipationDto, ScatterPoint } from '@/shared/dto/me-analytics.dto';
 
 export interface ReadinessComponent {
   label: string;
@@ -31,4 +34,9 @@ export interface Readiness {
 export async function getReadiness(): Promise<Readiness> {
   const res = await apiClient.get<Readiness>('/api/v1/me/readiness');
   return res.data;
+}
+
+/** Performance vs participation scatter — your dot among anonymized college peers. */
+export async function getMyPerformanceScatter(): Promise<PerformanceParticipationDto> {
+  return (await apiClient.get<PerformanceParticipationDto>('/api/v1/me/readiness/scatter')).data;
 }
