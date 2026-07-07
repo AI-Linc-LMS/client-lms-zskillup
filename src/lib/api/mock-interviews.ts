@@ -46,6 +46,17 @@ export async function nextInterviewQuestion(
   ).data;
 }
 
+/** Whisper speech-to-text: upload a recorded answer, get the transcript back. */
+export async function transcribeAnswer(audio: Blob, filename = 'answer.webm'): Promise<string> {
+  const form = new FormData();
+  form.append('audio', audio, filename);
+  const res = await apiClient.postForm<{ text: string }>(
+    '/api/v1/me/mock-interviews/transcribe',
+    form,
+  );
+  return res.data.text;
+}
+
 export async function submitInterview(
   id: string,
   responses: { questionId: number; answer: string }[],

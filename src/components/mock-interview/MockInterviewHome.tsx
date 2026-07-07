@@ -19,7 +19,7 @@ const STATUS_STYLE: Record<string, string> = {
 
 const STEPS = [
   { icon: Target, title: 'Pick a focus', text: 'Topic, style, difficulty & length' },
-  { icon: MessagesSquare, title: 'Converse with AI', text: 'Adaptive questions, type or speak' },
+  { icon: MessagesSquare, title: 'Talk it out', text: 'The interviewer speaks — you answer out loud' },
   { icon: Award, title: 'Get scored feedback', text: 'Strengths, gaps & a rubric score' },
 ];
 

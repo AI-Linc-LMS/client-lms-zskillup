@@ -34,6 +34,8 @@ export type AuthPosture = 'default' | 'login' | 'public';
 type RequestOptions = Omit<RequestInit, 'body'> & {
   /** JSON-serializable body; set automatically with the JSON content-type. */
   json?: unknown;
+  /** Multipart body (file uploads). When set, Content-Type is left to the browser. */
+  formData?: FormData;
   /** Auth posture — see file header. Defaults to 'default'. */
   auth?: AuthPosture;
 };
@@ -167,7 +169,7 @@ async function parseError(res: Response): Promise<ApiRequestError> {
 }
 
 async function rawRequest<T>(path: string, options: RequestOptions): Promise<ApiResponse<T>> {
-  const { json, headers, auth: _auth, ...rest } = options;
+  const { json, formData, headers, auth: _auth, ...rest } = options;
   void _auth;
   const token = authToken.get();
 
@@ -175,11 +177,12 @@ async function rawRequest<T>(path: string, options: RequestOptions): Promise<Api
     ...rest,
     headers: {
       Accept: 'application/json',
+      // For multipart (formData) let the browser set Content-Type + boundary.
       ...(json !== undefined ? { 'Content-Type': 'application/json' } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },
-    ...(json !== undefined ? { body: JSON.stringify(json) } : {}),
+    ...(json !== undefined ? { body: JSON.stringify(json) } : formData !== undefined ? { body: formData } : {}),
     // 'include' so the backend Set-Cookie (zskillup_refresh HttpOnly) is
     // accepted on login/logout and sent on subsequent same-site requests.
     credentials: 'include',
@@ -278,6 +281,8 @@ export const apiClient = {
     apiRequest<T>(path, { ...options, method: 'GET' }),
   post: <T>(path: string, json?: unknown, options?: RequestOptions) =>
     apiRequest<T>(path, { ...options, method: 'POST', json }),
+  postForm: <T>(path: string, formData: FormData, options?: RequestOptions) =>
+    apiRequest<T>(path, { ...options, method: 'POST', formData }),
   patch: <T>(path: string, json?: unknown, options?: RequestOptions) =>
     apiRequest<T>(path, { ...options, method: 'PATCH', json }),
   delete: <T>(path: string, options?: RequestOptions) =>

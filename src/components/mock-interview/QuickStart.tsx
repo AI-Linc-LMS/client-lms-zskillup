@@ -209,7 +209,7 @@ export function QuickStart() {
           <span className="whitespace-nowrap">~{estQuestions} questions</span>
         </p>
         <div className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-1 text-xs text-slate-400"><Mic className="size-3.5" /> Type or speak</span>
+          <span className="inline-flex items-center gap-1 text-xs text-slate-400"><Mic className="size-3.5" /> Spoken interview · mic recommended</span>
           <button
             onClick={start}
             disabled={creating}
