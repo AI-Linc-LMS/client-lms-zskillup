@@ -13,12 +13,11 @@ import {
 } from '@/lib/api/mock-interviews';
 import type { InterviewQuestionDto } from '@/shared/dto/mock-interview.dto';
 import { describeError } from '@/lib/api/errors';
-import { Bot, Keyboard, Loader2, Mic, RotateCcw, Send, Sparkles, Square, Volume2, VolumeX, X } from 'lucide-react';
+import { Bot, Keyboard, Loader2, Mic, Send, Sparkles, Video, VideoOff, Volume2, VolumeX, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-type RecState = 'idle' | 'recording' | 'transcribing';
+const WHISPER_EVERY_MS = 3500; // progressive re-transcription cadence
 
-/** Pick a natural English voice for the interviewer. */
 function pickVoice(): SpeechSynthesisVoice | null {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) return null;
   const voices = window.speechSynthesis.getVoices();
@@ -45,26 +44,33 @@ export function InterviewRunner({ id }: { id: string }) {
   const [submitting, setSubmitting] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
 
-  // voice
-  const [voiceOn, setVoiceOn] = useState(true); // interviewer speaks
+  // media + voice
+  const [voiceOn, setVoiceOn] = useState(true);
   const [interviewerSpeaking, setInterviewerSpeaking] = useState(false);
-  const [answerMode, setAnswerMode] = useState<'voice' | 'text'>('voice');
-  const [voiceCapable, setVoiceCapable] = useState(true); // Whisper (server key) available
-  const [recState, setRecState] = useState<RecState>('idle');
-  const [recElapsed, setRecElapsed] = useState(0);
+  const [voiceCapable, setVoiceCapable] = useState(true); // Whisper key present
+  const [camOn, setCamOn] = useState(false);
+  const [camError, setCamError] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const [typing, setTyping] = useState(false); // typed fallback
 
   const responsesRef = useRef<Map<number, string>>(new Map());
   const submitRef = useRef<() => void>(() => {});
   const submittingRef = useRef(false);
   const totalSecondsRef = useRef(0);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const recorderRef = useRef<MediaRecorder | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const lastSentRef = useRef(0);
+  const whisperBusyRef = useRef(false);
+  const progressTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const voiceOnRef = useRef(voiceOn);
   voiceOnRef.current = voiceOn;
+  const answerRef = useRef('');
+  answerRef.current = answer;
 
-  // ── init: resume or start ────────────────────────────────────────────────
+  // ── init: interview + camera/mic ─────────────────────────────────────────
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -77,6 +83,45 @@ export function InterviewRunner({ id }: { id: string }) {
         }
         setMaxTurns(detail.maxTurns);
         for (const r of detail.transcript.responses) responsesRef.current.set(r.question_id, r.answer);
+
+        // Camera + mic (self-view + Whisper source). Best-effort — falls back to typing.
+        const recorderOk = !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== 'undefined';
+        const whisperOk = recorderOk && (await aiInterviewStatus().catch(() => false));
+        if (recorderOk && whisperOk) {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+              audio: { echoCancellation: true, noiseSuppression: true },
+            });
+            if (!alive) {
+              stream.getTracks().forEach((t) => t.stop());
+              return;
+            }
+            streamRef.current = stream;
+            setCamOn(stream.getVideoTracks().length > 0);
+          } catch {
+            // Camera denied/absent — try audio-only so voice answers still work.
+            try {
+              const audioOnly = await navigator.mediaDevices.getUserMedia({
+                audio: { echoCancellation: true, noiseSuppression: true },
+              });
+              if (!alive) {
+                audioOnly.getTracks().forEach((t) => t.stop());
+                return;
+              }
+              streamRef.current = audioOnly;
+              setCamError(true);
+            } catch {
+              setCamError(true);
+              setVoiceCapable(false);
+              setTyping(true);
+            }
+          }
+        } else {
+          setVoiceCapable(false);
+          setTyping(true);
+        }
+
         const t = await startInterview(id);
         if (!alive) return;
         setQuestion(t.question);
@@ -99,9 +144,17 @@ export function InterviewRunner({ id }: { id: string }) {
     };
   }, [id, router]);
 
-  // ── interviewer speaks the current question ──────────────────────────────
-  const speak = useCallback((text: string) => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window) || !text.trim()) return;
+  // attach camera stream to the video element
+  useEffect(() => {
+    if (videoRef.current && streamRef.current) videoRef.current.srcObject = streamRef.current;
+  }, [camOn, loading]);
+
+  // ── interviewer TTS ──────────────────────────────────────────────────────
+  const speak = useCallback((text: string, onDone?: () => void) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window) || !text.trim()) {
+      onDone?.();
+      return;
+    }
     try {
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
@@ -109,56 +162,107 @@ export function InterviewRunner({ id }: { id: string }) {
       if (v) u.voice = v;
       u.lang = v?.lang ?? 'en-US';
       u.rate = 1;
-      u.pitch = 1;
       u.onstart = () => setInterviewerSpeaking(true);
-      u.onend = () => setInterviewerSpeaking(false);
-      u.onerror = () => setInterviewerSpeaking(false);
+      u.onend = () => {
+        setInterviewerSpeaking(false);
+        onDone?.();
+      };
+      u.onerror = () => {
+        setInterviewerSpeaking(false);
+        onDone?.();
+      };
       window.speechSynthesis.speak(u);
     } catch {
-      /* speech unavailable — the question is still shown as text */
+      onDone?.();
     }
   }, []);
-
-  // Warm TTS voices (async in some browsers) + probe voice-answer capability.
-  useEffect(() => {
-    let cleanup: (() => void) | undefined;
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.getVoices();
-      const onChange = () => window.speechSynthesis.getVoices();
-      window.speechSynthesis.addEventListener?.('voiceschanged', onChange);
-      cleanup = () => window.speechSynthesis.removeEventListener?.('voiceschanged', onChange);
-    }
-    // Voice answers need MediaRecorder + Whisper (server OPENAI key). Else: typing.
-    const recorderOk =
-      typeof window !== 'undefined' &&
-      !!navigator.mediaDevices?.getUserMedia &&
-      typeof MediaRecorder !== 'undefined';
-    if (!recorderOk) {
-      setVoiceCapable(false);
-      setAnswerMode('text');
-    } else {
-      aiInterviewStatus().then((ok) => {
-        if (!ok) {
-          setVoiceCapable(false);
-          setAnswerMode('text');
-        }
-      });
-    }
-    return cleanup;
-  }, []);
-
-  // Speak whenever a new (non-busy) question appears and voice is on.
-  useEffect(() => {
-    if (!question || busy || loading) return;
-    if (voiceOnRef.current) speak(question.question_text);
-    else if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [question?.id, busy, loading]);
 
   const stopSpeaking = useCallback(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel();
     setInterviewerSpeaking(false);
   }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.getVoices();
+      const onChange = () => window.speechSynthesis.getVoices();
+      window.speechSynthesis.addEventListener?.('voiceschanged', onChange);
+      return () => window.speechSynthesis.removeEventListener?.('voiceschanged', onChange);
+    }
+  }, []);
+
+  // ── recording + progressive Whisper ──────────────────────────────────────
+  const runWhisper = useCallback(async (final: boolean) => {
+    if (whisperBusyRef.current) return;
+    if (!chunksRef.current.length) return;
+    if (!final && chunksRef.current.length === lastSentRef.current) return; // nothing new
+    whisperBusyRef.current = true;
+    lastSentRef.current = chunksRef.current.length;
+    if (final) setTranscribing(true);
+    try {
+      const type = recorderRef.current?.mimeType || 'audio/webm';
+      const ext = type.includes('mp4') ? 'mp4' : type.includes('ogg') ? 'ogg' : 'webm';
+      const blob = new Blob(chunksRef.current, { type });
+      if (blob.size > 1200) {
+        const text = await transcribeAnswer(blob, `answer.${ext}`);
+        // Progressive: only accept if it meaningfully grew (Whisper is stable on a prefix).
+        if (text && (final || text.length >= answerRef.current.length - 4)) setAnswer(text);
+      }
+    } catch {
+      /* transient — keep going; the final pass or typing covers it */
+    } finally {
+      whisperBusyRef.current = false;
+      if (final) setTranscribing(false);
+    }
+  }, []);
+
+  const startRecording = useCallback(() => {
+    const stream = streamRef.current;
+    if (!stream || !voiceCapable || typing) return;
+    const audio = new MediaStream(stream.getAudioTracks());
+    if (!audio.getAudioTracks().length) return;
+    chunksRef.current = [];
+    lastSentRef.current = 0;
+    const mime = ['audio/webm', 'audio/mp4', 'audio/ogg'].find((m) => MediaRecorder.isTypeSupported?.(m));
+    const rec = new MediaRecorder(audio, mime ? { mimeType: mime } : undefined);
+    recorderRef.current = rec;
+    rec.ondataavailable = (e) => e.data.size && chunksRef.current.push(e.data);
+    rec.start(1000); // 1s chunks
+    setRecording(true);
+    progressTimerRef.current = setInterval(() => void runWhisper(false), WHISPER_EVERY_MS);
+  }, [runWhisper, typing, voiceCapable]);
+
+  const stopRecording = useCallback(async () => {
+    if (progressTimerRef.current) {
+      clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
+    }
+    const rec = recorderRef.current;
+    if (!rec || rec.state === 'inactive') {
+      setRecording(false);
+      return;
+    }
+    await new Promise<void>((resolve) => {
+      rec.onstop = () => resolve();
+      rec.stop();
+    });
+    setRecording(false);
+    await runWhisper(true); // final accurate pass
+  }, [runWhisper]);
+
+  // Speak each new question, then auto-arm recording when it finishes.
+  useEffect(() => {
+    if (!question || busy || loading) return;
+    const armRecording = () => {
+      if (voiceCapable && !typing) startRecording();
+    };
+    if (voiceOnRef.current) speak(question.question_text, armRecording);
+    else {
+      stopSpeaking();
+      armRecording();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [question?.id, busy, loading]);
 
   // ── countdown ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -171,84 +275,19 @@ export function InterviewRunner({ id }: { id: string }) {
     return () => clearTimeout(t);
   }, [secondsLeft]);
 
-  // ── auto-grow textarea ────────────────────────────────────────────────────
-  useEffect(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = 'auto';
-    el.style.height = `${Math.min(el.scrollHeight, 340)}px`;
-  }, [answer]);
-
-  // ── recording (MediaRecorder → Whisper) ──────────────────────────────────
-  const releaseStream = useCallback(() => {
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-    streamRef.current = null;
-  }, []);
-
-  const startRecording = useCallback(async () => {
-    setError(null);
-    stopSpeaking();
-    let stream: MediaStream;
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch {
-      setError('Microphone access was blocked. Enable it, or switch to typing.');
-      setAnswerMode('text');
-      return;
-    }
-    streamRef.current = stream;
-    chunksRef.current = [];
-    const mime = ['audio/webm', 'audio/mp4', 'audio/ogg'].find((m) => MediaRecorder.isTypeSupported?.(m));
-    const rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
-    recorderRef.current = rec;
-    rec.ondataavailable = (e) => e.data.size && chunksRef.current.push(e.data);
-    rec.onstop = async () => {
-      releaseStream();
-      const blob = new Blob(chunksRef.current, { type: rec.mimeType || 'audio/webm' });
-      if (!blob.size) {
-        setRecState('idle');
-        return;
-      }
-      setRecState('transcribing');
-      try {
-        const mt = rec.mimeType || 'webm';
-        const ext = mt.includes('mp4') ? 'mp4' : mt.includes('ogg') ? 'ogg' : 'webm';
-        const text = await transcribeAnswer(blob, `answer.${ext}`);
-        setAnswer((prev) => (prev.trim() ? `${prev.trim()} ${text}` : text).trim());
-      } catch (err) {
-        setError(describeError(err, 'Could not transcribe that. Try again or type your answer.'));
-      } finally {
-        setRecState('idle');
-      }
-    };
-    rec.start();
-    setRecState('recording');
-    setRecElapsed(0);
-  }, [releaseStream, stopSpeaking]);
-
-  const stopRecording = useCallback(() => {
-    if (recorderRef.current && recorderRef.current.state !== 'inactive') recorderRef.current.stop();
-  }, []);
-
-  // recording elapsed timer
-  useEffect(() => {
-    if (recState !== 'recording') return;
-    const t = setInterval(() => setRecElapsed((s) => s + 1), 1000);
-    return () => clearInterval(t);
-  }, [recState]);
-
-  // cleanup
+  // cleanup: stop camera + mic + speech on unmount
   useEffect(
     () => () => {
       stopSpeaking();
+      if (progressTimerRef.current) clearInterval(progressTimerRef.current);
       try {
         if (recorderRef.current && recorderRef.current.state !== 'inactive') recorderRef.current.stop();
       } catch {
         /* noop */
       }
-      releaseStream();
+      streamRef.current?.getTracks().forEach((t) => t.stop());
     },
-    [releaseStream, stopSpeaking],
+    [stopSpeaking],
   );
 
   // ── turn flow ────────────────────────────────────────────────────────────
@@ -256,25 +295,28 @@ export function InterviewRunner({ id }: { id: string }) {
     if (submittingRef.current) return;
     submittingRef.current = true;
     stopSpeaking();
-    stopRecording();
+    await stopRecording();
     setSubmitting(true);
-    if (question) responsesRef.current.set(question.id, answer);
+    if (question) responsesRef.current.set(question.id, answerRef.current);
     const responses = [...responsesRef.current.entries()].map(([questionId, a]) => ({ questionId, answer: a }));
     try {
       await submitInterview(id, responses);
+      streamRef.current?.getTracks().forEach((t) => t.stop());
       router.replace(`/mock-interview/${id}/result`);
     } catch (err) {
       setError(describeError(err, 'Submit failed. Please retry.'));
       setSubmitting(false);
       submittingRef.current = false;
     }
-  }, [answer, id, question, router, stopRecording, stopSpeaking]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, question, router, stopRecording, stopSpeaking]);
   submitRef.current = doSubmit;
 
   const doNext = async () => {
-    if (!question || busy || recState !== 'idle') return;
-    stopSpeaking();
-    responsesRef.current.set(question.id, answer);
+    if (!question || busy || transcribing) return;
+    await stopRecording();
+    const finalAnswer = answerRef.current;
+    responsesRef.current.set(question.id, finalAnswer);
     if (isFinal) {
       doSubmit();
       return;
@@ -282,7 +324,7 @@ export function InterviewRunner({ id }: { id: string }) {
     setBusy(true);
     setError(null);
     try {
-      const t = await nextInterviewQuestion(id, question.id, answer);
+      const t = await nextInterviewQuestion(id, question.id, finalAnswer);
       if (!t.question) {
         doSubmit();
         return;
@@ -301,7 +343,13 @@ export function InterviewRunner({ id }: { id: string }) {
   const quit = () => {
     if (!window.confirm('Leave this interview? Your progress is saved and you can resume it.')) return;
     stopSpeaking();
-    stopRecording();
+    if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+    try {
+      if (recorderRef.current && recorderRef.current.state !== 'inactive') recorderRef.current.stop();
+    } catch {
+      /* noop */
+    }
+    streamRef.current?.getTracks().forEach((t) => t.stop());
     router.push('/mock-interview');
   };
 
@@ -311,15 +359,12 @@ export function InterviewRunner({ id }: { id: string }) {
   const low = secondsLeft !== null && secondsLeft < 30;
   const mm = secondsLeft !== null ? Math.floor(secondsLeft / 60) : 0;
   const ss = secondsLeft !== null ? secondsLeft % 60 : 0;
-  const recMin = Math.floor(recElapsed / 60);
-  const recSec = recElapsed % 60;
-  const hasAnswer = answer.trim().length > 0;
 
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-28">
-        <Orb speaking />
-        <p className="text-sm text-slate-500">Setting up your interview…</p>
+        <InterviewerBlob speaking />
+        <p className="text-sm text-slate-500">Setting up your interview — enabling camera &amp; mic…</p>
       </div>
     );
   }
@@ -328,9 +373,9 @@ export function InterviewRunner({ id }: { id: string }) {
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
-      {/* Sticky top bar: progress + timer */}
-      <div className="sticky top-0 z-20 -mx-4 mb-5 border-b border-slate-100 bg-gradient-to-b from-white via-white to-white/85 px-4 py-3 backdrop-blur">
+    <div className="mx-auto max-w-5xl">
+      {/* Top bar */}
+      <div className="sticky top-0 z-20 -mx-4 mb-5 border-b border-slate-100 bg-white/90 px-4 py-3 backdrop-blur">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <span className="text-sm font-bold text-navy">Question {turnNumber}</span>
@@ -344,10 +389,7 @@ export function InterviewRunner({ id }: { id: string }) {
                 if (!nv) stopSpeaking();
                 else if (question) speak(question.question_text);
               }}
-              className={cn(
-                'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-xs font-semibold transition-colors',
-                voiceOn ? 'border-navy/20 bg-navy/5 text-navy' : 'border-slate-200 text-slate-400 hover:bg-slate-50',
-              )}
+              className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-xs font-semibold transition-colors', voiceOn ? 'border-navy/20 bg-navy/5 text-navy' : 'border-slate-200 text-slate-400 hover:bg-slate-50')}
               title={voiceOn ? 'Interviewer voice on' : 'Interviewer voice off'}
             >
               {voiceOn ? <Volume2 className="size-3.5" /> : <VolumeX className="size-3.5" />}
@@ -359,168 +401,144 @@ export function InterviewRunner({ id }: { id: string }) {
         </div>
       </div>
 
-      <div className="space-y-5">
-        {/* Interviewer + question */}
-        <div className="flex items-start gap-4">
-          <Orb speaking={busy || interviewerSpeaking} />
-          <div className="relative flex-1 overflow-hidden rounded-2xl rounded-tl-sm border border-slate-200 bg-white p-5 shadow-sm">
-            <span aria-hidden className="pointer-events-none absolute -right-10 -top-10 size-32 rounded-full bg-orange/5 blur-2xl" />
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-                AI Interviewer{interviewerSpeaking ? ' · speaking' : isFinal ? ' · final question' : ''}
-              </p>
-              {question && !busy && (
-                <button
-                  onClick={() => speak(question.question_text)}
-                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400 transition-colors hover:text-navy"
-                  title="Replay question"
-                >
-                  <Volume2 className="size-3.5" /> Replay
-                </button>
-              )}
-            </div>
-            <div className="relative mt-1 min-h-[2.5rem]">
-              <AnimatePresence mode="wait">
-                {busy ? (
-                  <motion.div key="thinking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2 text-slate-400">
-                    <span className="text-[15px]">Thinking</span><ThinkingDots />
-                  </motion.div>
-                ) : (
-                  <motion.p
-                    key={question?.id ?? 'q'}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.28 }}
-                    className="text-[16px] font-medium leading-relaxed text-navy"
-                  >
-                    {question?.question_text}
-                  </motion.p>
-                )}
-              </AnimatePresence>
-            </div>
+      {/* Calibration stage: interviewer + candidate camera */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        {/* Interviewer */}
+        <div className="relative flex min-h-[240px] flex-col items-center justify-center gap-4 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-sm">
+          <span aria-hidden className="pointer-events-none absolute -left-10 -top-10 size-40 rounded-full bg-[#8b5cf6]/25 blur-3xl" />
+          <InterviewerBlob speaking={interviewerSpeaking || busy} big />
+          <div className="text-center">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-white/50">AI Interviewer</p>
+            <p className="text-sm font-semibold text-white/80">
+              {busy ? 'Thinking…' : interviewerSpeaking ? 'Speaking…' : 'Listening'}
+            </p>
           </div>
         </div>
 
-        {/* Answer */}
-        <div className={cn('rounded-2xl border bg-white p-4 shadow-sm transition-colors', recState === 'recording' ? 'border-orange/60 ring-1 ring-orange/30' : 'border-slate-200')}>
-          <div className="mb-3 flex items-center justify-between">
-            <label className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Your answer</label>
-            {voiceCapable && (
-              <div className="inline-flex rounded-full border border-slate-200 bg-slate-50 p-0.5 text-xs font-semibold">
-                <button
-                  onClick={() => setAnswerMode('voice')}
-                  className={cn('inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 transition-colors', answerMode === 'voice' ? 'bg-white text-navy shadow-sm' : 'text-slate-500')}
-                >
-                  <Mic className="size-3.5" /> Speak
-                </button>
-                <button
-                  onClick={() => { stopRecording(); setAnswerMode('text'); }}
-                  className={cn('inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 transition-colors', answerMode === 'text' ? 'bg-white text-navy shadow-sm' : 'text-slate-500')}
-                >
-                  <Keyboard className="size-3.5" /> Type
-                </button>
-              </div>
+        {/* Candidate camera */}
+        <div className="relative min-h-[240px] overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-sm">
+          {camOn ? (
+            <video ref={videoRef} autoPlay muted playsInline className="size-full object-cover" style={{ transform: 'scaleX(-1)' }} />
+          ) : (
+            <div className="flex size-full flex-col items-center justify-center gap-2 text-slate-400">
+              <VideoOff className="size-8" />
+              <p className="text-xs">{camError ? 'Camera unavailable' : 'Camera off'}</p>
+            </div>
+          )}
+          {/* overlays */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between gap-2 bg-gradient-to-b from-black/50 to-transparent p-2.5">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/40 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white/80 backdrop-blur">
+              <span className="size-1.5 rounded-full bg-emerald-400" /> Monitoring
+            </span>
+            {recording && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/90 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+                <motion.span className="size-1.5 rounded-full bg-white" animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.2, repeat: Infinity }} /> Rec
+              </span>
             )}
           </div>
-
-          {/* VOICE mode */}
-          {answerMode === 'voice' ? (
-            <div className="space-y-3">
-              {recState === 'idle' && !hasAnswer ? (
-                <button
-                  onClick={startRecording}
-                  className="group flex w-full flex-col items-center gap-2 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 py-8 transition-colors hover:border-orange/50 hover:bg-orange/5"
-                >
-                  <span className="grid size-14 place-items-center rounded-full bg-gradient-to-br from-orange to-[#f5872f] text-white shadow-lg transition-transform group-hover:scale-105">
-                    <Mic className="size-6" />
-                  </span>
-                  <span className="text-sm font-bold text-navy">Tap to record your answer</span>
-                  <span className="text-xs text-slate-400">Speak naturally — we&apos;ll transcribe it with Whisper</span>
-                </button>
-              ) : recState === 'recording' ? (
-                <button
-                  onClick={stopRecording}
-                  className="flex w-full flex-col items-center gap-2 rounded-xl border-2 border-orange/50 bg-orange/5 py-8"
-                >
-                  <span className="grid size-14 place-items-center rounded-full bg-red-500 text-white shadow-lg">
-                    <Square className="size-5 fill-current" />
-                  </span>
-                  <span className="flex items-center gap-2 text-sm font-bold text-navy">
-                    <RecWave /> Recording · {recMin}:{String(recSec).padStart(2, '0')}
-                  </span>
-                  <span className="text-xs text-slate-400">Tap to stop</span>
-                </button>
-              ) : recState === 'transcribing' ? (
-                <div className="flex w-full flex-col items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/60 py-8">
-                  <Loader2 className="size-7 animate-spin text-orange" />
-                  <span className="text-sm font-semibold text-slate-500">Transcribing with Whisper…</span>
-                </div>
-              ) : null}
-
-              {/* transcript (editable) after recording */}
-              {recState === 'idle' && hasAnswer && (
-                <>
-                  <textarea
-                    ref={textareaRef}
-                    value={answer}
-                    onChange={(e) => setAnswer(e.target.value)}
-                    rows={5}
-                    className="w-full resize-none rounded-lg border border-slate-200 px-3.5 py-3 text-[15px] leading-relaxed shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
-                  />
-                  <button
-                    onClick={startRecording}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
-                  >
-                    <RotateCcw className="size-3.5" /> Re-record / add more
-                  </button>
-                </>
-              )}
-            </div>
-          ) : (
-            /* TEXT fallback */
-            <textarea
-              ref={textareaRef}
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); doNext(); } }}
-              rows={6}
-              placeholder="Type your answer…"
-              className="w-full resize-none rounded-lg border border-slate-200 px-3.5 py-3 text-[15px] leading-relaxed shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
-            />
-          )}
-
-          {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-
-          <div className="mt-3 flex items-center justify-between">
-            <span className="text-[11px] text-slate-400">{wordCount} word{wordCount === 1 ? '' : 's'}</span>
-            <div className="flex items-center gap-3">
-              {!isFinal && (
-                <button onClick={doSubmit} disabled={submitting || busy || recState !== 'idle'} className="text-xs font-medium text-slate-400 transition-colors hover:text-slate-600 disabled:opacity-50">End early</button>
-              )}
-              <button
-                onClick={doNext}
-                disabled={busy || submitting || recState !== 'idle'}
-                className={cn(
-                  'inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:shadow disabled:opacity-50',
-                  isFinal ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700' : 'bg-gradient-to-r from-orange to-[#f5872f] hover:brightness-105',
-                )}
-              >
-                {busy || submitting ? <Loader2 className="size-4 animate-spin" /> : isFinal ? <Sparkles className="size-4" /> : <Send className="size-4" />}
-                {isFinal ? 'Finish & get feedback' : 'Next question'}
-              </button>
-            </div>
+          <div className="pointer-events-none absolute bottom-2 left-2.5 inline-flex items-center gap-1.5 rounded-full bg-black/40 px-2 py-1 text-[10px] font-semibold text-white/80 backdrop-blur">
+            {camOn ? <Video className="size-3" /> : <VideoOff className="size-3" />} You
           </div>
         </div>
-
-        <p className="text-center text-xs text-slate-400">No camera, no proctoring — a calm space to practise out loud. Take your time.</p>
       </div>
+
+      {/* Question */}
+      <div className="relative mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+            Question{isFinal ? ' · final' : ''}
+          </p>
+          {question && !busy && (
+            <button onClick={() => speak(question.question_text)} className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400 transition-colors hover:text-navy" title="Replay">
+              <Volume2 className="size-3.5" /> Replay
+            </button>
+          )}
+        </div>
+        <div className="mt-1 min-h-[2rem]">
+          <AnimatePresence mode="wait">
+            {busy ? (
+              <motion.div key="thinking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2 text-slate-400"><span className="text-[15px]">Thinking</span><ThinkingDots /></motion.div>
+            ) : (
+              <motion.p key={question?.id ?? 'q'} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.28 }} className="text-[16px] font-medium leading-relaxed text-navy">
+                {question?.question_text}
+              </motion.p>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* Live transcript */}
+      <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="mb-2 flex items-center justify-between">
+          <label className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+            Your answer
+            {recording && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-bold text-orange">
+                <Mic className="size-3" /> live · Whisper
+              </span>
+            )}
+            {transcribing && <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-400"><Loader2 className="size-3 animate-spin" /> finalising</span>}
+          </label>
+          {voiceCapable && (
+            <button onClick={() => setTyping((t) => !t)} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-500 transition-colors hover:bg-slate-50">
+              {typing ? <><Mic className="size-3.5" /> Use voice</> : <><Keyboard className="size-3.5" /> Type</>}
+            </button>
+          )}
+        </div>
+
+        {typing || !voiceCapable ? (
+          <textarea
+            value={answer}
+            onChange={(e) => setAnswer(e.target.value)}
+            onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); doNext(); } }}
+            rows={5}
+            placeholder="Type your answer…"
+            className="w-full resize-none rounded-lg border border-slate-200 px-3.5 py-3 text-[15px] leading-relaxed shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+          />
+        ) : (
+          <div className="min-h-[6rem] rounded-lg border border-slate-100 bg-slate-50/60 px-3.5 py-3 text-[15px] leading-relaxed text-navy">
+            {answer ? (
+              <p className="whitespace-pre-wrap">{answer}</p>
+            ) : recording ? (
+              <span className="flex items-center gap-2 text-slate-400"><EqBars /> Listening — start speaking, your words appear here…</span>
+            ) : (
+              <span className="text-slate-400">The interviewer will speak, then your answer records automatically.</span>
+            )}
+          </div>
+        )}
+        {answer && !typing && voiceCapable && (
+          <button onClick={() => setTyping(true)} className="mt-2 text-xs font-medium text-slate-400 transition-colors hover:text-navy">Edit transcript</button>
+        )}
+
+        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+
+        <div className="mt-3 flex items-center justify-between">
+          <span className="text-[11px] text-slate-400">{wordCount} word{wordCount === 1 ? '' : 's'}</span>
+          <div className="flex items-center gap-3">
+            {!isFinal && (
+              <button onClick={doSubmit} disabled={submitting || busy || transcribing} className="text-xs font-medium text-slate-400 transition-colors hover:text-slate-600 disabled:opacity-50">End early</button>
+            )}
+            <button
+              onClick={doNext}
+              disabled={busy || submitting || transcribing}
+              className={cn('inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:shadow disabled:opacity-50', isFinal ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700' : 'bg-gradient-to-r from-orange to-[#f5872f] hover:brightness-105')}
+            >
+              {busy || submitting || transcribing ? <Loader2 className="size-4 animate-spin" /> : isFinal ? <Sparkles className="size-4" /> : <Send className="size-4" />}
+              {isFinal ? 'Finish & get feedback' : 'Next question'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <p className="mt-3 text-center text-xs text-slate-400">
+        Your camera is a self-view for a real interview feel — nothing is uploaded, and there&apos;s no strict proctoring.
+      </p>
 
       {/* Evaluating overlay */}
       <AnimatePresence>
         {submitting && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-white/90 backdrop-blur-sm">
-            <Orb speaking />
+            <InterviewerBlob speaking big />
             <div className="text-center">
               <p className="text-lg font-bold text-navy">Reviewing your interview…</p>
               <p className="mt-1 text-sm text-slate-500">Scoring your answers and writing feedback.</p>
@@ -534,39 +552,34 @@ export function InterviewRunner({ id }: { id: string }) {
 
 // ── presentational bits ──────────────────────────────────────────────────────
 
-/** Interviewer "blob": an organic morphing gradient shape that pulses + morphs
- *  while the interviewer speaks (in place of a static avatar). */
-function Orb({ speaking }: { speaking?: boolean }) {
+/** Interviewer "blob": an organic morphing gradient shape that pulses + morphs while speaking. */
+function InterviewerBlob({ speaking, big }: { speaking?: boolean; big?: boolean }) {
+  const wrap = big ? 'size-24' : 'size-14';
+  const inner = big ? 'size-20' : 'size-12';
+  const icon = big ? 'size-8' : 'size-5';
   return (
-    <div className="relative grid size-14 shrink-0 place-items-center">
-      {/* soft glow */}
+    <div className={cn('relative grid shrink-0 place-items-center', wrap)}>
       <motion.span
         aria-hidden
-        className="absolute inset-0 rounded-full blur-lg"
+        className="absolute inset-0 rounded-full blur-xl"
         style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899)' }}
-        animate={speaking ? { opacity: [0.35, 0.6, 0.35], scale: [1, 1.18, 1] } : { opacity: 0.22, scale: 1 }}
+        animate={speaking ? { opacity: [0.4, 0.7, 0.4], scale: [1, 1.2, 1] } : { opacity: 0.28, scale: 1 }}
         transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
       />
-      {/* morphing blob */}
       <motion.div
-        className="relative grid size-12 place-items-center text-white shadow-[0_10px_30px_-8px_rgba(124,58,237,0.6)] ring-2 ring-white"
+        className={cn('relative grid place-items-center text-white shadow-[0_12px_36px_-8px_rgba(124,58,237,0.6)] ring-2 ring-white/70', inner)}
         style={{ background: 'linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#ec4899 100%)' }}
         animate={
           speaking
             ? {
-                borderRadius: [
-                  '58% 42% 40% 60% / 55% 45% 55% 45%',
-                  '42% 58% 65% 35% / 40% 60% 40% 60%',
-                  '60% 40% 45% 55% / 60% 40% 55% 45%',
-                  '58% 42% 40% 60% / 55% 45% 55% 45%',
-                ],
+                borderRadius: ['58% 42% 40% 60% / 55% 45% 55% 45%', '42% 58% 65% 35% / 40% 60% 40% 60%', '60% 40% 45% 55% / 60% 40% 55% 45%', '58% 42% 40% 60% / 55% 45% 55% 45%'],
                 scale: [1, 1.06, 0.98, 1],
               }
             : { borderRadius: '56% 44% 47% 53% / 52% 48% 52% 48%', scale: 1 }
         }
         transition={{ duration: speaking ? 2.6 : 6, repeat: Infinity, ease: 'easeInOut' }}
       >
-        <Bot className="size-5 opacity-90" />
+        <Bot className={cn('opacity-90', icon)} />
       </motion.div>
     </div>
   );
@@ -606,11 +619,11 @@ function ThinkingDots() {
   );
 }
 
-function RecWave() {
+function EqBars() {
   return (
     <span className="flex items-end gap-0.5">
       {[0.5, 1, 0.7, 1, 0.6].map((h, i) => (
-        <motion.span key={i} className="w-0.5 rounded-full bg-red-500" style={{ height: 12 }} animate={{ scaleY: [h * 0.4, h, h * 0.4] }} transition={{ duration: 0.7, repeat: Infinity, delay: i * 0.08 }} />
+        <motion.span key={i} className="w-0.5 rounded-full bg-orange" style={{ height: 12 }} animate={{ scaleY: [h * 0.4, h, h * 0.4] }} transition={{ duration: 0.7, repeat: Infinity, delay: i * 0.08 }} />
       ))}
     </span>
   );
