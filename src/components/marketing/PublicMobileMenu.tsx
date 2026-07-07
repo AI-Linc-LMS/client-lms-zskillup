@@ -24,6 +24,7 @@ const LINKS = [
   { label: 'Companies', href: '/dashboard/company' },
   { label: 'Prepare', href: '/dashboard/company' },
   { label: 'Leaderboard', href: '/leaderboard' },
+  { label: 'Blog', href: '/blog' },
 ];
 
 export function PublicMobileMenu() {

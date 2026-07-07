@@ -22,8 +22,9 @@ import { PublicAuthCta } from '@/components/marketing/PublicAuthCta';
 import { BrandLogo } from '@/components/layout/BrandLogo';
 import { HomeFeaturedTracks } from '@/components/marketing/HomeFeaturedTracks';
 import { HomeTopCohort } from '@/components/marketing/HomeTopCohort';
+import { HomeBlogSection } from '@/components/marketing/HomeBlogSection';
 import { VideoPlaceholder } from '@/components/media/VideoPlaceholder';
-import { getPublicTestimonials } from '@/lib/server/public-content';
+import { getPublicBlogs, getPublicTestimonials } from '@/lib/server/public-content';
 import {
   LANDING_COVERAGE_TOPICS,
   LANDING_FOOTER,
@@ -96,6 +97,7 @@ function initialsOf(name: string): string {
 export default async function HomePage() {
   // Prefer admin-curated testimonials (Phase 5 CMS); fall back to built-in copy.
   const cms = await getPublicTestimonials();
+  const blogs = await getPublicBlogs();
   const testimonials =
     cms.length > 0
       ? cms.map((t) => ({
@@ -116,6 +118,7 @@ export default async function HomePage() {
             { label: 'Companies', href: LANDING_HREFS.companies },
             { label: 'Prepare', href: LANDING_HREFS.prepare },
             { label: 'Leaderboard', href: '/leaderboard' },
+            { label: 'Blog', href: '/blog' },
           ].map((l) => (
             <Link
               key={l.href}
@@ -578,6 +581,9 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ── From the blog ────────────────────────────────────────────────── */}
+      <HomeBlogSection posts={blogs.slice(0, 3)} />
 
       {/* ── Final CTA ─────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-gradient-to-br from-[#0b1220] via-[#101d4a] to-[#1e3a8a] py-16 text-white lg:py-24">
