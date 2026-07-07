@@ -241,7 +241,7 @@ export default function UpgradePage() {
               subtitle="One topic, e.g. Profit & Loss"
               price={retailPrice(priceMap, EntitlementScope.TOPIC, BillingPeriod.MONTHLY)}
               annual={retailPrice(priceMap, EntitlementScope.TOPIC, BillingPeriod.ANNUAL)}
-              href="/practice"
+              href="/shop"
               cta="Browse topics"
             />
             <MiniPlan
@@ -250,7 +250,7 @@ export default function UpgradePage() {
               subtitle="All topics in a section"
               price={retailPrice(priceMap, EntitlementScope.SECTION, BillingPeriod.MONTHLY)}
               annual={retailPrice(priceMap, EntitlementScope.SECTION, BillingPeriod.ANNUAL)}
-              href="/practice"
+              href="/shop"
               cta="Browse sections"
             />
             <MiniPlan
@@ -259,7 +259,7 @@ export default function UpgradePage() {
               subtitle="One recruiter's PYQ bank"
               price={retailPrice(priceMap, EntitlementScope.COMPANY, BillingPeriod.MONTHLY)}
               annual={retailPrice(priceMap, EntitlementScope.COMPANY, BillingPeriod.ANNUAL)}
-              href="/dashboard/company"
+              href="/shop"
               cta="Browse companies"
             />
           </div>

@@ -98,7 +98,7 @@ export default function CartPage() {
           <p className="mt-4 font-bold text-navy">Your cart is empty</p>
           <p className="mt-1 text-sm text-slate-500">Add topics, sections, or company hubs to unlock them together.</p>
           <Link
-            href="/practice"
+            href="/shop"
             className="mt-6 inline-block rounded-xl bg-navy px-5 py-2.5 text-sm font-bold text-white"
           >
             Browse topics

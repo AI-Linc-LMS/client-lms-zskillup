@@ -24,6 +24,7 @@ import {
   School,
   ScrollText,
   Settings,
+  ShoppingBag,
   Sparkles,
   Target,
   TrendingUp,
@@ -91,6 +92,7 @@ export const STUDENT_NAV: NavSection[] = [
     heading: 'EXPLORE',
     items: [
       { label: 'Company Hubs', href: '/dashboard/company', icon: Building2 },
+      { label: 'Shop', href: '/shop', icon: ShoppingBag },
       { label: 'Upgrade', href: '/upgrade', icon: Sparkles },
       { label: 'Help & Support', href: '/support', icon: LifeBuoy },
     ],
