@@ -18,6 +18,18 @@ import { cn } from '@/lib/utils';
 
 const WHISPER_EVERY_MS = 3500; // progressive re-transcription cadence
 
+/** Minimal browser SpeechRecognition typing (Web Speech API) for instant interim words. */
+interface SpeechRec {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start: () => void;
+  stop: () => void;
+  onresult: ((e: { resultIndex: number; results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }> }) => void) | null;
+  onend: (() => void) | null;
+  onerror: (() => void) | null;
+}
+
 function pickVoice(): SpeechSynthesisVoice | null {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) return null;
   const voices = window.speechSynthesis.getVoices();
@@ -53,6 +65,7 @@ export function InterviewRunner({ id }: { id: string }) {
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [typing, setTyping] = useState(false); // typed fallback
+  const [interim, setInterim] = useState(''); // live browser-SR words (instant preview)
 
   const responsesRef = useRef<Map<number, string>>(new Map());
   const submitRef = useRef<() => void>(() => {});
@@ -65,6 +78,8 @@ export function InterviewRunner({ id }: { id: string }) {
   const lastSentRef = useRef(0);
   const whisperBusyRef = useRef(false);
   const progressTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const recognitionRef = useRef<SpeechRec | null>(null);
+  const recordingRef = useRef(false); // sync flag so SR onend can auto-restart while recording
   const voiceOnRef = useRef(voiceOn);
   voiceOnRef.current = voiceOn;
   const answerRef = useRef('');
@@ -229,10 +244,58 @@ export function InterviewRunner({ id }: { id: string }) {
     rec.ondataavailable = (e) => e.data.size && chunksRef.current.push(e.data);
     rec.start(1000); // 1s chunks
     setRecording(true);
+    recordingRef.current = true;
     progressTimerRef.current = setInterval(() => void runWhisper(false), WHISPER_EVERY_MS);
+
+    // Instant word-level preview via the browser's SpeechRecognition (grey interim),
+    // running alongside Whisper — Whisper still owns the accurate confirmed text.
+    const w = window as unknown as {
+      SpeechRecognition?: new () => SpeechRec;
+      webkitSpeechRecognition?: new () => SpeechRec;
+    };
+    const SRCtor = w.SpeechRecognition ?? w.webkitSpeechRecognition;
+    if (SRCtor) {
+      try {
+        const sr = new SRCtor();
+        sr.continuous = true;
+        sr.interimResults = true;
+        sr.lang = 'en-US';
+        sr.onresult = (e) => {
+          let live = '';
+          for (let i = e.resultIndex; i < e.results.length; i++) {
+            if (!e.results[i].isFinal) live += e.results[i][0].transcript;
+          }
+          setInterim(live.trim());
+        };
+        sr.onend = () => {
+          if (recordingRef.current) {
+            try {
+              sr.start();
+            } catch {
+              /* already started / stopping */
+            }
+          }
+        };
+        sr.onerror = () => {};
+        recognitionRef.current = sr;
+        sr.start();
+      } catch {
+        /* SR unavailable — Whisper still fills the transcript every ~3.5s */
+      }
+    }
   }, [runWhisper, typing, voiceCapable]);
 
   const stopRecording = useCallback(async () => {
+    recordingRef.current = false;
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch {
+        /* noop */
+      }
+      recognitionRef.current = null;
+    }
+    setInterim('');
     if (progressTimerRef.current) {
       clearInterval(progressTimerRef.current);
       progressTimerRef.current = null;
@@ -275,11 +338,18 @@ export function InterviewRunner({ id }: { id: string }) {
     return () => clearTimeout(t);
   }, [secondsLeft]);
 
-  // cleanup: stop camera + mic + speech on unmount
+  // cleanup: stop camera + mic + speech + interim recognition on unmount
   useEffect(
     () => () => {
       stopSpeaking();
       if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+      recordingRef.current = false;
+      try {
+        recognitionRef.current?.stop();
+      } catch {
+        /* noop */
+      }
+      recognitionRef.current = null;
       try {
         if (recorderRef.current && recorderRef.current.state !== 'inactive') recorderRef.current.stop();
       } catch {
@@ -497,8 +567,18 @@ export function InterviewRunner({ id }: { id: string }) {
           />
         ) : (
           <div className="min-h-[6rem] rounded-lg border border-slate-100 bg-slate-50/60 px-3.5 py-3 text-[15px] leading-relaxed text-navy">
-            {answer ? (
-              <p className="whitespace-pre-wrap">{answer}</p>
+            {answer || interim ? (
+              // Confirmed text (navy, from Whisper) with the browser's instant
+              // interim words trailing in grey until Whisper finalises them.
+              <p className="whitespace-pre-wrap">
+                {answer}
+                {interim && (
+                  <span className="text-slate-400">
+                    {answer ? ' ' : ''}
+                    {interim}
+                  </span>
+                )}
+              </p>
             ) : recording ? (
               <span className="flex items-center gap-2 text-slate-400"><EqBars /> Listening — start speaking, your words appear here…</span>
             ) : (
