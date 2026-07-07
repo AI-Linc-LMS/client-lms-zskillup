@@ -135,13 +135,16 @@ export default function ProfilePage() {
     setErr(null);
     setSaved(false);
     try {
+      // Send an explicit null (not undefined) for empty fields so cleared values
+      // actually persist — undefined is dropped by JSON.stringify, which made the
+      // backend skip the field and keep the old value (profile "reverted" on refresh).
       const updated = await updateMe({
-        fullName: v.fullName.trim() || undefined,
-        phone: v.phone.trim() || undefined,
-        course: v.course.trim() || undefined,
-        yearOfStudy: v.yearOfStudy ? Number(v.yearOfStudy) : undefined,
-        collegeName: v.collegeName.trim() || undefined,
-        passoutYear: v.passoutYear ? Number(v.passoutYear) : undefined,
+        fullName: v.fullName.trim() || null,
+        phone: v.phone.trim() || null,
+        course: v.course.trim() || null,
+        yearOfStudy: v.yearOfStudy ? Number(v.yearOfStudy) : null,
+        collegeName: v.collegeName.trim() || null,
+        passoutYear: v.passoutYear ? Number(v.passoutYear) : null,
         skills: v.skills,
         rolesInterested: v.roles,
       });
