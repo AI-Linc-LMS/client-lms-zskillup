@@ -29,6 +29,7 @@ import {
   TrendingUp,
   Trophy,
   Users,
+  Video,
   Wallet,
 } from 'lucide-react';
 
@@ -64,6 +65,7 @@ export const STUDENT_NAV: NavSection[] = [
       { label: 'Performance', href: '/performance', icon: TrendingUp },
       { label: 'Leaderboard', href: '/leaderboard', icon: Trophy },
       { label: 'Community', href: '/community', icon: MessagesSquare },
+      { label: 'Live Sessions', href: '/live-sessions', icon: Video },
     ],
   },
   {
@@ -200,6 +202,7 @@ export const ADMIN_NAV: NavSection[] = [
     heading: 'ENGAGEMENT',
     items: [
       { label: 'Broadcasts', href: '/admin/broadcasts', icon: Megaphone },
+      { label: 'Live Sessions', href: '/admin/live-sessions', icon: Video },
       { label: 'Subscriptions', href: '/admin/subscriptions', icon: CreditCard },
       { label: 'Financials', href: '/admin/financials', icon: IndianRupee },
       { label: 'Support', href: '/admin/support', icon: LifeBuoy },

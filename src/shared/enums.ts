@@ -212,3 +212,9 @@ export enum CommunityPostType {
   RESOURCE = 'RESOURCE',
   ANNOUNCEMENT = 'ANNOUNCEMENT',
 }
+
+/** Who a live session is for. */
+export enum LiveSessionAudience {
+  PLATFORM = 'PLATFORM',
+  COMPANY = 'COMPANY',
+}
