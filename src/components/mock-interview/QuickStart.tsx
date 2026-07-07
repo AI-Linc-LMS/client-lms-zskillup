@@ -19,6 +19,11 @@ const PRESET_TOPICS = [
   'System Design', 'Data Structures & Algorithms', 'Database Design',
   'Cloud & DevOps', 'Behavioral', 'Product Management',
 ];
+const ROLE_PRESETS = [
+  'Software Engineer', 'Frontend Developer', 'Backend Developer', 'Full Stack Developer',
+  'Data Analyst', 'Data Scientist', 'DevOps Engineer', 'QA / SDET',
+  'Business Analyst', 'Product Manager',
+];
 const DIFFICULTIES: { value: InterviewDifficulty; hint: string }[] = [
   { value: 'Easy', hint: 'Supportive, surface-level' },
   { value: 'Medium', hint: 'Practical depth' },
@@ -36,7 +41,9 @@ function estimateQuestions(duration: number): number {
 
 export function QuickStart() {
   const router = useRouter();
+  const [focus, setFocus] = useState<'topic' | 'role'>('topic');
   const [topic, setTopic] = useState('React');
+  const [role, setRole] = useState('Software Engineer');
   const [customTopic, setCustomTopic] = useState('');
   const [difficulty, setDifficulty] = useState<InterviewDifficulty>('Medium');
   const [interviewType, setInterviewType] = useState<InterviewTypeValue>('mixed');
@@ -54,7 +61,7 @@ export function QuickStart() {
   }, []);
 
   const isCustom = topic === '__custom';
-  const effectiveTopic = isCustom ? customTopic.trim() : topic;
+  const effectiveTopic = focus === 'role' ? role : isCustom ? customTopic.trim() : topic;
   const estQuestions = useMemo(() => estimateQuestions(duration), [duration]);
 
   const start = async () => {
@@ -88,42 +95,87 @@ export function QuickStart() {
         </div>
       )}
 
-      {/* Topic */}
+      {/* Topic or job role */}
       <div>
-        <label className="mb-2.5 block text-xs font-semibold uppercase tracking-widest text-slate-400">Topic / Role</label>
-        <div className="flex flex-wrap gap-2">
-          {PRESET_TOPICS.map((t) => (
+        <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+          <label className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+            {focus === 'role' ? 'Interview for a role' : 'Practice a topic'}
+          </label>
+          <div className="inline-flex rounded-full border border-slate-200 bg-slate-50 p-0.5 text-xs font-semibold">
             <button
-              key={t}
-              onClick={() => setTopic(t)}
-              className={cn(
-                'rounded-full border px-3.5 py-1.5 text-sm font-medium transition-all',
-                topic === t ? 'border-orange bg-orange/10 text-orange shadow-sm' : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50',
-              )}
+              type="button"
+              onClick={() => setFocus('topic')}
+              className={cn('rounded-full px-3 py-1 transition-colors', focus === 'topic' ? 'bg-white text-navy shadow-sm' : 'text-slate-500')}
             >
-              {t}
+              By topic
             </button>
-          ))}
-          <button
-            onClick={() => setTopic('__custom')}
-            className={cn(
-              'inline-flex items-center gap-1 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-all',
-              isCustom ? 'border-orange bg-orange/10 text-orange shadow-sm' : 'border-dashed border-slate-300 text-slate-500 hover:bg-slate-50',
-            )}
-          >
-            <Plus className="size-3.5" /> Custom
-          </button>
+            <button
+              type="button"
+              onClick={() => setFocus('role')}
+              className={cn('rounded-full px-3 py-1 transition-colors', focus === 'role' ? 'bg-white text-navy shadow-sm' : 'text-slate-500')}
+            >
+              By job role
+            </button>
+          </div>
         </div>
-        {isCustom && (
-          <motion.input
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            autoFocus
-            value={customTopic}
-            onChange={(e) => setCustomTopic(e.target.value)}
-            placeholder="e.g. Kubernetes, Machine Learning, Sales"
-            className="mt-3 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
-          />
+
+        {focus === 'topic' ? (
+          <>
+            <div className="flex flex-wrap gap-2">
+              {PRESET_TOPICS.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTopic(t)}
+                  className={cn(
+                    'rounded-full border px-3.5 py-1.5 text-sm font-medium transition-all',
+                    topic === t ? 'border-orange bg-orange/10 text-orange shadow-sm' : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50',
+                  )}
+                >
+                  {t}
+                </button>
+              ))}
+              <button
+                onClick={() => setTopic('__custom')}
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-all',
+                  isCustom ? 'border-orange bg-orange/10 text-orange shadow-sm' : 'border-dashed border-slate-300 text-slate-500 hover:bg-slate-50',
+                )}
+              >
+                <Plus className="size-3.5" /> Custom
+              </button>
+            </div>
+            {isCustom && (
+              <motion.input
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                autoFocus
+                value={customTopic}
+                onChange={(e) => setCustomTopic(e.target.value)}
+                placeholder="e.g. Kubernetes, Machine Learning, Sales"
+                className="mt-3 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+              />
+            )}
+          </>
+        ) : (
+          <>
+            <div className="flex flex-wrap gap-2">
+              {ROLE_PRESETS.map((r) => (
+                <button
+                  key={r}
+                  onClick={() => setRole(r)}
+                  className={cn(
+                    'rounded-full border px-3.5 py-1.5 text-sm font-medium transition-all',
+                    role === r ? 'border-orange bg-orange/10 text-orange shadow-sm' : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50',
+                  )}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+            <p className="mt-2.5 text-xs text-slate-400">
+              A <span className="font-semibold text-navy">{role}</span> interview — questions span what that role is hired for.
+            </p>
+          </>
         )}
       </div>
 

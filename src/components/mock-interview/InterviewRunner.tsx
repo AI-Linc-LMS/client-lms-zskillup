@@ -534,18 +534,40 @@ export function InterviewRunner({ id }: { id: string }) {
 
 // ── presentational bits ──────────────────────────────────────────────────────
 
+/** Interviewer "blob": an organic morphing gradient shape that pulses + morphs
+ *  while the interviewer speaks (in place of a static avatar). */
 function Orb({ speaking }: { speaking?: boolean }) {
   return (
-    <div className="relative grid size-11 shrink-0 place-items-center">
+    <div className="relative grid size-14 shrink-0 place-items-center">
+      {/* soft glow */}
       <motion.span
         aria-hidden
-        className="absolute inset-0 rounded-full bg-navy/20"
-        animate={speaking ? { scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] } : { scale: 1, opacity: 0.3 }}
-        transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute inset-0 rounded-full blur-lg"
+        style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899)' }}
+        animate={speaking ? { opacity: [0.35, 0.6, 0.35], scale: [1, 1.18, 1] } : { opacity: 0.22, scale: 1 }}
+        transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
       />
-      <div className="relative grid size-11 place-items-center rounded-full bg-gradient-to-br from-[#1f2d4d] to-[#0b1220] text-white shadow-md ring-2 ring-white">
-        <Bot className="size-5" />
-      </div>
+      {/* morphing blob */}
+      <motion.div
+        className="relative grid size-12 place-items-center text-white shadow-[0_10px_30px_-8px_rgba(124,58,237,0.6)] ring-2 ring-white"
+        style={{ background: 'linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#ec4899 100%)' }}
+        animate={
+          speaking
+            ? {
+                borderRadius: [
+                  '58% 42% 40% 60% / 55% 45% 55% 45%',
+                  '42% 58% 65% 35% / 40% 60% 40% 60%',
+                  '60% 40% 45% 55% / 60% 40% 55% 45%',
+                  '58% 42% 40% 60% / 55% 45% 55% 45%',
+                ],
+                scale: [1, 1.06, 0.98, 1],
+              }
+            : { borderRadius: '56% 44% 47% 53% / 52% 48% 52% 48%', scale: 1 }
+        }
+        transition={{ duration: speaking ? 2.6 : 6, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <Bot className="size-5 opacity-90" />
+      </motion.div>
     </div>
   );
 }
