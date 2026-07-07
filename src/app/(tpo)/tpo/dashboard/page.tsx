@@ -10,7 +10,6 @@ import {
   ClipboardCheck,
   GraduationCap,
   Loader2,
-  Mail,
   Plus,
   TrendingUp,
   Upload,
@@ -97,9 +96,9 @@ export default function TpoExecutiveDashboard() {
         <p className="text-sm font-semibold text-slate-500">
           Campus overview · <span className="text-navy">{cohortLabel}</span>
         </p>
-        <Button asChild size="sm">
-          <Link href="/tpo/invitations">
-            <Mail className="size-4" /> Invite students
+        <Button asChild size="sm" variant="outline">
+          <Link href="/tpo/students">
+            <Users className="size-4" /> View students
           </Link>
         </Button>
       </div>
@@ -272,25 +271,21 @@ function EmptyState() {
       <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-orange/10 text-orange">
         <Upload className="size-6" aria-hidden="true" />
       </span>
-      <h2 className="mt-4 text-lg font-extrabold text-navy">Invite your cohort to get started</h2>
+      <h2 className="mt-4 text-lg font-extrabold text-navy">Your cohort is being onboarded</h2>
       <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">
-        Once students join and start practising, campus readiness, participation quadrants, company
-        readiness, and skill gaps populate this console automatically.
+        Your Platform Admin adds your college&apos;s batches and students. Once they join and start
+        practising, campus readiness, participation quadrants, company readiness and skill gaps
+        populate this console automatically.
       </p>
       <div className="mt-5 flex flex-wrap justify-center gap-3">
-        <Button asChild>
-          <Link href="/tpo/invitations">
-            <Mail className="size-4" /> Invite students
-          </Link>
-        </Button>
         <Button variant="outline" asChild>
-          <Link href="/tpo/cohorts">
-            <Users className="size-4" /> Manage cohorts
+          <Link href="/tpo/students">
+            <Users className="size-4" /> View students
           </Link>
         </Button>
       </div>
       <p className="mt-6 inline-flex items-center gap-1.5 text-xs text-slate-400">
-        <BarChart3 className="size-3.5" /> Interview, coding & placement modules populate as students engage.
+        <BarChart3 className="size-3.5" /> Interview, coding &amp; placement modules populate as students engage.
       </p>
     </section>
   );

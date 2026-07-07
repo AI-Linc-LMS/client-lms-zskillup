@@ -15,7 +15,6 @@ import {
   LifeBuoy,
   ListChecks,
   type LucideIcon,
-  Mail,
   MessagesSquare,
   Megaphone,
   MessageSquare,
@@ -159,8 +158,8 @@ export const TPO_NAV: NavSection[] = [
     items: [
       { label: 'Student Management', href: '/tpo/students', icon: Users },
       { label: 'Assessment Center', href: '/tpo/assessments', icon: ClipboardCheck },
-      { label: 'Cohorts', href: '/tpo/cohorts', icon: GraduationCap },
-      { label: 'Invitations', href: '/tpo/invitations', icon: Mail },
+      // Cohorts + Invitations are configured by the Platform Admin (per-college),
+      // not the TPO. TPOs keep read-only cohort access via the dashboard batch filter.
     ],
   },
   {

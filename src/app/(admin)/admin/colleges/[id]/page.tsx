@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { use, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import {
@@ -9,6 +9,7 @@ import {
   type AdminCollegeDetail,
   type AdminStudentReportRow,
 } from '@/lib/api/admin';
+import { CollegeCohortsManager } from '@/components/admin/CollegeCohortsManager';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 
 /** Admin console — college detail: identity, enrolment + performance, roster. */
@@ -19,29 +20,23 @@ export default function AdminCollegeDetailPage({ params }: { params: Promise<{ i
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      setLoading(true);
-      try {
-        const [d, roster] = await Promise.all([
-          getAdminCollegeDetail(id),
-          listStudentReports({ collegeId: id, limit: 100 }),
-        ]);
-        if (alive) {
-          setDetail(d);
-          setStudents(roster.rows);
-        }
-      } catch {
-        if (alive) setError('Failed to load this college.');
-      } finally {
-        if (alive) setLoading(false);
-      }
-    })();
-    return () => {
-      alive = false;
-    };
+  const reload = useCallback(async () => {
+    try {
+      const [d, roster] = await Promise.all([
+        getAdminCollegeDetail(id),
+        listStudentReports({ collegeId: id, limit: 100 }),
+      ]);
+      setDetail(d);
+      setStudents(roster.rows);
+    } catch {
+      setError('Failed to load this college.');
+    }
   }, [id]);
+
+  useEffect(() => {
+    setLoading(true);
+    void reload().finally(() => setLoading(false));
+  }, [reload]);
 
   return (
     <div className="space-y-6">
@@ -97,6 +92,9 @@ export default function AdminCollegeDetailPage({ params }: { params: Promise<{ i
               <Kpi label="Avg %" value={detail.avgScorePct ?? '—'} />
             </dl>
           </section>
+
+          {/* Cohorts + student invitations — Platform Admin manages these (TPO is read-only). */}
+          <CollegeCohortsManager collegeId={id} onChange={() => void reload()} />
 
           <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
             <div className="border-b border-slate-100 px-4 py-3">
