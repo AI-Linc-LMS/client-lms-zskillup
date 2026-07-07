@@ -24,6 +24,7 @@ import {
 } from '@/lib/api/gamification';
 import { getMe, type ApiMe } from '@/lib/api/me';
 import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
+import { XpInfoButton } from '@/components/gamification/XpInfoButton';
 
 const fmt = (n: number) => n.toLocaleString('en-IN');
 
@@ -304,7 +305,9 @@ export default function LeaderboardPage() {
               </div>
               <div className="ml-auto flex flex-wrap items-center gap-x-8 gap-y-2">
                 <div>
-                  <p className="text-lg font-black tabular-nums text-navy">{fmt(myEntry.totalXp)} XP</p>
+                  <p className="flex items-center gap-1.5 text-lg font-black tabular-nums text-navy">
+                    {fmt(myEntry.totalXp)} XP <XpInfoButton />
+                  </p>
                   {xpAway != null && nextEntry && (
                     <p className="text-xs text-slate-500">{fmt(xpAway)} XP to reach Rank #{nextEntry.rank}</p>
                   )}

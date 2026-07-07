@@ -18,9 +18,9 @@ function dueLabel(iso: string): string {
 }
 
 /**
- * Compact upcoming-assessments list for the left nav rail (students). Fills the
- * space below the menu; live drives are highlighted and start in one tap. Hidden
- * when the student has nothing scheduled.
+ * Compact upcoming-assessments card (students). Lives in the dashboard right rail
+ * under the skill profile; live drives are highlighted and start in one tap.
+ * Hidden when the student has nothing scheduled.
  */
 export function SidebarUpcoming() {
   const [items, setItems] = useState<ApiScheduledAssessment[] | null>(null);
@@ -56,12 +56,12 @@ export function SidebarUpcoming() {
   if (!items || items.length === 0) return null;
 
   return (
-    <div className="relative z-10 max-h-[60%] shrink-0 overflow-y-auto border-t border-[var(--color-line)] bg-white px-3 pb-4 pt-4">
-      <div className="mb-2 flex items-center justify-between px-2">
-        <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mb-2.5 flex items-center justify-between">
+        <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-slate-400">
           <CalendarClock className="size-3.5 text-orange" /> Upcoming
         </p>
-        <Link href="/assessments" className="text-[10px] font-bold text-orange hover:underline">
+        <Link href="/assessments" className="text-[11px] font-bold text-orange hover:underline">
           All
         </Link>
       </div>
