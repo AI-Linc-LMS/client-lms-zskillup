@@ -215,7 +215,7 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_20rem]">
+      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_24rem]">
         {/* ── Edit form (grouped) ────────────────────────────────────────── */}
         <div className="space-y-5">
           <SectionCard icon={User} title="Personal" subtitle="How we address you and reach out.">

@@ -17,10 +17,10 @@ export interface ScatterPoint {
 export interface PerformanceParticipationDto {
   /** The caller's own point (null only if they have no activity yet). */
   you: ScatterPoint | null;
-  /** Anonymized points for the other students in the caller's college. */
+  /** Anonymized points for the peer students shown (active students only). */
   peers: ScatterPoint[];
-  /** Total students considered (incl. the caller). */
+  /** Total students plotted (peers + the caller). */
   cohortSize: number;
-  /** 'college' when peers are the caller's college; 'solo' when they have none. */
-  scope: 'college' | 'solo';
+  /** 'college' when peers are the caller's college; 'platform' when widened to everyone. */
+  scope: 'college' | 'platform';
 }
