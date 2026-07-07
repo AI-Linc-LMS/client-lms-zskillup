@@ -37,6 +37,12 @@ export default function CommunityPage() {
   }, []);
   useEffect(() => refreshStats(), [refreshStats]);
 
+  // Honour a ?tag= deep-link (e.g. from a tag chip on a post) once on mount.
+  useEffect(() => {
+    const urlTag = new URLSearchParams(window.location.search).get('tag');
+    if (urlTag) setTag(urlTag.toLowerCase());
+  }, []);
+
   useEffect(() => {
     const t = setTimeout(() => setDebounced(search.trim()), 300);
     return () => clearTimeout(t);

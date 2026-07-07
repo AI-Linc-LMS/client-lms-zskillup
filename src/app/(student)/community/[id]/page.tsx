@@ -14,7 +14,7 @@ import {
   pinCommunityPost,
   type CommunityPostDetailDto,
 } from '@/lib/api/community';
-import { AuthorMeta, CommunityAvatar, LikeButton, TypeBadge } from '@/components/community/ui';
+import { AuthorMeta, CommunityAvatar, LikeButton, safeHttpUrl, TypeBadge } from '@/components/community/ui';
 import { CommentThread } from '@/components/community/CommentThread';
 
 export default function CommunityPostPage({ params }: { params: Promise<{ id: string }> }) {
@@ -155,9 +155,9 @@ export default function CommunityPostPage({ params }: { params: Promise<{ id: st
           <p className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-slate-700">{post.body}</p>
         )}
 
-        {post.linkUrl && (
+        {safeHttpUrl(post.linkUrl) && (
           <a
-            href={post.linkUrl}
+            href={safeHttpUrl(post.linkUrl)!}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-3 inline-flex max-w-full items-center gap-1.5 truncate rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100"
