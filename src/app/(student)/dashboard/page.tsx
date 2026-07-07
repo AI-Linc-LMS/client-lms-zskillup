@@ -16,6 +16,7 @@ import { AdaptiveSkillProfile } from '@/components/student/AdaptiveSkillProfile'
 import { SubscriptionValidity } from '@/components/student/SubscriptionValidity';
 import { SidebarUpcoming } from '@/components/layout/SidebarUpcoming';
 import { ReadinessPanel } from '@/components/student/ReadinessPanel';
+import { PerformanceParticipation } from '@/components/student/PerformanceParticipation';
 import { CompanyReadiness } from '@/components/student/CompanyReadiness';
 import { Reveal } from '@/components/motion/primitives';
 
@@ -38,6 +39,9 @@ export default function StudentDashboardPage() {
           <AuroraStats />
           <Reveal>
             <ReadinessPanel />
+          </Reveal>
+          <Reveal>
+            <PerformanceParticipation />
           </Reveal>
           <Reveal>
             <DailyQuest />
