@@ -227,20 +227,18 @@ export default async function HomePage() {
                 </div>
               ))}
             </div>
-            {/* Disclaimer — these figures are Prephasz's own platform numbers. */}
+            {/* Disclaimer — these figures come from the ZSkillup platform. */}
             <p className="mt-4 max-w-2xl text-[11px] leading-relaxed text-white/45">
-              Students enrolled, partner colleges and placement-success figures reflect Prephasz
-              platform data.
+              Students enrolled, partner colleges and placement-success figures are from the ZSkillup
+              platform.
             </p>
           </div>
 
-          {/* Right — floating preview cards, spaced apart so each reads on its own */}
-          <div className="relative hidden h-[30rem] lg:block">
-            {/* Card 1 — course card (top-left) */}
-            <div
-              className="float-card-1 absolute left-0 top-0 w-[17rem] overflow-hidden rounded-2xl border border-white/15 bg-white shadow-2xl"
-              style={{ transformOrigin: 'center center' }}
-            >
+          {/* Right — floating preview cards, staggered in a vertical stack with real
+              gaps so they never intersect regardless of content height. */}
+          <div className="relative hidden flex-col justify-center gap-6 lg:flex">
+            {/* Card 1 — course card */}
+            <div className="float-card-1 w-[19rem] self-start overflow-hidden rounded-2xl border border-white/15 bg-white shadow-2xl">
               <div className="relative flex h-24 items-center justify-center bg-gradient-to-br from-[#1d4ed8] to-[#0b1220]">
                 <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-md bg-[#1d4ed8] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-white shadow">
                   Most enrolled
@@ -273,11 +271,8 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Card 2 — XP / level (top-right) */}
-            <div
-              className="float-card-2 absolute right-0 top-8 w-[15.5rem] rounded-2xl border border-white/15 bg-white p-5 shadow-2xl"
-              style={{ transformOrigin: 'center center' }}
-            >
+            {/* Card 2 — XP / level */}
+            <div className="float-card-2 w-[17rem] self-end rounded-2xl border border-white/15 bg-white p-5 shadow-2xl">
               <div className="flex items-center gap-3">
                 <span className="level-badge shrink-0">Lv 12</span>
                 <div className="min-w-0 flex-1">
@@ -303,11 +298,8 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Card 3 — leaderboard rank (mid-left) */}
-            <div
-              className="float-card-4 trophy-tile absolute left-2 top-1/2 w-[15rem] -translate-y-1/2 p-4"
-              style={{ transformOrigin: 'center center' }}
-            >
+            {/* Card 3 — leaderboard rank */}
+            <div className="float-card-4 trophy-tile w-[16rem] self-start p-4">
               <div className="flex items-center gap-3">
                 <Trophy className="h-7 w-7" />
                 <div className="min-w-0">
@@ -320,11 +312,8 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Card 4 — daily quest, given its own corner (bottom-right) */}
-            <div
-              className="float-card-3 quest-card absolute bottom-0 right-0 w-[18rem]"
-              style={{ transformOrigin: 'center center' }}
-            >
+            {/* Card 4 — daily quest */}
+            <div className="float-card-3 quest-card w-[19rem] self-end">
               <p className="earned-badge">
                 <Star className="h-3 w-3 fill-current" /> Daily quest
               </p>
@@ -429,6 +418,7 @@ export default async function HomePage() {
                   </div>
                 ))}
               </div>
+              <p className="relative mt-3 text-[10px] text-white/40">Figures from the ZSkillup platform.</p>
             </div>
 
             {/* RIGHT — Lokesh (photo placeholder + quote + designation) */}
@@ -680,7 +670,7 @@ export default async function HomePage() {
                   <Star key={k} className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden />
                 ))}
               </span>
-              4.7 average · 240,000+ students
+              4.7 average · 240,000+ students on the ZSkillup platform
             </div>
           </div>
 
