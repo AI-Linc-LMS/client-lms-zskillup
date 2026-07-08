@@ -62,12 +62,6 @@ export function CompanyPrepPanel({
         </p>
       </div>
 
-      {/* Totals strip */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <StatChip icon={Layers} label="Practice questions" value={prep.totals.total.toLocaleString()} />
-        <StatChip icon={CalendarClock} label="Previous-year (PYQ)" value={prep.totals.pyq.toLocaleString()} tone="violet" />
-      </div>
-
       {/* Year-wise previous year papers */}
       {prep.years.length ? (
         <section>
@@ -84,7 +78,6 @@ export function CompanyPrepPanel({
                   className="pointer-events-none absolute inset-0 bg-gradient-to-br from-violet-50/60 via-transparent to-transparent"
                 />
                 <p className="relative text-2xl font-black tracking-tight tabular-nums text-navy">{y.year}</p>
-                <p className="relative mt-0.5 text-xs text-slate-500">{y.count} questions</p>
                 <span className="relative mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-violet-600">
                   Practice <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
                 </span>
@@ -114,7 +107,7 @@ export function CompanyPrepPanel({
       {/* All topics */}
       {prep.topics.length ? (
         <section>
-          <SectionHead icon={Layers} title="All topics" sub="Start a mock quiz on any topic — counts are live" />
+          <SectionHead icon={Layers} title="All topics" sub="Start a mock quiz on any topic" />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {prep.topics.map((t) => (
               <Link
@@ -124,7 +117,6 @@ export function CompanyPrepPanel({
               >
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-bold text-navy">{t.name}</span>
-                  <span className="text-[11px] text-slate-500">{t.count} questions</span>
                 </span>
                 <ArrowRight className="size-4 shrink-0 text-slate-300 transition-colors group-hover:text-violet-600" />
               </Link>
@@ -158,40 +150,6 @@ function SectionHead({
         <h3 className="text-lg font-extrabold tracking-tight text-navy sm:text-xl">{title}</h3>
       </div>
       <p className="mt-2 text-[13px] leading-relaxed text-slate-500">{sub}</p>
-    </div>
-  );
-}
-
-function StatChip({
-  icon: Icon,
-  label,
-  value,
-  tone,
-}: {
-  icon: typeof Layers;
-  label: string;
-  value: string;
-  tone?: 'emerald' | 'violet';
-}) {
-  const t =
-    tone === 'emerald'
-      ? 'text-emerald-700'
-      : tone === 'violet'
-        ? 'text-violet-700'
-        : 'text-navy';
-  return (
-    <div className="relative flex items-center gap-4 overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_-30px_rgba(124,58,237,0.22)]">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-br from-violet-50/60 via-transparent to-transparent"
-      />
-      <span className="relative grid size-12 shrink-0 place-items-center rounded-2xl bg-violet-50 text-violet-600 ring-1 ring-inset ring-violet-100">
-        <Icon className="size-5" />
-      </span>
-      <span className="relative">
-        <span className={`block text-2xl font-black leading-none tracking-tight tabular-nums ${t}`}>{value}</span>
-        <span className="mt-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</span>
-      </span>
     </div>
   );
 }

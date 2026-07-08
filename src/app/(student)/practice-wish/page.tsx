@@ -222,11 +222,6 @@ export default function PracticeWishPage() {
                           >
                             {busy ? <Loader2 className="size-3 animate-spin text-violet-500" /> : null}
                             {t.name}
-                            {t.questionCount ? (
-                              <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-slate-500">
-                                {t.questionCount}
-                              </span>
-                            ) : null}
                             <ArrowRight className="size-3 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-violet-500" />
                           </button>
                         );

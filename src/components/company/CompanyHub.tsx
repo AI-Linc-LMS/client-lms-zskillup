@@ -224,12 +224,6 @@ function CompanyHero({ content, reduce }: { content: HubContent; reduce: boolean
     { icon: Star, label: 'Rating', value: c.rating.toFixed(1) },
     { icon: Users, label: 'Enrolled', value: c.enrolled },
     { icon: Target, label: 'Difficulty', value: c.difficulty },
-    {
-      icon: ListChecks,
-      label: 'Question bank',
-      // Real live count (falls back to the legacy display string only if absent).
-      value: c.questionCount != null ? c.questionCount.toLocaleString() : (c.mcqs ?? '—'),
-    },
   ];
 
   return (

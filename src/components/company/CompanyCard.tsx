@@ -33,12 +33,6 @@ function monogramOf(name: string): string {
   return name.trim().slice(0, 2).toUpperCase();
 }
 
-/** Compact integer formatting: 1240 → "1.2k", 320 → "320". */
-function compact(n: number): string {
-  if (n >= 1000) return `${(n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, '')}k`;
-  return String(n);
-}
-
 /** Difficulty → tonal pill classes (emerald / amber / red). */
 const DIFFICULTY_TONE: Record<string, string> = {
   Easy: 'bg-emerald-50 text-emerald-700 ring-emerald-200/70',
@@ -55,6 +49,13 @@ export function CompanyCard({ company }: { company: CompanyCardData }) {
   const difficultyTone =
     (company.difficulty && DIFFICULTY_TONE[company.difficulty]) ??
     'bg-slate-50 text-slate-600 ring-slate-200/70';
+
+  // What's inside — surfaced as content-type chips (no counts), so students see
+  // what they get without the offering being reduced to a raw question tally.
+  const feats: Array<{ icon: typeof ClipboardList; label: string }> = [];
+  if ((company.questionCount ?? 0) > 0) feats.push({ icon: ClipboardList, label: 'Practice Qs' });
+  if ((company.pyqCount ?? 0) > 0) feats.push({ icon: History, label: 'Previous-year' });
+  if ((company.codingCount ?? 0) > 0) feats.push({ icon: Code2, label: 'Coding' });
 
   return (
     <motion.article
@@ -147,36 +148,19 @@ export function CompanyCard({ company }: { company: CompanyCardData }) {
           {/* spacer keeps the footer pinned to the bottom for even card heights */}
           <div className="flex-1" />
 
-          {/* stat footer — REAL bank counts (live from the question/coding banks) */}
-          <div className="mt-5 grid grid-cols-3 gap-2 border-t border-slate-100 pt-4">
-            <div className="flex flex-col">
-              <span className="flex items-center gap-1 text-[17px] font-extrabold leading-none tabular-nums text-navy">
-                <ClipboardList className="size-3.5 text-slate-400" aria-hidden="true" />
-                {compact(company.questionCount ?? 0)}
-              </span>
-              <span className="mt-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                Questions
-              </span>
+          {/* what's inside — content types available (no counts) */}
+          {feats.length > 0 ? (
+            <div className="mt-5 flex flex-wrap gap-1.5 border-t border-slate-100 pt-4">
+              {feats.map((f) => (
+                <span
+                  key={f.label}
+                  className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-600 ring-1 ring-inset ring-slate-200/70"
+                >
+                  <f.icon className="size-3 text-slate-400" aria-hidden="true" /> {f.label}
+                </span>
+              ))}
             </div>
-            <div className="flex flex-col border-l border-slate-100 pl-2">
-              <span className="flex items-center gap-1 text-[17px] font-extrabold leading-none tabular-nums text-navy">
-                <History className="size-3.5 text-orange" aria-hidden="true" />
-                {compact(company.pyqCount ?? 0)}
-              </span>
-              <span className="mt-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                PYQs
-              </span>
-            </div>
-            <div className="flex flex-col border-l border-slate-100 pl-2">
-              <span className="flex items-center gap-1 text-[17px] font-extrabold leading-none tabular-nums text-emerald-600">
-                <Code2 className="size-3.5 text-emerald-500" aria-hidden="true" />
-                {compact(company.codingCount ?? 0)}
-              </span>
-              <span className="mt-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                Coding
-              </span>
-            </div>
-          </div>
+          ) : null}
 
           {/* CTA */}
           <div className="mt-4 flex items-center gap-1 text-[13px] font-bold text-orange transition-colors group-hover:text-[#d9610f]">

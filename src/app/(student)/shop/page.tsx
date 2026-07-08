@@ -12,7 +12,6 @@ import {
   Search,
   ShoppingCart,
   Sparkles,
-  Target,
 } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { useCart } from '@/components/billing/CartProvider';
@@ -291,9 +290,7 @@ export default function ShopPage() {
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-bold text-navy">{c.name}</p>
-                      <p className="truncate text-xs text-slate-400">
-                        {c.questionCount ? `${c.questionCount.toLocaleString('en-IN')} questions` : 'Recruiter PYQ bank'}
-                      </p>
+                      <p className="truncate text-xs text-slate-400">Recruiter PYQ bank</p>
                     </div>
                     {priceCell(companyPrice)}
                     <AddControl
@@ -360,11 +357,6 @@ export default function ShopPage() {
                             <div key={t.id} className="flex items-center gap-3 py-2.5">
                               <div className="min-w-0 flex-1 pl-11">
                                 <p className="truncate text-sm font-semibold text-navy">{t.name}</p>
-                                {t.questionCount ? (
-                                  <p className="text-xs text-slate-400">
-                                    {t.questionCount.toLocaleString('en-IN')} questions
-                                  </p>
-                                ) : null}
                               </div>
                               {priceCell(topicPrice)}
                               <AddControl
