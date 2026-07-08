@@ -3,13 +3,21 @@ import {
   ArrowRight,
   BadgeCheck,
   BookOpen,
-  Building2,
+  Brain,
+  Calculator,
   CheckCircle2,
+  ClipboardList,
   Clock3,
+  Code2,
   Compass,
+  Cpu,
+  FileText,
   Flame,
   LineChart,
+  LogIn,
+  MessageSquare,
   PlayCircle,
+  Quote,
   Sparkles,
   Star,
   Trophy,
@@ -26,7 +34,6 @@ import { HomeBlogSection } from '@/components/marketing/HomeBlogSection';
 import { VideoPlaceholder } from '@/components/media/VideoPlaceholder';
 import { getPublicBlogs, getPublicTestimonials } from '@/lib/server/public-content';
 import {
-  LANDING_COVERAGE_TOPICS,
   LANDING_FOOTER,
   LANDING_HERO_STATS,
   LANDING_HREFS,
@@ -36,30 +43,34 @@ import {
 
 const HERO_STATS = LANDING_HERO_STATS;
 
-const FEATURES = [
-  {
-    icon: Compass,
-    title: 'Company-wise tracks',
-    body: 'Pattern-matched papers for TCS NQT, Infosys InfyTQ, Wipro NTH, Cognizant GenC and more. Real previous-year coverage updated each season.',
-  },
-  {
-    icon: Zap,
-    title: 'Mock quizzes',
-    body: 'Difficulty re-tunes to your accuracy and speed. Hint ladders, video walkthroughs, and bookmarked weak spots — never grind blindly.',
-  },
-  {
-    icon: Trophy,
-    title: 'Gamified progress',
-    body: 'XP, streaks, daily quests, level badges and a national leaderboard turn prep into a habit you actually want to keep.',
-  },
-  {
-    icon: LineChart,
-    title: 'Institutional analytics',
-    body: 'TPOs see cohort heat-maps, at-risk students and PPS distributions — export-ready and audit-friendly.',
-  },
+/** The eight modules that make up the platform (was four). */
+const MODULES = [
+  { icon: Compass, title: 'Company-wise tracks', body: 'Pattern-matched papers for TCS, Infosys, Wipro, Cognizant, Accenture & Capgemini — real PYQ coverage, refreshed each season.' },
+  { icon: Zap, title: 'Adaptive practice', body: 'Difficulty and pace re-tune to your accuracy and speed on every question — you never grind blindly.' },
+  { icon: ClipboardList, title: 'Timed mock assessments', body: 'Full-length simulations with the section weights, timing and cut-offs of the real drive.' },
+  { icon: MessageSquare, title: 'AI mock interviews', body: 'Spoken, role-aware interviews with instant rubric feedback on your strengths and gaps.' },
+  { icon: FileText, title: 'Resume builder', body: 'ATS-ready templates, AI tailoring to a target role, and one-click PDF export.' },
+  { icon: Code2, title: 'Coding practice', body: 'Write, run and judge real problems in-browser across languages — DSA to company sets.' },
+  { icon: Trophy, title: 'Gamified progress', body: 'XP, streaks, daily quests, level badges and a national leaderboard make prep a habit.' },
+  { icon: LineChart, title: 'Institutional analytics', body: 'TPOs get cohort heat-maps, at-risk flags and placement-readiness — export-ready.' },
 ];
 
-const TOPIC_PILLS = LANDING_COVERAGE_TOPICS;
+/** Practice-by-section cards — the five sections students segregate prep by. */
+const SECTION_TINT = {
+  sky: 'bg-sky-50 text-sky-600 ring-sky-100',
+  orange: 'bg-orange-50 text-orange-600 ring-orange-100',
+  violet: 'bg-violet-50 text-violet-600 ring-violet-100',
+  emerald: 'bg-emerald-50 text-emerald-600 ring-emerald-100',
+  indigo: 'bg-indigo-50 text-indigo-600 ring-indigo-100',
+} as const;
+
+const SECTIONS: { icon: typeof Calculator; name: string; blurb: string; tint: keyof typeof SECTION_TINT }[] = [
+  { icon: Calculator, name: 'Numerical Ability', blurb: 'Percentages, ratios, time-speed-distance & data interpretation.', tint: 'sky' },
+  { icon: Brain, name: 'Logical Reasoning', blurb: 'Series, blood relations, syllogisms, coding-decoding & puzzles.', tint: 'orange' },
+  { icon: BookOpen, name: 'Verbal Ability', blurb: 'Reading comprehension, grammar, vocabulary & error spotting.', tint: 'violet' },
+  { icon: Cpu, name: 'Technical MCQs', blurb: 'DBMS, OS, computer networks, OOP & core CS fundamentals.', tint: 'emerald' },
+  { icon: Code2, name: 'Coding', blurb: 'Judge-backed problems across languages — DSA to company sets.', tint: 'indigo' },
+];
 
 const TESTIMONIALS = [
   {
@@ -82,6 +93,13 @@ const TESTIMONIALS = [
     name: 'Dr. Priya Menon',
     meta: 'TPO, VVIT',
     initials: 'PM',
+  },
+  {
+    quote:
+      'The mock interviews felt real — I walked into my Infosys interview having already answered the hard questions out loud.',
+    name: 'Rahul Nair',
+    meta: 'SRM IST · CSE 2025',
+    initials: 'RN',
   },
 ];
 
@@ -107,6 +125,9 @@ export default async function HomePage() {
           initials: initialsOf(t.authorName),
         }))
       : TESTIMONIALS;
+  // Duplicated once so the vertical outcomes ticker loops seamlessly.
+  const outcomesLoop = [...testimonials, ...testimonials];
+
   return (
     <main className="min-h-screen overflow-x-hidden bg-white text-[var(--color-text)]">
 
@@ -175,19 +196,13 @@ export default async function HomePage() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Link href="/signup" className="btn-brand rounded-full px-7 py-3 text-sm">
-                Create free account <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/dashboard/company"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/[0.08] px-7 py-3 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/[0.14]"
-              >
-                <Building2 className="h-4 w-4" /> Browse companies
+                Get started free <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/login"
-                className="text-sm font-semibold text-white/70 transition hover:text-white sm:ml-2"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/[0.08] px-7 py-3 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/[0.14]"
               >
-                Existing user → log in
+                <LogIn className="h-4 w-4" /> Login
               </Link>
             </div>
 
@@ -212,13 +227,18 @@ export default async function HomePage() {
                 </div>
               ))}
             </div>
+            {/* Disclaimer — these figures are Prephasz's own platform numbers. */}
+            <p className="mt-4 max-w-2xl text-[11px] leading-relaxed text-white/45">
+              Students enrolled, partner colleges and placement-success figures reflect Prephasz
+              platform data.
+            </p>
           </div>
 
-          {/* Right — floating preview cards */}
-          <div className="relative hidden h-[28rem] lg:block">
-            {/* Card 1 — course card */}
+          {/* Right — floating preview cards, spaced apart so each reads on its own */}
+          <div className="relative hidden h-[30rem] lg:block">
+            {/* Card 1 — course card (top-left) */}
             <div
-              className="float-card-1 absolute left-0 top-4 w-[18rem] overflow-hidden rounded-2xl border border-white/15 bg-white shadow-2xl"
+              className="float-card-1 absolute left-0 top-0 w-[17rem] overflow-hidden rounded-2xl border border-white/15 bg-white shadow-2xl"
               style={{ transformOrigin: 'center center' }}
             >
               <div className="relative flex h-24 items-center justify-center bg-gradient-to-br from-[#1d4ed8] to-[#0b1220]">
@@ -253,9 +273,9 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Card 2 — XP / level */}
+            {/* Card 2 — XP / level (top-right) */}
             <div
-              className="float-card-2 absolute right-0 top-0 w-[16rem] rounded-2xl border border-white/15 bg-white p-5 shadow-2xl"
+              className="float-card-2 absolute right-0 top-8 w-[15.5rem] rounded-2xl border border-white/15 bg-white p-5 shadow-2xl"
               style={{ transformOrigin: 'center center' }}
             >
               <div className="flex items-center gap-3">
@@ -283,9 +303,26 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Card 3 — daily quest */}
+            {/* Card 3 — leaderboard rank (mid-left) */}
             <div
-              className="float-card-3 quest-card absolute bottom-0 right-6 w-[18rem]"
+              className="float-card-4 trophy-tile absolute left-2 top-1/2 w-[15rem] -translate-y-1/2 p-4"
+              style={{ transformOrigin: 'center center' }}
+            >
+              <div className="flex items-center gap-3">
+                <Trophy className="h-7 w-7" />
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">
+                    National rank
+                  </p>
+                  <p className="text-2xl font-extrabold tracking-tight num-tab">#228</p>
+                  <p className="text-[11px] font-semibold opacity-80">↑ 12 places · cohort 4,910</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 4 — daily quest, given its own corner (bottom-right) */}
+            <div
+              className="float-card-3 quest-card absolute bottom-0 right-0 w-[18rem]"
               style={{ transformOrigin: 'center center' }}
             >
               <p className="earned-badge">
@@ -304,60 +341,47 @@ export default async function HomePage() {
                 <span className="num-tab text-[11px] font-bold text-[var(--color-brand-ink)]">3/5</span>
               </div>
             </div>
-
-            {/* Card 4 — leaderboard rank */}
-            <div
-              className="float-card-4 trophy-tile absolute bottom-12 left-12 w-[15rem] p-4"
-              style={{ transformOrigin: 'center center' }}
-            >
-              <div className="flex items-center gap-3">
-                <Trophy className="h-7 w-7" />
-                <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">
-                    National rank
-                  </p>
-                  <p className="text-2xl font-extrabold tracking-tight num-tab">#228</p>
-                  <p className="text-[11px] font-semibold opacity-80">↑ 12 places · cohort 4,910</p>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* Recruiter logo strip */}
+        {/* Recruiter logo ticker — centred, larger logos, colour on hover */}
         <div className="relative border-t border-white/10 bg-white/[0.03]">
-          <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-6 px-5 py-5 md:px-8 lg:gap-10">
-            <p className="shrink-0 text-[11px] font-bold uppercase tracking-[0.18em] text-white/55">
-              Aligned with hiring patterns of
+          <div className="mx-auto max-w-[1400px] px-5 py-8 md:px-8">
+            <p className="text-center text-[11px] font-bold uppercase tracking-[0.18em] text-white/55">
+              Aligned with the hiring patterns of
             </p>
-            <div className="flex flex-1 flex-wrap items-center gap-x-3 gap-y-2 sm:gap-x-5">
-              {HOMEPAGE_COMPANY_LOGOS.map((c) => (
-                <Link
-                  key={c.slug}
-                  href={`/dashboard/company/${c.slug}`}
-                  title={c.name}
-                  className="group relative flex h-9 w-24 items-center justify-center overflow-hidden rounded-md bg-white/[0.06] px-2 py-1 transition hover:bg-white/[0.14] sm:w-28"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={c.logoSrc}
-                    alt={c.logoAlt}
-                    className="max-h-5 max-w-full object-contain brightness-0 invert opacity-70 transition group-hover:opacity-100"
-                  />
-                </Link>
-              ))}
+            <div className="marquee-hover-pause edge-fade-x relative mt-5 overflow-hidden">
+              <div className="marquee-x flex w-max items-center gap-4 pr-4">
+                {[...HOMEPAGE_COMPANY_LOGOS, ...HOMEPAGE_COMPANY_LOGOS].map((c, i) => (
+                  <Link
+                    key={`${c.slug}-${i}`}
+                    href={`/dashboard/company/${c.slug}`}
+                    title={c.name}
+                    aria-hidden={i >= HOMEPAGE_COMPANY_LOGOS.length}
+                    tabIndex={i >= HOMEPAGE_COMPANY_LOGOS.length ? -1 : undefined}
+                    className="group flex h-16 w-40 shrink-0 items-center justify-center rounded-xl bg-white/[0.06] px-6 ring-1 ring-white/10 transition hover:bg-white hover:ring-white/50"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={c.logoSrc}
+                      alt={c.logoAlt}
+                      className="max-h-8 max-w-full object-contain opacity-70 [filter:brightness(0)_invert(1)] transition group-hover:opacity-100 group-hover:[filter:none]"
+                    />
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Platform intro video ──────────────────────────────────────────── */}
+      {/* ── What is Prephasz (platform tour) ──────────────────────────────── */}
       <section className="relative bg-[var(--color-bg)] pt-16 lg:pt-20">
         <div className="mx-auto max-w-[1400px] px-5 md:px-8">
           <div className="mb-8 text-center">
-            <p className="section-tag">See it in action</p>
+            <p className="section-tag">Platform overview</p>
             <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
-              A quick tour of the platform
+              What is Prephasz?
             </h2>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-[var(--color-text-muted)] sm:text-base">
               How adaptive practice, company drives, mock assessments and placement readiness fit together.
@@ -366,15 +390,72 @@ export default async function HomePage() {
           <div className="mx-auto max-w-4xl">
             <VideoPlaceholder
               eyebrow="Platform tour"
-              title="See how ZSkillup works"
+              title="See how Prephasz works"
               subtitle="From your first practice question to placement-ready — the full journey. Video coming soon."
             />
           </div>
         </div>
       </section>
 
-      {/* ── Featured Tracks ───────────────────────────────────────────────── */}
-      <section className="relative bg-[var(--color-bg)] py-16 lg:py-20">
+      {/* ── Founder note — card left, Lokesh right ────────────────────────── */}
+      <section className="bg-[var(--color-bg)] py-16 lg:py-20">
+        <div className="mx-auto max-w-[1400px] px-5 md:px-8">
+          <div className="grid items-stretch gap-6 lg:grid-cols-2 lg:gap-8">
+            {/* LEFT — mission card */}
+            <div className="relative overflow-hidden rounded-[var(--radius-card-lg)] bg-gradient-to-br from-[#0b1220] via-[#101d4a] to-[#1e3a8a] p-8 text-white lg:p-10">
+              <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[#f37021]/20 blur-3xl" />
+              <p className="relative text-[11px] font-bold uppercase tracking-[0.18em] text-white/55">
+                Why we exist
+              </p>
+              <h2 className="relative mt-3 text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl">
+                Placement prep that meets students where they are
+              </h2>
+              <p className="relative mt-4 max-w-md text-sm leading-relaxed text-white/75">
+                Not everyone has a mentor, a senior&apos;s notes, or a coaching budget. Prephasz turns
+                honest, pattern-accurate practice into something every student can reach — and every
+                placement cell can trust.
+              </p>
+              <div className="relative mt-7 grid grid-cols-3 gap-4 border-t border-white/10 pt-6">
+                {[
+                  { k: '240k+', v: 'Students' },
+                  { k: '1,200+', v: 'Colleges' },
+                  { k: '82%', v: 'Place rate' },
+                ].map((s) => (
+                  <div key={s.v}>
+                    <p className="text-xl font-extrabold tracking-tight num-tab">{s.k}</p>
+                    <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wider text-white/50">
+                      {s.v}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* RIGHT — Lokesh (photo placeholder + quote + designation) */}
+            <figure className="flex flex-col justify-center rounded-[var(--radius-card-lg)] border border-[var(--color-line)] bg-white p-8 shadow-[var(--shadow-card)] lg:p-10">
+              <Quote className="h-8 w-8 text-[var(--color-brand)]" aria-hidden />
+              <blockquote className="mt-4 text-lg font-semibold leading-relaxed tracking-tight text-[var(--color-text)] sm:text-xl">
+                &ldquo;We built Prephasz so that where you come from never decides where you can reach.
+                Every student deserves the same shot at a great first job — structured, honest practice
+                that mirrors the real drive.&rdquo;
+              </blockquote>
+              <figcaption className="mt-7 flex items-center gap-4 border-t border-[var(--color-line)] pt-6">
+                {/* Photo placeholder — swap for a real headshot when available. */}
+                <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-brand)] text-lg font-extrabold text-white shadow-md">
+                  L
+                </span>
+                <span>
+                  <p className="text-base font-bold text-[var(--color-text)]">Lokesh</p>
+                  <p className="text-sm text-[var(--color-text-muted)]">Founder · Prephasz</p>
+                </span>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Featured Tracks — all 8 companies, 4 per row ──────────────────── */}
+      <section className="relative bg-white py-16 lg:py-20">
         <div className="mx-auto max-w-[1400px] px-5 md:px-8">
           <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -399,18 +480,77 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Why ZSkillup ─────────────────────────────────────────────────── */}
+      {/* ── Practice by section (after the company cards) ─────────────────── */}
+      <section className="bg-[var(--color-bg)] py-16 lg:py-20">
+        <div className="mx-auto max-w-[1400px] px-5 md:px-8">
+          <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="section-tag">Practice by section</p>
+              <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
+                Every section the recruiters test
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm text-[var(--color-text-muted)] sm:text-base">
+                Drill one area at a time, or run a full mock — the bank spans all five.
+              </p>
+            </div>
+            <Link href={LANDING_HREFS.catalog} className="text-sm font-bold text-[var(--color-primary)] hover:underline">
+              Browse the catalog →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {SECTIONS.map((s) => (
+              <Link
+                key={s.name}
+                href="/signup"
+                className="hover-lift group relative flex items-start gap-4 overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6"
+              >
+                <span
+                  className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl ring-1 ring-inset ${SECTION_TINT[s.tint]}`}
+                >
+                  <s.icon className="h-6 w-6" />
+                </span>
+                <div className="min-w-0">
+                  <h3 className="flex items-center gap-1 text-lg font-bold tracking-tight text-[var(--color-text)]">
+                    {s.name}
+                    <ArrowRight className="h-4 w-4 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
+                  </h3>
+                  <p className="mt-1 text-sm leading-relaxed text-[var(--color-text-muted)]">{s.blurb}</p>
+                </div>
+              </Link>
+            ))}
+            {/* Trailing CTA tile keeps the 3-col grid balanced at five sections. */}
+            <Link
+              href="/signup"
+              className="hover-lift flex flex-col justify-center gap-1 rounded-[var(--radius-card)] border border-dashed border-[var(--color-accent)]/40 bg-[var(--color-primary-highlight)]/40 p-6 text-[var(--color-primary)]"
+            >
+              <span className="text-sm font-bold">Build a custom mock</span>
+              <span className="text-xs text-[var(--color-text-muted)]">
+                Mix sections and difficulty into one timed set.
+              </span>
+              <span className="mt-1 inline-flex items-center gap-1 text-sm font-bold">
+                Start <ArrowRight className="h-3.5 w-3.5" />
+              </span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Why Prephasz — eight modules ──────────────────────────────────── */}
       <section className="bg-white py-16 lg:py-20">
         <div className="mx-auto max-w-[1400px] px-5 md:px-8">
           <div className="mb-12 max-w-3xl text-center sm:mx-auto">
-            <p className="section-tag">Why ZSkillup</p>
+            <p className="section-tag">Why Prephasz</p>
             <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
-              Built like the platforms students already trust — only smarter
+              One platform for the whole placement journey
             </h2>
+            <p className="mt-3 text-sm text-[var(--color-text-muted)] sm:text-base">
+              Eight modules that take you from your first practice question to a signed offer letter.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {FEATURES.map((f) => (
+            {MODULES.map((f) => (
               <div
                 key={f.title}
                 className="hover-lift relative h-full rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6"
@@ -430,65 +570,69 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Gamification Preview ──────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-[var(--color-bg)] py-16 lg:py-24">
+      {/* ── Gamified prep (redesigned) ────────────────────────────────────── */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#0b1220] via-[#101d4a] to-[#1e3a8a] py-16 text-white lg:py-24">
+        <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-[#f37021]/20 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-white/[0.07] blur-3xl" />
         <div
           aria-hidden
-          className="absolute inset-0 opacity-30"
+          className="absolute inset-0 opacity-[0.05]"
           style={{
-            backgroundImage:
-              'radial-gradient(circle at 15% 20%, rgb(243 112 33 / 0.12), transparent 40%), radial-gradient(circle at 85% 70%, rgb(37 99 235 / 0.15), transparent 45%)',
+            backgroundImage: 'radial-gradient(rgb(255 255 255 / 0.8) 1px, transparent 1px)',
+            backgroundSize: '22px 22px',
           }}
         />
-        <div className="relative mx-auto grid max-w-[1400px] gap-10 px-5 md:px-8 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+        <div className="relative mx-auto grid max-w-[1400px] items-center gap-10 px-5 md:px-8 lg:grid-cols-[1fr_1.1fr]">
           <div>
-            <p className="section-tag">Gamified prep</p>
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-white/85">
+              <Sparkles className="h-3.5 w-3.5 text-amber-300" /> Gamified prep
+            </span>
+            <h2 className="mt-5 text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-4xl">
               Daily quests, streaks, levels — prep becomes a habit, not a grind
             </h2>
-            <p className="mt-3 text-base text-[var(--color-text-muted)]">
-              Earn XP for every drill. Unlock badges, level up, climb the national leaderboard.
+            <p className="mt-4 max-w-lg text-base text-white/75">
+              Earn XP for every drill. Unlock badges, level up, and climb the national leaderboard.
               The dopamine loop does the work — you just show up.
             </p>
 
-            <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <ul className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {[
-                { icon: Flame, label: 'Streaks' },
+                { icon: Flame, label: 'Streaks that reward showing up' },
                 { icon: Zap, label: 'Daily quests with XP rewards' },
                 { icon: Trophy, label: 'College & national leaderboard' },
                 { icon: BadgeCheck, label: 'Earnable concept badges' },
               ].map((row) => (
                 <li
                   key={row.label}
-                  className="flex items-center gap-3 rounded-xl border border-[var(--color-line)] bg-white px-4 py-3"
+                  className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 backdrop-blur-sm"
                 >
-                  <row.icon className="h-5 w-5 shrink-0 text-[var(--color-brand)]" aria-hidden />
-                  <span className="text-sm font-semibold text-[var(--color-text)]">{row.label}</span>
+                  <row.icon className="h-5 w-5 shrink-0 text-amber-300" aria-hidden />
+                  <span className="text-sm font-semibold text-white/90">{row.label}</span>
                 </li>
               ))}
             </ul>
 
-            <Link href="/leaderboard" className="btn-brand mt-6 inline-flex text-sm">
+            <Link href="/leaderboard" className="btn-brand mt-7 inline-flex text-sm">
               <Trophy className="h-4 w-4" /> See live leaderboard
             </Link>
           </div>
 
-          {/* Preview grid */}
+          {/* Preview cluster on glassy cards */}
           <div className="relative grid gap-4 sm:grid-cols-2">
-            <div className="lms-card p-5">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-subtle)]">
+            <div className="rounded-2xl border border-white/12 bg-white/[0.07] p-5 backdrop-blur-sm">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/55">
                 {LANDING_TODAYS_FOCUS.eyebrow}
               </p>
-              <p className="mt-1 text-base font-bold tracking-tight">{LANDING_TODAYS_FOCUS.topic}</p>
-              <p className="mt-1 text-xs text-[var(--color-text-muted)]">{LANDING_TODAYS_FOCUS.meta}</p>
+              <p className="mt-1 text-base font-bold tracking-tight text-white">{LANDING_TODAYS_FOCUS.topic}</p>
+              <p className="mt-1 text-xs text-white/60">{LANDING_TODAYS_FOCUS.meta}</p>
               <Link href={LANDING_TODAYS_FOCUS.ctaHref} className="btn-brand mt-3 inline-flex text-xs">
                 <PlayCircle className="h-3.5 w-3.5" /> {LANDING_TODAYS_FOCUS.ctaLabel}
               </Link>
             </div>
 
-            <div className="lms-card p-5">
+            <div className="rounded-2xl border border-white/12 bg-white/[0.07] p-5 backdrop-blur-sm">
               <div className="flex items-center justify-between">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-subtle)]">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-white/55">
                   Active streak
                 </p>
                 <span className="streak-flame" style={{ padding: '0.25rem 0.6rem', fontSize: '0.66rem' }}>
@@ -496,14 +640,14 @@ export default async function HomePage() {
                   {LANDING_STREAK_DEMO.days}d
                 </span>
               </div>
-              <div className="mt-3 flex h-12 items-end gap-1.5">
+              <div className="mt-4 flex h-12 items-end gap-1.5">
                 {LANDING_STREAK_DEMO.week.map((h, i) => (
                   <div key={i} className="flex flex-1 flex-col items-center gap-1">
                     <div
-                      className="w-full rounded-md bg-[var(--color-primary-highlight)]"
+                      className="w-full rounded-md bg-gradient-to-t from-[#f37021] to-[#fbbf24]"
                       style={{ height: `${(h / 100) * 36}px` }}
                     />
-                    <span className="text-[9px] font-semibold text-[var(--color-text-subtle)]">
+                    <span className="text-[9px] font-semibold text-white/50">
                       {LANDING_STREAK_DEMO.labels[i]}
                     </span>
                   </div>
@@ -511,73 +655,64 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <HomeTopCohort />
-          </div>
-        </div>
-      </section>
-
-      {/* ── Topics Coverage ───────────────────────────────────────────────── */}
-      <section className="bg-white py-14">
-        <div className="mx-auto max-w-[1400px] px-5 md:px-8">
-          <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="section-tag">Coverage</p>
-              <h2 className="mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl">
-                Every section the recruiters ask
-              </h2>
+            <div className="sm:col-span-2">
+              <HomeTopCohort />
             </div>
-            <Link href={LANDING_HREFS.catalog} className="text-sm font-bold text-[var(--color-primary)] hover:underline">
-              Browse the catalog →
-            </Link>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {TOPIC_PILLS.map((p) => (
-              <span
-                key={p}
-                className="inline-flex cursor-default items-center gap-1.5 rounded-full border border-[var(--color-line)] bg-[var(--color-surface-2)] px-3.5 py-1.5 text-sm font-semibold text-[var(--color-text)] transition hover:border-[var(--color-brand)] hover:bg-[var(--color-brand-soft)] hover:text-[var(--color-brand-ink)]"
-              >
-                <BookOpen className="h-3.5 w-3.5 text-[var(--color-text-subtle)]" aria-hidden />
-                {p}
-              </span>
-            ))}
           </div>
         </div>
       </section>
 
-      {/* ── Testimonials ─────────────────────────────────────────────────── */}
-      <section className="bg-[var(--color-bg)] py-16 lg:py-20">
-        <div className="mx-auto max-w-[1400px] px-5 md:px-8">
-          <div className="mb-10 max-w-2xl">
+      {/* ── Outcomes — vertical testimonial ticker ────────────────────────── */}
+      <section className="bg-white py-16 lg:py-20">
+        <div className="mx-auto grid max-w-[1400px] gap-10 px-5 md:px-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
+          <div>
             <p className="section-tag">Outcomes</p>
             <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
               Loved by students. Trusted by TPOs.
             </h2>
+            <p className="mt-3 max-w-md text-sm text-[var(--color-text-muted)] sm:text-base">
+              Real results from students who prepped on Prephasz and placement cells that run their
+              cohorts on it.
+            </p>
+            <div className="mt-6 flex items-center gap-2 text-sm font-semibold text-[var(--color-text-muted)]">
+              <span className="flex items-center gap-0.5">
+                {Array.from({ length: 5 }).map((_, k) => (
+                  <Star key={k} className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden />
+                ))}
+              </span>
+              4.7 average · 240,000+ students
+            </div>
           </div>
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-            {testimonials.map((t) => (
-              <figure
-                key={t.name}
-                className="hover-lift flex h-full flex-col rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6"
-              >
-                <div className="mb-3 flex items-center gap-1">
-                  {Array.from({ length: 5 }).map((_, k) => (
-                    <Star key={k} className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden />
-                  ))}
-                </div>
-                <blockquote className="text-sm leading-relaxed text-[var(--color-text)]">
-                  &ldquo;{t.quote}&rdquo;
-                </blockquote>
-                <figcaption className="mt-5 flex items-center gap-3 border-t border-[var(--color-line)] pt-4">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] text-xs font-extrabold text-white">
-                    {t.initials}
-                  </span>
-                  <span>
-                    <p className="text-sm font-bold text-[var(--color-text)]">{t.name}</p>
-                    <p className="text-xs text-[var(--color-text-muted)]">{t.meta}</p>
-                  </span>
-                </figcaption>
-              </figure>
-            ))}
+
+          {/* Vertical ticker viewport */}
+          <div className="marquee-hover-pause edge-fade-y relative h-[26rem] overflow-hidden lg:h-[30rem]">
+            <div className="marquee-y flex flex-col gap-4">
+              {outcomesLoop.map((t, i) => (
+                <figure
+                  key={`${t.name}-${i}`}
+                  aria-hidden={i >= testimonials.length}
+                  className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6 shadow-[var(--shadow-card)]"
+                >
+                  <div className="mb-3 flex items-center gap-1">
+                    {Array.from({ length: 5 }).map((_, k) => (
+                      <Star key={k} className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden />
+                    ))}
+                  </div>
+                  <blockquote className="text-sm leading-relaxed text-[var(--color-text)]">
+                    &ldquo;{t.quote}&rdquo;
+                  </blockquote>
+                  <figcaption className="mt-5 flex items-center gap-3 border-t border-[var(--color-line)] pt-4">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] text-xs font-extrabold text-white">
+                      {t.initials}
+                    </span>
+                    <span>
+                      <p className="text-sm font-bold text-[var(--color-text)]">{t.name}</p>
+                      <p className="text-xs text-[var(--color-text-muted)]">{t.meta}</p>
+                    </span>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -608,7 +743,7 @@ export default async function HomePage() {
               href="/login"
               className="inline-flex h-12 items-center justify-center rounded-full border border-white/25 bg-white/[0.08] px-8 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/[0.14]"
             >
-              Log in
+              Login
             </Link>
           </div>
         </div>
@@ -661,7 +796,7 @@ export default async function HomePage() {
           </div>
         </div>
         <div className="mx-auto mt-10 max-w-[1400px] border-t border-[var(--color-line)] pt-6 text-center text-xs text-[var(--color-text-subtle)]">
-          © 2026 ZSkillup · Future-ready graduates, future-strong institutions
+          © 2026 Prephasz · Powered by ZSkillup · Future-ready graduates, future-strong institutions
         </div>
       </footer>
     </main>

@@ -48,10 +48,13 @@ export function ProfileLockGate({
         {children}
       </div>
 
-      {/* translucent lock film + card */}
-      <div className="absolute inset-0 z-10 grid place-items-center rounded-3xl bg-white/50 p-4 backdrop-blur-[3px]">
-        <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white/95 p-7 text-center shadow-[0_30px_80px_-30px_rgba(11,18,32,0.55)]">
-          <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.8)]">
+      {/* translucent lock film. The card is centered in the VIEWPORT via a sticky
+          box that tracks the scroll, rather than in the full — possibly very tall
+          — gated section, so it's always on-screen without scrolling down. */}
+      <div className="absolute inset-0 z-10 rounded-3xl bg-white/50 backdrop-blur-[3px]">
+        <div className="sticky top-0 flex h-[100dvh] max-h-full items-center justify-center p-4">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white/95 p-7 text-center shadow-[0_30px_80px_-30px_rgba(11,18,32,0.55)]">
+            <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.8)]">
             <Lock className="size-6" />
           </span>
           <h2 className="mt-4 text-lg font-black text-navy">{feature} is locked</h2>
@@ -81,6 +84,7 @@ export function ProfileLockGate({
           >
             Complete profile <ArrowRight className="size-4" />
           </Link>
+          </div>
         </div>
       </div>
     </div>
