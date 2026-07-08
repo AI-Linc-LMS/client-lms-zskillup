@@ -29,14 +29,26 @@ export function InterviewProctorGate({ id }: { id: string }) {
     setStarting(false);
   };
 
-  if (!started) return <IntroGate onStart={begin} starting={starting} />;
+  if (!started) {
+    // Full-bleed even before start, so the setup screen is focused (no app chrome).
+    return (
+      <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-background p-4">
+        <IntroGate onStart={begin} starting={starting} />
+      </div>
+    );
+  }
 
   return (
-    <div className="relative">
-      <InterviewRunner id={id} />
+    // Full-bleed surface — covers the AppShell sidebar + top bar so the proctored
+    // interview owns the whole screen (browser fullscreen removes browser chrome;
+    // this removes the app chrome).
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
+      <div className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6">
+        <InterviewRunner id={id} />
+      </div>
 
       {/* Live proctor indicator */}
-      <div className="fixed right-4 top-[4.5rem] z-40 flex items-center gap-2.5 rounded-full border border-slate-200 bg-white/95 px-3.5 py-2 text-xs font-semibold shadow-lg backdrop-blur">
+      <div className="fixed right-4 top-4 z-[60] flex items-center gap-2.5 rounded-full border border-slate-200 bg-white/95 px-3.5 py-2 text-xs font-semibold shadow-lg backdrop-blur">
         <span className="inline-flex items-center gap-1.5 text-emerald-600">
           <span className="relative flex size-2">
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
@@ -51,7 +63,7 @@ export function InterviewProctorGate({ id }: { id: string }) {
 
       {/* Transient warning */}
       {guard.lastWarning && (
-        <div className="fixed left-1/2 top-4 z-40 -translate-x-1/2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700 shadow-lg">
+        <div className="fixed left-1/2 top-16 z-[60] -translate-x-1/2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700 shadow-lg">
           {guard.lastWarning}
         </div>
       )}
