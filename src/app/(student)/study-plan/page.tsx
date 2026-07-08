@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowRight, Brain, Loader2, RefreshCw, ShieldCheck, Sparkles, Target, TrendingUp, type LucideIcon } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ProfileLockGate } from '@/components/student/ProfileLockGate';
 import { cn } from '@/lib/utils';
 import { getStudyPlan, getTrends, type StudyAction, type StudyPlan, type Trends } from '@/lib/api/study';
 
@@ -29,6 +30,7 @@ export default function StudyPlanPage() {
     <div className="w-full">
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Study Plan' }]} />
 
+      <ProfileLockGate feature="Study Plan">
       {/* Hero */}
       <section className="relative mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-[0_24px_60px_-30px_rgba(11,18,32,0.85)] sm:p-8">
         <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#f37021]/20 blur-3xl" />
@@ -117,6 +119,7 @@ export default function StudyPlanPage() {
           </div>
         </aside>
       </div>
+      </ProfileLockGate>
     </div>
   );
 }
