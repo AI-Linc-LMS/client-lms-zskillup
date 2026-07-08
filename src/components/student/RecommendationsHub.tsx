@@ -35,12 +35,13 @@ const bandTone = (band: string) =>
 export function RecommendationsHub() {
   const [data, setData] = useState<CalibrationResultsDto | null>(null);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
   const { mockTestId } = useCalibrationStatus();
 
   useEffect(() => {
     getCalibrationResults()
       .then(setData)
-      .catch(() => {})
+      .catch(() => setFailed(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -48,6 +49,7 @@ export function RecommendationsHub() {
     if (!data) return [];
     const map = new Map<string, { order: number; items: RecommendationDto[] }>();
     for (const r of data.recommendations) {
+      if (r.id === data.best?.id) continue; // shown in the "Best next step" hero
       const g = groupOf(r.product);
       if (!map.has(g.key)) map.set(g.key, { order: g.order, items: [] });
       map.get(g.key)!.items.push(r);
@@ -63,8 +65,18 @@ export function RecommendationsHub() {
     );
   }
 
+  // Transient fetch failure — don't mistake it for "not calibrated".
+  if (failed || !data) {
+    return (
+      <div className="mx-auto max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+        <h2 className="font-display text-lg font-bold text-navy">Couldn&apos;t load your recommendations</h2>
+        <p className="mt-1.5 text-sm text-slate-500">Something went wrong. Please refresh and try again.</p>
+      </div>
+    );
+  }
+
   // Not calibrated yet — recommendations are driven by the calibration + practice.
-  if (!data || !data.calibrated) {
+  if (!data.calibrated) {
     return (
       <div className="mx-auto max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
         <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.8)]">

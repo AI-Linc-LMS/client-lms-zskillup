@@ -32,6 +32,7 @@ import {
   Users,
   Video,
   Wallet,
+  Wand2,
 } from 'lucide-react';
 
 /**
@@ -94,6 +95,7 @@ export const STUDENT_NAV: NavSection[] = [
   {
     heading: 'EXPLORE',
     items: [
+      { label: 'Recommendations', href: '/recommendations', icon: Wand2 },
       { label: 'Company Hubs', href: '/dashboard/company', icon: Building2 },
       { label: 'Shop', href: '/shop', icon: ShoppingBag },
       { label: 'Upgrade', href: '/upgrade', icon: Sparkles },
