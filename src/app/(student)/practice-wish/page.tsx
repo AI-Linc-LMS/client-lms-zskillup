@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ProfileLockGate } from '@/components/student/ProfileLockGate';
+import { CalibrationLockGate } from '@/components/student/CalibrationLockGate';
 import { ArrowRight, ChevronDown, Layers, Loader2, Search, Sparkles, Wand2 } from 'lucide-react';
 import { listTopicsWithCounts, type ApiTopic } from '@/lib/api/catalog';
 import { listCodingTopics, type CodingTopic } from '@/lib/api/mocks';
@@ -118,6 +119,7 @@ export default function PracticeWishPage() {
         ]}
       />
 
+      <CalibrationLockGate feature="Practice as Wish">
       <ProfileLockGate feature="Practice as Wish" contentClassName="space-y-8">
       {/* hero */}
       <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#3b1f6d] via-[#2a1a52] to-[#140b28] p-6 text-white shadow-sm sm:p-8">
@@ -251,6 +253,7 @@ export default function PracticeWishPage() {
         )}
       </div>
       </ProfileLockGate>
+      </CalibrationLockGate>
     </div>
   );
 }

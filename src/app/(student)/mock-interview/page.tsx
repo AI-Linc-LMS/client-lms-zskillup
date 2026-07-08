@@ -1,6 +1,7 @@
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { MockInterviewHome } from '@/components/mock-interview/MockInterviewHome';
 import { ProfileLockGate } from '@/components/student/ProfileLockGate';
+import { CalibrationLockGate } from '@/components/student/CalibrationLockGate';
 import { Bot, ShieldOff, Sparkles, Zap } from 'lucide-react';
 
 export const metadata = {
@@ -19,6 +20,7 @@ export default function MockInterviewPage() {
     <div className="space-y-6">
       <Breadcrumb items={[{ label: 'Home', href: '/dashboard' }, { label: 'Mock Interview' }]} />
 
+      <CalibrationLockGate feature="Mock Interview">
       <ProfileLockGate feature="Mock Interview" contentClassName="space-y-6">
       {/* Hero */}
       <header className="night-hero rounded-2xl p-6 shadow-sm sm:p-8">
@@ -51,6 +53,7 @@ export default function MockInterviewPage() {
 
       <MockInterviewHome />
       </ProfileLockGate>
+      </CalibrationLockGate>
     </div>
   );
 }

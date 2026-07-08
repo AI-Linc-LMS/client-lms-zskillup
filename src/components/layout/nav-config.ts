@@ -104,6 +104,17 @@ export const STUDENT_NAV: NavSection[] = [
  *  shown with a lock in the sidebar until the profile is finished). */
 export const PROFILE_GATED_HREFS = new Set<string>(['/study-plan', '/practice-wish', '/mock-interview']);
 
+/** Student features gated behind the one-time calibration assessment — all
+ *  practice + assessment surfaces are locked until the student takes it. */
+export const CALIBRATION_GATED_HREFS = new Set<string>([
+  '/practice',
+  '/practice-wish',
+  '/mock-assessment',
+  '/assessments',
+  '/mock-interview',
+  '/coding',
+]);
+
 export const SUPERADMIN_NAV: NavSection[] = [
   {
     heading: 'OVERVIEW',
