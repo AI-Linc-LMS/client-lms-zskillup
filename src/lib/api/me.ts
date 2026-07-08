@@ -41,6 +41,8 @@ export interface ApiStudentProfile {
   skills: string[];
   rolesInterested: string[];
   isOnboarded: boolean;
+  /** Whether the student has completed the one-time calibration assessment. */
+  isCalibrated: boolean;
 }
 
 /** Patchable profile fields (PATCH /me). */

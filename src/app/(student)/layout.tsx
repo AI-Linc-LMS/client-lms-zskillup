@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { AppShell } from '@/components/layout/AppShell';
 import { CartProvider } from '@/components/billing/CartProvider';
 import { ChatWidget } from '@/components/assistant/ChatWidget';
+import { CalibrationPrompt } from '@/components/student/CalibrationPrompt';
 
 /**
  * Student route-group layout. Wraps every (student) page in the shared AppShell
@@ -15,6 +16,7 @@ export default function StudentLayout({ children }: { children: ReactNode }) {
     <CartProvider>
       <AppShell>{children}</AppShell>
       <ChatWidget />
+      <CalibrationPrompt />
     </CartProvider>
   );
 }

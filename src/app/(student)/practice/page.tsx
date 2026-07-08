@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { CalibrationLockGate } from '@/components/student/CalibrationLockGate';
 import { Compass, GraduationCap, Layers, Sparkles, Target } from 'lucide-react';
 import {
   listCompanies,
@@ -75,6 +76,7 @@ export default async function PracticePage({ searchParams }: PageProps) {
         ]}
       />
 
+      <CalibrationLockGate feature="Practice" contentClassName="space-y-8">
       <Reveal>
         <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-sm sm:p-8">
           <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#6d3bf5]/25 blur-3xl" />
@@ -121,6 +123,7 @@ export default async function PracticePage({ searchParams }: PageProps) {
       <PracticePicker topics={topics} companies={pickerCompanies} companyParam={companyParam} />
 
       <TopicAccuracyPanels />
+      </CalibrationLockGate>
     </div>
   );
 }
