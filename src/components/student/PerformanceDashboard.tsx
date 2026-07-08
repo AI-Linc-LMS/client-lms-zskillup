@@ -60,7 +60,7 @@ export function PerformanceDashboard() {
   return (
     <div className="space-y-7">
       {/* Readiness front-and-center */}
-      <ReadinessPanel />
+      <ReadinessPanel tour="performance" />
 
       <section>
         <h2 className="mb-4 flex items-center gap-2.5 text-lg font-extrabold tracking-tight text-navy sm:text-xl">
@@ -70,7 +70,7 @@ export function PerformanceDashboard() {
         {/* Bento grid — accuracy card spans 2 cols, trend fills the rest */}
         <div className="grid gap-5 lg:grid-cols-3">
           {/* Practice accuracy — featured, spans 2 columns */}
-          <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(79,70,229,0.25)] lg:col-span-2">
+          <div data-tour="perf:practice-accuracy" className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(79,70,229,0.25)] lg:col-span-2">
             <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 to-indigo-400" />
             <span
               aria-hidden
@@ -91,7 +91,7 @@ export function PerformanceDashboard() {
           </div>
 
           {/* Mock score trend */}
-          <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(79,70,229,0.25)]">
+          <div data-tour="perf:score-trend" className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(79,70,229,0.25)]">
             <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 to-indigo-400" />
             <div className="flex items-center justify-between gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-indigo-600 ring-1 ring-inset ring-indigo-100">
@@ -153,7 +153,7 @@ export function PerformanceDashboard() {
 
       {/* Focus areas */}
       {weak.length ? (
-        <section>
+        <section data-tour="perf:focus-areas">
           <h2 className="mb-4 flex items-center gap-2.5 text-lg font-extrabold tracking-tight text-navy sm:text-xl">
             <AlertTriangle className="size-5 text-amber-500" /> Focus areas
           </h2>

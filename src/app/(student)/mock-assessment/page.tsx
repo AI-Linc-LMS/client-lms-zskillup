@@ -23,7 +23,7 @@ export default function MockAssessmentPage() {
 
       <CalibrationLockGate feature="Mock Assessment" contentClassName="space-y-8">
       <Reveal>
-        <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#12324a] via-[#0f2740] to-[#0a1a2c] p-6 text-white shadow-sm sm:p-8">
+        <section data-tour="mock:hero" className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#12324a] via-[#0f2740] to-[#0a1a2c] p-6 text-white shadow-sm sm:p-8">
           <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#38bdf8]/25 blur-3xl" />
           <span aria-hidden className="pointer-events-none absolute -bottom-20 left-1/4 size-56 rounded-full bg-[#22d3ee]/20 blur-3xl" />
           <div className="relative">
@@ -46,7 +46,7 @@ export default function MockAssessmentPage() {
 
       <CustomMockBuilder />
 
-      <section>
+      <section data-tour="mock:history">
         <h2 className="mb-3 text-lg font-extrabold tracking-tight text-navy sm:text-xl">Your past mock attempts</h2>
         <MockHistory scope="custom" />
       </section>

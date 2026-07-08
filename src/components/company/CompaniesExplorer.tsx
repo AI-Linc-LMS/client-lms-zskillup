@@ -98,7 +98,7 @@ export function CompaniesExplorer() {
   return (
     <div>
       {/* Filter bar — a crisp white control panel with layered depth */}
-      <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-3 shadow-[0_8px_30px_-20px_rgba(15,23,42,0.35)] sm:p-3.5">
+      <div data-tour="company:filters" className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-3 shadow-[0_8px_30px_-20px_rgba(15,23,42,0.35)] sm:p-3.5">
         <span
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-50/70 via-transparent to-transparent"
@@ -177,13 +177,15 @@ export function CompaniesExplorer() {
           </p>
         </div>
       ) : (
-        <Stagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((c) => (
-            <StaggerItem key={c.slug} className="h-full">
-              <CompanyCard company={c} />
-            </StaggerItem>
-          ))}
-        </Stagger>
+        <div data-tour="company:grid">
+          <Stagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((c) => (
+              <StaggerItem key={c.slug} className="h-full">
+                <CompanyCard company={c} />
+              </StaggerItem>
+            ))}
+          </Stagger>
+        </div>
       )}
     </div>
   );

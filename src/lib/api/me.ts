@@ -43,6 +43,8 @@ export interface ApiStudentProfile {
   isOnboarded: boolean;
   /** Whether the student has completed the one-time calibration assessment. */
   isCalibrated: boolean;
+  /** Whether the student has seen (or dismissed) the platform-guide walkthrough. */
+  hasSeenGuide: boolean;
 }
 
 /** Patchable profile fields (PATCH /me). */

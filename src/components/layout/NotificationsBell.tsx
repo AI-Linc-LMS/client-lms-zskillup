@@ -114,7 +114,7 @@ export function NotificationsBell() {
   }, [open]);
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative" ref={ref} data-tour="chrome:notifications">
       <motion.button
         type="button"
         aria-label={hasUnread ? `Notifications, ${unreadCount} unread` : 'Notifications'}

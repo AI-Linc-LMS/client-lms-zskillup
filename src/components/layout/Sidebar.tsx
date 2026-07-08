@@ -58,6 +58,7 @@ export function Sidebar() {
                   <li key={item.href}>
                     <Link
                       href={item.href}
+                      data-tour={`nav:${item.href}`}
                       aria-current={active ? 'page' : undefined}
                       className={cn(
                         'group relative flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition-all duration-200',

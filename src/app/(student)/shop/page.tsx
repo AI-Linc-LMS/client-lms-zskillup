@@ -190,6 +190,7 @@ export default function ShopPage() {
           </p>
         </div>
         <Link
+          data-tour="shop:cart"
           href="/cart"
           className="inline-flex items-center gap-2 rounded-full bg-navy px-4 py-2 text-sm font-bold text-white transition hover:brightness-110"
         >
@@ -198,7 +199,7 @@ export default function ShopPage() {
       </div>
 
       {/* Controls: search + billing period */}
-      <div className="mt-6 flex flex-wrap items-center gap-3">
+      <div data-tour="shop:controls" className="mt-6 flex flex-wrap items-center gap-3">
         <div className="relative min-w-[220px] flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
           <input
@@ -231,7 +232,7 @@ export default function ShopPage() {
         <div className="mt-6 space-y-8">
           {/* Full platform */}
           {!owned.platform && (
-            <section className="overflow-hidden rounded-3xl border border-orange/30 bg-gradient-to-br from-orange/5 to-white p-6 shadow-sm">
+            <section data-tour="shop:platform" className="overflow-hidden rounded-3xl border border-orange/30 bg-gradient-to-br from-orange/5 to-white p-6 shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <span className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white">
@@ -275,7 +276,7 @@ export default function ShopPage() {
 
           {/* Company hubs */}
           {visibleCompanies.length > 0 && (
-            <section>
+            <section data-tour="shop:companies">
               <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-400">
                 <Building2 className="size-4" /> Company hubs
               </h2>
@@ -309,7 +310,7 @@ export default function ShopPage() {
 
           {/* Sections + their topics (collapsible) */}
           {visibleSections.length > 0 && (
-            <section>
+            <section data-tour="shop:sections">
               <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-400">
                 <Layers className="size-4" /> Sections &amp; topics
               </h2>

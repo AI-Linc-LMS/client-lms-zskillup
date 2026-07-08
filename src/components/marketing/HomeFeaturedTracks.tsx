@@ -33,11 +33,12 @@ export function HomeFeaturedTracks() {
     };
   }, []);
 
-  // Once live data is in, only show tracks that map to a real company hub.
-  const tracks = HOMEPAGE_FEATURED_TRACKS.filter((t) => !live || live.has(t.slug));
+  // Show the full curated set of 8 company tracks (all back real company hubs);
+  // `live` only enriches each card's metrics when the catalog resolves.
+  const tracks = HOMEPAGE_FEATURED_TRACKS;
 
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
       {tracks.map((t) => {
         const co = live?.get(t.slug);
         const logoSrc = co?.logoUrl ?? t.logoSrc;

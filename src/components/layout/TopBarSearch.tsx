@@ -39,7 +39,7 @@ export function TopBarSearch() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="relative ml-auto hidden max-w-xs flex-1 lg:block">
+    <form onSubmit={onSubmit} data-tour="chrome:search" className="relative ml-auto hidden max-w-xs flex-1 lg:block">
       {/* focus glow halo */}
       <div
         aria-hidden

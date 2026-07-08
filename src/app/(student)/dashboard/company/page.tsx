@@ -28,7 +28,7 @@ export default async function CompaniesPage() {
 
       {/* Hero — deep navy aurora canvas with glass stat cards */}
       <Reveal>
-        <section className="relative isolate mb-8 overflow-hidden rounded-[1.75rem] p-7 text-white shadow-[0_30px_90px_-32px_rgba(11,18,32,0.85)] sm:rounded-[2rem] sm:p-10">
+        <section data-tour="company:hero" className="relative isolate mb-8 overflow-hidden rounded-[1.75rem] p-7 text-white shadow-[0_30px_90px_-32px_rgba(11,18,32,0.85)] sm:rounded-[2rem] sm:p-10">
           <AuroraBackground />
 
           {/* layered depth — inner ring + top-edge highlight */}

@@ -145,7 +145,7 @@ export function AiBriefingHero() {
   // First paint: a shimmering skeleton over the aurora — never the 0-state.
   if (!ready) {
     return (
-      <section className="relative isolate overflow-hidden rounded-[1.5rem] p-6 text-white shadow-[0_30px_90px_-32px_rgba(11,18,32,0.85)] sm:rounded-[2rem] sm:p-10">
+      <section data-tour="dash:briefing-hero" className="relative isolate overflow-hidden rounded-[1.5rem] p-6 text-white shadow-[0_30px_90px_-32px_rgba(11,18,32,0.85)] sm:rounded-[2rem] sm:p-10">
         <AuroraBackground />
         <div aria-hidden className="pointer-events-none absolute inset-0 rounded-[1.5rem] ring-1 ring-inset ring-white/10 sm:rounded-[2rem]" />
         <div className="relative z-10 max-w-3xl animate-pulse" aria-busy="true" aria-label="Loading your briefing">
@@ -170,7 +170,7 @@ export function AiBriefingHero() {
   }
 
   return (
-    <section className="relative isolate overflow-hidden rounded-[1.5rem] p-6 text-white shadow-[0_30px_90px_-32px_rgba(11,18,32,0.85)] sm:rounded-[2rem] sm:p-10">
+    <section data-tour="dash:briefing-hero" className="relative isolate overflow-hidden rounded-[1.5rem] p-6 text-white shadow-[0_30px_90px_-32px_rgba(11,18,32,0.85)] sm:rounded-[2rem] sm:p-10">
       <AuroraBackground />
 
       {/* Extra layered depth: a warm top-edge highlight + an inner ring so the

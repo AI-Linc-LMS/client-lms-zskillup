@@ -139,7 +139,7 @@ export default function LeaderboardPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       {/* ── Hero rank card ─────────────────────────────────────────────────── */}
-      <section className="overflow-hidden rounded-3xl border border-orange/20 bg-gradient-to-br from-orange-50 via-amber-50/60 to-white p-6 shadow-sm sm:p-8">
+      <section data-tour="lb:rank-hero" className="overflow-hidden rounded-3xl border border-orange/20 bg-gradient-to-br from-orange-50 via-amber-50/60 to-white p-6 shadow-sm sm:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-orange lg:hidden">
             <Globe2 className="size-3.5" /> {scopeLabel}
@@ -208,7 +208,7 @@ export default function LeaderboardPage() {
       </section>
 
       {/* ── Filter tabs ────────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div data-tour="lb:scope-tabs" className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
           {SCOPE_TABS.map(({ key, label, icon: Icon }) => (
             <button
@@ -264,7 +264,7 @@ export default function LeaderboardPage() {
       ) : (
         <>
           {/* ── Podium ───────────────────────────────────────────────────────── */}
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 pb-0 shadow-sm">
+          <section data-tour="lb:podium" className="rounded-3xl border border-slate-200 bg-white p-6 pb-0 shadow-sm">
             <div className="mx-auto grid max-w-2xl grid-cols-3 items-end gap-3 sm:gap-6">
               {[podium[1], podium[0], podium[2]].map((e, i) => {
                 if (!e) return <div key={i} />;
@@ -294,7 +294,7 @@ export default function LeaderboardPage() {
 
           {/* ── YOU card ─────────────────────────────────────────────────────── */}
           {myEntry && (
-            <section className="flex flex-wrap items-center gap-4 rounded-2xl border-2 border-orange/40 bg-orange-50/50 p-4">
+            <section data-tour="lb:you-card" className="flex flex-wrap items-center gap-4 rounded-2xl border-2 border-orange/40 bg-orange-50/50 p-4">
               <span className="rounded-lg bg-orange px-2 py-1 text-[11px] font-black text-white">YOU</span>
               <Avatar entry={myEntry} size={44} />
               <div className="min-w-0">
@@ -322,7 +322,7 @@ export default function LeaderboardPage() {
           )}
 
           {/* ── Table ────────────────────────────────────────────────────────── */}
-          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <section data-tour="lb:table" className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[720px] text-sm">
                 <thead>

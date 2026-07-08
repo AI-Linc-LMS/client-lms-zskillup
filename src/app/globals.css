@@ -782,6 +782,18 @@
 .float-card-3 { --card-rotate: -2deg; animation: float-slow 7s ease-in-out infinite 1.6s; }
 .float-card-4 { --card-rotate: 3deg;  animation: float-med  5.5s ease-in-out infinite 0.4s; }
 
+/* ── Marquees — horizontal recruiter ticker + vertical outcomes ticker ── */
+@keyframes marquee-x { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes marquee-y { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+.marquee-x { animation: marquee-x var(--marquee-dur, 36s) linear infinite; will-change: transform; }
+.marquee-y { animation: marquee-y var(--marquee-dur, 28s) linear infinite; will-change: transform; }
+/* Pause the belt on hover so a logo can be inspected (and its true colours shown). */
+.marquee-hover-pause:hover .marquee-x,
+.marquee-hover-pause:hover .marquee-y { animation-play-state: paused; }
+/* Soft fade at the belt edges so items slide in/out instead of hard-clipping. */
+.edge-fade-x { -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent); mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent); }
+.edge-fade-y { -webkit-mask-image: linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent); }
+
 /* ── Callout-soft ──────────────────────────────────────────── */
 .callout-soft {
   border: 1px dashed color-mix(in srgb, var(--color-accent) 35%, var(--color-line));

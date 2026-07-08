@@ -68,14 +68,14 @@ export function MockInterviewHome() {
   return (
     <div className="space-y-5">
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
+      <div data-tour="mi:stats" className="grid grid-cols-3 gap-3">
         <Stat icon={ClipboardList} label="Total" value={rows.length} tint="text-navy" />
         <Stat icon={CheckCircle2} label="Completed" value={completed.length} tint="text-green-600" />
         <Stat icon={Award} label="Avg score" value={avg} suffix="%" tint="text-orange" />
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1 text-sm font-semibold">
+      <div data-tour="mi:tabs" className="flex gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1 text-sm font-semibold">
         {(['new', 'previous'] as Tab[]).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={cn('flex-1 rounded-lg px-4 py-2 transition-colors', tab === t ? 'bg-white text-navy shadow-sm' : 'text-slate-500 hover:text-slate-700')}>
             {t === 'new' ? 'New interview' : `Previous${rows.length ? ` (${rows.length})` : ''}`}

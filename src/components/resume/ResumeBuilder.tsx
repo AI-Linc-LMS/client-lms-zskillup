@@ -255,7 +255,7 @@ export function ResumeBuilder() {
           {currentId && <span className="hidden shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700 sm:inline">Saved</span>}
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setShowAts(true)} className={cn('inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold hover:bg-slate-50', atsColor(ats))}>
+          <button data-tour="resume:ats" onClick={() => setShowAts(true)} className={cn('inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold hover:bg-slate-50', atsColor(ats))}>
             <Gauge className="size-4" /> ATS {ats}
           </button>
           <button onClick={openResumes} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">
@@ -269,14 +269,14 @@ export function ResumeBuilder() {
               Save as new
             </button>
           )}
-          <button onClick={download} disabled={downloading} className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-orange to-[#f5872f] px-4 py-2 text-sm font-bold text-white shadow-sm transition-all hover:shadow disabled:opacity-50">
+          <button data-tour="resume:save-export" onClick={download} disabled={downloading} className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-orange to-[#f5872f] px-4 py-2 text-sm font-bold text-white shadow-sm transition-all hover:shadow disabled:opacity-50">
             {downloading ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />} PDF
           </button>
         </div>
       </div>
 
       {/* Row 2: template picker + sample/clear */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+      <div data-tour="resume:templates" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <span className="inline-flex shrink-0 items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
             <LayoutTemplate className="size-3.5" /> Template
@@ -300,7 +300,7 @@ export function ResumeBuilder() {
             })}
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div data-tour="resume:starters" className="flex shrink-0 items-center gap-2">
           <button onClick={fillFromProfile} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">
             <UserRound className="size-4" /> From profile
           </button>
@@ -323,7 +323,7 @@ export function ResumeBuilder() {
             )}
           />
         </div>
-        <div className="lg:sticky lg:top-4 lg:self-start">
+        <div data-tour="resume:preview" className="lg:sticky lg:top-4 lg:self-start">
           <ResumePreview ref={pageRef} data={data} templateKey={template} />
         </div>
       </div>

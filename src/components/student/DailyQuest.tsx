@@ -33,7 +33,7 @@ export function DailyQuest() {
 
   if (!quest) {
     return (
-      <section className="quest-card">
+      <section className="quest-card" data-tour="dash:daily-quest">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-start gap-3">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-brand)] px-3 py-1 text-[11px] font-bold text-white shadow-sm">
@@ -62,7 +62,7 @@ export function DailyQuest() {
   const isMissed = quest.status === 'MISSED';
 
   return (
-    <section className="quest-card">
+    <section className="quest-card" data-tour="dash:daily-quest">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-start gap-3">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-brand)] px-3 py-1 text-[11px] font-bold text-white shadow-sm">

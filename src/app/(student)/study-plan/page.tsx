@@ -32,7 +32,7 @@ export default function StudyPlanPage() {
 
       <ProfileLockGate feature="Study Plan">
       {/* Hero */}
-      <section className="relative mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-[0_24px_60px_-30px_rgba(11,18,32,0.85)] sm:p-8">
+      <section data-tour="plan:hero" className="relative mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-[0_24px_60px_-30px_rgba(11,18,32,0.85)] sm:p-8">
         <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#f37021]/20 blur-3xl" />
         <p className="relative flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#ffb877]">
           <Sparkles className="size-3.5" /> Your study plan
@@ -42,7 +42,7 @@ export default function StudyPlanPage() {
           One focused queue from your weak topics, reviews and upcoming drives — so you always know the highest-impact next step.
         </p>
         {plan ? (
-          <div className="relative mt-5 flex flex-wrap gap-3">
+          <div data-tour="plan:readiness" className="relative mt-5 flex flex-wrap gap-3">
             <span className="rounded-2xl border border-white/15 bg-white/[0.06] px-4 py-2 text-sm font-bold backdrop-blur">
               Readiness <span className="ml-1 text-[#ffb877]">{plan.readiness}%</span>
             </span>
@@ -55,7 +55,7 @@ export default function StudyPlanPage() {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_22rem]">
         {/* Action queue */}
-        <section>
+        <section data-tour="plan:action-queue">
           <h2 className="mb-3 text-lg font-extrabold tracking-tight text-navy sm:text-xl">This week&apos;s plan</h2>
           {err ? (
             <p className="rounded-2xl border border-rose-200 bg-rose-50 p-5 text-sm text-rose-700">Could not load your study plan.</p>
@@ -100,7 +100,7 @@ export default function StudyPlanPage() {
         </section>
 
         {/* Trends */}
-        <aside>
+        <aside data-tour="plan:trend">
           <h2 className="mb-3 flex items-center gap-2 text-lg font-extrabold tracking-tight text-navy sm:text-xl">
             <TrendingUp className="size-5 text-indigo-500" /> Your trend
           </h2>

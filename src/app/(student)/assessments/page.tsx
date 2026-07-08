@@ -132,7 +132,7 @@ export default function AssessmentsPage() {
       <CalibrationLockGate feature="Assessments">
       {/* ── Premium navy hero with live stats ─────────────────────────────── */}
       <Reveal>
-        <section className="relative mt-4 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-sm sm:p-8">
+        <section data-tour="assess:hero" className="relative mt-4 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-sm sm:p-8">
           <span
             aria-hidden
             className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#f37021]/20 blur-3xl"
@@ -191,7 +191,7 @@ export default function AssessmentsPage() {
         <div className="mt-6 flex flex-col gap-6">
           {/* ── Month grid ──────────────────────────────────────────────── */}
           <Reveal className="order-2">
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <div data-tour="assess:calendar" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
@@ -321,7 +321,7 @@ export default function AssessmentsPage() {
           </Reveal>
 
           {/* ── Upcoming timeline ───────────────────────────────────────── */}
-          <aside className="order-1 space-y-3">
+          <aside data-tour="assess:upcoming" className="order-1 space-y-3">
             <h2 className="px-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
               {selectedDay ? fmtDate(`${selectedDay}T00:00:00`) : 'Upcoming drives'}
             </h2>
@@ -461,10 +461,10 @@ export default function AssessmentsPage() {
 
       {/* ── Past assessments + your ranking ──────────────────────────────── */}
       <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_20rem]">
-        <div className="min-w-0">
+        <div data-tour="assess:history" className="min-w-0">
           <MockHistory scope="assessment" />
         </div>
-        <aside className="min-w-0">
+        <aside data-tour="assess:ranking" className="min-w-0">
           <h2 className="mb-3 text-lg font-extrabold tracking-tight text-navy">Your ranking</h2>
           <MyRankingPanel />
         </aside>

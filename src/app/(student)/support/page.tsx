@@ -13,7 +13,7 @@ export default function SupportPage() {
       <Breadcrumb items={[{ label: 'Home', href: '/dashboard' }, { label: 'Help & Support' }]} />
 
       {/* Hero */}
-      <header className="night-hero rounded-2xl p-6 shadow-sm sm:p-8">
+      <header data-tour="support:hero" className="night-hero rounded-2xl p-6 shadow-sm sm:p-8">
         <div className="relative z-[1]">
           <div className="flex items-center gap-3">
             <div className="grid size-11 place-items-center rounded-xl bg-white/10 ring-1 ring-white/20 backdrop-blur">

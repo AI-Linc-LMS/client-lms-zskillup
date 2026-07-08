@@ -60,7 +60,7 @@ export function AuroraStats() {
   ];
 
   return (
-    <Stagger className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+    <Stagger data-tour="dash:stats" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
       {tiles.map((t) => {
         const Icon = t.Icon;
         return (

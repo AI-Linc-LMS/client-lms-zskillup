@@ -187,7 +187,7 @@ export default function ProfilePage() {
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Profile' }]} />
 
       {/* ── Hero header ──────────────────────────────────────────────────── */}
-      <section className="relative mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-[0_24px_60px_-30px_rgba(11,18,32,0.85)] sm:p-7">
+      <section data-tour="profile:hero" className="relative mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-[0_24px_60px_-30px_rgba(11,18,32,0.85)] sm:p-7">
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div className="absolute -left-1/4 -top-1/2 size-[40vw] rounded-full bg-[#f37021]/20 blur-[110px]" />
           <div className="absolute -right-1/4 -bottom-1/2 size-[36vw] rounded-full bg-[#2563eb]/20 blur-[110px]" />
@@ -218,7 +218,7 @@ export default function ProfilePage() {
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_24rem]">
         {/* ── Edit form (grouped) ────────────────────────────────────────── */}
         <div className="space-y-5">
-          <SectionCard icon={User} title="Personal" subtitle="How we address you and reach out.">
+          <SectionCard data-tour="profile:personal" icon={User} title="Personal" subtitle="How we address you and reach out.">
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Full name" done={!!v.fullName.trim()}>
                 <input value={v.fullName} onChange={(e) => set('fullName', e.target.value)} className={inputCls} placeholder="Your name" />
@@ -229,7 +229,7 @@ export default function ProfilePage() {
             </div>
           </SectionCard>
 
-          <SectionCard icon={GraduationCap} title="Academic" subtitle="Your college and where you are in your degree.">
+          <SectionCard data-tour="profile:academic" icon={GraduationCap} title="Academic" subtitle="Your college and where you are in your degree.">
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Course / degree" done={!!v.course.trim()}>
                 <input value={v.course} onChange={(e) => set('course', e.target.value)} placeholder="B.Tech CSE" className={inputCls} />
@@ -256,7 +256,7 @@ export default function ProfilePage() {
             </div>
           </SectionCard>
 
-          <SectionCard icon={Sparkles} title="Career" subtitle="Skills and target roles power your recommendations + resume.">
+          <SectionCard data-tour="profile:career" icon={Sparkles} title="Career" subtitle="Skills and target roles power your recommendations + resume.">
             <SkillsInput skills={v.skills} onAdd={addSkill} onRemove={(s) => set('skills', v.skills.filter((x) => x !== s))} />
             <div className="mt-5">
               <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Target roles</p>
@@ -286,7 +286,7 @@ export default function ProfilePage() {
         {/* ── Aside ──────────────────────────────────────────────────────── */}
         <aside className="space-y-4">
           {completion < 100 && (
-            <div className="rounded-3xl border border-orange/25 bg-gradient-to-b from-orange/[0.06] to-white p-5 shadow-sm">
+            <div data-tour="profile:completion" className="rounded-3xl border border-orange/25 bg-gradient-to-b from-orange/[0.06] to-white p-5 shadow-sm">
               <h2 className="flex items-center justify-between text-sm font-bold text-navy">
                 Profile completion
                 <span className="rounded-full bg-orange/15 px-2 py-0.5 text-[11px] font-bold tabular-nums text-orange">{completion}%</span>
@@ -386,14 +386,16 @@ function SectionCard({
   title,
   subtitle,
   children,
+  'data-tour': dataTour,
 }: {
   icon: typeof User;
   title: string;
   subtitle: string;
   children: React.ReactNode;
+  'data-tour'?: string;
 }) {
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section data-tour={dataTour} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="mb-4 flex items-center gap-3">
         <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-orange/10 text-orange">
           <Icon className="size-[18px]" />
