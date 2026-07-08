@@ -192,12 +192,21 @@ export default function AssessmentCenterPage() {
           {form.mode === 'COMPANY' && (
             <label className="text-xs font-semibold text-slate-600">
               Company
-              <input list="tpo-companies" value={form.companySlug} onChange={(e) => setForm((f) => ({ ...f, companySlug: e.target.value }))} className={`mt-1 ${inputCls}`} placeholder="company slug" />
-              <datalist id="tpo-companies">
+              <select
+                value={form.companySlug}
+                onChange={(e) => setForm((f) => ({ ...f, companySlug: e.target.value }))}
+                className={`mt-1 ${inputCls}`}
+              >
+                <option value="">Select a company…</option>
                 {companies.map((c) => (
-                  <option key={c.slug} value={c.slug}>{c.name}</option>
+                  <option key={c.slug} value={c.slug}>
+                    {c.name}
+                  </option>
                 ))}
-              </datalist>
+              </select>
+              <span className="mt-1 block text-[11px] font-normal text-slate-400">
+                Questions are drawn from this company&apos;s pattern &amp; previous papers.
+              </span>
             </label>
           )}
           {form.mode === 'SECTIONAL' && (
