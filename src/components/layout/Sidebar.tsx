@@ -3,8 +3,10 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, useReducedMotion } from 'framer-motion';
+import { Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { navForPath } from './nav-config';
+import { useProfileCompletion } from '@/hooks/useProfileCompletion';
+import { navForPath, PROFILE_GATED_HREFS } from './nav-config';
 
 /**
  * Workspace sidebar — route-aware (student / super-admin / TPO). Pure
@@ -21,6 +23,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const sections = navForPath(pathname);
   const reduce = useReducedMotion();
+  const { complete: profileComplete } = useProfileCompletion();
 
   return (
     <aside className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-60 shrink-0 flex-col self-start border-r border-[var(--color-line)] bg-white md:flex">
@@ -45,6 +48,7 @@ export function Sidebar() {
             <ul className="space-y-0.5">
               {section.items.map((item) => {
                 const active = pathname === item.href || pathname.startsWith(item.href + '/');
+                const locked = !profileComplete && PROFILE_GATED_HREFS.has(item.href);
                 const Icon = item.icon;
                 return (
                   <li key={item.href}>
@@ -106,6 +110,12 @@ export function Sidebar() {
                         <Icon className="size-4" />
                       </span>
                       <span className="relative z-10 flex-1 truncate">{item.label}</span>
+                      {locked && (
+                        <Lock
+                          className="relative z-10 size-3.5 shrink-0 text-slate-300"
+                          aria-label="Locked until your profile is complete"
+                        />
+                      )}
                     </Link>
                   </li>
                 );
