@@ -591,21 +591,41 @@ function MockRunningView({
     [start.questions, questionStatus, setIdx],
   );
 
-  // NTA-style sections: MCQ → "Quiz", CODING → "Coding". Each holds its
-  // questions with their GLOBAL index so the palette + nav can jump correctly.
+  // NTA-style sections: MCQs grouped by their ROOT SECTION (Quant / Logical /
+  // Verbal / Technical), coding last. Each section holds its questions with their
+  // GLOBAL index so the palette + nav can jump correctly. Falls back to a single
+  // "Quiz" section for mocks whose questions carry no section (older payloads).
   const sections = useMemo(() => {
+    const SHORT: Record<string, string> = {
+      'Numerical Ability': 'Quant',
+      'Logical Reasoning': 'Logical Reasoning',
+      'Verbal Ability': 'Verbal',
+      'Technical MCQs': 'Technical',
+    };
     const items = start.questions.map((q, i) => ({ q, i }));
-    const out: Array<{ key: 'quiz' | 'coding'; label: string; items: typeof items }> = [];
-    const quiz = items.filter((x) => x.q.type !== 'CODING');
-    const coding = items.filter((x) => x.q.type === 'CODING');
-    if (quiz.length) out.push({ key: 'quiz', label: 'Quiz', items: quiz });
-    if (coding.length) out.push({ key: 'coding', label: 'Coding', items: coding });
-    return out;
+    const order: string[] = [];
+    const byKey = new Map<string, typeof items>();
+    for (const it of items) {
+      const key = it.q.type === 'CODING' ? 'Coding' : it.q.section || 'Quiz';
+      if (!byKey.has(key)) {
+        byKey.set(key, []);
+        order.push(key);
+      }
+      byKey.get(key)!.push(it);
+    }
+    order.sort((a, b) => Number(a === 'Coding') - Number(b === 'Coding')); // coding always last
+    return order.map((key) => ({ key, label: SHORT[key] ?? key, items: byKey.get(key)! }));
   }, [start.questions]);
 
-  const activeKey: 'quiz' | 'coding' = question?.type === 'CODING' ? 'coding' : 'quiz';
+  const activeKey = question
+    ? question.type === 'CODING'
+      ? 'Coding'
+      : question.section || 'Quiz'
+    : (sections[0]?.key ?? 'Quiz');
+  const activeSection = sections.find((s) => s.key === activeKey);
+  const activeLabel = activeSection?.label ?? activeKey;
   const activeSectionIdx = Math.max(0, sections.findIndex((s) => s.key === activeKey));
-  const activeItems = sections.find((s) => s.key === activeKey)?.items ?? [];
+  const activeItems = activeSection?.items ?? [];
   const posInSec = activeItems.findIndex((x) => x.i === idx);
   const isLastInSection = posInSec >= activeItems.length - 1;
   const isLastSection = activeSectionIdx >= sections.length - 1;
@@ -636,26 +656,41 @@ function MockRunningView({
         </div>
       </header>
 
-      {/* Section tabs (NTA-style) */}
+      {/* Section tabs (NTA-style) — one per section, coding last, with live
+          per-section progress. Horizontally scrollable so 5 tabs fit on phones. */}
       {sections.length > 1 ? (
-        <div className="sticky top-14 z-10 flex gap-1.5 border-b border-slate-200 bg-white px-4 py-2 sm:px-6">
+        <div className="scroll-soft sticky top-14 z-10 flex gap-2 overflow-x-auto border-b border-slate-200 bg-white px-4 py-2.5 sm:px-6">
           {sections.map((s) => {
             const done = s.items.filter((x) => isAnswered(x.q)).length;
             const active = s.key === activeKey;
+            const complete = s.items.length > 0 && done === s.items.length;
             return (
               <button
                 key={s.key}
                 type="button"
                 onClick={() => setIdx(() => s.items[0].i)}
+                aria-current={active ? 'true' : undefined}
                 className={cn(
-                  'flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-sm font-bold transition-colors',
-                  active ? 'bg-navy text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200',
+                  'relative flex shrink-0 items-center gap-2 overflow-hidden rounded-xl px-4 py-2 text-sm font-bold transition-all',
+                  active
+                    ? 'bg-gradient-to-r from-[#f7a14e] to-[#f37021] text-white shadow-[0_8px_20px_-8px_rgba(243,112,33,0.7)]'
+                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200',
                 )}
               >
                 {s.label}
-                <span className={cn('rounded-full px-1.5 py-0.5 text-[10px] font-bold', active ? 'bg-white/20 text-white' : 'bg-white text-slate-500')}>
+                <span
+                  className={cn(
+                    'rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums',
+                    active ? 'bg-white/25 text-white' : complete ? 'bg-emerald-100 text-emerald-700' : 'bg-white text-slate-500',
+                  )}
+                >
                   {done}/{s.items.length}
                 </span>
+                <span
+                  aria-hidden
+                  className={cn('absolute inset-x-0 bottom-0 h-0.5 origin-left transition-transform duration-500', active ? 'bg-white/50' : 'bg-orange/50')}
+                  style={{ transform: `scaleX(${s.items.length ? done / s.items.length : 0})` }}
+                />
               </button>
             );
           })}
@@ -674,7 +709,7 @@ function MockRunningView({
         <article className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="flex items-center justify-between gap-3">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-              {sections.length > 1 ? `${activeKey === 'coding' ? 'Coding' : 'Quiz'} · ` : ''}
+              {sections.length > 1 ? `${activeLabel} · ` : ''}
               Question {posInSec + 1} of {activeItems.length}
             </p>
             <div className="flex items-center gap-2">
@@ -784,7 +819,7 @@ function MockRunningView({
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                {sections.length > 1 ? (activeKey === 'coding' ? 'Coding' : 'Quiz') : 'Questions'}
+                {sections.length > 1 ? activeLabel : 'Questions'}
               </p>
               <span className="text-[11px] font-bold text-slate-500">{answeredCount}/{total} answered</span>
             </div>

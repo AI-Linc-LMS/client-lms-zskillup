@@ -43,6 +43,9 @@ export interface ApiMockQuestion {
   type: 'MCQ' | 'MULTI_SELECT' | 'NUMERIC' | 'CODING';
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   stem: string;
+  /** Root section name (e.g. "Numerical Ability"); "Coding" for coding items.
+   *  Drives the per-section tabs in the runner. */
+  section?: string | null;
   /** PYQ tag — company tag ids + years this question was asked in. */
   companyIds?: string[];
   yearTags?: number[];
