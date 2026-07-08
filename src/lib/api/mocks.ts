@@ -170,6 +170,8 @@ export interface ApiMockReport extends ApiMockResult {
   topicBreakdown: ApiMockTopicBreakdown[];
   questions: ApiMockReviewQuestion[];
   proctoring?: ApiMockProctoring | null;
+  /** True when this attempt is the one-time calibration assessment (renders the recommendation-centric results). */
+  isCalibration?: boolean;
 }
 
 export interface CreateCustomMockBody {

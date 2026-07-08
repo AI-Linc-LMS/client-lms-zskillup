@@ -46,6 +46,7 @@ import { MockCodingPanel } from '@/components/practice/MockCodingPanel';
 import { PyqTag } from '@/components/practice/PyqTag';
 import { useProctoring } from '@/lib/proctoring/useProctoring';
 import { ProctorOverlay } from '@/components/proctoring/ProctorOverlay';
+import { CalibrationResults } from '@/components/student/CalibrationResults';
 
 /**
  * Mock-test runner — the Sprint 4 timed assessment surface (Zone B → focused
@@ -288,6 +289,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
   }
 
   if (phase === 'report' && report) {
+    if (report.isCalibration) return <CalibrationResults report={report} reward={reward} />;
     return <MockReportView report={report} reward={reward} kind={proctored ? 'assessment' : 'test'} />;
   }
 
@@ -892,7 +894,7 @@ function MockRunningView({
 
 // ── Report view ─────────────────────────────────────────────────────────────
 
-function MockReportView({
+export function MockReportView({
   report,
   reward = null,
   kind = 'test',
@@ -1228,5 +1230,6 @@ export function MockReportLoader({ attemptId }: { attemptId: string }) {
     );
   }
 
+  if (report.isCalibration) return <CalibrationResults report={report} />;
   return <MockReportView report={report} />;
 }
