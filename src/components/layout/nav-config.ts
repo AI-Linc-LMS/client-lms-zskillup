@@ -1,4 +1,5 @@
 import {
+  Award,
   BarChart3,
   Brain,
   Building2,
@@ -87,6 +88,7 @@ export const STUDENT_NAV: NavSection[] = [
     items: [
       { label: 'Resume Builder', href: '/resume-builder', icon: FileText },
       { label: 'Mock Interview', href: '/mock-interview', icon: MessageSquare },
+      { label: 'Certificates', href: '/certificates', icon: Award },
     ],
   },
   {
