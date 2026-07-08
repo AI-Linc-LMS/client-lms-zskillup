@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import {
   ArrowRight,
-  BadgeCheck,
   BookOpen,
   Brain,
   Calculator,
@@ -16,7 +15,6 @@ import {
   LineChart,
   LogIn,
   MessageSquare,
-  PlayCircle,
   Quote,
   Sparkles,
   Star,
@@ -29,7 +27,7 @@ import { PublicMobileMenu } from '@/components/marketing/PublicMobileMenu';
 import { PublicAuthCta } from '@/components/marketing/PublicAuthCta';
 import { BrandLogo } from '@/components/layout/BrandLogo';
 import { HomeFeaturedTracks } from '@/components/marketing/HomeFeaturedTracks';
-import { HomeTopCohort } from '@/components/marketing/HomeTopCohort';
+import { GamifiedShowcase } from '@/components/marketing/GamifiedShowcase';
 import { HomeBlogSection } from '@/components/marketing/HomeBlogSection';
 import { VideoPlaceholder } from '@/components/media/VideoPlaceholder';
 import { getPublicBlogs, getPublicTestimonials } from '@/lib/server/public-content';
@@ -37,8 +35,6 @@ import {
   LANDING_FOOTER,
   LANDING_HERO_STATS,
   LANDING_HREFS,
-  LANDING_STREAK_DEMO,
-  LANDING_TODAYS_FOCUS,
 } from '@/lib/landing-config';
 
 const HERO_STATS = LANDING_HERO_STATS;
@@ -560,97 +556,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Gamified prep (redesigned) ────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#0b1220] via-[#101d4a] to-[#1e3a8a] py-16 text-white lg:py-24">
-        <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-[#f37021]/20 blur-3xl" />
-        <div aria-hidden className="pointer-events-none absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-white/[0.07] blur-3xl" />
-        <div
-          aria-hidden
-          className="absolute inset-0 opacity-[0.05]"
-          style={{
-            backgroundImage: 'radial-gradient(rgb(255 255 255 / 0.8) 1px, transparent 1px)',
-            backgroundSize: '22px 22px',
-          }}
-        />
-        <div className="relative mx-auto grid max-w-[1400px] items-center gap-10 px-5 md:px-8 lg:grid-cols-[1fr_1.1fr]">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-white/85">
-              <Sparkles className="h-3.5 w-3.5 text-amber-300" /> Gamified prep
-            </span>
-            <h2 className="mt-5 text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-4xl">
-              Daily quests, streaks, levels — prep becomes a habit, not a grind
-            </h2>
-            <p className="mt-4 max-w-lg text-base text-white/75">
-              Earn XP for every drill. Unlock badges, level up, and climb the national leaderboard.
-              The dopamine loop does the work — you just show up.
-            </p>
-
-            <ul className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {[
-                { icon: Flame, label: 'Streaks that reward showing up' },
-                { icon: Zap, label: 'Daily quests with XP rewards' },
-                { icon: Trophy, label: 'College & national leaderboard' },
-                { icon: BadgeCheck, label: 'Earnable concept badges' },
-              ].map((row) => (
-                <li
-                  key={row.label}
-                  className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 backdrop-blur-sm"
-                >
-                  <row.icon className="h-5 w-5 shrink-0 text-amber-300" aria-hidden />
-                  <span className="text-sm font-semibold text-white/90">{row.label}</span>
-                </li>
-              ))}
-            </ul>
-
-            <Link href="/leaderboard" className="btn-brand mt-7 inline-flex text-sm">
-              <Trophy className="h-4 w-4" /> See live leaderboard
-            </Link>
-          </div>
-
-          {/* Preview cluster on glassy cards */}
-          <div className="relative grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border border-white/12 bg-white/[0.07] p-5 backdrop-blur-sm">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/55">
-                {LANDING_TODAYS_FOCUS.eyebrow}
-              </p>
-              <p className="mt-1 text-base font-bold tracking-tight text-white">{LANDING_TODAYS_FOCUS.topic}</p>
-              <p className="mt-1 text-xs text-white/60">{LANDING_TODAYS_FOCUS.meta}</p>
-              <Link href={LANDING_TODAYS_FOCUS.ctaHref} className="btn-brand mt-3 inline-flex text-xs">
-                <PlayCircle className="h-3.5 w-3.5" /> {LANDING_TODAYS_FOCUS.ctaLabel}
-              </Link>
-            </div>
-
-            <div className="rounded-2xl border border-white/12 bg-white/[0.07] p-5 backdrop-blur-sm">
-              <div className="flex items-center justify-between">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-white/55">
-                  Active streak
-                </p>
-                <span className="streak-flame" style={{ padding: '0.25rem 0.6rem', fontSize: '0.66rem' }}>
-                  <Flame className="h-3 w-3" />
-                  {LANDING_STREAK_DEMO.days}d
-                </span>
-              </div>
-              <div className="mt-4 flex h-12 items-end gap-1.5">
-                {LANDING_STREAK_DEMO.week.map((h, i) => (
-                  <div key={i} className="flex flex-1 flex-col items-center gap-1">
-                    <div
-                      className="w-full rounded-md bg-gradient-to-t from-[#f37021] to-[#fbbf24]"
-                      style={{ height: `${(h / 100) * 36}px` }}
-                    />
-                    <span className="text-[9px] font-semibold text-white/50">
-                      {LANDING_STREAK_DEMO.labels[i]}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="sm:col-span-2">
-              <HomeTopCohort />
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ── Gamified prep — animated showcase (backdrop + varied scroll animations) ── */}
+      <GamifiedShowcase />
 
       {/* ── Outcomes — vertical testimonial ticker ────────────────────────── */}
       <section className="bg-white py-16 lg:py-20">
