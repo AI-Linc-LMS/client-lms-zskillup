@@ -48,7 +48,7 @@ export function ResumeForm({ data, onChange, sectionAction }: Props) {
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" data-tour="resume:editor">
       {/* Basic info */}
       <Section title="Basic Information" icon={<User className="size-4" />} defaultOpen>
         <div className="grid grid-cols-2 gap-3">

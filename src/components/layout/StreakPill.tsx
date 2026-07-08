@@ -76,6 +76,7 @@ export function StreakPill() {
 
   return (
     <motion.span
+      data-tour="chrome:streak"
       initial={reduce ? false : { opacity: 0, scale: 0.85, y: -4 }}
       animate={
         celebrate && !reduce

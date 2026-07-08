@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { ArrowRight, ClipboardCheck, Clock, Layers, ShieldOff } from 'lucide-react';
 import { useCalibrationStatus } from '@/hooks/useCalibrationStatus';
+import { useGuideSeen } from '@/hooks/useGuideSeen';
+import { useGuide } from '@/components/guide/GuideProvider';
 import { Modal } from '@/components/ui/Modal';
 
 /**
@@ -15,6 +17,8 @@ import { Modal } from '@/components/ui/Modal';
  */
 export function CalibrationPrompt() {
   const { loading, required, mockTestId } = useCalibrationStatus();
+  const { loading: guideLoading, seen: guideSeen } = useGuideSeen();
+  const { active: guideActive } = useGuide();
   const router = useRouter();
   const pathname = usePathname();
   const [snoozed, setSnoozed] = useState(false);
@@ -24,7 +28,10 @@ export function CalibrationPrompt() {
     if (pathname === '/dashboard') setSnoozed(false);
   }, [pathname]);
 
-  if (loading || !required || snoozed) return null;
+  // Guide-first: hold the calibration prompt until the platform guide has been
+  // seen or dismissed (and never while the tour is actively running), so a
+  // brand-new student is oriented before being asked — one overlay at a time.
+  if (loading || guideLoading || !guideSeen || guideActive || !required || snoozed) return null;
 
   const start = () => {
     setSnoozed(true);

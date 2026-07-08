@@ -285,7 +285,7 @@ export function TopicAccuracyPanels() {
   return (
     <>
       {/* Weak topics */}
-      <div>
+      <div data-tour="practice:weak-topics">
         <SectionLabel icon={TrendingDown} eyebrow="Focus here">Your weak topics</SectionLabel>
         {weak.length === 0 ? (
           <Reveal>

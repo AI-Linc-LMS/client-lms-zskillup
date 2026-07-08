@@ -141,7 +141,7 @@ export function AvatarMenu({ initials = '··' }: { initials?: string }) {
   const showProfile = isPreviewing || sessionRole === 'STUDENT';
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative" ref={ref} data-tour="chrome:account">
       <button
         type="button"
         aria-haspopup="menu"

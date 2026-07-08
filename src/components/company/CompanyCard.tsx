@@ -64,6 +64,7 @@ export function CompanyCard({ company }: { company: CompanyCardData }) {
       className="group relative h-full"
     >
       <Link
+        data-tour="company:card"
         href={`/dashboard/company/${company.slug}`}
         className="relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white shadow-[0_10px_34px_-20px_rgba(15,23,42,0.4)] transition-shadow duration-300 hover:shadow-[0_36px_70px_-30px_rgba(15,23,42,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/40 focus-visible:ring-offset-2"
       >

@@ -22,7 +22,7 @@ export default function StudentLiveSessionsPage() {
     <div className="space-y-6">
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Live Sessions' }]} />
 
-      <header>
+      <header data-tour="live:intro">
         <h1 className="flex items-center gap-2 text-2xl font-black tracking-tight text-navy">
           <Video className="size-6 text-orange" /> Live Sessions
         </h1>
@@ -39,7 +39,7 @@ export default function StudentLiveSessionsPage() {
       ) : (
         <>
           {data.upcoming.length > 0 && (
-            <section className="space-y-3">
+            <section className="space-y-3" data-tour="live:upcoming">
               <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400">Upcoming</h2>
               <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
                 {data.upcoming.map((s) => <StudentCard key={s.id} s={s} />)}
@@ -47,7 +47,7 @@ export default function StudentLiveSessionsPage() {
             </section>
           )}
           {data.past.length > 0 && (
-            <section className="space-y-3">
+            <section className="space-y-3" data-tour="live:past">
               <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400">Past</h2>
               <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
                 {data.past.map((s) => <StudentCard key={s.id} s={s} past />)}
@@ -65,7 +65,7 @@ function StudentCard({ s, past }: { s: LiveSessionDto; past?: boolean }) {
   const recording = safeHttpUrl(s.recordingUrl);
   const isLive = s.status === 'LIVE';
   return (
-    <div className={cn('rounded-2xl border bg-white p-5 shadow-sm', isLive ? 'border-red-200 ring-1 ring-red-100' : 'border-slate-200')}>
+    <div data-tour="live:session-card" className={cn('rounded-2xl border bg-white p-5 shadow-sm', isLive ? 'border-red-200 ring-1 ring-red-100' : 'border-slate-200')}>
       <div className="flex flex-wrap items-center gap-2">
         <StatusBadge status={s.status} />
         <AudiencePill audience={s.audience} companyName={s.companyName} />

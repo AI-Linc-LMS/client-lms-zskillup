@@ -99,7 +99,7 @@ export default function CommunityPage() {
       <div className="mt-2 grid gap-6 xl:grid-cols-[1fr_18rem]">
         <div className="min-w-0 space-y-5">
           {/* Header */}
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div data-tour="community:new-post" className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h1 className="flex items-center gap-2 text-2xl font-black tracking-tight text-navy">
                 <MessagesSquare className="size-6 text-orange" /> Community
@@ -128,7 +128,7 @@ export default function CommunityPage() {
           </button>
 
           {/* Filters */}
-          <div className="space-y-3">
+          <div data-tour="community:filters" className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
               {typeTabs.map((t) => (
                 <button
@@ -200,7 +200,7 @@ export default function CommunityPage() {
               </button>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div data-tour="community:feed" className="space-y-3">
               {posts.map((p) => (
                 <PostCard key={p.id} post={p} onDeleted={(id) => setPosts((prev) => prev.filter((x) => x.id !== id))} />
               ))}
@@ -219,7 +219,7 @@ export default function CommunityPage() {
 
         {/* Right rail */}
         <aside className="hidden space-y-4 xl:block">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div data-tour="community:stats" className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400">Community</h2>
             <div className="mt-3 grid grid-cols-3 gap-2 text-center">
               <Stat label="Posts" value={stats?.totalPosts ?? 0} />
@@ -229,7 +229,7 @@ export default function CommunityPage() {
           </div>
 
           {stats && stats.topTags.length > 0 && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div data-tour="community:tags" className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
               <h2 className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-slate-400">
                 <Sparkles className="size-3.5" /> Popular tags
               </h2>

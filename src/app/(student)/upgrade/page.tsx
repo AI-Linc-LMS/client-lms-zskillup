@@ -117,7 +117,7 @@ export default function UpgradePage() {
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Upgrade' }]} />
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section className="relative mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-[0_24px_60px_-30px_rgba(11,18,32,0.85)] sm:p-8">
+      <section data-tour="upgrade:hero" className="relative mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-[0_24px_60px_-30px_rgba(11,18,32,0.85)] sm:p-8">
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div className="absolute -left-1/4 -top-1/2 size-[42vw] rounded-full bg-[#f37021]/25 blur-[120px]" />
           <div className="absolute -right-1/4 -bottom-1/2 size-[38vw] rounded-full bg-[#2563eb]/20 blur-[120px]" />
@@ -176,7 +176,7 @@ export default function UpgradePage() {
       )}
 
       {/* ── Full platform plans ──────────────────────────────────────────── */}
-      <section className="mt-8">
+      <section data-tour="upgrade:platform-plans" className="mt-8">
         <div className="flex items-end justify-between gap-3">
           <div>
             <h2 className="text-lg font-black tracking-tight text-navy sm:text-xl">Full platform</h2>
@@ -247,7 +247,7 @@ export default function UpgradePage() {
 
       {/* ── Buy just what you need ───────────────────────────────────────── */}
       {!hasPlatform && (
-        <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section data-tour="upgrade:mini-plans" className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-black tracking-tight text-navy">Or buy just what you need</h2>
           <p className="text-sm text-slate-500">
             You get the first 5 questions of any topic free. Unlock more from the topic or company page.
@@ -286,7 +286,7 @@ export default function UpgradePage() {
 
       {/* ── Purchase history ─────────────────────────────────────────────── */}
       {sub && sub.history.length > 0 && (
-        <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section data-tour="upgrade:history" className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-400">
             <Clock className="size-4 text-slate-400" /> Purchase history
           </h2>

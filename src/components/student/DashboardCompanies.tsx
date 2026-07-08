@@ -41,7 +41,7 @@ export function DashboardCompanies() {
   if (companies.length === 0) return null;
 
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div data-tour="dash:companies" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-2xl font-black tracking-tight text-navy">
           <Building2 className="size-5 text-orange" /> Company drives

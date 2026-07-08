@@ -48,10 +48,19 @@ const itemV: Variants = {
 };
 
 /** A grid/list whose children animate in one after another on scroll. */
-export function Stagger({ children, className }: { children: ReactNode; className?: string }) {
+export function Stagger({
+  children,
+  className,
+  'data-tour': dataTour,
+}: {
+  children: ReactNode;
+  className?: string;
+  'data-tour'?: string;
+}) {
   return (
     <motion.div
       className={className}
+      data-tour={dataTour}
       variants={containerV}
       initial="hidden"
       whileInView="show"

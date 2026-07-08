@@ -83,7 +83,7 @@ export function StudentSupport() {
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
       {/* Quick help */}
-      <div>
+      <div data-tour="support:topics">
         <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-widest text-slate-400">What do you need help with?</p>
         <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
           {HELP_TOPICS.map((h) => {
@@ -105,7 +105,7 @@ export function StudentSupport() {
       </div>
 
       {/* Tickets header */}
-      <div className="flex items-center justify-between gap-3">
+      <div data-tour="support:new-ticket" className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-bold text-navy">Your tickets</h2>
           {openCount > 0 && <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700">{openCount} open</span>}
@@ -120,7 +120,7 @@ export function StudentSupport() {
 
       {error && <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div data-tour="support:tickets" className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         {loading ? (
           <div className="flex items-center justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-400" /></div>
         ) : tickets.length === 0 ? (

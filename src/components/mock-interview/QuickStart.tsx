@@ -96,7 +96,7 @@ export function QuickStart() {
       )}
 
       {/* Topic or job role */}
-      <div>
+      <div data-tour="mi:focus">
         <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
           <label className="text-xs font-semibold uppercase tracking-widest text-slate-400">
             {focus === 'role' ? 'Interview for a role' : 'Practice a topic'}
@@ -180,7 +180,7 @@ export function QuickStart() {
       </div>
 
       {/* Style */}
-      <div>
+      <div data-tour="mi:style">
         <label className="mb-2.5 block text-xs font-semibold uppercase tracking-widest text-slate-400">Interview style</label>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           {TYPES.map((t) => {
@@ -255,7 +255,7 @@ export function QuickStart() {
       {error && <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
 
       {/* Summary + CTA */}
-      <div className="flex flex-col gap-4 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
+      <div data-tour="mi:start" className="flex flex-col gap-4 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-slate-500">
           <span className="font-semibold text-navy">{effectiveTopic || 'Your topic'}</span> · {interviewType} · {difficulty} ·{' '}
           <span className="whitespace-nowrap">~{estQuestions} questions</span>

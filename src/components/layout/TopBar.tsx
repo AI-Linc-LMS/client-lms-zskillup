@@ -10,6 +10,7 @@ import { ExploreMenu } from './ExploreMenu';
 import { StreakPill } from './StreakPill';
 import { TopBarSearch } from './TopBarSearch';
 import { NotificationsBell } from './NotificationsBell';
+import { GuideLauncher } from './GuideLauncher';
 import { CartButton } from '@/components/billing/CartProvider';
 import { workspaceLabelForPath } from './nav-config';
 
@@ -85,6 +86,7 @@ export function TopBar() {
       >
         <StreakPill />
         <CartButton />
+        {isStudentZone ? <GuideLauncher /> : null}
         <NotificationsBell />
         <span aria-hidden className="mx-0.5 hidden h-6 w-px bg-slate-200/80 sm:block" />
         <AvatarMenu />
