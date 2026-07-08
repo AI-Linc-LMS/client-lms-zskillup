@@ -12,7 +12,7 @@ export function CodingBlock({ topics }: { topics: CodingTopic[] }) {
   const Icon = CODING_META.icon;
   const a = ACCENT_CLASS[CODING_META.accent];
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(99,102,241,0.25)]">
+    <div data-tour="aswish:coding" className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(99,102,241,0.25)]">
       <span aria-hidden className="pointer-events-none absolute -right-10 -top-12 size-32 rounded-full bg-indigo-400/10 blur-2xl" />
       <div className="relative flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">

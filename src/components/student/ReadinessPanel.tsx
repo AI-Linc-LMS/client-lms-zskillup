@@ -105,7 +105,15 @@ const COMP_ICON: Record<string, LucideIcon> = {
   Coverage: Compass,
 };
 
-export function ReadinessPanel({ compact = false }: { compact?: boolean }) {
+export function ReadinessPanel({
+  compact = false,
+  tour,
+}: {
+  compact?: boolean;
+  /** Which route this instance renders on — scopes the guide `data-tour` anchors
+   *  so the shared panel doesn't collide across /dashboard and /performance. */
+  tour?: 'dashboard' | 'performance';
+}) {
   const [data, setData] = useState<Readiness | null>(null);
   const [companies, setCompanies] = useState<ApiCompany[]>([]);
   const [err, setErr] = useState(false);
@@ -129,9 +137,15 @@ export function ReadinessPanel({ compact = false }: { compact?: boolean }) {
   const rdyBySlug = new Map(data.companies.map((co) => [co.slug, co]));
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div
+      data-tour={tour === 'dashboard' ? 'dash:readiness' : undefined}
+      className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+    >
       {/* ── Navy premium hero band ──────────────────────────────────────── */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 sm:p-8">
+      <div
+        data-tour={tour === 'performance' ? 'perf:readiness-hero' : undefined}
+        className="relative overflow-hidden bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 sm:p-8"
+      >
         <span aria-hidden className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full opacity-25 blur-3xl" style={{ background: c }} />
         <span aria-hidden className="pointer-events-none absolute -bottom-20 left-1/4 size-56 rounded-full bg-[#2563eb]/20 blur-3xl" />
         <div className="relative flex items-center justify-between gap-2">
@@ -197,7 +211,7 @@ export function ReadinessPanel({ compact = false }: { compact?: boolean }) {
         <div className="space-y-6 p-6">
           {/* company readiness — one card per PUBLISHED company (logo + score) */}
           {companies.length ? (
-            <div>
+            <div data-tour={tour === 'performance' ? 'perf:company-readiness' : undefined}>
               <h3 className="mb-3 text-2xl font-black tracking-tight text-navy">Company readiness</h3>
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                 {companies.map((co) => {
@@ -223,7 +237,7 @@ export function ReadinessPanel({ compact = false }: { compact?: boolean }) {
 
           {/* topic mastery — heatmap chips */}
           {data.topics.length ? (
-            <div>
+            <div data-tour={tour === 'performance' ? 'perf:topic-mastery' : undefined}>
               <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Topic mastery</p>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {data.topics.slice(0, 10).map((t, i) => (

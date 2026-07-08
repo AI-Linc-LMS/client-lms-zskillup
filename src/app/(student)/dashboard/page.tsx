@@ -42,7 +42,7 @@ export default function StudentDashboardPage() {
             <CalibrationRecommendations />
           </Reveal>
           <Reveal>
-            <ReadinessPanel />
+            <ReadinessPanel tour="dashboard" />
           </Reveal>
           <Reveal>
             <PerformanceParticipation />

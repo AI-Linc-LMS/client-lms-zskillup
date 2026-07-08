@@ -106,7 +106,7 @@ export function PracticePicker({
   return (
     <div className="space-y-8">
       {/* search bar */}
-      <div className="relative max-w-xl">
+      <div data-tour="practice:search" className="relative max-w-xl">
         <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
         <input
           value={query}
@@ -124,7 +124,7 @@ export function PracticePicker({
 
       {/* By company */}
       {filteredCompanies.length > 0 ? (
-        <div>
+        <div data-tour="practice:by-company">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-violet-600 ring-1 ring-inset ring-violet-100">
             <Building2 className="size-3.5" /> By company
           </span>
@@ -148,7 +148,7 @@ export function PracticePicker({
 
       {/* By section → topics */}
       {filteredRoots.length > 0 || codingVisible ? (
-        <div>
+        <div data-tour="practice:by-section">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-emerald-600 ring-1 ring-inset ring-emerald-100">
             <ListTree className="size-3.5" /> By section
           </span>

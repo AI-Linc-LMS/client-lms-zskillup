@@ -122,7 +122,7 @@ export default function PracticeWishPage() {
       <CalibrationLockGate feature="Practice as Wish">
       <ProfileLockGate feature="Practice as Wish" contentClassName="space-y-8">
       {/* hero */}
-      <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#3b1f6d] via-[#2a1a52] to-[#140b28] p-6 text-white shadow-sm sm:p-8">
+      <section data-tour="aswish:hero" className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#3b1f6d] via-[#2a1a52] to-[#140b28] p-6 text-white shadow-sm sm:p-8">
         <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#a855f7]/30 blur-3xl" />
         <span aria-hidden className="pointer-events-none absolute -bottom-20 left-1/4 size-56 rounded-full bg-[#f0abfc]/20 blur-3xl" />
         <div className="relative">
@@ -136,7 +136,7 @@ export default function PracticeWishPage() {
           </p>
 
           {/* search box */}
-          <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+          <div data-tour="aswish:topic-search" className="mt-6 flex flex-col gap-2 sm:flex-row">
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-white/40" />
               <input
@@ -169,7 +169,7 @@ export default function PracticeWishPage() {
       {codingVisible && codingTopics.length > 0 ? <CodingBlock topics={filteredCodingTopics} /> : null}
 
       {/* browse all topics, grouped by section */}
-      <div>
+      <div data-tour="aswish:browse-bank">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
           <div>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-violet-600 ring-1 ring-inset ring-violet-100">

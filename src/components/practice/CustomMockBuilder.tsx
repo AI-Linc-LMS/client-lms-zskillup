@@ -99,7 +99,7 @@ export function CustomMockBuilder() {
           Topic catalog is unavailable right now — try again shortly.
         </div>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div data-tour="mock:pick-scope" className="grid gap-4 lg:grid-cols-2">
           {roots.map((root) => {
             const sectionOn = sections.has(root.slug);
             return (
@@ -151,7 +151,7 @@ export function CustomMockBuilder() {
 
       {/* Coding topics (optional) — pick the coding topics to mix in */}
       {codingTopicList.length ? (
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
+        <div data-tour="mock:coding-topics" className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
           <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
             <Code2 className="size-3.5" /> Coding topics
             <span className="font-medium normal-case tracking-normal text-slate-400">(optional)</span>
@@ -178,7 +178,7 @@ export function CustomMockBuilder() {
       ) : null}
 
       {/* config bar */}
-      <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
+      <div data-tour="mock:config" className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
         <div className="grid gap-5 sm:grid-cols-3">
           <Stepper label="MCQ questions" icon={ListChecks} value={count} min={5} max={100} step={5} onChange={setCount} />
           <Stepper label="Duration (min)" icon={Clock} value={duration} min={5} max={180} step={5} onChange={setDuration} />
