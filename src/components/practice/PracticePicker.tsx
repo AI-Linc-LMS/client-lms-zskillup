@@ -140,11 +140,6 @@ export function PracticePicker({
               >
                 <Building2 className="size-3.5 text-violet-500" />
                 {c.name}
-                {c.questionCount ? (
-                  <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500">
-                    {c.questionCount}
-                  </span>
-                ) : null}
               </Link>
             ))}
           </div>
@@ -194,7 +189,6 @@ function SectionBlock({
             <p className="text-base font-bold leading-snug text-navy">{root.name}</p>
             <p className="mt-0.5 text-xs text-slate-500">
               {root.children.length} topic{root.children.length === 1 ? '' : 's'}
-              {root.questionCount ? ` · ${root.questionCount.toLocaleString()} questions` : ''}
             </p>
           </div>
         </div>
@@ -214,11 +208,6 @@ function SectionBlock({
             className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors ${a.chip}`}
           >
             {child.name}
-            {child.questionCount ? (
-              <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500">
-                {child.questionCount}
-              </span>
-            ) : null}
           </Link>
         ))}
       </div>

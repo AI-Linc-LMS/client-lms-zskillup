@@ -105,7 +105,7 @@ export function CustomMockBuilder() {
                   <span className="flex items-center gap-2">
                     <Layers className="size-4 text-slate-400" /> {root.name}
                     <span className="text-[11px] font-semibold text-slate-400">
-                      whole section · {root.questionCount ?? 0} Qs
+                      whole section
                     </span>
                   </span>
                   <span className={cn('grid size-5 place-items-center rounded-md border', sectionOn ? 'border-orange bg-orange text-white' : 'border-slate-300')}>
@@ -161,9 +161,6 @@ export function CustomMockBuilder() {
                 >
                   {on ? <Check className="size-3" /> : <Code2 className="size-3 text-slate-400" />}
                   {c.topic}
-                  <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500">
-                    {c.count}
-                  </span>
                 </button>
               );
             })}

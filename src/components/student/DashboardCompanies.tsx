@@ -8,18 +8,6 @@ import { cn } from '@/lib/utils';
 import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
 import { getMyRegistrations, registerForCompany } from '@/lib/api/registrations';
 
-const compact = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1).replace(/\.0$/, '')}k` : String(n));
-
-function Stat({ icon: Icon, value, label, tone }: { icon: typeof ClipboardList; value: string; label: string; tone: string }) {
-  return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50/60 px-2 py-2 text-center">
-      <Icon className={cn('mx-auto size-3.5', tone)} />
-      <p className="mt-1 text-sm font-black tabular-nums text-navy">{value}</p>
-      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
-    </div>
-  );
-}
-
 /** Dashboard companies — browse + register for a company drive in one tap. */
 export function DashboardCompanies() {
   const [companies, setCompanies] = useState<ApiCompany[] | null>(null);
@@ -107,12 +95,25 @@ export function DashboardCompanies() {
                 </div>
               </div>
 
-              {/* stats */}
-              <div className="relative mt-3.5 grid grid-cols-3 gap-2">
-                <Stat icon={ClipboardList} tone="text-slate-500" value={compact(c.questionCount ?? 0)} label="Questions" />
-                <Stat icon={History} tone="text-orange" value={`${compact(c.pyqCount ?? 0)}`} label="PYQ" />
-                <Stat icon={Code2} tone="text-emerald-500" value={compact(c.codingCount ?? 0)} label="Coding" />
-              </div>
+              {/* what's inside — content types available (no counts) */}
+              {(() => {
+                const feats: Array<{ icon: typeof ClipboardList; label: string; tone: string }> = [];
+                if ((c.questionCount ?? 0) > 0) feats.push({ icon: ClipboardList, label: 'Practice', tone: 'text-slate-400' });
+                if ((c.pyqCount ?? 0) > 0) feats.push({ icon: History, label: 'Previous-year', tone: 'text-orange' });
+                if ((c.codingCount ?? 0) > 0) feats.push({ icon: Code2, label: 'Coding', tone: 'text-emerald-500' });
+                return feats.length ? (
+                  <div className="relative mt-3.5 flex flex-wrap gap-1.5">
+                    {feats.map((f) => (
+                      <span
+                        key={f.label}
+                        className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-600 ring-1 ring-inset ring-slate-200/70"
+                      >
+                        <f.icon className={cn('size-3', f.tone)} aria-hidden="true" /> {f.label}
+                      </span>
+                    ))}
+                  </div>
+                ) : null;
+              })()}
 
               {/* CTA */}
               <div className="relative mt-3.5">

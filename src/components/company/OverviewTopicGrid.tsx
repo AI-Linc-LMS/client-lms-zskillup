@@ -54,7 +54,7 @@ export function OverviewTopicGrid({ slug }: { slug: string }) {
               <span className="min-w-0">
                 <span className="block truncate text-sm font-semibold text-navy group-hover:text-orange">{t.name}</span>
                 <span className="flex items-center gap-1 text-[11px] font-medium text-slate-400">
-                  <History className="size-3 text-orange" /> {t.pyqCount} PYQ{t.pyqCount === 1 ? '' : 's'}
+                  <History className="size-3 text-orange" /> Previous-year questions
                 </span>
               </span>
               <span className="grid size-7 shrink-0 place-items-center rounded-full border border-slate-200 text-slate-400 transition-colors group-hover:border-orange group-hover:bg-orange group-hover:text-white">
