@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { Sparkles } from 'lucide-react';
 import { Logo } from './Logo';
 import { MobileNav } from './MobileNav';
 import { AvatarMenu } from './AvatarMenu';
@@ -64,6 +65,18 @@ export function TopBar() {
               className="group relative rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:text-navy"
             >
               Companies
+              <span
+                aria-hidden
+                className="absolute inset-x-3 -bottom-px h-px scale-x-0 bg-gradient-to-r from-orange to-amber-500 transition-transform duration-300 group-hover:scale-x-100"
+              />
+            </Link>
+            <Link
+              href="/recommendations"
+              data-tour="chrome:recommendations"
+              className="group relative inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:text-navy"
+            >
+              <Sparkles className="size-3.5 text-orange" />
+              Recommendations
               <span
                 aria-hidden
                 className="absolute inset-x-3 -bottom-px h-px scale-x-0 bg-gradient-to-r from-orange to-amber-500 transition-transform duration-300 group-hover:scale-x-100"
