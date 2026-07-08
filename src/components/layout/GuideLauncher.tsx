@@ -1,20 +1,33 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Compass, HelpCircle, MousePointerClick } from 'lucide-react';
 import { useOptionalGuide } from '@/components/guide/GuideProvider';
+import { useProfileCompletion } from '@/hooks/useProfileCompletion';
+import { useCalibrationStatus } from '@/hooks/useCalibrationStatus';
+import { CALIBRATION_GATED_HREFS, PROFILE_GATED_HREFS } from './nav-config';
 
 /**
  * Top-bar "?" launcher for the platform guide. Opens a small popover: replay the
- * full platform tour anytime, or (when the current page has one) take its
- * focused mini-tour. Renders nothing in route groups without a GuideProvider
- * (e.g. /prepare), so the shared top bar never crashes there.
+ * full platform tour anytime, or (when the current page has one AND it's unlocked
+ * for this student) take its focused mini-tour. Renders nothing in route groups
+ * without a GuideProvider (e.g. /prepare), so the shared top bar never crashes.
  */
 export function GuideLauncher() {
   const guide = useOptionalGuide();
+  const pathname = usePathname();
+  const { complete: profileComplete } = useProfileCompletion();
+  const { required: calibrationRequired } = useCalibrationStatus();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  // A page mini-tour that drills into gated content is only useful once the page
+  // is actually unlocked — otherwise it would spotlight the blurred lock overlay.
+  const pageLocked =
+    (calibrationRequired && CALIBRATION_GATED_HREFS.has(pathname)) ||
+    (!profileComplete && PROFILE_GATED_HREFS.has(pathname));
 
   useEffect(() => {
     if (!open) return;
@@ -32,6 +45,7 @@ export function GuideLauncher() {
 
   if (!guide) return null;
   const { start, startPageTour, hasPageTour } = guide;
+  const pageTourAvailable = hasPageTour && !pageLocked;
 
   return (
     <div className="relative" ref={ref} data-tour="chrome:guide">
@@ -70,7 +84,7 @@ export function GuideLauncher() {
                 <span className="block text-xs text-slate-500">Walk through every module</span>
               </span>
             </button>
-            {hasPageTour && (
+            {pageTourAvailable && (
               <button
                 type="button"
                 onClick={() => {

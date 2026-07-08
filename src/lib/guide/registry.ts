@@ -67,6 +67,47 @@ const GRAND_TOUR: GuideTour = { id: GRAND_TOUR_ID, label: 'Platform tour', steps
 
 /** Per-route mini-tours. Keyed by route; longest-prefix match resolves dynamics. */
 export const PAGE_TOURS: Record<string, GuideTour> = {
+  "/study-plan": { id: "plan", label: "Study Plan tour", steps: [
+    { id: "plan-hero", route: "/study-plan", target: "plan:hero", placement: "auto", eyebrow: "Study Plan", title: "Your study plan", body: "A one-focused queue built from your weak topics, reviews and upcoming drives, so you always know the highest-impact next step." },
+    { id: "plan-readiness", route: "/study-plan", target: "plan:readiness", placement: "auto", eyebrow: "Study Plan", title: "Readiness & review due", body: "Two glance stats: your overall Readiness percentage and how many questions are Due to review right now." },
+    { id: "plan-action-queue", route: "/study-plan", target: "plan:action-queue", placement: "auto", eyebrow: "Study Plan", title: "This week's plan", body: "Your numbered queue of actions — review, practice, assessment or adaptive — each with an est time and a one-tap CTA." },
+    { id: "plan-trend", route: "/study-plan", target: "plan:trend", placement: "auto", eyebrow: "Study Plan", title: "Your trend", body: "A dual-line chart tracking your weekly practice accuracy and mock scores so you can watch your progress climb." },
+  ] },
+  "/practice": { id: "practice", label: "Practice tour", steps: [
+    { id: "practice-hero", route: "/practice", target: "practice:hero", placement: "auto", eyebrow: "Practice", title: "Adaptive practice, your way", body: "Your practice home: it explains adaptive, non-proctored drilling and shows how many sections and topics are available to you." },
+    { id: "practice-search", route: "/practice", target: "practice:search", placement: "auto", eyebrow: "Practice", title: "Search everything", body: "Type here to instantly filter companies, sections, and topics so you can jump straight to what you want to practise." },
+    { id: "practice-by-company", route: "/practice", target: "practice:by-company", placement: "auto", eyebrow: "Practice", title: "By company", body: "Practise in a specific company's question style — tap a company chip to launch adaptive practice tuned to their pattern." },
+    { id: "practice-by-section", route: "/practice", target: "practice:by-section", placement: "auto", eyebrow: "Practice", title: "By section or topic", body: "Practise a whole section or a single topic: use 'Practice whole section' or tap a topic chip; Coding links out separately." },
+    { id: "practice-weak-topics", route: "/practice", target: "practice:weak-topics", placement: "auto", eyebrow: "Practice", title: "Your weak topics", body: "After you attempt questions, your weakest topics surface here with live accuracy so you know exactly where to focus." },
+  ] },
+  "/practice-wish": { id: "aswish", label: "Practice as Wish tour", steps: [
+    { id: "aswish-hero", route: "/practice-wish", target: "aswish:hero", placement: "auto", eyebrow: "Practice as Wish", title: "Practice anything", body: "A purple banner introduces the mode: practice any topic, any amount, with adaptive questions that never run out." },
+    { id: "aswish-topic-search", route: "/practice-wish", target: "aswish:topic-search", placement: "auto", eyebrow: "Practice as Wish", title: "Search a topic", body: "Type any topic here and hit Start practicing; no exact match just means we craft fresh AI questions for you." },
+    { id: "aswish-coding", route: "/practice-wish", target: "aswish:coding", placement: "auto", eyebrow: "Practice as Wish", title: "Coding practice", body: "Jump into Judge0-evaluated DSA problems: pick a coding-topic chip or hit 'Practice all coding' to open the coding page." },
+    { id: "aswish-browse-bank", route: "/practice-wish", target: "aswish:browse-bank", placement: "auto", eyebrow: "Practice as Wish", title: "Browse the bank", body: "Expand each section to reveal every topic, then click any chip to launch an instant adaptive session on it." },
+  ] },
+  "/mock-assessment": { id: "mock", label: "Mock Assessment tour", steps: [
+    { id: "mock-hero", route: "/mock-assessment", target: "mock:hero", placement: "auto", eyebrow: "Mock Assessment", title: "How mocks work", body: "A quick intro banner: your custom mocks are camera-proctored, server-timed, and unlimited — the same experience as a real placement drive." },
+    { id: "mock-pick-scope", route: "/mock-assessment", target: "mock:pick-scope", placement: "auto", eyebrow: "Mock Assessment", title: "Pick sections & topics", body: "Tap whole sections or individual topics to decide exactly what your mock covers across aptitude, reasoning, verbal and more." },
+    { id: "mock-coding-topics", route: "/mock-assessment", target: "mock:coding-topics", placement: "auto", eyebrow: "Mock Assessment", title: "Add coding (optional)", body: "Optionally add coding problems by picking one or more coding topics to mix into your mock alongside the MCQs." },
+    { id: "mock-config", route: "/mock-assessment", target: "mock:config", placement: "auto", eyebrow: "Mock Assessment", title: "Size, duration & start", body: "Set how many questions, the duration, and coding count, then hit Start mock assessment to launch the proctored test." },
+    { id: "mock-history", route: "/mock-assessment", target: "mock:history", placement: "auto", eyebrow: "Mock Assessment", title: "Your past attempts", body: "Review every past mock: tests taken, average score, best percentile, plus each attempt's result card linking to its full report." },
+  ] },
+  "/assessments": { id: "assess", label: "Assessments tour", steps: [
+    { id: "assess-hero", route: "/assessments", target: "assess:hero", placement: "auto", eyebrow: "Assessments", title: "Your drives at a glance", body: "A live snapshot: your next drive countdown, how many assessments are upcoming, and how many need a webcam for proctoring." },
+    { id: "assess-upcoming", route: "/assessments", target: "assess:upcoming", placement: "auto", eyebrow: "Assessments", title: "Upcoming drives", body: "Cards for each upcoming or live drive — start a live assessment, view the company hub, or open its leaderboard once ended." },
+    { id: "assess-calendar", route: "/assessments", target: "assess:calendar", placement: "auto", eyebrow: "Assessments", title: "Month calendar", body: "Browse your drives by month; tap any highlighted day to filter the timeline to the assessments scheduled then." },
+    { id: "assess-history", route: "/assessments", target: "assess:history", placement: "auto", eyebrow: "Assessments", title: "Past assessments", body: "Your finished assessment attempts with scores and dates; each row deep-links to its full saved report." },
+    { id: "assess-ranking", route: "/assessments", target: "assess:ranking", placement: "auto", eyebrow: "Assessments", title: "Your ranking", body: "See where you rank against other students on the assessment leaderboard." },
+  ] },
+  "/mock-interview": { id: "mi", label: "Mock Interview tour", steps: [
+    { id: "mi-hero", route: "/mock-interview", target: "mi:hero", placement: "auto", eyebrow: "Mock Interview", title: "What is AI Mock Interview", body: "Your intro: pick a topic and difficulty, then hold a real adaptive conversation with an AI interviewer — no camera, no proctoring." },
+    { id: "mi-stats", route: "/mock-interview", target: "mi:stats", placement: "auto", eyebrow: "Mock Interview", title: "Your interview stats", body: "Track your totals here: interviews started, how many you completed, and your average rubric score across all scored sessions." },
+    { id: "mi-tabs", route: "/mock-interview", target: "mi:tabs", placement: "auto", eyebrow: "Mock Interview", title: "New vs previous", body: "Switch between starting a fresh interview and reviewing your previous sessions, where you can resume, open results, or delete them." },
+    { id: "mi-focus", route: "/mock-interview", target: "mi:focus", placement: "auto", eyebrow: "Mock Interview", title: "Pick a topic or role", body: "Choose what to be interviewed on: toggle By topic or By job role, then pick a preset chip or add your own custom topic." },
+    { id: "mi-style", route: "/mock-interview", target: "mi:style", placement: "auto", eyebrow: "Mock Interview", title: "Tune style, difficulty & length", body: "Set the interview style (mixed, technical, behavioral); difficulty and length controls sit right below to shape depth and pacing." },
+    { id: "mi-start", route: "/mock-interview", target: "mi:start", placement: "auto", eyebrow: "Mock Interview", title: "Start the interview", body: "Review your setup summary and hit Start interview — it's spoken, so a mic is recommended before you begin." },
+  ] },
   "/dashboard": { id: "dash", label: "Dashboard tour", steps: [
     { id: "dash-briefing-hero", route: "/dashboard", target: "dash:briefing-hero", placement: "auto", eyebrow: "Dashboard", title: "Your AI briefing", body: "A personalized AI greeting over the aurora hero shows your level, XP, streak, focus areas, and a one-tap next action." },
     { id: "dash-stats", route: "/dashboard", target: "dash:stats", placement: "auto", eyebrow: "Dashboard", title: "Your stats", body: "Five animated tiles count up your Level, Total XP, day streak, coins, and badges — your live progress at a glance." },
