@@ -5,6 +5,7 @@
  * The one-time calibration assessment: whether a student must take it, and their
  * per-section result once they have.
  */
+import type { RecommendationDto } from './recommendations.dto';
 
 export interface CalibrationScoresDto {
   /** Overall correct % across all sections + coding (0–100). */
@@ -30,4 +31,35 @@ export interface CalibrationStatusDto {
   scheduledAssessmentId: string | null;
   /** Per-section result once completed (null otherwise). */
   scores: CalibrationScoresDto | null;
+}
+
+/** One section's calibration result (for the results page). */
+export interface CalibrationSectionResultDto {
+  key: string;
+  label: string;
+  score: number;
+}
+
+/** The recommendation-centric calibration results — powers the post-assessment
+ *  results page (and mirrors the dashboard recommendations). */
+export interface CalibrationResultsDto {
+  calibrated: boolean;
+  overall: number;
+  band: 'High' | 'Medium' | 'Low';
+  /** Human band label, e.g. "Placement-ready" / "Developing" / "Building foundations". */
+  bandLabel: string;
+  /** All sections in a stable order. */
+  sections: CalibrationSectionResultDto[];
+  /** Strongest sections (score desc), for "your strong areas". */
+  strengths: CalibrationSectionResultDto[];
+  /** Weakest sections (score asc, below the weak bar), for "focus areas". */
+  gaps: CalibrationSectionResultDto[];
+  /** Top company matches (readiness desc). */
+  companies: Array<{ slug: string; name: string; readiness: number }>;
+  topCompany: { slug: string; name: string; readiness: number } | null;
+  /** Ranked product recommendations (same engine as the dashboard). */
+  recommendations: RecommendationDto[];
+  best: RecommendationDto | null;
+  /** AI-written personal summary tying the result to the recommendation. */
+  aiSummary: string;
 }
