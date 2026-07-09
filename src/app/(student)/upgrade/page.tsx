@@ -2,365 +2,36 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import {
   ArrowRight,
-  BadgeCheck,
   Building2,
   Check,
   Clock,
-  Code2,
+  Crown,
+  FileText,
+  Gift,
+  HelpCircle,
   Layers,
   Loader2,
+  Puzzle,
+  Receipt,
+  RefreshCw,
   Sparkles,
   Target,
+  TrendingUp,
 } from 'lucide-react';
 import { getMe, type ApiMe } from '@/lib/api/me';
 import { getMySubscription, getPricing } from '@/lib/api/payments';
+import { getReadiness, type Readiness } from '@/lib/api/readiness';
 import { formatPrice } from '@/lib/api/subscriptions';
-import { buildPriceMap, PERIODS, retailPrice } from '@/lib/payments/pricing';
-import { practiceLinkForEntitlement } from '@/lib/payments/entitlement-links';
+import { buildPriceMap, periodMonths, retailPrice } from '@/lib/payments/pricing';
 import { usePurchase } from '@/components/billing/usePurchase';
+import { FeatureItem, PlanPill } from '@/components/billing/plan-ui';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { BillingPeriod, EntitlementScope } from '@/shared/enums';
-import type { EntitlementDto, MySubscriptionDto, PriceBookEntryDto } from '@/shared/dto/payments.dto';
+import type { EntitlementDto, MySubscriptionDto, PriceBookEntryDto, PurchaseHistoryItemDto } from '@/shared/dto/payments.dto';
 import { cn } from '@/lib/utils';
-
-/** Turn a slug ("profit-loss" / "coding:arrays-hashing") into a readable label. */
-function prettyRef(ref: string | null): string {
-  if (!ref) return '';
-  return ref
-    .replace(/^coding:/, '')
-    .replace(/^section-\d+-/, '')
-    .split(/[-:]/)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-}
-
-function scopeIcon(scope: EntitlementScope) {
-  switch (scope) {
-    case EntitlementScope.PLATFORM:
-      return Sparkles;
-    case EntitlementScope.SECTION:
-      return Layers;
-    case EntitlementScope.COMPANY:
-      return Building2;
-    default:
-      return Target;
-  }
-}
-
-/** Plan/period label for a history row. Cart orders have no single period, so show
- *  the shared one when every line matches, else "Mixed". */
-function historyPlanLabel(h: { period: BillingPeriod | null; items?: { period: BillingPeriod }[] }): string {
-  if (h.period) return h.period.toLowerCase();
-  if (h.items && h.items.length > 0) {
-    const distinct = new Set(h.items.map((i) => i.period));
-    return distinct.size === 1 ? [...distinct][0].toLowerCase() : 'mixed';
-  }
-  return '—';
-}
-
-export default function UpgradePage() {
-  const [me, setMe] = useState<ApiMe | null>(null);
-  const [sub, setSub] = useState<MySubscriptionDto | null>(null);
-  const [pricing, setPricing] = useState<PriceBookEntryDto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { buy, busyKey } = usePurchase();
-
-  const load = async () => {
-    const [m, s, p] = await Promise.all([
-      getMe().catch(() => null),
-      getMySubscription().catch(() => null),
-      getPricing().catch(() => [] as PriceBookEntryDto[]),
-    ]);
-    setMe(m);
-    setSub(s);
-    setPricing(p);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    void load();
-  }, []);
-
-  const priceMap = useMemo(() => buildPriceMap(pricing), [pricing]);
-  const hasPlatform = sub?.hasPlatform ?? false;
-  const platformEnt = sub?.entitlements.find(
-    (e) => e.scopeType === EntitlementScope.PLATFORM && e.status === 'ACTIVE',
-  );
-  const activeUnlocks = (sub?.entitlements ?? []).filter(
-    (e) => e.status === 'ACTIVE' && e.scopeType !== EntitlementScope.PLATFORM,
-  );
-
-  const refresh = () => void getMySubscription().then(setSub).catch(() => {});
-
-  const buyPlatform = (period: BillingPeriod) =>
-    buy({
-      key: `platform:${period}`,
-      scope: EntitlementScope.PLATFORM,
-      period,
-      label: `Full platform (${period.toLowerCase()})`,
-      prefill: { name: me?.fullName, email: me?.email },
-      onPurchased: refresh,
-    });
-
-  if (loading) {
-    return (
-      <div className="grid place-items-center py-24">
-        <Loader2 className="size-6 animate-spin text-slate-400" />
-      </div>
-    );
-  }
-
-  return (
-    <div className="w-full">
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Upgrade' }]} />
-
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section data-tour="upgrade:hero" className="relative mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-[0_24px_60px_-30px_rgba(11,18,32,0.85)] sm:p-8">
-        <div aria-hidden className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-1/4 -top-1/2 size-[42vw] rounded-full bg-[#f37021]/25 blur-[120px]" />
-          <div className="absolute -right-1/4 -bottom-1/2 size-[38vw] rounded-full bg-[#2563eb]/20 blur-[120px]" />
-        </div>
-        <div className="relative z-10 max-w-2xl">
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#f37021]/40 bg-[#f37021]/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#ffb787]">
-            <Sparkles className="size-3.5" /> {hasPlatform ? 'Full access active' : 'Upgrade'}
-          </span>
-          <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">
-            {hasPlatform ? "You're all unlocked." : 'Unlock the whole question bank.'}
-          </h1>
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/70 sm:text-base">
-            {hasPlatform
-              ? `Full platform access is active${
-                  platformEnt?.daysRemaining != null ? ` — ${platformEnt.daysRemaining} days left` : ''
-                }. Every topic, section and company hub is open.`
-              : 'Get every topic, every section and every company hub — or unlock just what you need, one topic at a time. You always get the first 5 questions of anything free.'}
-          </p>
-        </div>
-      </section>
-
-      {/* ── Your access ──────────────────────────────────────────────────── */}
-      {(hasPlatform || activeUnlocks.length > 0) && (
-        <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-400">
-            <BadgeCheck className="size-4 text-emerald-500" /> Your access
-          </h2>
-          {hasPlatform ? (
-            <div className="mt-4 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-              <span className="grid size-10 place-items-center rounded-xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white">
-                <Sparkles className="size-5" />
-              </span>
-              <div>
-                <p className="text-sm font-extrabold text-navy">Full platform</p>
-                <p className="text-xs text-slate-500">
-                  {platformEnt?.daysRemaining != null
-                    ? `${platformEnt.daysRemaining} days remaining`
-                    : 'Active'}
-                </p>
-              </div>
-              <Link
-                href="/practice"
-                className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-full bg-navy px-4 py-2 text-xs font-bold text-white transition hover:brightness-110"
-              >
-                Start practising <ArrowRight className="size-3.5" />
-              </Link>
-            </div>
-          ) : (
-            <ul className="mt-4 grid gap-2 sm:grid-cols-2">
-              {activeUnlocks.map((e) => (
-                <AccessRow key={e.id} ent={e} />
-              ))}
-            </ul>
-          )}
-        </section>
-      )}
-
-      {/* ── Full platform plans ──────────────────────────────────────────── */}
-      <section data-tour="upgrade:platform-plans" className="mt-8">
-        <div className="flex items-end justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-black tracking-tight text-navy sm:text-xl">Full platform</h2>
-            <p className="text-sm text-slate-500">Everything unlocked while your plan is active.</p>
-          </div>
-        </div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
-          {PERIODS.map(({ period, label }, i) => {
-            const price = retailPrice(priceMap, EntitlementScope.PLATFORM, period);
-            const best = period === BillingPeriod.ANNUAL;
-            const key = `platform:${period}`;
-            return (
-              <div
-                key={period}
-                className={cn(
-                  'relative flex flex-col rounded-3xl border bg-white p-6 shadow-sm transition-shadow hover:shadow-md',
-                  best ? 'border-orange ring-1 ring-orange/30' : 'border-slate-200',
-                )}
-              >
-                {best && (
-                  <span className="absolute -top-3 left-6 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-white shadow">
-                    Best value
-                  </span>
-                )}
-                <p className="text-sm font-bold uppercase tracking-widest text-slate-400">{label}</p>
-                <p className="mt-2 text-3xl font-black tracking-tight text-navy">
-                  {price ? formatPrice(price.amountCents, price.currency) : '—'}
-                  <span className="text-sm font-semibold text-slate-400">
-                    {' '}
-                    /{period === BillingPeriod.MONTHLY ? 'mo' : period === BillingPeriod.QUARTERLY ? 'qtr' : 'yr'}
-                  </span>
-                </p>
-                <ul className="mt-4 flex-1 space-y-2 text-sm text-slate-600">
-                  {['All 4 aptitude sections', 'All coding topics', 'Every company hub + PYQs', 'Unlimited questions'].map(
-                    (f) => (
-                      <li key={f} className="flex items-center gap-2">
-                        <Check className="size-4 shrink-0 text-emerald-500" /> {f}
-                      </li>
-                    ),
-                  )}
-                </ul>
-                <button
-                  type="button"
-                  disabled={hasPlatform || busyKey === key || !price}
-                  onClick={() => void buyPlatform(period)}
-                  className={cn(
-                    'mt-5 flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-extrabold transition-opacity disabled:opacity-60',
-                    best
-                      ? 'bg-gradient-to-r from-[#f7a14e] to-[#f37021] text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.8)]'
-                      : 'bg-navy text-white',
-                  )}
-                >
-                  {hasPlatform ? (
-                    'Active'
-                  ) : busyKey === key ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <>
-                      Get {label} <ArrowRight className="size-4" />
-                    </>
-                  )}
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* ── Buy just what you need ───────────────────────────────────────── */}
-      {!hasPlatform && (
-        <section data-tour="upgrade:mini-plans" className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-black tracking-tight text-navy">Or buy just what you need</h2>
-          <p className="text-sm text-slate-500">
-            You get the first 5 questions of any topic free. Unlock more from the topic or company page.
-          </p>
-          <div className="mt-5 grid gap-4 sm:grid-cols-3">
-            <MiniPlan
-              icon={Target}
-              title="Single topic"
-              subtitle="One topic, e.g. Profit & Loss"
-              price={retailPrice(priceMap, EntitlementScope.TOPIC, BillingPeriod.MONTHLY)}
-              annual={retailPrice(priceMap, EntitlementScope.TOPIC, BillingPeriod.ANNUAL)}
-              href="/shop"
-              cta="Browse topics"
-            />
-            <MiniPlan
-              icon={Layers}
-              title="Whole section"
-              subtitle="All topics in a section"
-              price={retailPrice(priceMap, EntitlementScope.SECTION, BillingPeriod.MONTHLY)}
-              annual={retailPrice(priceMap, EntitlementScope.SECTION, BillingPeriod.ANNUAL)}
-              href="/shop"
-              cta="Browse sections"
-            />
-            <MiniPlan
-              icon={Building2}
-              title="Company hub"
-              subtitle="One recruiter's PYQ bank"
-              price={retailPrice(priceMap, EntitlementScope.COMPANY, BillingPeriod.MONTHLY)}
-              annual={retailPrice(priceMap, EntitlementScope.COMPANY, BillingPeriod.ANNUAL)}
-              href="/shop"
-              cta="Browse companies"
-            />
-          </div>
-        </section>
-      )}
-
-      {/* ── Purchase history ─────────────────────────────────────────────── */}
-      {sub && sub.history.length > 0 && (
-        <section data-tour="upgrade:history" className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-400">
-            <Clock className="size-4 text-slate-400" /> Purchase history
-          </h2>
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[520px] text-sm">
-              <thead>
-                <tr className="text-left text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  <th className="pb-2">Item</th>
-                  <th className="pb-2">Plan</th>
-                  <th className="pb-2 text-right">Amount</th>
-                  <th className="pb-2 text-right">Status</th>
-                  <th className="pb-2 text-right">Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {sub.history.map((h) => (
-                  <tr key={h.orderId}>
-                    <td className="py-2.5 font-semibold text-navy">
-                      {h.items && h.items.length > 0
-                        ? `Cart · ${h.items.length} item${h.items.length === 1 ? '' : 's'}`
-                        : h.scopeType === EntitlementScope.PLATFORM
-                          ? 'Full platform'
-                          : prettyRef(h.scopeRef) || h.scopeType}
-                    </td>
-                    <td className="py-2.5 capitalize text-slate-500">{historyPlanLabel(h)}</td>
-                    <td className="py-2.5 text-right tabular-nums text-navy">{formatPrice(h.amountCents, h.currency)}</td>
-                    <td className="py-2.5 text-right">
-                      <StatusPill status={h.status} />
-                    </td>
-                    <td className="py-2.5 text-right tabular-nums text-slate-500">
-                      {new Date(h.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
-
-      <p className="mt-8 flex items-center justify-center gap-1.5 text-xs text-slate-400">
-        <Code2 className="size-3.5" /> Secured by Razorpay · GST invoices on request
-      </p>
-    </div>
-  );
-}
-
-function AccessRow({ ent }: { ent: EntitlementDto }) {
-  const Icon = scopeIcon(ent.scopeType);
-  const label =
-    ent.scopeType === EntitlementScope.PLATFORM
-      ? 'Full platform'
-      : `${ent.scopeType.charAt(0) + ent.scopeType.slice(1).toLowerCase()}: ${slugToLabel(ent.scopeRef)}`;
-  const link = practiceLinkForEntitlement(ent.scopeType, ent.scopeRef);
-  return (
-    <li className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-3">
-      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white text-orange ring-1 ring-slate-200">
-        <Icon className="size-4" />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-semibold text-navy">{label}</span>
-        <span className="text-xs text-slate-500">
-          {ent.daysRemaining != null ? `${ent.daysRemaining} days left` : 'Lifetime'}
-        </span>
-      </span>
-      <Link
-        href={link.href}
-        className="inline-flex shrink-0 items-center gap-1 rounded-full bg-navy px-3 py-1.5 text-xs font-bold text-white transition hover:brightness-110"
-      >
-        {link.cta} <ArrowRight className="size-3.5" />
-      </Link>
-    </li>
-  );
-}
 
 function slugToLabel(ref: string | null): string {
   if (!ref) return '';
@@ -372,44 +43,565 @@ function slugToLabel(ref: string | null): string {
     .join(' ');
 }
 
-function MiniPlan({
-  icon: Icon,
-  title,
-  subtitle,
-  price,
-  annual,
-  href,
-  cta,
-}: {
-  icon: typeof Target;
-  title: string;
-  subtitle: string;
-  price?: PriceBookEntryDto;
-  annual?: PriceBookEntryDto;
-  href: string;
-  cta: string;
-}) {
+function fmtDate(iso: string | null | undefined): string {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function historyPlanLabel(h: PurchaseHistoryItemDto): string {
+  if (h.period) return h.period.toLowerCase();
+  if (h.items && h.items.length > 0) {
+    const distinct = new Set(h.items.map((i) => i.period));
+    return distinct.size === 1 ? [...distinct][0].toLowerCase() : 'mixed';
+  }
+  return '—';
+}
+
+export default function UpgradeRenewPage() {
+  const [me, setMe] = useState<ApiMe | null>(null);
+  const [sub, setSub] = useState<MySubscriptionDto | null>(null);
+  const [pricing, setPricing] = useState<PriceBookEntryDto[]>([]);
+  const [readiness, setReadiness] = useState<Readiness | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showHistory, setShowHistory] = useState(false);
+  const { buy, busyKey } = usePurchase();
+
+  useEffect(() => {
+    void (async () => {
+      const [m, s, p, r] = await Promise.all([
+        getMe().catch(() => null),
+        getMySubscription().catch(() => null),
+        getPricing().catch(() => [] as PriceBookEntryDto[]),
+        getReadiness().catch(() => null),
+      ]);
+      setMe(m);
+      setSub(s);
+      setPricing(p);
+      setReadiness(r);
+      setLoading(false);
+    })();
+  }, []);
+
+  const priceMap = useMemo(() => buildPriceMap(pricing), [pricing]);
+  const refresh = () => void getMySubscription().then(setSub).catch(() => {});
+
+  const hasPlatform = sub?.hasPlatform ?? false;
+  const active = (sub?.entitlements ?? []).filter((e) => e.status === 'ACTIVE');
+  const platformEnt = active.find((e) => e.scopeType === EntitlementScope.PLATFORM);
+  const granular = active.filter((e) => e.scopeType !== EntitlementScope.PLATFORM);
+  const paidHistory = (sub?.history ?? []).filter((h) => h.status === 'PAID');
+  const totalPaid = paidHistory.reduce((n, h) => n + h.amountCents, 0);
+
+  const renew = (period: BillingPeriod) =>
+    buy({
+      key: `renew:${period}`,
+      scope: EntitlementScope.PLATFORM,
+      period,
+      label: `Full Platform (${periodMonths(period)})`,
+      prefill: { name: me?.fullName, email: me?.email },
+      onPurchased: refresh,
+    });
+
+  if (loading) {
+    return (
+      <div className="grid place-items-center py-24">
+        <Loader2 className="size-6 animate-spin text-indigo-500" />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col rounded-2xl border border-slate-200 p-5">
-      <span className="grid size-9 place-items-center rounded-xl bg-orange/10 text-orange">
-        <Icon className="size-4" />
-      </span>
-      <p className="mt-3 text-sm font-extrabold text-navy">{title}</p>
-      <p className="text-xs text-slate-500">{subtitle}</p>
-      <p className="mt-3 text-xl font-black text-navy">
-        {price ? formatPrice(price.amountCents, price.currency) : '—'}
-        <span className="text-xs font-semibold text-slate-400"> /mo</span>
+    <div className="mx-auto max-w-6xl px-4 py-8">
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Upgrade & Renew' }]} />
+      <h1 data-tour="upgrade:title" className="mt-4 text-2xl font-black tracking-tight text-navy">
+        {hasPlatform ? 'Upgrade & Renew' : 'Plans & Access'}
+      </h1>
+      <p className="mt-1 text-sm text-slate-500">
+        {hasPlatform
+          ? 'Your membership, readiness and quick actions in one place.'
+          : 'See what you already have and choose the best way to continue your preparation.'}
       </p>
-      {annual && (
-        <p className="text-[11px] text-slate-400">or {formatPrice(annual.amountCents, annual.currency)} /yr</p>
+
+      {hasPlatform ? (
+        <PremiumView
+          platformEnt={platformEnt}
+          history={sub?.history ?? []}
+          readiness={readiness}
+          period={paidHistory.find((h) => h.scopeType === EntitlementScope.PLATFORM)?.period ?? null}
+          onRenew={renew}
+          busyKey={busyKey}
+          showHistory={showHistory}
+          setShowHistory={setShowHistory}
+        />
+      ) : granular.length > 0 ? (
+        <CustomPlanView
+          granular={granular}
+          totalPaid={totalPaid}
+          history={sub?.history ?? []}
+          showHistory={showHistory}
+          setShowHistory={setShowHistory}
+        />
+      ) : (
+        <NoPlanView priceMap={priceMap} />
       )}
+    </div>
+  );
+}
+
+/* ───────────────────────── Premium (full platform) ───────────────────────── */
+
+function PremiumView({
+  platformEnt,
+  history,
+  readiness,
+  period,
+  onRenew,
+  busyKey,
+  showHistory,
+  setShowHistory,
+}: {
+  platformEnt?: EntitlementDto;
+  history: PurchaseHistoryItemDto[];
+  readiness: Readiness | null;
+  period: BillingPeriod | null;
+  onRenew: (p: BillingPeriod) => void;
+  busyKey: string | null;
+  showHistory: boolean;
+  setShowHistory: (v: boolean) => void;
+}) {
+  const planName = period ? `Premium ${periodMonths(period)}` : 'Premium';
+  const days = platformEnt?.daysRemaining ?? null;
+  const score = readiness?.overall.score ?? null;
+  const companies = readiness?.companies.filter((c) => c.questionsAttempted > 0).length ?? 0;
+  const topics = readiness?.topics.length ?? 0;
+  const attempted = readiness?.companies.reduce((n, c) => n + c.questionsAttempted, 0) ?? 0;
+
+  const quickActions = [
+    { icon: RefreshCw, label: 'Renew Plan', onClick: () => onRenew(BillingPeriod.ANNUAL) },
+    { icon: Receipt, label: 'Payment History', onClick: () => setShowHistory(!showHistory) },
+    { icon: FileText, label: 'Download Invoice', onClick: () => toast.info('GST invoices are available on request — contact support.') },
+    { icon: Gift, label: 'Gift Premium', onClick: () => toast.info('Gifting is coming soon.') },
+    { icon: HelpCircle, label: 'Need Help?', href: '/support' },
+  ];
+
+  return (
+    <div className="mt-6 space-y-6">
+      <div className="grid gap-4 lg:grid-cols-4">
+        {/* Premium member */}
+        <div className="rounded-3xl border border-emerald-200 bg-emerald-50/70 p-5">
+          <span className="grid size-11 place-items-center rounded-2xl bg-emerald-500 text-white">
+            <Crown className="size-6" />
+          </span>
+          <p className="mt-3 text-base font-black text-emerald-900">You&apos;re a Premium Member! 🎉</p>
+          <p className="mt-1 text-xs text-emerald-800/80">
+            Enjoy unlimited access to all companies, sections and topics.
+          </p>
+          <Link
+            href="/shop"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-bold text-emerald-700"
+          >
+            Explore Plans <ArrowRight className="size-3.5" />
+          </Link>
+        </div>
+
+        {/* Your premium plan */}
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-black text-navy">Your Premium Plan</h3>
+            <PlanPill tone="emerald">Active</PlanPill>
+          </div>
+          <dl className="mt-3 space-y-2 text-sm">
+            <KV k="Plan" v={planName} />
+            <KV k="Valid till" v={fmtDate(platformEnt?.expiresAt)} />
+            {days != null && <KV k="Days left" v={`${days} days`} />}
+          </dl>
+          <button
+            type="button"
+            onClick={() => setShowHistory(!showHistory)}
+            className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-700"
+          >
+            Manage Subscription <ArrowRight className="size-3.5" />
+          </button>
+        </div>
+
+        {/* Placement readiness */}
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h3 className="text-sm font-black text-navy">Your Placement Readiness</h3>
+          <div className="mt-3 flex items-center gap-3">
+            <ReadinessDonut score={score} />
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-emerald-600">{readiness?.overall.level ?? 'Keep going'}</p>
+              <Link
+                href="/study-plan"
+                className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-700"
+              >
+                Go to Study Plan <ArrowRight className="size-3.5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick actions */}
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h3 className="text-sm font-black text-navy">Quick Actions</h3>
+          <div className="mt-3 space-y-1">
+            {quickActions.map((a) =>
+              a.href ? (
+                <Link
+                  key={a.label}
+                  href={a.href}
+                  className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-navy"
+                >
+                  <a.icon className="size-4 text-indigo-500" /> {a.label}
+                </Link>
+              ) : (
+                <button
+                  key={a.label}
+                  type="button"
+                  onClick={a.onClick}
+                  className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-navy"
+                >
+                  <a.icon className="size-4 text-indigo-500" /> {a.label}
+                </button>
+              ),
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Preparation at a glance */}
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-black tracking-tight text-navy">Your Preparation at a Glance</h2>
+        <div className="mt-4 grid gap-3 sm:grid-cols-4">
+          <StatTile icon={Building2} tint="bg-violet-50 text-violet-600" label="Companies Practised" value={companies} />
+          <StatTile icon={Layers} tint="bg-amber-50 text-amber-600" label="Topics Practised" value={topics} />
+          <StatTile icon={Target} tint="bg-emerald-50 text-emerald-600" label="Questions Attempted" value={attempted} />
+          <StatTile icon={TrendingUp} tint="bg-indigo-50 text-indigo-600" label="Readiness" value={score != null ? `${score}%` : '—'} />
+        </div>
+        <p className="mt-3 flex items-center gap-1.5 text-xs text-slate-400">
+          <Sparkles className="size-3.5 text-indigo-400" /> New companies, mock tests &amp; questions are added every week.
+        </p>
+      </section>
+
+      {/* What's new */}
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-black tracking-tight text-navy">What&apos;s New for You</h2>
+          <Link href="/dashboard/company" className="inline-flex items-center gap-1 text-sm font-bold text-indigo-600">
+            View All <ArrowRight className="size-3.5" />
+          </Link>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <WhatsNew icon={Building2} title="Company Hubs" sub="Explore recruiter PYQ banks" href="/dashboard/company" />
+          <WhatsNew icon={FileText} title="Study Material" sub="Curated videos, quizzes & notes" href="/dashboard/company" />
+          <WhatsNew icon={Sparkles} title="Live Sessions" sub="Join upcoming expert sessions" href="/live-sessions" />
+        </div>
+      </section>
+
+      {showHistory && <HistorySection history={history} />}
+    </div>
+  );
+}
+
+/* ───────────────────────── Custom plan (Plans & Access) ───────────────────────── */
+
+function CustomPlanView({
+  granular,
+  totalPaid,
+  history,
+  showHistory,
+  setShowHistory,
+}: {
+  granular: EntitlementDto[];
+  totalPaid: number;
+  history: PurchaseHistoryItemDto[];
+  showHistory: boolean;
+  setShowHistory: (v: boolean) => void;
+}) {
+  const companies = granular.filter((e) => e.scopeType === EntitlementScope.COMPANY);
+  const sections = granular.filter((e) => e.scopeType === EntitlementScope.SECTION);
+  const topics = granular.filter((e) => e.scopeType === EntitlementScope.TOPIC);
+  const maxDays = granular.reduce((n, e) => Math.max(n, e.daysRemaining ?? 0), 0);
+
+  return (
+    <div className="mt-6 space-y-6">
+      {/* Your current plan */}
+      <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-black tracking-tight text-navy">Your Current Plan</h2>
+          <PlanPill tone="emerald">Active</PlanPill>
+        </div>
+        <p className="mt-1 text-sm text-slate-500">Here&apos;s what you currently have access to.</p>
+
+        <div className="mt-5 grid gap-5 lg:grid-cols-[220px_1fr]">
+          <div className="flex flex-col items-center justify-center rounded-2xl bg-indigo-50/60 p-5 text-center">
+            <span className="grid size-14 place-items-center rounded-2xl bg-white text-indigo-600 shadow-sm">
+              <Puzzle className="size-7" />
+            </span>
+            <p className="mt-3 text-base font-black text-navy">Custom Plan</p>
+            <p className="text-xs text-slate-500">Total Value</p>
+            <p className="text-xl font-black tabular-nums text-emerald-600">{formatPrice(totalPaid, 'INR')}</p>
+            <div className="mt-4 flex w-full flex-col gap-2">
+              <Link
+                href="/shop/build"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white"
+              >
+                Manage My Selections
+              </Link>
+              <button
+                type="button"
+                onClick={() => setShowHistory(!showHistory)}
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-navy"
+              >
+                <RefreshCw className="size-3.5" /> Payment History
+              </button>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-3">
+            <PlanFacet icon={Building2} label="Companies" primary={`${companies.length} ${companies.length === 1 ? 'Company' : 'Companies'}`} sub={companies.map((e) => slugToLabel(e.scopeRef)).slice(0, 2).join(', ') || '—'} />
+            <PlanFacet icon={Layers} label="Sections" primary={`${sections.length} Section${sections.length === 1 ? '' : 's'}`} sub={sections.map((e) => slugToLabel(e.scopeRef)).slice(0, 2).join(', ') || '—'} />
+            <PlanFacet icon={Target} label="Sub-topics" primary={`${topics.length} Topic${topics.length === 1 ? '' : 's'}`} sub={topics.map((e) => slugToLabel(e.scopeRef)).slice(0, 2).join(', ') || '—'} />
+            <PlanFacet icon={Sparkles} label="Access" primary={`${granular.length} unlock${granular.length === 1 ? '' : 's'}`} sub="Practice + analytics" />
+            <PlanFacet icon={Clock} label="Validity" primary={maxDays > 0 ? `${maxDays} days left` : 'Active'} sub="Renew any time" />
+          </div>
+        </div>
+      </section>
+
+      {/* Choose how you want to learn */}
+      <section>
+        <h2 className="text-lg font-black tracking-tight text-navy">Choose how you want to learn</h2>
+        <p className="text-sm text-slate-500">Two flexible ways to continue your placement preparation.</p>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <LearnCard
+            tone="indigo"
+            icon={Crown}
+            title="Unlimited Platform Access"
+            pill="Best Value"
+            subtitle="Unlock everything on Prephasz and prepare without any limits."
+            features={['100+ Companies', '55,000+ Questions', 'Unlimited Mock Tests', 'AI Study Plan', 'Interview Prep', 'Advanced Analytics']}
+            cta="Upgrade to Premium"
+            href="/shop/full"
+          />
+          <LearnCard
+            tone="sky"
+            icon={Puzzle}
+            title="Build Your Own Plan"
+            pill="Pay for what you need"
+            subtitle="Choose companies, sections and topics you want to prepare for."
+            features={['Choose Companies', 'Choose Sections', 'Choose Topics', 'Set different validity', 'Pay only for what you select']}
+            cta="Customize Your Plan"
+            href="/shop/build"
+          />
+        </div>
+      </section>
+
+      {showHistory && <HistorySection history={history} />}
+
+      <p className="flex items-center justify-center gap-1.5 rounded-2xl border border-emerald-100 bg-emerald-50/60 px-4 py-2.5 text-xs font-semibold text-emerald-700">
+        <Check className="size-4" /> Plans are valid for the selected duration. Renew any time to continue your access.
+      </p>
+    </div>
+  );
+}
+
+/* ───────────────────────── No plan ───────────────────────── */
+
+function NoPlanView({ priceMap }: { priceMap: Map<string, PriceBookEntryDto> }) {
+  const platform = retailPrice(priceMap, EntitlementScope.PLATFORM, BillingPeriod.ANNUAL);
+  return (
+    <div className="mx-auto mt-10 max-w-lg rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+      <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-indigo-50 text-indigo-600">
+        <Crown className="size-7" />
+      </span>
+      <p className="mt-4 text-lg font-black text-navy">You don&apos;t have a plan yet</p>
+      <p className="mt-1 text-sm text-slate-500">
+        Unlock companies, sections and topics — or go all-access
+        {platform ? ` from ${formatPrice(platform.amountCents, 'INR')}/year` : ''}.
+      </p>
       <Link
-        href={href}
-        className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-orange hover:underline"
+        href="/shop"
+        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white"
       >
-        {cta} <ArrowRight className="size-3.5" />
+        <Sparkles className="size-4" /> Explore Plans
       </Link>
     </div>
+  );
+}
+
+/* ───────────────────────── shared bits ───────────────────────── */
+
+function KV({ k, v }: { k: string; v: string }) {
+  return (
+    <div className="flex items-center justify-between">
+      <dt className="text-slate-500">{k}</dt>
+      <dd className="font-bold text-navy">{v}</dd>
+    </div>
+  );
+}
+
+function StatTile({ icon: Icon, tint, label, value }: { icon: typeof Building2; tint: string; label: string; value: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
+      <span className={cn('grid size-9 place-items-center rounded-xl', tint)}>
+        <Icon className="size-5" />
+      </span>
+      <p className="mt-3 text-2xl font-black tabular-nums text-navy">{value}</p>
+      <p className="text-xs text-slate-500">{label}</p>
+    </div>
+  );
+}
+
+function WhatsNew({ icon: Icon, title, sub, href }: { icon: typeof Building2; title: string; sub: string; href: string }) {
+  return (
+    <Link href={href} className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/50 p-3 transition hover:border-indigo-200 hover:bg-indigo-50/40">
+      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-indigo-600 shadow-sm">
+        <Icon className="size-5" />
+      </span>
+      <div className="min-w-0">
+        <p className="truncate text-sm font-bold text-navy">{title}</p>
+        <p className="truncate text-xs text-slate-500">{sub}</p>
+      </div>
+    </Link>
+  );
+}
+
+function PlanFacet({ icon: Icon, label, primary, sub }: { icon: typeof Building2; label: string; primary: string; sub: string }) {
+  return (
+    <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
+      <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-400">
+        <Icon className="size-3.5" /> {label}
+      </p>
+      <p className="mt-1.5 text-sm font-black text-navy">{primary}</p>
+      <p className="truncate text-xs text-slate-500">{sub}</p>
+    </div>
+  );
+}
+
+function LearnCard({
+  tone,
+  icon: Icon,
+  title,
+  pill,
+  subtitle,
+  features,
+  cta,
+  href,
+}: {
+  tone: 'indigo' | 'sky';
+  icon: typeof Crown;
+  title: string;
+  pill: string;
+  subtitle: string;
+  features: string[];
+  cta: string;
+  href: string;
+}) {
+  const accent = tone === 'indigo' ? 'text-indigo-600 bg-indigo-50' : 'text-sky-600 bg-sky-50';
+  const btn = tone === 'indigo' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-emerald-600 hover:bg-emerald-700';
+  return (
+    <div className="flex flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="flex items-center gap-3">
+        <span className={cn('grid size-11 place-items-center rounded-2xl', accent)}>
+          <Icon className="size-6" />
+        </span>
+        <div className="flex-1">
+          <p className="text-base font-black text-navy">{title}</p>
+        </div>
+        <PlanPill tone={tone === 'indigo' ? 'emerald' : 'amber'}>{pill}</PlanPill>
+      </div>
+      <p className="mt-2 text-sm text-slate-500">{subtitle}</p>
+      <ul className="mt-4 grid flex-1 gap-2 sm:grid-cols-2">
+        {features.map((f) => (
+          <FeatureItem key={f} tone={tone === 'indigo' ? 'violet' : 'slate'}>
+            {f}
+          </FeatureItem>
+        ))}
+      </ul>
+      <Link
+        href={href}
+        className={cn('mt-5 inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition', btn)}
+      >
+        {cta} <ArrowRight className="size-4" />
+      </Link>
+    </div>
+  );
+}
+
+function ReadinessDonut({ score }: { score: number | null }) {
+  const pct = Math.max(0, Math.min(100, score ?? 0));
+  const r = 26;
+  const c = 2 * Math.PI * r;
+  return (
+    <div className="relative grid size-20 shrink-0 place-items-center">
+      <svg viewBox="0 0 64 64" className="size-20 -rotate-90">
+        <circle cx="32" cy="32" r={r} fill="none" stroke="currentColor" strokeWidth="7" className="text-slate-100" />
+        <circle
+          cx="32"
+          cy="32"
+          r={r}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="7"
+          strokeLinecap="round"
+          strokeDasharray={c}
+          strokeDashoffset={c * (1 - pct / 100)}
+          className="text-emerald-500 transition-all"
+        />
+      </svg>
+      <span className="absolute text-sm font-black tabular-nums text-navy">{score != null ? `${score}%` : '—'}</span>
+    </div>
+  );
+}
+
+function HistorySection({ history }: { history: PurchaseHistoryItemDto[] }) {
+  if (!history.length) {
+    return (
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-400 shadow-sm">
+        No purchases yet.
+      </section>
+    );
+  }
+  return (
+    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-400">
+        <Clock className="size-4" /> Purchase history
+      </h2>
+      <div className="mt-4 overflow-x-auto">
+        <table className="w-full min-w-[520px] text-sm">
+          <thead>
+            <tr className="text-left text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              <th className="pb-2">Item</th>
+              <th className="pb-2">Plan</th>
+              <th className="pb-2 text-right">Amount</th>
+              <th className="pb-2 text-right">Status</th>
+              <th className="pb-2 text-right">Date</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {history.map((h) => (
+              <tr key={h.orderId}>
+                <td className="py-2.5 font-semibold text-navy">
+                  {h.items && h.items.length > 0
+                    ? `Cart · ${h.items.length} item${h.items.length === 1 ? '' : 's'}`
+                    : h.scopeType === EntitlementScope.PLATFORM
+                      ? 'Full Platform'
+                      : slugToLabel(h.scopeRef) || h.scopeType}
+                </td>
+                <td className="py-2.5 capitalize text-slate-500">{historyPlanLabel(h)}</td>
+                <td className="py-2.5 text-right tabular-nums text-navy">{formatPrice(h.amountCents, h.currency)}</td>
+                <td className="py-2.5 text-right">
+                  <StatusPill status={h.status} />
+                </td>
+                <td className="py-2.5 text-right tabular-nums text-slate-500">
+                  {new Date(h.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }
 

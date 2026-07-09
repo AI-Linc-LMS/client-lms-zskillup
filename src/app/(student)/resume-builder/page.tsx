@@ -1,5 +1,6 @@
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ResumeBuilder } from '@/components/resume/ResumeBuilder';
+import { SubscriptionLockGate } from '@/components/billing/SubscriptionLockGate';
 import { FileText, Gauge, LayoutTemplate, Sparkles } from 'lucide-react';
 
 export const metadata = {
@@ -48,7 +49,9 @@ export default function ResumeBuilderPage() {
         </div>
       </header>
 
-      <ResumeBuilder />
+      <SubscriptionLockGate tool="resume" feature="Resume Builder">
+        <ResumeBuilder />
+      </SubscriptionLockGate>
     </div>
   );
 }
