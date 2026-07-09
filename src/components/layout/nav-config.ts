@@ -11,6 +11,7 @@ import {
   FileCheck2,
   FileText,
   GraduationCap,
+  MonitorPlay,
   LayoutDashboard,
   IndianRupee,
   LifeBuoy,
@@ -241,6 +242,7 @@ export const ADMIN_NAV: NavSection[] = [
       { label: 'Mock Tests', href: '/admin/mocks', icon: FileCheck2 },
       { label: 'Assessments', href: '/admin/scheduled-assessments', icon: CalendarClock },
       { label: 'Courses', href: '/admin/courses', icon: GraduationCap },
+      { label: 'Study Material', href: '/admin/study-material', icon: MonitorPlay },
     ],
   },
 ];
