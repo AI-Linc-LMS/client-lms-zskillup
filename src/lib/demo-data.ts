@@ -33,6 +33,8 @@ export interface DemoCompany {
   rounds: number;
   badge?: string;
   accent: string; // tailwind gradient classes
+  /** Real company logo URL (from the API); falls back to the initials tile when absent. */
+  logoUrl?: string | null;
 }
 
 export const DEMO_COMPANIES: DemoCompany[] = [

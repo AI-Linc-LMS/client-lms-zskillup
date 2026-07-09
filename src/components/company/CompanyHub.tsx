@@ -222,6 +222,8 @@ export function CompanyHub({ content }: { content: HubContent }) {
 function CompanyHero({ content, reduce }: { content: HubContent; reduce: boolean }) {
   const c = content.company;
   const initials = c.name.slice(0, 2).toUpperCase();
+  const [logoError, setLogoError] = useState(false);
+  const hasLogo = !!c.logoUrl && !logoError;
   const readyPct = useMemo(() => parsePct(content.quickStats.readiness), [content.quickStats.readiness]);
 
   const facts: Array<{ icon: typeof Star; label: string; value: string }> = [
@@ -266,14 +268,27 @@ function CompanyHero({ content, reduce }: { content: HubContent; reduce: boolean
           <div className="mt-6 flex items-center gap-4">
             <motion.span
               className={cn(
-                'grid size-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br text-xl font-extrabold text-white shadow-[0_14px_34px_-10px_rgba(0,0,0,0.6)] ring-1 ring-white/15',
-                c.accent,
+                'grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl shadow-[0_14px_34px_-10px_rgba(0,0,0,0.6)] ring-1 ring-white/15',
+                hasLogo
+                  ? 'bg-white p-2.5'
+                  : cn('bg-gradient-to-br text-xl font-extrabold text-white', c.accent),
               )}
               initial={reduce ? false : { opacity: 0, scale: 0.85 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
             >
-              {initials}
+              {hasLogo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={c.logoUrl!}
+                  alt={`${c.name} logo`}
+                  onError={() => setLogoError(true)}
+                  loading="lazy"
+                  className="size-full object-contain"
+                />
+              ) : (
+                initials
+              )}
             </motion.span>
             <div className="min-w-0">
               <motion.h1
