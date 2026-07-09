@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FileText, Loader2, Plus, PlayCircle, ListChecks, Trash2, X } from 'lucide-react';
+import { FileText, Loader2, Plus, PlayCircle, ListChecks, Sparkles, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { listAdminCompanies, type AdminCompanyRow } from '@/lib/api/admin';
 import { listTopicsWithCounts, type ApiTopic } from '@/lib/api/catalog';
@@ -13,6 +13,7 @@ import {
   deleteItem,
   deleteSection,
   deleteTopic,
+  generateStudyMaterialQuizzes,
   getAdminStudyMaterial,
   updateItem,
   updateSection,
@@ -38,6 +39,7 @@ export function StudyMaterialAdmin() {
   const [newSection, setNewSection] = useState('');
   const [itemForm, setItemForm] = useState<{ topicId: string; item?: AdminStudyMaterialItemDto } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
     listAdminCompanies()
@@ -98,6 +100,31 @@ export function StudyMaterialAdmin() {
         </select>
         {tree && <span className="text-xs text-slate-400">{tree.sections.length} sections · edits show instantly on the student side</span>}
         {(loading || busy) && <Loader2 className="size-4 animate-spin text-slate-300" />}
+        <button
+          type="button"
+          onClick={async () => {
+            if (
+              !companyId ||
+              !confirm(
+                "Regenerate this company's quiz sections from its real question bank? Auto-generated quizzes are replaced with fresh ones (your videos and hand-added sections are kept).",
+              )
+            )
+              return;
+            setGenerating(true);
+            try {
+              const r = await generateStudyMaterialQuizzes(companyId);
+              load();
+              alert(`Generated ${r.sections} sections · ${r.topics} topics · ${r.quizzes} quizzes from the question bank.`);
+            } finally {
+              setGenerating(false);
+            }
+          }}
+          disabled={!companyId || generating}
+          className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[#1f2d4d] to-[#0b1220] px-3.5 py-2 text-xs font-bold text-white transition hover:opacity-90 disabled:opacity-50"
+        >
+          {generating ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5" />}
+          Auto-generate quizzes
+        </button>
       </div>
 
       {/* Sections */}

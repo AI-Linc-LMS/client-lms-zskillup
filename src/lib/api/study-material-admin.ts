@@ -64,3 +64,15 @@ export async function deleteItem(id: string) {
 export async function reorderStudyMaterial(level: 'section' | 'topic' | 'item', ids: string[]) {
   await apiClient.post('/api/v1/admin/study-material/reorder', { level, ids });
 }
+
+/** (Re)generate this company's quiz sections from its real question bank. */
+export async function generateStudyMaterialQuizzes(
+  companyId: string,
+): Promise<{ sections: number; topics: number; quizzes: number }> {
+  return (
+    await apiClient.post<{ sections: number; topics: number; quizzes: number }>(
+      `/api/v1/admin/companies/${companyId}/study-material/generate-quizzes`,
+      {},
+    )
+  ).data;
+}
