@@ -199,8 +199,10 @@ export default function FullPlatformPage() {
                           Just {formatPrice(perMo, 'INR')}/month
                         </span>
                       )}
+                      {/* spacer bottom-aligns the CTA across cards of unequal content */}
+                      <span aria-hidden className="grow" />
                       <span
-                        className={`mt-4 inline-flex items-center justify-center rounded-lg px-3 py-2 text-xs font-bold transition ${
+                        className={`mt-5 inline-flex items-center justify-center rounded-lg px-3 py-2.5 text-xs font-bold transition ${
                           active ? 'bg-indigo-600 text-white' : 'border border-slate-200 text-navy'
                         }`}
                       >
