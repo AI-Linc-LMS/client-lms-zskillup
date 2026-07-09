@@ -9,6 +9,7 @@ import { DEMO_COMPANIES, type DemoCompany } from './demo-data';
 export const HUB_TABS = [
   'Overview',
   'Syllabus',
+  'Study Material',
   'Practice Quiz',
   'Coding',
   'Full Mock Assessment',

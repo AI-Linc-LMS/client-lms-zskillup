@@ -1,0 +1,348 @@
+'use client';
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  CheckCircle2,
+  ChevronDown,
+  Circle,
+  FileText,
+  ListChecks,
+  Loader2,
+  MonitorPlay,
+  PlayCircle,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+  completeStudyMaterialItem,
+  getStudyMaterial,
+  type StudyMaterialDto,
+  type StudyMaterialItemDto,
+} from '@/lib/api/study-material';
+import { VideoPlayer } from './VideoPlayer';
+
+const pct = (done: number, total: number) => (total > 0 ? Math.round((done / total) * 100) : 0);
+
+const ITEM_ICON = { VIDEO: PlayCircle, QUIZ: ListChecks, ARTICLE: FileText } as const;
+const tone = (p: number) => (p >= 75 ? 'bg-emerald-500' : p >= 40 ? 'bg-amber-500' : p > 0 ? 'bg-orange' : 'bg-slate-300');
+
+export function StudyMaterialTab({ slug }: { slug: string }) {
+  const [data, setData] = useState<StudyMaterialDto | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [openTopics, setOpenTopics] = useState<Set<string>>(new Set());
+  const [playing, setPlaying] = useState<StudyMaterialItemDto | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    getStudyMaterial(slug)
+      .then((d) => {
+        if (!alive) return;
+        setData(d);
+        const first = d.sections[0];
+        setActiveSection(first?.id ?? null);
+        if (first?.topics[0]) setOpenTopics(new Set([first.topics[0].id]));
+      })
+      .catch(() => {})
+      .finally(() => alive && setLoading(false));
+    return () => {
+      alive = false;
+    };
+  }, [slug]);
+
+  const section = useMemo(
+    () => data?.sections.find((s) => s.id === activeSection) ?? data?.sections[0] ?? null,
+    [data, activeSection],
+  );
+
+  const toggleItem = useCallback(
+    async (item: StudyMaterialItemDto) => {
+      const next = !item.done;
+      setBusy(item.id);
+      setData((prev) => (prev ? recompute(mapItem(prev, item.id, (i) => ({ ...i, done: next }))) : prev));
+      setPlaying((p) => (p && p.id === item.id ? { ...p, done: next } : p));
+      try {
+        await completeStudyMaterialItem(slug, item.id, next);
+      } catch {
+        setData((prev) => (prev ? recompute(mapItem(prev, item.id, (i) => ({ ...i, done: !next }))) : prev));
+      } finally {
+        setBusy(null);
+      }
+    },
+    [slug],
+  );
+
+  if (loading) {
+    return (
+      <div className="grid h-64 place-items-center">
+        <Loader2 className="size-6 animate-spin text-slate-300" />
+      </div>
+    );
+  }
+  if (!data || !data.hasContent || !section) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-slate-200 bg-white p-14 text-center">
+        <span className="grid size-14 place-items-center rounded-2xl bg-slate-100 text-slate-400">
+          <MonitorPlay className="size-6" />
+        </span>
+        <p className="text-sm font-bold text-navy">Study material is coming soon</p>
+        <p className="max-w-sm text-xs text-slate-500">
+          Concept videos, guided solutions and topic quizzes for this company are being prepared.
+        </p>
+      </div>
+    );
+  }
+
+  const sectionIndex = data.sections.findIndex((s) => s.id === section.id);
+
+  return (
+    <div>
+      {/* Overall progress banner */}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+        <div className="flex items-center gap-2.5">
+          <span className="grid size-9 place-items-center rounded-xl bg-orange/10 text-orange">
+            <MonitorPlay className="size-4" />
+          </span>
+          <div>
+            <p className="text-sm font-bold text-navy">Study Material</p>
+            <p className="text-[11px] text-slate-500">{data.doneCount} of {data.itemCount} items completed</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-2 w-40 overflow-hidden rounded-full bg-slate-100">
+            <motion.div
+              className="h-full rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021]"
+              initial={{ width: 0 }}
+              animate={{ width: `${data.progressPct}%` }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            />
+          </div>
+          <span className="text-sm font-black tabular-nums text-navy">{data.progressPct}%</span>
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)]">
+        {/* Left rail — sections */}
+        <aside className="rounded-2xl border border-slate-200 bg-white p-2.5 lg:sticky lg:top-20 lg:self-start">
+          <p className="px-2 pb-1.5 pt-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Topics</p>
+          <ul className="space-y-1">
+            {data.sections.map((s, i) => {
+              const active = s.id === section.id;
+              return (
+                <li key={s.id}>
+                  <button
+                    type="button"
+                    onClick={() => setActiveSection(s.id)}
+                    className={cn(
+                      'w-full rounded-xl px-3 py-2.5 text-left transition',
+                      active ? 'bg-orange/[0.07] ring-1 ring-orange/20' : 'hover:bg-slate-50',
+                    )}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={cn('truncate text-sm font-bold', active ? 'text-navy' : 'text-slate-600')}>
+                        {i + 1}. {s.title}
+                      </span>
+                      <span className="shrink-0 text-xs font-bold tabular-nums text-slate-400">{s.progressPct}%</span>
+                    </div>
+                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                      <div className={cn('h-full rounded-full', tone(s.progressPct))} style={{ width: `${s.progressPct}%` }} />
+                    </div>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </aside>
+
+        {/* Right — the selected section's topics */}
+        <section className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h3 className="flex items-center gap-2.5 font-display text-base font-bold text-navy">
+              <span className="grid size-7 place-items-center rounded-full bg-orange text-xs font-black text-white">
+                {sectionIndex + 1}
+              </span>
+              {section.title}
+            </h3>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Progress</span>
+              <div className="h-2 w-28 overflow-hidden rounded-full bg-slate-100">
+                <div className="h-full rounded-full bg-gradient-to-r from-[#7c6cf5] to-[#5b4bd6]" style={{ width: `${section.progressPct}%` }} />
+              </div>
+              <span className="text-xs font-bold tabular-nums text-navy">{section.progressPct}%</span>
+            </div>
+          </div>
+
+          <div className="space-y-2.5">
+            {section.topics.map((t, ti) => {
+              const open = openTopics.has(t.id);
+              return (
+                <div key={t.id} className="overflow-hidden rounded-2xl border border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOpenTopics((prev) => {
+                        const n = new Set(prev);
+                        if (n.has(t.id)) n.delete(t.id);
+                        else n.add(t.id);
+                        return n;
+                      })
+                    }
+                    className="flex w-full items-center gap-3 bg-slate-50/60 px-4 py-3 text-left transition hover:bg-slate-50"
+                  >
+                    <ChevronDown className={cn('size-4 shrink-0 text-slate-400 transition-transform', open && 'rotate-180')} />
+                    <span className="flex-1 truncate text-sm font-bold text-navy">
+                      {sectionIndex + 1}.{ti + 1} {t.title}
+                    </span>
+                    <span className="shrink-0 text-xs font-bold tabular-nums text-slate-500">{t.progressPct}%</span>
+                    <div className="hidden h-1.5 w-20 shrink-0 overflow-hidden rounded-full bg-slate-200 sm:block">
+                      <div className={cn('h-full rounded-full', tone(t.progressPct))} style={{ width: `${t.progressPct}%` }} />
+                    </div>
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {open && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                        className="overflow-hidden"
+                      >
+                        <ul className="divide-y divide-slate-100">
+                          {t.items.map((item) => (
+                            <li key={item.id}>
+                              <ItemRow item={item} busy={busy === item.id} onToggle={() => toggleItem(item)} onPlay={() => setPlaying(item)} />
+                            </li>
+                          ))}
+                          {t.items.length === 0 && <li className="px-4 py-3 text-xs text-slate-400">No items yet.</li>}
+                        </ul>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      </div>
+
+      <VideoPlayer item={playing} busy={busy === playing?.id} onToggleDone={() => playing && toggleItem(playing)} onClose={() => setPlaying(null)} />
+    </div>
+  );
+}
+
+function ItemRow({
+  item,
+  busy,
+  onToggle,
+  onPlay,
+}: {
+  item: StudyMaterialItemDto;
+  busy: boolean;
+  onToggle: () => void;
+  onPlay: () => void;
+}) {
+  const Icon = ITEM_ICON[item.kind];
+  const meta =
+    item.kind === 'VIDEO'
+      ? item.durationLabel ?? 'Video'
+      : item.kind === 'QUIZ'
+        ? item.quizQuestionCount
+          ? `${item.quizQuestionCount} Questions`
+          : 'Quiz'
+        : 'Article';
+  return (
+    <div className="flex items-center gap-3 px-4 py-3">
+      <button
+        type="button"
+        onClick={onToggle}
+        disabled={busy}
+        aria-pressed={item.done}
+        aria-label={item.done ? 'Mark not done' : 'Mark done'}
+        className="shrink-0"
+      >
+        {busy ? (
+          <Loader2 className="size-5 animate-spin text-slate-300" />
+        ) : item.done ? (
+          <CheckCircle2 className="size-5 text-emerald-500" />
+        ) : (
+          <Circle className="size-5 text-slate-300 transition hover:text-orange" />
+        )}
+      </button>
+      <span
+        className={cn(
+          'grid size-9 shrink-0 place-items-center rounded-xl',
+          item.kind === 'VIDEO' ? 'bg-orange/10 text-orange' : item.kind === 'QUIZ' ? 'bg-amber-50 text-amber-600' : 'bg-sky-50 text-sky-600',
+        )}
+      >
+        <Icon className="size-4" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className={cn('truncate text-sm font-semibold', item.done ? 'text-slate-400' : 'text-navy')}>{item.title}</p>
+        {item.description && <p className="truncate text-xs text-slate-500">{item.description}</p>}
+      </div>
+      <span className="hidden shrink-0 text-[11px] font-semibold text-slate-400 sm:block">{meta}</span>
+      {item.kind === 'VIDEO' ? (
+        <button
+          type="button"
+          onClick={onPlay}
+          className="shrink-0 rounded-full bg-navy px-3 py-1.5 text-xs font-bold text-white transition hover:bg-navy/90"
+        >
+          Watch
+        </button>
+      ) : item.kind === 'QUIZ' && item.quizHref ? (
+        <Link
+          href={item.quizHref}
+          className="shrink-0 rounded-full bg-navy px-3 py-1.5 text-xs font-bold text-white transition hover:bg-navy/90"
+        >
+          Take quiz
+        </Link>
+      ) : item.embedUrl ? (
+        <a
+          href={item.embedUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shrink-0 rounded-full bg-navy px-3 py-1.5 text-xs font-bold text-white transition hover:bg-navy/90"
+        >
+          Read
+        </a>
+      ) : null}
+    </div>
+  );
+}
+
+// ── local tree helpers (optimistic updates) ─────────────────────────────────
+function mapItem(
+  d: StudyMaterialDto,
+  itemId: string,
+  fn: (i: StudyMaterialItemDto) => StudyMaterialItemDto,
+): StudyMaterialDto {
+  return {
+    ...d,
+    sections: d.sections.map((s) => ({
+      ...s,
+      topics: s.topics.map((t) => ({ ...t, items: t.items.map((i) => (i.id === itemId ? fn(i) : i)) })),
+    })),
+  };
+}
+
+function recompute(d: StudyMaterialDto): StudyMaterialDto {
+  let oTotal = 0;
+  let oDone = 0;
+  const sections = d.sections.map((s) => {
+    let sTotal = 0;
+    let sDone = 0;
+    const topics = s.topics.map((t) => {
+      const done = t.items.filter((i) => i.done).length;
+      sTotal += t.items.length;
+      sDone += done;
+      return { ...t, doneCount: done, itemCount: t.items.length, progressPct: pct(done, t.items.length) };
+    });
+    oTotal += sTotal;
+    oDone += sDone;
+    return { ...s, topics, doneCount: sDone, itemCount: sTotal, progressPct: pct(sDone, sTotal) };
+  });
+  return { ...d, sections, itemCount: oTotal, doneCount: oDone, progressPct: pct(oDone, oTotal) };
+}

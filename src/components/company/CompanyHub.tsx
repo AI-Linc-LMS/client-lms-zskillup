@@ -12,6 +12,7 @@ import {
   Gauge,
   LayoutGrid,
   ListChecks,
+  MonitorPlay,
   Sparkles,
   Star,
   Target,
@@ -26,11 +27,13 @@ import { HUB_TABS, type HubContent, type HubTab } from '@/lib/hub-data';
 import { AnimatedNumber, AuroraBackground, Reveal, Stagger, StaggerItem } from '@/components/motion/primitives';
 import { CompanyPrepPanel } from './CompanyPrepPanel';
 import { CompanyMockTab as MockTab } from './CompanyMockTab';
+import { StudyMaterialTab } from '@/components/study-material/StudyMaterialTab';
 import { CodingProblemsList } from '@/components/coding/CodingProblemsList';
 
 const TAB_ICONS: Record<HubTab, typeof BookOpen> = {
   Overview: LayoutGrid,
   Syllabus: ClipboardList,
+  'Study Material': MonitorPlay,
   'Practice Quiz': ListChecks,
   Coding: Code2,
   'Full Mock Assessment': Trophy,
@@ -164,6 +167,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
           >
             {tab === 'Overview' && <OverviewTab content={content} />}
             {tab === 'Syllabus' && <SyllabusTab content={content} />}
+            {tab === 'Study Material' && <StudyMaterialTab slug={content.company.slug} />}
             {tab === 'Practice Quiz' && (
               <CompanyPrepPanel
                 companySlug={content.company.slug}
