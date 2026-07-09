@@ -49,7 +49,9 @@ export function ProgressRing({
           </linearGradient>
         </defs>
       </svg>
-      <div className="absolute inset-0 grid place-items-center text-center">{children}</div>
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-center leading-none">
+        {children}
+      </div>
     </div>
   );
 }
