@@ -182,3 +182,27 @@ export class CreateTpoAssessmentDto {
   @IsUUID('all', { each: true })
   topicIds?: string[];
 }
+
+/** Input for the live "questions available" preview (a subset of create). */
+export class PreviewTpoAssessmentDto {
+  @IsIn(['SECTIONAL', 'COMPANY'])
+  mode!: string;
+
+  @IsOptional()
+  @Transform(trimString)
+  @IsString()
+  @MaxLength(120)
+  companySlug?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(100)
+  @IsUUID('all', { each: true })
+  topicIds?: string[];
+}
+
+/** How many questions the current selection actually has. */
+export interface TpoAssessmentAvailability {
+  mcqAvailable: number;
+  codingAvailable: number;
+}

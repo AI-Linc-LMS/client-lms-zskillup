@@ -3,7 +3,9 @@ import type {
   CollegeSubscriptionDto,
   CreateTpoAssessmentDto,
   CreateTpoPlacementDto,
+  PreviewTpoAssessmentDto,
   TpoAssessment,
+  TpoAssessmentAvailability,
   TpoAssessmentList,
   TpoBulkInviteDto,
   TpoBulkInviteResult,
@@ -112,6 +114,12 @@ export async function getTpoAssessments(cohortId?: string): Promise<TpoAssessmen
 
 export async function createTpoAssessment(dto: CreateTpoAssessmentDto): Promise<TpoAssessment> {
   const res = await apiClient.post<TpoAssessment>('/api/v1/tpo/assessments', dto);
+  return res.data;
+}
+
+/** How many MCQ + coding questions the current selection has (for the composer). */
+export async function previewTpoAssessment(dto: PreviewTpoAssessmentDto): Promise<TpoAssessmentAvailability> {
+  const res = await apiClient.post<TpoAssessmentAvailability>('/api/v1/tpo/assessments/preview', dto);
   return res.data;
 }
 

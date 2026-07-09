@@ -20,11 +20,12 @@ import {
   deleteTpoAssessment,
   getTpoAssessmentResults,
   getTpoAssessments,
+  previewTpoAssessment,
   releaseTpoAssessment,
 } from '@/lib/api/tpo';
 import { listCompanies } from '@/lib/api/catalog';
 import type { AssessmentResults } from '@/lib/api/scheduling';
-import type { TpoAssessment, TpoAssessmentList, TpoAssessmentStatus } from '@/shared';
+import type { TpoAssessment, TpoAssessmentAvailability, TpoAssessmentList, TpoAssessmentStatus } from '@/shared';
 import { useTpoConsole } from '@/components/tpo/TpoConsole';
 import { KpiCard } from '@/components/tpo/ui';
 import { SectionTopicPicker } from '@/components/tpo/SectionTopicPicker';
@@ -66,6 +67,26 @@ export default function AssessmentCenterPage() {
     cohortId: '',
   });
   const [topicSel, setTopicSel] = useState<Set<string>>(new Set());
+  const [avail, setAvail] = useState<TpoAssessmentAvailability | null>(null);
+
+  // Live "questions available" for the current selection (debounced), so a drive is
+  // never built blind or short of the requested count.
+  useEffect(() => {
+    if (!showForm || (form.mode === 'COMPANY' && !form.companySlug.trim())) {
+      setAvail(null);
+      return;
+    }
+    const t = setTimeout(() => {
+      previewTpoAssessment({
+        mode: form.mode,
+        companySlug: form.mode === 'COMPANY' ? form.companySlug || undefined : undefined,
+        topicIds: topicSel.size > 0 ? [...topicSel] : undefined,
+      })
+        .then(setAvail)
+        .catch(() => setAvail(null));
+    }, 400);
+    return () => clearTimeout(t);
+  }, [showForm, form.mode, form.companySlug, topicSel]);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -115,7 +136,7 @@ export default function AssessmentCenterPage() {
         codingCount: Number(form.codingCount) || undefined,
         proctored: form.proctored,
         cohortId: form.cohortId || undefined,
-        topicIds: form.mode === 'SECTIONAL' && topicSel.size > 0 ? [...topicSel] : undefined,
+        topicIds: topicSel.size > 0 ? [...topicSel] : undefined,
       });
       toast.success('Assessment created');
       setShowForm(false);
@@ -209,9 +230,14 @@ export default function AssessmentCenterPage() {
               </span>
             </label>
           )}
-          {form.mode === 'SECTIONAL' && (
+          <div className="sm:col-span-2 lg:col-span-3">
+            {form.mode === 'COMPANY' && (
+              <p className="mb-1.5 text-[11px] font-medium text-slate-400">
+                Optional — narrow the company&apos;s bank to specific sections/topics (leave empty to use the whole bank).
+              </p>
+            )}
             <SectionTopicPicker selected={topicSel} onChange={setTopicSel} />
-          )}
+          </div>
           <label className="text-xs font-semibold text-slate-600 sm:col-span-2 lg:col-span-1">
             Title
             <input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} className={`mt-1 ${inputCls}`} placeholder="e.g. TCS Mock — Round 1" required />
@@ -245,6 +271,26 @@ export default function AssessmentCenterPage() {
             <input type="checkbox" checked={form.proctored} onChange={(e) => setForm((f) => ({ ...f, proctored: e.target.checked }))} />
             Proctored
           </label>
+          {avail && (
+            <div
+              className={`rounded-xl border px-3.5 py-2.5 text-xs sm:col-span-2 lg:col-span-3 ${
+                avail.mcqAvailable < (Number(form.mcqCount) || 0) || avail.codingAvailable < (Number(form.codingCount) || 0)
+                  ? 'border-amber-300 bg-amber-50 text-amber-800'
+                  : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+              }`}
+            >
+              <span className="font-bold tabular-nums">{avail.mcqAvailable} MCQs</span> ·{' '}
+              <span className="font-bold tabular-nums">{avail.codingAvailable} coding</span> questions available for this
+              selection.
+              {(avail.mcqAvailable < (Number(form.mcqCount) || 0) ||
+                avail.codingAvailable < (Number(form.codingCount) || 0)) && (
+                <span className="mt-1 block font-semibold">
+                  You requested more than the bank has — the drive will include only what&apos;s available. Lower the
+                  count or widen the scope.
+                </span>
+              )}
+            </div>
+          )}
           <div className="flex items-center gap-2 sm:col-span-2 lg:col-span-3">
             <Button type="submit" size="sm" disabled={saving}>{saving ? 'Creating…' : 'Create & schedule'}</Button>
             <Button type="button" size="sm" variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
