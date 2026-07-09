@@ -4,28 +4,22 @@ import { useEffect, useState } from 'react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { Activity, Building2, Code2, Loader2, MessageSquare, Sparkles, Users } from 'lucide-react';
 import { getAdminStats, getAdminCompanyStats, type AdminPlatformStats, type AdminCompanyStat } from '@/lib/api/admin';
-import { getFinancialsPayments } from '@/lib/api/financials';
-import { formatPrice } from '@/lib/api/subscriptions';
-import type { FinancialsPaymentsDto } from '@/shared/dto/financials.dto';
 import { AreaChart, Donut, MiniStat, Panel, ProgressRow } from '@/components/superadmin/dashboard-ui';
 
 /**
  * Platform Analytics (ADMIN). Distributions + trends over ADMIN-accessible stats.
- * Financials (SUPER_ADMIN-only endpoint) degrade to a capability note for ADMINs.
  */
 export default function AdminAnalyticsPage() {
   const [stats, setStats] = useState<AdminPlatformStats | null>(null);
   const [companies, setCompanies] = useState<AdminCompanyStat[]>([]);
-  const [fin, setFin] = useState<FinancialsPaymentsDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([getAdminStats(), getAdminCompanyStats(), getFinancialsPayments().catch(() => null)])
-      .then(([s, c, f]) => {
+    Promise.all([getAdminStats(), getAdminCompanyStats()])
+      .then(([s, c]) => {
         setStats(s);
         setCompanies(c);
-        setFin(f);
       })
       .catch((e) => setError(e instanceof Error ? e.message : 'Failed to load analytics'))
       .finally(() => setLoading(false));
@@ -34,7 +28,6 @@ export default function AdminAnalyticsPage() {
   const diff = stats?.questionsByDifficulty;
   const topCompanies = [...companies].sort((a, b) => b.registrations - a.registrations).slice(0, 10);
   const regMax = Math.max(1, ...topCompanies.map((c) => c.registrations));
-  const scopeMax = Math.max(1, ...(fin?.revenueByScope ?? []).map((s) => s.amountCents));
 
   return (
     <div className="space-y-6">
@@ -93,20 +86,6 @@ export default function AdminAnalyticsPage() {
                 <div className="space-y-3">
                   {topCompanies.map((c) => (
                     <ProgressRow key={c.id} label={c.name} value={c.registrations} total={regMax} color="#2563eb" hint={`${c.assessments} drives`} />
-                  ))}
-                </div>
-              )}
-            </Panel>
-
-            <Panel title="Revenue by product (B2C)">
-              {!fin ? (
-                <p className="text-sm text-slate-400">Revenue analytics require the financials capability (Super-Admin only).</p>
-              ) : fin.revenueByScope.length === 0 ? (
-                <p className="text-sm text-slate-400">No captured B2C revenue yet.</p>
-              ) : (
-                <div className="space-y-3">
-                  {fin.revenueByScope.map((s) => (
-                    <ProgressRow key={s.scope} label={`${s.scope} (${s.count})`} value={s.amountCents} total={scopeMax} color="#059669" hint={formatPrice(s.amountCents, fin.currency)} />
                   ))}
                 </div>
               )}

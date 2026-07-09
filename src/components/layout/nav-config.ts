@@ -221,8 +221,6 @@ export const ADMIN_NAV: NavSection[] = [
     items: [
       { label: 'Broadcasts', href: '/admin/broadcasts', icon: Megaphone },
       { label: 'Live Sessions', href: '/admin/live-sessions', icon: Video },
-      { label: 'Subscriptions', href: '/admin/subscriptions', icon: CreditCard },
-      { label: 'Financials', href: '/admin/financials', icon: IndianRupee },
       { label: 'Support', href: '/admin/support', icon: LifeBuoy },
     ],
   },

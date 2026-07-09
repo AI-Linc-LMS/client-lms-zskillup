@@ -9,7 +9,6 @@ import {
   GraduationCap,
   PanelLeft,
   Plus,
-  Send,
   Upload,
   type LucideIcon,
 } from 'lucide-react';
@@ -24,7 +23,6 @@ interface QuickAction {
 }
 const QUICK_ACTIONS: QuickAction[] = [
   { label: 'Create Assessment', href: '/tpo/assessments', icon: Plus },
-  { label: 'Send Notification', href: '/tpo/assessments', icon: Send },
   { label: 'Upload Students', href: '/tpo/invitations', icon: Upload },
   { label: 'Export Report', href: '/tpo/reports', icon: Download },
 ];

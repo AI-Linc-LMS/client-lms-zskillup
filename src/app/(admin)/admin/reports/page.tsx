@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
-import { Building2, Download, IndianRupee, Loader2, School } from 'lucide-react';
+import { Building2, Download, Loader2, School } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getAdminStats, getAdminCompanyStats, type AdminPlatformStats, type AdminCompanyStat } from '@/lib/api/admin';
-import { getFinancialsPayments } from '@/lib/api/financials';
-import type { FinancialsPaymentsDto } from '@/shared/dto/financials.dto';
 
 const BOM = String.fromCharCode(0xfeff);
 function toCsv(headers: string[], rows: (string | number)[][]): string {
@@ -21,7 +19,6 @@ function download(name: string, csv: string) {
   a.click();
   URL.revokeObjectURL(url);
 }
-const rupees = (cents: number) => Math.round(cents) / 100;
 
 /**
  * Reports (ADMIN). Platform + Company reports are ADMIN-accessible; the Financial
@@ -30,17 +27,15 @@ const rupees = (cents: number) => Math.round(cents) / 100;
  */
 export default function AdminReportsPage() {
   const [stats, setStats] = useState<AdminPlatformStats | null>(null);
-  const [fin, setFin] = useState<FinancialsPaymentsDto | null>(null);
   const [companies, setCompanies] = useState<AdminCompanyStat[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([getAdminStats(), getAdminCompanyStats(), getFinancialsPayments().catch(() => null)])
-      .then(([s, c, f]) => {
+    Promise.all([getAdminStats(), getAdminCompanyStats()])
+      .then(([s, c]) => {
         setStats(s);
         setCompanies(c);
-        setFin(f);
       })
       .catch((e) => setError(e instanceof Error ? e.message : 'Failed to load report data'))
       .finally(() => setLoading(false));
@@ -73,20 +68,6 @@ export default function AdminReportsPage() {
     download('platform-report.csv', toCsv(['Metric', 'Value'], rows));
   };
 
-  const exportFinancial = () => {
-    if (!fin) return;
-    const rows: (string | number)[][] = [
-      ['Monthly revenue (₹)', rupees(fin.monthlyRevenueCents)],
-      ['Annual revenue (₹)', rupees(fin.annualRevenueCents)],
-      ['Lifetime revenue (₹)', rupees(fin.lifetimeRevenueCents)],
-      ['Successful payments', fin.successfulPayments],
-      ['Failed payments', fin.failedPayments],
-      ['Pending payments', fin.pendingPayments],
-      ['Active subscriptions', fin.activeEntitlements],
-      ...fin.revenueByScope.map((s) => [`Revenue — ${s.scope} (₹)`, rupees(s.amountCents)] as [string, number]),
-    ];
-    download('financial-report.csv', toCsv(['Metric', 'Value'], rows));
-  };
 
   const exportCompanies = () => {
     const rows = companies.map((c) => [c.name, c.slug, c.registrations, c.assessments, c.questionCount, c.codingCount]);
@@ -122,15 +103,6 @@ export default function AdminReportsPage() {
             meta={`${companies.length} companies`}
             onExport={exportCompanies}
           />
-          {fin && (
-            <ReportCard
-              icon={IndianRupee}
-              title="Financial Report"
-              desc="Revenue, payment states, and B2C breakdown."
-              meta={`${fin.successfulPayments} payments captured`}
-              onExport={exportFinancial}
-            />
-          )}
         </div>
       )}
     </div>

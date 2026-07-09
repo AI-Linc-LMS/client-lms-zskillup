@@ -3,7 +3,6 @@ import { Reveal } from '@/components/motion/primitives';
 import { ShieldCheck } from 'lucide-react';
 import { PlatformOverviewLive } from '@/components/superadmin/PlatformOverviewLive';
 import { CompanyStatsCharts } from '@/components/superadmin/CompanyStatsCharts';
-import { RevenueCharts } from '@/components/superadmin/RevenueCharts';
 
 /**
  * Platform Admin console home. The internal operator's overview — platform
@@ -34,7 +33,6 @@ export default function AdminDashboardPage() {
       </Reveal>
 
       <PlatformOverviewLive />
-      <RevenueCharts />
       <CompanyStatsCharts />
     </div>
   );
