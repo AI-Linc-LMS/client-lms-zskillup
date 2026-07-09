@@ -8,6 +8,7 @@ import { Briefcase, ChevronDown, ClipboardCheck, Compass, LayoutGrid, Lock, Targ
 import { cn } from '@/lib/utils';
 import { useProfileCompletion } from '@/hooks/useProfileCompletion';
 import { useCalibrationStatus } from '@/hooks/useCalibrationStatus';
+import { useGuide } from '@/components/guide/GuideProvider';
 import {
   navForPath,
   PROFILE_GATED_HREFS,
@@ -101,12 +102,19 @@ function StudentAccordion({
   reduce: boolean;
 }) {
   // The section holding the current route — opened by default and re-opened on
-  // navigation. Clicking a header toggles which section is expanded.
+  // navigation. Clicking a header toggles that section (multi-open: opening one
+  // does NOT collapse the others).
   const activeHeading =
     sections.find((s) => s.items.some((i) => isActive(i.href)))?.heading ?? null;
-  const [open, setOpen] = useState<string | null>(activeHeading);
+  // While the platform guide runs, force every section open so its nav-item
+  // steps (which live in otherwise-collapsed sections) can find + spotlight
+  // their `data-tour` targets.
+  const { active: guideActive } = useGuide();
+  const [open, setOpen] = useState<Set<string>>(() => new Set(activeHeading ? [activeHeading] : []));
   useEffect(() => {
-    if (activeHeading) setOpen(activeHeading);
+    if (activeHeading) {
+      setOpen((prev) => (prev.has(activeHeading) ? prev : new Set(prev).add(activeHeading)));
+    }
   }, [activeHeading]);
 
   return (
@@ -116,13 +124,20 @@ function StudentAccordion({
         {sections.map((section) => {
           const SecIcon = SECTION_ICON[section.heading] ?? Compass;
           const active = section.items.some((i) => isActive(i.href));
-          const expanded = open === section.heading;
+          const expanded = guideActive || open.has(section.heading);
           return (
             <div key={section.heading}>
               <button
                 type="button"
                 aria-expanded={expanded}
-                onClick={() => setOpen((cur) => (cur === section.heading ? null : section.heading))}
+                onClick={() =>
+                  setOpen((prev) => {
+                    const next = new Set(prev);
+                    if (next.has(section.heading)) next.delete(section.heading);
+                    else next.add(section.heading);
+                    return next;
+                  })
+                }
                 className={cn(
                   'group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2.5 transition-colors',
                   expanded ? 'bg-[#f37021]/[0.07]' : 'hover:bg-slate-50',
