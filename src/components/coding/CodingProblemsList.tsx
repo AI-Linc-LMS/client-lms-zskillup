@@ -106,7 +106,7 @@ export function CodingProblemsList({ company, topic }: { company?: string; topic
   return (
     <div className="space-y-5">
       <Reveal>
-        <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+        <div data-tour="coding:progress" className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
           <div
             aria-hidden
             className="pointer-events-none absolute -right-10 -top-10 size-32 rounded-full bg-indigo-300/20 blur-2xl"
@@ -124,7 +124,7 @@ export function CodingProblemsList({ company, topic }: { company?: string; topic
               </p>
             </div>
             {/* Search — filter by problem title or tag */}
-            <div className="relative w-full sm:w-64">
+            <div data-tour="coding:search" className="relative w-full sm:w-64">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
               <input
                 value={q}

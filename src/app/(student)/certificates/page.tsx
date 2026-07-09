@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function CertificatesPage() {
   return (
-    <div className="space-y-6" data-tour="certs:gallery">
+    <div className="space-y-6">
       <Breadcrumb items={[{ label: 'Home', href: '/dashboard' }, { label: 'Certificates' }]} />
       <CertificatesGallery />
     </div>
