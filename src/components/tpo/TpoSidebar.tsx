@@ -1,9 +1,11 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import {
+  ChevronDown,
   ChevronLeft,
   Download,
   GraduationCap,
@@ -38,6 +40,13 @@ export function TpoSidebar() {
   const reduce = useReducedMotion();
   const { summary, collapsed, toggleCollapsed } = useTpoConsole();
 
+  const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
+  const activeHeading = TPO_NAV.find((s) => s.items.some((i) => isActive(i.href)))?.heading ?? null;
+  const [open, setOpen] = useState<Set<string>>(() => new Set(activeHeading ? [activeHeading] : []));
+  useEffect(() => {
+    if (activeHeading) setOpen((p) => (p.has(activeHeading) ? p : new Set(p).add(activeHeading)));
+  }, [activeHeading]);
+
   return (
     <aside
       className={cn(
@@ -69,16 +78,46 @@ export function TpoSidebar() {
 
       {/* Nav */}
       <nav className="scroll-soft flex-1 space-y-5 overflow-y-auto px-3 py-4" aria-label="Placement Office">
-        {TPO_NAV.map((section) => (
+        {TPO_NAV.map((section) => {
+          const sectionActive = section.items.some((i) => isActive(i.href));
+          // When width-collapsed (icon rail) every section shows; otherwise it's a
+          // click-to-toggle accordion (multi-open, active section open by default).
+          const expanded = collapsed || open.has(section.heading);
+          return (
           <div key={section.heading}>
             {!collapsed && (
-              <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-                {section.heading}
-              </p>
+              <button
+                type="button"
+                onClick={() =>
+                  setOpen((p) => {
+                    const n = new Set(p);
+                    if (n.has(section.heading)) n.delete(section.heading);
+                    else n.add(section.heading);
+                    return n;
+                  })
+                }
+                aria-expanded={expanded}
+                className={cn(
+                  'mb-1 flex w-full items-center gap-1.5 rounded-lg px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest transition-colors',
+                  sectionActive ? 'text-orange' : 'text-slate-400 hover:text-navy',
+                )}
+              >
+                <span className="flex-1 text-left">{section.heading}</span>
+                <ChevronDown className={cn('size-3.5 shrink-0 transition-transform', expanded && 'rotate-180')} />
+              </button>
             )}
-            <ul className="space-y-0.5">
+            <AnimatePresence initial={false}>
+              {expanded && (
+                <motion.ul
+                  key="items"
+                  initial={collapsed || reduce ? false : { height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={reduce ? { duration: 0 } : { duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                  className="space-y-0.5 overflow-hidden"
+                >
               {section.items.map((item) => {
-                const active = pathname === item.href || pathname.startsWith(item.href + '/');
+                const active = isActive(item.href);
                 const Icon = item.icon;
                 return (
                   <li key={item.href}>
@@ -126,9 +165,12 @@ export function TpoSidebar() {
                   </li>
                 );
               })}
-            </ul>
+                </motion.ul>
+              )}
+            </AnimatePresence>
           </div>
-        ))}
+          );
+        })}
 
         {/* Quick actions */}
         <div>
