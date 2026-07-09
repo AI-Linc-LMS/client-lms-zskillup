@@ -43,6 +43,7 @@ const GRAND_STEPS: GuideStep[] = [
   { id: 'nav-assessments', target: nav('/assessments'), placement: 'right', desktopOnly: true, eyebrow: 'Assessment', title: 'Assessments', body: 'Official assessments scheduled by your college or the platform show up here.' },
   { id: 'nav-resume', target: nav('/resume-builder'), placement: 'right', desktopOnly: true, eyebrow: 'Career', title: 'Resume Builder', body: 'Craft an ATS-friendly resume from proven templates \u2014 and tailor it to any job with AI.' },
   { id: 'nav-mock-interview', target: nav('/mock-interview'), placement: 'right', desktopOnly: true, eyebrow: 'Career', title: 'Mock Interview', body: 'Practice a realistic AI-driven interview and get instant feedback on your answers.' },
+  { id: 'nav-certificates', target: nav('/certificates'), placement: 'right', desktopOnly: true, eyebrow: 'Career', title: 'Certificates', body: 'Earn shareable, verifiable certificates as you hit XP milestones \u2014 download them as PDFs for your applications.' },
   { id: 'nav-company', target: nav('/dashboard/company'), placement: 'right', desktopOnly: true, eyebrow: 'Explore', title: 'Company Hubs', body: 'Company-specific prep \u2014 past questions, patterns and your readiness for each target company.' },
   { id: 'nav-shop', target: nav('/shop'), placement: 'right', desktopOnly: true, eyebrow: 'Plans', title: 'Explore Plans', body: 'Go all-access with Full Platform, or build your own plan from the companies, sections and topics you need.' },
   { id: 'nav-upgrade', target: nav('/upgrade'), placement: 'right', desktopOnly: true, eyebrow: 'Plans', title: 'Upgrade & Renew', body: 'Manage your membership \u2014 see what you own, renew before it lapses, or add more access.' },
@@ -176,6 +177,16 @@ export const PAGE_TOURS: Record<string, GuideTour> = {
     { id: "profile-academic", route: "/profile", target: "profile:academic", placement: "auto", eyebrow: "Profile", title: "Academic details", body: "Add your course, year of study, college, and passout year to describe where you are in your degree." },
     { id: "profile-career", route: "/profile", target: "profile:career", placement: "auto", eyebrow: "Profile", title: "Skills & target roles", body: "Type skills (Enter to add) and pick target roles. These power your recommendations and resume, so fill them carefully." },
     { id: "profile-completion", route: "/profile", target: "profile:completion", placement: "auto", eyebrow: "Profile", title: "Completion checklist", body: "Track which of the eight profile fields are done; tick them all off to reach 100% and unlock gated features." },
+  ] },
+  "/certificates": { id: "certs", label: "Certificates tour", steps: [
+    { id: "certs-hero", route: "/certificates", target: "certs:hero", placement: "auto", eyebrow: "Certificates", title: "Earn as you climb", body: "Seven certificates unlock at XP milestones as you practise — your total XP and how many you've unlocked show right here." },
+    { id: "certs-journey", route: "/certificates", target: "certs:journey", placement: "auto", eyebrow: "Certificates", title: "Your milestone journey", body: "The full ladder of tiers with your live position filled in — see exactly how much XP stands between you and the next certificate." },
+    { id: "certs-gallery", route: "/certificates", target: "certs:gallery", placement: "auto", eyebrow: "Certificates", title: "Your certificate gallery", body: "Every certificate as a card. Unlocked ones can be downloaded as a PDF and shared with a public, verifiable link." },
+  ] },
+  "/coding": { id: "coding", label: "Coding tour", steps: [
+    { id: "coding-hero", route: "/coding", target: "coding:hero", placement: "auto", eyebrow: "Coding", title: "Practice coding by topic", body: "DSA problems grouped by topic, each graded on the self-hosted Judge0 — you earn XP the first time you solve one." },
+    { id: "coding-progress", route: "/coding", target: "coding:progress", placement: "auto", eyebrow: "Coding", title: "Your solve count", body: "Track how many problems you've solved out of what's available; the ones you've cleared show as green cards below." },
+    { id: "coding-search", route: "/coding", target: "coding:search", placement: "auto", eyebrow: "Coding", title: "Find a problem", body: "Search by problem title or tag to jump straight to what you want to practise." },
   ] },
 };
 

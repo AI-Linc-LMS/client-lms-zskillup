@@ -50,7 +50,7 @@ export function CertificatesGallery() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+      <div data-tour="certs:hero" className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
         <div className="relative bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white sm:p-8">
           <span aria-hidden className="pointer-events-none absolute -right-10 -top-16 size-56 rounded-full bg-[#f5cf5a]/20 blur-3xl" />
           <span aria-hidden className="pointer-events-none absolute -left-16 bottom-0 size-56 rounded-full bg-[#3b82f6]/10 blur-3xl" />
@@ -80,7 +80,7 @@ export function CertificatesGallery() {
           </div>
 
           {/* Milestone journey */}
-          <div className="relative mt-6">
+          <div data-tour="certs:journey" className="relative mt-6">
             <JourneyRail certs={data.certificates} totalXp={data.totalXp} />
           </div>
 
@@ -116,7 +116,7 @@ export function CertificatesGallery() {
       </div>
 
       {/* Grid */}
-      <div className="grid justify-items-center gap-6 sm:grid-cols-2 xl:grid-cols-3">
+      <div data-tour="certs:gallery" className="grid justify-items-center gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {data.certificates.map((c) => (
           <CertificateCard key={c.slug} cert={c} holderName={data.holderName} totalXp={data.totalXp} onOpen={() => setActive(c)} />
         ))}
