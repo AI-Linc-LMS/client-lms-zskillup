@@ -8,7 +8,7 @@ import { ArrowUpRight, BookOpen, Calendar, CalendarClock, Target, Timer } from '
 import { cn } from '@/lib/utils';
 import { Reveal, Stagger, StaggerItem } from '@/components/motion/primitives';
 import { getMockHistory, type ApiMockAttemptHistory } from '@/lib/api/mocks';
-import { getPracticeAccuracy, type ApiAccuracy } from '@/lib/api/practice';
+import { getPracticeAccuracy, getTopicAccuracy, type ApiAccuracy } from '@/lib/api/practice';
 import { getMySchedule, type ApiScheduledAssessment } from '@/lib/api/scheduling';
 
 const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
@@ -23,6 +23,7 @@ const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 
 const UP_NEXT = [
   {
+    id: 'mock',
     icon: Timer,
     title: 'Take a timed mock',
     meta: 'Score, percentile, and a full answer review',
@@ -31,6 +32,7 @@ const UP_NEXT = [
     to: '#f37021',
   },
   {
+    id: 'weak',
     icon: Target,
     title: 'Drill a weak topic',
     meta: 'Server-graded practice with instant hints',
@@ -39,6 +41,7 @@ const UP_NEXT = [
     to: '#5b3bf5',
   },
   {
+    id: 'company',
     icon: BookOpen,
     title: 'Browse company hubs',
     meta: 'Pattern-matched prep for 9 recruiters',
@@ -95,6 +98,7 @@ export function DashboardRightRail() {
   const [history, setHistory] = useState<ApiMockAttemptHistory[] | null>(null);
   const [accuracy, setAccuracy] = useState<ApiAccuracy | null>(null);
   const [schedule, setSchedule] = useState<ApiScheduledAssessment[] | null>(null);
+  const [weakTopic, setWeakTopic] = useState<{ slug: string; name: string; pct: number } | null>(null);
   const [week, setWeek] = useState<Array<{ d: string; n: number; today: boolean; key: string }>>([]);
 
   useEffect(() => {
@@ -104,6 +108,18 @@ export function DashboardRightRail() {
       .catch(() => !cancelled && setHistory([]));
     getPracticeAccuracy()
       .then((a) => !cancelled && setAccuracy(a))
+      .catch(() => {});
+    // Resolve the student's weakest practised topic so "Drill a weak topic"
+    // deep-links into that topic's adaptive drill (not the generic page).
+    getTopicAccuracy()
+      .then((rows) => {
+        if (cancelled) return;
+        const attempted = rows.filter((r) => r.total > 0);
+        const weak =
+          attempted.filter((r) => r.total >= 3 && r.accuracyPct < 60).sort((a, b) => a.accuracyPct - b.accuracyPct)[0] ??
+          [...attempted].sort((a, b) => a.accuracyPct - b.accuracyPct)[0];
+        if (weak) setWeakTopic({ slug: weak.topicSlug, name: weak.topicName, pct: weak.accuracyPct });
+      })
       .catch(() => {});
     getMySchedule()
       .then((rows) => !cancelled && setSchedule(rows))
@@ -136,7 +152,20 @@ export function DashboardRightRail() {
         <RailCard glow="#f37021">
           <RailLabel>Up Next</RailLabel>
           <div className="space-y-2.5">
-            {UP_NEXT.map(({ icon: Icon, title, meta, href, from, to }) => (
+            {UP_NEXT.map((item) => {
+              const { id, icon: Icon, title, from, to } = item;
+              // "Drill a weak topic" deep-links into the student's weakest topic
+              // (adaptive drill), falling back to the practice page until they've
+              // practised enough to have one.
+              const href =
+                id === 'weak' && weakTopic
+                  ? `/dashboard/quiz/adaptive?topic=${encodeURIComponent(weakTopic.slug)}`
+                  : item.href;
+              const meta =
+                id === 'weak' && weakTopic
+                  ? `${weakTopic.name} · ${weakTopic.pct}% — drill to improve`
+                  : item.meta;
+              return (
               <motion.div key={title} whileHover={{ y: -2 }} transition={{ duration: 0.2 }}>
                 <Link
                   href={href}
@@ -159,7 +188,8 @@ export function DashboardRightRail() {
                   />
                 </Link>
               </motion.div>
-            ))}
+              );
+            })}
           </div>
         </RailCard>
       </StaggerItem>

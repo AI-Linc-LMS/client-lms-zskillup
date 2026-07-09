@@ -22,6 +22,7 @@ export function CustomMockBuilder() {
   const [sections, setSections] = useState<Set<string>>(new Set());
   const [chosenTopics, setChosenTopics] = useState<Set<string>>(new Set());
   const [codingTopics, setCodingTopics] = useState<Set<string>>(new Set());
+  const [codingAll, setCodingAll] = useState(false);
   const [count, setCount] = useState(20);
   const [codingCount, setCodingCount] = useState(3);
   const [duration, setDuration] = useState(30);
@@ -59,7 +60,8 @@ export function CustomMockBuilder() {
   };
 
   const hasQuiz = sections.size + chosenTopics.size > 0;
-  const hasScope = hasQuiz || codingTopics.size > 0;
+  const codingChosen = codingAll || codingTopics.size > 0;
+  const hasScope = hasQuiz || codingChosen;
 
   const start = async () => {
     if (!hasScope || busy) return;
@@ -71,8 +73,8 @@ export function CustomMockBuilder() {
         topicSlugs: [...chosenTopics],
         questionCount: count,
         durationMinutes: duration,
-        codingTopics: [...codingTopics],
-        codingCount: codingTopics.size ? codingCount : undefined,
+        codingTopics: codingAll ? codingTopicList.map((c) => c.topic) : [...codingTopics],
+        codingCount: codingChosen ? codingCount : undefined,
       });
       router.push(`/dashboard/quiz?mock=${mockId}&proctored=1`);
     } catch (e) {
@@ -156,24 +158,48 @@ export function CustomMockBuilder() {
             <Code2 className="size-3.5" /> Coding topics
             <span className="font-medium normal-case tracking-normal text-slate-400">(optional)</span>
           </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {codingTopicList.map((c) => {
-              const on = codingTopics.has(c.topic);
-              return (
-                <button
-                  key={c.topic}
-                  onClick={() => toggle(codingTopics, setCodingTopics, c.topic)}
-                  className={cn(
-                    'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors',
-                    on ? 'border-orange bg-orange/10 text-navy' : 'border-slate-200 text-slate-600 hover:bg-slate-50',
-                  )}
-                >
-                  {on ? <Check className="size-3" /> : <Code2 className="size-3 text-slate-400" />}
-                  {c.topic}
-                </button>
-              );
-            })}
-          </div>
+
+          {/* Whole coding section — parity with the MCQ "whole section" toggle. */}
+          <button
+            onClick={() => setCodingAll((v) => !v)}
+            className={cn(
+              'mt-3 flex w-full items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left text-sm font-bold transition-colors',
+              codingAll ? 'border-orange bg-orange/10 text-navy' : 'border-slate-200 text-navy hover:bg-slate-50',
+            )}
+          >
+            <span className="flex items-center gap-2">
+              <Code2 className="size-4 text-slate-400" /> Full coding section
+              <span className="text-[11px] font-semibold text-slate-400">
+                all {codingTopicList.length} topics
+              </span>
+            </span>
+            <span className={cn('grid size-5 place-items-center rounded-md border', codingAll ? 'border-orange bg-orange text-white' : 'border-slate-300')}>
+              {codingAll ? <Check className="size-3.5" /> : null}
+            </span>
+          </button>
+
+          {codingAll ? (
+            <p className="mt-2 text-[11px] font-medium text-orange">Whole coding section selected</p>
+          ) : (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {codingTopicList.map((c) => {
+                const on = codingTopics.has(c.topic);
+                return (
+                  <button
+                    key={c.topic}
+                    onClick={() => toggle(codingTopics, setCodingTopics, c.topic)}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors',
+                      on ? 'border-orange bg-orange/10 text-navy' : 'border-slate-200 text-slate-600 hover:bg-slate-50',
+                    )}
+                  >
+                    {on ? <Check className="size-3" /> : <Code2 className="size-3 text-slate-400" />}
+                    {c.topic}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       ) : null}
 
@@ -182,7 +208,7 @@ export function CustomMockBuilder() {
         <div className="grid gap-5 sm:grid-cols-3">
           <Stepper label="MCQ questions" icon={ListChecks} value={count} min={5} max={100} step={5} onChange={setCount} />
           <Stepper label="Duration (min)" icon={Clock} value={duration} min={5} max={180} step={5} onChange={setDuration} />
-          {codingTopics.size ? (
+          {codingChosen ? (
             <Stepper label="Coding problems" icon={Code2} value={codingCount} min={1} max={20} step={1} onChange={setCodingCount} />
           ) : (
             <div>
