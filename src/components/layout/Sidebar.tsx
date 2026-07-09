@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { Briefcase, ClipboardCheck, Compass, LayoutGrid, Lock, Target } from 'lucide-react';
+import { Briefcase, ChevronDown, ClipboardCheck, Compass, LayoutGrid, Lock, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useProfileCompletion } from '@/hooks/useProfileCompletion';
 import { useCalibrationStatus } from '@/hooks/useCalibrationStatus';
@@ -13,22 +13,21 @@ import {
   PROFILE_GATED_HREFS,
   CALIBRATION_GATED_HREFS,
   type NavItem,
-  type NavSection,
 } from './nav-config';
 
 /**
  * Workspace sidebar — route-aware.
  *
- * Student zone: a COLLAPSED icon rail of the five sections (Workspace / Practice
- * / Assessment / Career / Explore). Hovering (or focusing) a section slides out
- * an animated flyout with its sub-items — more canvas for the page, the nav a
- * hover away. Admin / TPO keep the classic full sidebar (their consoles rely on
- * always-visible section lists).
+ * Student zone: a full-width sidebar of the five sections (Workspace / Practice
+ * / Assessment / Career / Explore) as collapsible accordion headers. Hovering
+ * (or focusing) a section expands its sub-items DOWNWARD with an animated
+ * height reveal; the section holding the current route stays open by default.
+ * Admin / TPO keep the classic always-open full sidebar.
  */
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-/** Section-level icons for the collapsed rail, keyed by the nav heading. */
+/** Section-level icons for the accordion headers, keyed by the nav heading. */
 const SECTION_ICON: Record<string, typeof Compass> = {
   WORKSPACE: LayoutGrid,
   PRACTICE: Target,
@@ -79,9 +78,9 @@ export function Sidebar() {
     );
   }
 
-  // ── Student: collapsed rail with hover-expand flyouts ──────────────────────
+  // ── Student: accordion sidebar (sections expand downward on hover) ─────────
   return (
-    <StudentRail
+    <StudentAccordion
       sections={sections}
       isActive={isActive}
       isLocked={isLocked}
@@ -90,17 +89,19 @@ export function Sidebar() {
   );
 }
 
-function StudentRail({
+function StudentAccordion({
   sections,
   isActive,
   isLocked,
   reduce,
 }: {
-  sections: NavSection[];
+  sections: ReturnType<typeof navForPath>;
   isActive: (href: string) => boolean;
   isLocked: (href: string) => boolean;
   reduce: boolean;
 }) {
+  // `open` = the section the pointer is hovering (or null). When nothing is
+  // hovered, the section containing the current route stays expanded.
   const [open, setOpen] = useState<string | null>(null);
   const closeTimer = useRef<number | null>(null);
 
@@ -119,41 +120,39 @@ function StudentRail({
   );
   const scheduleClose = useCallback(() => {
     cancelClose();
-    closeTimer.current = window.setTimeout(() => setOpen(null), 140);
+    closeTimer.current = window.setTimeout(() => setOpen(null), 160);
   }, [cancelClose]);
   useEffect(() => () => cancelClose(), [cancelClose]);
 
   return (
-    <aside className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-[4.75rem] shrink-0 flex-col self-start border-r border-[var(--color-line)] bg-white md:flex">
+    <aside className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-64 shrink-0 flex-col self-start border-r border-[var(--color-line)] bg-white md:flex">
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#f37021]/[0.05] to-transparent" />
-      <nav className="relative flex flex-1 flex-col gap-1.5 px-2 py-4" aria-label="Workspace">
+      <nav className="scroll-soft relative flex-1 space-y-1.5 overflow-y-auto px-3 py-4" aria-label="Workspace">
         {sections.map((section) => {
           const SecIcon = SECTION_ICON[section.heading] ?? Compass;
           const active = section.items.some((i) => isActive(i.href));
-          const isOpen = open === section.heading;
+          const expanded = open === section.heading || (open === null && active);
           return (
             <div
               key={section.heading}
-              className="relative"
               onMouseEnter={() => openNow(section.heading)}
               onMouseLeave={scheduleClose}
             >
               <button
                 type="button"
-                aria-expanded={isOpen}
-                aria-label={titleCase(section.heading)}
+                aria-expanded={expanded}
                 onFocus={() => openNow(section.heading)}
                 className={cn(
-                  'group flex w-full flex-col items-center gap-1 rounded-2xl px-1 py-2 transition-colors',
-                  active || isOpen ? 'bg-[#f37021]/[0.09]' : 'hover:bg-slate-50',
+                  'group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2.5 transition-colors',
+                  expanded ? 'bg-[#f37021]/[0.07]' : 'hover:bg-slate-50',
                 )}
               >
                 <span
                   className={cn(
-                    'grid size-9 place-items-center rounded-xl transition-all duration-200',
+                    'grid size-8 shrink-0 place-items-center rounded-lg transition-all duration-200',
                     active
-                      ? 'bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_6px_16px_-6px_rgba(243,112,33,0.7)]'
-                      : isOpen
+                      ? 'bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_5px_14px_-5px_rgba(243,112,33,0.7)]'
+                      : expanded
                         ? 'bg-[#f37021]/10 text-[var(--color-primary)]'
                         : 'text-[var(--color-text-subtle)] group-hover:text-[var(--color-text)]',
                   )}
@@ -162,45 +161,38 @@ function StudentRail({
                 </span>
                 <span
                   className={cn(
-                    'text-[9px] font-bold uppercase tracking-wide',
-                    active || isOpen ? 'text-[var(--color-primary)]' : 'text-slate-400',
+                    'flex-1 text-left text-[13px] font-bold uppercase tracking-wide',
+                    active || expanded ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)]',
                   )}
                 >
                   {titleCase(section.heading)}
                 </span>
+                <ChevronDown
+                  aria-hidden
+                  className={cn(
+                    'size-4 shrink-0 text-slate-400 transition-transform duration-200',
+                    expanded && 'rotate-180',
+                  )}
+                />
               </button>
 
-              <AnimatePresence>
-                {isOpen ? (
+              <AnimatePresence initial={false}>
+                {expanded ? (
                   <motion.div
-                    className="absolute left-full top-0 z-50 ml-1.5 w-56"
-                    onMouseEnter={() => openNow(section.heading)}
-                    onMouseLeave={scheduleClose}
-                    role="menu"
-                    aria-label={titleCase(section.heading)}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -8 }}
-                    transition={reduce ? { duration: 0 } : { duration: 0.18, ease: EASE }}
+                    key="items"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={reduce ? { duration: 0 } : { duration: 0.24, ease: EASE }}
+                    className="overflow-hidden"
                   >
-                    <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-2 shadow-[0_30px_70px_-30px_rgba(11,18,32,0.5)]">
-                      <p className="flex items-center gap-2 px-2.5 pb-1.5 pt-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-                        <span aria-hidden className="h-px w-3 rounded-full bg-gradient-to-r from-[#f37021]/60 to-transparent" />
-                        {section.heading}
-                      </p>
-                      <ul className="space-y-0.5">
-                        {section.items.map((item) => (
-                          <li key={item.href}>
-                            <FlyoutNavLink
-                              item={item}
-                              active={isActive(item.href)}
-                              locked={isLocked(item.href)}
-                              onNavigate={() => setOpen(null)}
-                            />
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    <ul className="ml-4 mt-1 space-y-0.5 border-l border-slate-100 pl-2">
+                      {section.items.map((item) => (
+                        <li key={item.href}>
+                          <SubNavLink item={item} active={isActive(item.href)} locked={isLocked(item.href)} />
+                        </li>
+                      ))}
+                    </ul>
                   </motion.div>
                 ) : null}
               </AnimatePresence>
@@ -273,25 +265,14 @@ function FullNavLink({
   );
 }
 
-/** Flyout item (student rail) — compact, closes the flyout on navigate. */
-function FlyoutNavLink({
-  item,
-  active,
-  locked,
-  onNavigate,
-}: {
-  item: NavItem;
-  active: boolean;
-  locked: boolean;
-  onNavigate: () => void;
-}) {
+/** Accordion sub-item (student) — compact row under a section header. */
+function SubNavLink({ item, active, locked }: { item: NavItem; active: boolean; locked: boolean }) {
   const Icon = item.icon;
   return (
     <Link
       href={item.href}
       data-tour={`nav:${item.href}`}
       aria-current={active ? 'page' : undefined}
-      onClick={onNavigate}
       className={cn(
         'group flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm transition-colors',
         active
