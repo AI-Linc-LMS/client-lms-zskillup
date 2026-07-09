@@ -11,7 +11,6 @@ import {
   Loader2,
   Sparkles,
   Trophy,
-  Wand2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCalibrationStatus } from '@/hooks/useCalibrationStatus';
@@ -26,6 +25,7 @@ import { ProgressRing, TaskRow } from './StudyBits';
 import { RoadmapRail } from './RoadmapRail';
 import { DayDrawerPortal } from './DayDrawer';
 import { Confetti } from './Confetti';
+import { CalibrationScope, RoadmapJourney } from './illustrations';
 
 export function StudyPlanClient() {
   const [ov, setOv] = useState<StudyPlanOverviewDto | null>(null);
@@ -158,6 +158,7 @@ function Hero({ ov }: { ov: StudyPlanOverviewDto }) {
     <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-[0_24px_60px_-30px_rgba(11,18,32,0.85)] sm:p-8">
       <span aria-hidden className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-[#f37021]/20 blur-3xl" />
       <span aria-hidden className="pointer-events-none absolute -bottom-24 -left-10 size-56 rounded-full bg-sky-500/10 blur-3xl" />
+      <RoadmapJourney className="pointer-events-none absolute -bottom-4 right-1 hidden w-72 opacity-[0.22] xl:block" />
       <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center">
         <div className="min-w-0 flex-1">
           <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#ffb877]">
@@ -266,11 +267,9 @@ function TodayPanel({
 // ── Gates ───────────────────────────────────────────────────────────────────────
 function NotCalibrated({ mockId }: { mockId: string | null }) {
   return (
-    <div className="mt-4 grid place-items-center rounded-3xl border border-dashed border-slate-200 bg-white p-10 text-center">
-      <span className="grid size-16 place-items-center rounded-3xl bg-gradient-to-br from-[#1f2d4d] to-[#0b1220] text-white">
-        <Brain className="size-7" />
-      </span>
-      <h2 className="mt-4 font-display text-xl font-black tracking-tight text-navy">First, take your calibration</h2>
+    <div className="mt-4 grid place-items-center rounded-3xl border border-dashed border-slate-200 bg-gradient-to-b from-white to-slate-50/60 p-10 text-center">
+      <CalibrationScope className="w-40 sm:w-44" />
+      <h2 className="mt-3 font-display text-xl font-black tracking-tight text-navy">First, take your calibration</h2>
       <p className="mt-2 max-w-md text-sm text-slate-500">
         Your 90-day roadmap is built from one short calibration assessment — it finds your strong and weak areas so every
         day targets exactly what will move your placement readiness fastest.
@@ -289,10 +288,8 @@ function GenerateHero({ generating, onGenerate }: { generating: boolean; onGener
   return (
     <div className="mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-8 text-center text-white shadow-[0_24px_60px_-30px_rgba(11,18,32,0.85)] sm:p-12">
       <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 mx-auto size-64 rounded-full bg-[#f37021]/20 blur-3xl" />
-      <span className="relative mx-auto grid size-16 place-items-center rounded-3xl bg-white/10">
-        <Wand2 className="size-7 text-[#ffb877]" />
-      </span>
-      <h2 className="relative mt-4 font-display text-2xl font-black tracking-tight sm:text-3xl">
+      <RoadmapJourney className="relative mx-auto w-60 sm:w-72" />
+      <h2 className="relative mt-3 font-display text-2xl font-black tracking-tight sm:text-3xl">
         Build your 90-day roadmap
       </h2>
       <p className="relative mx-auto mt-2 max-w-lg text-sm leading-relaxed text-white/70">

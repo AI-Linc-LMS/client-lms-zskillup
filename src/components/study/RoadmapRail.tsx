@@ -2,9 +2,10 @@
 
 import { Fragment } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Check, Flag, Lock, Star } from 'lucide-react';
+import { Check, Lock, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PHASE_META, unlockCopy } from './study-ui';
+import { PhaseGlyph } from './illustrations';
 import type { StudyDayNodeDto, StudyPhase } from '@/shared/dto/study-plan.dto';
 
 const PHASES: StudyPhase[] = ['foundation', 'practice', 'interview'];
@@ -37,7 +38,7 @@ export function RoadmapRail({
             {/* Phase band header */}
             <div className="mb-4 flex items-center gap-3">
               <span className={cn('grid size-9 place-items-center rounded-xl bg-gradient-to-br text-white shadow-sm', meta.grad)}>
-                <Flag className="size-4" />
+                <PhaseGlyph phase={phase} className="size-5 text-white" />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="flex items-baseline gap-2 font-display text-sm font-black tracking-tight text-navy">
