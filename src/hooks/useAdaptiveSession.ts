@@ -91,12 +91,6 @@ export interface AdaptiveSessionParams {
   year?: number | null;
 }
 
-/** Anchor the question timer on the server `servedAt` so resume is continuous. */
-function anchorFrom(q: AdaptivePendingQuestion | null): number {
-  const t = q?.servedAt ? Date.parse(q.servedAt) : NaN;
-  return Number.isFinite(t) ? t : Date.now();
-}
-
 export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSessionReturn {
   const {
     mockTestId = null,
@@ -178,7 +172,13 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
         sessionMeta: meta,
         currentQuestion: firstQuestion,
         paywall: null,
-        questionStartMs: anchorFrom(firstQuestion),
+        // Start the per-question clock when the question is actually SHOWN, not
+        // when the server pinned it. The next question is pinned during the
+        // previous submit, so anchoring to its `servedAt` counted the time spent
+        // reading the previous solution — the timer looked pre-started + points
+        // decayed before you saw the question. On resume this also restarts the
+        // clock fairly instead of penalising time away.
+        questionStartMs: Date.now(),
         sessionPoints: data.sessionPoints ?? 0,
         resumed: !!data.resumed,
       }));
@@ -277,7 +277,9 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
         phase: 'active',
         currentQuestion: s.pendingNext,
         hintState: null,
-        questionStartMs: anchorFrom(s.pendingNext),
+        // Clock starts now — the moment the student taps Next and sees the
+        // question — not when it was pinned during the previous submit.
+        questionStartMs: Date.now(),
       };
     });
   }, []);

@@ -31,6 +31,7 @@ import { LivePointsMeter } from '@/components/adaptive/LivePointsMeter';
 import { PointsBurst } from '@/components/adaptive/PointsBurst';
 import type { AdaptiveOption } from '@/lib/api/adaptive';
 import { getQuestionSolution, type QuestionSolutionDto } from '@/lib/api/question-solutions';
+import { MarkdownLite } from '@/components/ui/MarkdownLite';
 
 /* Brand quiz palette — light surface with an orange accent. */
 const BRAND_GRAD = 'linear-gradient(135deg,#f7a14e 0%,#f37021 100%)';
@@ -743,7 +744,7 @@ function SolutionReveal({
         {/* Detailed */}
         {tab === 'detailed' &&
           (detailed ? (
-            <p className="whitespace-pre-wrap text-[13.5px] leading-relaxed text-slate-700">{detailed}</p>
+            <MarkdownLite text={detailed} />
           ) : loading ? (
             <SolLoading label="Working out the solution…" />
           ) : (
@@ -761,7 +762,7 @@ function SolutionReveal({
               <p className="mb-1 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-amber-600">
                 <Zap className="size-3.5 fill-amber-400" /> Exam-time shortcut
               </p>
-              <p className="whitespace-pre-wrap text-[13.5px] leading-relaxed text-slate-700">{sol.shortcut}</p>
+              <MarkdownLite text={sol.shortcut} />
             </div>
           ) : (
             <p className="text-[13px] text-slate-500">
