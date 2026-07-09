@@ -40,22 +40,47 @@ export function CompaniesExplorer() {
     listCompanies()
       .then((live) => {
         if (cancelled) return;
-        setCompanies(
-          live.map((c) => ({
-            slug: c.slug,
-            name: c.name,
-            tagline: c.tagline,
-            accent: c.accent,
-            badge: c.badge,
-            type: c.type,
-            logoUrl: c.logoUrl,
-            difficulty: (c.difficulty as CompanyCardData['difficulty']) ?? undefined,
-            rounds: c.rounds ?? undefined,
-            questionCount: c.questionCount,
-            pyqCount: c.pyqCount,
-            codingCount: c.codingCount,
-          })),
-        );
+        const mapLive = (c: ApiCompany): ExplorerCompany => ({
+          slug: c.slug,
+          name: c.name,
+          tagline: c.tagline,
+          accent: c.accent,
+          badge: c.badge,
+          type: c.type,
+          logoUrl: c.logoUrl,
+          difficulty: (c.difficulty as CompanyCardData['difficulty']) ?? undefined,
+          rounds: c.rounds ?? undefined,
+          questionCount: c.questionCount,
+          pyqCount: c.pyqCount,
+          codingCount: c.codingCount,
+          locked: false,
+        });
+        const demoType = (t: (typeof DEMO_COMPANIES)[number]['type']): ApiCompany['type'] =>
+          t === 'Service' ? 'SERVICE' : t === 'Product' ? 'PRODUCT' : 'CONSULTING';
+        const liveBySlug = new Map(live.map((c) => [c.slug, c]));
+        // Always show the full canonical set of companies. Live-catalog rows
+        // unlock + enrich their card; the rest render locked ("coming soon").
+        const merged: ExplorerCompany[] = DEMO_COMPANIES.map((d) => {
+          const l = liveBySlug.get(d.slug);
+          if (l) return mapLive(l);
+          return {
+            slug: d.slug,
+            name: d.name,
+            tagline: d.tagline,
+            accent: d.accent,
+            badge: null,
+            type: demoType(d.type),
+            difficulty: d.difficulty as CompanyCardData['difficulty'],
+            rounds: d.rounds,
+            locked: true,
+          };
+        });
+        // Append any live company that isn't part of the canonical set (unlocked).
+        const canon = new Set(DEMO_COMPANIES.map((d) => d.slug));
+        for (const l of live) if (!canon.has(l.slug)) merged.push(mapLive(l));
+        // Unlocked hubs lead; locked ("coming soon") ones trail. (stable sort)
+        merged.sort((a, b) => Number(!!a.locked) - Number(!!b.locked));
+        setCompanies(merged);
       })
       .catch(() => {
         if (cancelled) return;

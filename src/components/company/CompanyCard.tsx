@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowRight, ArrowUpRight, ClipboardList, Code2, History } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, ClipboardList, Code2, History, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -24,6 +24,8 @@ export interface CompanyCardData {
   questionCount?: number;
   pyqCount?: number;
   codingCount?: number;
+  /** When true the hub isn't available yet — the card renders locked + non-navigating. */
+  locked?: boolean;
 }
 
 /** Two-letter monogram from the company name (e.g. "TCS" → "TC", "Capgemini" → "Ca"). */
@@ -57,17 +59,11 @@ export function CompanyCard({ company }: { company: CompanyCardData }) {
   if ((company.pyqCount ?? 0) > 0) feats.push({ icon: History, label: 'Previous-year' });
   if ((company.codingCount ?? 0) > 0) feats.push({ icon: Code2, label: 'Coding' });
 
-  return (
-    <motion.article
-      whileHover={{ y: -8 }}
-      transition={{ type: 'spring', stiffness: 320, damping: 26 }}
-      className="group relative h-full"
-    >
-      <Link
-        data-tour="company:card"
-        href={`/dashboard/company/${company.slug}`}
-        className="relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white shadow-[0_10px_34px_-20px_rgba(15,23,42,0.4)] transition-shadow duration-300 hover:shadow-[0_36px_70px_-30px_rgba(15,23,42,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/40 focus-visible:ring-offset-2"
-      >
+  const cardClass =
+    'relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white shadow-[0_10px_34px_-20px_rgba(15,23,42,0.4)]';
+
+  const body = (
+    <>
         {/* ── Logo banner (landing-page style) ───────────────────────────── */}
         <div className="relative flex h-36 items-center justify-center border-b border-slate-100 bg-gradient-to-br from-slate-50/90 via-white to-slate-50/50 px-8">
           {/* accent bar keyed to the brand */}
@@ -169,7 +165,41 @@ export function CompanyCard({ company }: { company: CompanyCardData }) {
             <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
           </div>
         </div>
-      </Link>
+    </>
+  );
+
+  return (
+    <motion.article
+      whileHover={company.locked ? undefined : { y: -8 }}
+      transition={{ type: 'spring', stiffness: 320, damping: 26 }}
+      className="group relative h-full"
+    >
+      {company.locked ? (
+        <div className={cn(cardClass, 'cursor-default')} aria-disabled="true">
+          <div className="pointer-events-none opacity-[0.55] grayscale">{body}</div>
+          {/* lock overlay */}
+          <div className="absolute inset-0 grid place-items-center rounded-[1.75rem] bg-white/30 backdrop-blur-[1px]">
+            <div className="flex flex-col items-center gap-1.5 rounded-2xl bg-white/95 px-5 py-4 text-center shadow-lg ring-1 ring-slate-200">
+              <span className="grid size-10 place-items-center rounded-full bg-navy text-white">
+                <Lock className="size-4" />
+              </span>
+              <span className="text-xs font-bold text-navy">Locked</span>
+              <span className="text-[11px] text-slate-500">Coming soon</span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <Link
+          data-tour="company:card"
+          href={`/dashboard/company/${company.slug}`}
+          className={cn(
+            cardClass,
+            'transition-shadow duration-300 hover:shadow-[0_36px_70px_-30px_rgba(15,23,42,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/40 focus-visible:ring-offset-2',
+          )}
+        >
+          {body}
+        </Link>
+      )}
     </motion.article>
   );
 }
