@@ -6,6 +6,7 @@ import { AvatarMenu } from '@/components/layout/AvatarMenu';
 import { NotificationsBell } from '@/components/layout/NotificationsBell';
 import { TPO_NAV } from '@/components/layout/nav-config';
 import { useTpoConsole } from './TpoConsole';
+import { TpoMobileNav } from './TpoMobileNav';
 
 /** Longest-prefix match of the current route against the module nav → page title. */
 function moduleTitle(pathname: string): string {
@@ -36,6 +37,7 @@ export function TpoTopBar() {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-slate-200 bg-white/85 px-4 backdrop-blur-md sm:px-6">
+      <TpoMobileNav />
       <div className="min-w-0 flex-1">
         <h1 className="truncate text-lg font-black tracking-tight text-navy">{title}</h1>
         <p className="hidden truncate text-xs text-slate-400 sm:block">
