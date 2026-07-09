@@ -223,4 +223,9 @@ export interface MySubscriptionDto {
   hasPlatform: boolean;
   entitlements: EntitlementDto[];
   history: PurchaseHistoryItemDto[];
+  /** Server view of the paywall switch (false → everything is open / dormant). */
+  paywallEnabled: boolean;
+  /** Career tools (Mock Interview, Resume Builder) unlocked — bundled with a
+   *  Company hub or the Full Platform plan (true while the paywall is off). */
+  careerToolsEntitled: boolean;
 }

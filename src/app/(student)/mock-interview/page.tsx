@@ -2,6 +2,7 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { MockInterviewHome } from '@/components/mock-interview/MockInterviewHome';
 import { ProfileLockGate } from '@/components/student/ProfileLockGate';
 import { CalibrationLockGate } from '@/components/student/CalibrationLockGate';
+import { SubscriptionLockGate } from '@/components/billing/SubscriptionLockGate';
 import { Bot, ShieldOff, Sparkles, Zap } from 'lucide-react';
 
 export const metadata = {
@@ -51,7 +52,9 @@ export default function MockInterviewPage() {
         </div>
       </header>
 
-      <MockInterviewHome />
+      <SubscriptionLockGate tool="mock-interview" feature="Mock Interview">
+        <MockInterviewHome />
+      </SubscriptionLockGate>
       </ProfileLockGate>
       </CalibrationLockGate>
     </div>

@@ -4,15 +4,27 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { Briefcase, ChevronDown, ClipboardCheck, Compass, LayoutGrid, Lock, Target } from 'lucide-react';
+import {
+  Briefcase,
+  Building2,
+  ChevronDown,
+  ClipboardCheck,
+  Compass,
+  CreditCard,
+  LayoutGrid,
+  Lock,
+  Target,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useProfileCompletion } from '@/hooks/useProfileCompletion';
 import { useCalibrationStatus } from '@/hooks/useCalibrationStatus';
+import { useMySubscription } from '@/hooks/useMySubscription';
 import { useOptionalGuide } from '@/components/guide/GuideProvider';
 import {
   navForPath,
   PROFILE_GATED_HREFS,
   CALIBRATION_GATED_HREFS,
+  PLAN_ONLY_HREFS,
   type NavItem,
 } from './nav-config';
 
@@ -36,6 +48,8 @@ const SECTION_ICON: Record<string, typeof Compass> = {
   ASSESSMENT: ClipboardCheck,
   CAREER: Briefcase,
   EXPLORE: Compass,
+  'COMPANY HUBS': Building2,
+  'PLANS & SUPPORT': CreditCard,
   // Admin / Super-admin / TPO
   'PLATFORM ADMIN': LayoutGrid,
   OVERVIEW: LayoutGrid,
@@ -63,6 +77,20 @@ export function Sidebar() {
   const reduce = useReducedMotion();
   const { complete: profileComplete } = useProfileCompletion();
   const { required: calibrationRequired } = useCalibrationStatus();
+  // "Upgrade & Renew" only makes sense once a plan exists; free users buy via
+  // "Explore Plans". Skip the fetch outside the student zone (the endpoint is
+  // student-only) and hide plan-only items while there's no active plan.
+  const isStudentZone = !/^\/(admin|tpo|superadmin)(\/|$)/.test(pathname);
+  const { planStatus } = useMySubscription(isStudentZone);
+
+  const visibleSections = sections
+    .map((s) => ({
+      ...s,
+      items: s.items.filter(
+        (i) => !(PLAN_ONLY_HREFS.has(i.href) && planStatus === 'none'),
+      ),
+    }))
+    .filter((s) => s.items.length > 0);
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
   const isLocked = (href: string) =>
@@ -73,7 +101,7 @@ export function Sidebar() {
   // sections expand on click, multi-open, with the active section open by default.
   return (
     <NavAccordion
-      sections={sections}
+      sections={visibleSections}
       isActive={isActive}
       isLocked={isLocked}
       reduce={!!reduce}

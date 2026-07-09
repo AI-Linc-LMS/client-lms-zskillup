@@ -44,8 +44,8 @@ const GRAND_STEPS: GuideStep[] = [
   { id: 'nav-resume', target: nav('/resume-builder'), placement: 'right', desktopOnly: true, eyebrow: 'Career', title: 'Resume Builder', body: 'Craft an ATS-friendly resume from proven templates \u2014 and tailor it to any job with AI.' },
   { id: 'nav-mock-interview', target: nav('/mock-interview'), placement: 'right', desktopOnly: true, eyebrow: 'Career', title: 'Mock Interview', body: 'Practice a realistic AI-driven interview and get instant feedback on your answers.' },
   { id: 'nav-company', target: nav('/dashboard/company'), placement: 'right', desktopOnly: true, eyebrow: 'Explore', title: 'Company Hubs', body: 'Company-specific prep \u2014 past questions, patterns and your readiness for each target company.' },
-  { id: 'nav-shop', target: nav('/shop'), placement: 'right', desktopOnly: true, eyebrow: 'Explore', title: 'Shop', body: 'Browse and buy company courses, topic bundles and add-ons that fit your goals.' },
-  { id: 'nav-upgrade', target: nav('/upgrade'), placement: 'right', desktopOnly: true, eyebrow: 'Explore', title: 'Upgrade', body: 'Unlock the full platform \u2014 every company, every assessment, every feature.' },
+  { id: 'nav-shop', target: nav('/shop'), placement: 'right', desktopOnly: true, eyebrow: 'Plans', title: 'Explore Plans', body: 'Go all-access with Full Platform, or build your own plan from the companies, sections and topics you need.' },
+  { id: 'nav-upgrade', target: nav('/upgrade'), placement: 'right', desktopOnly: true, eyebrow: 'Plans', title: 'Upgrade & Renew', body: 'Manage your membership \u2014 see what you own, renew before it lapses, or add more access.' },
   { id: 'nav-support', target: nav('/support'), placement: 'right', desktopOnly: true, eyebrow: 'Explore', title: 'Help & Support', body: "Stuck on anything? Raise a ticket here and we'll help you out." },
   // ── Dashboard drill (what's inside your home base) ──
   { id: "dash-briefing-hero", route: "/dashboard", target: "dash:briefing-hero", placement: "auto", eyebrow: "Dashboard", title: "Your AI briefing", body: "A personalized AI greeting over the aurora hero shows your level, XP, streak, focus areas, and a one-tap next action." },
@@ -157,18 +157,12 @@ export const PAGE_TOURS: Record<string, GuideTour> = {
     { id: "company-grid", route: "/dashboard/company", target: "company:grid", placement: "auto", eyebrow: "Company Hubs", title: "Company hubs grid", body: "Every recruiter appears as a card here; click any to open its full prep track. Filters instantly reshuffle this grid." },
     { id: "company-card", route: "/dashboard/company", target: "company:card", placement: "auto", eyebrow: "Company Hubs", title: "Inside a company card", body: "Each card shows the logo, difficulty, round count, and 'what's inside' chips (Practice Qs, Previous-year, Coding); 'Prepare now' opens the hub." },
   ] },
-  "/shop": { id: "shop", label: "Shop tour", steps: [
-    { id: "shop-cart", route: "/shop", target: "shop:cart", placement: "auto", eyebrow: "Shop", title: "Your cart", body: "Everything you add collects here; open your cart any time to review picks and check out — the badge tracks your item count." },
-    { id: "shop-controls", route: "/shop", target: "shop:controls", placement: "auto", eyebrow: "Shop", title: "Search & billing period", body: "Search for any topic or company, and switch between monthly, quarterly and annual billing — every price on the page updates instantly." },
-    { id: "shop-platform", route: "/shop", target: "shop:platform", placement: "auto", eyebrow: "Shop", title: "Full platform unlock", body: "Unlock every topic, section, company hub and coding in one purchase — the best-value option, shown here with its price." },
-    { id: "shop-companies", route: "/shop", target: "shop:companies", placement: "auto", eyebrow: "Shop", title: "Company hubs", body: "Browse recruiter PYQ banks by company and add any hub to your cart at the current billing period's price." },
-    { id: "shop-sections", route: "/shop", target: "shop:sections", placement: "auto", eyebrow: "Shop", title: "Sections & topics", body: "Expand any section to see its topics; buy a single topic or the whole section, then add it to your cart." },
+  "/shop": { id: "shop", label: "Explore Plans tour", steps: [
+    { id: "plans-full", route: "/shop", target: "plans:full", placement: "auto", eyebrow: "Explore Plans", title: "Full Platform Access", body: "Go all-access — every company, section, topic, mock and career tool in one plan. Pick 1, 3 or 12 months on the next screen." },
+    { id: "plans-build", route: "/shop", target: "plans:build", placement: "auto", eyebrow: "Explore Plans", title: "Build Your Own Plan", body: "Prefer to pay only for what you need? Hand-pick companies, sections and sub-topics, each with its own validity, then add them to your cart." },
   ] },
-  "/upgrade": { id: "upgrade", label: "Upgrade tour", steps: [
-    { id: "upgrade-hero", route: "/upgrade", target: "upgrade:hero", placement: "auto", eyebrow: "Upgrade", title: "Your upgrade status", body: "See at a glance whether full platform access is already active with days left, or what upgrading unlocks for you." },
-    { id: "upgrade-platform-plans", route: "/upgrade", target: "upgrade:platform-plans", placement: "auto", eyebrow: "Upgrade", title: "Full platform plans", body: "Compare monthly, quarterly and annual full-access plans, see each price and feature list, then buy your pick in one tap." },
-    { id: "upgrade-mini-plans", route: "/upgrade", target: "upgrade:mini-plans", placement: "auto", eyebrow: "Upgrade", title: "Buy just what you need", body: "Prefer to pay less? Unlock a single topic, a whole section, or one company's PYQ hub instead of everything." },
-    { id: "upgrade-history", route: "/upgrade", target: "upgrade:history", placement: "auto", eyebrow: "Upgrade", title: "Purchase history", body: "Review every past order here — item, plan, amount, payment status and date — so you can track your billing." },
+  "/upgrade": { id: "upgrade", label: "Upgrade & Renew tour", steps: [
+    { id: "upgrade-hero", route: "/upgrade", target: "upgrade:title", placement: "auto", eyebrow: "Upgrade & Renew", title: "Your membership", body: "Everything about your plan lives here — what you own, how long it's valid, and one-tap ways to renew or add more access." },
   ] },
   "/support": { id: "support", label: "Help & Support tour", steps: [
     { id: "support-hero", route: "/support", target: "support:hero", placement: "auto", eyebrow: "Help & Support", title: "Support overview", body: "The banner sets expectations: replies usually land within a day, in private tickets tracked as one ongoing conversation right here." },

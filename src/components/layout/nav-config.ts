@@ -7,7 +7,9 @@ import {
   ClipboardCheck,
   ClipboardList,
   Code2,
+  Compass,
   CreditCard,
+  Crown,
   FileCheck2,
   FileText,
   GraduationCap,
@@ -25,7 +27,6 @@ import {
   School,
   ScrollText,
   Settings,
-  ShoppingBag,
   Sparkles,
   Target,
   TrendingUp,
@@ -93,15 +94,24 @@ export const STUDENT_NAV: NavSection[] = [
     ],
   },
   {
-    heading: 'EXPLORE',
+    heading: 'COMPANY HUBS',
+    items: [{ label: 'Company Hubs', href: '/dashboard/company', icon: Building2 }],
+  },
+  {
+    heading: 'PLANS & SUPPORT',
     items: [
-      { label: 'Company Hubs', href: '/dashboard/company', icon: Building2 },
-      { label: 'Shop', href: '/shop', icon: ShoppingBag },
-      { label: 'Upgrade', href: '/upgrade', icon: Sparkles },
+      { label: 'Explore Plans', href: '/shop', icon: Compass },
+      { label: 'Upgrade & Renew', href: '/upgrade', icon: Crown },
       { label: 'Help & Support', href: '/support', icon: LifeBuoy },
     ],
   },
 ];
+
+/** Student nav items shown ONLY to users who already hold a paid plan
+ *  (platform or any granular purchase). "Upgrade & Renew" is meaningless to a
+ *  free user — they use "Explore Plans" to buy first. The Sidebar filters these
+ *  out via the live subscription status (falls open while the paywall is off). */
+export const PLAN_ONLY_HREFS = new Set<string>(['/upgrade']);
 
 /** Student features gated behind a 100%-complete profile (blur-locked in-page +
  *  shown with a lock in the sidebar until the profile is finished). */

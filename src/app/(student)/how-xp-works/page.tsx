@@ -166,7 +166,7 @@ export default function HowXpWorksPage() {
           </div>
           <p className="mt-3 text-sm leading-relaxed text-slate-600">
             You earn <b>10 coins</b> for each daily quest you complete. Coins are separate from XP — they don&apos;t
-            affect your level. Spend them in the <Link href="/shop" className="font-semibold text-orange hover:underline">Shop</Link>.
+            affect your level. Put them toward a plan in <Link href="/shop" className="font-semibold text-orange hover:underline">Explore Plans</Link>.
           </p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
