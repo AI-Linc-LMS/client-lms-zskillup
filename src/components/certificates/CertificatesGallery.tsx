@@ -26,38 +26,92 @@ export function CertificatesGallery() {
 
   if (!data) {
     return (
-      <div className="grid h-64 place-items-center">
-        <Loader2 className="size-6 animate-spin text-slate-300" />
+      <div className="space-y-6">
+        <div className="h-48 animate-pulse rounded-3xl bg-slate-100" />
+        <div className="grid justify-items-center gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="w-full max-w-[340px] space-y-2.5">
+              <div className="aspect-[1.55] w-full animate-pulse rounded-2xl bg-slate-100" />
+              <div className="h-4 w-2/3 animate-pulse rounded bg-slate-100" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
 
   const earned = data.certificates.filter((c) => c.unlocked).length;
   const next = data.certificates.find((c) => !c.unlocked);
+  const prevXp = earned > 0 ? data.certificates[earned - 1].xp : 0;
+  const nextSegPct = next
+    ? Math.min(100, Math.max(0, Math.round(((data.totalXp - prevXp) / (next.xp - prevXp)) * 100)))
+    : 100;
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <div className="relative flex flex-col gap-4 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white sm:flex-row sm:items-center sm:justify-between sm:p-8">
+        <div className="relative bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white sm:p-8">
           <span aria-hidden className="pointer-events-none absolute -right-10 -top-16 size-56 rounded-full bg-[#f5cf5a]/20 blur-3xl" />
-          <div className="relative">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-[#f5cf5a] ring-1 ring-inset ring-white/15">
-              <Award className="size-3.5" /> Certificates
-            </span>
-            <h1 className="mt-3 font-display text-2xl font-bold tracking-tight sm:text-3xl">Earn as you climb</h1>
-            <p className="mt-1.5 max-w-lg text-sm leading-relaxed text-white/70">
-              Every certificate unlocks at an XP milestone — download it as a PDF and share a public, verifiable link.
-            </p>
-          </div>
-          <div className="relative shrink-0 text-right">
-            <div className="font-display text-4xl font-black tabular-nums text-[#f5cf5a]">{data.totalXp.toLocaleString()}</div>
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-white/60">Total XP</div>
-            <div className="mt-2 text-xs text-white/70">
-              {earned} of {data.certificates.length} unlocked
-              {next && <> · {(next.xp - data.totalXp).toLocaleString()} XP to next</>}
+          <span aria-hidden className="pointer-events-none absolute -left-16 bottom-0 size-56 rounded-full bg-[#3b82f6]/10 blur-3xl" />
+
+          <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-[#f5cf5a] ring-1 ring-inset ring-white/15">
+                <Award className="size-3.5" /> Certificates
+              </span>
+              <h1 className="mt-3 font-display text-2xl font-bold tracking-tight sm:text-3xl">Earn as you climb</h1>
+              <p className="mt-1.5 max-w-lg text-sm leading-relaxed text-white/70">
+                Every certificate unlocks at an XP milestone — download it as a PDF and share a public, verifiable link.
+              </p>
+            </div>
+            <div className="flex shrink-0 gap-6 sm:flex-col sm:items-end sm:gap-1 sm:text-right">
+              <div>
+                <div className="font-display text-4xl font-black tabular-nums text-[#f5cf5a]">{data.totalXp.toLocaleString()}</div>
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-white/60">Total XP</div>
+              </div>
+              <div className="self-end sm:mt-2">
+                <div className="font-display text-2xl font-black tabular-nums sm:text-3xl">
+                  {earned}<span className="text-white/40">/{data.certificates.length}</span>
+                </div>
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-white/60">Unlocked</div>
+              </div>
             </div>
           </div>
+
+          {/* Milestone journey */}
+          <div className="relative mt-6">
+            <JourneyRail certs={data.certificates} totalXp={data.totalXp} />
+          </div>
+
+          {/* Next up / summit */}
+          {next ? (
+            <div className="relative mt-3 flex items-center gap-3 rounded-2xl bg-white/[0.05] p-3 ring-1 ring-inset ring-white/10">
+              <span
+                className="grid size-9 shrink-0 place-items-center rounded-xl text-white ring-1 ring-inset ring-white/15"
+                style={{ backgroundColor: `${themeForTier(next.tier).metal}33` }}
+              >
+                <Lock className="size-4" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-semibold text-white/85">
+                  Next: {next.shortName}
+                  <span className="font-normal text-white/45"> · {next.tagline}</span>
+                </p>
+                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/12">
+                  <div className="h-full rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f5cf5a] transition-[width] duration-700" style={{ width: `${nextSegPct}%` }} />
+                </div>
+              </div>
+              <span className="shrink-0 text-right">
+                <span className="block text-sm font-black tabular-nums text-[#f5cf5a]">{(next.xp - data.totalXp).toLocaleString()}</span>
+                <span className="block text-[10px] font-semibold uppercase tracking-wider text-white/50">XP to go</span>
+              </span>
+            </div>
+          ) : (
+            <div className="relative mt-3 flex items-center gap-2 rounded-2xl bg-emerald-500/15 p-3 text-sm font-semibold text-emerald-200 ring-1 ring-inset ring-emerald-400/25">
+              <Sparkles className="size-4" /> All certificates unlocked — you&apos;ve reached the summit.
+            </div>
+          )}
         </div>
       </div>
 
@@ -77,6 +131,70 @@ export function CertificatesGallery() {
   function refresh() {
     getMyCertificates().then(setData).catch(() => {});
   }
+}
+
+function fmtXp(n: number): string {
+  return n >= 1000 ? `${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 1).replace(/\.0$/, '')}k` : String(n);
+}
+
+/**
+ * Horizontal milestone track — the 7 XP tiers as nodes with the student's live
+ * position filled in. Nodes take each tier's metal colour; the next unearned one
+ * is highlighted so the goal reads at a glance.
+ */
+function JourneyRail({ certs, totalXp }: { certs: MyCertificateDto[]; totalXp: number }) {
+  const n = certs.length;
+  const nodePos = (i: number) => ((i + 0.5) / n) * 100;
+  const earned = certs.filter((c) => c.unlocked).length;
+  const lastIdx = earned - 1;
+  const nextCert = certs[earned];
+  const prevXp = lastIdx >= 0 ? certs[lastIdx].xp : 0;
+  const partial = nextCert
+    ? Math.min(1, Math.max(0, (totalXp - prevXp) / (nextCert.xp - prevXp)))
+    : 1;
+  const prevPos = lastIdx >= 0 ? nodePos(lastIdx) : 0;
+  const nextPos = nextCert ? nodePos(earned) : 100;
+  const fillPct = prevPos + (nextPos - prevPos) * partial;
+
+  return (
+    <div className="relative overflow-x-auto scroll-soft pb-1">
+      <div className="relative h-16 min-w-[560px]">
+        <div className="absolute inset-x-0 top-5 h-1 rounded-full bg-white/12" />
+        <div
+          className="absolute left-0 top-5 h-1 rounded-full bg-gradient-to-r from-[#f7a14e] via-[#f0a844] to-[#f5cf5a] transition-[width] duration-700"
+          style={{ width: `${fillPct}%` }}
+        />
+        {certs.map((c, i) => {
+          const theme = themeForTier(c.tier);
+          const isNext = i === earned;
+          return (
+            <div
+              key={c.slug}
+              className="absolute top-2 flex -translate-x-1/2 flex-col items-center"
+              style={{ left: `${nodePos(i)}%` }}
+              title={`${c.shortName} · ${c.xp.toLocaleString()} XP`}
+            >
+              <span
+                className={`grid size-7 place-items-center rounded-full ring-2 transition ${
+                  c.unlocked ? 'ring-white/25' : 'bg-white/10 ring-white/15'
+                } ${isNext ? 'ring-amber-300/80' : ''}`}
+                style={c.unlocked ? { backgroundColor: theme.metal, color: theme.metalInk } : undefined}
+              >
+                {c.unlocked ? <Check className="size-3.5" /> : <Lock className="size-3 text-white/50" />}
+              </span>
+              <span
+                className={`mt-1.5 whitespace-nowrap text-[9px] font-bold tabular-nums ${
+                  isNext ? 'text-amber-300' : 'text-white/50'
+                }`}
+              >
+                {fmtXp(c.xp)}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 function CertificateCard({
@@ -137,18 +255,29 @@ function CertificateCard({
         )}
       </button>
 
-      <div className="mt-2.5 flex items-center justify-between px-1">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-bold text-navy">{cert.shortName}</p>
-          <p className="text-xs text-slate-400">{cert.xp.toLocaleString()} XP</p>
+      <div className="mt-3 px-1">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="truncate text-sm font-bold text-navy">{cert.shortName}</p>
+              <span
+                className="shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
+                style={{ backgroundColor: `${theme.metal}22`, color: theme.metalDeep }}
+              >
+                {theme.metalLabel}
+              </span>
+            </div>
+            <p className="text-xs text-slate-400">{cert.xp.toLocaleString()} XP</p>
+          </div>
+          {cert.unlocked ? (
+            <button onClick={onOpen} className="inline-flex shrink-0 items-center gap-1 rounded-full bg-navy px-3 py-1.5 text-xs font-bold text-white transition hover:bg-navy/90">
+              <Download className="size-3.5" /> Get
+            </button>
+          ) : (
+            <Lock className="size-4 shrink-0 text-slate-300" />
+          )}
         </div>
-        {cert.unlocked ? (
-          <button onClick={onOpen} className="inline-flex items-center gap-1 rounded-full bg-navy px-3 py-1.5 text-xs font-bold text-white transition hover:bg-navy/90">
-            <Download className="size-3.5" /> Get
-          </button>
-        ) : (
-          <Lock className="size-4 text-slate-300" />
-        )}
+        <p className="mt-1 line-clamp-1 text-[11px] text-slate-400">{cert.tagline}</p>
       </div>
     </div>
   );
