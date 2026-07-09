@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowRight,
   Brain,
+  CalendarClock,
   CheckCircle2,
   Flame,
   Loader2,
@@ -20,7 +21,7 @@ import {
   toggleRoadmapTask,
   type StudyPlanOverviewDto,
 } from '@/lib/api/roadmap';
-import { PHASE_META } from './study-ui';
+import { PHASE_META, unlockCopy } from './study-ui';
 import { ProgressRing, TaskRow } from './StudyBits';
 import { RoadmapRail } from './RoadmapRail';
 import { DayDrawerPortal } from './DayDrawer';
@@ -105,9 +106,11 @@ export function StudyPlanClient() {
       <Hero ov={ov!} />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
-        {/* Today */}
-        <div data-tour="plan:today" className="lg:sticky lg:top-20 lg:self-start">
+        {/* Today + progress rail — fills the column beside the tall roadmap */}
+        <div data-tour="plan:today" className="space-y-5 lg:sticky lg:top-20 lg:self-start">
           {ov!.today && <TodayPanel today={ov!.today} onToggle={toggleToday} busyTask={busyTask} />}
+          <ProgressPanel summary={ov!.summary} />
+          <UpNextPanel days={ov!.days} currentDay={ov!.summary.currentDay} />
         </div>
 
         {/* The roadmap */}
@@ -200,24 +203,96 @@ function Hero({ ov }: { ov: StudyPlanOverviewDto }) {
         </ProgressRing>
       </div>
 
-      {/* phase mini-progress */}
-      <div className="relative mt-6 grid grid-cols-3 gap-2">
+    </section>
+  );
+}
+
+/** Left-column progress panel — streak, headline stats, and per-phase progress.
+ *  Fills the space beside the tall roadmap and lives on the light column. */
+function ProgressPanel({ summary }: { summary: StudyPlanOverviewDto['summary'] }) {
+  const s = summary;
+  return (
+    <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex items-center gap-3">
+        <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#ffb877] to-[#f37021] text-white shadow-[0_8px_20px_-8px_rgba(243,112,33,0.8)]">
+          <Flame className="size-6" />
+        </span>
+        <div className="min-w-0">
+          <p className="font-display text-2xl font-black leading-none tabular-nums text-navy">
+            {s.streakDays}
+            <span className="ml-1 text-sm font-bold text-slate-400">day streak</span>
+          </p>
+          <p className="mt-1 text-xs text-slate-500">Complete today’s tasks to keep it going.</p>
+        </div>
+      </div>
+
+      <div className="mt-4 grid grid-cols-3 gap-2">
+        {[
+          { label: 'Days done', value: `${s.daysCompleted}/${s.totalDays}` },
+          { label: 'Tasks', value: `${s.tasksCompleted}/${s.tasksTotal}` },
+          { label: 'Plan XP', value: `${s.planXp}` },
+        ].map((m) => (
+          <div key={m.label} className="rounded-2xl border border-slate-100 bg-slate-50/60 px-2 py-2.5 text-center">
+            <p className="font-display text-base font-black leading-none tabular-nums text-navy">{m.value}</p>
+            <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">{m.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-4 space-y-2.5">
         {s.phases.map((p) => {
           const m = PHASE_META[p.key];
           const total = p.endDay - p.startDay + 1;
+          const isCurrent = s.currentPhase === p.key;
           return (
-            <div key={p.key} className="rounded-2xl bg-white/[0.06] p-3">
-              <p className="flex items-center justify-between text-[11px] font-bold text-white/80">
-                <span>{m.label}</span>
-                <span className="tabular-nums text-white/50">{p.daysCompleted}/{total}</span>
+            <div key={p.key}>
+              <p className="flex items-center justify-between text-[11px] font-bold">
+                <span className={cn(isCurrent ? m.text : 'text-slate-500')}>
+                  {m.label}
+                  {isCurrent && <span className="ml-1.5 rounded-full bg-orange/10 px-1.5 py-px text-[9px] font-black uppercase text-orange">Now</span>}
+                </span>
+                <span className="tabular-nums text-slate-400">{p.daysCompleted}/{total}</span>
               </p>
-              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+              <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100">
                 <div className={cn('h-full rounded-full bg-gradient-to-r', m.grad)} style={{ width: `${(p.daysCompleted / total) * 100}%` }} />
               </div>
             </div>
           );
         })}
       </div>
+    </section>
+  );
+}
+
+/** Left-column "coming up" preview — the next few locked days. */
+function UpNextPanel({ days, currentDay }: { days: StudyPlanOverviewDto['days']; currentDay: number | null }) {
+  const upcoming = currentDay ? days.filter((d) => d.dayNumber > currentDay).slice(0, 4) : [];
+  if (upcoming.length === 0) return null;
+  return (
+    <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h3 className="flex items-center gap-2 font-display text-sm font-bold text-navy">
+        <span className="grid size-7 place-items-center rounded-lg bg-slate-100 text-slate-500">
+          <CalendarClock className="size-4" />
+        </span>
+        Coming up
+      </h3>
+      <ul className="mt-3 space-y-2">
+        {upcoming.map((d) => {
+          const m = PHASE_META[d.phase];
+          return (
+            <li key={d.dayNumber} className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/50 px-3 py-2.5">
+              <span className="grid size-8 shrink-0 place-items-center rounded-full bg-white text-[11px] font-black tabular-nums text-slate-400 ring-1 ring-slate-200">
+                {d.dayNumber}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className={cn('text-[10px] font-bold uppercase tracking-wide', m.text)}>Day {d.dayNumber}</p>
+                <p className="truncate text-sm font-bold text-slate-500">{d.theme}</p>
+              </div>
+              <span className="shrink-0 text-[10px] font-semibold text-slate-400">{unlockCopy(d.unlockDate)}</span>
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 }
