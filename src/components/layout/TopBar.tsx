@@ -7,6 +7,7 @@ import { Logo } from './Logo';
 import { MobileNav } from './MobileNav';
 import { AvatarMenu } from './AvatarMenu';
 import { ExploreMenu } from './ExploreMenu';
+import { RecommendedMenu } from './RecommendedMenu';
 import { StreakPill } from './StreakPill';
 import { TopBarSearch } from './TopBarSearch';
 import { NotificationsBell } from './NotificationsBell';
@@ -69,6 +70,7 @@ export function TopBar() {
                 className="absolute inset-x-3 -bottom-px h-px scale-x-0 bg-gradient-to-r from-orange to-amber-500 transition-transform duration-300 group-hover:scale-x-100"
               />
             </Link>
+            <RecommendedMenu />
           </nav>
 
           <TopBarSearch />

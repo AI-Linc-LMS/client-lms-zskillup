@@ -7,6 +7,8 @@
  * and returns the ranked, resolved recommendations to render verbatim.
  */
 
+import { EntitlementScope } from '../enums';
+
 export type RecoUserType = 'Free' | 'Paid';
 export type RecoScoreBand = 'High' | 'Medium' | 'Low' | 'All';
 
@@ -26,6 +28,14 @@ export interface RecommendationDto {
   href: string;
   /** Analytics tag from the sheet. */
   businessObjective: string;
+  /** Short "why" behind this reco (the rule's AI trigger, e.g. "Company Readiness >85%"). */
+  reason: string;
+  /** Entitlement scope this product maps to when purchasable (null = not add-to-cart-able). */
+  scope: EntitlementScope | null;
+  /** Target slug for the scope (company / section-root / topic); null for PLATFORM or non-purchasable. */
+  scopeRef: string | null;
+  /** True when this reco resolves to a purchasable product that can be added to the cart. */
+  addable: boolean;
 }
 
 export interface RecommendationsResponseDto {
