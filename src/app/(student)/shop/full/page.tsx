@@ -99,7 +99,7 @@ export default function FullPlatformPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <Link
         href="/shop"
         className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 transition hover:text-navy"

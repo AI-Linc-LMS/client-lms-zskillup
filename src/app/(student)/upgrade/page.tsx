@@ -27,7 +27,8 @@ import { getReadiness, type Readiness } from '@/lib/api/readiness';
 import { formatPrice } from '@/lib/api/subscriptions';
 import { buildPriceMap, periodMonths, retailPrice } from '@/lib/payments/pricing';
 import { usePurchase } from '@/components/billing/usePurchase';
-import { FeatureItem, PlanPill } from '@/components/billing/plan-ui';
+import { FeatureItem, IncludedGrid, PlanPill, StatBand, TrustBadges, ValueProps } from '@/components/billing/plan-ui';
+import { PLAN_INCLUDED, PLAN_STATS, PLAN_VALUES } from '@/components/billing/plan-content';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { BillingPeriod, EntitlementScope } from '@/shared/enums';
 import type { EntitlementDto, MySubscriptionDto, PriceBookEntryDto, PurchaseHistoryItemDto } from '@/shared/dto/payments.dto';
@@ -111,7 +112,7 @@ export default function UpgradeRenewPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Upgrade & Renew' }]} />
       <h1 data-tour="upgrade:title" className="mt-4 text-2xl font-black tracking-tight text-navy">
         {hasPlatform ? 'Upgrade & Renew' : 'Plans & Access'}
@@ -283,6 +284,13 @@ function PremiumView({
         </p>
       </section>
 
+      {/* Premium perks */}
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-black tracking-tight text-navy">Everything your Premium unlocks</h2>
+        <p className="mt-1 text-sm text-slate-500">It&apos;s all included — dive into any of it.</p>
+        <IncludedGrid items={PLAN_INCLUDED} className="mt-4" />
+      </section>
+
       {/* What's new */}
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex items-center justify-between">
@@ -368,6 +376,8 @@ function CustomPlanView({
         </div>
       </section>
 
+      <StatBand stats={PLAN_STATS} />
+
       {/* Choose how you want to learn */}
       <section>
         <h2 className="text-lg font-black tracking-tight text-navy">Choose how you want to learn</h2>
@@ -396,6 +406,15 @@ function CustomPlanView({
         </div>
       </section>
 
+      {/* Unlock more */}
+      <section>
+        <h2 className="text-lg font-black tracking-tight text-navy">Unlock the full experience</h2>
+        <p className="mt-1 text-sm text-slate-500">Upgrade any time to open everything below.</p>
+        <IncludedGrid items={PLAN_INCLUDED} className="mt-4" />
+      </section>
+
+      <ValueProps items={PLAN_VALUES} />
+
       {showHistory && <HistorySection history={history} />}
 
       <p className="flex items-center justify-center gap-1.5 rounded-2xl border border-emerald-100 bg-emerald-50/60 px-4 py-2.5 text-xs font-semibold text-emerald-700">
@@ -408,23 +427,72 @@ function CustomPlanView({
 /* ───────────────────────── No plan ───────────────────────── */
 
 function NoPlanView({ priceMap }: { priceMap: Map<string, PriceBookEntryDto> }) {
-  const platform = retailPrice(priceMap, EntitlementScope.PLATFORM, BillingPeriod.ANNUAL);
+  const platform = retailPrice(priceMap, EntitlementScope.PLATFORM, BillingPeriod.MONTHLY);
   return (
-    <div className="mx-auto mt-10 max-w-lg rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-      <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-indigo-50 text-indigo-600">
-        <Crown className="size-7" />
-      </span>
-      <p className="mt-4 text-lg font-black text-navy">You don&apos;t have a plan yet</p>
-      <p className="mt-1 text-sm text-slate-500">
-        Unlock companies, sections and topics — or go all-access
-        {platform ? ` from ${formatPrice(platform.amountCents, 'INR')}/year` : ''}.
-      </p>
-      <Link
-        href="/shop"
-        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white"
-      >
-        <Sparkles className="size-4" /> Explore Plans
-      </Link>
+    <div className="mt-6 space-y-8">
+      {/* Hero */}
+      <section className="relative overflow-hidden rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-sky-50 px-6 py-10 text-center shadow-sm sm:px-10 sm:py-14">
+        <div aria-hidden className="pointer-events-none absolute -left-16 -top-16 size-64 rounded-full bg-indigo-300/20 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -right-16 -bottom-16 size-64 rounded-full bg-sky-300/20 blur-3xl" />
+        <div className="relative mx-auto max-w-2xl">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-white px-3 py-1 text-xs font-bold uppercase tracking-widest text-indigo-600">
+            <Crown className="size-3.5" /> Get started
+          </span>
+          <h2 className="mt-4 text-3xl font-black tracking-tight text-navy sm:text-4xl">Start your placement prep</h2>
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base">
+            You don&apos;t have a plan yet. Unlock companies, sections and topics — or go all-access
+            {platform ? ` from ${formatPrice(platform.amountCents, 'INR')}/month` : ''}.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <Link href="/shop/full" className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700">
+              <Crown className="size-4" /> Get Full Access
+            </Link>
+            <Link href="/shop/build" className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-navy transition hover:bg-slate-50">
+              <Puzzle className="size-4 text-sky-600" /> Build Your Own
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <StatBand stats={PLAN_STATS} />
+
+      {/* Two ways to learn */}
+      <section>
+        <h2 className="text-lg font-black tracking-tight text-navy">Choose how you want to learn</h2>
+        <p className="text-sm text-slate-500">Two flexible ways to start your placement preparation.</p>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <LearnCard
+            tone="indigo"
+            icon={Crown}
+            title="Unlimited Platform Access"
+            pill="Best Value"
+            subtitle="Unlock everything on Prephasz and prepare without any limits."
+            features={['100+ Companies', '55,000+ Questions', 'Unlimited Mock Tests', 'AI Study Plan', 'Interview Prep', 'Advanced Analytics']}
+            cta="Get Full Access"
+            href="/shop/full"
+          />
+          <LearnCard
+            tone="sky"
+            icon={Puzzle}
+            title="Build Your Own Plan"
+            pill="Pay for what you need"
+            subtitle="Choose companies, sections and topics you want to prepare for."
+            features={['Choose Companies', 'Choose Sections', 'Choose Topics', 'Set different validity', 'Pay only for what you select']}
+            cta="Start Customizing"
+            href="/shop/build"
+          />
+        </div>
+      </section>
+
+      {/* Everything you unlock */}
+      <section>
+        <h2 className="text-lg font-black tracking-tight text-navy">Everything you unlock</h2>
+        <p className="mt-1 text-sm text-slate-500">Every plan is packed with the tools recruiters test on.</p>
+        <IncludedGrid items={PLAN_INCLUDED} className="mt-4" />
+      </section>
+
+      <ValueProps items={PLAN_VALUES} />
+      <TrustBadges />
     </div>
   );
 }

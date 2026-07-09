@@ -244,7 +244,7 @@ export default function BuildYourOwnPage() {
   const visibleSections = showAllSections ? sections : sections.slice(0, 4);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 pb-28 lg:pb-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 pb-28 sm:px-6 lg:px-8 lg:pb-8">
       <div className="flex items-start justify-between gap-4">
         <div>
           <Link

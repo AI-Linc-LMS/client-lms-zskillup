@@ -1,8 +1,10 @@
 'use client';
 
-import type { ReactNode } from 'react';
-import { BadgeCheck, CheckCircle2, ShieldCheck, Sparkles, Zap } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
+import { BadgeCheck, CheckCircle2, ChevronDown, ShieldCheck, Sparkles, Zap, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+type IconType = LucideIcon;
 
 /**
  * Shared chrome for the plans/checkout surfaces (Explore Plans, Full Platform,
@@ -92,6 +94,113 @@ export function SecurePaymentsNote({ className }: { className?: string }) {
       <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-500">
         <ShieldCheck className="size-4 text-emerald-500" /> 100% Secure Payments
       </span>
+    </div>
+  );
+}
+
+/** A full-width band of headline stats (companies / questions / mocks …). */
+export function StatBand({
+  stats,
+  className,
+}: {
+  stats: { icon: IconType; value: string; label: string; tint: string }[];
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        'grid grid-cols-2 gap-3 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:grid-cols-4',
+        className,
+      )}
+    >
+      {stats.map((s) => (
+        <div key={s.label} className="flex items-center gap-3 rounded-2xl px-2 py-1.5">
+          <span className={cn('grid size-11 shrink-0 place-items-center rounded-2xl', s.tint)}>
+            <s.icon className="size-5" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-xl font-black tabular-nums tracking-tight text-navy">{s.value}</p>
+            <p className="truncate text-xs font-medium text-slate-500">{s.label}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** "Everything includes" grid — icon cards describing what a plan unlocks. */
+export function IncludedGrid({
+  items,
+  className,
+}: {
+  items: { icon: IconType; title: string; desc: string }[];
+  className?: string;
+}) {
+  return (
+    <div className={cn('grid gap-3 sm:grid-cols-2 lg:grid-cols-3', className)}>
+      {items.map((it) => (
+        <div
+          key={it.title}
+          className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-indigo-200 hover:shadow-md"
+        >
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-600">
+            <it.icon className="size-5" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-navy">{it.title}</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{it.desc}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Three (or more) value props in a row — icon tile + title + one line. */
+export function ValueProps({
+  items,
+  className,
+}: {
+  items: { icon: IconType; title: string; desc: string; tint: string }[];
+  className?: string;
+}) {
+  return (
+    <div className={cn('grid gap-4 sm:grid-cols-3', className)}>
+      {items.map((v) => (
+        <div key={v.title} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <span className={cn('grid size-11 place-items-center rounded-2xl', v.tint)}>
+            <v.icon className="size-5" />
+          </span>
+          <p className="mt-3 text-sm font-black text-navy">{v.title}</p>
+          <p className="mt-1 text-xs leading-relaxed text-slate-500">{v.desc}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Lightweight FAQ accordion for the plan pages. */
+export function FaqAccordion({ items, className }: { items: { q: string; a: string }[]; className?: string }) {
+  const [open, setOpen] = useState<number | null>(0);
+  return (
+    <div className={cn('divide-y divide-slate-100 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm', className)}>
+      {items.map((it, i) => {
+        const isOpen = open === i;
+        return (
+          <div key={it.q}>
+            <button
+              type="button"
+              onClick={() => setOpen(isOpen ? null : i)}
+              aria-expanded={isOpen}
+              className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition hover:bg-slate-50/60"
+            >
+              <span className="text-sm font-bold text-navy">{it.q}</span>
+              <ChevronDown className={cn('size-4 shrink-0 text-slate-400 transition-transform', isOpen && 'rotate-180')} />
+            </button>
+            {isOpen && <p className="px-5 pb-4 text-sm leading-relaxed text-slate-500">{it.a}</p>}
+          </div>
+        );
+      })}
     </div>
   );
 }
