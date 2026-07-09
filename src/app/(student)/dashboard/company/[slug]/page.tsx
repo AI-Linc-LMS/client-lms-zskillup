@@ -48,6 +48,7 @@ export default async function CompanyHubPage({
     rounds: live.rounds ?? fallback.company.rounds,
     badge: live.badge ?? fallback.company.badge,
     accent: live.accent ?? fallback.company.accent,
+    logoUrl: live.logoUrl ?? fallback.company.logoUrl ?? null,
   };
 
   const h = live.hub;
