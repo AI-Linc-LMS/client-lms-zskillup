@@ -32,7 +32,7 @@ export function StudyMaterialTab({ slug }: { slug: string }) {
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [openTopics, setOpenTopics] = useState<Set<string>>(new Set());
-  const [playing, setPlaying] = useState<StudyMaterialItemDto | null>(null);
+  const [playing, setPlaying] = useState<{ topicId: string; index: number } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
   useEffect(() => {
@@ -57,12 +57,25 @@ export function StudyMaterialTab({ slug }: { slug: string }) {
     [data, activeSection],
   );
 
+  // The video playlist the player navigates — the current topic's VIDEO items,
+  // derived live from the tree so progress/done stays in sync after a toggle.
+  const playlist = useMemo(() => {
+    if (!playing || !data) return [] as StudyMaterialItemDto[];
+    for (const s of data.sections)
+      for (const t of s.topics) if (t.id === playing.topicId) return t.items.filter((i) => i.kind === 'VIDEO');
+    return [] as StudyMaterialItemDto[];
+  }, [playing, data]);
+
+  const openVideo = useCallback((topicId: string, videoItems: StudyMaterialItemDto[], item: StudyMaterialItemDto) => {
+    const i = videoItems.findIndex((v) => v.id === item.id);
+    setPlaying({ topicId, index: Math.max(0, i) });
+  }, []);
+
   const toggleItem = useCallback(
     async (item: StudyMaterialItemDto) => {
       const next = !item.done;
       setBusy(item.id);
       setData((prev) => (prev ? recompute(mapItem(prev, item.id, (i) => ({ ...i, done: next }))) : prev));
-      setPlaying((p) => (p && p.id === item.id ? { ...p, done: next } : p));
       try {
         await completeStudyMaterialItem(slug, item.id, next);
       } catch {
@@ -213,7 +226,12 @@ export function StudyMaterialTab({ slug }: { slug: string }) {
                         <ul className="divide-y divide-slate-100">
                           {t.items.map((item) => (
                             <li key={item.id}>
-                              <ItemRow item={item} busy={busy === item.id} onToggle={() => toggleItem(item)} onPlay={() => setPlaying(item)} />
+                              <ItemRow
+                                item={item}
+                                busy={busy === item.id}
+                                onToggle={() => toggleItem(item)}
+                                onPlay={() => openVideo(t.id, t.items.filter((i) => i.kind === 'VIDEO'), item)}
+                              />
                             </li>
                           ))}
                           {t.items.length === 0 && <li className="px-4 py-3 text-xs text-slate-400">No items yet.</li>}
@@ -228,7 +246,14 @@ export function StudyMaterialTab({ slug }: { slug: string }) {
         </section>
       </div>
 
-      <VideoPlayer item={playing} busy={busy === playing?.id} onToggleDone={() => playing && toggleItem(playing)} onClose={() => setPlaying(null)} />
+      <VideoPlayer
+        playlist={playlist}
+        index={playing?.index ?? null}
+        onIndex={(i) => setPlaying((p) => (p ? { ...p, index: i } : p))}
+        onToggleDone={(item) => toggleItem(item)}
+        busy={playing != null && busy === playlist[playing.index]?.id}
+        onClose={() => setPlaying(null)}
+      />
     </div>
   );
 }
