@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, CheckCircle2, Code2, Loader2, Trophy } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Code2, Loader2, Search, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Reveal, Stagger, StaggerItem } from '@/components/motion/primitives';
 import { listCodingProblems, type CodingProblemListItem } from '@/lib/api/coding';
@@ -22,6 +22,7 @@ const DIFF_TONE: Record<string, string> = {
 export function CodingProblemsList({ company, topic }: { company?: string; topic?: string } = {}) {
   const [problems, setProblems] = useState<CodingProblemListItem[] | null>(null);
   const [errored, setErrored] = useState(false);
+  const [q, setQ] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -38,13 +39,24 @@ export function CodingProblemsList({ company, topic }: { company?: string; topic
   }, [company]);
 
   // When a topic is selected, keep only problems carrying that tag (case-insensitive,
-  // any position — a problem tagged [Arrays, Hashing] shows for both).
+  // any position — a problem tagged [Arrays, Hashing] shows for both). Then apply the
+  // free-text search (matches the title or any tag).
   const filtered = useMemo(() => {
-    const all = problems ?? [];
-    if (!topic) return all;
-    const t = topic.trim().toLowerCase();
-    return all.filter((p) => p.tags?.some((tag) => tag.trim().toLowerCase() === t));
-  }, [problems, topic]);
+    let all = problems ?? [];
+    if (topic) {
+      const t = topic.trim().toLowerCase();
+      all = all.filter((p) => p.tags?.some((tag) => tag.trim().toLowerCase() === t));
+    }
+    const needle = q.trim().toLowerCase();
+    if (needle) {
+      all = all.filter(
+        (p) =>
+          p.title.toLowerCase().includes(needle) ||
+          p.tags?.some((tag) => tag.toLowerCase().includes(needle)),
+      );
+    }
+    return all;
+  }, [problems, topic, q]);
 
   // Group problems by their primary tag (the topic) so the catalogue reads
   // topic-wise, matching the Practice Quiz tab. Ordered by size, then name.
@@ -73,7 +85,7 @@ export function CodingProblemsList({ company, topic }: { company?: string; topic
       </div>
     );
   }
-  if (filtered.length === 0) {
+  if (problems.length === 0) {
     return (
       <div className="rounded-2xl border border-slate-200/80 bg-white p-10 text-center shadow-sm">
         <Code2 className="mx-auto mb-3 size-8 text-slate-300" />
@@ -99,11 +111,11 @@ export function CodingProblemsList({ company, topic }: { company?: string; topic
             aria-hidden
             className="pointer-events-none absolute -right-10 -top-10 size-32 rounded-full bg-indigo-300/20 blur-2xl"
           />
-          <div className="relative flex items-center gap-3">
+          <div className="relative flex flex-wrap items-center gap-3">
             <span className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-indigo-400 to-indigo-600 text-white">
               <Trophy className="size-5" />
             </span>
-            <div>
+            <div className="flex-1">
               <p className="text-sm font-bold text-navy">
                 {solvedCount} / {filtered.length} solved
               </p>
@@ -111,9 +123,34 @@ export function CodingProblemsList({ company, topic }: { company?: string; topic
                 Earn XP for every problem you solve for the first time.
               </p>
             </div>
+            {/* Search — filter by problem title or tag */}
+            <div className="relative w-full sm:w-64">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search problems or tags…"
+                aria-label="Search coding problems"
+                className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm text-navy outline-none transition focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+              />
+            </div>
           </div>
         </div>
       </Reveal>
+
+      {filtered.length === 0 && (
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-10 text-center shadow-sm">
+          <Search className="mx-auto mb-3 size-8 text-slate-300" />
+          <p className="text-sm font-semibold text-navy">No problems match “{q}”</p>
+          <button
+            type="button"
+            onClick={() => setQ('')}
+            className="mt-2 text-sm font-bold text-indigo-600 hover:text-indigo-700"
+          >
+            Clear search
+          </button>
+        </div>
+      )}
 
       {/* Topic-wise sections (like the Practice Quiz tab) */}
       {groups.map(([topic, items]) => {
@@ -147,11 +184,19 @@ function ProblemCard({ p }: { p: CodingProblemListItem }) {
   return (
     <Link
       href={`/coding/${p.slug}`}
-      className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-[0_18px_40px_-22px_rgba(15,23,42,0.4)]"
+      className={cn(
+        'group relative flex h-full flex-col overflow-hidden rounded-2xl border p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-[0_18px_40px_-22px_rgba(15,23,42,0.4)]',
+        p.solved
+          ? 'border-emerald-300 bg-emerald-50/60 ring-1 ring-inset ring-emerald-200/70'
+          : 'border-slate-200/80 bg-white',
+      )}
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-10 -top-10 size-28 rounded-full bg-indigo-300/15 blur-2xl"
+        className={cn(
+          'pointer-events-none absolute -right-10 -top-10 size-28 rounded-full blur-2xl',
+          p.solved ? 'bg-emerald-300/30' : 'bg-indigo-300/15',
+        )}
       />
       <div className="relative flex items-center justify-between">
         <span
@@ -163,7 +208,9 @@ function ProblemCard({ p }: { p: CodingProblemListItem }) {
           {p.difficulty}
         </span>
         {p.solved ? (
-          <CheckCircle2 className="size-5 text-emerald-500" />
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+            <CheckCircle2 className="size-3.5" /> Solved
+          </span>
         ) : (
           <Code2 className="size-5 text-slate-300" />
         )}
@@ -174,7 +221,10 @@ function ProblemCard({ p }: { p: CodingProblemListItem }) {
           {p.tags.slice(0, 3).map((t) => (
             <span
               key={t}
-              className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500"
+              className={cn(
+                'rounded-md px-2 py-0.5 text-[10px] font-medium',
+                p.solved ? 'bg-emerald-100/70 text-emerald-700' : 'bg-slate-100 text-slate-500',
+              )}
             >
               {t}
             </span>
@@ -183,7 +233,12 @@ function ProblemCard({ p }: { p: CodingProblemListItem }) {
       ) : null}
       <div className="relative mt-auto flex items-center justify-between pt-4">
         <span className="text-[12px] font-bold text-orange">+{p.xpReward} XP</span>
-        <span className="inline-flex items-center gap-1 text-[12px] font-bold text-slate-400 group-hover:text-navy">
+        <span
+          className={cn(
+            'inline-flex items-center gap-1 text-[12px] font-bold group-hover:text-navy',
+            p.solved ? 'text-emerald-600' : 'text-slate-400',
+          )}
+        >
           {p.solved ? 'Review' : 'Solve'}{' '}
           <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
         </span>

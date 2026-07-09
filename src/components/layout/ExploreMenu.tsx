@@ -43,7 +43,9 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 type Dest = { label: string; href: string; icon: typeof Compass; desc: string };
 
 const PRACTICE: Dest[] = [
-  { label: 'Company Hubs', href: '/dashboard/company', icon: Building2, desc: 'Pattern-matched company drives' },
+  // "Company Hubs" now lives as its own sidebar section, so it's dropped from the
+  // Explore dropdown to avoid duplicate navigation (the "Top companies" column
+  // below still offers quick per-company jump-in).
   { label: 'Topic Mastery', href: '/practice', icon: Target, desc: 'Adaptive drills, section by section' },
   { label: 'Full Mock Quiz', href: '/mock-assessment', icon: ClipboardList, desc: 'Timed, full-length simulation' },
   { label: 'Practice as-wish', href: '/practice-wish', icon: Sparkles, desc: 'Free-form practice on any topic' },
