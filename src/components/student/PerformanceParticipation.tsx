@@ -2,13 +2,22 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Loader2, Target } from 'lucide-react';
-import { getMyPerformanceScatter, type PerformanceParticipationDto } from '@/lib/api/readiness';
+import { ArrowRight, Loader2, Target, TrendingUp } from 'lucide-react';
+import { getMyPerformanceScatter, type PerformanceParticipationDto, type ScatterPoint } from '@/lib/api/readiness';
 
 const PART_HIGH = 15; // participation threshold (effort divider)
 const PERF_HIGH = 50; // accuracy threshold (performance divider)
 const KNEE = 0.4; // the effort divider always sits at 40% of the plot width
 const INSET = 5; // % padding so points never clip the plot edges
+
+type ZoneKey = 'thriving' | 'coasting' | 'grinding' | 'start';
+
+const ZONES: Array<{ key: ZoneKey; label: string; bar: string; dot: string; tone: string }> = [
+  { key: 'thriving', label: 'Thriving', bar: 'bg-emerald-400', dot: 'bg-emerald-400', tone: 'text-emerald-600' },
+  { key: 'coasting', label: 'Coasting', bar: 'bg-sky-400', dot: 'bg-sky-400', tone: 'text-sky-600' },
+  { key: 'grinding', label: 'Grinding', bar: 'bg-amber-400', dot: 'bg-amber-400', tone: 'text-amber-600' },
+  { key: 'start', label: 'Start here', bar: 'bg-rose-300', dot: 'bg-rose-300', tone: 'text-rose-500' },
+];
 
 function p95(values: number[]): number {
   if (values.length === 0) return 0;
@@ -16,8 +25,26 @@ function p95(values: number[]): number {
   return s[Math.min(s.length - 1, Math.floor(s.length * 0.95))];
 }
 
-/** Which zone the student's point sits in + a one-line nudge. Labels match the
- *  in-chart quadrant captions so the read is coherent. */
+const mean = (arr: number[]) => (arr.length ? arr.reduce((s, x) => s + x, 0) / arr.length : 0);
+
+/** Percentile rank of `val` within `arr` — share of the cohort at or below it. */
+const pctRank = (val: number, arr: number[]) =>
+  arr.length ? Math.round((arr.filter((a) => a <= val).length / arr.length) * 100) : 0;
+
+/** Correct ordinal suffix: 1st, 2nd, 3rd, 4th … 21st … */
+function ord(n: number): string {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return `${n}${s[(v - 20) % 10] ?? s[v] ?? s[0]}`;
+}
+
+const zoneOf = (p: ScatterPoint): ZoneKey => {
+  const hiP = p.performance >= PERF_HIGH;
+  const hiE = p.participation >= PART_HIGH;
+  return hiP && hiE ? 'thriving' : hiP ? 'coasting' : hiE ? 'grinding' : 'start';
+};
+
+/** Which zone the student sits in + a one-line nudge. Labels match the in-chart captions. */
 function verdict(perf: number, part: number): { label: string; tip: string; tone: string } {
   const hiP = perf >= PERF_HIGH;
   const hiE = part >= PART_HIGH;
@@ -27,12 +54,25 @@ function verdict(perf: number, part: number): { label: string; tip: string; tone
   return { label: 'Getting started', tip: 'A little daily practice moves you up fast — start with one topic.', tone: 'text-rose-500' };
 }
 
+/** The concrete gap to reach the top (high accuracy AND high volume) zone. */
+function pathToTop(perf: number, part: number): string | null {
+  const hiP = perf >= PERF_HIGH;
+  const hiE = part >= PART_HIGH;
+  const needAcc = Math.max(0, Math.ceil(PERF_HIGH - perf));
+  const needAct = Math.max(0, Math.ceil(PART_HIGH - part));
+  if (hiP && hiE) return null;
+  if (hiP && !hiE) return `${needAct} more activity to reach Thriving`;
+  if (!hiP && hiE) return `+${needAcc}% accuracy to reach Thriving`;
+  return `+${needAcc}% accuracy and ${needAct} more activity to reach Thriving`;
+}
+
 /**
  * Performance × participation quadrant for the student — your dot (orange) among
- * anonymized peers (grey). Performance = practice accuracy; participation = activity
- * volume. Rebuilt as a responsive HTML/CSS chart (not a stretched SVG): every label
- * uses the platform font at a real size, so it stays crisp at any dashboard width.
- * A fixed 40% effort divider keeps the quadrants from squashing on sparse data.
+ * anonymized peers (grey), with the cohort-average marker, your percentile on each
+ * axis, how the cohort splits across the four zones, and the concrete gap to the
+ * top zone. A responsive HTML/CSS chart (not a stretched SVG) so every label stays
+ * crisp at any dashboard width; a fixed 40% effort divider keeps the quadrants from
+ * squashing on sparse data.
  */
 export function PerformanceParticipation() {
   const [data, setData] = useState<PerformanceParticipationDto | null>(null);
@@ -54,9 +94,36 @@ export function PerformanceParticipation() {
     return Math.max(PART_HIGH * 2, p95(parts));
   }, [data]);
 
+  // Derived analytics from the full scatter: percentiles, cohort averages, and the
+  // zone distribution. Computed over the whole cohort (peers + you) so the numbers
+  // agree with the plot.
+  const stats = useMemo(() => {
+    if (!data?.you) return null;
+    const all = [...data.peers, data.you];
+    const perfs = all.map((p) => p.performance);
+    const parts = all.map((p) => p.participation);
+    const counts: Record<ZoneKey, number> = { thriving: 0, coasting: 0, grinding: 0, start: 0 };
+    for (const p of all) counts[zoneOf(p)] += 1;
+    const n = all.length;
+    return {
+      n,
+      perfPct: pctRank(data.you.performance, perfs),
+      partPct: pctRank(data.you.participation, parts),
+      avgPerf: Math.round(mean(perfs)),
+      avgPart: Math.round(mean(parts)),
+      counts,
+      zonePct: {
+        thriving: (counts.thriving / n) * 100,
+        coasting: (counts.coasting / n) * 100,
+        grinding: (counts.grinding / n) * 100,
+        start: (counts.start / n) * 100,
+      } as Record<ZoneKey, number>,
+      yourZone: zoneOf(data.you),
+    };
+  }, [data]);
+
   // Piecewise x: 0→PART_HIGH maps to the left 40%, PART_HIGH→partMax to the right
-  // 60% — the effort divider is pinned at 40% regardless of the data spread. Both
-  // axes are inset so points sit comfortably inside the frame.
+  // 60% — the effort divider is pinned at 40% regardless of the data spread.
   const xNorm = (p: number) =>
     p <= PART_HIGH
       ? (p / PART_HIGH) * KNEE
@@ -68,7 +135,9 @@ export function PerformanceParticipation() {
   const hy = yPct(PERF_HIGH); // horizontal divider (%)
 
   const v = data?.you ? verdict(data.you.performance, data.you.participation) : null;
+  const next = data?.you ? pathToTop(data.you.performance, data.you.participation) : null;
   const peerCount = data ? Math.max(0, data.cohortSize - 1) : 0;
+  const scopeWord = data?.scope === 'college' ? 'College' : 'Platform';
 
   const youX = data?.you ? xPct(data.you.participation) : 0;
   const youY = data?.you ? yPct(data.you.performance) : 0;
@@ -100,7 +169,7 @@ export function PerformanceParticipation() {
         <div className="flex h-56 items-center justify-center">
           <Loader2 className="size-5 animate-spin text-slate-300" />
         </div>
-      ) : !data || !data.you ? (
+      ) : !data || !data.you || !stats ? (
         <div className="mt-4 flex h-56 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-200 text-center">
           <Target className="size-7 text-slate-300" />
           <p className="max-w-xs text-sm text-slate-500">Answer a few practice questions to see where you land on the map.</p>
@@ -110,6 +179,25 @@ export function PerformanceParticipation() {
         </div>
       ) : (
         <>
+          {/* Metric strip — your numbers + where they place you in the cohort */}
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            <Metric
+              label="Your accuracy"
+              value={`${data.you.performance}%`}
+              sub={peerCount > 0 ? `${ord(stats.perfPct)} percentile` : 'practice accuracy'}
+            />
+            <Metric
+              label="Your activity"
+              value={`${data.you.participation}`}
+              sub={peerCount > 0 ? `${ord(stats.partPct)} percentile` : 'effort volume'}
+            />
+            <Metric
+              label={`${scopeWord} average`}
+              value={`${stats.avgPerf}%`}
+              sub={`${stats.avgPart} activity · ${stats.n} students`}
+            />
+          </div>
+
           {/* Chart: y-axis rail + plot area */}
           <div className="mt-4 flex gap-2.5">
             {/* Y axis */}
@@ -148,6 +236,18 @@ export function PerformanceParticipation() {
                 />
               ))}
 
+              {/* Cohort average marker (hollow diamond) */}
+              {peerCount > 0 && (
+                <div
+                  className="absolute -translate-x-1/2 -translate-y-1/2"
+                  style={{ left: `${xPct(stats.avgPart)}%`, top: `${yPct(stats.avgPerf)}%` }}
+                >
+                  <span className="block size-2.5 rotate-45 border border-navy/55 bg-white/80 shadow-sm">
+                    <span className="sr-only">Cohort average</span>
+                  </span>
+                </div>
+              )}
+
               {/* You */}
               <div
                 className="absolute -translate-x-1/2 -translate-y-1/2"
@@ -176,24 +276,91 @@ export function PerformanceParticipation() {
             Participation →
           </p>
 
-          {/* Verdict + legend */}
-          <div className="mt-2.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-slate-100 pt-3">
-            <p className="min-w-0 text-xs">
-              <span className={`font-bold ${v!.tone}`}>{v!.label}.</span> <span className="text-slate-500">{v!.tip}</span>
+          {/* Cohort distribution across the four zones */}
+          {peerCount > 0 && (
+            <div className="mt-3.5">
+              <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                <span>Where the cohort sits</span>
+                <span className="normal-case tracking-normal text-slate-400">
+                  You&apos;re <span className={ZONES.find((z) => z.key === stats.yourZone)!.tone}>
+                    {stats.yourZone === 'start' ? 'getting started' : ZONES.find((z) => z.key === stats.yourZone)!.label.toLowerCase()}
+                  </span>
+                </span>
+              </div>
+              <div className="mt-1.5 flex h-2.5 overflow-hidden rounded-full bg-slate-100">
+                {ZONES.map((z) =>
+                  stats.zonePct[z.key] > 0 ? (
+                    <span
+                      key={z.key}
+                      className={`${z.bar} ${stats.yourZone === z.key ? 'ring-2 ring-inset ring-navy/45' : ''}`}
+                      style={{ width: `${stats.zonePct[z.key]}%` }}
+                      title={`${z.label}: ${stats.counts[z.key]}`}
+                    />
+                  ) : null,
+                )}
+              </div>
+              <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5">
+                {ZONES.map((z) => (
+                  <span key={z.key} className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-500">
+                    <span className={`size-2 rounded-full ${z.dot}`} />
+                    {z.label}
+                    <span className="tabular-nums text-slate-400">{stats.counts[z.key]}</span>
+                    {stats.yourZone === z.key && <span className="font-bold text-navy">· you</span>}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Verdict + concrete next step */}
+          <div className="mt-3.5 rounded-2xl border border-slate-100 bg-slate-50/70 p-3">
+            <p className="text-xs leading-relaxed">
+              <span className={`font-bold ${v!.tone}`}>{v!.label}.</span>{' '}
+              <span className="text-slate-600">{v!.tip}</span>
             </p>
-            <span className="flex shrink-0 items-center gap-2.5 text-[11px] font-semibold text-slate-400">
-              <span className="inline-flex items-center gap-1">
-                <span className="size-2 rounded-full bg-orange" /> You
-              </span>
-              {peerCount > 0 && (
-                <span className="inline-flex items-center gap-1">
-                  <span className="size-2 rounded-full bg-slate-300" /> {peerCount} {data.scope === 'college' ? 'peers' : 'students'}
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5">
+              {next ? (
+                <Link
+                  href="/practice"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-navy px-3 py-1.5 text-[11px] font-bold text-white transition hover:bg-navy/90"
+                >
+                  <TrendingUp className="size-3.5" /> {next}
+                </Link>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-bold text-emerald-700">
+                  <TrendingUp className="size-3.5" /> Top zone — keep the streak alive
                 </span>
               )}
-            </span>
+              <span className="flex shrink-0 items-center gap-2.5 text-[11px] font-semibold text-slate-400">
+                <span className="inline-flex items-center gap-1">
+                  <span className="size-2 rounded-full bg-orange" /> You
+                </span>
+                {peerCount > 0 && (
+                  <>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="size-2 rounded-full bg-slate-300" /> {peerCount} {data.scope === 'college' ? 'peers' : 'students'}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="size-2 rotate-45 border border-navy/55 bg-white" /> Avg
+                    </span>
+                  </>
+                )}
+              </span>
+            </div>
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+/** Compact metric tile for the stats strip. */
+function Metric({ label, value, sub }: { label: string; value: string; sub: string }) {
+  return (
+    <div className="rounded-2xl border border-slate-100 bg-slate-50/60 px-3 py-2.5">
+      <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+      <p className="mt-0.5 font-display text-lg font-bold leading-none tabular-nums text-navy">{value}</p>
+      <p className="mt-1 truncate text-[10px] font-medium text-slate-400">{sub}</p>
     </div>
   );
 }
