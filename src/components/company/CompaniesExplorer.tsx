@@ -7,7 +7,15 @@ import { cn } from '@/lib/utils';
 import { CompanyCard, type CompanyCardData } from './CompanyCard';
 import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
 import { DEMO_COMPANIES } from '@/lib/demo-data';
+import { HOMEPAGE_COMPANY_LOGOS } from '@/lib/demo-data-extra';
 import { Stagger, StaggerItem } from '@/components/motion/primitives';
+
+/** Real brand logos for the canonical companies — locked cards have no live
+ *  logoUrl from the catalog, so they'd otherwise fall back to a text monogram. */
+const LOGO_BY_SLUG: Record<string, string> = {
+  ...Object.fromEntries(HOMEPAGE_COMPANY_LOGOS.map((c) => [c.slug, c.logoSrc])),
+  google: 'https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg',
+};
 
 const TYPE_TABS: Array<{ key: 'All' | ApiCompany['type']; label: string }> = [
   { key: 'All', label: 'All' },
@@ -70,6 +78,7 @@ export function CompaniesExplorer() {
             accent: d.accent,
             badge: null,
             type: demoType(d.type),
+            logoUrl: LOGO_BY_SLUG[d.slug] ?? null,
             difficulty: d.difficulty as CompanyCardData['difficulty'],
             rounds: d.rounds,
             locked: true,
