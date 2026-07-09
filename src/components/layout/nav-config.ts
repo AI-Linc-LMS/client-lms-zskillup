@@ -104,7 +104,7 @@ export const STUDENT_NAV: NavSection[] = [
 
 /** Student features gated behind a 100%-complete profile (blur-locked in-page +
  *  shown with a lock in the sidebar until the profile is finished). */
-export const PROFILE_GATED_HREFS = new Set<string>(['/study-plan', '/practice-wish', '/mock-interview']);
+export const PROFILE_GATED_HREFS = new Set<string>(['/practice-wish', '/mock-interview']);
 
 /** Student features gated behind the one-time calibration assessment — all
  *  practice + assessment surfaces are locked until the student takes it. */

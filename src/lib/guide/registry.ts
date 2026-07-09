@@ -32,7 +32,7 @@ const GRAND_STEPS: GuideStep[] = [
   { id: 'chrome-account', target: 'chrome:account', placement: 'bottom', eyebrow: 'Your account', title: 'Profile & settings', body: 'Open your profile, switch settings, and sign out from your avatar menu.' },
   // \u2500\u2500 Sidebar walk (where every module lives) \u2500\u2500
   { id: 'nav-dashboard', route: '/dashboard', target: nav('/dashboard'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Dashboard \u2014 your home base', body: 'Your personalized hub: recommendations, readiness, daily challenges and quick practice, all in one place.' },
-  { id: 'nav-study-plan', target: nav('/study-plan'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Study Plan', body: 'A guided, day-by-day plan tailored to your goals. Unlocks once your profile is 100% complete.' },
+  { id: 'nav-study-plan', target: nav('/study-plan'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Study Plan', body: 'Your fixed 90-day placement roadmap, built from your calibration result — one day unlocks at a time.' },
   { id: 'nav-performance', target: nav('/performance'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Performance', body: 'Track accuracy, strengths and \u2014 at the bottom \u2014 your focus areas to work on next.' },
   { id: 'nav-leaderboard', target: nav('/leaderboard'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Leaderboard', body: 'See how you rank against peers on XP. Friendly competition that keeps you sharp.' },
   { id: 'nav-community', target: nav('/community'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Community', body: 'Ask questions, share tips and discuss problems with other students.' },
@@ -68,10 +68,9 @@ const GRAND_TOUR: GuideTour = { id: GRAND_TOUR_ID, label: 'Platform tour', steps
 /** Per-route mini-tours. Keyed by route; longest-prefix match resolves dynamics. */
 export const PAGE_TOURS: Record<string, GuideTour> = {
   "/study-plan": { id: "plan", label: "Study Plan tour", steps: [
-    { id: "plan-hero", route: "/study-plan", target: "plan:hero", placement: "auto", eyebrow: "Study Plan", title: "Your study plan", body: "A one-focused queue built from your weak topics, reviews and upcoming drives, so you always know the highest-impact next step." },
-    { id: "plan-readiness", route: "/study-plan", target: "plan:readiness", placement: "auto", eyebrow: "Study Plan", title: "Readiness & review due", body: "Two glance stats: your overall Readiness percentage and how many questions are Due to review right now." },
-    { id: "plan-action-queue", route: "/study-plan", target: "plan:action-queue", placement: "auto", eyebrow: "Study Plan", title: "This week's plan", body: "Your numbered queue of actions — review, practice, assessment or adaptive — each with an est time and a one-tap CTA." },
-    { id: "plan-trend", route: "/study-plan", target: "plan:trend", placement: "auto", eyebrow: "Study Plan", title: "Your trend", body: "A dual-line chart tracking your weekly practice accuracy and mock scores so you can watch your progress climb." },
+    { id: "plan-hero", route: "/study-plan", target: "plan:hero", placement: "auto", eyebrow: "Study Plan", title: "Your 90-day roadmap", body: "Built once from your calibration result — a fixed, day-by-day path to placement-ready that front-loads your weak areas. The ring shows how far you've come." },
+    { id: "plan-today", route: "/study-plan", target: "plan:today", placement: "auto", eyebrow: "Study Plan", title: "Today's focus", body: "Just today's few tasks — practice, timed quizzes, mocks or coding. They tick off automatically when you finish the linked activity, or check them yourself." },
+    { id: "plan-roadmap", route: "/study-plan", target: "plan:roadmap", placement: "auto", eyebrow: "Study Plan", title: "The road ahead", body: "All 90 days across three phases. Completed days fill in, today pulses, and future days unlock one at a time — tomorrow's unlocks tomorrow." },
   ] },
   "/practice": { id: "practice", label: "Practice tour", steps: [
     { id: "practice-hero", route: "/practice", target: "practice:hero", placement: "auto", eyebrow: "Practice", title: "Adaptive practice, your way", body: "Your practice home: it explains adaptive, non-proctored drilling and shows how many sections and topics are available to you." },
