@@ -19,6 +19,13 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DEMO_COMPANIES } from '@/lib/demo-data';
+import { HOMEPAGE_COMPANY_LOGOS } from '@/lib/demo-data-extra';
+
+/** Real brand logos keyed by slug, so the menu shows the company logo (not a
+ *  monogram) with a graceful fallback when a logo is missing or fails to load. */
+const LOGO_BY_SLUG: Record<string, string> = Object.fromEntries(
+  HOMEPAGE_COMPANY_LOGOS.map((c) => [c.slug, c.logoSrc]),
+);
 
 /**
  * Explore mega-menu — a discovery hub that surfaces the platform's key
@@ -211,14 +218,7 @@ export function ExploreMenu() {
                         onClick={closeNow}
                         className="group flex items-center gap-3 rounded-xl border border-transparent px-2.5 py-2 transition-colors hover:border-slate-200/80 hover:bg-white hover:shadow-[0_10px_24px_-16px_rgba(11,18,32,0.5)]"
                       >
-                        <span
-                          className={cn(
-                            'grid size-8 shrink-0 place-items-center rounded-lg bg-gradient-to-br text-[10px] font-bold text-white shadow-sm',
-                            c.accent,
-                          )}
-                        >
-                          {c.name.slice(0, 2).toUpperCase()}
-                        </span>
+                        <CompanyChip name={c.name} accent={c.accent} logo={LOGO_BY_SLUG[c.slug]} />
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-sm font-semibold text-slate-700 group-hover:text-navy">
                             {c.name}
@@ -287,6 +287,35 @@ export function ExploreMenu() {
         ) : null}
       </AnimatePresence>
     </div>
+  );
+}
+
+/** Company logo chip — real brand logo on a white tile, monogram fallback. */
+function CompanyChip({ name, accent, logo }: { name: string; accent: string; logo?: string }) {
+  const [failed, setFailed] = useState(false);
+  const showLogo = !!logo && !failed;
+  return (
+    <span
+      className={cn(
+        'grid size-8 shrink-0 place-items-center overflow-hidden rounded-lg shadow-sm',
+        showLogo
+          ? 'bg-white p-1 ring-1 ring-slate-200/70'
+          : cn('bg-gradient-to-br text-[10px] font-bold text-white', accent),
+      )}
+    >
+      {showLogo ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={logo}
+          alt={`${name} logo`}
+          onError={() => setFailed(true)}
+          loading="lazy"
+          className="size-full object-contain"
+        />
+      ) : (
+        name.slice(0, 2).toUpperCase()
+      )}
+    </span>
   );
 }
 
