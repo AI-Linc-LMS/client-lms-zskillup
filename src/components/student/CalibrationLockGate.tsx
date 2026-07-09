@@ -8,9 +8,9 @@ import { cn } from '@/lib/utils';
 
 /**
  * Gates a feature behind the one-time calibration assessment. Until the student
- * takes it (and while the feature flag is on) the real section renders under a
- * translucent blur film with a lock card + "Take the calibration" CTA; otherwise
- * the children render untouched. Mirrors ProfileLockGate; re-checks on focus.
+ * takes it (and while the feature flag is on) the real section shows as a blurred
+ * teaser with a lock card + "Take the calibration" CTA; otherwise the children
+ * render untouched. Mirrors ProfileLockGate; re-checks on focus.
  */
 export function CalibrationLockGate({
   feature,
@@ -34,35 +34,34 @@ export function CalibrationLockGate({
 
   const href = mockTestId ? `/dashboard/quiz?mock=${mockTestId}` : '/dashboard';
 
+  // Contained lock (see ProfileLockGate): card in a normal in-flow block, blurred
+  // teaser on an absolute clipped layer — no sticky / no 100dvh scroll-follow.
   return (
-    <div className="relative">
+    <div className="relative isolate overflow-hidden rounded-3xl">
       <div
         aria-hidden
-        className={cn('pointer-events-none select-none blur-[7px] opacity-70 saturate-[0.65]', contentClassName)}
+        className={cn('pointer-events-none absolute inset-0 select-none blur-[7px] opacity-60 saturate-[0.65]', contentClassName)}
       >
         {children}
       </div>
+      <div aria-hidden className="absolute inset-0 bg-white/60 backdrop-blur-[3px]" />
 
-      {/* Lock film — card centered in the VIEWPORT (sticky) so it never sits below
-          the fold on a tall gated section. */}
-      <div className="absolute inset-0 z-10 rounded-3xl bg-white/50 backdrop-blur-[3px]">
-        <div className="sticky top-0 flex h-[100dvh] max-h-full items-center justify-center p-4">
-          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white/95 p-7 text-center shadow-[0_30px_80px_-30px_rgba(11,18,32,0.55)]">
-            <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.8)]">
-              <ClipboardCheck className="size-6" />
-            </span>
-            <h2 className="mt-4 text-lg font-black text-navy">{feature} is locked</h2>
-            <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
-              Take your calibration assessment first — it maps where you stand across every section and unlocks {feature}
-              {' '}plus personalized recommendations and your company matches.
-            </p>
-            <Link
-              href={href}
-              className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105"
-            >
-              Take the calibration <ArrowRight className="size-4" />
-            </Link>
-          </div>
+      <div className="relative z-10 flex min-h-[60vh] items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white/95 p-7 text-center shadow-[0_30px_80px_-30px_rgba(11,18,32,0.55)]">
+          <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.8)]">
+            <ClipboardCheck className="size-6" />
+          </span>
+          <h2 className="mt-4 text-lg font-black text-navy">{feature} is locked</h2>
+          <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
+            Take your calibration assessment first — it maps where you stand across every section and unlocks {feature}
+            {' '}plus personalized recommendations and your company matches.
+          </p>
+          <Link
+            href={href}
+            className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105"
+          >
+            Take the calibration <ArrowRight className="size-4" />
+          </Link>
         </div>
       </div>
     </div>

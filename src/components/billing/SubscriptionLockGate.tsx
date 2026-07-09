@@ -38,12 +38,18 @@ export function SubscriptionLockGate({
   }
 
   return (
-    <div className="relative">
-      <div aria-hidden className={cn('pointer-events-none select-none blur-[7px] opacity-70 saturate-[0.65]', contentClassName)}>
+    <div className="relative isolate overflow-hidden rounded-3xl">
+      {/* blurred teaser — clipped to the gate's height, so it never adds scroll */}
+      <div
+        aria-hidden
+        className={cn('pointer-events-none absolute inset-0 select-none blur-[7px] opacity-60 saturate-[0.65]', contentClassName)}
+      >
         {children}
       </div>
-      <div className="absolute inset-0 z-10 rounded-3xl bg-white/50 backdrop-blur-[3px]" />
-      <div className="sticky top-0 z-20 flex h-[100dvh] items-center justify-center px-4">
+      <div aria-hidden className="absolute inset-0 bg-white/60 backdrop-blur-[3px]" />
+      {/* the card sits in a normal centered block that DEFINES the gate height —
+          no sticky / no 100dvh, so it doesn't follow the scroll or leave a gap. */}
+      <div className="relative z-10 flex min-h-[60vh] items-center justify-center p-4">
         <div className="w-full max-w-md rounded-3xl border border-indigo-200 bg-white p-7 text-center shadow-xl">
           <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white">
             <Lock className="size-7" />
