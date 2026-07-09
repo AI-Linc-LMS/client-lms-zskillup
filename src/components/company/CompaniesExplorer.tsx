@@ -8,7 +8,6 @@ import { CompanyCard, type CompanyCardData } from './CompanyCard';
 import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
 import { DEMO_COMPANIES } from '@/lib/demo-data';
 import { HOMEPAGE_COMPANY_LOGOS } from '@/lib/demo-data-extra';
-import { Stagger, StaggerItem } from '@/components/motion/primitives';
 
 /** Real brand logos for the canonical companies — locked cards have no live
  *  logoUrl from the catalog, so they'd otherwise fall back to a text monogram. */
@@ -212,13 +211,29 @@ export function CompaniesExplorer() {
         </div>
       ) : (
         <div data-tour="company:grid">
-          <Stagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Reveal on mount (not whileInView) and re-key per filter, so the cards
+              are never left stuck at opacity-0 when the grid mounts below the fold
+              or the filtered set changes. */}
+          <motion.div
+            key={type}
+            className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+            initial="hidden"
+            animate="show"
+            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06, delayChildren: 0.04 } } }}
+          >
             {filtered.map((c) => (
-              <StaggerItem key={c.slug} className="h-full">
+              <motion.div
+                key={c.slug}
+                className="h-full"
+                variants={{
+                  hidden: { opacity: 0, y: 16 },
+                  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } },
+                }}
+              >
                 <CompanyCard company={c} />
-              </StaggerItem>
+              </motion.div>
             ))}
-          </Stagger>
+          </motion.div>
         </div>
       )}
     </div>
