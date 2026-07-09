@@ -26,6 +26,7 @@ import { RoadmapRail } from './RoadmapRail';
 import { DayDrawerPortal } from './DayDrawer';
 import { Confetti } from './Confetti';
 import { CalibrationScope, RoadmapJourney } from './illustrations';
+import { StudyArt } from './StudyArt';
 
 export function StudyPlanClient() {
   const [ov, setOv] = useState<StudyPlanOverviewDto | null>(null);
@@ -110,14 +111,31 @@ export function StudyPlanClient() {
         </div>
 
         {/* The roadmap */}
-        <section data-tour="plan:roadmap" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="mb-4 flex items-center gap-2">
-            <span className="grid size-7 place-items-center rounded-lg bg-orange/10 text-orange">
-              <Trophy className="size-4" />
-            </span>
-            <h2 className="font-display text-base font-bold tracking-tight text-navy">Your 90-day roadmap</h2>
+        <section data-tour="plan:roadmap" className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div className="relative overflow-hidden bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] px-5 py-4 text-white">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 opacity-[0.12]"
+              style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #fff 1px, transparent 0)', backgroundSize: '16px 16px' }}
+            />
+            <StudyArt
+              name="man-riding-a-rocket"
+              className="pointer-events-none absolute -right-3 -top-4 hidden h-28 w-28 opacity-90 drop-shadow-lg sm:block"
+              fallback={<RoadmapJourney className="pointer-events-none absolute right-0 top-1 hidden h-24 opacity-30 sm:block" />}
+            />
+            <div className="relative">
+              <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[#ffb877]">
+                <Trophy className="size-3.5" /> The journey
+              </p>
+              <h2 className="mt-1 font-display text-lg font-black tracking-tight">Your 90-day roadmap</h2>
+              <p className="mt-0.5 text-[11px] text-white/60">
+                Day {ov!.summary.currentDay} of {ov!.summary.totalDays} · one unlocks each day
+              </p>
+            </div>
           </div>
-          <RoadmapRail days={ov!.days} onSelect={setSelected} />
+          <div className="p-5">
+            <RoadmapRail days={ov!.days} onSelect={setSelected} />
+          </div>
         </section>
       </div>
 
@@ -232,21 +250,33 @@ function TodayPanel({
   const allDone = today.doneCount >= today.taskCount && today.taskCount > 0;
   return (
     <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <div className={cn('flex items-center gap-3 bg-gradient-to-br p-5 text-white', meta.grad)}>
-        <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/75">
-            Today · Day {today.dayNumber}
-          </p>
-          <h2 className="mt-0.5 text-lg font-black tracking-tight">{today.theme}</h2>
-        </div>
-        <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-white/15 text-center">
-          <span className="text-lg font-black leading-none tabular-nums">{today.doneCount}/{today.taskCount}</span>
+      <div className={cn('relative overflow-hidden bg-gradient-to-br p-5 text-white', meta.grad)}>
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.14]"
+          style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #fff 1.1px, transparent 0)', backgroundSize: '15px 15px' }}
+        />
+        <div className="relative flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em]">
+              <Sparkles className="size-3" /> Today · Day {today.dayNumber}
+            </span>
+            <h2 className="mt-2 text-xl font-black tracking-tight drop-shadow-sm">{today.theme}</h2>
+            <p className="mt-1 text-[11px] font-bold text-white/75">
+              {today.estMinutes} min · {today.xp} XP · {meta.label}
+            </p>
+          </div>
+          <DayRing done={today.doneCount} total={today.taskCount} />
         </div>
       </div>
       <div className="p-4">
         {allDone && (
-          <div className="mb-3 flex items-center gap-2 rounded-2xl bg-emerald-50 px-3 py-2.5 text-sm font-bold text-emerald-700">
-            <CheckCircle2 className="size-4" /> Today’s done — come back tomorrow for Day {today.dayNumber + 1}.
+          <div className="mb-3 flex items-center gap-3 rounded-2xl bg-emerald-50 p-3">
+            <StudyArt name="success" className="h-14 w-14 shrink-0" fallback={<CheckCircle2 className="size-9 text-emerald-500" />} />
+            <div>
+              <p className="text-sm font-black text-emerald-700">Today’s done!</p>
+              <p className="text-xs font-medium text-emerald-600/80">Come back tomorrow for Day {today.dayNumber + 1}.</p>
+            </div>
           </div>
         )}
         <ul className="space-y-2.5">
@@ -261,6 +291,35 @@ function TodayPanel({
         </p>
       </div>
     </section>
+  );
+}
+
+/** Small white progress ring for the Today card (on the phase-gradient header). */
+function DayRing({ done, total }: { done: number; total: number }) {
+  const frac = total ? done / total : 0;
+  const r = 22;
+  const c = 2 * Math.PI * r;
+  return (
+    <div className="relative grid size-14 shrink-0 place-items-center">
+      <svg viewBox="0 0 56 56" className="size-14 -rotate-90">
+        <circle cx="28" cy="28" r={r} className="fill-none stroke-white/25" strokeWidth="5" />
+        <motion.circle
+          cx="28"
+          cy="28"
+          r={r}
+          className="fill-none stroke-white"
+          strokeWidth="5"
+          strokeLinecap="round"
+          strokeDasharray={c}
+          initial={{ strokeDashoffset: c }}
+          animate={{ strokeDashoffset: c * (1 - frac) }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        />
+      </svg>
+      <span className="absolute text-xs font-black tabular-nums">
+        {done}/{total}
+      </span>
+    </div>
   );
 }
 
@@ -288,7 +347,12 @@ function GenerateHero({ generating, onGenerate }: { generating: boolean; onGener
   return (
     <div className="mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-8 text-center text-white shadow-[0_24px_60px_-30px_rgba(11,18,32,0.85)] sm:p-12">
       <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 mx-auto size-64 rounded-full bg-[#f37021]/20 blur-3xl" />
-      <RoadmapJourney className="relative mx-auto w-60 sm:w-72" />
+      <StudyArt
+        name="man-riding-a-rocket"
+        alt=""
+        className="relative mx-auto h-40 w-auto sm:h-48"
+        fallback={<RoadmapJourney className="mx-auto w-60 sm:w-72" />}
+      />
       <h2 className="relative mt-3 font-display text-2xl font-black tracking-tight sm:text-3xl">
         Build your 90-day roadmap
       </h2>
