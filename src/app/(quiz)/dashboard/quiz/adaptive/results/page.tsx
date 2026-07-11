@@ -106,6 +106,12 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
 
   const incorrect = results.total - results.correct;
   const timeMin = Math.max(1, Math.round(results.questions.reduce((s, q) => s + (q.timeMs ?? 0), 0) / 60000));
+  // Send them BACK where they came from. This used to hardcode /practice, so a quiz
+  // launched from a Company Hub (Study Material → Adaptive Quiz) still said
+  // "Back to Practice" and dumped you on the wrong page.
+  const back = results.companySlug
+    ? { href: `/dashboard/company/${results.companySlug}`, label: 'Back to Company Hubs' }
+    : { href: '/practice', label: 'Back to Practice' };
   // Weakest skills (lowest mastery) — labels the re-quiz CTA. The weak skill is
   // resolved to a topic server-side by the requiz endpoint (skill name → slug).
   const weakSkills = [...results.skillMastery].sort((a, b) => a.masteryPct - b.masteryPct);
@@ -132,8 +138,8 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
         </div>
         <div className="relative z-10 mx-auto max-w-5xl px-5 pb-8 pt-6 sm:px-6">
           <div className="flex items-center justify-between">
-            <Link href="/practice" className="inline-flex items-center gap-1.5 text-xs text-white/60 transition-colors hover:text-white">
-              <ArrowLeft className="size-3.5" /> Back to Practice
+            <Link href={back.href} className="inline-flex items-center gap-1.5 text-xs text-white/60 transition-colors hover:text-white">
+              <ArrowLeft className="size-3.5" /> {back.label}
             </Link>
             <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#ffb877]">
               Session results
@@ -256,7 +262,7 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" size="sm" asChild>
-              <Link href="/practice">Back to Practice</Link>
+              <Link href={back.href}>{back.label}</Link>
             </Button>
             <Button size="sm" asChild>
               <Link href={requizHref}>

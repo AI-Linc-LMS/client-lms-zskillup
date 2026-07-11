@@ -165,7 +165,12 @@ function AdaptiveQuizRunner({
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background text-navy">
         <p className="text-rose-600">{error ?? 'Something went wrong.'}</p>
-        <Button variant="secondary" onClick={() => router.replace('/practice')}>Back to Practice</Button>
+        <Button
+          variant="secondary"
+          onClick={() => router.replace(companySlug ? `/dashboard/company/${companySlug}` : '/practice')}
+        >
+          {companySlug ? 'Back to Company Hubs' : 'Back to Practice'}
+        </Button>
       </div>
     );
   }

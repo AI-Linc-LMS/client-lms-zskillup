@@ -8,6 +8,12 @@ import { CompanyCard, type CompanyCardData } from './CompanyCard';
 import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
 import { DEMO_COMPANIES } from '@/lib/demo-data';
 import { HOMEPAGE_COMPANY_LOGOS } from '@/lib/demo-data-extra';
+import { useMySubscription } from '@/hooks/useMySubscription';
+import { getPricing } from '@/lib/api/payments';
+import { formatPrice } from '@/lib/api/subscriptions';
+import { buildPriceMap, retailPrice } from '@/lib/payments/pricing';
+import { BillingPeriod, EntitlementScope } from '@/shared/enums';
+import type { PriceBookEntryDto } from '@/shared/dto/payments.dto';
 
 /** Real brand logos for the canonical companies — locked cards have no live
  *  logoUrl from the catalog, so they'd otherwise fall back to a text monogram. */
@@ -40,6 +46,34 @@ export function CompaniesExplorer() {
   const [type, setType] = useState<'All' | ApiCompany['type']>('All');
   const [companies, setCompanies] = useState<ExplorerCompany[] | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Buy-from-the-grid: fetched ONCE here (not per card) so the cards stay cheap.
+  const { hasPlatform, active } = useMySubscription();
+  const [prices, setPrices] = useState<PriceBookEntryDto[]>([]);
+
+  useEffect(() => {
+    getPricing()
+      .then(setPrices)
+      .catch(() => setPrices([]));
+  }, []);
+
+  /** Company hubs the student already has (Full Platform unlocks every one). */
+  const ownedSlugs = useMemo(
+    () =>
+      new Set(
+        active
+          .filter((e) => e.scopeType === EntitlementScope.COMPANY && e.scopeRef)
+          .map((e) => e.scopeRef as string),
+      ),
+    [active],
+  );
+  const isOwned = (slug: string) => hasPlatform || ownedSlugs.has(slug);
+
+  /** Annual company price, shown on the Add button (e.g. "₹599"). */
+  const priceLabel = useMemo(() => {
+    const entry = retailPrice(buildPriceMap(prices), EntitlementScope.COMPANY, BillingPeriod.ANNUAL);
+    return entry ? formatPrice(entry.amountCents, 'INR') : null;
+  }, [prices]);
 
   useEffect(() => {
     let cancelled = false;
@@ -230,7 +264,7 @@ export function CompaniesExplorer() {
                   show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } },
                 }}
               >
-                <CompanyCard company={c} />
+                <CompanyCard company={c} owned={isOwned(c.slug)} priceLabel={priceLabel} />
               </motion.div>
             ))}
           </motion.div>

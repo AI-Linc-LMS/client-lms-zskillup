@@ -3,7 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowRight, ArrowUpRight, ClipboardList, Code2, History, Lock } from 'lucide-react';
+import { toast } from 'sonner';
+import { ArrowRight, ArrowUpRight, Check, ClipboardList, Code2, History, Lock, ShoppingCart } from 'lucide-react';
+import { useCartOptional } from '@/components/billing/CartProvider';
+import { BillingPeriod, EntitlementScope } from '@/shared/enums';
 import { cn } from '@/lib/utils';
 
 /**
@@ -42,8 +45,90 @@ const DIFFICULTY_TONE: Record<string, string> = {
   Hard: 'bg-red-50 text-red-700 ring-red-200/70',
 };
 
+/**
+ * "Add to cart" on a purchasable company card. It renders INSIDE the card's
+ * `<Link>`, so the click must be swallowed (preventDefault stops the anchor's
+ * navigation; stopPropagation stops Next's Link handler) — otherwise adding to the
+ * cart would also navigate you into the hub. Adds at ANNUAL (best value); the plan
+ * length is changeable in the cart.
+ */
+function CardCartAction({
+  company,
+  owned,
+  priceLabel,
+}: {
+  company: CompanyCardData;
+  owned?: boolean;
+  priceLabel?: string | null;
+}) {
+  const cart = useCartOptional();
+
+  // Already unlocked (Full Platform, or this hub) — nothing to buy.
+  if (owned) {
+    return (
+      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1.5 text-[11px] font-bold text-emerald-700 ring-1 ring-inset ring-emerald-200/70">
+        <Check className="size-3" /> Owned
+      </span>
+    );
+  }
+  if (!cart) return null; // rendered outside a CartProvider (e.g. marketing pages)
+
+  const inCart = cart.has(EntitlementScope.COMPANY, company.slug);
+
+  const onClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (inCart) return;
+    cart.add({
+      scope: EntitlementScope.COMPANY,
+      scopeRef: company.slug,
+      period: BillingPeriod.ANNUAL,
+      label: company.name,
+    });
+    toast.success(`${company.name} added to cart`, {
+      description: 'Keep browsing — change the plan length any time in your cart.',
+    });
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={inCart}
+      aria-label={inCart ? `${company.name} is in your cart` : `Add ${company.name} to cart`}
+      className={cn(
+        'inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[11px] font-bold transition',
+        inCart
+          ? 'cursor-default bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200/70'
+          : 'bg-indigo-600 text-white shadow-sm hover:bg-indigo-700',
+      )}
+    >
+      {inCart ? (
+        <>
+          <Check className="size-3" /> In cart
+        </>
+      ) : (
+        <>
+          <ShoppingCart className="size-3" />
+          {priceLabel ? `Add · ${priceLabel}` : 'Add to cart'}
+        </>
+      )}
+    </button>
+  );
+}
+
 /** A single company card. One template, many instances (DEMO + live API). */
-export function CompanyCard({ company }: { company: CompanyCardData }) {
+export function CompanyCard({
+  company,
+  owned,
+  priceLabel,
+}: {
+  company: CompanyCardData;
+  /** Student already has this hub (or Full Platform) → show "Owned", not a buy CTA. */
+  owned?: boolean;
+  /** Formatted annual company price, e.g. "₹599" — shown on the Add button. */
+  priceLabel?: string | null;
+}) {
   const accent = company.accent ?? 'from-slate-700 to-slate-900';
   const monogram = monogramOf(company.name);
   const [logoFailed, setLogoFailed] = useState(false);
@@ -159,10 +244,15 @@ export function CompanyCard({ company }: { company: CompanyCardData }) {
             </div>
           ) : null}
 
-          {/* CTA */}
-          <div className="mt-4 flex items-center gap-1 text-[13px] font-bold text-orange transition-colors group-hover:text-[#d9610f]">
-            Prepare now
-            <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+          {/* CTA + buy action. Locked ("coming soon") hubs never offer a cart action. */}
+          <div className="mt-4 flex items-center justify-between gap-2">
+            <span className="flex items-center gap-1 text-[13px] font-bold text-orange transition-colors group-hover:text-[#d9610f]">
+              Prepare now
+              <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+            </span>
+            {!company.locked && (
+              <CardCartAction company={company} owned={owned} priceLabel={priceLabel} />
+            )}
           </div>
         </div>
     </>

@@ -128,6 +128,10 @@ export interface AdaptiveResults {
   sessionId: string;
   mockTestId: string;
   status: string;
+  /** Scope the session was started in — drives the context-aware "back" CTA, so a
+   *  quiz launched from a Company Hub doesn't send you to Practice. */
+  topicSlug: string | null;
+  companySlug: string | null;
   correct: number;
   total: number;
   accuracy: number;
