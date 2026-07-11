@@ -190,16 +190,20 @@ function PremiumView({
     readiness?.topics.reduce((n, t) => n + t.attempts, 0) ??
     0;
 
-  // The billing history renders at the BOTTOM of the page, so simply toggling it
-  // looked like nothing happened — "Manage Subscription" read as un-clickable.
-  // Open it and scroll it into view so the click has an obvious effect.
+  // The billing history renders at the BOTTOM of the page, so merely toggling it
+  // looked like nothing happened ("Manage Subscription" / "Payment History" read as
+  // dead). Open it AND scroll to it. The scroll runs in an effect — i.e. AFTER the
+  // DOM commit — because doing it on a timer raced the render: the ref could still
+  // be null and the scroll would silently no-op.
   const historyRef = useRef<HTMLDivElement | null>(null);
+  const scrollToHistory = () =>
+    historyRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  useEffect(() => {
+    if (showHistory) scrollToHistory();
+  }, [showHistory]);
   const openHistory = () => {
-    setShowHistory(true);
-    window.setTimeout(
-      () => historyRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
-      60,
-    );
+    if (showHistory) scrollToHistory(); // already open → just take them there
+    else setShowHistory(true); // the effect scrolls once it's mounted
   };
 
   const quickActions = [
@@ -360,15 +364,17 @@ function CustomPlanView({
   const topics = granular.filter((e) => e.scopeType === EntitlementScope.TOPIC);
   const maxDays = granular.reduce((n, e) => Math.max(n, e.daysRemaining ?? 0), 0);
 
-  // Same as the premium view — reveal the history AND scroll to it, so the click
-  // isn't a no-op from the user's point of view.
+  // Same as the premium view — reveal the history AND scroll to it (in an effect,
+  // after the DOM commit, so the ref is guaranteed to exist).
   const historyRef = useRef<HTMLDivElement | null>(null);
+  const scrollToHistory = () =>
+    historyRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  useEffect(() => {
+    if (showHistory) scrollToHistory();
+  }, [showHistory]);
   const openHistory = () => {
-    setShowHistory(true);
-    window.setTimeout(
-      () => historyRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
-      60,
-    );
+    if (showHistory) scrollToHistory();
+    else setShowHistory(true);
   };
 
   return (

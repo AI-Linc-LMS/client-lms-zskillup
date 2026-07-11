@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ShoppingCart } from 'lucide-react';
+import { getMe } from '@/lib/api/me';
 import type { BillingPeriod, EntitlementScope } from '@/shared/enums';
 
 /** One line the student has added to their cart (pre-checkout, client-side). The
@@ -29,32 +30,69 @@ interface CartContextValue {
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
-const STORAGE_KEY = 'zsk_cart_v1';
+
+/**
+ * The cart used to live under ONE global localStorage key. localStorage is scoped
+ * to the BROWSER, not the account — so signing out and into a second account on the
+ * same machine loaded the first account's cart (and vice-versa), showing plans that
+ * belonged to someone else. The key is now namespaced per user id.
+ */
+const LEGACY_STORAGE_KEY = 'zsk_cart_v1';
+const storageKeyFor = (userId: string) => `zsk_cart_v1:${userId}`;
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
-  // Load once on mount (localStorage is client-only).
+  // Identify the signed-in user FIRST, then load only that user's cart.
   useEffect(() => {
+    let alive = true;
+
+    // Drop the old shared cart. We deliberately do NOT migrate it into the current
+    // user's cart — we can't know which account it belonged to, and adopting it
+    // would just re-create the leak. A pre-checkout cart is cheap to rebuild.
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setItems(JSON.parse(raw) as CartItem[]);
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
     } catch {
-      /* ignore malformed cart */
+      /* private mode */
     }
-    setHydrated(true);
+
+    getMe()
+      .then((me) => {
+        if (!alive) return;
+        setUserId(me.id);
+        try {
+          const raw = localStorage.getItem(storageKeyFor(me.id));
+          setItems(raw ? (JSON.parse(raw) as CartItem[]) : []);
+        } catch {
+          setItems([]); // malformed cart
+        }
+        setHydrated(true);
+      })
+      .catch(() => {
+        // Signed out / not a student — start empty. Never inherit another account's cart.
+        if (!alive) return;
+        setUserId(null);
+        setItems([]);
+        setHydrated(true);
+      });
+
+    return () => {
+      alive = false;
+    };
   }, []);
 
-  // Persist on change (after hydration, so we never clobber saved state with []).
+  // Persist under THIS user's key (never while signed out, or we'd write a cart
+  // with no owner that the next account could pick up).
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || !userId) return;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      localStorage.setItem(storageKeyFor(userId), JSON.stringify(items));
     } catch {
       /* quota / private mode — cart just won't persist */
     }
-  }, [items, hydrated]);
+  }, [items, hydrated, userId]);
 
   const add = useCallback((item: CartItem) => {
     setItems((prev) =>
