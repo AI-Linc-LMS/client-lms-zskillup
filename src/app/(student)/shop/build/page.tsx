@@ -23,6 +23,8 @@ import {
 } from 'lucide-react';
 import { useCart, type CartItem } from '@/components/billing/CartProvider';
 import { PlanPill } from '@/components/billing/plan-ui';
+import { companyTip, sectionTip, subsectionTip } from '@/components/billing/plan-tips';
+import { InfoTip, type TipContent } from '@/components/ui/InfoTip';
 import { getMySubscription, getPricing } from '@/lib/api/payments';
 import { formatPrice } from '@/lib/api/subscriptions';
 import { listCompanies, listTopicsWithCounts, type ApiCompany, type ApiTopic } from '@/lib/api/catalog';
@@ -283,6 +285,7 @@ export default function BuildYourOwnPage() {
                     key={c.slug}
                     label={c.name}
                     icon={<Building2 className="size-5" />}
+                    tip={companyTip(c)}
                     selected={isStaged(EntitlementScope.COMPANY, c.slug)}
                     owned={isOwned(EntitlementScope.COMPANY, c.slug)}
                     onClick={() => toggle(EntitlementScope.COMPANY, c.slug, companyPeriod, c.name)}
@@ -307,11 +310,12 @@ export default function BuildYourOwnPage() {
             {/* Step 2 — Section */}
             <Step n={2} title="Select a Section">
               <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-                {visibleSections.map(({ section }) => (
+                {visibleSections.map(({ section, topics: subs }) => (
                   <PickCard
                     key={section.id}
                     label={section.name}
                     icon={<Layers className="size-5" />}
+                    tip={sectionTip(section.name, subs)}
                     selected={isStaged(EntitlementScope.SECTION, section.slug)}
                     owned={isOwned(EntitlementScope.SECTION, section.slug)}
                     onClick={() => toggle(EntitlementScope.SECTION, section.slug, sectionPeriod, section.name)}
@@ -369,6 +373,7 @@ export default function BuildYourOwnPage() {
               {activeSub && (
                 <SubTable
                   subs={subsOpen ? activeSub.topics : activeSub.topics.slice(0, 5)}
+                  sectionName={activeSub.section.name}
                   priceMap={priceMap}
                   isOwned={(ref) => isOwned(EntitlementScope.TOPIC, ref)}
                   stagedPeriod={(ref) => stagedPeriod(EntitlementScope.TOPIC, ref)}
@@ -538,59 +543,67 @@ function Step({
 function PickCard({
   label,
   icon,
+  tip,
   selected,
   owned,
   onClick,
 }: {
   label: string;
   icon: React.ReactNode;
+  tip: TipContent;
   selected: boolean;
   owned: boolean;
   onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={owned}
-      className={`relative flex flex-col items-center justify-center gap-2 rounded-2xl border p-3 text-center transition ${
-        owned
-          ? 'cursor-default border-emerald-200 bg-emerald-50/60'
-          : selected
-            ? 'border-indigo-500 bg-indigo-50/60 ring-1 ring-indigo-500/30'
-            : 'border-slate-200 bg-white hover:border-slate-300'
-      }`}
-    >
-      {(selected || owned) && (
-        <span
-          className={`absolute right-2 top-2 grid size-4 place-items-center rounded-full text-white ${
-            owned ? 'bg-emerald-500' : 'bg-indigo-500'
-          }`}
-        >
-          <Check className="size-3" />
-        </span>
-      )}
-      <span
-        className={`grid size-10 place-items-center rounded-xl ${
-          selected ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500'
+    // The InfoTip span becomes the grid cell, so the card must fill it (h-full w-full)
+    // to keep every tile the same height as before the wrapper existed.
+    <InfoTip content={tip} label={label} className="relative block h-full">
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={owned}
+        className={`relative flex h-full w-full flex-col items-center justify-center gap-2 rounded-2xl border p-3 text-center transition ${
+          owned
+            ? 'cursor-default border-emerald-200 bg-emerald-50/60'
+            : selected
+              ? 'border-indigo-500 bg-indigo-50/60 ring-1 ring-indigo-500/30'
+              : 'border-slate-200 bg-white hover:border-slate-300'
         }`}
       >
-        {icon}
-      </span>
-      <span className="line-clamp-2 text-xs font-bold text-navy">{label}</span>
-      {owned && <span className="text-[10px] font-bold text-emerald-600">Owned</span>}
-    </button>
+        {(selected || owned) && (
+          <span
+            className={`absolute right-2 top-2 grid size-4 place-items-center rounded-full text-white ${
+              owned ? 'bg-emerald-500' : 'bg-indigo-500'
+            }`}
+          >
+            <Check className="size-3" />
+          </span>
+        )}
+        <span
+          className={`grid size-10 place-items-center rounded-xl ${
+            selected ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500'
+          }`}
+        >
+          {icon}
+        </span>
+        <span className="line-clamp-2 text-xs font-bold text-navy">{label}</span>
+        {owned && <span className="text-[10px] font-bold text-emerald-600">Owned</span>}
+      </button>
+    </InfoTip>
   );
 }
 
 function SubTable({
   subs,
+  sectionName,
   priceMap,
   isOwned,
   stagedPeriod,
   onPick,
 }: {
   subs: ApiTopic[];
+  sectionName: string;
   priceMap: Map<string, PriceBookEntryDto>;
   isOwned: (ref: string) => boolean;
   stagedPeriod: (ref: string) => BillingPeriod | undefined;
@@ -622,7 +635,14 @@ function SubTable({
             return (
               <tr key={t.id} className="border-b border-slate-50 last:border-0">
                 <td className="py-2.5 pr-3">
-                  <span className="font-semibold text-navy">{t.name}</span>
+                  <InfoTip
+                    content={subsectionTip(t.name, sectionName)}
+                    label={t.name}
+                    className="relative inline-flex items-center gap-1.5"
+                    dotClassName="" // inline after the name, not pinned to a corner
+                  >
+                    <span className="font-semibold text-navy">{t.name}</span>
+                  </InfoTip>
                   {owned && <span className="ml-2 text-[10px] font-bold text-emerald-600">Owned</span>}
                 </td>
                 {PERIODS.map((p) => {
