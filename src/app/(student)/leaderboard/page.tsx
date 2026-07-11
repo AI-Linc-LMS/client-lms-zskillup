@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { useEffect, useMemo, useState } from 'react';
 import {
   Building2,
@@ -14,6 +16,7 @@ import {
   TrendingDown,
   TrendingUp,
   Trophy,
+  ArrowRight,
 } from 'lucide-react';
 import {
   getLeaderboard,
@@ -256,6 +259,25 @@ export default function LeaderboardPage() {
       {loading ? (
         <div className="grid h-64 place-items-center">
           <Loader2 className="size-7 animate-spin text-orange" />
+        </div>
+      ) : data?.needsCollege ? (
+        /* "My College" with no college on the account. This used to silently show
+           the NATIONAL board; now we say so and send them to fix it. */
+        <div className="rounded-3xl border border-amber-200 bg-amber-50/60 p-12 text-center shadow-sm">
+          <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-amber-100 text-amber-700">
+            <GraduationCap className="size-6" />
+          </span>
+          <p className="mt-3 text-sm font-black text-navy">Pick your college first</p>
+          <p className="mx-auto mt-1 max-w-sm text-sm text-slate-500">
+            We can only rank you against your college once we know which one it is.
+            Choose it in your profile and this board will fill up.
+          </p>
+          <Link
+            href="/profile"
+            className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-orange px-5 py-2.5 text-sm font-bold text-white transition hover:bg-orange/90"
+          >
+            Select your college <ArrowRight className="size-4" />
+          </Link>
         </div>
       ) : entries.length === 0 ? (
         <div className="rounded-3xl border border-slate-200 bg-white p-16 text-center text-sm text-slate-400 shadow-sm">

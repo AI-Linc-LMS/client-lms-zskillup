@@ -56,6 +56,10 @@ export interface UpdateMePayload {
   skills?: string[];
   rolesInterested?: string[];
   collegeName?: string | null;
+  /** Canonical college (tenancy.colleges.id), picked from the profile dropdown.
+   *  This is what actually sets auth.users.college_id — free-text `collegeName`
+   *  never did, which is why the "My College" leaderboard had nothing to filter on. */
+  collegeId?: string | null;
   passoutYear?: number | null;
 }
 

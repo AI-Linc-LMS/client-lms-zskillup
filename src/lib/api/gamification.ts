@@ -77,6 +77,9 @@ export interface ApiLeaderboardEntry {
 }
 
 export interface ApiLeaderboard {
+  /** Asked for "My College" but no college is set on the account — the board is
+   *  empty on purpose (it used to silently fall back to the NATIONAL rankings). */
+  needsCollege?: boolean;
   entries: ApiLeaderboardEntry[];
   myRank: number | null;
   myEntry: ApiLeaderboardEntry | null;

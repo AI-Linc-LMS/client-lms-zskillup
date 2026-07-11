@@ -17,6 +17,7 @@ import {
   X,
 } from 'lucide-react';
 import { getMe, updateMe, type ApiMe } from '@/lib/api/me';
+import { listColleges, type College } from '@/lib/api/auth';
 import { getMyRegistrations, type ApiRegistration } from '@/lib/api/registrations';
 import { ApiRequestError } from '@/lib/api/types';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
@@ -42,6 +43,9 @@ type Values = {
   phone: string;
   course: string;
   yearOfStudy: number | '';
+  /** Canonical college id — what actually gets saved (sets auth.users.college_id). */
+  collegeId: string;
+  /** Legacy free-text name; kept only to show what a pre-dropdown user had saved. */
   collegeName: string;
   passoutYear: number | '';
   skills: string[];
@@ -49,7 +53,7 @@ type Values = {
 };
 
 const EMPTY: Values = {
-  fullName: '', phone: '', course: '', yearOfStudy: '', collegeName: '', passoutYear: '', skills: [], roles: [],
+  fullName: '', phone: '', course: '', yearOfStudy: '', collegeId: '', collegeName: '', passoutYear: '', skills: [], roles: [],
 };
 
 const snap = (v: Values) =>
@@ -68,6 +72,8 @@ const snap = (v: Values) =>
 export default function ProfilePage() {
   const [me, setMe] = useState<ApiMe | null>(null);
   const [regs, setRegs] = useState<ApiRegistration[]>([]);
+  /** Pre-loaded colleges for the picker (public endpoint, same list as signup). */
+  const [colleges, setColleges] = useState<College[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -76,6 +82,22 @@ export default function ProfilePage() {
   const [v, setV] = useState<Values>(EMPTY);
   const [baseline, setBaseline] = useState<string>(snap(EMPTY));
   const set = <K extends keyof Values>(k: K, val: Values[K]) => setV((p) => ({ ...p, [k]: val }));
+
+  // Pre-load the colleges list for the picker (public endpoint — same source the
+  // signup wizard uses, so the ids line up with tenancy.colleges).
+  useEffect(() => {
+    let cancelled = false;
+    listColleges({})
+      .then((cs) => {
+        if (!cancelled) setColleges([...cs].sort((a, b) => a.name.localeCompare(b.name)));
+      })
+      .catch(() => {
+        /* picker just shows the empty state */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -90,6 +112,7 @@ export default function ProfilePage() {
           phone: p?.phone ?? '',
           course: p?.course ?? '',
           yearOfStudy: p?.yearOfStudy ?? '',
+          collegeId: p?.collegeId ?? '',
           collegeName: p?.collegeName ?? '',
           passoutYear: p?.passoutYear ?? '',
           skills: p?.skills ?? [],
@@ -143,7 +166,10 @@ export default function ProfilePage() {
         phone: v.phone.trim() || null,
         course: v.course.trim() || null,
         yearOfStudy: v.yearOfStudy ? Number(v.yearOfStudy) : null,
-        collegeName: v.collegeName.trim() || null,
+        // The canonical id is the source of truth — the server sets auth.users
+        // .college_id from it and denormalises the display name, so we no longer
+        // send free text (which left college_id NULL and broke the college board).
+        collegeId: v.collegeId || null,
         passoutYear: v.passoutYear ? Number(v.passoutYear) : null,
         skills: v.skills,
         rolesInterested: v.roles,
@@ -167,6 +193,7 @@ export default function ProfilePage() {
       phone: p?.phone ?? '',
       course: p?.course ?? '',
       yearOfStudy: p?.yearOfStudy ?? '',
+      collegeId: p?.collegeId ?? '',
       collegeName: p?.collegeName ?? '',
       passoutYear: p?.passoutYear ?? '',
       skills: p?.skills ?? [],
@@ -242,8 +269,30 @@ export default function ProfilePage() {
                   ))}
                 </select>
               </Field>
-              <Field label="College" done={!!v.collegeName.trim()}>
-                <input value={v.collegeName} onChange={(e) => set('collegeName', e.target.value)} className={inputCls} placeholder="Your college" />
+              {/* Pre-loaded colleges. This must be a PICK, not free text: choosing a
+                  college sets the real college_id, which is what the "My College"
+                  leaderboard (and cohort scoping) filter on. Typing it never did —
+                  which is why that board silently showed national rankings. */}
+              <Field label="College" done={!!v.collegeId}>
+                <select
+                  value={v.collegeId}
+                  onChange={(e) => set('collegeId', e.target.value)}
+                  className={inputCls}
+                >
+                  <option value="">{colleges.length ? 'Select your college' : 'Loading colleges…'}</option>
+                  {colleges.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                      {c.city ? ` · ${c.city}` : ''}
+                    </option>
+                  ))}
+                </select>
+                {!v.collegeId && v.collegeName ? (
+                  <p className="mt-1 text-[11px] text-amber-600">
+                    Currently saved as “{v.collegeName}”. Pick it from the list so your
+                    college leaderboard works.
+                  </p>
+                ) : null}
               </Field>
               <Field label="Passout year" done={!!v.passoutYear}>
                 <select value={v.passoutYear} onChange={(e) => set('passoutYear', e.target.value ? Number(e.target.value) : '')} className={inputCls}>
