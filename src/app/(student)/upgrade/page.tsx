@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import {
@@ -177,9 +177,21 @@ function PremiumView({
   const topics = readiness?.topics.length ?? 0;
   const attempted = readiness?.companies.reduce((n, c) => n + c.questionsAttempted, 0) ?? 0;
 
+  // The billing history renders at the BOTTOM of the page, so simply toggling it
+  // looked like nothing happened — "Manage Subscription" read as un-clickable.
+  // Open it and scroll it into view so the click has an obvious effect.
+  const historyRef = useRef<HTMLDivElement | null>(null);
+  const openHistory = () => {
+    setShowHistory(true);
+    window.setTimeout(
+      () => historyRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+      60,
+    );
+  };
+
   const quickActions = [
     { icon: RefreshCw, label: 'Renew Plan', onClick: () => onRenew(BillingPeriod.ANNUAL) },
-    { icon: Receipt, label: 'Payment History', onClick: () => setShowHistory(!showHistory) },
+    { icon: Receipt, label: 'Payment History', onClick: openHistory },
     { icon: FileText, label: 'Download Invoice', onClick: () => toast.info('GST invoices are available on request — contact support.') },
     { icon: Gift, label: 'Gift Premium', onClick: () => toast.info('Gifting is coming soon.') },
     { icon: HelpCircle, label: 'Need Help?', href: '/support' },
@@ -218,8 +230,8 @@ function PremiumView({
           </dl>
           <button
             type="button"
-            onClick={() => setShowHistory(!showHistory)}
-            className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-700"
+            onClick={openHistory}
+            className="mt-3 inline-flex items-center gap-1.5 rounded-lg text-xs font-bold text-indigo-600 underline-offset-2 transition hover:text-indigo-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
           >
             Manage Subscription <ArrowRight className="size-3.5" />
           </button>
@@ -306,7 +318,11 @@ function PremiumView({
         </div>
       </section>
 
-      {showHistory && <HistorySection history={history} />}
+      {showHistory && (
+        <div ref={historyRef}>
+          <HistorySection history={history} />
+        </div>
+      )}
     </div>
   );
 }
@@ -330,6 +346,17 @@ function CustomPlanView({
   const sections = granular.filter((e) => e.scopeType === EntitlementScope.SECTION);
   const topics = granular.filter((e) => e.scopeType === EntitlementScope.TOPIC);
   const maxDays = granular.reduce((n, e) => Math.max(n, e.daysRemaining ?? 0), 0);
+
+  // Same as the premium view — reveal the history AND scroll to it, so the click
+  // isn't a no-op from the user's point of view.
+  const historyRef = useRef<HTMLDivElement | null>(null);
+  const openHistory = () => {
+    setShowHistory(true);
+    window.setTimeout(
+      () => historyRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+      60,
+    );
+  };
 
   return (
     <div className="mt-6 space-y-6">
@@ -358,7 +385,7 @@ function CustomPlanView({
               </Link>
               <button
                 type="button"
-                onClick={() => setShowHistory(!showHistory)}
+                onClick={openHistory}
                 className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-navy"
               >
                 <RefreshCw className="size-3.5" /> Payment History
@@ -415,7 +442,11 @@ function CustomPlanView({
 
       <ValueProps items={PLAN_VALUES} />
 
-      {showHistory && <HistorySection history={history} />}
+      {showHistory && (
+        <div ref={historyRef}>
+          <HistorySection history={history} />
+        </div>
+      )}
 
       <p className="flex items-center justify-center gap-1.5 rounded-2xl border border-emerald-100 bg-emerald-50/60 px-4 py-2.5 text-xs font-semibold text-emerald-700">
         <Check className="size-4" /> Plans are valid for the selected duration. Renew any time to continue your access.

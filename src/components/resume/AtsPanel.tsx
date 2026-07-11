@@ -40,6 +40,11 @@ export function AtsPanel({ data, onClose }: { data: ResumeData; onClose: () => v
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
 
+  /** The single headline score. The AI review reads the actual content (relevance,
+   *  impact, role fit) so it supersedes the structural heuristic once it has run —
+   *  otherwise the panel showed two contradictory "ATS scores" side by side. */
+  const headline = ai?.overallScore ?? result.overall;
+
   useEffect(() => {
     let alive = true;
     aiStatus().then((ok) => alive && setAiOk(ok));
@@ -72,25 +77,30 @@ export function AtsPanel({ data, onClose }: { data: ResumeData; onClose: () => v
         </div>
 
         <div className="space-y-6 p-5">
-          {/* Overall */}
+          {/* Overall — ONE authoritative number. The AI review judges content,
+              relevance and impact, so it supersedes the local heuristic once it
+              has run; showing both as competing headline scores was the source of
+              the "heuristic says 71, AI says 35" contradiction. */}
           <div className="flex items-center gap-5 rounded-2xl border border-slate-200 bg-slate-50/60 p-5">
             <div className="relative grid size-24 place-items-center">
               <svg viewBox="0 0 36 36" className="size-24 -rotate-90">
                 <circle cx="18" cy="18" r="16" fill="none" stroke="#e2e8f0" strokeWidth="3" />
                 <circle
                   cx="18" cy="18" r="16" fill="none" strokeWidth="3" strokeLinecap="round"
-                  stroke={result.overall >= 75 ? '#16a34a' : result.overall >= 50 ? '#d97706' : '#ef4444'}
-                  strokeDasharray={`${(result.overall / 100) * 100.5} 100.5`}
+                  stroke={headline >= 75 ? '#16a34a' : headline >= 50 ? '#d97706' : '#ef4444'}
+                  strokeDasharray={`${(headline / 100) * 100.5} 100.5`}
                 />
               </svg>
-              <span className={cn('absolute text-2xl font-black', scoreColor(result.overall))}>{result.overall}</span>
+              <span className={cn('absolute text-2xl font-black', scoreColor(headline))}>{headline}</span>
             </div>
             <div>
               <p className="text-sm font-bold text-navy">
-                {result.overall >= 75 ? 'Strong' : result.overall >= 50 ? 'Getting there' : 'Needs work'}
+                {headline >= 75 ? 'Strong' : headline >= 50 ? 'Getting there' : 'Needs work'}
               </p>
               <p className="mt-1 text-xs text-slate-500">
-                Heuristic ATS readiness{jd.trim().length >= 15 ? ', tailored to the job below' : ''}. Add a job description for keyword matching.
+                {ai
+                  ? 'AI review of your content, relevance and impact.'
+                  : `Quick local check of structure and completeness${jd.trim().length >= 15 ? ', tailored to the job below' : ''}. Run the AI analysis for a content review.`}
               </p>
             </div>
           </div>
@@ -99,17 +109,35 @@ export function AtsPanel({ data, onClose }: { data: ResumeData; onClose: () => v
           <div>
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-slate-400">Breakdown</p>
             <div className="space-y-2.5">
-              {dims.map((k) => (
-                <div key={k}>
-                  <div className="mb-0.5 flex justify-between text-xs">
-                    <span className="text-slate-600">{DIM_LABELS[k]}</span>
-                    <span className={cn('font-semibold', scoreColor(result.breakdown[k]))}>{result.breakdown[k]}</span>
+              {dims.map((k) => {
+                const v = result.breakdown[k];
+                // `null` = not scored (keyword match with no job description). It
+                // used to default to 100 and render a full green bar, which alone
+                // inflated the overall score.
+                if (v === null) {
+                  return (
+                    <div key={k}>
+                      <div className="mb-0.5 flex justify-between text-xs">
+                        <span className="text-slate-600">{DIM_LABELS[k]}</span>
+                        <span className="font-semibold text-slate-400">Not scored</span>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-slate-100" />
+                      <p className="mt-0.5 text-[10px] text-slate-400">Paste a job description below to score this.</p>
+                    </div>
+                  );
+                }
+                return (
+                  <div key={k}>
+                    <div className="mb-0.5 flex justify-between text-xs">
+                      <span className="text-slate-600">{DIM_LABELS[k]}</span>
+                      <span className={cn('font-semibold', scoreColor(v))}>{v}</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-slate-100">
+                      <div className={cn('h-1.5 rounded-full', barColor(v))} style={{ width: `${v}%` }} />
+                    </div>
                   </div>
-                  <div className="h-1.5 rounded-full bg-slate-100">
-                    <div className={cn('h-1.5 rounded-full', barColor(result.breakdown[k]))} style={{ width: `${result.breakdown[k]}%` }} />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
