@@ -180,7 +180,10 @@ function PremiumView({
   // "Companies Practised" counted every company that merely shared a tag (15 for a
   // student who had actually practised 3). Fall back to the true topic-sum, which
   // is exact because subtopic_id is single-valued.
-  const companies = readiness?.stats?.companiesPractised ?? 0;
+  // `companiesPractised` has no honest client-side fallback (the only other signal
+  // is the tag-inflated companies[]), so show "—" rather than a false 0 on a server
+  // that predates `stats`. The other two DO have exact fallbacks.
+  const companies = readiness?.stats?.companiesPractised ?? null;
   const topics = readiness?.stats?.topicsPractised ?? readiness?.topics.length ?? 0;
   const attempted =
     readiness?.stats?.questionsAttempted ??
@@ -296,7 +299,7 @@ function PremiumView({
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-lg font-black tracking-tight text-navy">Your Preparation at a Glance</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-4">
-          <StatTile icon={Building2} tint="bg-violet-50 text-violet-600" label="Companies Practised" value={companies} />
+          <StatTile icon={Building2} tint="bg-violet-50 text-violet-600" label="Companies Practised" value={companies ?? '—'} />
           <StatTile icon={Layers} tint="bg-amber-50 text-amber-600" label="Topics Practised" value={topics} />
           <StatTile icon={Target} tint="bg-emerald-50 text-emerald-600" label="Questions Attempted" value={attempted} />
           <StatTile icon={TrendingUp} tint="bg-indigo-50 text-indigo-600" label="Readiness" value={score != null ? `${score}%` : '—'} />
