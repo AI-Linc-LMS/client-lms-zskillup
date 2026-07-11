@@ -23,7 +23,7 @@ import {
 } from '@/lib/api/resumes';
 import type { ResumeSummaryDto } from '@/shared/dto/resume.dto';
 import { describeError } from '@/lib/api/errors';
-import { Download, FileText, FolderOpen, Gauge, LayoutTemplate, Loader2, RotateCcw, Save, Sparkles, Trash2, UserRound, X } from 'lucide-react';
+import { Copy, Download, FileText, FolderOpen, Gauge, LayoutTemplate, Loader2, RotateCcw, Save, Sparkles, Trash2, UserRound, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const DRAFT_KEY = 'zskillup_resume_draft';
@@ -97,6 +97,13 @@ export function ResumeBuilder() {
   const [template, setTemplate] = useState<TemplateKey>('modern');
   const [title, setTitle] = useState('My Resume');
   const [currentId, setCurrentId] = useState<string | null>(null);
+  /** Title of the resume currently open, so we can tell a RENAME from an edit.
+   *  Renaming + "Save" used to silently overwrite the original, which is why
+   *  users couldn't keep multiple resumes under different names. */
+  const [savedTitle, setSavedTitle] = useState('');
+  /** Renamed an open resume → they almost certainly want a SEPARATE file, so we
+   *  highlight "Save as new" rather than quietly overwriting the original. */
+  const renamed = currentId !== null && title.trim() !== savedTitle.trim();
   const [downloading, setDownloading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [hydrated, setHydrated] = useState(false);
@@ -189,11 +196,13 @@ export function ResumeBuilder() {
     try {
       if (currentId && !asNew) {
         await updateResume(currentId, { title, template, data });
-        flash('Saved.');
+        setSavedTitle(title);
+        flash(`Updated "${title}".`);
       } else {
         const created = await createResume({ title, template, data });
         setCurrentId(created.id);
-        flash('Saved to My Resumes.');
+        setSavedTitle(title);
+        flash(`Saved "${title}" to My Resumes.`);
       }
       refreshList();
     } catch (err) {
@@ -209,6 +218,7 @@ export function ResumeBuilder() {
       setData(normalizeResume(r.data));
       setTemplate(isTemplateKey(r.template) ? r.template : 'modern');
       setTitle(r.title);
+      setSavedTitle(r.title);
       setCurrentId(r.id);
       setShowResumes(false);
       flash(`Loaded "${r.title}".`);
@@ -232,7 +242,7 @@ export function ResumeBuilder() {
     if (!window.confirm(`Delete "${name}"?`)) return;
     try {
       await deleteResume(id);
-      if (currentId === id) setCurrentId(null);
+      if (currentId === id) { setCurrentId(null); setSavedTitle(''); }
       refreshList();
       flash('Deleted.');
     } catch (err) {
@@ -261,12 +271,32 @@ export function ResumeBuilder() {
           <button onClick={openResumes} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">
             <FolderOpen className="size-4" /> <span className="hidden sm:inline">My Resumes</span>
           </button>
-          <button onClick={() => save(false)} disabled={saving} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-navy hover:bg-slate-50 disabled:opacity-50">
-            {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} Save
+          {/* "Save" OVERWRITES the open resume, so say so once one is open. */}
+          <button
+            onClick={() => save(false)}
+            disabled={saving}
+            title={currentId ? `Overwrite "${savedTitle || title}"` : 'Save to My Resumes'}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-navy hover:bg-slate-50 disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+            {currentId ? 'Update' : 'Save'}
           </button>
+          {/* Always reachable (it used to be `hidden sm:inline-flex`, so on mobile
+              there was NO way to keep a second resume). Emphasised once the name
+              has been changed — that's the moment users expect a separate file. */}
           {currentId && (
-            <button onClick={() => save(true)} disabled={saving} className="hidden rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 sm:inline-flex">
-              Save as new
+            <button
+              onClick={() => save(true)}
+              disabled={saving}
+              title="Save this as a separate resume"
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold disabled:opacity-50',
+                renamed
+                  ? 'border-orange bg-orange/10 text-orange hover:bg-orange/15'
+                  : 'border-slate-200 text-slate-600 hover:bg-slate-50',
+              )}
+            >
+              <Copy className="size-4" /> Save as new
             </button>
           )}
           <button data-tour="resume:save-export" onClick={download} disabled={downloading} className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-orange to-[#f5872f] px-4 py-2 text-sm font-bold text-white shadow-sm transition-all hover:shadow disabled:opacity-50">
@@ -307,7 +337,7 @@ export function ResumeBuilder() {
           <button onClick={() => { setData(SAMPLE_RESUME); flash('Sample loaded.'); }} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">
             <Sparkles className="size-4" /> Sample
           </button>
-          <button onClick={() => { if (window.confirm('Clear the whole resume?')) { setData(emptyResume()); setCurrentId(null); flash('Cleared.'); } }} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">
+          <button onClick={() => { if (window.confirm('Clear the whole resume?')) { setData(emptyResume()); setCurrentId(null); setSavedTitle(''); flash('Cleared.'); } }} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">
             <RotateCcw className="size-4" /> Clear
           </button>
         </div>
