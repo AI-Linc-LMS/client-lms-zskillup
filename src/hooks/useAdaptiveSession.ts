@@ -264,6 +264,10 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
         pendingNext: null,
         pendingComplete: false,
         pendingPaywall: null,
+        // Reset the per-answer award too, or the "+N pts" burst keeps rendering
+        // (it's driven off `lastPoints.earned`) and follows you into the next
+        // question. `sessionPoints` — the running banked total — is NOT cleared.
+        lastPoints: null,
       } as const;
       if (s.pendingPaywall) {
         return { ...s, ...cleared, phase: 'paywalled', paywall: s.pendingPaywall, currentQuestion: null };
