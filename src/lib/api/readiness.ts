@@ -25,10 +25,26 @@ export interface TopicReadiness {
   attempts: number;
   level: string;
 }
+/**
+ * Honest headline counts. Do NOT derive these from `companies[]` — that array is
+ * keyed off the many-to-many company tags (a question is tagged to ~2.8 companies),
+ * so summing its `questionsAttempted` double-counts (~4.5x) and any shared tag makes
+ * a company look "practised". The server computes these from single-valued sources.
+ */
+export interface ReadinessStats {
+  /** True total practice attempts (no company-tag join). */
+  questionsAttempted: number;
+  /** Distinct sub-topics attempted (subtopic_id is single-valued). */
+  topicsPractised: number;
+  /** Companies the student DELIBERATELY practised (company-scoped sessions). */
+  companiesPractised: number;
+}
+
 export interface Readiness {
   overall: { score: number; level: string; components: ReadinessComponent[] };
   companies: CompanyReadiness[];
   topics: TopicReadiness[];
+  stats?: ReadinessStats;
 }
 
 export async function getReadiness(): Promise<Readiness> {

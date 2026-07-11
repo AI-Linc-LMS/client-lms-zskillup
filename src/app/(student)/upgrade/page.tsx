@@ -173,9 +173,19 @@ function PremiumView({
   const planName = period ? `Premium ${periodMonths(period)}` : 'Premium';
   const days = platformEnt?.daysRemaining ?? null;
   const score = readiness?.overall.score ?? null;
-  const companies = readiness?.companies.filter((c) => c.questionsAttempted > 0).length ?? 0;
-  const topics = readiness?.topics.length ?? 0;
-  const attempted = readiness?.companies.reduce((n, c) => n + c.questionsAttempted, 0) ?? 0;
+
+  // Use the server's honest counts. These used to be derived from `companies[]`,
+  // which is keyed off the MANY-TO-MANY company tags — so "Questions Attempted"
+  // summed the same question once per tagged company (~4.5x too high) and
+  // "Companies Practised" counted every company that merely shared a tag (15 for a
+  // student who had actually practised 3). Fall back to the true topic-sum, which
+  // is exact because subtopic_id is single-valued.
+  const companies = readiness?.stats?.companiesPractised ?? 0;
+  const topics = readiness?.stats?.topicsPractised ?? readiness?.topics.length ?? 0;
+  const attempted =
+    readiness?.stats?.questionsAttempted ??
+    readiness?.topics.reduce((n, t) => n + t.attempts, 0) ??
+    0;
 
   // The billing history renders at the BOTTOM of the page, so simply toggling it
   // looked like nothing happened — "Manage Subscription" read as un-clickable.
