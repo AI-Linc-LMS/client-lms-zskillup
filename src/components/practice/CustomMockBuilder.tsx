@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { AlertTriangle, Check, Clock, Code2, Layers, ListChecks, Loader2, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { listTopicsWithCounts, type ApiTopic } from '@/lib/api/catalog';
@@ -63,20 +64,72 @@ export function CustomMockBuilder() {
   const codingChosen = codingAll || codingTopics.size > 0;
   const hasScope = hasQuiz || codingChosen;
 
+  /**
+   * How many MCQs the current selection can actually yield.
+   *
+   * The bank is very unevenly stocked — several leaf topics hold 1-2 questions ("Ages" has
+   * 2, "Data Structures & Algorithms" has 1) — so asking for 20 from them was silently
+   * producing a 1-question mock. Cap the stepper at what exists rather than letting the
+   * student request questions that cannot be served.
+   *
+   * An UPPER bound, not a promise: the sampler is seen-aware, so questions already answered
+   * are skipped and the real yield can still be lower. That is why the build also reports
+   * what it actually assembled.
+   */
+  const availableMcqs = useMemo(() => {
+    if (!topics) return 0;
+    const bySlug = new Map(topics.map((t) => [t.slug, t]));
+    const counted = new Set<string>();
+    let n = 0;
+    for (const rootSlug of sections) {
+      const root = bySlug.get(rootSlug);
+      if (!root) continue;
+      for (const c of topics.filter((t) => t.parentId === root.id)) {
+        if (counted.has(c.id)) continue;
+        counted.add(c.id);
+        n += c.questionCount ?? 0;
+      }
+    }
+    for (const slug of chosenTopics) {
+      const t = bySlug.get(slug);
+      if (!t || counted.has(t.id)) continue;
+      counted.add(t.id);
+      n += t.questionCount ?? 0;
+    }
+    return n;
+  }, [topics, sections, chosenTopics]);
+
+  // Never let the request exceed the pool. Without this the builder happily accepted "20"
+  // for a topic holding 1 question and then shipped a 1-question mock.
+  const maxCount = hasQuiz ? Math.max(1, Math.min(100, availableMcqs)) : 100;
+  const effectiveCount = Math.min(count, maxCount);
+
   const start = async () => {
     if (!hasScope || busy) return;
     setBusy(true);
     setError(null);
     try {
-      const { mockId } = await createCustomMock({
+      const built = await createCustomMock({
         sectionSlugs: [...sections],
         topicSlugs: [...chosenTopics],
-        questionCount: count,
+        questionCount: effectiveCount,
         durationMinutes: duration,
         codingTopics: codingAll ? codingTopicList.map((c) => c.topic) : [...codingTopics],
         codingCount: codingChosen ? codingCount : undefined,
       });
-      router.push(`/dashboard/quiz?mock=${mockId}&proctored=1`);
+
+      // Say so when it came up short. The stepper is capped at the topic pool, but the
+      // sampler is seen-aware and free students are capped per topic, so the real yield can
+      // still land under the ask. Silently opening a 2-question "20-question mock" is the
+      // bug being fixed — don't reintroduce it one layer up.
+      const short = built.mcqCount < effectiveCount;
+      if (short) {
+        toast.warning(
+          `Built with ${built.mcqCount} question${built.mcqCount === 1 ? '' : 's'} — that's all these topics could serve right now.`,
+          { description: 'Pick more topics (or a whole section) for a longer mock.' },
+        );
+      }
+      router.push(`/dashboard/quiz?mock=${built.mockId}&proctored=1`);
     } catch (e) {
       // Free-tier limit (backend 403 PAYWALL) → prompt to upgrade in a modal
       // instead of a tiny inline note, so the moment actually converts.
@@ -206,7 +259,17 @@ export function CustomMockBuilder() {
       {/* config bar */}
       <div data-tour="mock:config" className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
         <div className="grid gap-5 sm:grid-cols-3">
-          <Stepper label="MCQ questions" icon={ListChecks} value={count} min={5} max={100} step={5} onChange={setCount} />
+          {/* max is the real pool for the current selection, not a flat 100 — asking for 20
+              from a topic that holds 1 was the reported bug. */}
+          <Stepper
+            label="MCQ questions"
+            icon={ListChecks}
+            value={effectiveCount}
+            min={Math.min(5, maxCount)}
+            max={maxCount}
+            step={5}
+            onChange={setCount}
+          />
           <Stepper label="Duration (min)" icon={Clock} value={duration} min={5} max={180} step={5} onChange={setDuration} />
           {codingChosen ? (
             <Stepper label="Coding problems" icon={Code2} value={codingCount} min={1} max={20} step={1} onChange={setCodingCount} />

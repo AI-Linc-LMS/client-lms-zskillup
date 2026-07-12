@@ -188,9 +188,25 @@ export interface CreateCustomMockBody {
   title?: string;
 }
 
-/** Build a self-serve Mock Assessment (Mode 3) and get its id to run proctored. */
-export async function createCustomMock(body: CreateCustomMockBody): Promise<{ mockId: string }> {
-  const res = await apiClient.post<{ mockId: string }>('/api/v1/mocks/custom', body);
+/** What the builder actually assembled, versus what was asked for. */
+export interface CustomMockCreated {
+  mockId: string;
+  mcqCount: number;
+  codingCount: number;
+  requestedMcq: number;
+  requestedCoding: number;
+}
+
+/**
+ * Build a self-serve Mock Assessment (Mode 3) and get its id to run proctored.
+ *
+ * Returns the REAL counts, not just the id. A custom mock can legitimately come up short —
+ * thin topics, the seen-aware sampler skipping questions you've already answered, or a free
+ * student's per-topic cap — and this used to return a bare `{ mockId }`, so asking for 20
+ * and getting 2 dropped you into a 2-question mock with no explanation.
+ */
+export async function createCustomMock(body: CreateCustomMockBody): Promise<CustomMockCreated> {
+  const res = await apiClient.post<CustomMockCreated>('/api/v1/mocks/custom', body);
   return res.data;
 }
 
