@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { getCalibrationResults, type CalibrationResultsDto, type RecommendationDto } from '@/lib/api/recommendations';
 import { useCalibrationStatus } from '@/hooks/useCalibrationStatus';
+import { useUpgradeGate } from '@/hooks/useUpgradeGate';
+import { UpgradeModal } from '@/components/billing/UpgradeModal';
 
 /** Coarse grouping so products/companies/topics/sections read as distinct buckets. */
 function groupOf(product: string): { key: string; order: number } {
@@ -37,6 +39,9 @@ export function RecommendationsHub() {
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
   const { mockTestId } = useCalibrationStatus();
+  // Free students read every recommendation; acting on one prompts an upgrade. Inert while
+  // PAYWALL_ENABLED is off — see useUpgradeGate.
+  const upgrade = useUpgradeGate();
 
   useEffect(() => {
     getCalibrationResults()
@@ -135,6 +140,7 @@ export function RecommendationsHub() {
       {data.best && (
         <Link
           href={data.best.href}
+          onClick={(e) => upgrade.guard(e, 'your best next step')}
           className="group block rounded-3xl border border-orange/30 bg-gradient-to-br from-orange/[0.08] to-transparent p-5 shadow-sm transition hover:border-orange/50 sm:p-6"
         >
           <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-orange">
@@ -158,6 +164,7 @@ export function RecommendationsHub() {
               <li key={r.id}>
                 <Link
                   href={r.href}
+                  onClick={(e) => upgrade.guard(e, r.category.toLowerCase())}
                   className="group flex h-full items-start gap-3 rounded-2xl border border-slate-100 p-4 transition hover:border-orange/40 hover:bg-orange/[0.03]"
                 >
                   <span className="min-w-0 flex-1">
@@ -190,6 +197,7 @@ export function RecommendationsHub() {
               <li key={c.slug}>
                 <Link
                   href={`/dashboard/company/${c.slug}`}
+                  onClick={(e) => upgrade.guard(e, c.name)}
                   className="group block rounded-2xl border border-slate-100 p-4 transition hover:border-navy/30 hover:bg-slate-50/60"
                 >
                   <div className="flex items-center justify-between gap-2">
@@ -220,6 +228,7 @@ export function RecommendationsHub() {
               <Link
                 key={s.key}
                 href="/practice"
+                onClick={(e) => upgrade.guard(e, s.label)}
                 className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3.5 py-2 text-sm font-semibold text-navy transition hover:border-orange/40 hover:bg-orange/[0.04]"
               >
                 <TrendingUp className="size-3.5 text-orange" /> {s.label}
@@ -242,6 +251,12 @@ export function RecommendationsHub() {
           </Link>
         </div>
       </div>
+
+      <UpgradeModal
+        open={upgrade.feature !== null}
+        onClose={upgrade.close}
+        feature={upgrade.feature ?? undefined}
+      />
     </div>
   );
 }
