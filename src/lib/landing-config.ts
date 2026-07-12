@@ -8,14 +8,29 @@
 
 /** Where the marketing CTAs should go (public visitors are logged out). */
 export const LANDING_HREFS = {
-  /** "Prepare" / "view all tracks" — the real, content-backed prep path is the company hubs. */
-  prepare: '/dashboard/company',
+  /** "Prepare" — the practice picker: sections, topics and coding. Deliberately NOT the
+   *  company hubs: `prepare` and `companies` both pointed at /dashboard/company, so the
+   *  navbar shipped two links that went to the same page. */
+  prepare: '/practice',
   /** "Start a session" — practice needs an account, so start = sign up. */
   start: '/signup',
   /** "Browse the catalog" of topics — full catalog unlocks after sign-up. */
   catalog: '/signup',
+  /** "Companies" — the company hubs (company-specific tracks). */
   companies: '/dashboard/company',
 } as const;
+
+/**
+ * The public navbar's primary links. ONE list, consumed by both the desktop nav in the
+ * landing header and the PublicMobileMenu hamburger — the mobile menu used to hand-copy
+ * these, so the two could (and did) drift apart.
+ */
+export const LANDING_NAV = [
+  { label: 'Companies', href: LANDING_HREFS.companies },
+  { label: 'Prepare', href: LANDING_HREFS.prepare },
+  { label: 'Leaderboard', href: '/leaderboard' },
+  { label: 'Blog', href: '/blog' },
+] as const;
 
 export const LANDING_HERO_STATS = [
   { label: 'Students enrolled', value: '240,000+' },

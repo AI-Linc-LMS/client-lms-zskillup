@@ -253,7 +253,7 @@ export function ExploreMenu() {
                     <div className="relative flex flex-1 flex-col">
                       <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.08] px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-white/80 backdrop-blur">
                         <Sparkles className="size-3 text-[#ffb877]" />
-                        Prephasz Plus
+                        prephasz Plus
                       </span>
                       <p className="mt-3 text-sm font-semibold leading-snug text-white">
                         Practice like the real drive.

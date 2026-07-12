@@ -166,7 +166,9 @@ export default function PracticeWishPage() {
       </section>
 
       {/* Coding — practise any coding topic on the go (Judge0-evaluated) */}
-      {codingVisible && codingTopics.length > 0 ? <CodingBlock topics={filteredCodingTopics} /> : null}
+      {codingVisible && codingTopics.length > 0 ? (
+        <CodingBlock topics={filteredCodingTopics} showPracticeAll={false} />
+      ) : null}
 
       {/* browse all topics, grouped by section */}
       <div data-tour="aswish:browse-bank">

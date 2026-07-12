@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { motion, useReducedMotion } from 'framer-motion';
@@ -24,6 +24,8 @@ import { CompanyRegisterCard } from '@/components/company/CompanyRegisterCard';
 import { VideoPlaceholder } from '@/components/media/VideoPlaceholder';
 import { cn } from '@/lib/utils';
 import { HUB_TABS, type HubContent, type HubTab } from '@/lib/hub-data';
+import { getCompanyReadiness } from '@/lib/api/adaptive';
+import { InfoTip } from '@/components/ui/InfoTip';
 import { AnimatedNumber, AuroraBackground, Reveal, Stagger, StaggerItem } from '@/components/motion/primitives';
 import { CompanyPrepPanel } from './CompanyPrepPanel';
 import { CompanyMockTab as MockTab } from './CompanyMockTab';
@@ -39,14 +41,57 @@ const TAB_ICONS: Record<HubTab, typeof BookOpen> = {
   'Full Mock Assessment': Trophy,
 };
 
-/** Pull the leading integer out of a readiness string like "74%" → 74. */
-function parsePct(raw: string): number | null {
-  const m = raw.match(/-?\d+(\.\d+)?/);
-  if (!m) return null;
-  const n = Math.round(Number(m[0]));
-  if (Number.isNaN(n)) return null;
-  return Math.max(0, Math.min(100, n));
+/**
+ * The student's REAL readiness for this company.
+ *
+ * The hero used to render `quickStats.readiness` under the label "Community readiness".
+ * That number was never computed from anything: it is a string literal in the seed
+ * migration (ten companies share the identical value "74%"), and it has not changed
+ * since. Presenting a hardcoded constant as a community statistic — and then adding a
+ * tooltip to explain "how it is calculated" — would have been inventing a number and
+ * attributing it to real users.
+ *
+ * There is also no community to average: 19 students have ever run an adaptive session,
+ * and ten of the fifteen companies have zero. So this shows the ONE readiness figure that
+ * is genuinely computed and genuinely meaningful to the person reading it: their own.
+ * `/adaptive-mocks/company-readiness` derives it from the skill mastery in their latest
+ * completed adaptive session, weighted across the skills this company actually tests.
+ *
+ * Fails soft: any error, or no session yet, leaves `pct` null and the hero shows a "start
+ * practising" state instead of a fake number.
+ */
+function useMyReadiness(slug: string): { loading: boolean; pct: number | null } {
+  const [state, setState] = useState<{ loading: boolean; pct: number | null }>({
+    loading: true,
+    pct: null,
+  });
+  useEffect(() => {
+    let cancelled = false;
+    getCompanyReadiness()
+      .then((rows) => {
+        if (cancelled) return;
+        const mine = rows.find((r) => r.companySlug === slug);
+        setState({ loading: false, pct: mine ? Math.round(mine.readinessPct) : null });
+      })
+      .catch(() => {
+        if (!cancelled) setState({ loading: false, pct: null });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+  return state;
 }
+
+const READINESS_TIP = {
+  title: 'Your readiness',
+  body: 'How prepared you are for this company right now — measured from your own practice, not an average.',
+  bullets: [
+    'Built from the skill mastery in your latest adaptive session',
+    'Weighted across the skills this company actually tests',
+    'Moves every time you finish an adaptive quiz',
+  ],
+};
 
 /**
  * Rounds vs. stages — two different things that kept getting conflated.
@@ -230,7 +275,7 @@ function CompanyHero({ content, reduce }: { content: HubContent; reduce: boolean
   const initials = c.name.slice(0, 2).toUpperCase();
   const [logoError, setLogoError] = useState(false);
   const hasLogo = !!c.logoUrl && !logoError;
-  const readyPct = useMemo(() => parsePct(content.quickStats.readiness), [content.quickStats.readiness]);
+  const mine = useMyReadiness(c.slug);
 
   const facts: Array<{ icon: typeof Star; label: string; value: string }> = [
     { icon: Star, label: 'Rating', value: c.rating.toFixed(1) },
@@ -370,12 +415,23 @@ function CompanyHero({ content, reduce }: { content: HubContent; reduce: boolean
           transition={{ duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.06] p-6 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur">
-            <ReadinessRing pct={readyPct} raw={content.quickStats.readiness} reduce={reduce} />
-            <p className="mt-4 text-[11px] font-semibold uppercase tracking-widest text-white/50">
-              Community readiness
-            </p>
+            <ReadinessRing pct={mine.loading ? null : mine.pct} reduce={reduce} />
+            <InfoTip
+              content={READINESS_TIP}
+              label="your readiness"
+              className="relative mt-4 flex items-center justify-center gap-1.5"
+              dotClassName="text-white/40 hover:text-white"
+            >
+              <span className="text-[11px] font-semibold uppercase tracking-widest text-white/50">
+                Your readiness
+              </span>
+            </InfoTip>
             <p className="mt-1 text-xs leading-relaxed text-white/55">
-              {roundCounts(content).totalRounds} rounds · {content.quickStats.examType}
+              {mine.loading
+                ? 'Checking your practice…'
+                : mine.pct === null
+                  ? 'Practise this company to see your readiness'
+                  : `${roundCounts(content).totalRounds} rounds · ${content.quickStats.examType}`}
             </p>
           </div>
         </motion.div>
@@ -384,7 +440,9 @@ function CompanyHero({ content, reduce }: { content: HubContent; reduce: boolean
   );
 }
 
-function ReadinessRing({ pct, raw, reduce }: { pct: number | null; raw: string; reduce: boolean }) {
+/** `pct === null` = no adaptive session for this company yet. Show an em-dash, not a 0% —
+ *  "0%" reads as "you scored zero", which is a very different (and wrong) message. */
+function ReadinessRing({ pct, reduce }: { pct: number | null; reduce: boolean }) {
   const R = 52;
   const C = 2 * Math.PI * R;
   const value = pct ?? 0;
@@ -417,7 +475,7 @@ function ReadinessRing({ pct, raw, reduce }: { pct: number | null; raw: string; 
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         {pct === null ? (
-          <span className="text-2xl font-extrabold tabular-nums text-white">{raw}</span>
+          <span className="text-3xl font-extrabold text-white/35">—</span>
         ) : (
           <span className="text-4xl font-extrabold tabular-nums text-white">
             <AnimatedNumber value={pct} />

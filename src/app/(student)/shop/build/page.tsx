@@ -284,7 +284,8 @@ export default function BuildYourOwnPage() {
                   <PickCard
                     key={c.slug}
                     label={c.name}
-                    icon={<Building2 className="size-5" />}
+                    icon={<CompanyMark company={c} />}
+                    plainTile
                     tip={companyTip(c)}
                     selected={isStaged(EntitlementScope.COMPANY, c.slug)}
                     owned={isOwned(EntitlementScope.COMPANY, c.slug)}
@@ -540,6 +541,30 @@ function Step({
   );
 }
 
+/**
+ * The company's real logo, with a graceful fall back to the generic building glyph.
+ *
+ * These cards rendered `<Building2 />` for every company, so "Select a Company" was five
+ * identical grey icons — you had to read the label to tell TCS from Infosys. `logoUrl` was
+ * on the API payload the whole time; CompanyCard has always used it. Same treatment here:
+ * lazy-loaded, and any missing or broken URL falls back rather than showing a dead image.
+ */
+function CompanyMark({ company }: { company: ApiCompany }) {
+  const [failed, setFailed] = useState(false);
+  if (!company.logoUrl || failed) return <Building2 className="size-5" />;
+  return (
+    /* eslint-disable-next-line @next/next/no-img-element */
+    <img
+      src={company.logoUrl}
+      alt=""
+      aria-hidden
+      className="size-7 object-contain"
+      loading="lazy"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 function PickCard({
   label,
   icon,
@@ -547,6 +572,7 @@ function PickCard({
   selected,
   owned,
   onClick,
+  plainTile = false,
 }: {
   label: string;
   icon: React.ReactNode;
@@ -554,6 +580,8 @@ function PickCard({
   selected: boolean;
   owned: boolean;
   onClick: () => void;
+  /** Company logos want a clean white chip; the tinted tile is for line-art glyphs. */
+  plainTile?: boolean;
 }) {
   return (
     // The InfoTip span becomes the grid cell, so the card must fill it (h-full w-full)
@@ -582,7 +610,11 @@ function PickCard({
         )}
         <span
           className={`grid size-10 place-items-center rounded-xl ${
-            selected ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500'
+            plainTile
+              ? 'bg-white ring-1 ring-slate-200/80'
+              : selected
+                ? 'bg-indigo-100 text-indigo-600'
+                : 'bg-slate-100 text-slate-500'
           }`}
         >
           {icon}

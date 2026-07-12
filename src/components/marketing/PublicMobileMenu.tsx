@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 import { roleHint } from '@/lib/session-hints';
+import { LANDING_NAV } from '@/lib/landing-config';
 
 function roleHome(role: string | null): string {
   if (role === 'SUPER_ADMIN') return '/superadmin/dashboard';
@@ -20,12 +21,10 @@ function roleHome(role: string | null): string {
  * links on phones. Self-contained client island dropped into the server-rendered
  * header.
  */
-const LINKS = [
-  { label: 'Companies', href: '/dashboard/company' },
-  { label: 'Prepare', href: '/dashboard/company' },
-  { label: 'Leaderboard', href: '/leaderboard' },
-  { label: 'Blog', href: '/blog' },
-];
+// Shared with the desktop nav in the landing header. This list used to be hand-copied
+// here, which is how "Companies" and "Prepare" ended up pointing at the same route in
+// BOTH navbars — fix one, miss the other. One list now.
+const LINKS = LANDING_NAV;
 
 export function PublicMobileMenu() {
   const [open, setOpen] = useState(false);
@@ -64,7 +63,7 @@ export function PublicMobileMenu() {
             <nav className="flex flex-col gap-1" aria-label="Primary">
               {LINKS.map((l) => (
                 <Link
-                  key={l.href}
+                  key={l.label}
                   href={l.href}
                   onClick={() => setOpen(false)}
                   className="rounded-lg px-3 py-2.5 text-sm font-medium text-white/85 transition-colors hover:bg-white/10 hover:text-white"

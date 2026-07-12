@@ -35,6 +35,7 @@ import {
   LANDING_FOOTER,
   LANDING_HERO_STATS,
   LANDING_HREFS,
+  LANDING_NAV,
 } from '@/lib/landing-config';
 
 const HERO_STATS = LANDING_HERO_STATS;
@@ -131,14 +132,11 @@ export default async function HomePage() {
       <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-white/10 bg-gradient-to-r from-[#0b1220] to-[#1e3a8a] px-5 md:px-8">
         <BrandLogo variant="light" priority className="h-8" />
         <nav className="hidden items-center gap-6 lg:flex" aria-label="Primary">
-          {[
-            { label: 'Companies', href: LANDING_HREFS.companies },
-            { label: 'Prepare', href: LANDING_HREFS.prepare },
-            { label: 'Leaderboard', href: '/leaderboard' },
-            { label: 'Blog', href: '/blog' },
-          ].map((l) => (
+          {/* Keyed by label, not href: two links legitimately CAN share a destination, and
+              keying on href silently produced duplicate React keys when they did. */}
+          {LANDING_NAV.map((l) => (
             <Link
-              key={l.href}
+              key={l.label}
               href={l.href}
               className="text-sm font-medium text-white/75 transition-colors hover:text-white"
             >
@@ -360,13 +358,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── What is Prephasz (platform tour) ──────────────────────────────── */}
+      {/* ── What is prephasz (platform tour) ──────────────────────────────── */}
       <section className="relative bg-[var(--color-bg)] pt-16 lg:pt-20">
         <div className="mx-auto max-w-[1400px] px-5 md:px-8">
           <div className="mb-8 text-center">
             <p className="section-tag">Platform overview</p>
             <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
-              What is Prephasz?
+              What is prephasz?
             </h2>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-[var(--color-text-muted)] sm:text-base">
               How adaptive practice, company drives, mock assessments and placement readiness fit together.
@@ -375,7 +373,7 @@ export default async function HomePage() {
           <div className="mx-auto max-w-4xl">
             <VideoPlaceholder
               eyebrow="Platform tour"
-              title="See how Prephasz works"
+              title="See how prephasz works"
               subtitle="From your first practice question to placement-ready — the full journey. Video coming soon."
             />
           </div>
@@ -396,7 +394,7 @@ export default async function HomePage() {
                 Placement prep that meets students where they are
               </h2>
               <p className="relative mt-4 max-w-md text-sm leading-relaxed text-white/75">
-                Not everyone has a mentor, a senior&apos;s notes, or a coaching budget. Prephasz turns
+                Not everyone has a mentor, a senior&apos;s notes, or a coaching budget. prephasz turns
                 honest, pattern-accurate practice into something every student can reach — and every
                 placement cell can trust.
               </p>
@@ -421,7 +419,7 @@ export default async function HomePage() {
             <figure className="flex flex-col justify-center rounded-[var(--radius-card-lg)] border border-[var(--color-line)] bg-white p-8 shadow-[var(--shadow-card)] lg:p-10">
               <Quote className="h-8 w-8 text-[var(--color-brand)]" aria-hidden />
               <blockquote className="mt-4 text-lg font-semibold leading-relaxed tracking-tight text-[var(--color-text)] sm:text-xl">
-                &ldquo;We built Prephasz so that where you come from never decides where you can reach.
+                &ldquo;We built prephasz so that where you come from never decides where you can reach.
                 Every student deserves the same shot at a great first job — structured, honest practice
                 that mirrors the real drive.&rdquo;
               </blockquote>
@@ -432,7 +430,7 @@ export default async function HomePage() {
                 </span>
                 <span>
                   <p className="text-base font-bold text-[var(--color-text)]">Lokesh</p>
-                  <p className="text-sm text-[var(--color-text-muted)]">Founder · Prephasz</p>
+                  <p className="text-sm text-[var(--color-text-muted)]">Founder · prephasz</p>
                 </span>
               </figcaption>
             </figure>
@@ -522,11 +520,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Why Prephasz — eight modules ──────────────────────────────────── */}
+      {/* ── Why prephasz — eight modules ──────────────────────────────────── */}
       <section className="bg-white py-16 lg:py-20">
         <div className="mx-auto max-w-[1400px] px-5 md:px-8">
           <div className="mb-12 max-w-3xl text-center sm:mx-auto">
-            <p className="section-tag">Why Prephasz</p>
+            <p className="section-tag">Why prephasz</p>
             <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
               One platform for the whole placement journey
             </h2>
@@ -568,7 +566,7 @@ export default async function HomePage() {
               Loved by students. Trusted by TPOs.
             </h2>
             <p className="mt-3 max-w-md text-sm text-[var(--color-text-muted)] sm:text-base">
-              Real results from students who prepped on Prephasz and placement cells that run their
+              Real results from students who prepped on prephasz and placement cells that run their
               cohorts on it.
             </p>
             <div className="mt-6 flex items-center gap-2 text-sm font-semibold text-[var(--color-text-muted)]">
@@ -693,7 +691,7 @@ export default async function HomePage() {
           </div>
         </div>
         <div className="mx-auto mt-10 max-w-[1400px] border-t border-[var(--color-line)] pt-6 text-center text-xs text-[var(--color-text-subtle)]">
-          © 2026 Prephasz · Powered by ZSkillup · Future-ready graduates, future-strong institutions
+          © 2026 prephasz · Powered by ZSkillup · Future-ready graduates, future-strong institutions
         </div>
       </footer>
     </main>

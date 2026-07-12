@@ -83,7 +83,7 @@ export const PAGE_TOURS: Record<string, GuideTour> = {
   "/practice-wish": { id: "aswish", label: "Practice as Wish tour", steps: [
     { id: "aswish-hero", route: "/practice-wish", target: "aswish:hero", placement: "auto", eyebrow: "Practice as Wish", title: "Practice anything", body: "A purple banner introduces the mode: practice any topic, any amount, with adaptive questions that never run out." },
     { id: "aswish-topic-search", route: "/practice-wish", target: "aswish:topic-search", placement: "auto", eyebrow: "Practice as Wish", title: "Search a topic", body: "Type any topic here and hit Start practicing; no exact match just means we craft fresh AI questions for you." },
-    { id: "aswish-coding", route: "/practice-wish", target: "aswish:coding", placement: "auto", eyebrow: "Practice as Wish", title: "Coding practice", body: "Jump into Judge0-evaluated DSA problems: pick a coding-topic chip or hit 'Practice all coding' to open the coding page." },
+    { id: "aswish-coding", route: "/practice-wish", target: "aswish:coding", placement: "auto", eyebrow: "Practice as Wish", title: "Coding practice", body: "Jump into Judge0-evaluated DSA problems — pick any coding-topic chip to start drilling it." },
     { id: "aswish-browse-bank", route: "/practice-wish", target: "aswish:browse-bank", placement: "auto", eyebrow: "Practice as Wish", title: "Browse the bank", body: "Expand each section to reveal every topic, then click any chip to launch an instant adaptive session on it." },
   ] },
   "/mock-assessment": { id: "mock", label: "Mock Assessment tour", steps: [

@@ -434,7 +434,7 @@ function CustomPlanView({
             icon={Crown}
             title="Unlimited Platform Access"
             pill="Best Value"
-            subtitle="Unlock everything on Prephasz and prepare without any limits."
+            subtitle="Unlock everything on prephasz and prepare without any limits."
             features={['100+ Companies', '55,000+ Questions', 'Unlimited Mock Tests', 'AI Study Plan', 'Interview Prep', 'Advanced Analytics']}
             cta="Upgrade to Premium"
             href="/shop/full"
@@ -516,7 +516,7 @@ function NoPlanView({ priceMap }: { priceMap: Map<string, PriceBookEntryDto> }) 
             icon={Crown}
             title="Unlimited Platform Access"
             pill="Best Value"
-            subtitle="Unlock everything on Prephasz and prepare without any limits."
+            subtitle="Unlock everything on prephasz and prepare without any limits."
             features={['100+ Companies', '55,000+ Questions', 'Unlimited Mock Tests', 'AI Study Plan', 'Interview Prep', 'Advanced Analytics']}
             cta="Get Full Access"
             href="/shop/full"

@@ -4,11 +4,21 @@ import type { CodingTopic } from '@/lib/api/mocks';
 import { ACCENT_CLASS, CODING_META } from './section-meta';
 
 /**
- * The "Coding" section block — a card with a "Practice all coding" CTA plus a
- * chip per coding topic that deep-links to `/coding?topic=`. Shared by the
- * Practice picker and Practice-as-wish so both offer on-the-go coding practice.
+ * The "Coding" section block — a chip per coding topic that deep-links to
+ * `/coding?topic=`, optionally preceded by a "Practice all coding" CTA.
+ *
+ * Shared by the Practice picker AND Practice-as-wish, so the CTA is a prop rather
+ * than removed outright: Practice-as-wish is about picking a *specific* thing to
+ * drill, and a bulk "practice everything" button cuts against that page's whole
+ * premise. The Practice picker still wants it.
  */
-export function CodingBlock({ topics }: { topics: CodingTopic[] }) {
+export function CodingBlock({
+  topics,
+  showPracticeAll = true,
+}: {
+  topics: CodingTopic[];
+  showPracticeAll?: boolean;
+}) {
   const Icon = CODING_META.icon;
   const a = ACCENT_CLASS[CODING_META.accent];
   return (
@@ -28,12 +38,18 @@ export function CodingBlock({ topics }: { topics: CodingTopic[] }) {
             </p>
           </div>
         </div>
-        <Link
-          href="/coding"
-          className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-4 py-2 text-xs font-extrabold text-white transition-transform hover:-translate-y-0.5"
-        >
-          Practice all coding <ArrowRight className="size-3.5" />
-        </Link>
+        {showPracticeAll && (
+          // bg-navy, matching "Practice whole section" on every other section block. The
+          // per-section accent (sky / violet / orange / emerald / indigo) dresses the icon
+          // tile and the topic chips — never the CTA. Coding was leaking its indigo accent
+          // into the button, so it was the only section with a differently-coloured CTA.
+          <Link
+            href="/coding"
+            className="inline-flex items-center gap-1.5 rounded-full bg-navy px-4 py-2 text-xs font-extrabold text-white transition-transform hover:-translate-y-0.5"
+          >
+            Practice all coding <ArrowRight className="size-3.5" />
+          </Link>
+        )}
       </div>
 
       {topics.length ? (

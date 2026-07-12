@@ -113,7 +113,7 @@ export default function FullPlatformPage() {
         </span>
         <div>
           <h1 className="text-2xl font-black tracking-tight text-navy">Full Platform Access</h1>
-          <p className="text-sm text-slate-500">Get unlimited access to everything on Prephasz</p>
+          <p className="text-sm text-slate-500">Get unlimited access to everything on prephasz</p>
         </div>
       </header>
 

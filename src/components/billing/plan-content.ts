@@ -56,7 +56,7 @@ export const PLAN_VALUES = [
 export const PLAN_FAQ = [
   {
     q: 'What’s the difference between the two plans?',
-    a: 'Full Platform Access unlocks everything on Prephasz in one plan. Build Your Own lets you pick only the companies, sections or topics you need — and pay only for those.',
+    a: 'Full Platform Access unlocks everything on prephasz in one plan. Build Your Own lets you pick only the companies, sections or topics you need — and pay only for those.',
   },
   {
     q: 'Can I upgrade from a custom plan to Full Platform later?',
