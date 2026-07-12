@@ -2,8 +2,10 @@
  * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at the same path in the other repo. Change both together.
  *
- * Mock Interview (AI-powered, text-based, no proctoring). A dynamic interview: the
- * AI asks one question at a time, adapts to answers, then evaluates the transcript.
+ * Mock Interview (AI-powered, text-based; fullscreen-proctored, no camera). A dynamic
+ * interview: the AI asks one question at a time, adapts to answers, then evaluates the
+ * transcript. The client runs it behind InterviewProctorGate — a fullscreen gate that
+ * counts tab switches and fullscreen exits. There is no webcam anywhere in the flow.
  */
 import { ArrayMaxSize, IsArray, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min, MinLength, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';

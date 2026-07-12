@@ -3,17 +3,23 @@ import { MockInterviewHome } from '@/components/mock-interview/MockInterviewHome
 import { ProfileLockGate } from '@/components/student/ProfileLockGate';
 import { CalibrationLockGate } from '@/components/student/CalibrationLockGate';
 import { SubscriptionLockGate } from '@/components/billing/SubscriptionLockGate';
-import { Bot, ShieldOff, Sparkles, Zap } from 'lucide-react';
+import { Bot, ShieldCheck, Sparkles, Zap } from 'lucide-react';
 
 export const metadata = {
   title: 'Mock Interview · ZSkillup',
-  description: 'Practise with an AI interviewer — adaptive questions, instant feedback, no proctoring.',
+  description:
+    'Practise with an AI interviewer — adaptive questions, instant scored feedback, fullscreen proctoring, no camera.',
 };
 
+// The interview IS proctored: InterviewProctorGate puts it behind a fullscreen gate and
+// tracks tab switches + fullscreen exits, blocking until the candidate returns. This copy
+// predates that gate and still promised "no proctoring" — which was simply false, and a
+// nasty surprise for a student who starts the interview expecting none.
+// "No camera" stays: that part is true, and it's the reassuring half.
 const PILLS = [
   { icon: Sparkles, label: 'Adaptive AI questions' },
   { icon: Zap, label: 'Instant scored feedback' },
-  { icon: ShieldOff, label: 'No camera · no proctoring' },
+  { icon: ShieldCheck, label: 'Fullscreen proctored · no camera' },
 ];
 
 export default function MockInterviewPage() {

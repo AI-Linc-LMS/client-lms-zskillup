@@ -49,25 +49,31 @@ function parsePct(raw: string): number | null {
 }
 
 /**
- * Single source of truth for "rounds" so the headline count, the quick-stat, and
- * the syllabus list can never drift apart.
+ * Rounds vs. stages — two different things that kept getting conflated.
  *
- * RCA: the seed authored `quickStats.rounds` (a raw number), `overview.process`,
- * and `syllabus[]` independently — Infosys showed "3 online stages" while the
- * list rendered 6 rows. We now derive both counts from the syllabus array and
- * only fall back to the stored number when a hub has no syllabus rows.
+ * `syllabus[]` is a list of EXAM SECTIONS, not hiring rounds. Infosys's six rows are
+ * Reasoning / Mathematical / Verbal / Pseudocode / SP-DSE Coding / Technical+HR — and
+ * the first four are sections *inside a single online test*, not four separate rounds.
  *
- * - totalRounds  = every stage in the syllabus (incl. the final interview)
- * - onlineStages = stages that happen online, *before* the final interview
+ * An earlier pass noticed the hub said "3" while the syllabus listed 6 rows and made the
+ * stat follow the list (`totalRounds = syllabus.length`). That fixed the symptom the wrong
+ * way round: the list was never a list of rounds. It left the hub announcing "TOTAL ROUNDS
+ * 6" while the company card next to it said "3 ROUNDS" — the same company, two numbers.
+ *
+ * - totalRounds  = the authored hiring-round count. Same field the card reads
+ *                  (companies.rounds -> quickStats.rounds), so the two cannot disagree.
+ * - onlineStages = syllabus rows before the final interview. This one genuinely IS derived
+ *                  from the syllabus — "the drive runs in N online stages" is about exam
+ *                  sections, and that reading was always correct.
  */
 function roundCounts(content: HubContent): { totalRounds: number; onlineStages: number } {
   const syllabus = content.syllabus ?? [];
+  const totalRounds = content.quickStats.rounds;
   if (syllabus.length === 0) {
-    const r = content.quickStats.rounds;
-    return { totalRounds: r, onlineStages: Math.max(1, r - 1) };
+    return { totalRounds, onlineStages: Math.max(1, totalRounds - 1) };
   }
   const onlineStages = syllabus.filter((r) => r.type !== 'Final').length;
-  return { totalRounds: syllabus.length, onlineStages: onlineStages || syllabus.length };
+  return { totalRounds, onlineStages: onlineStages || syllabus.length };
 }
 
 /**
