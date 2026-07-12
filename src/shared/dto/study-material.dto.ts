@@ -35,6 +35,17 @@ export interface StudyMaterialTopicDto {
   doneCount: number;
   itemCount: number;
   progressPct: number;
+  /**
+   * A module (topic) stays locked until the PREVIOUS module in its section is finished,
+   * so students can't skip ahead. The first module of every section is always open, and
+   * within an open module the items can be done in any order.
+   *
+   * Server-computed and server-ENFORCED: toggleItem() refuses to complete an item inside
+   * a locked topic, so hiding the UI is not the gate — hitting the API directly fails too.
+   */
+  locked: boolean;
+  /** Student-facing reason, e.g. "Complete 'Arrays' to unlock this module." null when open. */
+  lockedReason: string | null;
 }
 
 export interface StudyMaterialSectionDto {

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
+import { toast } from 'sonner';
 import {
   CheckCircle2,
   ChevronDown,
@@ -10,6 +11,7 @@ import {
   FileText,
   ListChecks,
   Loader2,
+  Lock,
   MonitorPlay,
   PlayCircle,
 } from 'lucide-react';
@@ -75,11 +77,26 @@ export function StudyMaterialTab({ slug }: { slug: string }) {
     async (item: StudyMaterialItemDto) => {
       const next = !item.done;
       setBusy(item.id);
+      // Optimistic tick so the checkbox feels instant.
       setData((prev) => (prev ? recompute(mapItem(prev, item.id, (i) => ({ ...i, done: next }))) : prev));
       try {
         await completeStudyMaterialItem(slug, item.id, next);
-      } catch {
+        // Locks are computed SERVER-side, and `recompute` only fixes local progress numbers.
+        // Finishing a module's last item unlocks the next one (and un-ticking re-locks it),
+        // which the client cannot know — so resync the tree instead of duplicating the rule
+        // here and letting the two drift. Cheap, and it happens behind the optimistic tick.
+        const fresh = await getStudyMaterial(slug);
+        setData(fresh);
+      } catch (e) {
+        // Roll back, and SAY WHY. The server refuses to complete an item inside a locked
+        // module; without this the tick would just silently flick back.
         setData((prev) => (prev ? recompute(mapItem(prev, item.id, (i) => ({ ...i, done: !next }))) : prev));
+        const msg = e instanceof Error ? e.message : '';
+        toast.error(
+          /unlock|locked|previous module/i.test(msg)
+            ? 'Complete the previous module to unlock this one.'
+            : "Couldn't update that just now — please try again.",
+        );
       } finally {
         setBusy(null);
       }
@@ -189,11 +206,22 @@ export function StudyMaterialTab({ slug }: { slug: string }) {
 
           <div className="space-y-2.5">
             {section.topics.map((t, ti) => {
-              const open = openTopics.has(t.id);
+              // A locked module never opens — its items are not rendered at all, so there is
+              // nothing to click through to. The server rejects completing them anyway; this
+              // is the visible half of the same rule.
+              const open = openTopics.has(t.id) && !t.locked;
               return (
-                <div key={t.id} className="overflow-hidden rounded-2xl border border-slate-200">
+                <div
+                  key={t.id}
+                  className={cn(
+                    'overflow-hidden rounded-2xl border',
+                    t.locked ? 'border-slate-200/70 bg-slate-50/40' : 'border-slate-200',
+                  )}
+                >
                   <button
                     type="button"
+                    disabled={t.locked}
+                    aria-expanded={open}
                     onClick={() =>
                       setOpenTopics((prev) => {
                         const n = new Set(prev);
@@ -202,17 +230,48 @@ export function StudyMaterialTab({ slug }: { slug: string }) {
                         return n;
                       })
                     }
-                    className="flex w-full items-center gap-3 bg-slate-50/60 px-4 py-3 text-left transition hover:bg-slate-50"
+                    className={cn(
+                      'flex w-full items-center gap-3 px-4 py-3 text-left transition',
+                      t.locked
+                        ? 'cursor-not-allowed bg-slate-50/60'
+                        : 'bg-slate-50/60 hover:bg-slate-50',
+                    )}
                   >
-                    <ChevronDown className={cn('size-4 shrink-0 text-slate-400 transition-transform', open && 'rotate-180')} />
-                    <span className="flex-1 truncate text-sm font-bold text-navy">
+                    {t.locked ? (
+                      <Lock className="size-4 shrink-0 text-slate-400" />
+                    ) : (
+                      <ChevronDown
+                        className={cn('size-4 shrink-0 text-slate-400 transition-transform', open && 'rotate-180')}
+                      />
+                    )}
+                    <span
+                      className={cn(
+                        'flex-1 truncate text-sm font-bold',
+                        t.locked ? 'text-slate-400' : 'text-navy',
+                      )}
+                    >
                       {sectionIndex + 1}.{ti + 1} {t.title}
                     </span>
-                    <span className="shrink-0 text-xs font-bold tabular-nums text-slate-500">{t.progressPct}%</span>
-                    <div className="hidden h-1.5 w-20 shrink-0 overflow-hidden rounded-full bg-slate-200 sm:block">
-                      <div className={cn('h-full rounded-full', tone(t.progressPct))} style={{ width: `${t.progressPct}%` }} />
-                    </div>
+                    {t.locked ? (
+                      <span className="shrink-0 rounded-full bg-slate-200/70 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                        Locked
+                      </span>
+                    ) : (
+                      <>
+                        <span className="shrink-0 text-xs font-bold tabular-nums text-slate-500">{t.progressPct}%</span>
+                        <div className="hidden h-1.5 w-20 shrink-0 overflow-hidden rounded-full bg-slate-200 sm:block">
+                          <div className={cn('h-full rounded-full', tone(t.progressPct))} style={{ width: `${t.progressPct}%` }} />
+                        </div>
+                      </>
+                    )}
                   </button>
+
+                  {t.locked && (
+                    <p className="flex items-center gap-1.5 border-t border-slate-200/70 px-4 py-2.5 text-xs text-slate-500">
+                      <Lock className="size-3 shrink-0" />
+                      {t.lockedReason ?? 'Complete the previous module to unlock this module.'}
+                    </p>
+                  )}
 
                   <AnimatePresence initial={false}>
                     {open && (
