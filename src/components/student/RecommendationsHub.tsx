@@ -256,6 +256,11 @@ export function RecommendationsHub() {
         open={upgrade.feature !== null}
         onClose={upgrade.close}
         feature={upgrade.feature ?? undefined}
+        message={
+          upgrade.feature
+            ? `Your recommendations are yours to read. Opening ${upgrade.feature} needs a plan.`
+            : undefined
+        }
       />
     </div>
   );

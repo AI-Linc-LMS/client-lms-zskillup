@@ -42,6 +42,8 @@ import {
 } from '@/lib/api/mocks';
 import type { GamificationSummary } from '@/lib/api/gamification-types';
 import { RewardOverlay } from '@/components/gamification/RewardOverlay';
+import { ApiRequestError } from '@/lib/api/types';
+import { UpgradeModal } from '@/components/billing/UpgradeModal';
 import { MockCodingPanel } from '@/components/practice/MockCodingPanel';
 import { PyqTag } from '@/components/practice/PyqTag';
 import { useProctoring } from '@/lib/proctoring/useProctoring';
@@ -83,6 +85,8 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
   const [starting, setStarting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Server's 403 PAYWALL message when the free-mock allowance is spent. */
+  const [upgradeMsg, setUpgradeMsg] = useState<string | null>(null);
 
   const deadlineRef = useRef<number | null>(null);
   const submittedRef = useRef(false);
@@ -139,7 +143,14 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
       if (proctored) void proctor.start();
       setPhase('running');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not start the mock test.');
+      // Free-mock allowance spent (backend 403 PAYWALL). Convert the block into an
+      // upgrade prompt rather than a red error string — this is the moment that converts,
+      // and "Could not start the mock test" tells the student nothing about why.
+      if (err instanceof ApiRequestError && err.code === 'PAYWALL') {
+        setUpgradeMsg(err.message);
+      } else {
+        setError(err instanceof Error ? err.message : 'Could not start the mock test.');
+      }
     } finally {
       setStarting(false);
     }
@@ -332,6 +343,15 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] text-white">
+      {/* Free-mock allowance spent — the server refused the start. Portalled, so the dark
+          full-bleed runner backdrop can't clip or tint it. */}
+      <UpgradeModal
+        open={upgradeMsg !== null}
+        onClose={() => setUpgradeMsg(null)}
+        title="Upgrade for unlimited mocks"
+        message={upgradeMsg ?? undefined}
+      />
+
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div className="absolute -left-1/4 -top-1/3 size-[55vw] rounded-full bg-[#f37021]/15 blur-[130px]" />
         <div className="absolute -right-1/4 top-1/4 size-[45vw] rounded-full bg-[#2563eb]/15 blur-[130px]" />

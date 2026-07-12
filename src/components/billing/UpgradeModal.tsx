@@ -25,12 +25,18 @@ const INCLUDED = [
 export function UpgradeModal({
   open,
   onClose,
-  feature = 'this recommendation',
+  feature = 'this',
+  title = 'Upgrade to start preparing',
+  message,
 }: {
   open: boolean;
   onClose: () => void;
   /** What they just tried to open — makes the prompt specific rather than generic. */
   feature?: string;
+  title?: string;
+  /** The server's own paywall message (403 PAYWALL). Preferred over the generic line —
+   *  it already says exactly which allowance ran out. */
+  message?: string;
 }) {
   const id = useId();
   const [mounted, setMounted] = useState(false);
@@ -85,10 +91,10 @@ export function UpgradeModal({
             <Crown className="size-6" />
           </span>
           <h2 id={`${id}-title`} className="mt-3 text-lg font-black tracking-tight">
-            Upgrade to start preparing
+            {title}
           </h2>
           <p className="mt-1 text-sm text-white/80">
-            Your recommendations are yours to read. Opening {feature} needs a plan.
+            {message ?? `Opening ${feature} needs a plan.`}
           </p>
         </div>
 

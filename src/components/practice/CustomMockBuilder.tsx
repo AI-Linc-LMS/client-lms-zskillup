@@ -2,12 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { AlertTriangle, Check, Clock, Code2, Layers, ListChecks, Loader2, ShieldCheck, Sparkles } from 'lucide-react';
+import { AlertTriangle, Check, Clock, Code2, Layers, ListChecks, Loader2, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { listTopicsWithCounts, type ApiTopic } from '@/lib/api/catalog';
 import { createCustomMock, listCodingTopics, type CodingTopic } from '@/lib/api/mocks';
 import { ApiRequestError } from '@/lib/api/types';
+import { UpgradeModal } from '@/components/billing/UpgradeModal';
 import { HIDDEN_ROOT_SLUGS, sectionMetaFor } from './section-meta';
 
 /**
@@ -242,52 +242,21 @@ export function CustomMockBuilder() {
         </div>
       </div>
 
-      {upgradeMsg ? <UpgradeModal message={upgradeMsg} onClose={() => setUpgradeMsg(null)} /> : null}
+      <UpgradeModal
+        open={upgradeMsg !== null}
+        onClose={() => setUpgradeMsg(null)}
+        title="Upgrade to build full mocks"
+        message={upgradeMsg ?? undefined}
+      />
     </div>
   );
 }
 
-/** Freemium paywall popup — shown when a free student has used up their free
- *  questions for the chosen topics, converting the block into an upgrade CTA. */
-function UpgradeModal({ message, onClose }: { message: string; onClose: () => void }) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]);
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <button
-        type="button"
-        aria-label="Close"
-        onClick={onClose}
-        className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
-      />
-      <div className="relative w-full max-w-md rounded-3xl border border-slate-200 bg-white p-7 text-center shadow-2xl">
-        <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.8)]">
-          <Sparkles className="size-6" />
-        </span>
-        <h3 className="mt-4 text-lg font-black text-navy">Upgrade to build full mocks</h3>
-        <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{message}</p>
-        <div className="mt-5 flex flex-col gap-2">
-          <Link
-            href="/upgrade"
-            className="inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105"
-          >
-            <Sparkles className="size-4" /> See plans &amp; upgrade
-          </Link>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full px-5 py-2 text-sm font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-navy"
-          >
-            Maybe later
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+// The local UpgradeModal that used to live here has been folded into
+// @/components/billing/UpgradeModal. Three surfaces now raise the same prompt — the
+// custom-mock builder, the mock runner's free-mock limit, and the recommendations hub —
+// and two of them were about to ship with different designs, different copy, and
+// different destinations (/upgrade vs /shop). One modal, one upgrade path.
 
 function Stepper({
   label,
