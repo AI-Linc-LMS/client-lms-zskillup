@@ -111,8 +111,16 @@ export async function getPracticeAccuracy(): Promise<ApiAccuracy> {
   return res.data;
 }
 
-/** Per-topic accuracy, most recently practised first (weak/recent topic surfaces). */
-export async function getTopicAccuracy(): Promise<ApiTopicAccuracy[]> {
-  const res = await apiClient.get<ApiTopicAccuracy[]>('/api/v1/practice/accuracy/topics');
+/**
+ * Per-topic accuracy, most recently practised first (weak/recent topic surfaces).
+ *
+ * @param companySlug scope to ONE Company Hub. A Company Hub MUST pass this: calling it
+ *   unscoped is what made every hub display the same progress, so a quiz finished under
+ *   Accenture showed the topic as practised for TCS, Infosys, Cognizant and Capgemini too.
+ *   Omit it only for genuinely cross-company surfaces (dashboard, performance).
+ */
+export async function getTopicAccuracy(companySlug?: string): Promise<ApiTopicAccuracy[]> {
+  const qs = companySlug ? `?company=${encodeURIComponent(companySlug)}` : '';
+  const res = await apiClient.get<ApiTopicAccuracy[]>(`/api/v1/practice/accuracy/topics${qs}`);
   return res.data;
 }

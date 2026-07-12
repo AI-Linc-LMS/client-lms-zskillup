@@ -54,8 +54,11 @@ export function CompanyPrepPanel({
       .catch(() => {
         if (!cancelled) setErrored(true);
       });
-    // Per-topic practice progress (best-effort — absent = "not started").
-    getTopicAccuracy()
+    // Per-topic practice progress for THIS company (best-effort — absent = "not started").
+    // Scoped deliberately: this panel is headed "Your progress across <Company>'s topics",
+    // and calling it unscoped returned the student's progress across EVERY company — so a
+    // quiz finished in the Accenture hub showed the topic as practised here too.
+    getTopicAccuracy(companySlug)
       .then((rows) => {
         if (!cancelled) setAccBySlug(Object.fromEntries(rows.map((r) => [r.topicSlug, r])));
       })
