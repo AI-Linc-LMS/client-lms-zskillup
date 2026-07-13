@@ -230,8 +230,9 @@ function SubNavLink({ item, active, locked }: { item: NavItem; active: boolean; 
       className={cn(
         'group flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm transition-colors',
         active
-          ? // Active = black pill, yellow ring accent, yellow label — high-contrast, per spec.
-            'bg-[#1a1a1a] font-semibold text-[#ffc42d] ring-1 ring-[#ffc42d]/40'
+          ? // Active = black pill, WHITE label, GOLD icon + a gold ring accent — matches the
+            // benchmark (black bg, white text, yellow icon) with the requested yellow border.
+            'bg-[#1a1a1a] font-semibold text-white ring-1 ring-[#ffc42d]/30'
           : 'font-medium text-[var(--color-text-muted)] hover:bg-[#fff5ea] hover:text-[var(--color-text)]',
       )}
     >

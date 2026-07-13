@@ -66,7 +66,7 @@ export default function ReviewPage() {
       />
 
       {/* Hero */}
-      <section className="relative mt-4 overflow-hidden rounded-3xl border border-emerald-200/70 bg-gradient-to-br from-emerald-50 to-white p-6 shadow-[0_18px_50px_-30px_rgba(16,185,129,0.4)]">
+      <section className="relative mt-4 overflow-hidden rounded-3xl border border-emerald-200/70 bg-gradient-to-br from-emerald-50 to-white p-6">
         <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-emerald-400" />
         <div className="flex items-center gap-3">
           <span className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-sm">
@@ -89,7 +89,7 @@ export default function ReviewPage() {
         {!questions ? (
           <div className="grid h-60 place-items-center"><Loader2 className="size-6 animate-spin text-slate-400" /></div>
         ) : done ? (
-          <div className="rounded-3xl border border-slate-200/80 bg-white p-7 text-center shadow-sm sm:p-10">
+          <div className="rounded-3xl border border-slate-200/80 bg-white p-7 text-center sm:p-10">
             <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
               <Sparkles className="size-7" />
             </span>
@@ -102,7 +102,7 @@ export default function ReviewPage() {
                 : `You reviewed ${reviewed} question${reviewed === 1 ? '' : 's'} and got ${correct} right.`}
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-              <Link href="/study-plan" className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white">
+              <Link href="/study-plan" className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-5 py-2.5 text-sm font-extrabold text-[#171717]">
                 Back to study plan <ArrowRight className="size-4" />
               </Link>
               <Link href="/practice" className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50">
@@ -111,7 +111,7 @@ export default function ReviewPage() {
             </div>
           </div>
         ) : q ? (
-          <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm">
+          <div className="rounded-3xl border border-slate-200/80 bg-white p-6">
             <div className="flex items-center justify-between">
               <span className={cn('rounded-full px-2.5 py-0.5 text-[11px] font-semibold capitalize ring-1', q.difficulty === 'EASY' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : q.difficulty === 'HARD' ? 'bg-rose-50 text-rose-700 ring-rose-200' : 'bg-amber-50 text-amber-700 ring-amber-200')}>
                 {q.difficulty.toLowerCase()}
@@ -169,7 +169,7 @@ export default function ReviewPage() {
                   {idx + 1 < questions.length ? 'Next' : 'Finish'} <ArrowRight className="size-4" />
                 </button>
               ) : (
-                <button onClick={check} disabled={selected.length === 0 || submitting} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white disabled:opacity-50">
+                <button onClick={check} disabled={selected.length === 0 || submitting} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-5 py-2.5 text-sm font-extrabold text-[#171717] disabled:opacity-50">
                   {submitting ? <Loader2 className="size-4 animate-spin" /> : null} Check
                 </button>
               )}

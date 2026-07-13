@@ -78,7 +78,7 @@ export function DashboardHero() {
 
         {/* Stat chips */}
         <div className="flex flex-wrap items-start gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-brand)] px-3 py-1 text-[11px] font-bold text-white shadow-sm">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-brand)] px-3 py-1 text-[11px] font-bold text-[#171717] shadow-sm">
             <Target className="h-3.5 w-3.5" aria-hidden />
             {accuracy ? `${accuracy.total} QUESTIONS PRACTISED` : 'START PRACTISING'}
           </span>

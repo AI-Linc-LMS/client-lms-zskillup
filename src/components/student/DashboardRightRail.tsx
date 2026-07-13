@@ -28,8 +28,8 @@ const UP_NEXT = [
     title: 'Take a timed mock',
     meta: 'Score, percentile, and a full answer review',
     href: '/mock-assessment',
-    from: '#f7a14e',
-    to: '#f37021',
+    from: '#171b2e',
+    to: '#0f1117',
   },
   {
     id: 'weak',
@@ -74,7 +74,7 @@ function RailCard({
   return (
     <section
       className={cn(
-        'group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_8px_30px_-18px_rgba(15,23,42,0.35)] transition-shadow hover:shadow-[0_18px_50px_-24px_rgba(15,23,42,0.45)]',
+        'group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5',
         className,
       )}
     >
@@ -149,7 +149,7 @@ export function DashboardRightRail() {
     <Stagger className="space-y-5">
       {/* Up next — live feature entry points */}
       <StaggerItem>
-        <RailCard glow="#f37021">
+        <RailCard glow="#ffc42d">
           <RailLabel>Up Next</RailLabel>
           <div className="space-y-2.5">
             {UP_NEXT.map((item) => {
@@ -183,7 +183,7 @@ export function DashboardRightRail() {
                     <span className="mt-0.5 block text-xs leading-snug text-slate-500">{meta}</span>
                   </span>
                   <ArrowUpRight
-                    className="size-4 shrink-0 -translate-x-1 text-slate-300 opacity-0 transition-all duration-200 group-hover/item:translate-x-0 group-hover/item:text-orange group-hover/item:opacity-100"
+                    className="size-4 shrink-0 -translate-x-1 text-slate-300 opacity-0 transition-all duration-200 group-hover/item:translate-x-0 group-hover/item:text-[#f5b400] group-hover/item:opacity-100"
                     aria-hidden="true"
                   />
                 </Link>
@@ -215,7 +215,7 @@ export function DashboardRightRail() {
                   className={cn(
                     'relative grid size-8 place-items-center rounded-xl text-[13px] font-bold tabular-nums transition-colors sm:size-9',
                     day.today
-                      ? 'bg-gradient-to-b from-[#1f2d4d] to-[#0b1220] text-white shadow-[0_8px_18px_-8px_rgba(11,18,32,0.7)]'
+                      ? 'bg-gradient-to-b from-[#171b2e] to-[#0f1117] text-white shadow-[0_8px_18px_-8px_rgba(15,17,23,0.7)]'
                       : 'text-slate-600 hover:bg-slate-100',
                   )}
                 >
@@ -229,7 +229,7 @@ export function DashboardRightRail() {
                   {day.n}
                 </span>
                 {scheduledDays.has(day.key) ? (
-                  <span aria-hidden title="Assessment scheduled" className="size-1.5 rounded-full bg-orange shadow-[0_0_6px_rgba(243,112,33,0.8)]" />
+                  <span aria-hidden title="Assessment scheduled" className="size-1.5 rounded-full bg-orange shadow-[0_0_6px_rgba(245,180,0,0.8)]" />
                 ) : day.today ? (
                   <span aria-hidden className="size-1 rounded-full bg-slate-300" />
                 ) : (
@@ -245,7 +245,7 @@ export function DashboardRightRail() {
               <div className="mt-4 space-y-1.5">
                 {weekCount > 0 ? (
                   <div className="flex items-center gap-1.5 rounded-xl border border-orange/20 bg-orange/[0.06] px-3 py-2">
-                    <CalendarClock className="size-3.5 text-orange" />
+                    <CalendarClock className="size-3.5 text-[#f5b400]" />
                     <p className="text-[11px] font-semibold text-navy">
                       {weekCount} assessment{weekCount > 1 ? 's' : ''} this week
                     </p>

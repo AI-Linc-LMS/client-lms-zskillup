@@ -110,8 +110,8 @@ export function AdaptiveSkillProfile() {
 
   if (state.loading) {
     return (
-      <div className="flex items-center gap-3 rounded-3xl border border-slate-200/80 bg-white p-5 text-sm text-slate-400 shadow-sm">
-        <Loader2 className="size-4 animate-spin text-orange" />
+      <div className="flex items-center gap-3 rounded-3xl border border-slate-200/80 bg-white p-5 text-sm text-slate-400">
+        <Loader2 className="size-4 animate-spin text-[#f5b400]" />
         Loading your skill profile…
       </div>
     );
@@ -123,29 +123,29 @@ export function AdaptiveSkillProfile() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="group relative overflow-hidden rounded-3xl border border-orange/20 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+        className="group relative overflow-hidden rounded-3xl border border-[#ffc42d]/30 bg-white p-5 transition-all hover:-translate-y-0.5"
       >
         {/* warm gradient wash + glow */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-br from-orange/[0.06] via-transparent to-amber-100/30" />
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#ffc42d]/[0.08] via-transparent to-amber-100/30" />
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-10 -top-10 size-32 rounded-full bg-orange/20 opacity-60 blur-2xl transition-opacity group-hover:opacity-90"
+          className="pointer-events-none absolute -right-10 -top-10 size-32 rounded-full bg-[#ffc42d]/25 opacity-60 blur-2xl transition-opacity group-hover:opacity-90"
         />
         <div className="relative flex items-start gap-3.5">
           <span
-            className="grid size-11 shrink-0 place-items-center rounded-2xl text-white shadow-sm"
-            style={{ background: 'linear-gradient(135deg, #f7a14e, #f37021)' }}
+            className="grid size-11 shrink-0 place-items-center rounded-2xl text-[#171717] shadow-sm"
+            style={{ background: 'linear-gradient(135deg, #ffd24d, #f5b400)' }}
           >
             <Sparkles className="size-5" />
           </span>
           <div>
-            <p className="text-sm font-bold text-navy">Discover your skill level</p>
+            <p className="text-sm font-bold text-[#1a1d29]">Discover your skill level</p>
             <p className="mt-0.5 text-xs leading-relaxed text-slate-500">
               Take an AI adaptive quiz to get a personalised skill profile and study plan.
             </p>
             <Link
               href="/mock-assessment"
-              className="group/cta mt-3 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-[#f7a14e] to-[#f37021] px-3.5 py-2 text-xs font-bold text-white shadow-[0_10px_24px_-12px_rgba(243,112,33,0.9)] transition-transform active:scale-[0.98]"
+              className="group/cta mt-3 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-3.5 py-2 text-xs font-bold text-[#171717] shadow-[0_10px_24px_-12px_rgba(245,180,0,0.9)] transition-transform active:scale-[0.98]"
             >
               Take your first adaptive test
               <ArrowRight className="size-3.5 transition-transform group-hover/cta:translate-x-0.5" />
@@ -165,13 +165,13 @@ export function AdaptiveSkillProfile() {
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-      className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+      className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 transition-all hover:-translate-y-0.5"
     >
       {/* layered depth: gradient wash + colored glow blob */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-50/80 via-transparent to-orange/[0.04]" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-50/80 via-transparent to-[#ffc42d]/[0.05]" />
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-12 -top-12 size-36 rounded-full bg-orange/15 opacity-50 blur-3xl transition-opacity group-hover:opacity-80"
+        className="pointer-events-none absolute -right-12 -top-12 size-36 rounded-full bg-[#ffc42d]/20 opacity-50 blur-3xl transition-opacity group-hover:opacity-80"
       />
 
       <div className="relative">
@@ -179,8 +179,8 @@ export function AdaptiveSkillProfile() {
         <div className="mb-5 flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             <span
-              className="grid size-10 shrink-0 place-items-center rounded-2xl text-white shadow-sm"
-              style={{ background: 'linear-gradient(135deg, #f7a14e, #f37021)' }}
+              className="grid size-10 shrink-0 place-items-center rounded-2xl text-[#171717] shadow-sm"
+              style={{ background: 'linear-gradient(135deg, #ffd24d, #f5b400)' }}
             >
               <Brain className="size-5" />
             </span>
@@ -188,7 +188,7 @@ export function AdaptiveSkillProfile() {
               <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                 Adaptive
               </p>
-              <p className="flex items-center gap-1.5 text-sm font-bold text-navy">
+              <p className="flex items-center gap-1.5 text-sm font-bold text-[#1a1d29]">
                 Your Skill Profile
                 <button
                   type="button"
@@ -204,7 +204,7 @@ export function AdaptiveSkillProfile() {
           </div>
           <Link
             href={`/dashboard/quiz/adaptive/results?session=${state.sessionId}`}
-            className="group/link mt-1 inline-flex shrink-0 items-center gap-1 text-[11px] font-bold text-orange transition-colors hover:text-[#d85f12]"
+            className="group/link mt-1 inline-flex shrink-0 items-center gap-1 text-[11px] font-bold text-[#f5b400] transition-colors hover:text-[#c99200]"
           >
             Full report
             <ArrowRight className="size-3 transition-transform group-hover/link:translate-x-0.5" />
@@ -223,13 +223,13 @@ export function AdaptiveSkillProfile() {
               <button type="button" onClick={() => setShowInfo(false)} aria-label="Close" className="text-slate-300 hover:text-slate-500"><X className="size-3.5" /></button>
             </div>
             <p>
-              This is an <span className="font-semibold text-navy">adaptive (IRT) estimate</span>. Each
+              This is an <span className="font-semibold text-[#1a1d29]">adaptive (IRT) estimate</span>. Each
               adaptive quiz updates a difficulty score (θ) per skill from <span className="font-semibold">which
               questions you get right and how hard they are</span>, then maps it to 0–100% mastery. It reflects
               the level you can <span className="font-semibold">reliably</span> answer — not your raw % correct.
             </p>
             <p className="mt-1.5">
-              That&apos;s why it differs from <span className="font-semibold text-navy">Topic Mastery</span>, which is
+              That&apos;s why it differs from <span className="font-semibold text-[#1a1d29]">Topic Mastery</span>, which is
               simply accuracy (correct ÷ attempted) on practice questions — a topic can read 100% there while its
               adaptive mastery here is still building.
             </p>
@@ -242,7 +242,7 @@ export function AdaptiveSkillProfile() {
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
               Overall mastery
             </p>
-            <p className="mt-0.5 text-3xl font-black leading-none tracking-tight text-navy">
+            <p className="mt-0.5 text-3xl font-black leading-none tracking-tight text-[#1a1d29]">
               <AnimatedNumber value={overallMastery} format={(n) => `${n}%`} />
             </p>
           </div>
@@ -256,7 +256,7 @@ export function AdaptiveSkillProfile() {
           {state.skills.slice(0, 5).map((s, i) => (
             <div key={s.skill}>
               <div className="mb-1.5 flex items-center justify-between gap-2">
-                <span className="truncate text-xs font-semibold text-navy">{s.skill}</span>
+                <span className="truncate text-xs font-semibold text-[#1a1d29]">{s.skill}</span>
                 <div className="flex shrink-0 items-center gap-1.5">
                   <span
                     className={cn(
@@ -266,7 +266,7 @@ export function AdaptiveSkillProfile() {
                   >
                     {BAND_LABEL[s.band]}
                   </span>
-                  <span className="text-xs font-extrabold text-navy tabular-nums">
+                  <span className="text-xs font-extrabold text-[#1a1d29] tabular-nums">
                     <AnimatedNumber value={s.masteryPct} format={(n) => `${n}%`} />
                   </span>
                 </div>

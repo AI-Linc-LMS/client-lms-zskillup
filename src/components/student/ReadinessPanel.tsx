@@ -130,7 +130,7 @@ export function ReadinessPanel({
 
   if (err) return null;
   if (!data) {
-    return <div className="grid h-52 animate-pulse place-items-center rounded-2xl border border-slate-200 bg-white shadow-sm" />;
+    return <div className="grid h-52 animate-pulse place-items-center rounded-2xl border border-slate-200 bg-white" />;
   }
 
   const c = tone(data.overall.score);
@@ -139,18 +139,18 @@ export function ReadinessPanel({
   return (
     <div
       data-tour={tour === 'dashboard' ? 'dash:readiness' : undefined}
-      className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+      className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
     >
       {/* ── Navy premium hero band ──────────────────────────────────────── */}
       <div
         data-tour={tour === 'performance' ? 'perf:readiness-hero' : undefined}
-        className="relative overflow-hidden bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 sm:p-8"
+        className="relative overflow-hidden bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] p-6 sm:p-8"
       >
         <span aria-hidden className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full opacity-25 blur-3xl" style={{ background: c }} />
         <span aria-hidden className="pointer-events-none absolute -bottom-20 left-1/4 size-56 rounded-full bg-[#2563eb]/20 blur-3xl" />
         <div className="relative flex items-center justify-between gap-2">
           <h2 className="flex items-center gap-2 text-2xl font-black tracking-tight text-white">
-            <Target className="size-5 text-[#ffb877]" /> Placement readiness
+            <Target className="size-5 text-[#ffc42d]" /> Placement readiness
           </h2>
           <button
             type="button"
@@ -171,14 +171,14 @@ export function ReadinessPanel({
             className="relative mt-4 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.05] p-4 text-[11px] leading-relaxed text-white/70 backdrop-blur"
           >
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-[#ffb877]">How readiness is calculated</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#ffc42d]">How readiness is calculated</p>
               <button type="button" onClick={() => setShowInfo(false)} aria-label="Close" className="text-white/40 hover:text-white/80"><X className="size-3.5" /></button>
             </div>
             <ul className="mt-3 grid gap-2.5 sm:grid-cols-2">
-              <li className="flex gap-2"><ClipboardList className="mt-0.5 size-3.5 shrink-0 text-[#ffb877]" /><span><b className="text-white">Practice · 35%</b><br />Accuracy on practice questions — correct ÷ attempted.</span></li>
-              <li className="flex gap-2"><FileCheck2 className="mt-0.5 size-3.5 shrink-0 text-[#ffb877]" /><span><b className="text-white">Mock tests · 30%</b><br />Your average score across finished mock quizzes &amp; assessments (mean of score ÷ total per attempt).</span></li>
-              <li className="flex gap-2"><Code2 className="mt-0.5 size-3.5 shrink-0 text-[#ffb877]" /><span><b className="text-white">Coding · 20%</b><br />Solve rate — distinct problems solved ÷ distinct problems attempted.</span></li>
-              <li className="flex gap-2"><Compass className="mt-0.5 size-3.5 shrink-0 text-[#ffb877]" /><span><b className="text-white">Coverage · 15%</b><br />Breadth — distinct topics you&apos;ve practised ÷ all topics on the platform.</span></li>
+              <li className="flex gap-2"><ClipboardList className="mt-0.5 size-3.5 shrink-0 text-[#ffc42d]" /><span><b className="text-white">Practice · 35%</b><br />Accuracy on practice questions — correct ÷ attempted.</span></li>
+              <li className="flex gap-2"><FileCheck2 className="mt-0.5 size-3.5 shrink-0 text-[#ffc42d]" /><span><b className="text-white">Mock tests · 30%</b><br />Your average score across finished mock quizzes &amp; assessments (mean of score ÷ total per attempt).</span></li>
+              <li className="flex gap-2"><Code2 className="mt-0.5 size-3.5 shrink-0 text-[#ffc42d]" /><span><b className="text-white">Coding · 20%</b><br />Solve rate — distinct problems solved ÷ distinct problems attempted.</span></li>
+              <li className="flex gap-2"><Compass className="mt-0.5 size-3.5 shrink-0 text-[#ffc42d]" /><span><b className="text-white">Coverage · 15%</b><br />Breadth — distinct topics you&apos;ve practised ÷ all topics on the platform.</span></li>
             </ul>
             <p className="mt-3 border-t border-white/10 pt-3">
               <b className="text-white">Overall readiness</b> is a weighted blend of the four
@@ -284,7 +284,7 @@ function CompanyRing({ name, logo, pct, level, sub }: { name: string; logo: stri
   const c = toneSolid(pct);
   const n = useCountUp(pct);
   return (
-    <div className="group flex flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md">
+    <div className="group flex flex-col rounded-2xl border border-slate-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-slate-300">
       <div className="flex items-center gap-2.5">
         <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5">
           {logo ? (

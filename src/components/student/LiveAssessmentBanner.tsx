@@ -67,7 +67,7 @@ export function LiveAssessmentBanner() {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45 }}
-      className="relative overflow-hidden rounded-2xl border border-emerald-300 bg-gradient-to-r from-emerald-50 via-white to-emerald-50/40 p-4 shadow-[0_18px_50px_-24px_rgba(16,185,129,0.6)] sm:p-5"
+      className="relative overflow-hidden rounded-2xl border border-emerald-300 bg-gradient-to-r from-emerald-50 via-white to-emerald-50/40 p-4 sm:p-5"
     >
       <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-emerald-400 to-emerald-600" />
       <span aria-hidden className="pointer-events-none absolute -right-12 -top-12 size-44 rounded-full bg-emerald-400/15 blur-3xl" />

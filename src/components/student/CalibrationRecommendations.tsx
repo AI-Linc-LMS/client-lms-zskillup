@@ -22,14 +22,14 @@ export function CalibrationRecommendations() {
   if (!data.calibrated) {
     const href = cal.mockTestId ? `/dashboard/quiz?mock=${cal.mockTestId}` : '/dashboard';
     return (
-      <div className="relative overflow-hidden rounded-3xl border border-orange/30 bg-gradient-to-br from-orange/[0.07] to-transparent p-5 shadow-sm sm:p-6">
+      <div className="relative overflow-hidden rounded-3xl border border-orange/30 bg-gradient-to-br from-orange/[0.07] to-transparent p-5 sm:p-6">
         <span aria-hidden className="pointer-events-none absolute -right-8 -top-10 size-40 rounded-full bg-orange/10 blur-3xl" />
         <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center">
-          <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-sm">
+          <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#ffd24d] via-[#ffc42d] to-[#f5b400] text-[#171717]">
             <Lock className="size-5" />
           </span>
           <div className="min-w-0 flex-1">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-orange/10 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-orange">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-orange/10 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#f5b400]">
               <Sparkles className="size-3.5" /> Recommended for you
             </span>
             <h2 className="mt-1.5 text-base font-black tracking-tight text-navy">
@@ -56,10 +56,10 @@ export function CalibrationRecommendations() {
   const rest = data.items.filter((i) => i.id !== best?.id).slice(0, 3);
 
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+    <div className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
       <div className="mb-3 flex items-center justify-between gap-2">
         <div>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-orange/10 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-orange">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-orange/10 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#f5b400]">
             <Sparkles className="size-3.5" /> Recommended for you
           </span>
           <h2 className="mt-1.5 text-lg font-black tracking-tight text-navy">Your next steps</h2>

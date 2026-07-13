@@ -12,7 +12,7 @@ import { PRACTICE_HUB } from '@/lib/demo-data';
 
 const ACCENTS = [
   { tile: 'bg-sky-50 text-sky-600 ring-1 ring-sky-100', card: 'border-slate-200' },
-  { tile: 'bg-orange/10 text-orange ring-1 ring-orange/20', card: 'border-orange/40 ring-1 ring-orange/20 shadow-md' },
+  { tile: 'bg-orange/10 text-[#f5b400] ring-1 ring-orange/20', card: 'border-orange/40 ring-1 ring-orange/20' },
   { tile: 'bg-violet-50 text-violet-600 ring-1 ring-violet-100', card: 'border-slate-200' },
 ] as const;
 
@@ -30,7 +30,7 @@ export function PracticeHub() {
             <article
               key={card.title}
               className={cn(
-                'flex flex-col rounded-3xl border bg-white p-6 shadow-[0_18px_50px_-30px_rgba(15,23,42,0.18)] transition-all hover:-translate-y-0.5 hover:shadow-md',
+                'flex flex-col rounded-3xl border bg-white p-6 transition-all hover:-translate-y-0.5',
                 a.card,
               )}
             >
@@ -41,7 +41,7 @@ export function PracticeHub() {
               <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{card.body}</p>
               <Link
                 href={card.href}
-                className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-navy transition-colors hover:text-orange"
+                className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-navy transition-colors hover:text-[#f5b400]"
               >
                 {card.cta}
                 <ArrowRight className="size-3.5" aria-hidden="true" />

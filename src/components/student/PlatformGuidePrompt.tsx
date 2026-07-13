@@ -41,7 +41,7 @@ export function PlatformGuidePrompt() {
   return (
     <Modal open onClose={later} dismissible>
       <div className="text-center">
-        <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.8)]">
+        <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-[#ffd24d] via-[#ffc42d] to-[#f5b400] text-[#171717] shadow-[0_10px_24px_-10px_rgba(245,180,0,0.8)]">
           <Compass className="size-7" />
         </span>
         <h2 className="mt-4 font-display text-xl font-bold tracking-tight text-navy">Take a quick tour?</h2>
@@ -56,7 +56,7 @@ export function PlatformGuidePrompt() {
               key={f.label}
               className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 ring-1 ring-inset ring-slate-200/70"
             >
-              <f.icon className="size-3.5 text-orange" /> {f.label}
+              <f.icon className="size-3.5 text-[#f5b400]" /> {f.label}
             </span>
           ))}
         </div>
@@ -65,7 +65,7 @@ export function PlatformGuidePrompt() {
           <button
             type="button"
             onClick={take}
-            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105"
+            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-5 py-2.5 text-sm font-extrabold text-[#171717] shadow-sm transition hover:brightness-105"
           >
             Take the tour <Compass className="size-4" />
           </button>

@@ -29,7 +29,7 @@ export default async function CompaniesPage() {
 
       {/* Hero — deep navy aurora canvas with glass stat cards */}
       <Reveal>
-        <section data-tour="company:hero" className="relative isolate mb-8 overflow-hidden rounded-[1.75rem] p-7 text-white shadow-[0_30px_90px_-32px_rgba(11,18,32,0.85)] sm:rounded-[2rem] sm:p-10">
+        <section data-tour="company:hero" className="relative isolate mb-8 overflow-hidden rounded-[1.75rem] p-7 text-white sm:rounded-[2rem] sm:p-10">
           <AuroraBackground />
 
           {/* layered depth — inner ring + top-edge highlight */}
@@ -44,12 +44,12 @@ export default async function CompaniesPage() {
 
           <div className="relative z-10 max-w-3xl">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-white/75 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur">
-              <Sparkles className="size-3.5 text-[#ffb877]" />
+              <Sparkles className="size-3.5 text-[#ffc42d]" />
               Catalog · Campus recruitment · Company hubs
             </span>
 
             <h1 className="mt-6 bg-gradient-to-b from-white to-white/70 bg-clip-text text-3xl font-extrabold leading-[1.08] tracking-tight text-transparent sm:text-[42px]">
-              Choose your <span className="text-[#ffb877]">target company</span>.
+              Choose your <span className="text-[#ffc42d]">target company</span>.
             </h1>
             <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-white/65 sm:text-base">
               Pick a recruiter and follow a guided track — process overview, topic-wise practice
@@ -63,7 +63,7 @@ export default async function CompaniesPage() {
                     key={label}
                     className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur transition-colors hover:border-white/20 hover:bg-white/[0.1]"
                   >
-                    <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_8px_20px_-8px_rgba(243,112,33,0.7)]">
+                    <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#ffd24d] via-[#ffc42d] to-[#f5b400] text-[#171717] shadow-[0_8px_20px_-8px_rgba(245,180,0,0.5)]">
                       <Icon className="size-4" aria-hidden="true" />
                     </span>
                     <dd className="mt-3 text-2xl font-extrabold leading-none tabular-nums">

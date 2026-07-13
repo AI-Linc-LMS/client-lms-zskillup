@@ -88,9 +88,9 @@ function ResultsView({ data, onReview }: { data: CalibrationResultsDto; onReview
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-sm sm:px-6">
+      <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6">
         <span className="flex min-w-0 items-center gap-1.5 truncate text-sm font-bold text-navy">
-          <Sparkles className="size-4 shrink-0 text-orange" aria-hidden="true" /> Your calibration results
+          <Sparkles className="size-4 shrink-0 text-[#f5b400]" aria-hidden="true" /> Your calibration results
         </span>
         <Button variant="ghost" size="sm" asChild>
           <Link href="/dashboard">
@@ -101,7 +101,7 @@ function ResultsView({ data, onReview }: { data: CalibrationResultsDto; onReview
 
       <main className="mx-auto w-full max-w-3xl flex-1 space-y-5 px-4 py-6 sm:px-6 sm:py-8">
         {/* Hero — overall band + AI narrative */}
-        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
           <div className="flex flex-col items-center gap-4 border-b border-slate-100 bg-gradient-to-br from-orange/[0.06] to-transparent px-6 py-7 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-left">
             <ScoreRing value={data.overall} tone={tone} />
             <div className="min-w-0">
@@ -110,7 +110,7 @@ function ResultsView({ data, onReview }: { data: CalibrationResultsDto; onReview
                   'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider ring-1',
                   tone === 'emerald' && 'bg-emerald-50 text-emerald-700 ring-emerald-100',
                   tone === 'amber' && 'bg-amber-50 text-amber-700 ring-amber-100',
-                  tone === 'orange' && 'bg-orange/10 text-orange ring-orange/20',
+                  tone === 'orange' && 'bg-orange/10 text-[#f5b400] ring-orange/20',
                 )}
               >
                 <Award className="size-3.5" aria-hidden="true" /> {data.bandLabel}
@@ -146,7 +146,7 @@ function ResultsView({ data, onReview }: { data: CalibrationResultsDto; onReview
         </div>
 
         {/* Full section breakdown */}
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <section className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
           <h2 className="mb-4 text-sm font-black uppercase tracking-wide text-slate-500">Section breakdown</h2>
           <div className="space-y-3.5">
             {data.sections.map((s) => (
@@ -157,13 +157,13 @@ function ResultsView({ data, onReview }: { data: CalibrationResultsDto; onReview
 
         {/* Company alignment */}
         {data.companies.length > 0 && top && (
-          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <section className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
             <div className="mb-1 flex items-center gap-2">
               <Building2 className="size-4 text-navy" aria-hidden="true" />
               <h2 className="text-sm font-black uppercase tracking-wide text-slate-500">Company alignment</h2>
             </div>
             <p className="mb-4 text-[15px] font-semibold leading-relaxed text-navy">
-              You align best with <span className="text-orange">{top.name}</span> — you're{' '}
+              You align best with <span className="text-[#f5b400]">{top.name}</span> — you're{' '}
               <span className="tabular-nums">{top.readiness}%</span> ready for their pattern.
             </p>
             <div className="space-y-3.5">
@@ -176,24 +176,24 @@ function ResultsView({ data, onReview }: { data: CalibrationResultsDto; onReview
 
         {/* Recommendations */}
         {best && (
-          <section className="rounded-3xl border border-orange/25 bg-white p-5 shadow-sm sm:p-6">
+          <section className="rounded-3xl border border-orange/25 bg-white p-5 sm:p-6">
             <div className="mb-3 flex items-center gap-2">
-              <Trophy className="size-4 text-orange" aria-hidden="true" />
-              <h2 className="text-sm font-black uppercase tracking-wide text-orange">Recommended for you</h2>
+              <Trophy className="size-4 text-[#f5b400]" aria-hidden="true" />
+              <h2 className="text-sm font-black uppercase tracking-wide text-[#f5b400]">Recommended for you</h2>
             </div>
 
             <Link
               href={best.href}
               className="group block rounded-2xl border border-orange/30 bg-gradient-to-br from-orange/[0.08] to-transparent p-4 transition hover:border-orange/50"
             >
-              <span className="text-[10px] font-bold uppercase tracking-widest text-orange">{best.category}</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#f5b400]">{best.category}</span>
               <p className="mt-1 text-[15px] font-semibold leading-relaxed text-navy">{best.message}</p>
               {top && (
                 <p className="mt-1.5 text-xs font-semibold text-slate-500">
                   Unlock this to get <span className="text-navy">{top.name}</span>-ready faster.
                 </p>
               )}
-              <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-4 py-1.5 text-xs font-extrabold text-white shadow-sm">
+              <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-4 py-1.5 text-xs font-extrabold text-[#171717]">
                 {best.cta} <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
               </span>
             </Link>
@@ -210,7 +210,7 @@ function ResultsView({ data, onReview }: { data: CalibrationResultsDto; onReview
                         <span className="block text-[10px] font-bold uppercase tracking-widest text-slate-400">{r.category}</span>
                         <span className="mt-0.5 block text-sm leading-snug text-slate-600">{r.message}</span>
                       </span>
-                      <span className="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-orange transition-colors group-hover:text-[#d9610f]">
+                      <span className="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-[#f5b400] transition-colors group-hover:text-[#cc9600]">
                         {r.cta} <ArrowRight className="size-3.5" />
                       </span>
                     </Link>
@@ -245,7 +245,7 @@ function ResultsView({ data, onReview }: { data: CalibrationResultsDto; onReview
 
 function ScoreRing({ value, tone }: { value: number; tone: 'emerald' | 'amber' | 'orange' }) {
   const stroke =
-    tone === 'emerald' ? '#059669' : tone === 'amber' ? '#d97706' : '#f37021';
+    tone === 'emerald' ? '#059669' : tone === 'amber' ? '#d97706' : '#f5b400';
   const r = 34;
   const c = 2 * Math.PI * r;
   const dash = Math.max(0, Math.min(100, value)) / 100;
@@ -276,7 +276,7 @@ function ScoreRing({ value, tone }: { value: number; tone: 'emerald' | 'amber' |
 function barTone(v: number) {
   if (v >= 70) return { bar: 'bg-emerald-500', text: 'text-emerald-600' };
   if (v >= 50) return { bar: 'bg-amber-500', text: 'text-amber-600' };
-  return { bar: 'bg-orange', text: 'text-orange' };
+  return { bar: 'bg-[#f5b400]', text: 'text-[#f5b400]' };
 }
 
 function ScoreBar({ label, value }: { label: string; value: number }) {
@@ -308,12 +308,12 @@ function SectionCard({
   empty: string;
 }) {
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="rounded-3xl border border-slate-200 bg-white p-5">
       <div className="mb-3 flex items-center gap-2">
         <span
           className={cn(
             'grid size-7 place-items-center rounded-full',
-            accent === 'emerald' ? 'bg-emerald-50 text-emerald-600' : 'bg-orange/10 text-orange',
+            accent === 'emerald' ? 'bg-emerald-50 text-emerald-600' : 'bg-orange/10 text-[#f5b400]',
           )}
         >
           {icon}

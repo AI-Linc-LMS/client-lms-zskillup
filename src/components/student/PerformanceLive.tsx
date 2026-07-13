@@ -61,7 +61,7 @@ export function PerformanceLive() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center rounded-3xl border border-slate-200/80 bg-white p-16 shadow-[0_8px_30px_-18px_rgba(15,23,42,0.35)]">
+      <div className="flex items-center justify-center rounded-3xl border border-slate-200/80 bg-white p-16">
         <Loader2 className="size-5 animate-spin text-slate-400" aria-hidden="true" />
       </div>
     );
@@ -130,7 +130,7 @@ export function PerformanceLive() {
       {/* Topic-wise accuracy */}
       <Reveal>
         <SectionCard
-          glow="#f37021"
+          glow="#f5b400"
           icon={TrendingUp}
           eyebrow="Topic-wise Accuracy"
           title="How each topic is trending"
@@ -187,7 +187,7 @@ export function PerformanceLive() {
                 <motion.div
                   whileHover={{ y: -4 }}
                   transition={{ duration: 0.2 }}
-                  className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-red-200/80 bg-white p-5 shadow-[0_8px_30px_-18px_rgba(190,18,60,0.35)] transition-shadow hover:shadow-[0_18px_50px_-22px_rgba(190,18,60,0.45)]"
+                  className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-red-200/80 bg-white p-5"
                 >
                   <div
                     aria-hidden
@@ -287,7 +287,7 @@ export function PerformanceLive() {
                       <td className="py-3.5 text-right">
                         <Link
                           href={`/dashboard/quiz?report=${m.attemptId}`}
-                          className="inline-flex items-center gap-1 text-xs font-bold text-orange transition-colors hover:text-orange/80"
+                          className="inline-flex items-center gap-1 text-xs font-bold text-[#f5b400] transition-colors hover:text-[#f5b400]/80"
                         >
                           View report
                           <ArrowUpRight className="size-3.5 transition-transform group-hover/row:translate-x-0.5 group-hover/row:-translate-y-0.5" />
@@ -331,10 +331,10 @@ function PerformanceHero({
   }>;
 }) {
   return (
-    <section className="relative isolate overflow-hidden rounded-3xl border border-slate-200/80 bg-[#0b1220] p-6 text-white shadow-[0_30px_90px_-40px_rgba(11,18,32,0.85)] sm:p-7">
+    <section className="relative isolate overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] p-6 text-white sm:p-7">
       {/* aurora orbs */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-24 -top-28 size-72 rounded-full bg-[#f37021]/25 blur-[110px]" />
+        <div className="absolute -left-24 -top-28 size-72 rounded-full bg-[#ffc42d]/25 blur-[110px]" />
         <div className="absolute -right-20 top-0 size-64 rounded-full bg-[#6d3bf5]/30 blur-[110px]" />
         <div className="absolute -bottom-24 left-1/3 size-64 rounded-full bg-[#1e6ff5]/20 blur-[110px]" />
         <div
@@ -440,14 +440,14 @@ function AccuracyRing({ pct, hasData }: { pct: number; hasData: boolean }) {
       {/* glow under the ring */}
       <div
         aria-hidden
-        className="absolute inset-2 rounded-full bg-[#f37021]/25 blur-2xl"
+        className="absolute inset-2 rounded-full bg-[#ffc42d]/25 blur-2xl"
       />
       <svg viewBox="0 0 110 110" className="relative size-full -rotate-90">
         <defs>
           <linearGradient id="perf-ring" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#f7a14e" />
-            <stop offset="55%" stopColor="#f37021" />
-            <stop offset="100%" stopColor="#f5491e" />
+            <stop offset="0%" stopColor="#ffd24d" />
+            <stop offset="55%" stopColor="#ffc42d" />
+            <stop offset="100%" stopColor="#f5b400" />
           </linearGradient>
         </defs>
         <circle cx="55" cy="55" r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="9" />
@@ -467,7 +467,7 @@ function AccuracyRing({ pct, hasData }: { pct: number; hasData: boolean }) {
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
-        <Gauge className="size-7 text-[#ffb877]" aria-hidden="true" />
+        <Gauge className="size-7 text-[#ffd24d]" aria-hidden="true" />
       </div>
     </div>
   );
@@ -490,7 +490,7 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_8px_30px_-18px_rgba(15,23,42,0.35)] transition-shadow hover:shadow-[0_18px_50px_-24px_rgba(15,23,42,0.45)]">
+    <section className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-50/70 via-transparent to-transparent"
@@ -568,7 +568,7 @@ function ScoreMeter({
   const c = 2 * Math.PI * r;
   const clamped = Math.max(0, Math.min(100, pct));
   const offset = c - (c * clamped) / 100;
-  const stroke = expired ? '#f59e0b' : passed ? '#10b981' : '#f37021';
+  const stroke = expired ? '#f59e0b' : passed ? '#10b981' : '#f5b400';
   return (
     <svg viewBox="0 0 32 32" className="size-7 shrink-0 -rotate-90" aria-hidden="true">
       <circle cx="16" cy="16" r={r} fill="none" stroke="rgb(241 245 249)" strokeWidth="4" />
@@ -627,7 +627,7 @@ function barTone(accuracy: number): BarTone {
 /** Darker companion for a hex accent so icon chips read as a true gradient. */
 function shade(hex: string): string {
   const map: Record<string, string> = {
-    '#f37021': '#f5491e',
+    '#f5b400': '#d99a00',
     '#6d3bf5': '#5b3bf5',
     '#2563eb': '#1e6ff5',
   };

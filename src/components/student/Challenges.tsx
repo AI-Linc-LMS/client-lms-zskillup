@@ -38,7 +38,7 @@ export function Challenges() {
   if (list && list.length === 0) return null; // nothing authored yet
 
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(244,63,94,0.3)]">
+    <section className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6">
       {reward ? <RewardOverlay summary={reward} onClose={() => setReward(null)} passed /> : null}
       <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-400" />
       <div
@@ -87,7 +87,7 @@ function ChallengeCard({
     'group relative block overflow-hidden rounded-xl border p-4 text-left transition-all',
     c.completed
       ? 'border-emerald-200 bg-emerald-50/50'
-      : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-rose-300 hover:shadow-md',
+      : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-rose-300',
   );
 
   const inner = (
@@ -229,7 +229,7 @@ function ChallengeSolveModal({
 
   return (
     <motion.div
-      className="fixed inset-0 z-[150] grid place-items-center bg-[#0b1220]/70 px-5 backdrop-blur-sm"
+      className="fixed inset-0 z-[150] grid place-items-center bg-[#0f1117]/70 px-5 backdrop-blur-sm"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}

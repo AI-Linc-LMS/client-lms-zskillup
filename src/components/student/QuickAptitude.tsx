@@ -82,7 +82,7 @@ export function QuickAptitude() {
   };
 
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-violet-200/70 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(124,58,237,0.45)] sm:p-7">
+    <section className="relative overflow-hidden rounded-3xl border border-violet-200/70 bg-white p-6 sm:p-7">
       <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500 via-indigo-500 to-violet-400" />
       <div
         aria-hidden

@@ -80,9 +80,9 @@ export function CompanyReadiness() {
 
   if (loading) {
     return (
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5">
         <div className="flex items-center gap-3 text-sm text-slate-400">
-          <Loader2 className="size-4 animate-spin text-orange" />
+          <Loader2 className="size-4 animate-spin text-[#f5b400]" />
           Checking company readiness…
         </div>
         <div className="mt-4 space-y-3">
@@ -109,12 +109,12 @@ export function CompanyReadiness() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
       transition={{ duration: 0.6, ease: EASE }}
-      className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+      className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 transition-all hover:-translate-y-0.5"
     >
       {/* layered depth: faint wash + a colored glow that intensifies on hover */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-br from-orange/[0.04] via-transparent to-transparent"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#ffc42d]/[0.04] via-transparent to-transparent"
       />
       <div
         aria-hidden
@@ -127,8 +127,8 @@ export function CompanyReadiness() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <span
-              className="grid size-8 place-items-center rounded-xl text-white shadow-sm"
-              style={{ background: 'linear-gradient(135deg, #f7a14e, #f37021)' }}
+              className="grid size-8 place-items-center rounded-xl text-[#171717] shadow-sm"
+              style={{ background: 'linear-gradient(135deg, #ffd24d, #f5b400)' }}
             >
               <Building2 className="size-4" />
             </span>
@@ -152,7 +152,7 @@ export function CompanyReadiness() {
           <motion.div
             whileHover={{ y: -2 }}
             transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-            className="relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white p-4 shadow-sm"
+            className="relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white p-4"
           >
             <div
               aria-hidden
@@ -261,7 +261,7 @@ export function CompanyReadiness() {
             </p>
             <Link
               href="/mock-assessment"
-              className="group/cta inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-[#f7a14e] to-[#f37021] px-4 py-2 text-xs font-bold text-white shadow-[0_10px_24px_-12px_rgba(243,112,33,0.9)] transition-transform active:scale-[0.98]"
+              className="group/cta inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-4 py-2 text-xs font-bold text-[#171717] shadow-[0_10px_24px_-12px_rgba(245,180,0,0.5)] transition-transform active:scale-[0.98]"
             >
               Retake adaptive test
               <ArrowRight className="size-3.5 transition-transform group-hover/cta:translate-x-0.5" />
@@ -345,11 +345,11 @@ function EmptyState() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
       transition={{ duration: 0.6, ease: EASE }}
-      className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 text-center shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+      className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 text-center transition-all hover:-translate-y-0.5"
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute -left-10 -top-12 size-40 rounded-full bg-orange/15 opacity-60 blur-3xl transition-opacity duration-500 group-hover:opacity-100"
+        className="pointer-events-none absolute -left-10 -top-12 size-40 rounded-full bg-[#ffc42d]/15 opacity-60 blur-3xl transition-opacity duration-500 group-hover:opacity-100"
       />
       <div
         aria-hidden
@@ -358,8 +358,8 @@ function EmptyState() {
 
       <div className="relative z-10 flex flex-col items-center">
         <motion.span
-          className="grid size-14 place-items-center rounded-2xl text-white shadow-[0_12px_28px_-12px_rgba(243,112,33,0.8)]"
-          style={{ background: 'linear-gradient(135deg, #f7a14e, #f37021)' }}
+          className="grid size-14 place-items-center rounded-2xl text-[#171717] shadow-[0_12px_28px_-12px_rgba(245,180,0,0.4)]"
+          style={{ background: 'linear-gradient(135deg, #ffd24d, #f5b400)' }}
           initial={{ scale: 0.85, rotate: -6 }}
           whileInView={{ scale: 1, rotate: 0 }}
           viewport={{ once: true }}
@@ -378,7 +378,7 @@ function EmptyState() {
 
         <Link
           href="/mock-assessment"
-          className="group/cta mt-4 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-xs font-bold text-white shadow-[0_12px_28px_-12px_rgba(243,112,33,0.9)] transition-transform active:scale-[0.98]"
+          className="group/cta mt-4 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-5 py-2.5 text-xs font-bold text-[#171717] shadow-[0_12px_28px_-12px_rgba(245,180,0,0.5)] transition-transform active:scale-[0.98]"
         >
           Take adaptive test
           <ArrowRight className="size-3.5 transition-transform group-hover/cta:translate-x-0.5" />

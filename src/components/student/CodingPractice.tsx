@@ -41,7 +41,7 @@ export function CodingPractice() {
     .slice(0, 3);
 
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(99,102,241,0.3)]">
+    <section className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6">
       <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-400" />
       <div
         aria-hidden
@@ -68,7 +68,7 @@ export function CodingPractice() {
             {p.solved ? (
               <CheckCircle2 className="size-4 shrink-0 text-emerald-500" />
             ) : (
-              <span className="shrink-0 text-[11px] font-bold text-orange">+{p.xpReward}</span>
+              <span className="shrink-0 text-[11px] font-bold text-[#f5b400]">+{p.xpReward}</span>
             )}
           </Link>
         ))}

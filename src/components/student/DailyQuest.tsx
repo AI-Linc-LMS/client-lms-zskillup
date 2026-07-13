@@ -36,7 +36,7 @@ export function DailyQuest() {
       <section className="quest-card" data-tour="dash:daily-quest">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-start gap-3">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-brand)] px-3 py-1 text-[11px] font-bold text-white shadow-sm">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-brand)] px-3 py-1 text-[11px] font-bold text-[#171717]">
               <Sparkles className="h-3 w-3" aria-hidden />
               TODAY&apos;S FOCUS
             </span>
@@ -49,7 +49,7 @@ export function DailyQuest() {
               </p>
             </div>
           </div>
-          <Link href="/dashboard/quiz/adaptive?topic=percentages" className="btn-brand inline-flex shrink-0 rounded-full px-5 py-2 text-sm">
+          <Link href="/dashboard/quiz/adaptive?topic=percentages" className="btn-brand inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2 text-sm font-bold text-[#171717]">
             <Zap className="h-4 w-4" aria-hidden />
             Start practising
           </Link>
@@ -65,7 +65,7 @@ export function DailyQuest() {
     <section className="quest-card" data-tour="dash:daily-quest">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-start gap-3">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-brand)] px-3 py-1 text-[11px] font-bold text-white shadow-sm">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-brand)] px-3 py-1 text-[11px] font-bold text-[#171717]">
             {isCompleted ? (
               <CheckCircle2 className="h-3 w-3" aria-hidden />
             ) : isMissed ? (
@@ -91,7 +91,7 @@ export function DailyQuest() {
         {!isCompleted && !isMissed && (
           <Link
             href={questHref(quest)}
-            className="btn-brand inline-flex shrink-0 rounded-full px-5 py-2 text-sm"
+            className="btn-brand inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2 text-sm font-bold text-[#171717]"
           >
             <Zap className="h-4 w-4" aria-hidden />
             {quest.kind === 'MOCK' ? 'Take mock test' : 'Start practising'}

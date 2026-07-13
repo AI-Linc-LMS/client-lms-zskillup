@@ -100,7 +100,7 @@ export function DailyChallenge() {
   };
 
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-sky-200/70 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(14,165,233,0.45)] sm:p-7">
+    <section className="relative overflow-hidden rounded-3xl border border-sky-200/70 bg-white p-6 sm:p-7">
       {reward ? (
         <RewardOverlay summary={reward} onClose={() => setReward(null)} passed />
       ) : null}

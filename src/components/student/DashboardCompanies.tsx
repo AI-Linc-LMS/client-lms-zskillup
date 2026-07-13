@@ -36,17 +36,17 @@ export function DashboardCompanies() {
   };
 
   if (companies === null) {
-    return <div className="grid h-40 place-items-center rounded-3xl border border-slate-200 bg-white shadow-sm"><Loader2 className="size-5 animate-spin text-slate-400" /></div>;
+    return <div className="grid h-40 place-items-center rounded-3xl border border-slate-200 bg-white"><Loader2 className="size-5 animate-spin text-slate-400" /></div>;
   }
   if (companies.length === 0) return null;
 
   return (
-    <div data-tour="dash:companies" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div data-tour="dash:companies" className="rounded-3xl border border-slate-200 bg-white p-5">
       <div className="flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-2xl font-black tracking-tight text-navy">
-          <Building2 className="size-5 text-orange" /> Company drives
+          <Building2 className="size-5 text-[#f5b400]" /> Company drives
         </h3>
-        <Link href="/dashboard/company" className="flex items-center gap-1 text-xs font-bold text-orange hover:underline">
+        <Link href="/dashboard/company" className="flex items-center gap-1 text-xs font-bold text-[#f5b400] hover:underline">
           All companies <ArrowUpRight className="size-3.5" />
         </Link>
       </div>
@@ -60,13 +60,13 @@ export function DashboardCompanies() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-orange/40 hover:shadow-[0_18px_40px_-24px_rgba(243,112,33,0.55)]"
+              className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-orange/40"
             >
               <span aria-hidden className="pointer-events-none absolute -right-10 -top-10 size-28 rounded-full bg-orange/[0.06] blur-2xl transition-opacity group-hover:bg-orange/[0.12]" />
               <div className="relative flex items-start gap-3.5">
                 <Link
                   href={`/dashboard/company/${c.slug}`}
-                  className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-sm"
+                  className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-2xl border border-slate-200 bg-white p-2"
                 >
                   {c.logoUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -76,7 +76,7 @@ export function DashboardCompanies() {
                   )}
                 </Link>
                 <div className="min-w-0 flex-1">
-                  <Link href={`/dashboard/company/${c.slug}`} className="block truncate text-lg font-black tracking-tight text-navy transition-colors group-hover:text-orange">
+                  <Link href={`/dashboard/company/${c.slug}`} className="block truncate text-lg font-black tracking-tight text-navy transition-colors group-hover:text-[#f5b400]">
                     {c.name}
                   </Link>
                   <div className="mt-1 flex flex-wrap items-center gap-1.5">
@@ -99,7 +99,7 @@ export function DashboardCompanies() {
               {(() => {
                 const feats: Array<{ icon: typeof ClipboardList; label: string; tone: string }> = [];
                 if ((c.questionCount ?? 0) > 0) feats.push({ icon: ClipboardList, label: 'Practice', tone: 'text-slate-400' });
-                if ((c.pyqCount ?? 0) > 0) feats.push({ icon: History, label: 'Previous-year', tone: 'text-orange' });
+                if ((c.pyqCount ?? 0) > 0) feats.push({ icon: History, label: 'Previous-year', tone: 'text-[#f5b400]' });
                 if ((c.codingCount ?? 0) > 0) feats.push({ icon: Code2, label: 'Coding', tone: 'text-emerald-500' });
                 return feats.length ? (
                   <div className="relative mt-3.5 flex flex-wrap gap-1.5">
@@ -126,7 +126,7 @@ export function DashboardCompanies() {
                     type="button"
                     onClick={() => setConfirm(c)}
                     disabled={busy === c.slug}
-                    className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#f7a14e] to-[#f37021] py-2.5 text-sm font-extrabold text-white shadow-[0_10px_24px_-12px_rgba(243,112,33,0.9)] transition-transform hover:brightness-105 active:scale-[0.99] disabled:opacity-50"
+                    className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] py-2.5 text-sm font-extrabold text-[#171717] shadow-[0_10px_24px_-12px_rgba(245,180,0,0.5)] transition-transform hover:brightness-105 active:scale-[0.99] disabled:opacity-50"
                   >
                     {busy === c.slug ? <Loader2 className="size-4 animate-spin" /> : 'Register'}
                   </button>
@@ -162,7 +162,7 @@ export function DashboardCompanies() {
                 type="button"
                 onClick={() => register(confirm.slug)}
                 disabled={busy === confirm.slug}
-                className="flex-[1.4] inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-4 py-2.5 text-sm font-extrabold text-white disabled:opacity-60"
+                className="flex-[1.4] inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-4 py-2.5 text-sm font-extrabold text-[#171717] disabled:opacity-60"
               >
                 {busy === confirm.slug ? <Loader2 className="size-4 animate-spin" /> : <><BadgeCheck className="size-4" /> Confirm</>}
               </button>

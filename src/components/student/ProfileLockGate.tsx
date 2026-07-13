@@ -54,7 +54,7 @@ export function ProfileLockGate({
 
       <div className="relative z-10 flex min-h-[60vh] items-center justify-center p-4">
         <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white/95 p-7 text-center shadow-[0_30px_80px_-30px_rgba(11,18,32,0.55)]">
-          <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.8)]">
+          <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-[#ffd24d] via-[#ffc42d] to-[#f5b400] text-[#171717]">
             <Lock className="size-6" />
           </span>
           {/* Leads with the ACTION, not the wall. "{feature} is locked" told a brand-new
@@ -67,11 +67,11 @@ export function ProfileLockGate({
           <div className="mx-auto mt-4 max-w-xs">
             <div className="flex items-center justify-between text-[11px] font-bold">
               <span className="uppercase tracking-wider text-slate-400">Profile</span>
-              <span className="tabular-nums text-orange">{percent}%</span>
+              <span className="tabular-nums text-[#f5b400]">{percent}%</span>
             </div>
             <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] transition-[width] duration-700"
+                className="h-full rounded-full bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] transition-[width] duration-700"
                 style={{ width: `${percent}%` }}
               />
             </div>

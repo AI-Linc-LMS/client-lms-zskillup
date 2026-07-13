@@ -42,8 +42,8 @@ export function AuroraStats() {
       value: s?.level ?? 0,
       sub: s ? `${s.xpIntoLevel.toLocaleString()} / ${s.xpForNextLevel.toLocaleString()} XP` : undefined,
       Icon: Star,
-      from: '#f7a14e',
-      to: '#f37021',
+      from: '#ffd24d',
+      to: '#f5b400',
       info: true,
     },
     { label: 'Total XP', value: s?.totalXp ?? 0, Icon: Zap, from: '#7c6cf5', to: '#5b3bf5', info: true },
@@ -65,7 +65,7 @@ export function AuroraStats() {
         const Icon = t.Icon;
         return (
           <StaggerItem key={t.label}>
-            <div className="group relative h-full overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-[0_22px_50px_-26px_rgba(15,23,42,0.4)]">
+            <div className="group relative h-full overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 transition-all hover:-translate-y-1">
               {/* accent top hairline */}
               <span
                 aria-hidden
@@ -87,7 +87,7 @@ export function AuroraStats() {
               />
               {t.info ? <XpInfoButton className="absolute right-3 top-3 z-10" /> : null}
               <div className="relative">
-                <p className="text-[28px] font-black leading-none tracking-tight text-navy sm:text-[34px]">
+                <p className="text-[28px] font-black leading-none tracking-tight text-[#1a1d29] sm:text-[34px]">
                   <AnimatedNumber value={t.value} />
                 </p>
                 <p className="mt-2 text-[11px] font-bold uppercase tracking-widest text-slate-500">

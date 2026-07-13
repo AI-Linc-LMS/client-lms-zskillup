@@ -132,10 +132,10 @@ export default function AssessmentsPage() {
       <ProfileLockGate feature="Assessments">
       {/* ── Premium navy hero with live stats ─────────────────────────────── */}
       <Reveal>
-        <section data-tour="assess:hero" className="relative mt-4 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-sm sm:p-8">
+        <section data-tour="assess:hero" className="relative mt-4 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] p-6 text-white sm:p-8">
           <span
             aria-hidden
-            className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#f37021]/20 blur-3xl"
+            className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#ffc42d]/20 blur-3xl"
           />
           <span
             aria-hidden
@@ -143,7 +143,7 @@ export default function AssessmentsPage() {
           />
           <div className="relative">
             <div className="flex items-center gap-3">
-              <span className="grid size-11 place-items-center rounded-2xl border border-white/10 bg-white/5 text-[#ffb877]">
+              <span className="grid size-11 place-items-center rounded-2xl border border-white/10 bg-white/5 text-[#ffc42d]">
                 <CalendarDays className="size-5" />
               </span>
               <div>
@@ -191,7 +191,7 @@ export default function AssessmentsPage() {
         <div className="mt-6 flex flex-col gap-6">
           {/* ── Month grid ──────────────────────────────────────────────── */}
           <Reveal className="order-2">
-            <div data-tour="assess:calendar" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <div data-tour="assess:calendar" className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
@@ -277,7 +277,7 @@ export default function AssessmentsPage() {
                             isToday
                               ? 'bg-navy text-white'
                               : has
-                                ? 'text-orange'
+                                ? 'text-[#f5b400]'
                                 : isWeekend
                                   ? 'text-slate-300'
                                   : 'text-slate-500',
@@ -286,7 +286,7 @@ export default function AssessmentsPage() {
                           {date.getDate()}
                         </span>
                         {has && (
-                          <span className="size-1.5 rounded-full bg-orange shadow-[0_0_0_3px_rgba(243,112,33,0.15)]" />
+                          <span className="size-1.5 rounded-full bg-orange shadow-[0_0_0_3px_rgba(255,196,45,0.2)]" />
                         )}
                       </div>
                       {has ? (
@@ -311,7 +311,7 @@ export default function AssessmentsPage() {
                   <button
                     type="button"
                     onClick={() => setSelectedDay(null)}
-                    className="ml-auto font-semibold text-orange hover:underline"
+                    className="ml-auto font-semibold text-[#f5b400] hover:underline"
                   >
                     Clear selection
                   </button>
@@ -326,7 +326,7 @@ export default function AssessmentsPage() {
               {selectedDay ? fmtDate(`${selectedDay}T00:00:00`) : 'Upcoming drives'}
             </h2>
             {upcoming.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center shadow-sm">
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center">
                 <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-slate-50 text-slate-300 ring-1 ring-slate-100">
                   <CalendarDays className="size-6" />
                 </span>
@@ -336,7 +336,7 @@ export default function AssessmentsPage() {
                 </p>
                 <Link
                   href="/dashboard/company"
-                  className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-orange hover:underline"
+                  className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#f5b400] hover:underline"
                 >
                   Browse companies →
                 </Link>
@@ -357,7 +357,7 @@ export default function AssessmentsPage() {
                     <StaggerItem key={it.id}>
                       <div
                         className={cn(
-                          'relative overflow-hidden rounded-2xl border bg-white p-4 shadow-sm transition-all',
+                          'relative overflow-hidden rounded-2xl border bg-white p-4 transition-all',
                           live ? 'border-orange/40' : 'border-slate-200',
                           dimmed ? 'opacity-40' : 'opacity-100',
                         )}
@@ -365,7 +365,7 @@ export default function AssessmentsPage() {
                         {live && (
                           <span
                             aria-hidden
-                            className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-[#f7a14e] to-[#f37021]"
+                            className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-[#ffd24d] via-[#ffc42d] to-[#f5b400]"
                           />
                         )}
                         <div className="flex items-center gap-2.5">
@@ -411,7 +411,7 @@ export default function AssessmentsPage() {
                         ) : live && it.mockTestId ? (
                           <Link
                             href={`/dashboard/quiz?mock=${it.mockTestId}${it.proctored ? '&proctored=1' : ''}`}
-                            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-3 py-2 text-xs font-extrabold text-white transition-transform hover:brightness-105"
+                            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-3 py-2 text-xs font-extrabold text-[#171717] transition-transform hover:brightness-105"
                           >
                             <ShieldCheck className="size-4" /> Start assessment now
                           </Link>
@@ -430,7 +430,7 @@ export default function AssessmentsPage() {
                             {it.companySlug ? (
                               <Link
                                 href={`/dashboard/company/${it.companySlug}`}
-                                className="flex items-center gap-1 text-xs font-bold text-navy transition-colors hover:text-orange"
+                                className="flex items-center gap-1 text-xs font-bold text-navy transition-colors hover:text-[#f5b400]"
                               >
                                 <ShieldCheck className="size-3.5" /> View hub
                               </Link>

@@ -70,7 +70,7 @@ export function PerformanceDashboard() {
         {/* Bento grid — accuracy card spans 2 cols, trend fills the rest */}
         <div className="grid gap-5 lg:grid-cols-3">
           {/* Practice accuracy — featured, spans 2 columns */}
-          <div data-tour="perf:practice-accuracy" className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(79,70,229,0.25)] lg:col-span-2">
+          <div data-tour="perf:practice-accuracy" className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 lg:col-span-2">
             <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 to-indigo-400" />
             <span
               aria-hidden
@@ -91,7 +91,7 @@ export function PerformanceDashboard() {
           </div>
 
           {/* Mock score trend */}
-          <div data-tour="perf:score-trend" className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_-30px_rgba(79,70,229,0.25)]">
+          <div data-tour="perf:score-trend" className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6">
             <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 to-indigo-400" />
             <div className="flex items-center justify-between gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-indigo-600 ring-1 ring-inset ring-indigo-100">
@@ -157,7 +157,7 @@ export function PerformanceDashboard() {
           <h2 className="mb-4 flex items-center gap-2.5 text-lg font-extrabold tracking-tight text-navy sm:text-xl">
             <AlertTriangle className="size-5 text-amber-500" /> Focus areas
           </h2>
-          <div className="relative overflow-hidden rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-50/80 to-orange-50/40 p-6 shadow-[0_18px_50px_-30px_rgba(217,119,6,0.3)]">
+          <div className="relative overflow-hidden rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-50/80 to-orange-50/40 p-6">
             <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-500 to-orange-400" />
             <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-amber-700 ring-1 ring-inset ring-amber-200">
               <AlertTriangle className="size-3.5" /> Under 60%

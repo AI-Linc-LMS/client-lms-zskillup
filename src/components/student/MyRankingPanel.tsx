@@ -28,7 +28,7 @@ export function MyRankingPanel() {
   if (errored) return null;
   if (!data) {
     return (
-      <div className="flex h-40 items-center justify-center rounded-3xl border border-slate-200/80 bg-white shadow-sm">
+      <div className="flex h-40 items-center justify-center rounded-3xl border border-slate-200/80 bg-white">
         <Loader2 className="size-5 animate-spin text-slate-400" />
       </div>
     );
@@ -37,8 +37,8 @@ export function MyRankingPanel() {
   return (
     <div className="space-y-4">
       {/* Your rank hero */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-5 text-white shadow-sm sm:p-6">
-        <span aria-hidden className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-[#ffb877]/20 blur-3xl" />
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] p-5 text-white sm:p-6">
+        <span aria-hidden className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-[#ffc42d]/20 blur-3xl" />
         <div className="relative flex items-center justify-between gap-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Your rank</p>
@@ -66,17 +66,17 @@ export function MyRankingPanel() {
               <p className="mt-2 text-xs text-white/55">Take an assessment or practice to join the board.</p>
             )}
           </div>
-          <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-white/10 text-[#ffb877] ring-1 ring-inset ring-white/15">
+          <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-white/10 text-[#ffc42d] ring-1 ring-inset ring-white/15">
             <Trophy className="size-6" />
           </span>
         </div>
       </div>
 
       {/* Top of the board */}
-      <div className="rounded-3xl border border-slate-200/80 bg-white p-4 shadow-sm">
+      <div className="rounded-3xl border border-slate-200/80 bg-white p-4">
         <div className="mb-2 flex items-center justify-between">
           <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Top students</p>
-          <Link href="/leaderboard" className="inline-flex items-center gap-1 text-[11px] font-bold text-orange hover:underline">
+          <Link href="/leaderboard" className="inline-flex items-center gap-1 text-[11px] font-bold text-orange-600 hover:underline">
             Full leaderboard <ArrowUpRight className="size-3" />
           </Link>
         </div>
@@ -124,7 +124,7 @@ function RankRow({ e }: { e: ApiLeaderboardEntry }) {
       </span>
       <span className={cn('min-w-0 flex-1 truncate text-sm font-semibold', e.isYou ? 'text-navy' : 'text-slate-700')}>
         {e.fullName ?? 'Student'}
-        {e.isYou ? <span className="ml-1 text-[10px] font-bold text-orange">You</span> : null}
+        {e.isYou ? <span className="ml-1 text-[10px] font-bold text-orange-600">You</span> : null}
       </span>
       <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 tabular-nums">
         <Zap className="size-3.5 fill-amber-400 text-amber-500" /> {e.totalXp.toLocaleString()}

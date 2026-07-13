@@ -62,13 +62,13 @@ export default function AssessmentLeaderboardPage({ params }: { params: Promise<
       />
 
       {/* Hero */}
-      <section className="relative mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-[0_24px_60px_-30px_rgba(11,18,32,0.85)] sm:p-8">
+      <section className="relative mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] p-6 text-white sm:p-8">
         <div aria-hidden className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-1/4 -top-1/2 size-[44vw] rounded-full bg-[#f37021]/20 blur-[120px]" />
+          <div className="absolute -left-1/4 -top-1/2 size-[44vw] rounded-full bg-[#ffc42d]/20 blur-[120px]" />
           <div className="absolute -right-1/4 -bottom-1/2 size-[40vw] rounded-full bg-[#2563eb]/20 blur-[120px]" />
         </div>
         <div className="relative z-10">
-          <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#ffb877]">
+          <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#ffc42d]">
             <Trophy className="size-3.5" /> Assessment leaderboard
           </p>
           <h1 className="mt-1.5 text-2xl font-black tracking-tight sm:text-3xl">{lb.assessment.title}</h1>
@@ -79,7 +79,7 @@ export default function AssessmentLeaderboardPage({ params }: { params: Promise<
               <span className="text-sm font-bold">Your result</span>
               <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-extrabold">Rank #{lb.myRank}</span>
               {lb.myPercentile != null ? (
-                <span className="rounded-full bg-[#ffb877]/20 px-2.5 py-1 text-xs font-extrabold text-[#ffb877]">
+                <span className="rounded-full bg-[#ffc42d]/20 px-2.5 py-1 text-xs font-extrabold text-[#ffc42d]">
                   {lb.myPercentile}th percentile
                 </span>
               ) : null}
@@ -99,7 +99,7 @@ export default function AssessmentLeaderboardPage({ params }: { params: Promise<
               <div
                 key={e.userId}
                 className={cn(
-                  'flex flex-col items-center rounded-2xl border bg-white p-4 text-center shadow-sm',
+                  'flex flex-col items-center rounded-2xl border bg-white p-4 text-center',
                   place === 1 ? 'border-amber-300 sm:-translate-y-2' : 'border-slate-200',
                 )}
               >
@@ -117,7 +117,7 @@ export default function AssessmentLeaderboardPage({ params }: { params: Promise<
 
       {/* Section-wise percentile */}
       {lb.sections.length ? (
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Your section-wise percentile</p>
           <ul className="mt-3 space-y-3">
             {lb.sections.map((s) => (
@@ -139,10 +139,10 @@ export default function AssessmentLeaderboardPage({ params }: { params: Promise<
       ) : null}
 
       {/* Full ranking */}
-      <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Rankings</p>
-          <Link href="/assessments" className="inline-flex items-center gap-1 text-xs font-bold text-orange hover:underline">
+          <Link href="/assessments" className="inline-flex items-center gap-1 text-xs font-bold text-[#f5b400] hover:underline">
             <ArrowLeft className="size-3.5" /> Calendar
           </Link>
         </div>

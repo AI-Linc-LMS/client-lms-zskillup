@@ -37,9 +37,9 @@ export default function HowXpWorksPage() {
       </Link>
 
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-7 text-white shadow-[0_24px_60px_-30px_rgba(11,18,32,0.85)] sm:p-9">
+      <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] p-7 text-white sm:p-9">
         <div aria-hidden className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-1/4 -top-1/2 size-[38vw] rounded-full bg-[#f37021]/20 blur-[110px]" />
+          <div className="absolute -left-1/4 -top-1/2 size-[38vw] rounded-full bg-[#ffc42d]/20 blur-[110px]" />
           <div className="absolute -right-1/4 -bottom-1/2 size-[34vw] rounded-full bg-[#7c3aed]/20 blur-[110px]" />
         </div>
         <div className="relative">
@@ -69,7 +69,7 @@ export default function HowXpWorksPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <EarnCard
           icon={<Target className="size-5" />}
-          tint="#f37021"
+          tint="#f5b400"
           title="Practice questions"
           headline="+10 XP"
           sub="per correct answer"
@@ -113,7 +113,7 @@ export default function HowXpWorksPage() {
       {/* Streak multiplier callout */}
       <div className="mt-4 overflow-hidden rounded-2xl border border-orange/30 bg-gradient-to-r from-orange/10 to-transparent p-5">
         <div className="flex items-start gap-3">
-          <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-sm">
+          <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#ffd24d] via-[#ffc42d] to-[#f5b400] text-[#171717] shadow-sm">
             <Flame className="size-5" />
           </span>
           <div>
@@ -129,7 +129,7 @@ export default function HowXpWorksPage() {
 
       {/* Levels */}
       <h2 className="mt-10 mb-3 text-sm font-bold uppercase tracking-widest text-slate-400">How levels work</h2>
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6">
         <div className="flex flex-wrap items-center gap-3">
           <span className="grid size-11 place-items-center rounded-2xl bg-blue-50 text-blue-600">
             <TrendingUp className="size-5" />
@@ -146,7 +146,7 @@ export default function HowXpWorksPage() {
         </div>
         <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50/70 p-4 text-sm text-slate-600">
           <p className="flex items-center gap-1.5 font-semibold text-navy">
-            <Gauge className="size-4 text-orange" /> Example
+            <Gauge className="size-4 text-[#f5b400]" /> Example
           </p>
           <p className="mt-1 leading-relaxed">
             At <b>4,922 XP</b> you&apos;re <b>Level 7</b> (level 7 starts at 4,900 XP). You need{' '}
@@ -157,7 +157,7 @@ export default function HowXpWorksPage() {
 
       {/* Coins + Badges */}
       <div className="mt-4 grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6">
           <div className="flex items-center gap-3">
             <span className="grid size-11 place-items-center rounded-2xl bg-amber-50 text-amber-600">
               <Coins className="size-5" />
@@ -166,10 +166,10 @@ export default function HowXpWorksPage() {
           </div>
           <p className="mt-3 text-sm leading-relaxed text-slate-600">
             You earn <b>10 coins</b> for each daily quest you complete. Coins are separate from XP — they don&apos;t
-            affect your level. Put them toward a plan in <Link href="/shop" className="font-semibold text-orange hover:underline">Explore Plans</Link>.
+            affect your level. Put them toward a plan in <Link href="/shop" className="font-semibold text-[#f5b400] hover:underline">Explore Plans</Link>.
           </p>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6">
           <div className="flex items-center gap-3">
             <span className="grid size-11 place-items-center rounded-2xl bg-emerald-50 text-emerald-600">
               <Trophy className="size-5" />
@@ -188,7 +188,7 @@ export default function HowXpWorksPage() {
       </div>
 
       {/* In-quiz points note */}
-      <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5">
         <h3 className="flex items-center gap-1.5 text-sm font-black text-navy">
           <BookOpen className="size-4 text-slate-400" /> A note on the live points meter
         </h3>
@@ -208,7 +208,7 @@ export default function HowXpWorksPage() {
 
 function MetricCard({ icon, tint, label, desc }: { icon: React.ReactNode; tint: string; label: string; desc: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white p-3.5">
       <span className="grid size-8 place-items-center rounded-lg" style={{ background: `color-mix(in srgb, ${tint} 12%, white)`, color: tint }}>
         {icon}
       </span>
@@ -236,7 +236,7 @@ function EarnCard({
   foot: string;
 }) {
   return (
-    <div className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5">
       <div className="flex items-center gap-3">
         <span className="grid size-11 place-items-center rounded-2xl text-white shadow-sm" style={{ background: tint }}>
           {icon}

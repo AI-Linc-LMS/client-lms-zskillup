@@ -45,7 +45,7 @@ export function KpiRow() {
       label: 'XP earned',
       value: stats ? stats.totalXp : null,
       sub: stats ? `Level ${stats.level} · ${stats.badgesEarned} badge${stats.badgesEarned === 1 ? '' : 's'}` : 'Complete quests to earn XP',
-      accent: '#1e3a8a',
+      accent: '#1a1a1a',
     },
     {
       label: 'Day streak',
@@ -60,7 +60,7 @@ export function KpiRow() {
         mocks && mocks.taken > 0
           ? `Best score ${mocks.best}%`
           : 'Take your first timed mock',
-      accent: '#f37021',
+      accent: '#f5b400',
     },
   ];
 

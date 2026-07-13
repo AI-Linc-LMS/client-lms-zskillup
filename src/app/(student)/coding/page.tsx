@@ -30,7 +30,7 @@ export default async function CodingPracticePage({ searchParams }: PageProps) {
       />
 
       <Reveal>
-        <section data-tour="coding:hero" className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-sm sm:p-8">
+        <section data-tour="coding:hero" className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] p-6 text-white sm:p-8">
           <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#6d3bf5]/25 blur-3xl" />
           <span aria-hidden className="pointer-events-none absolute -bottom-20 left-1/4 size-56 rounded-full bg-[#4f7bf5]/20 blur-3xl" />
           <div className="relative">

@@ -78,9 +78,9 @@ export default async function PracticePage({ searchParams }: PageProps) {
 
       <ProfileLockGate feature="Practice" contentClassName="space-y-8">
       <Reveal>
-        <section data-tour="practice:hero" className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-sm sm:p-8">
+        <section data-tour="practice:hero" className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] p-6 text-white sm:p-8">
           <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#6d3bf5]/25 blur-3xl" />
-          <span aria-hidden className="pointer-events-none absolute -bottom-20 left-1/4 size-56 rounded-full bg-[#f37021]/20 blur-3xl" />
+          <span aria-hidden className="pointer-events-none absolute -bottom-20 left-1/4 size-56 rounded-full bg-[#ffc42d]/20 blur-3xl" />
           <div className="relative">
             <div className="flex items-center gap-3">
               <span className="grid size-11 place-items-center rounded-2xl border border-white/10 bg-white/5 text-[#c9b6ff]">
@@ -103,7 +103,7 @@ export default async function PracticePage({ searchParams }: PageProps) {
               <div className="mt-6">
                 <Link
                   href={`/dashboard/quiz/adaptive?company=${encodeURIComponent(activeCompany.slug)}`}
-                  className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-extrabold text-[#16223f] transition-transform hover:-translate-y-0.5"
+                  className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-extrabold text-[#1a1d29] transition-transform hover:-translate-y-0.5"
                 >
                   <Target className="size-4" /> Start {activeCompany.name}-wide practice
                 </Link>

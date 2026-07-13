@@ -63,9 +63,9 @@ export function TodaysTip() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
       transition={{ duration: 0.5 }}
-      className="group relative overflow-hidden rounded-3xl border border-amber-200/70 bg-gradient-to-br from-amber-50 to-white p-6 shadow-[0_18px_50px_-30px_rgba(245,158,11,0.5)] sm:p-7"
+      className="group relative overflow-hidden rounded-3xl border border-amber-200/70 bg-gradient-to-br from-amber-50 to-white p-6 sm:p-7"
     >
-      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400" />
+      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-400 via-[#f5b400] to-amber-400" />
       <div
         aria-hidden
         className="pointer-events-none absolute -right-10 -top-10 size-36 rounded-full bg-amber-300/30 blur-3xl transition-opacity group-hover:opacity-80"
@@ -82,7 +82,7 @@ export function TodaysTip() {
       ) : (
         <div className="relative flex items-start gap-4">
           <motion.span
-            className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-[0_10px_24px_-10px_rgba(245,158,11,0.9)]"
+            className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717] shadow-[0_10px_24px_-10px_rgba(245,158,11,0.9)]"
             animate={{ rotate: [0, -8, 8, 0] }}
             transition={{ duration: 0.8, delay: 0.3 }}
           >
@@ -100,7 +100,7 @@ export function TodaysTip() {
             {tip.ctaLabel && tip.ctaHref ? (
               <Link
                 href={tip.ctaHref}
-                className="mt-2.5 inline-flex items-center gap-1 text-sm font-bold text-orange-600 transition-colors hover:text-orange-700"
+                className="mt-2.5 inline-flex items-center gap-1 text-sm font-bold text-amber-600 transition-colors hover:text-amber-700"
               >
                 {tip.ctaLabel}
                 <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />

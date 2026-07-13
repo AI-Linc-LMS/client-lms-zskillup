@@ -214,9 +214,9 @@ export default function ProfilePage() {
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Profile' }]} />
 
       {/* ── Hero header ──────────────────────────────────────────────────── */}
-      <section data-tour="profile:hero" className="relative mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-[0_24px_60px_-30px_rgba(11,18,32,0.85)] sm:p-7">
+      <section data-tour="profile:hero" className="relative mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] p-6 text-white sm:p-7">
         <div aria-hidden className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-1/4 -top-1/2 size-[40vw] rounded-full bg-[#f37021]/20 blur-[110px]" />
+          <div className="absolute -left-1/4 -top-1/2 size-[40vw] rounded-full bg-[#ffc42d]/20 blur-[110px]" />
           <div className="absolute -right-1/4 -bottom-1/2 size-[36vw] rounded-full bg-[#2563eb]/20 blur-[110px]" />
         </div>
         <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center">
@@ -335,7 +335,7 @@ export default function ProfilePage() {
         {/* ── Aside ──────────────────────────────────────────────────────── */}
         <aside className="space-y-4">
           {completion < 100 && (
-            <div data-tour="profile:completion" className="rounded-3xl border border-orange/25 bg-gradient-to-b from-orange/[0.06] to-white p-5 shadow-sm">
+            <div data-tour="profile:completion" className="rounded-3xl border border-orange/25 bg-gradient-to-b from-orange/[0.06] to-white p-5">
               <h2 className="flex items-center justify-between text-sm font-bold text-navy">
                 Profile completion
                 <span className="rounded-full bg-orange/15 px-2 py-0.5 text-[11px] font-bold tabular-nums text-orange">{completion}%</span>
@@ -354,9 +354,9 @@ export default function ProfilePage() {
           )}
 
           <MySubscriptionCard />
-          <ActiveSubscriptions className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm" />
+          <ActiveSubscriptions className="rounded-3xl border border-slate-200 bg-white p-5" />
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="rounded-3xl border border-slate-200 bg-white p-5">
             <h2 className="flex items-center gap-1.5 text-sm font-bold text-navy">
               <Building2 className="size-4 text-orange" /> My drives
             </h2>
@@ -414,7 +414,7 @@ export default function ProfilePage() {
                 <button
                   onClick={save}
                   disabled={saving}
-                  className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2 text-sm font-extrabold text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.8)] disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-5 py-2 text-sm font-extrabold text-[#171717] shadow-[0_10px_24px_-10px_rgba(245,180,0,0.5)] disabled:opacity-60"
                 >
                   {saving ? <Loader2 className="size-4 animate-spin" /> : 'Save changes'}
                 </button>
@@ -444,7 +444,7 @@ function SectionCard({
   'data-tour'?: string;
 }) {
   return (
-    <section data-tour={dataTour} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section data-tour={dataTour} className="rounded-3xl border border-slate-200 bg-white p-6">
       <div className="mb-4 flex items-center gap-3">
         <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-orange/10 text-orange">
           <Icon className="size-[18px]" />
@@ -558,7 +558,7 @@ function CompletionRing({ pct }: { pct: number }) {
             cy={32}
             r={r}
             fill="none"
-            stroke={pct >= 100 ? '#34d399' : '#ffb877'}
+            stroke={pct >= 100 ? '#34d399' : '#f5b400'}
             strokeWidth={6}
             strokeLinecap="round"
             strokeDasharray={circ}

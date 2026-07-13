@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Building2,
   ChevronDown,
@@ -66,7 +66,7 @@ function Avatar({ entry, size = 44 }: { entry: ApiLeaderboardEntry; size?: numbe
   return (
     <span
       style={px}
-      className="grid place-items-center rounded-full bg-gradient-to-br from-orange to-[#f7a14e] text-sm font-black text-white ring-2 ring-white"
+      className="grid place-items-center rounded-full bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-sm font-black text-[#171717] ring-2 ring-white"
     >
       {entry.initials}
     </span>
@@ -142,21 +142,21 @@ export default function LeaderboardPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       {/* ── Hero rank card ─────────────────────────────────────────────────── */}
-      <section data-tour="lb:rank-hero" className="overflow-hidden rounded-3xl border border-orange/20 bg-gradient-to-br from-orange-50 via-amber-50/60 to-white p-6 shadow-sm sm:p-8">
+      <section data-tour="lb:rank-hero" className="overflow-hidden rounded-3xl border border-orange/20 bg-gradient-to-br from-orange-50 via-amber-50/60 to-white p-6 sm:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-orange lg:hidden">
+          <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[#f5b400] lg:hidden">
             <Globe2 className="size-3.5" /> {scopeLabel}
           </div>
           {/* Rank */}
           <div className="min-w-[180px]">
-            <p className="hidden items-center gap-2 text-[11px] font-black uppercase tracking-widest text-orange lg:flex">
+            <p className="hidden items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[#f5b400] lg:flex">
               <Globe2 className="size-3.5" /> {scopeLabel}
               {season && <span className="text-slate-400">· Week {season.week}</span>}
             </p>
             {myRank ? (
               <>
                 <p className="mt-1 text-sm font-semibold text-slate-500">You&apos;re Ranked</p>
-                <p className="text-6xl font-black leading-none text-orange">#{myRank}</p>
+                <p className="text-6xl font-black leading-none text-[#f5b400]">#{myRank}</p>
                 {topPct != null && (
                   <span className="mt-3 inline-block rounded-full bg-white px-3 py-1 text-xs font-bold text-navy shadow-sm ring-1 ring-orange/20">
                     Top {topPct}% of {fmt(data?.totalStudents ?? 0)} learners
@@ -178,11 +178,11 @@ export default function LeaderboardPage() {
             {xpAway != null && nextEntry ? (
               <>
                 <p className="text-sm text-slate-600">
-                  You&apos;re only <span className="text-2xl font-black text-orange">{fmt(xpAway)} XP</span>
+                  You&apos;re only <span className="text-2xl font-black text-[#f5b400]">{fmt(xpAway)} XP</span>
                 </p>
                 <p className="text-sm font-semibold text-slate-500">away from Rank #{nextEntry.rank}</p>
                 <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-orange/10">
-                  <div className="h-full rounded-full bg-gradient-to-r from-orange to-[#f7a14e]" style={{ width: `${progress}%` }} />
+                  <div className="h-full rounded-full bg-gradient-to-r from-[#ffc42d] to-[#f5b400]" style={{ width: `${progress}%` }} />
                 </div>
                 <div className="mt-1 flex justify-between text-[11px] font-semibold tabular-nums text-slate-400">
                   <span>{fmt(myEntry?.totalXp ?? 0)} XP</span>
@@ -198,7 +198,7 @@ export default function LeaderboardPage() {
 
           {/* Reset + trophy */}
           <div className="flex items-center gap-4">
-            <div className="rounded-2xl bg-white/80 px-4 py-3 text-center shadow-sm ring-1 ring-slate-100">
+            <div className="rounded-2xl bg-white/80 px-4 py-3 text-center ring-1 ring-slate-100">
               <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Resets in</p>
               <p className="text-lg font-black text-navy">
                 {season ? `${season.days}d ${season.hours}h` : '—'}
@@ -218,7 +218,7 @@ export default function LeaderboardPage() {
               key={key}
               onClick={() => setScope(key)}
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition ${
-                scope === key ? 'bg-orange text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:border-orange/40 hover:text-navy'
+                scope === key ? 'bg-orange text-[#171717] shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:border-orange/40 hover:text-navy'
               }`}
             >
               <Icon className="size-4" /> {label}
@@ -258,12 +258,12 @@ export default function LeaderboardPage() {
 
       {loading ? (
         <div className="grid h-64 place-items-center">
-          <Loader2 className="size-7 animate-spin text-orange" />
+          <Loader2 className="size-7 animate-spin text-[#f5b400]" />
         </div>
       ) : data?.needsCollege ? (
         /* "My College" with no college on the account. This used to silently show
            the NATIONAL board; now we say so and send them to fix it. */
-        <div className="rounded-3xl border border-amber-200 bg-amber-50/60 p-12 text-center shadow-sm">
+        <div className="rounded-3xl border border-amber-200 bg-amber-50/60 p-12 text-center">
           <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-amber-100 text-amber-700">
             <GraduationCap className="size-6" />
           </span>
@@ -274,19 +274,19 @@ export default function LeaderboardPage() {
           </p>
           <Link
             href="/profile"
-            className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-orange px-5 py-2.5 text-sm font-bold text-white transition hover:bg-orange/90"
+            className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-orange px-5 py-2.5 text-sm font-bold text-[#171717] transition hover:bg-[#f5b400]"
           >
             Select your college <ArrowRight className="size-4" />
           </Link>
         </div>
       ) : entries.length === 0 ? (
-        <div className="rounded-3xl border border-slate-200 bg-white p-16 text-center text-sm text-slate-400 shadow-sm">
+        <div className="rounded-3xl border border-slate-200 bg-white p-16 text-center text-sm text-slate-400">
           No ranked learners here yet — be the first to earn XP.
         </div>
       ) : (
         <>
           {/* ── Podium ───────────────────────────────────────────────────────── */}
-          <section data-tour="lb:podium" className="rounded-3xl border border-slate-200 bg-white p-6 pb-0 shadow-sm">
+          <section data-tour="lb:podium" className="rounded-3xl border border-slate-200 bg-white p-6 pb-0">
             <div className="mx-auto grid max-w-2xl grid-cols-3 items-end gap-3 sm:gap-6">
               {[podium[1], podium[0], podium[2]].map((e, i) => {
                 if (!e) return <div key={i} />;
@@ -306,7 +306,7 @@ export default function LeaderboardPage() {
                     </div>
                     <p className="mt-3 max-w-[9rem] truncate text-center text-sm font-bold text-navy">{e.fullName ?? 'Learner'}</p>
                     <p className="max-w-[9rem] truncate text-center text-xs text-slate-400">{e.collegeName ?? '—'}</p>
-                    <p className={`mt-1 font-black tabular-nums ${first ? 'text-lg text-orange' : 'text-navy'}`}>{fmt(e.totalXp)} XP</p>
+                    <p className={`mt-1 font-black tabular-nums ${first ? 'text-lg text-[#f5b400]' : 'text-navy'}`}>{fmt(e.totalXp)} XP</p>
                     <div className={`mt-2 w-full rounded-t-xl bg-gradient-to-b ${cfg.pedestal}`} />
                   </div>
                 );
@@ -317,7 +317,7 @@ export default function LeaderboardPage() {
           {/* ── YOU card ─────────────────────────────────────────────────────── */}
           {myEntry && (
             <section data-tour="lb:you-card" className="flex flex-wrap items-center gap-4 rounded-2xl border-2 border-orange/40 bg-orange-50/50 p-4">
-              <span className="rounded-lg bg-orange px-2 py-1 text-[11px] font-black text-white">YOU</span>
+              <span className="rounded-lg bg-orange px-2 py-1 text-[11px] font-black text-[#171717]">YOU</span>
               <Avatar entry={myEntry} size={44} />
               <div className="min-w-0">
                 <p className="truncate font-bold text-navy">{myEntry.fullName ?? 'You'}</p>
@@ -334,8 +334,8 @@ export default function LeaderboardPage() {
                     <p className="text-xs text-slate-500">{fmt(xpAway)} XP to reach Rank #{nextEntry.rank}</p>
                   )}
                 </div>
-                <div className="flex items-center gap-1.5 text-orange">
-                  <Flame className="size-5 fill-orange/20" />
+                <div className="flex items-center gap-1.5 text-[#ff7a1a]">
+                  <Flame className="size-5 fill-[#ff7a1a]/20" />
                   <span className="font-black">{myEntry.currentStreakDays}</span>
                   <span className="text-xs font-semibold text-slate-500">day{myEntry.currentStreakDays === 1 ? '' : 's'}</span>
                 </div>
@@ -344,7 +344,7 @@ export default function LeaderboardPage() {
           )}
 
           {/* ── Table ────────────────────────────────────────────────────────── */}
-          <section data-tour="lb:table" className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <section data-tour="lb:table" className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[720px] text-sm">
                 <thead>
@@ -366,7 +366,7 @@ export default function LeaderboardPage() {
                         <div className="flex items-center gap-2.5">
                           <Avatar entry={e} size={32} />
                           <span className="font-semibold text-navy">{e.fullName ?? 'Learner'}</span>
-                          {e.isYou && <span className="rounded bg-orange px-1.5 py-0.5 text-[10px] font-black text-white">You</span>}
+                          {e.isYou && <span className="rounded bg-orange px-1.5 py-0.5 text-[10px] font-black text-[#171717]">You</span>}
                         </div>
                       </td>
                       <td className="px-2 py-3 text-slate-500">{e.collegeName ?? 'No college set'}</td>
@@ -376,7 +376,7 @@ export default function LeaderboardPage() {
                       <td className="px-2 py-3 text-right font-bold tabular-nums text-navy">{fmt(e.totalXp)} XP</td>
                       <td className="px-2 py-3">
                         {e.currentStreakDays > 0 ? (
-                          <span className="inline-flex items-center gap-1 text-sm font-semibold text-orange">
+                          <span className="inline-flex items-center gap-1 text-sm font-semibold text-[#ff7a1a]">
                             <Flame className="size-4" /> {e.currentStreakDays} day{e.currentStreakDays === 1 ? '' : 's'}
                           </span>
                         ) : (
