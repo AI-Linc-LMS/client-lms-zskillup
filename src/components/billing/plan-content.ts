@@ -44,7 +44,7 @@ export const PLAN_INCLUDED = [
   { icon: ClipboardList, title: 'Full-length mocks', desc: 'Timed, exam-style simulations with detailed reports.' },
   { icon: BarChart3, title: 'Performance analytics', desc: 'Track readiness, accuracy and weak spots over time.' },
   { icon: Trophy, title: 'All-India leaderboards', desc: 'See where you stand against your cohort and beyond.' },
-  { icon: CalendarCheck, title: 'Personalized study plan', desc: 'A day-by-day roadmap generated from your calibration.' },
+  { icon: CalendarCheck, title: 'Personalized study plan', desc: 'A day-by-day roadmap generated from your placement readiness.' },
 ];
 
 export const PLAN_VALUES = [

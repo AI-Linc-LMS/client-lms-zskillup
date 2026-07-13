@@ -127,7 +127,7 @@ export function UpgradeModal({
           </div>
 
           <p className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
-            <Lock className="size-3" /> You keep your calibration results and progress either way.
+            <Lock className="size-3" /> You keep your placement readiness results and progress either way.
           </p>
         </div>
       </div>

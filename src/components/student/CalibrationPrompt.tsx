@@ -52,7 +52,7 @@ export function CalibrationPrompt() {
         </span>
         <h2 className="mt-4 text-xl font-black tracking-tight text-[#1a1d29]">Find out where you stand</h2>
         <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-500">
-          Take a one-time calibration assessment. We&apos;ll measure your readiness across every section, show which
+          Take a one-time placement readiness test. We&apos;ll measure your readiness across every section, show which
           companies you&apos;re aligned with, and personalize your whole dashboard. It unlocks practice and assessments.
         </p>
 
@@ -80,11 +80,11 @@ export function CalibrationPrompt() {
             onClick={() => setSnoozed(true)}
             className="inline-flex flex-1 items-center justify-center rounded-full border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-600 transition hover:bg-slate-50"
           >
-            Give later
+            Take later
           </button>
         </div>
         <p className="mt-3 text-[11px] text-slate-400">
-          You can keep exploring for now — but practice &amp; assessments stay locked until you take it.
+          You can keep exploring for now — a "Take Placement Readiness Test" button stays on your dashboard until you finish it.
         </p>
       </div>
     </Modal>

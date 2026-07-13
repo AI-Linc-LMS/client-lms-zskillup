@@ -114,7 +114,7 @@ export function RecommendedMenu() {
                 </span>
                 {calibrated && data?.overall != null ? (
                   <span className="text-[11px] font-semibold text-slate-400">
-                    Calibration <span className="font-black tabular-nums text-navy">{data.overall}%</span>
+                    Placement readiness <span className="font-black tabular-nums text-navy">{data.overall}%</span>
                   </span>
                 ) : null}
               </div>
@@ -132,7 +132,7 @@ export function RecommendedMenu() {
                   </span>
                   <p className="mt-3 text-sm font-black text-navy">Unlock your recommendations</p>
                   <p className="mx-auto mt-1 max-w-[19rem] text-xs leading-relaxed text-slate-500">
-                    Take the quick calibration assessment and we&apos;ll pick the exact company tracks,
+                    Take the quick placement readiness test and we&apos;ll pick the exact company tracks,
                     sections and topics to focus on next.
                   </p>
                   <Link
@@ -140,7 +140,7 @@ export function RecommendedMenu() {
                     onClick={closeNow}
                     className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-navy px-4 py-2 text-xs font-bold text-white transition hover:bg-navy/90"
                   >
-                    Take calibration <ArrowRight className="size-3.5" />
+                    Take the placement readiness test <ArrowRight className="size-3.5" />
                   </Link>
                 </div>
               ) : (

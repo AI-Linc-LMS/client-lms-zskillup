@@ -64,7 +64,7 @@ export function CalibrationResults({
       <div className="grid min-h-screen place-items-center bg-background">
         <div className="flex flex-col items-center gap-3 text-slate-400">
           <Loader2 className="size-6 animate-spin" aria-hidden="true" />
-          <p className="text-xs font-semibold">Analysing your calibration…</p>
+          <p className="text-xs font-semibold">Analysing your placement readiness…</p>
         </div>
       </div>
     );
@@ -90,7 +90,7 @@ function ResultsView({ data, onReview }: { data: CalibrationResultsDto; onReview
     <div className="flex min-h-screen flex-col bg-background">
       <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6">
         <span className="flex min-w-0 items-center gap-1.5 truncate text-sm font-bold text-navy">
-          <Sparkles className="size-4 shrink-0 text-[#f5b400]" aria-hidden="true" /> Your calibration results
+          <Sparkles className="size-4 shrink-0 text-[#f5b400]" aria-hidden="true" /> Your placement readiness results
         </span>
         <Button variant="ghost" size="sm" asChild>
           <Link href="/dashboard">

@@ -36,7 +36,7 @@ export function CalibrationRecommendations() {
               Unlock your personalized recommendations
             </h2>
             <p className="mt-0.5 text-xs leading-relaxed text-slate-500">
-              Take the quick calibration assessment and we&apos;ll pick the exact company tracks,
+              Take the quick placement readiness test and we&apos;ll pick the exact company tracks,
               sections and topics to focus on next.
             </p>
           </div>
@@ -44,7 +44,7 @@ export function CalibrationRecommendations() {
             href={href}
             className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-navy px-4 py-2 text-xs font-bold text-white transition hover:bg-navy/90"
           >
-            Take calibration <ArrowRight className="size-3.5" />
+            Take the placement readiness test <ArrowRight className="size-3.5" />
           </Link>
         </div>
       </div>
@@ -66,7 +66,7 @@ export function CalibrationRecommendations() {
         </div>
         {data.overall != null && (
           <span className="shrink-0 text-right text-[11px] font-semibold text-slate-400">
-            Calibration
+            Placement readiness
             <span className="block text-base font-black tabular-nums text-navy">{data.overall}%</span>
           </span>
         )}

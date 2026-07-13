@@ -3,7 +3,7 @@ import { RecommendationsHub } from '@/components/student/RecommendationsHub';
 
 export const metadata = {
   title: 'Recommendations · ZSkillup',
-  description: 'Personalized courses, companies, sections and topics based on your calibration and practice.',
+  description: 'Personalized courses, companies, sections and topics based on your placement readiness and practice.',
 };
 
 export default function RecommendationsPage() {

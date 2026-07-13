@@ -89,14 +89,14 @@ export function RecommendationsHub() {
         </span>
         <h2 className="mt-4 font-display text-xl font-bold text-navy">Unlock your recommendations</h2>
         <p className="mt-2 text-sm leading-relaxed text-slate-500">
-          Take your one-time calibration assessment — we&apos;ll map where you stand and recommend exactly the courses,
+          Take your one-time placement readiness test — we&apos;ll map where you stand and recommend exactly the courses,
           companies, sections and topics to focus on next.
         </p>
         <Link
           href={mockTestId ? `/dashboard/quiz?mock=${mockTestId}` : '/dashboard'}
           className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-5 py-2.5 text-sm font-extrabold text-[#171717] shadow-sm transition hover:brightness-105"
         >
-          Take the calibration <ArrowRight className="size-4" />
+          Take the placement readiness test <ArrowRight className="size-4" />
         </Link>
       </div>
     );
@@ -118,7 +118,7 @@ export function RecommendationsHub() {
               Your personalized next steps
             </h1>
             <p className="mt-1 max-w-xl text-sm leading-relaxed text-slate-500">
-              Based on your calibration and the practice you&apos;ve done — the courses, companies, sections and topics
+              Based on your placement readiness and the practice you&apos;ve done — the courses, companies, sections and topics
               that move your readiness fastest.
             </p>
           </div>
