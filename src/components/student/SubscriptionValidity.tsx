@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   Building2,
   CalendarClock,
+  Crown,
   Layers,
   RefreshCw,
   Sparkles,
@@ -64,12 +65,25 @@ export function SubscriptionValidity() {
   const extra = active.length - shown.length;
 
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="overflow-hidden rounded-3xl border border-[#ffc42d]/45 bg-white shadow-sm ring-1 ring-[#ffc42d]/10">
+      {/* Premium banner — this card only renders for paying members, so it doubles
+          as the dashboard's Premium status marker. */}
+      <div className="flex items-center gap-2 bg-gradient-to-r from-[#fff6e0] via-[#fffaf0] to-white px-4 py-2.5">
+        <span className="grid size-6 shrink-0 place-items-center rounded-full bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717] shadow-[0_2px_8px_-2px_rgba(245,180,0,0.7)]">
+          <Crown className="size-3.5" strokeWidth={2.5} />
+        </span>
+        <span className="text-[11px] font-black uppercase tracking-wider text-[#a16207]">Premium member</span>
+        <span className="ml-auto hidden text-[10px] font-semibold text-[#a16207]/80 sm:inline">
+          Enjoying Premium benefits
+        </span>
+      </div>
+
+      <div className="p-4">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-sm font-black text-navy">
-          <CalendarClock className="size-4 text-orange" /> Your subscriptions
+          <CalendarClock className="size-4 text-[#f5b400]" /> Your subscriptions
         </h2>
-        <Link href="/upgrade" className="text-[11px] font-bold text-orange hover:underline">
+        <Link href="/upgrade" className="text-[11px] font-bold text-[#a16207] hover:underline">
           Manage →
         </Link>
       </div>
@@ -104,7 +118,7 @@ export function SubscriptionValidity() {
               <span
                 className={cn(
                   'grid size-7 shrink-0 place-items-center rounded-lg',
-                  urgent ? 'bg-amber-100 text-amber-600' : 'bg-orange/10 text-orange',
+                  urgent ? 'bg-amber-100 text-amber-600' : 'bg-[#fff5ea] text-[#f5b400]',
                 )}
               >
                 <Icon className="size-3.5" />
@@ -127,11 +141,12 @@ export function SubscriptionValidity() {
       {extra > 0 && (
         <Link
           href="/upgrade"
-          className="mt-2 block text-center text-[11px] font-semibold text-slate-500 transition-colors hover:text-orange"
+          className="mt-2 block text-center text-[11px] font-semibold text-slate-600 transition-colors hover:text-[#a16207]"
         >
           +{extra} more subscription{extra === 1 ? '' : 's'}
         </Link>
       )}
+      </div>
     </div>
   );
 }

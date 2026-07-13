@@ -1,13 +1,14 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, ChevronRight, Eye, IdCard, Loader2, LogOut, Sparkles, User } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Crown, Eye, IdCard, Loader2, LogOut, Sparkles, User } from 'lucide-react';
 import { logout } from '@/lib/api/auth';
 import { getMe } from '@/lib/api/me';
 import { startStudentPreview, exitStudentPreview } from '@/lib/preview-actions';
 import { roleHint } from '@/lib/session-hints';
+import { useMySubscription } from '@/hooks/useMySubscription';
 import { useAuthStore } from '@/store/auth';
 import { cn } from '@/lib/utils';
 
@@ -40,6 +41,13 @@ export function AvatarMenu({ initials = '··' }: { initials?: string }) {
   const [sessionRole, setSessionRole] = useState<string | null>(null);
   const previewUser = useAuthStore((s) => s.previewUser);
   const ref = useRef<HTMLDivElement>(null);
+
+  // Premium branding — a paying student (Full Platform or any active entitlement)
+  // gets a gold ring + PRO badge. Only fetch in the student zone (fails open).
+  const pathname = usePathname();
+  const isStudentZone = !/^\/(admin|tpo|superadmin)(\/|$)/.test(pathname ?? '');
+  const { planStatus } = useMySubscription(isStudentZone);
+  const isPremium = previewUser === null && planStatus !== 'none';
 
   useEffect(() => {
     setSessionRole(roleHint());
@@ -150,10 +158,15 @@ export function AvatarMenu({ initials = '··' }: { initials?: string }) {
         onClick={() => setOpen((v) => !v)}
         className="group relative grid size-9 place-items-center rounded-full transition-transform duration-200 hover:scale-[1.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/50 focus-visible:ring-offset-2"
       >
-        {/* gradient ring */}
+        {/* gradient ring — GOLD for Premium, understated silver for free */}
         <span
           aria-hidden
-          className="absolute inset-0 rounded-full bg-[conic-gradient(from_140deg,#f37021,#6d3bf5,#2563eb,#f37021)] p-[2px] opacity-90 shadow-[0_4px_14px_-4px_rgba(243,112,33,0.6)] transition-opacity group-hover:opacity-100"
+          className={cn(
+            'absolute inset-0 rounded-full p-[2px] opacity-90 transition-opacity group-hover:opacity-100',
+            isPremium
+              ? 'bg-[conic-gradient(from_140deg,#ffd24d,#f5b400,#ffc42d,#ffd24d)] shadow-[0_4px_16px_-3px_rgba(245,180,0,0.65)]'
+              : 'bg-[conic-gradient(from_140deg,#e2e8f0,#cbd5e1,#e2e8f0)]',
+          )}
         >
           <span className="block size-full rounded-full bg-white" />
         </span>
@@ -167,7 +180,7 @@ export function AvatarMenu({ initials = '··' }: { initials?: string }) {
             className="relative size-[30px] rounded-full object-cover"
           />
         ) : (
-          <span className="relative grid size-[30px] place-items-center rounded-full bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-[11px] font-bold text-white">
+          <span className="relative grid size-[30px] place-items-center rounded-full bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[11px] font-bold text-[#171717]">
             {shownInitials}
           </span>
         )}
@@ -176,6 +189,14 @@ export function AvatarMenu({ initials = '··' }: { initials?: string }) {
             aria-hidden
             className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-white bg-sky-500"
           />
+        ) : isPremium ? (
+          <span
+            aria-hidden
+            title="Premium member"
+            className="absolute -bottom-1 -right-1 grid size-4 place-items-center rounded-full border-2 border-white bg-gradient-to-br from-[#ffd24d] to-[#f5b400] shadow-sm"
+          >
+            <Crown className="size-2 text-[#171717]" strokeWidth={2.75} />
+          </span>
         ) : null}
       </button>
 
@@ -199,7 +220,12 @@ export function AvatarMenu({ initials = '··' }: { initials?: string }) {
               <div className="relative flex items-center gap-3">
                 <span
                   aria-hidden
-                  className="grid size-11 shrink-0 place-items-center rounded-full bg-[conic-gradient(from_140deg,#f37021,#6d3bf5,#2563eb,#f37021)] p-[2px]"
+                  className={cn(
+                    'grid size-11 shrink-0 place-items-center rounded-full p-[2px]',
+                    isPremium
+                      ? 'bg-[conic-gradient(from_140deg,#ffd24d,#f5b400,#ffc42d,#ffd24d)]'
+                      : 'bg-[conic-gradient(from_140deg,#e2e8f0,#cbd5e1,#e2e8f0)]',
+                  )}
                 >
                   {showAvatarImg ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -211,7 +237,7 @@ export function AvatarMenu({ initials = '··' }: { initials?: string }) {
                       className="size-full rounded-full object-cover ring-2 ring-white"
                     />
                   ) : (
-                    <span className="grid size-full place-items-center rounded-full bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-sm font-bold text-white ring-2 ring-white">
+                    <span className="grid size-full place-items-center rounded-full bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-sm font-bold text-[#171717] ring-2 ring-white">
                       {shownInitials}
                     </span>
                   )}
@@ -220,6 +246,10 @@ export function AvatarMenu({ initials = '··' }: { initials?: string }) {
                   {isPreviewing ? (
                     <p className="text-[10px] font-semibold uppercase tracking-widest text-orange">
                       Previewing as student
+                    </p>
+                  ) : isPremium ? (
+                    <p className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-[#a16207]">
+                      <Crown className="size-3 text-[#f5b400]" strokeWidth={2.5} /> Premium member
                     </p>
                   ) : (
                     <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">

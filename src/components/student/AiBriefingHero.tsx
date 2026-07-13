@@ -6,6 +6,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import {
   ArrowRight,
   ClipboardCheck,
+  Crown,
   Flame,
   Rocket,
   Star,
@@ -17,6 +18,7 @@ import { getBriefing, type StudentBriefing } from '@/lib/api/personalization';
 import { getStudentStats, type ApiStudentStats } from '@/lib/api/gamification';
 import { getMe, type ApiMe } from '@/lib/api/me';
 import { useCalibrationStatus } from '@/hooks/useCalibrationStatus';
+import { useMySubscription } from '@/hooks/useMySubscription';
 import { BriefingHeroCanvas } from '@/components/student/BriefingHeroCanvas';
 import { AnimatedNumber, AuroraBackground } from '@/components/motion/primitives';
 import { onXpUpdated } from '@/lib/xp-events';
@@ -58,6 +60,8 @@ function firstNameOf(fullName: string | null | undefined): string {
 export function AiBriefingHero() {
   const reduce = useReducedMotion();
   const calibration = useCalibrationStatus();
+  const { planStatus } = useMySubscription(true);
+  const isPremium = planStatus !== 'none';
   const [me, setMe] = useState<ApiMe | null>(null);
   const [stats, setStats] = useState<ApiStudentStats | null>(null);
   const [briefing, setBriefing] = useState<StudentBriefing | null>(null);
@@ -205,12 +209,17 @@ export function AiBriefingHero() {
 
         {/* greeting - the NAME rendered bold + yellow (benchmark). */}
         <motion.p
-          className="text-base font-bold uppercase tracking-[0.2em] text-white/55 sm:text-lg"
+          className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 sm:text-sm"
           initial={reduce ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.04 }}
         >
           {isReturning ? 'Welcome back' : 'Welcome'}, <span className="text-[#ffc42d]">{firstName}</span>
+          {isPremium ? (
+            <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-2 py-0.5 align-middle text-[9px] font-black tracking-wider text-[#171717]">
+              <Crown className="size-2.5" strokeWidth={2.75} /> PREMIUM
+            </span>
+          ) : null}
         </motion.p>
 
         {/* headline */}
