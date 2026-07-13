@@ -35,7 +35,6 @@ export default function StudentDashboardPage() {
       <div className="grid gap-6 xl:grid-cols-[1fr_20rem]">
         <div className="min-w-0 space-y-6">
           <AiBriefingHero />
-          <ProfileCompletionBanner />
           <LiveAssessmentBanner />
           <AuroraStats />
           <Reveal>
@@ -82,6 +81,9 @@ export default function StudentDashboardPage() {
         </div>
 
         <aside className="min-w-0 space-y-6">
+          {/* Onboarding nudge — pinned to the TOP of the rail, directly above the
+              Skill Profile, and stays until the profile hits 100%. */}
+          <ProfileCompletionBanner />
           <Reveal delay={0.03}>
             <SubscriptionValidity />
           </Reveal>

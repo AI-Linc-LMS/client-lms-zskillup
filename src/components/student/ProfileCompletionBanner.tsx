@@ -73,36 +73,34 @@ export function ProfileCompletionBanner() {
       : `${missing.slice(0, 3).join(', ')} +${missing.length - 3} more`;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-orange/30 bg-gradient-to-r from-orange/10 via-orange/[0.06] to-transparent p-4 sm:p-5">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#ffd24d] via-[#ffc42d] to-[#f5b400] text-[#171717]">
-          <UserRoundPen className="size-5" />
+    <div className="relative overflow-hidden rounded-2xl border border-orange/30 bg-gradient-to-br from-orange/[0.12] via-orange/[0.06] to-transparent p-4">
+      <div className="flex items-center gap-2.5">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#ffd24d] via-[#ffc42d] to-[#f5b400] text-[#171717]">
+          <UserRoundPen className="size-5" strokeWidth={2.2} />
         </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm font-black text-navy">Complete your profile</h3>
-            <span className="rounded-full bg-orange/15 px-2 py-0.5 text-[11px] font-bold text-[#f5b400] tabular-nums">
-              {pct}% done
-            </span>
-          </div>
-          <p className="mt-0.5 text-xs leading-relaxed text-slate-500">
-            Add your {missingText} to sharpen recommendations and auto-fill your resume.
-          </p>
-          {/* progress bar */}
-          <div className="mt-2 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-orange/15">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] transition-[width] duration-700"
-              style={{ width: `${pct}%` }}
-            />
-          </div>
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
+          <h3 className="text-sm font-black text-navy">Complete your profile</h3>
+          <span className="rounded-full bg-orange/15 px-2 py-0.5 text-[11px] font-bold text-[#f5b400] tabular-nums">
+            {pct}% done
+          </span>
         </div>
-        <Link
-          href="/profile"
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-navy px-4 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-navy/90"
-        >
-          Complete profile <ArrowRight className="size-3.5" />
-        </Link>
       </div>
+      <p className="mt-2 text-xs leading-relaxed text-slate-500">
+        Add your {missingText} to sharpen recommendations and auto-fill your resume.
+      </p>
+      {/* progress bar */}
+      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-orange/15">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] transition-[width] duration-700"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <Link
+        href="/profile"
+        className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-navy px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-navy/90"
+      >
+        Complete profile <ArrowRight className="size-3.5" />
+      </Link>
     </div>
   );
 }
