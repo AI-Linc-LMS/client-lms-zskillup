@@ -135,7 +135,7 @@ export function CompanyPrepPanel({
           Practice {companyName}
         </h2>
         <p className="mt-1.5 text-sm leading-relaxed text-slate-500 sm:text-base">
-          Real questions from the live bank — by year and by topic. Every card drops you straight into
+          Real questions from the live bank - by year and by topic. Every card drops you straight into
           the practice engine.
         </p>
       </div>
@@ -170,7 +170,7 @@ export function CompanyPrepPanel({
         </section>
       ) : null}
 
-      {/* All topics — searchable, filterable, with per-topic progress */}
+      {/* All topics - searchable, filterable, with per-topic progress */}
       {prep.topics.length ? (
         <section>
           <SectionHead icon={Layers} title="All topics" sub="Search, filter and start a mock quiz on any topic" />
@@ -284,7 +284,7 @@ function ProgressCard({
       <div className="mt-4 grid grid-cols-3 gap-3">
         <Metric label="Topics practiced" value={`${practiced}/${total}`} />
         <Metric label="Questions" value={attempted.toLocaleString()} />
-        <Metric label="Accuracy" value={started ? `${accuracy}%` : '—'} />
+        <Metric label="Accuracy" value={started ? `${accuracy}%` : '-'} />
       </div>
 
       <div className="mt-4">

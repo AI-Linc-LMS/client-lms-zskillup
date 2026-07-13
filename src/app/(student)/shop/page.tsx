@@ -65,7 +65,7 @@ export default function ExplorePlansPage() {
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base">
             Go all-access, or build a plan around exactly the companies and topics you&apos;re targeting.
-            Practice, mocks, analytics and AI career tools — all in one place.
+            Practice, mocks, analytics and AI career tools - all in one place.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Link
@@ -90,7 +90,7 @@ export default function ExplorePlansPage() {
           className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-indigo-200 bg-indigo-50/70 px-4 py-3 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50"
         >
           <span className="inline-flex items-center gap-2">
-            <Crown className="size-4" /> You already have Full Platform access — manage it in Upgrade &amp; Renew.
+            <Crown className="size-4" /> You already have Full Platform access - manage it in Upgrade &amp; Renew.
           </span>
           <ArrowRight className="size-4 shrink-0" />
         </Link>
@@ -103,7 +103,7 @@ export default function ExplorePlansPage() {
         <div className="text-center">
           <h2 className="inline-block text-2xl font-black tracking-tight text-navy">How would you like to prepare?</h2>
           <div className="mx-auto mt-2 h-1 w-16 rounded-full bg-indigo-500" />
-          <p className="mx-auto mt-3 max-w-lg text-sm text-slate-500">Pick the path that fits you — you can always add more later.</p>
+          <p className="mx-auto mt-3 max-w-lg text-sm text-slate-500">Pick the path that fits you - you can always add more later.</p>
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
@@ -179,7 +179,7 @@ export default function ExplorePlansPage() {
               ))}
             </ul>
             <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-slate-400">
-              <Check className="size-3.5 text-emerald-500" /> Mix &amp; match — different validity per item
+              <Check className="size-3.5 text-emerald-500" /> Mix &amp; match - different validity per item
             </div>
             <Link
               href="/shop/build"
@@ -225,7 +225,7 @@ export default function ExplorePlansPage() {
 
       <p className="mt-6 flex items-center justify-center gap-1.5 text-center text-xs text-slate-400">
         <ShieldCheck className="size-3.5 text-emerald-500" />
-        Prices are shown before you pay — no charge until you review and confirm.
+        Prices are shown before you pay - no charge until you review and confirm.
       </p>
     </div>
   );

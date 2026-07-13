@@ -226,11 +226,11 @@ export function AdaptiveSkillProfile() {
               This is an <span className="font-semibold text-[#1a1d29]">adaptive (IRT) estimate</span>. Each
               adaptive quiz updates a difficulty score (θ) per skill from <span className="font-semibold">which
               questions you get right and how hard they are</span>, then maps it to 0–100% mastery. It reflects
-              the level you can <span className="font-semibold">reliably</span> answer — not your raw % correct.
+              the level you can <span className="font-semibold">reliably</span> answer - not your raw % correct.
             </p>
             <p className="mt-1.5">
               That&apos;s why it differs from <span className="font-semibold text-[#1a1d29]">Topic Mastery</span>, which is
-              simply accuracy (correct ÷ attempted) on practice questions — a topic can read 100% there while its
+              simply accuracy (correct ÷ attempted) on practice questions - a topic can read 100% there while its
               adaptive mastery here is still building.
             </p>
           </motion.div>

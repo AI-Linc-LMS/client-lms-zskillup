@@ -9,7 +9,7 @@ export function BriefingHeroCanvas() {
     <>
       {/* Black base → subtle dark-navy toward the right (benchmark). */}
       <div aria-hidden className="absolute inset-0 bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e]" />
-      {/* Golden mesh illustration on the right — flowing arcs + glow. */}
+      {/* Golden mesh illustration on the right - flowing arcs + glow. */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -right-24 bottom-[-30%] h-[42rem] w-[42rem] rounded-full bg-[radial-gradient(closest-side,rgba(245,180,0,0.22),transparent)] blur-2xl" />
         <svg className="absolute right-0 top-0 h-full w-2/3 opacity-70" viewBox="0 0 600 400" fill="none" preserveAspectRatio="xMaxYMax slice">

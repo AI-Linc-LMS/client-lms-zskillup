@@ -110,7 +110,7 @@ export function CollegeCohortsManager({ collegeId, onChange }: { collegeId: stri
             <Loader2 className="size-5 animate-spin text-slate-300" />
           </div>
         ) : cohorts.length === 0 ? (
-          <p className="mt-3 text-sm text-slate-400">No cohorts yet — create the first batch below.</p>
+          <p className="mt-3 text-sm text-slate-400">No cohorts yet - create the first batch below.</p>
         ) : (
           <ul className="mt-3 divide-y divide-slate-100">
             {cohorts.map((c) => (

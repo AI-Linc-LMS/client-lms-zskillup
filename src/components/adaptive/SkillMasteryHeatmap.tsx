@@ -18,7 +18,7 @@ export function SkillMasteryHeatmap({ skillMastery }: SkillMasteryHeatmapProps) 
   if (skillMastery.length === 0) {
     return (
       <div className="rounded-xl border bg-slate-50 p-6 text-center text-sm text-muted-foreground">
-        No skill data yet — complete the quiz to see your mastery profile.
+        No skill data yet - complete the quiz to see your mastery profile.
       </div>
     );
   }

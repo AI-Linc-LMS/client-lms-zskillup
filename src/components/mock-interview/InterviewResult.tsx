@@ -27,10 +27,10 @@ function scoreBorder(n: number): string {
 }
 
 function band(n: number): { label: string; sub: string } {
-  if (n >= 80) return { label: 'Strong', sub: 'Interview-ready — polish the edges.' };
-  if (n >= 65) return { label: 'Solid', sub: 'A good showing — keep sharpening.' };
+  if (n >= 80) return { label: 'Strong', sub: 'Interview-ready - polish the edges.' };
+  if (n >= 65) return { label: 'Solid', sub: 'A good showing - keep sharpening.' };
   if (n >= 45) return { label: 'Developing', sub: 'Good foundation to build on.' };
-  return { label: 'Early days', sub: 'Keep practising — you improve fast here.' };
+  return { label: 'Early days', sub: 'Keep practising - you improve fast here.' };
 }
 
 function ringStroke(n: number): string {
@@ -139,11 +139,11 @@ export function InterviewResult({ id }: { id: string }) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="rounded-xl border border-green-200 bg-green-50/50 p-4">
           <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-green-700"><TrendingUp className="size-3.5" /> Strengths</p>
-          {evalv.strengths.length ? <ul className="list-disc space-y-1 pl-4 text-sm text-slate-700">{evalv.strengths.map((s, i) => <li key={i}>{s}</li>)}</ul> : <p className="text-sm text-slate-400">—</p>}
+          {evalv.strengths.length ? <ul className="list-disc space-y-1 pl-4 text-sm text-slate-700">{evalv.strengths.map((s, i) => <li key={i}>{s}</li>)}</ul> : <p className="text-sm text-slate-400">-</p>}
         </div>
         <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4">
           <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-amber-700"><Target className="size-3.5" /> Areas to improve</p>
-          {evalv.areas_for_improvement.length ? <ul className="list-disc space-y-1 pl-4 text-sm text-slate-700">{evalv.areas_for_improvement.map((s, i) => <li key={i}>{s}</li>)}</ul> : <p className="text-sm text-slate-400">—</p>}
+          {evalv.areas_for_improvement.length ? <ul className="list-disc space-y-1 pl-4 text-sm text-slate-700">{evalv.areas_for_improvement.map((s, i) => <li key={i}>{s}</li>)}</ul> : <p className="text-sm text-slate-400">-</p>}
         </div>
       </div>
 

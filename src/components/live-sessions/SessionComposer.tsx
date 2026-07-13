@@ -91,7 +91,7 @@ export function SessionComposer({
       };
       if (editing) await updateLiveSession(editing.id, body);
       else await createLiveSession(body);
-      toast.success(editing ? 'Session updated.' : 'Session scheduled — students notified.');
+      toast.success(editing ? 'Session updated.' : 'Session scheduled - students notified.');
       onSaved();
       onClose();
     } catch (err) {
@@ -123,7 +123,7 @@ export function SessionComposer({
 
             <div className="space-y-4 p-5">
               <Field label="Title">
-                <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} placeholder="e.g. Amazon SDE — interview masterclass" className={input} autoFocus />
+                <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} placeholder="e.g. Amazon SDE - interview masterclass" className={input} autoFocus />
               </Field>
               <Field label="Description">
                 <textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={5000} rows={3} placeholder="What's this session about?" className={cn(input, 'resize-y')} />
@@ -131,7 +131,7 @@ export function SessionComposer({
               <Field label="Meeting link (Zoom / Google Meet)">
                 <input value={meetingUrl} onChange={(e) => setMeetingUrl(e.target.value)} maxLength={1000} placeholder="https://zoom.us/j/…  or  https://meet.google.com/…" className={input} />
               </Field>
-              <Field label="Recording link (optional — add after the session for playback)">
+              <Field label="Recording link (optional - add after the session for playback)">
                 <input value={recordingUrl} onChange={(e) => setRecordingUrl(e.target.value)} maxLength={1000} placeholder="https://…/recording  (students can watch this back)" className={input} />
               </Field>
               <div className="grid grid-cols-2 gap-3">

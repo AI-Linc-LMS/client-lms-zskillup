@@ -81,7 +81,7 @@ export default function StudentDashboardPage() {
         </div>
 
         <aside className="min-w-0 space-y-6">
-          {/* Onboarding nudge — pinned to the TOP of the rail, directly above the
+          {/* Onboarding nudge - pinned to the TOP of the rail, directly above the
               Skill Profile, and stays until the profile hits 100%. */}
           <ProfileCompletionBanner />
           <Reveal delay={0.03}>

@@ -20,7 +20,7 @@ export default function SuperadminFinancialsPage() {
         <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Commercial</p>
         <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Financials</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Collected revenue from real payments, with a date filter — plus a projected (MRR/ARR) view.
+          Collected revenue from real payments, with a date filter - plus a projected (MRR/ARR) view.
         </p>
       </header>
 

@@ -16,7 +16,7 @@ function pctTone(pct: number | null): string {
 }
 
 function fmtDate(d: string | null): string {
-  if (!d) return '—';
+  if (!d) return '-';
   return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
@@ -125,18 +125,18 @@ export default function AdminStudentsReportPage() {
                     <td className="px-4 py-3">
                       <Link href={`/superadmin/students/${s.id}`} className="block">
                         <p className="font-semibold text-navy group-hover:underline">
-                          {s.fullName ?? '—'}
+                          {s.fullName ?? '-'}
                         </p>
                         <p className="text-xs text-slate-400">{s.email}</p>
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{s.collegeName ?? '—'}</td>
+                    <td className="px-4 py-3 text-slate-600">{s.collegeName ?? '-'}</td>
                     <td className="px-4 py-3 text-center font-semibold text-navy">{s.attempts}</td>
                     <td className={`px-4 py-3 text-center font-bold ${pctTone(s.avgScorePct)}`}>
-                      {s.avgScorePct === null ? '—' : `${s.avgScorePct}%`}
+                      {s.avgScorePct === null ? '-' : `${s.avgScorePct}%`}
                     </td>
                     <td className={`px-4 py-3 text-center font-semibold ${pctTone(s.bestScorePct)}`}>
-                      {s.bestScorePct === null ? '—' : `${s.bestScorePct}%`}
+                      {s.bestScorePct === null ? '-' : `${s.bestScorePct}%`}
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-400">{fmtDate(s.lastAttemptAt)}</td>
                     <td className="px-4 py-3 text-right">

@@ -48,7 +48,7 @@ export function DashboardCompanies() {
             <Building2 className="size-5 text-[#f5b400]" /> Company Assessments
           </h3>
           <p className="mt-1 text-sm leading-relaxed text-slate-500">
-            Company-specific practice &amp; mock assessments crafted by Prephasz — train on each company&apos;s pattern before the real thing.
+            Company-specific practice &amp; mock assessments crafted by Prephasz - train on each company&apos;s pattern before the real thing.
           </p>
         </div>
         <Link href="/dashboard/company" className="mt-1 flex shrink-0 items-center gap-1 text-xs font-bold text-[#f5b400] hover:underline">
@@ -100,7 +100,7 @@ export function DashboardCompanies() {
                 </div>
               </div>
 
-              {/* what's inside — content types available (no counts) */}
+              {/* what's inside - content types available (no counts) */}
               {(() => {
                 const feats: Array<{ icon: typeof ClipboardList; label: string; tone: string }> = [];
                 if ((c.questionCount ?? 0) > 0) feats.push({ icon: ClipboardList, label: 'Practice', tone: 'text-slate-400' });

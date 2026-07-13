@@ -25,7 +25,7 @@ export function Logo({
     >
       <Image
         src="/images/prephasz-logo-dark.png"
-        alt="prephasz — powered by ZSkillup"
+        alt="prephasz - powered by ZSkillup"
         width={293}
         height={80}
         priority

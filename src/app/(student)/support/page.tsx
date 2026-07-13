@@ -25,7 +25,7 @@ export default function SupportPage() {
             </div>
           </div>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70">
-            Stuck on something? Pick a topic or raise a ticket, and our team will get back to you — every reply
+            Stuck on something? Pick a topic or raise a ticket, and our team will get back to you - every reply
             lands right here in one tracked conversation.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">

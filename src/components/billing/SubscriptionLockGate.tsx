@@ -39,7 +39,7 @@ export function SubscriptionLockGate({
 
   return (
     <div className="relative isolate overflow-hidden rounded-3xl">
-      {/* blurred teaser — clipped to the gate's height, so it never adds scroll */}
+      {/* blurred teaser - clipped to the gate's height, so it never adds scroll */}
       <div
         aria-hidden
         className={cn('pointer-events-none absolute inset-0 select-none blur-[7px] opacity-60 saturate-[0.65]', contentClassName)}
@@ -47,7 +47,7 @@ export function SubscriptionLockGate({
         {children}
       </div>
       <div aria-hidden className="absolute inset-0 bg-white/60 backdrop-blur-[3px]" />
-      {/* the card sits in a normal centered block that DEFINES the gate height —
+      {/* the card sits in a normal centered block that DEFINES the gate height -
           no sticky / no 100dvh, so it doesn't follow the scroll or leave a gap. */}
       <div className="relative z-10 flex min-h-[60vh] items-center justify-center p-4">
         <div className="w-full max-w-md rounded-3xl border border-indigo-200 bg-white p-7 text-center shadow-xl">
@@ -58,7 +58,7 @@ export function SubscriptionLockGate({
           <p className="mt-2 text-sm text-slate-500">
             You&apos;ve used your free {feature.toLowerCase()}. It&apos;s bundled with any{' '}
             <span className="font-semibold text-navy">Company hub</span> or the{' '}
-            <span className="font-semibold text-navy">Full Platform</span> plan — unlock unlimited access.
+            <span className="font-semibold text-navy">Full Platform</span> plan - unlock unlimited access.
           </p>
 
           <div className="mt-5 space-y-2.5">

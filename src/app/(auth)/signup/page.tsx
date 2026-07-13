@@ -62,7 +62,7 @@ export default function SignupPage() {
               Step 1 of 3
             </p>
             <h1 className="mt-1 text-xl font-bold text-navy">Create your account</h1>
-            <p className="mt-0.5 text-sm text-slate-500">Personal details — takes under a minute.</p>
+            <p className="mt-0.5 text-sm text-slate-500">Personal details - takes under a minute.</p>
           </div>
           <div>
             <form onSubmit={onSubmit} className="space-y-4" noValidate>

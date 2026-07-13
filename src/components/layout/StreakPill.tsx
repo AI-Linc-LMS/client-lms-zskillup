@@ -100,7 +100,7 @@ export function StreakPill() {
           ? 'linear-gradient(120deg, #fb923c 0%, #f37021 45%, #ea580c 100%)'
           : 'linear-gradient(120deg, #94a3b8 0%, #64748b 100%)',
       }}
-      aria-label={`${streak}-day streak${lit ? '' : ' — start one today'}`}
+      aria-label={`${streak}-day streak${lit ? '' : ' - start one today'}`}
     >
       {/* warm glow that intensifies on hover / celebration */}
       <span
@@ -135,7 +135,7 @@ export function StreakPill() {
         </>
       ) : null}
 
-      {/* flame — flickers while the streak is alive */}
+      {/* flame - flickers while the streak is alive */}
       <span className="relative grid size-3.5 place-items-center">
         {flicker && (
           <motion.span

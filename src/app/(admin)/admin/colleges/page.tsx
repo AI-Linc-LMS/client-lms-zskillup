@@ -102,7 +102,7 @@ export default function AdminCollegesPage() {
                       </Link>
                     </td>
                     <td className="px-4 py-3 text-slate-600">
-                      {[c.city, c.state].filter(Boolean).join(', ') || '—'}
+                      {[c.city, c.state].filter(Boolean).join(', ') || '-'}
                     </td>
                     <td className="px-4 py-3">
                       <span

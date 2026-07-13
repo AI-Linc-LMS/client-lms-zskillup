@@ -57,7 +57,7 @@ export default function RoadmapPage() {
         </div>
       </header>
 
-      {/* Hero (Zone C — dark navy) */}
+      {/* Hero (Zone C - dark navy) */}
       <section className="relative overflow-hidden bg-navy text-white">
         <div
           aria-hidden="true"
@@ -197,7 +197,7 @@ export default function RoadmapPage() {
                         </span>
                       </div>
                       <h3 className="mt-1 font-bold text-navy">
-                        Step {step.number} — {step.title}
+                        Step {step.number} - {step.title}
                       </h3>
                     </div>
                     <span className="text-xs text-muted-foreground">{step.meta}</span>
@@ -227,7 +227,7 @@ export default function RoadmapPage() {
             <Trophy className="size-7 text-amber-400" />
           </div>
           <p className="text-xs font-semibold uppercase tracking-widest text-white/60">
-            Summit — Placement-ready
+            Summit - Placement-ready
           </p>
           <p className="mt-2 text-white/80 text-sm max-w-md mx-auto">
             Reach the summit to unlock a 100% placement-probability score, a verified certificate,

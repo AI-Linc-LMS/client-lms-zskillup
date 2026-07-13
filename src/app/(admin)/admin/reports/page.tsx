@@ -80,7 +80,7 @@ export default function AdminReportsPage() {
       <header>
         <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Insights</p>
         <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Reports &amp; Exports</h1>
-        <p className="mt-1 text-sm text-slate-500">Platform and company reports — download as CSV.</p>
+        <p className="mt-1 text-sm text-slate-500">Platform and company reports - download as CSV.</p>
       </header>
 
       {loading ? (
@@ -92,7 +92,7 @@ export default function AdminReportsPage() {
           <ReportCard
             icon={School}
             title="Platform Report"
-            desc="Institution-wide totals — students, colleges, content, activity."
+            desc="Institution-wide totals - students, colleges, content, activity."
             meta={`${stats?.students ?? 0} students · ${stats?.colleges ?? 0} colleges`}
             onExport={exportPlatform}
           />

@@ -233,14 +233,14 @@ export default function AssessmentCenterPage() {
           <div className="sm:col-span-2 lg:col-span-3">
             {form.mode === 'COMPANY' && (
               <p className="mb-1.5 text-[11px] font-medium text-slate-400">
-                Optional — narrow the company&apos;s bank to specific sections/topics (leave empty to use the whole bank).
+                Optional - narrow the company&apos;s bank to specific sections/topics (leave empty to use the whole bank).
               </p>
             )}
             <SectionTopicPicker selected={topicSel} onChange={setTopicSel} />
           </div>
           <label className="text-xs font-semibold text-slate-600 sm:col-span-2 lg:col-span-1">
             Title
-            <input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} className={`mt-1 ${inputCls}`} placeholder="e.g. TCS Mock — Round 1" required />
+            <input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} className={`mt-1 ${inputCls}`} placeholder="e.g. TCS Mock - Round 1" required />
           </label>
           <label className="text-xs font-semibold text-slate-600">
             Date &amp; time
@@ -285,7 +285,7 @@ export default function AssessmentCenterPage() {
               {(avail.mcqAvailable < (Number(form.mcqCount) || 0) ||
                 avail.codingAvailable < (Number(form.codingCount) || 0)) && (
                 <span className="mt-1 block font-semibold">
-                  You requested more than the bank has — the drive will include only what&apos;s available. Lower the
+                  You requested more than the bank has - the drive will include only what&apos;s available. Lower the
                   count or widen the scope.
                 </span>
               )}

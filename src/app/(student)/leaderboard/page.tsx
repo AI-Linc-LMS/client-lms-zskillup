@@ -191,7 +191,7 @@ export default function LeaderboardPage() {
               </>
             ) : (
               <p className="text-sm text-slate-500">
-                {myRank === 1 ? "You're #1 — defend your throne! 👑" : 'Every drill earns XP. Streaks multiply it.'}
+                {myRank === 1 ? "You're #1 - defend your throne! 👑" : 'Every drill earns XP. Streaks multiply it.'}
               </p>
             )}
           </div>
@@ -201,7 +201,7 @@ export default function LeaderboardPage() {
             <div className="rounded-2xl bg-white/80 px-4 py-3 text-center ring-1 ring-slate-100">
               <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Resets in</p>
               <p className="text-lg font-black text-navy">
-                {season ? `${season.days}d ${season.hours}h` : '—'}
+                {season ? `${season.days}d ${season.hours}h` : '-'}
               </p>
               <p className="text-[10px] text-slate-400">Sunday, 11:59 PM</p>
             </div>
@@ -281,7 +281,7 @@ export default function LeaderboardPage() {
         </div>
       ) : entries.length === 0 ? (
         <div className="rounded-3xl border border-slate-200 bg-white p-16 text-center text-sm text-slate-400">
-          No ranked learners here yet — be the first to earn XP.
+          No ranked learners here yet - be the first to earn XP.
         </div>
       ) : (
         <>
@@ -305,7 +305,7 @@ export default function LeaderboardPage() {
                       </span>
                     </div>
                     <p className="mt-3 max-w-[9rem] truncate text-center text-sm font-bold text-navy">{e.fullName ?? 'Learner'}</p>
-                    <p className="max-w-[9rem] truncate text-center text-xs text-slate-400">{e.collegeName ?? '—'}</p>
+                    <p className="max-w-[9rem] truncate text-center text-xs text-slate-400">{e.collegeName ?? '-'}</p>
                     <p className={`mt-1 font-black tabular-nums ${first ? 'text-lg text-[#f5b400]' : 'text-navy'}`}>{fmt(e.totalXp)} XP</p>
                     <div className={`mt-2 w-full rounded-t-xl bg-gradient-to-b ${cfg.pedestal}`} />
                   </div>

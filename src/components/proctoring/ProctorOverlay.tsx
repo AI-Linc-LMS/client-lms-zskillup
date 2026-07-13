@@ -20,7 +20,7 @@ export function ProctorOverlay({ controller }: { controller: ProctoringControlle
           the question (the runner reserves matching top space when proctored). */}
       <div className="fixed left-1/2 top-1.5 z-[80] -translate-x-1/2">
         <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white/95 p-1.5 pr-3.5 shadow-[0_12px_34px_-12px_rgba(15,23,42,0.45)] backdrop-blur">
-          {/* live self-view — larger landscape thumbnail */}
+          {/* live self-view - larger landscape thumbnail */}
           <span className="relative h-[6rem] w-[8rem] shrink-0 overflow-hidden rounded-xl bg-black ring-1 ring-slate-200">
             <video ref={videoRef} autoPlay muted playsInline className="size-full -scale-x-100 object-cover" />
             <span className="absolute left-1 top-1 inline-flex items-center gap-0.5 rounded bg-black/55 px-1 py-0.5 text-[8px] font-extrabold uppercase tracking-wider text-white backdrop-blur">

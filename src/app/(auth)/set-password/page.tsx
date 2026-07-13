@@ -41,7 +41,7 @@ function SetPasswordForm() {
       setServerError(
         err instanceof ApiRequestError
           ? err.message
-          : 'Could not set your password. The link may have expired — ask your admin to resend it.',
+          : 'Could not set your password. The link may have expired - ask your admin to resend it.',
       );
     }
   });

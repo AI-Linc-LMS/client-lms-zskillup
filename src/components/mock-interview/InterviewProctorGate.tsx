@@ -77,7 +77,7 @@ export function InterviewProctorGate({ id }: { id: string }) {
             </span>
             <h2 className="mt-4 text-lg font-black text-navy">You left fullscreen</h2>
             <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
-              Your interview is proctored. Return to fullscreen to continue — this exit has been logged.
+              Your interview is proctored. Return to fullscreen to continue - this exit has been logged.
             </p>
             <button
               type="button"
@@ -116,7 +116,7 @@ function IntroGate({ onStart, starting }: { onStart: () => void; starting: boole
           </span>
           <h1 className="relative mt-3 font-display text-2xl font-bold tracking-tight">Before you begin</h1>
           <p className="relative mt-1.5 text-sm leading-relaxed text-white/70">
-            Your AI mock interview runs in fullscreen so you can focus — just like a real interview.
+            Your AI mock interview runs in fullscreen so you can focus - just like a real interview.
           </p>
         </div>
         <div className="space-y-3 p-6">
@@ -132,7 +132,7 @@ function IntroGate({ onStart, starting }: { onStart: () => void; starting: boole
             {starting ? <Loader2 className="size-4 animate-spin" /> : <Maximize2 className="size-4" />}
             Enter fullscreen &amp; start interview
           </button>
-          <p className="text-center text-[11px] text-slate-400">A microphone is recommended — the interview is spoken.</p>
+          <p className="text-center text-[11px] text-slate-400">A microphone is recommended - the interview is spoken.</p>
         </div>
       </div>
     </div>

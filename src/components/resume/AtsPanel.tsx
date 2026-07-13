@@ -77,7 +77,7 @@ export function AtsPanel({ data, onClose }: { data: ResumeData; onClose: () => v
         </div>
 
         <div className="space-y-6 p-5">
-          {/* Overall — ONE authoritative number. The AI review judges content,
+          {/* Overall - ONE authoritative number. The AI review judges content,
               relevance and impact, so it supersedes the local heuristic once it
               has run; showing both as competing headline scores was the source of
               the "heuristic says 71, AI says 35" contradiction. */}

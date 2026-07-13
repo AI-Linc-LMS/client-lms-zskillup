@@ -75,7 +75,7 @@ export function ContinueLearning() {
               <div>
                 <p className="group-label mb-1.5">Practice accuracy</p>
                 <p className="font-semibold leading-snug text-[var(--color-ink)]">
-                  {accuracy && accuracy.total > 0 ? `${accuracy.accuracyPct}%` : '—'}
+                  {accuracy && accuracy.total > 0 ? `${accuracy.accuracyPct}%` : '-'}
                 </p>
                 <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
                   {accuracy && accuracy.total > 0
@@ -89,8 +89,8 @@ export function ContinueLearning() {
               <ProgressBar value={latest.pct} label="Latest mock score" />
               <p className="mt-1 text-xs text-[var(--color-text-muted)]">
                 {latest.passed
-                  ? 'Cleared the pass mark — push the percentile higher.'
-                  : 'Below the 60% pass mark — review the report and retake.'}
+                  ? 'Cleared the pass mark - push the percentile higher.'
+                  : 'Below the 60% pass mark - review the report and retake.'}
               </p>
             </div>
           </>

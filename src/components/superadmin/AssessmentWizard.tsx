@@ -315,7 +315,7 @@ export function AssessmentWizard({
             <div className="space-y-4">
               <label className="block">
                 <span className={labelCls}>Title</span>
-                <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="TCS NQT — Round 1" className={inputCls} />
+                <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="TCS NQT - Round 1" className={inputCls} />
               </label>
               <label className="block">
                 <span className={labelCls}>Audience</span>
@@ -363,7 +363,7 @@ export function AssessmentWizard({
                     </p>
                   ) : (
                     <p className="rounded-xl border border-rose-200 bg-rose-50/60 px-4 py-2.5 text-xs font-semibold text-rose-700">
-                      🔒 This assessment already has {existing.attempts} submission(s) — questions can no longer be changed. You can still cancel.
+                      🔒 This assessment already has {existing.attempts} submission(s) - questions can no longer be changed. You can still cancel.
                     </p>
                   )}
                   {existing.items.length ? (
@@ -410,11 +410,11 @@ export function AssessmentWizard({
               <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4">
                 <p className="text-sm font-black text-navy">{title || 'Untitled assessment'}</p>
                 <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[12px] text-slate-600 sm:grid-cols-3">
-                  <span>Company: <b className="text-navy">{companies.find((c) => c.id === companyId)?.name ?? '—'}</b></span>
+                  <span>Company: <b className="text-navy">{companies.find((c) => c.id === companyId)?.name ?? '-'}</b></span>
                   <span>Duration: <b className="text-navy">{durationMinutes}m</b></span>
                   <span>Pass: <b className="text-navy">{passingScore}%</b></span>
-                  <span>Start: <b className="text-navy">{startAt ? new Date(startAt).toLocaleString() : '—'}</b></span>
-                  <span>End: <b className="text-navy">{endAt ? new Date(endAt).toLocaleString() : '—'}</b></span>
+                  <span>Start: <b className="text-navy">{startAt ? new Date(startAt).toLocaleString() : '-'}</b></span>
+                  <span>End: <b className="text-navy">{endAt ? new Date(endAt).toLocaleString() : '-'}</b></span>
                   <span>Proctored: <b className="text-navy">{proctored ? 'Yes' : 'No'}</b></span>
                 </div>
               </div>
@@ -435,7 +435,7 @@ export function AssessmentWizard({
                   <p className="text-sm font-bold text-navy">{s.name}</p>
                   <ul className="mt-1 space-y-0.5 text-xs text-slate-500">
                     {s.items.map((it) => (
-                      <li key={it.key}>· {it.topicName} — {it.ids.length} {it.type === 'MCQ' ? 'MCQ' : 'coding'} ({it.fromBank} bank + {it.generated} AI)</li>
+                      <li key={it.key}>· {it.topicName} - {it.ids.length} {it.type === 'MCQ' ? 'MCQ' : 'coding'} ({it.fromBank} bank + {it.generated} AI)</li>
                     ))}
                   </ul>
                 </div>

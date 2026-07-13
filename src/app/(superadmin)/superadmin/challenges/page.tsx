@@ -95,7 +95,7 @@ export default function AdminChallengesPage() {
       setEditing(null);
       await load();
     } catch {
-      setError('Save failed — check the code is unique and MCQ has a valid question id.');
+      setError('Save failed - check the code is unique and MCQ has a valid question id.');
     } finally {
       setSaving(false);
     }
@@ -201,7 +201,7 @@ export default function AdminChallengesPage() {
                   onChange={(e) => setDraft({ ...draft, refCodingProblemId: e.target.value })}
                   className={INPUT}
                 >
-                  <option value="">— Select a coding problem —</option>
+                  <option value="">- Select a coding problem -</option>
                   {codingProblems.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.title} ({p.difficulty}){p.isActive ? '' : ' · inactive'}
@@ -264,7 +264,7 @@ export default function AdminChallengesPage() {
             <Loader2 className="size-6 animate-spin text-slate-400" />
           </div>
         ) : rows.length === 0 ? (
-          <div className="py-16 text-center text-sm text-slate-400">No challenges yet — create one.</div>
+          <div className="py-16 text-center text-sm text-slate-400">No challenges yet - create one.</div>
         ) : (
           <ul className="divide-y divide-slate-100">
             {rows.map((c) => (

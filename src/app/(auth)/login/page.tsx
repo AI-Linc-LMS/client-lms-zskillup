@@ -30,7 +30,7 @@ const BRAND_FEATURES = [
 
 const TESTIMONIAL = {
   quote:
-    'The TCS NQT track is shockingly close to the actual paper. I cleared in my first attempt — the daily quests kept me consistent.',
+    'The TCS NQT track is shockingly close to the actual paper. I cleared in my first attempt - the daily quests kept me consistent.',
   name: 'Aditya Krishnan',
   meta: 'VIT Vellore · CSE 2025',
   initials: 'AK',
@@ -112,7 +112,7 @@ function LoginForm() {
           Sign in to your workspace
         </h1>
         <p className="mt-1.5 text-sm text-[var(--color-text-muted)]">
-          Drop in your email — we&apos;ll take you straight to the right workspace.
+          Drop in your email - we&apos;ll take you straight to the right workspace.
         </p>
       </div>
 
@@ -120,14 +120,14 @@ function LoginForm() {
       {searchParams.get('welcome') || searchParams.get('reset') ? (
         <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm font-medium text-emerald-700">
           {searchParams.get('welcome')
-            ? 'Your password is set — welcome to ZSkillup! Sign in to continue.'
+            ? 'Your password is set - welcome to ZSkillup! Sign in to continue.'
             : 'Password updated. Sign in with your new password.'}
         </div>
       ) : null}
 
       {/* Form */}
       <div className="rounded-2xl border border-[var(--color-line)] bg-white p-6 shadow-[var(--shadow-card-lg)]">
-        {/* Google first — the primary, one-tap path */}
+        {/* Google first - the primary, one-tap path */}
         <GoogleSignInButton
           onSuccess={handleLoginSuccess}
           onError={(msg) => setServerError(msg)}
@@ -186,7 +186,7 @@ function LoginForm() {
               role="alert"
               className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm font-medium text-amber-700"
             >
-              You were signed out of another device — only one active session is allowed.
+              You were signed out of another device - only one active session is allowed.
             </p>
           )}
           {unverifiedEmail && (

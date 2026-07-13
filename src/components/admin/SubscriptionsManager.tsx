@@ -430,7 +430,7 @@ function SubscriptionsTab({
                       {s.seatLimit > 0 ? ` / ${s.seatLimit}` : ''}
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-400">
-                      {s.expiresAt ? new Date(s.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                      {s.expiresAt ? new Date(s.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-1.5">

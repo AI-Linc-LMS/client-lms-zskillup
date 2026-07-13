@@ -86,7 +86,7 @@ function useMyReadiness(slug: string): { loading: boolean; pct: number | null } 
 
 const READINESS_TIP = {
   title: 'Your readiness',
-  body: 'How prepared you are for this company right now — measured from your own practice, not an average.',
+  body: 'How prepared you are for this company right now - measured from your own practice, not an average.',
   bullets: [
     'Built from the skill mastery in your latest adaptive session',
     'Weighted across the skills this company actually tests',
@@ -165,7 +165,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
         ]}
       />
 
-      {/* ── Hero — dramatic aurora company identity + readiness ──────────── */}
+      {/* ── Hero - dramatic aurora company identity + readiness ──────────── */}
       <CompanyHero content={content} reduce={!!reduce} />
 
       {/* ── Sticky glass tab bar (7, canonical) ─────────────────────────── */}
@@ -234,7 +234,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
                     {content.company.name} coding questions
                   </h2>
                   <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
-                    Problems this company has asked — solve in your language, run the samples, then
+                    Problems this company has asked - solve in your language, run the samples, then
                     submit to grade against the full test set and earn XP.
                   </p>
                 </div>
@@ -249,7 +249,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
           {/* Register for this drive (assessment lifecycle) */}
           <CompanyRegisterCard companySlug={c.slug} companyName={c.name} />
 
-          {/* Quick stats — standout violet Aurora card */}
+          {/* Quick stats - standout violet Aurora card */}
           <AuroraCard glow="#7c3aed">
             <SectionLabel icon={Gauge}>Quick stats</SectionLabel>
             <div className="mt-4 space-y-2">
@@ -265,7 +265,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
       </div>
 
       {/* Mounted on the hub itself, not on the grid cards: this way it appears on EVERY
-          company, once, where the company's name and logo are actually being used — rather
+          company, once, where the company's name and logo are actually being used - rather
           than as a 60-word legal paragraph crammed into each tile of a card grid. */}
       <Disclaimer className="mt-8" />
     </div>
@@ -293,7 +293,7 @@ function CompanyHero({ content, reduce }: { content: HubContent; reduce: boolean
     <section className="relative isolate overflow-hidden rounded-[1.75rem] p-6 text-white shadow-[0_30px_90px_-32px_rgba(11,18,32,0.85)] sm:rounded-[2rem] sm:p-9">
       <AuroraBackground />
 
-      {/* layered depth — top highlight + inner ring */}
+      {/* layered depth - top highlight + inner ring */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 rounded-[1.75rem] ring-1 ring-inset ring-white/10 sm:rounded-[2rem]"
@@ -481,7 +481,7 @@ function ReadinessRing({ pct, reduce }: { pct: number | null; reduce: boolean })
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         {pct === null ? (
-          <span className="text-3xl font-extrabold text-white/35">—</span>
+          <span className="text-3xl font-extrabold text-white/35">-</span>
         ) : (
           <span className="text-4xl font-extrabold tabular-nums text-white">
             <AnimatedNumber value={pct} />
@@ -587,7 +587,7 @@ function OverviewTab({ content }: { content: HubContent }) {
         <VideoPlaceholder
           eyebrow="Company intro"
           title={`Inside the ${content.company.name} drive`}
-          subtitle="A short walkthrough of the hiring rounds, cut-offs and what to expect — video coming soon."
+          subtitle="A short walkthrough of the hiring rounds, cut-offs and what to expect - video coming soon."
         />
       </Reveal>
       <Reveal>

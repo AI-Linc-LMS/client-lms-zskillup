@@ -27,7 +27,7 @@ export function BrandLogo({
   const img = (
     <Image
       src={src}
-      alt="prephasz — powered by ZSkillup"
+      alt="prephasz - powered by ZSkillup"
       width={293}
       height={80}
       priority={priority}

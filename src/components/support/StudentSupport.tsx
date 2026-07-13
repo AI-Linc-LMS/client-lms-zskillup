@@ -128,7 +128,7 @@ export function StudentSupport() {
             <div className="grid size-12 place-items-center rounded-full bg-slate-50"><Headset className="size-6 text-slate-300" /></div>
             <div>
               <p className="text-sm font-semibold text-navy">No tickets yet</p>
-              <p className="mt-0.5 text-xs text-slate-400">Pick a topic above or open a ticket — we usually reply within a day.</p>
+              <p className="mt-0.5 text-xs text-slate-400">Pick a topic above or open a ticket - we usually reply within a day.</p>
             </div>
           </div>
         ) : (
@@ -186,7 +186,7 @@ function NewTicket({ initialCategory, onDone, onCancel }: { initialCategory?: st
       </button>
       <div>
         <h2 className="text-lg font-bold text-navy">Open a support ticket</h2>
-        <p className="mt-0.5 text-sm text-slate-500">Tell us what&apos;s going on — we usually reply within a day.</p>
+        <p className="mt-0.5 text-sm text-slate-500">Tell us what&apos;s going on - we usually reply within a day.</p>
       </div>
       {error && <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
 

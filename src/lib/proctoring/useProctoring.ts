@@ -71,7 +71,7 @@ export function useProctoring(enabled: boolean): ProctoringController {
     if (document.visibilityState === 'hidden') {
       setTabSwitches((n) => n + 1);
       logEvent('tab_switch');
-      warn('You switched away from the assessment — this is logged.');
+      warn('You switched away from the assessment - this is logged.');
     }
   }, [logEvent, warn]);
 
@@ -79,7 +79,7 @@ export function useProctoring(enabled: boolean): ProctoringController {
     if (!document.fullscreenElement) {
       setFullscreenExits((n) => n + 1);
       logEvent('fullscreen_exit');
-      warn('You exited fullscreen — please return to fullscreen.');
+      warn('You exited fullscreen - please return to fullscreen.');
     }
   }, [logEvent, warn]);
 

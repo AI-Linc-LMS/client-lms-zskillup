@@ -161,7 +161,7 @@ export function CollegeRequestForm({
           <Field label="College name">
             <input className={inputCls} value={v.collegeName} onChange={(e) => onName(e.target.value)} placeholder="VIT Vellore" />
           </Field>
-          <Field label="Slug" hint="lowercase, digits, dashes — used in the college URL">
+          <Field label="Slug" hint="lowercase, digits, dashes - used in the college URL">
             <input
               className={inputCls}
               value={v.collegeSlug}
@@ -267,8 +267,8 @@ export function CollegeRequestForm({
                 {v.students.slice(0, 20).map((s, i) => (
                   <tr key={`${s.email}-${i}`} className="border-t border-slate-100">
                     <td className="px-3 py-1.5 font-medium text-navy">{s.email}</td>
-                    <td className="px-3 py-1.5 text-slate-600">{s.fullName ?? '—'}</td>
-                    <td className="px-3 py-1.5 text-slate-500">{s.rollNumber ?? '—'}</td>
+                    <td className="px-3 py-1.5 text-slate-600">{s.fullName ?? '-'}</td>
+                    <td className="px-3 py-1.5 text-slate-500">{s.rollNumber ?? '-'}</td>
                   </tr>
                 ))}
               </tbody>

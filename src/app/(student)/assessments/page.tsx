@@ -156,7 +156,7 @@ export default function AssessmentsPage() {
               <HeroStat
                 icon={CalendarClock}
                 label="Next drive"
-                value={stats.next ? countdown(stats.next.scheduledAt) : '—'}
+                value={stats.next ? countdown(stats.next.scheduledAt) : '-'}
                 sub={stats.next?.companyName ?? 'Nothing scheduled'}
               />
               <HeroStat

@@ -61,7 +61,7 @@ export function ProfileLockGate({
               student what they couldn't do; it never told them what to do next. */}
           <h2 className="mt-4 text-lg font-black text-navy">Complete your profile</h2>
           <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
-            One minute of setup and {feature} opens up — it also sharpens everything we recommend to you.
+            One minute of setup and {feature} opens up - it also sharpens everything we recommend to you.
           </p>
 
           <div className="mx-auto mt-4 max-w-xs">

@@ -53,7 +53,7 @@ export function TodaysTip() {
     };
   }, []);
 
-  if (loaded && !tip) return null; // nothing to show — stay out of the way
+  if (loaded && !tip) return null; // nothing to show - stay out of the way
 
   const Icon = (tip?.icon && ICONS[tip.icon]) || Lightbulb;
 

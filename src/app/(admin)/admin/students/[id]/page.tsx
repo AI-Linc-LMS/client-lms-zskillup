@@ -69,7 +69,7 @@ export default function AdminStudentDetailPage({ params }: { params: Promise<{ i
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h1 className="text-2xl font-black tracking-tight text-navy">
-                  {report.student.fullName ?? '—'}
+                  {report.student.fullName ?? '-'}
                 </h1>
                 <p className="text-sm text-slate-500">{report.student.email}</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
@@ -118,8 +118,8 @@ export default function AdminStudentDetailPage({ params }: { params: Promise<{ i
             </div>
             <dl className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
               <Kpi label="Quizzes" value={report.summary.totalAttempts} />
-              <Kpi label="Avg %" value={report.summary.avgScorePct ?? '—'} />
-              <Kpi label="Best %" value={report.summary.bestScorePct ?? '—'} />
+              <Kpi label="Avg %" value={report.summary.avgScorePct ?? '-'} />
+              <Kpi label="Best %" value={report.summary.bestScorePct ?? '-'} />
               <Kpi
                 label="Time"
                 value={`${Math.round(report.summary.totalTimeSec / 60)}m`}
@@ -153,14 +153,14 @@ export default function AdminStudentDetailPage({ params }: { params: Promise<{ i
                       <tr key={a.id} className="hover:bg-slate-50">
                         <td className="px-4 py-3 font-medium text-navy">{a.mockTitle}</td>
                         <td className="px-4 py-3 text-right tabular-nums text-slate-700">
-                          {a.score ?? '—'}
+                          {a.score ?? '-'}
                           {a.total != null ? ` / ${a.total}` : ''}
                         </td>
                         <td className="px-4 py-3 text-right tabular-nums text-slate-700">
-                          {a.percentage ?? '—'}
+                          {a.percentage ?? '-'}
                         </td>
                         <td className="px-4 py-3 text-right tabular-nums text-slate-700">
-                          {a.percentile ?? '—'}
+                          {a.percentile ?? '-'}
                         </td>
                         <td className="px-4 py-3 text-xs text-slate-500">{a.status}</td>
                         <td className="px-4 py-3 text-xs text-slate-400">
@@ -170,7 +170,7 @@ export default function AdminStudentDetailPage({ params }: { params: Promise<{ i
                                 month: 'short',
                                 year: 'numeric',
                               })
-                            : '—'}
+                            : '-'}
                         </td>
                       </tr>
                     ))}

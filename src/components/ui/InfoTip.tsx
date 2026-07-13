@@ -74,7 +74,7 @@ export function InfoTip({
   const hide = useCallback(() => {
     if (timer.current) clearTimeout(timer.current);
     setOpen(false);
-    setPos(null); // force a re-measure next open — the grid reflows behind us
+    setPos(null); // force a re-measure next open - the grid reflows behind us
   }, []);
 
   useEffect(() => () => void (timer.current && clearTimeout(timer.current)), []);

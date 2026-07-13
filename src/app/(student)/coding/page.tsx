@@ -49,7 +49,7 @@ export default async function CodingPracticePage({ searchParams }: PageProps) {
             </div>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/60">
               {topic
-                ? `Every ${topic} problem in the bank — Judge0-evaluated, XP on your first solve.`
+                ? `Every ${topic} problem in the bank - Judge0-evaluated, XP on your first solve.`
                 : 'Solve DSA problems grouped by topic. Each solve is graded on the self-hosted Judge0 and earns XP the first time.'}
             </p>
             {topic ? (

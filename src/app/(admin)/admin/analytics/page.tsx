@@ -35,7 +35,7 @@ export default function AdminAnalyticsPage() {
       <header>
         <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Insights</p>
         <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Platform Analytics</h1>
-        <p className="mt-1 text-sm text-slate-500">Distributions and trends across the platform — headline KPIs live on the dashboard.</p>
+        <p className="mt-1 text-sm text-slate-500">Distributions and trends across the platform - headline KPIs live on the dashboard.</p>
       </header>
 
       {loading ? (

@@ -53,7 +53,7 @@ const STATUS_STYLE: Record<AdminUserDetail['status'], string> = {
 };
 
 function fmt(iso: string | null): string {
-  if (!iso) return '—';
+  if (!iso) return '-';
   return new Date(iso).toLocaleString('en-IN', {
     day: 'numeric',
     month: 'short',
@@ -239,7 +239,7 @@ export function UserDetailDrawer({
                   ) : (
                     <div className="flex items-center gap-2">
                       <h3 className="truncate text-lg font-extrabold text-navy">
-                        {user.fullName ?? '—'}
+                        {user.fullName ?? '-'}
                       </h3>
                       <button
                         onClick={() => {
@@ -285,7 +285,7 @@ export function UserDetailDrawer({
                 </span>
               </div>
 
-              {/* College link — the tenant boundary for STUDENT + COLLEGE_ADMIN.
+              {/* College link - the tenant boundary for STUDENT + COLLEGE_ADMIN.
                   A TPO with no college can't open the placement console. */}
               {(user.role === 'STUDENT' || user.role === 'COLLEGE_ADMIN') && (
                 <div className="mt-4">
@@ -303,7 +303,7 @@ export function UserDetailDrawer({
                     disabled={busy === 'college'}
                     className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange disabled:opacity-60"
                   >
-                    <option value="">— No college —</option>
+                    <option value="">- No college -</option>
                     {colleges.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.name}

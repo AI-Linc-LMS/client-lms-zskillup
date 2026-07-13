@@ -87,7 +87,7 @@ export function PerformanceLive() {
     {
       label: 'Questions attempted',
       value: accuracy ? accuracy.total : 0,
-      fallback: accuracy ? undefined : '—',
+      fallback: accuracy ? undefined : '-',
       sub: 'server-graded',
       icon: Crosshair,
       from: '#7c6cf5',
@@ -97,7 +97,7 @@ export function PerformanceLive() {
       label: 'Avg speed',
       value: hasAccuracy ? accuracy.avgTimeSec : 0,
       suffix: 's',
-      fallback: hasAccuracy ? undefined : '—',
+      fallback: hasAccuracy ? undefined : '-',
       sub: 'per question',
       icon: Timer,
       from: '#1e6ff5',
@@ -106,7 +106,7 @@ export function PerformanceLive() {
     {
       label: 'Mock tests',
       value: mocks ? mocks.length : 0,
-      fallback: mocks ? undefined : '—',
+      fallback: mocks ? undefined : '-',
       sub: bestMock !== null ? `best ${bestMock}%` : 'none taken yet',
       icon: Trophy,
       from: '#34d399',
@@ -116,7 +116,7 @@ export function PerformanceLive() {
 
   return (
     <div className="space-y-8">
-      {/* Stat hero — featured accuracy ring + supporting KPIs on dark aurora glass */}
+      {/* Stat hero - featured accuracy ring + supporting KPIs on dark aurora glass */}
       <Reveal>
         <PerformanceHero
           accuracyPct={accuracyPct}
@@ -206,7 +206,7 @@ export function PerformanceLive() {
                     </div>
                     <AccuracyBar value={t.accuracyPct} tone={barTone(t.accuracyPct)} label={`${t.topicName} accuracy`} />
                     <p className="mt-3 text-sm leading-relaxed text-slate-600">
-                      {t.correct} of {t.total} correct — drill this topic to pull the average up.
+                      {t.correct} of {t.total} correct - drill this topic to pull the average up.
                     </p>
                     <Button asChild size="sm" variant="outline" className="mt-4 w-fit">
                       <Link href={`/dashboard/quiz/adaptive?topic=${encodeURIComponent(t.topicSlug)}`}>Drill now</Link>
@@ -369,7 +369,7 @@ function PerformanceHero({
                   <span className="text-2xl text-white/60">%</span>
                 </>
               ) : (
-                <span className="text-white/40">—</span>
+                <span className="text-white/40">-</span>
               )}
             </p>
             <p className="mt-1.5 text-xs text-white/55">
@@ -385,7 +385,7 @@ function PerformanceHero({
           </div>
         </div>
 
-        {/* Supporting KPI tiles — glass */}
+        {/* Supporting KPI tiles - glass */}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {kpis.map(({ label, value, suffix, fallback, sub, icon: Icon, from, to }) => (
             <motion.div

@@ -44,7 +44,7 @@ export default async function CompanyPrepPage({
             Practice workspace
           </p>
           <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-navy sm:text-[28px]">
-            {company.name} — Prep
+            {company.name} - Prep
           </h1>
         </div>
         <Link

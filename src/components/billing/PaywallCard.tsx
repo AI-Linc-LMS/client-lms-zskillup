@@ -95,7 +95,7 @@ export function PaywallCard({
         You&apos;ve used your {paywall.freeLimit} free questions
       </h2>
       <p className="mx-auto mt-1.5 max-w-sm text-sm text-slate-500">
-        Unlock <span className="font-semibold text-navy">{name}</span> to keep practising — every
+        Unlock <span className="font-semibold text-navy">{name}</span> to keep practising - every
         question, hint and prediction in this {noun}.
       </p>
 
@@ -126,7 +126,7 @@ export function PaywallCard({
                     <span className="text-[11px] font-semibold text-slate-400">{short}</span>
                   </>
                 ) : (
-                  '—'
+                  '-'
                 )}
               </span>
             </button>
@@ -134,7 +134,7 @@ export function PaywallCard({
         })}
       </div>
 
-      {/* Add to cart — accumulate several unlocks and pay once */}
+      {/* Add to cart - accumulate several unlocks and pay once */}
       {cart && scope !== EntitlementScope.PLATFORM && (
         <div className="mt-3">
           {cart.has(scope, paywall.scopeRef) ? (
@@ -142,7 +142,7 @@ export function PaywallCard({
               href="/cart"
               className="flex w-full items-center justify-center gap-2 rounded-full border border-orange/40 bg-orange/5 px-5 py-2.5 text-sm font-bold text-orange"
             >
-              <Check className="size-4" /> In cart — view cart
+              <Check className="size-4" /> In cart - view cart
             </Link>
           ) : (
             <button
@@ -173,7 +173,7 @@ export function PaywallCard({
         className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-navy px-5 py-2.5 text-sm font-extrabold text-white disabled:opacity-60"
       >
         <Sparkles className="size-4 text-[#ffb787]" />
-        Full platform{platformAnnual ? ` — ${formatPrice(platformAnnual.amountCents, platformAnnual.currency)}/yr` : ''}
+        Full platform{platformAnnual ? ` - ${formatPrice(platformAnnual.amountCents, platformAnnual.currency)}/yr` : ''}
       </button>
       <Link
         href="/upgrade"

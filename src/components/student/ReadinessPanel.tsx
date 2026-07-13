@@ -176,15 +176,15 @@ export function ReadinessPanel({
               <button type="button" onClick={() => setShowInfo(false)} aria-label="Close" className="text-white/40 hover:text-white/80"><X className="size-3.5" /></button>
             </div>
             <ul className="mt-3 grid gap-2.5 sm:grid-cols-2">
-              <li className="flex gap-2"><ClipboardList className="mt-0.5 size-3.5 shrink-0 text-[#ffc42d]" /><span><b className="text-white">Practice · 35%</b><br />Accuracy on practice questions — correct ÷ attempted.</span></li>
+              <li className="flex gap-2"><ClipboardList className="mt-0.5 size-3.5 shrink-0 text-[#ffc42d]" /><span><b className="text-white">Practice · 35%</b><br />Accuracy on practice questions - correct ÷ attempted.</span></li>
               <li className="flex gap-2"><FileCheck2 className="mt-0.5 size-3.5 shrink-0 text-[#ffc42d]" /><span><b className="text-white">Mock tests · 30%</b><br />Your average score across finished mock quizzes &amp; assessments (mean of score ÷ total per attempt).</span></li>
-              <li className="flex gap-2"><Code2 className="mt-0.5 size-3.5 shrink-0 text-[#ffc42d]" /><span><b className="text-white">Coding · 20%</b><br />Solve rate — distinct problems solved ÷ distinct problems attempted.</span></li>
-              <li className="flex gap-2"><Compass className="mt-0.5 size-3.5 shrink-0 text-[#ffc42d]" /><span><b className="text-white">Coverage · 15%</b><br />Breadth — distinct topics you&apos;ve practised ÷ all topics on the platform.</span></li>
+              <li className="flex gap-2"><Code2 className="mt-0.5 size-3.5 shrink-0 text-[#ffc42d]" /><span><b className="text-white">Coding · 20%</b><br />Solve rate - distinct problems solved ÷ distinct problems attempted.</span></li>
+              <li className="flex gap-2"><Compass className="mt-0.5 size-3.5 shrink-0 text-[#ffc42d]" /><span><b className="text-white">Coverage · 15%</b><br />Breadth - distinct topics you&apos;ve practised ÷ all topics on the platform.</span></li>
             </ul>
             <p className="mt-3 border-t border-white/10 pt-3">
               <b className="text-white">Overall readiness</b> is a weighted blend of the four
               (Practice&nbsp;35% · Mock&nbsp;30% · Coding&nbsp;20% · Coverage&nbsp;15%), counting only the parts you have
-              data for — Coverage always counts. So your weakest area drags the score down the most by its weight.
+              data for - Coverage always counts. So your weakest area drags the score down the most by its weight.
             </p>
             <p className="mt-2">
               Bands: <b className="text-rose-300">Needs work</b> &lt;40 · <b className="text-amber-300">Developing</b> 40–59 ·{' '}
@@ -210,7 +210,7 @@ export function ReadinessPanel({
 
       {!compact ? (
         <div className="space-y-6 p-6">
-          {/* company readiness — one card per PUBLISHED company (logo + score) */}
+          {/* company readiness - one card per PUBLISHED company (logo + score) */}
           {companies.length ? (
             <div data-tour={tour === 'performance' ? 'perf:company-readiness' : undefined}>
               <h3 className="mb-3 text-2xl font-black tracking-tight text-navy">Company readiness</h3>
@@ -236,7 +236,7 @@ export function ReadinessPanel({
             </div>
           ) : null}
 
-          {/* topic mastery — heatmap chips */}
+          {/* topic mastery - heatmap chips */}
           {data.topics.length ? (
             <div data-tour={tour === 'performance' ? 'perf:topic-mastery' : undefined}>
               <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Topic mastery</p>

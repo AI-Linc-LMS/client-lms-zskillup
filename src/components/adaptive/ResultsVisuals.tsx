@@ -237,7 +237,7 @@ export function SkillRadar({ skills: allSkills, size = 360 }: { skills: SkillMas
           transition={{ delay: 0.3 + i * 0.06, type: 'spring', stiffness: 300 }}
         />
       ))}
-      {/* labels — FULL skill name on top, % beneath; the side padding gives
+      {/* labels - FULL skill name on top, % beneath; the side padding gives
           room so long names ("Boats & Streams") are never truncated. */}
       {skills.map((s, i) => {
         const p = pt(i, R + 20);

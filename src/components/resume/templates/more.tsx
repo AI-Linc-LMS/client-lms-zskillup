@@ -147,7 +147,7 @@ export function LuxSleekTemplate({ data }: TemplateProps) {
       </header>
       <div className="space-y-5">
         {b.summary && <section>{head('Profile')}<p className="text-center text-[12.5px] leading-relaxed text-slate-700">{b.summary}</p></section>}
-        {data.workExperience.length > 0 && <section>{head('Experience')}{data.workExperience.map((w) => (<div key={w.id} className="mb-3 text-center"><p className="text-[13px] font-bold">{w.position} — {w.company}</p><p className="text-[11px] italic text-slate-500">{dateRange(w.startDate, w.endDate, w.current)}</p><div className="mx-auto max-w-[90%]"><Bullets items={w.description} /></div></div>))}</section>}
+        {data.workExperience.length > 0 && <section>{head('Experience')}{data.workExperience.map((w) => (<div key={w.id} className="mb-3 text-center"><p className="text-[13px] font-bold">{w.position} - {w.company}</p><p className="text-[11px] italic text-slate-500">{dateRange(w.startDate, w.endDate, w.current)}</p><div className="mx-auto max-w-[90%]"><Bullets items={w.description} /></div></div>))}</section>}
         {data.education.length > 0 && <section>{head('Education')}{data.education.map((e) => (<p key={e.id} className="text-center text-[12px] text-slate-700">{e.degree}, {e.institution} · {dateRange(e.startDate, e.endDate)}</p>))}</section>}
         {data.skills.length > 0 && <section>{head('Skills')}<p className="text-center text-[12px] text-slate-700">{data.skills.map((s) => s.name).join('   ·   ')}</p></section>}
       </div>

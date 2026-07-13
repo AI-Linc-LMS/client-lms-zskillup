@@ -187,7 +187,7 @@ export default function BuildYourOwnPage() {
 
   const commit = (goToCart: boolean) => {
     if (owned.platform) {
-      toast.info('You already have Full Platform access — everything is unlocked.');
+      toast.info('You already have Full Platform access - everything is unlocked.');
       return;
     }
     if (!items.length) return;
@@ -225,7 +225,7 @@ export default function BuildYourOwnPage() {
                   {pct ? <PlanPill tone="emerald">Save {pct}%</PlanPill> : null}
                 </span>
                 <span className="text-sm font-semibold tabular-nums text-slate-500">
-                  {amt != null ? formatPrice(amt, 'INR') : '—'}
+                  {amt != null ? formatPrice(amt, 'INR') : '-'}
                 </span>
               </span>
               <span
@@ -277,7 +277,7 @@ export default function BuildYourOwnPage() {
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
           {/* Main column */}
           <div className="space-y-6">
-            {/* Step 1 — Company */}
+            {/* Step 1 - Company */}
             <Step n={1} title="Select a Company">
               <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
                 {visibleCompanies.map((c) => (
@@ -308,7 +308,7 @@ export default function BuildYourOwnPage() {
               )}
             </Step>
 
-            {/* Step 2 — Section */}
+            {/* Step 2 - Section */}
             <Step n={2} title="Select a Section">
               <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
                 {visibleSections.map(({ section, topics: subs }) => (
@@ -338,7 +338,7 @@ export default function BuildYourOwnPage() {
               )}
             </Step>
 
-            {/* Step 3 — Sub-section */}
+            {/* Step 3 - Sub-section */}
             <Step
               n={3}
               title="Select a Sub-section"
@@ -696,7 +696,7 @@ function SubTable({
                           {active && <span className="size-1.5 rounded-full bg-white" />}
                         </span>
                         <span className="text-xs font-semibold tabular-nums text-slate-500">
-                          {amt != null ? formatPrice(amt, 'INR') : '—'}
+                          {amt != null ? formatPrice(amt, 'INR') : '-'}
                         </span>
                       </button>
                     </td>

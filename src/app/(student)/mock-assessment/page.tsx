@@ -32,7 +32,7 @@ export default function MockAssessmentPage() {
             </span>
             <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Build your own mock, exam-style</h1>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/60">
-              Choose the sections and topics you want, set the length, and sit a full proctored mock —
+              Choose the sections and topics you want, set the length, and sit a full proctored mock -
               the same experience as a real drive, but unlimited and just for practice.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">

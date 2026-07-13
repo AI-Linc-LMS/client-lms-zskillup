@@ -190,7 +190,7 @@ export function CodingAdmin() {
                       <Pill tone={DIFF_TONE[r.difficulty]}>{cap(r.difficulty)}</Pill>
                     </td>
                     <td className="px-4 py-3.5 text-slate-600">
-                      {(r.companies ?? []).map((c) => companyName[c] ?? c).join(', ') || '—'}
+                      {(r.companies ?? []).map((c) => companyName[c] ?? c).join(', ') || '-'}
                     </td>
                     <td className="px-4 py-3.5">
                       {r.source ? (
@@ -199,7 +199,7 @@ export function CodingAdmin() {
                           {r.yearTags && r.yearTags.length ? ` · ${r.yearTags.join(', ')}` : ''}
                         </Pill>
                       ) : (
-                        <span className="text-slate-400">—</span>
+                        <span className="text-slate-400">-</span>
                       )}
                     </td>
                     <td className="max-w-[16rem] px-4 py-3.5">
@@ -217,7 +217,7 @@ export function CodingAdmin() {
                           <span className="break-words text-[12px] text-slate-600">{r.sourceRef}</span>
                         )
                       ) : (
-                        <span className="text-slate-300">—</span>
+                        <span className="text-slate-300">-</span>
                       )}
                     </td>
                     <td className="px-4 py-3.5">
@@ -322,7 +322,7 @@ function CodingDetailDrawer({
             {p.xpReward ? <Pill tone="bg-[#fff5ea] text-[#1a1d29] ring-[#ffc42d]/30">{p.xpReward} XP</Pill> : null}
           </div>
 
-          {/* source citation — the whole point */}
+          {/* source citation - the whole point */}
           {p.sourceRef ? (
             <Field label="Source citation">
               {/^https?:\/\//.test(p.sourceRef) ? (

@@ -125,7 +125,7 @@ export function DayDrawer({
                 ))}
               </ul>
               <p className="mt-4 text-center text-[11px] text-slate-400">
-                Tasks tick off automatically when you finish the linked practice or mock — or check them yourself.
+                Tasks tick off automatically when you finish the linked practice or mock - or check them yourself.
               </p>
             </>
           )}

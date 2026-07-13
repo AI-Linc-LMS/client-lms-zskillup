@@ -35,7 +35,7 @@ export default function SuperAdminBillingPage() {
       <Breadcrumb items={[{ label: 'Dashboard', href: '/superadmin/dashboard' }, { label: 'Billing' }]} />
       <div className="mt-4">
         <h1 className="text-2xl font-black tracking-tight text-navy">Billing &amp; revenue</h1>
-        <p className="text-sm text-slate-500">Real payments, configurable pricing, and student access — Super Admin.</p>
+        <p className="text-sm text-slate-500">Real payments, configurable pricing, and student access - Super Admin.</p>
       </div>
       <PaymentsSection />
       <PricingSection />
@@ -153,7 +153,7 @@ function PricingSection() {
   return (
     <section className="mt-8">
       <h2 className="text-lg font-black tracking-tight text-navy">Pricing</h2>
-      <p className="text-sm text-slate-500">Edit any price — it applies to new purchases immediately.</p>
+      <p className="text-sm text-slate-500">Edit any price - it applies to new purchases immediately.</p>
       <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
         <table className="w-full min-w-[640px] text-sm">
           <thead>

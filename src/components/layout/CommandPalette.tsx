@@ -77,7 +77,7 @@ export function CommandPalette() {
               </div>
               <Command.List className="scroll-soft max-h-[46vh] overflow-y-auto p-2">
                 <Command.Empty className="py-8 text-center text-sm text-slate-400">
-                  Nothing matches — try a page or company name.
+                  Nothing matches - try a page or company name.
                 </Command.Empty>
                 {sections.map((section) => (
                   <Command.Group
@@ -104,7 +104,7 @@ export function CommandPalette() {
                     })}
                   </Command.Group>
                 ))}
-                {/* Company quick-jumps — student area only */}
+                {/* Company quick-jumps - student area only */}
                 {!pathname.startsWith('/superadmin') && !pathname.startsWith('/admin') && !pathname.startsWith('/tpo') && (
                   <Command.Group
                     heading="COMPANY HUBS"

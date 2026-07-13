@@ -46,7 +46,7 @@ export function PlatformGuidePrompt() {
         </span>
         <h2 className="mt-4 font-display text-xl font-bold tracking-tight text-navy">Take a quick tour?</h2>
         <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-500">
-          New here? We&apos;ll show you around — where every module lives and what each one does, with a guided
+          New here? We&apos;ll show you around - where every module lives and what each one does, with a guided
           walkthrough you can follow in one go. It takes about a minute.
         </p>
 

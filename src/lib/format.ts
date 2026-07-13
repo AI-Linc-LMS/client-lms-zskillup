@@ -4,7 +4,7 @@
 
 /** "11 Jun 2026" (or "11 Jun" with `year: false`); em-dash for missing dates. */
 export function formatDateIN(iso: string | null, opts: { year?: boolean } = {}): string {
-  if (!iso) return '—';
+  if (!iso) return '-';
   return new Date(iso).toLocaleDateString('en-IN', {
     day: 'numeric',
     month: 'short',

@@ -74,9 +74,9 @@ export default function SuperadminReportsPage() {
       ['Active subscriptions', fin.activeEntitlements],
       ['Active subscribers', fin.activeSubscribers],
       ['Expiring within 7 days', fin.expiringSoon],
-      ...fin.revenueByScope.map((s) => [`Revenue — ${s.scope} (₹)`, rupees(s.amountCents)] as [string, number]),
+      ...fin.revenueByScope.map((s) => [`Revenue - ${s.scope} (₹)`, rupees(s.amountCents)] as [string, number]),
       ...fin.revenueByCollege.map(
-        (c) => [`Booked — ${c.collegeName} (₹)`, rupees(c.amountCents)] as [string, number],
+        (c) => [`Booked - ${c.collegeName} (₹)`, rupees(c.amountCents)] as [string, number],
       ),
     ];
     download('financial-report.csv', toCsv(['Metric', 'Value'], rows));
@@ -96,7 +96,7 @@ export default function SuperadminReportsPage() {
       <header>
         <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Operations</p>
         <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Reports &amp; Exports</h1>
-        <p className="mt-1 text-sm text-slate-500">Platform, financial and company reports — download as CSV.</p>
+        <p className="mt-1 text-sm text-slate-500">Platform, financial and company reports - download as CSV.</p>
       </header>
 
       {loading ? (
@@ -108,7 +108,7 @@ export default function SuperadminReportsPage() {
           <ReportCard
             icon={School}
             title="Platform Report"
-            desc="Institution-wide totals — students, colleges, content, activity."
+            desc="Institution-wide totals - students, colleges, content, activity."
             meta={`${stats?.students ?? 0} students · ${stats?.colleges ?? 0} colleges`}
             onExport={exportPlatform}
           />

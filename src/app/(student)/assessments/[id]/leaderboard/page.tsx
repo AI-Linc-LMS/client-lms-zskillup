@@ -106,7 +106,7 @@ export default function AssessmentLeaderboardPage({ params }: { params: Promise<
                 <span className={cn('mb-1 text-xs font-black', place === 1 ? 'text-amber-500' : 'text-slate-400')}>#{place}</span>
                 <Avatar src={e.avatarUrl} name={e.name} size={place === 1 ? 56 : 46} />
                 <p className="mt-2 truncate text-sm font-bold text-navy">{e.name}</p>
-                <p className="truncate text-[11px] text-slate-400">{e.collegeName ?? '—'}</p>
+                <p className="truncate text-[11px] text-slate-400">{e.collegeName ?? '-'}</p>
                 <p className="mt-1 text-lg font-black" style={{ color: toneFor(e.scorePct) }}>{e.scorePct}%</p>
                 <p className="text-[10px] font-semibold text-slate-400">{e.percentile}th pct · Lv {e.level}</p>
               </div>
@@ -171,7 +171,7 @@ export default function AssessmentLeaderboardPage({ params }: { params: Promise<
                   <p className="truncate text-sm font-bold text-navy">
                     {e.name} {e.isYou ? <span className="ml-1 rounded-full bg-sky-100 px-1.5 py-0.5 text-[10px] font-bold text-sky-700">You</span> : null}
                   </p>
-                  <p className="truncate text-[11px] text-slate-400">{e.collegeName ?? '—'}</p>
+                  <p className="truncate text-[11px] text-slate-400">{e.collegeName ?? '-'}</p>
                 </div>
                 <span className="hidden items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-600 sm:inline-flex" title="Streak"><Flame className="size-3" /> {e.currentStreakDays}d</span>
                 <span className="hidden items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-bold text-violet-600 sm:inline-flex" title="Badges"><Award className="size-3" /> {e.badgesEarned}</span>

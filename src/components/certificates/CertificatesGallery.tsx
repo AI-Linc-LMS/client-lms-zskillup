@@ -62,7 +62,7 @@ export function CertificatesGallery() {
               </span>
               <h1 className="mt-3 font-display text-2xl font-bold tracking-tight sm:text-3xl">Earn as you climb</h1>
               <p className="mt-1.5 max-w-lg text-sm leading-relaxed text-white/70">
-                Every certificate unlocks at an XP milestone — download it as a PDF and share a public, verifiable link.
+                Every certificate unlocks at an XP milestone - download it as a PDF and share a public, verifiable link.
               </p>
             </div>
             <div className="flex shrink-0 gap-6 sm:flex-col sm:items-end sm:gap-1 sm:text-right">
@@ -109,7 +109,7 @@ export function CertificatesGallery() {
             </div>
           ) : (
             <div className="relative mt-3 flex items-center gap-2 rounded-2xl bg-emerald-500/15 p-3 text-sm font-semibold text-emerald-200 ring-1 ring-inset ring-emerald-400/25">
-              <Sparkles className="size-4" /> All certificates unlocked — you&apos;ve reached the summit.
+              <Sparkles className="size-4" /> All certificates unlocked - you&apos;ve reached the summit.
             </div>
           )}
         </div>

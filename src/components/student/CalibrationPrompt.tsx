@@ -84,7 +84,7 @@ export function CalibrationPrompt() {
           </button>
         </div>
         <p className="mt-3 text-[11px] text-slate-400">
-          You can keep exploring for now — a "Take Placement Readiness Test" button stays on your dashboard until you finish it.
+          You can keep exploring for now - a "Take Placement Readiness Test" button stays on your dashboard until you finish it.
         </p>
       </div>
     </Modal>

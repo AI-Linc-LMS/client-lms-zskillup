@@ -30,7 +30,7 @@ function pctTone(pct: number | null): string {
 }
 
 function fmtDateTime(d: string | null): string {
-  if (!d) return '—';
+  if (!d) return '-';
   return new Date(d).toLocaleString('en-IN', {
     day: 'numeric',
     month: 'short',
@@ -42,7 +42,7 @@ function fmtDateTime(d: string | null): string {
 }
 
 function fmtDuration(sec: number | null): string {
-  if (sec === null || sec === 0) return '—';
+  if (sec === null || sec === 0) return '-';
   const m = Math.floor(sec / 60);
   const s = sec % 60;
   if (m === 0) return `${s}s`;
@@ -166,13 +166,13 @@ export default function StudentReportPage() {
         />
         <StatCard
           label="Avg score"
-          value={summary.avgScorePct === null ? '—' : `${summary.avgScorePct}%`}
+          value={summary.avgScorePct === null ? '-' : `${summary.avgScorePct}%`}
           icon={<Target className="size-4" />}
           accent="#f5b400"
         />
         <StatCard
           label="Best score"
-          value={summary.bestScorePct === null ? '—' : `${summary.bestScorePct}%`}
+          value={summary.bestScorePct === null ? '-' : `${summary.bestScorePct}%`}
           icon={<Trophy className="size-4" />}
           accent="#059669"
         />
@@ -184,7 +184,7 @@ export default function StudentReportPage() {
         />
         <StatCard
           label="Practice"
-          value={practicePct === null ? '—' : `${practicePct}%`}
+          value={practicePct === null ? '-' : `${practicePct}%`}
           sub={`${summary.practiceCorrect}/${summary.practiceAttempts} correct`}
           icon={<CheckCircle2 className="size-4" />}
           accent="#0ea5e9"
@@ -226,13 +226,13 @@ export default function StudentReportPage() {
                   <tr key={a.id} className="hover:bg-slate-50/50">
                     <td className="px-5 py-3 font-medium text-navy">{a.mockTitle}</td>
                     <td className="px-5 py-3 text-center text-slate-600">
-                      {a.score === null || a.total === null ? '—' : `${a.score} / ${a.total}`}
+                      {a.score === null || a.total === null ? '-' : `${a.score} / ${a.total}`}
                     </td>
                     <td className={`px-5 py-3 text-center font-bold ${pctTone(a.percentage)}`}>
-                      {a.percentage === null ? '—' : `${a.percentage}%`}
+                      {a.percentage === null ? '-' : `${a.percentage}%`}
                     </td>
                     <td className="px-5 py-3 text-center text-slate-600">
-                      {a.percentile === null ? '—' : a.percentile}
+                      {a.percentile === null ? '-' : a.percentile}
                     </td>
                     <td className="px-5 py-3">
                       <span

@@ -37,7 +37,7 @@ export default function AdminCollegesPage() {
         </h1>
         <p className="mt-1 text-sm text-slate-500">
           Onboard a new partner institution or suspend an existing one. Suspended
-          colleges keep their data — student profiles aren&rsquo;t deleted — but new
+          colleges keep their data - student profiles aren&rsquo;t deleted - but new
           sign-ins from their cohort are blocked.
         </p>
       </header>

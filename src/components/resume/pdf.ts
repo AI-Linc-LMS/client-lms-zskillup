@@ -20,7 +20,7 @@ export async function resumeToPdfBlob(pageNode: HTMLElement): Promise<Blob> {
   });
 
   const img = await loadImage(dataUrl);
-  if (!img.width || !img.height) throw new Error('Resume capture failed — nothing to export.');
+  if (!img.width || !img.height) throw new Error('Resume capture failed - nothing to export.');
   // `compress: true` deflates the PDF's internal streams on top of the JPEG.
   const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4', compress: true });
   const pageWmm = 210;
@@ -83,7 +83,7 @@ function toJpeg(img: HTMLImageElement, w: number, h: number): string {
   canvas.width = w;
   canvas.height = h;
   const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('Resume export failed — canvas unavailable.');
+  if (!ctx) throw new Error('Resume export failed - canvas unavailable.');
   ctx.fillStyle = '#ffffff'; // JPEG has no alpha; flatten onto white
   ctx.fillRect(0, 0, w, h);
   ctx.drawImage(img, 0, 0, w, h);

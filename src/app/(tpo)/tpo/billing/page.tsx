@@ -47,7 +47,7 @@ export default function TpoBillingPage() {
       scope: EntitlementScope.COMPANY,
       scopeRef: c.slug,
       period,
-      label: `${c.name} — cohort access (${period.toLowerCase()})`,
+      label: `${c.name} - cohort access (${period.toLowerCase()})`,
       forCollege: true,
       prefill: { name: me?.fullName, email: me?.email },
     });
@@ -63,7 +63,7 @@ export default function TpoBillingPage() {
         <div>
           <h1 className="text-2xl font-black tracking-tight text-navy">Cohort access</h1>
           <p className="max-w-xl text-sm text-slate-500">
-            Buy a company&apos;s question bank at the B2B rate — every student in your college gets it, no per-seat setup.
+            Buy a company&apos;s question bank at the B2B rate - every student in your college gets it, no per-seat setup.
           </p>
         </div>
         <div className="inline-flex rounded-full border border-slate-200 bg-white p-1">
@@ -108,7 +108,7 @@ export default function TpoBillingPage() {
                   </span>
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-extrabold text-navy">{c.name}</span>
-                    <span className="text-xs text-slate-400">{price ? formatPrice(price.amountCents, price.currency) : '—'}</span>
+                    <span className="text-xs text-slate-400">{price ? formatPrice(price.amountCents, price.currency) : '-'}</span>
                   </span>
                 </div>
                 <button

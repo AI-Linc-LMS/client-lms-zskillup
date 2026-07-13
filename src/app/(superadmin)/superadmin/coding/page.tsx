@@ -27,7 +27,7 @@ export default function AdminCodingPage() {
           <h1 className="mt-2 text-[28px] font-extrabold tracking-tight text-navy">Coding bank</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
             Company-tagged coding problems. Each shows its provenance, Judge0 verification status,
-            and — for sourced/PYQ problems — the citation link to where it came from.
+            and - for sourced/PYQ problems - the citation link to where it came from.
           </p>
         </div>
       </header>

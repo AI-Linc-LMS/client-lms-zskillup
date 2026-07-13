@@ -237,13 +237,13 @@ function StudentRow({ s, cohortName }: { s: TpoStudentRow; cohortName: string | 
     <tr className="transition-colors hover:bg-slate-50">
       <td className="px-4 py-2.5">
         <Link href={`/tpo/students/${s.id}`} className="group block">
-          <p className="font-semibold text-navy group-hover:text-[#1a1d29]">{s.name ?? '—'}</p>
+          <p className="font-semibold text-navy group-hover:text-[#1a1d29]">{s.name ?? '-'}</p>
           <p className="truncate text-xs text-slate-400">{s.email}</p>
         </Link>
       </td>
-      <td className="px-4 py-2.5 text-slate-500">{s.rollNumber ?? '—'}</td>
-      <td className="px-4 py-2.5 text-slate-600">{s.branch ?? '—'}</td>
-      <td className="px-4 py-2.5 text-slate-500">{cohortName ?? '—'}</td>
+      <td className="px-4 py-2.5 text-slate-500">{s.rollNumber ?? '-'}</td>
+      <td className="px-4 py-2.5 text-slate-600">{s.branch ?? '-'}</td>
+      <td className="px-4 py-2.5 text-slate-500">{cohortName ?? '-'}</td>
       <td className="px-4 py-2.5">
         <div className="flex items-center gap-2">
           <div className="h-1.5 w-16 overflow-hidden rounded-full bg-slate-100">

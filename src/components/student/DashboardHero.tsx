@@ -100,12 +100,12 @@ export function DashboardHero() {
       {/* Divider */}
       <div className="my-5 border-t border-[var(--color-line)]" />
 
-      {/* Bottom row — mock readiness + mini gamification hints */}
+      {/* Bottom row - mock readiness + mini gamification hints */}
       <div className="flex flex-wrap items-center gap-6">
         {/* Mock readiness */}
         <div className="flex min-w-0 flex-1 items-center gap-3.5">
           <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[var(--color-ink)] text-[13px] font-extrabold text-white shadow-md">
-            {bestPct !== null ? `${bestPct}%` : '—'}
+            {bestPct !== null ? `${bestPct}%` : '-'}
           </div>
           <div className="min-w-0 flex-1">
             <div className="mb-1.5 flex items-center justify-between gap-2">
@@ -124,7 +124,7 @@ export function DashboardHero() {
         <div className="hidden shrink-0 items-center gap-4 sm:flex">
           <div className="text-center">
             <span className="level-badge">
-              {stats ? `Lv ${stats.level}` : 'Lv —'}
+              {stats ? `Lv ${stats.level}` : 'Lv -'}
             </span>
             <p className="mt-1.5 text-[10px] font-bold uppercase tracking-wide text-[var(--color-text-subtle)]">
               Level
@@ -158,7 +158,7 @@ export function DashboardHero() {
           <div className="text-center">
             <span className="streak-flame">
               <Flame className="h-3.5 w-3.5" />
-              {stats ? `${stats.currentStreakDays} day${stats.currentStreakDays === 1 ? '' : 's'}` : '—'}
+              {stats ? `${stats.currentStreakDays} day${stats.currentStreakDays === 1 ? '' : 's'}` : '-'}
             </span>
             <p className="mt-1.5 text-[10px] font-bold uppercase tracking-wide text-[var(--color-text-subtle)]">
               Streak

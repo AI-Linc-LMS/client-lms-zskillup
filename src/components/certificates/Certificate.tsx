@@ -24,7 +24,7 @@ const display = 'var(--font-bricolage), var(--font-jakarta), sans-serif';
 const sans = 'var(--font-jakarta), ui-sans-serif, system-ui, sans-serif';
 
 function fmtDate(iso: string | null): string {
-  if (!iso) return '—';
+  if (!iso) return '-';
   const d = new Date(iso);
   return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
 }

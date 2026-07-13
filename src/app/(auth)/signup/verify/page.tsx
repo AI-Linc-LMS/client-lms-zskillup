@@ -84,7 +84,7 @@ function VerifyForm() {
         `${API_BASE_URL}/api/v1/auth/_dev/last-otp?email=${encodeURIComponent(email)}`,
       );
       if (!res.ok) {
-        setDevHint('No OTP found — try registering again or check backend logs.');
+        setDevHint('No OTP found - try registering again or check backend logs.');
         return;
       }
       const json = (await res.json()) as { data?: { code?: string } };
@@ -189,7 +189,7 @@ function VerifyForm() {
                 SMTP not wired? Click below to pull the OTP from the backend dev store
                 and pre-fill it. This shortcut is disabled in production.
                 If Mailhog is unavailable, the backend auto-creates an Ethereal.email
-                account — check the backend logs for a preview URL.
+                account - check the backend logs for a preview URL.
               </p>
               <button
                 type="button"

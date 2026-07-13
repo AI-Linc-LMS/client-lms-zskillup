@@ -111,7 +111,7 @@ export default function AdminAdaptiveSessionsPage() {
                         {s.accuracy}%
                       </span>
                     ) : (
-                      <span className="text-slate-400">—</span>
+                      <span className="text-slate-400">-</span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-400">

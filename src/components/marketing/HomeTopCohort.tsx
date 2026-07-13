@@ -38,7 +38,7 @@ export function HomeTopCohort() {
       </p>
       {entries && entries.length === 0 ? (
         <p className="mt-3 text-sm text-[var(--color-text-muted)]">
-          Be the first to top the leaderboard — start practising today.
+          Be the first to top the leaderboard - start practising today.
         </p>
       ) : (
         <ul className="mt-3 space-y-2">
@@ -53,7 +53,7 @@ export function HomeTopCohort() {
                 {i + 1}
               </span>
               <span className="flex-1 text-sm font-bold text-[var(--color-text)]">
-                {r ? (r.fullName ?? 'Student') : '—'}
+                {r ? (r.fullName ?? 'Student') : '-'}
               </span>
               <span className="num-tab text-xs font-bold text-[var(--color-text-muted)]">
                 {r ? `${r.totalXp.toLocaleString()} XP` : ''}

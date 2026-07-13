@@ -130,7 +130,7 @@ export default function PracticeWishPage() {
           <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Practice anything, any amount</h1>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/60">
             Type any topic, or browse every section below. We pull from the bank and, when it runs out,
-            craft brand-new questions with AI — adaptive, unbounded, and yours to end whenever you like.
+            craft brand-new questions with AI - adaptive, unbounded, and yours to end whenever you like.
           </p>
 
           {/* search box */}
@@ -141,7 +141,7 @@ export default function PracticeWishPage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && launch(query)}
-                placeholder="Search a topic, or type anything — e.g. Time & Work, Binary Search…"
+                placeholder="Search a topic, or type anything - e.g. Time & Work, Binary Search…"
                 className="w-full rounded-xl border border-white/15 bg-white/10 px-10 py-3 text-sm text-white placeholder:text-white/40 focus:border-white/40 focus:outline-none"
               />
             </div>
@@ -157,13 +157,13 @@ export default function PracticeWishPage() {
           {query.trim() && !exactMatch ? (
             <p className="mt-2 flex items-center gap-1.5 text-[12px] text-white/60">
               <Sparkles className="size-3.5 text-fuchsia-300" />
-              No exact match — we&apos;ll craft fresh questions for &ldquo;{query.trim()}&rdquo;.
+              No exact match - we&apos;ll craft fresh questions for &ldquo;{query.trim()}&rdquo;.
             </p>
           ) : null}
         </div>
       </section>
 
-      {/* Coding — practise any coding topic on the go (Judge0-evaluated) */}
+      {/* Coding - practise any coding topic on the go (Judge0-evaluated) */}
       {codingVisible && codingTopics.length > 0 ? (
         <CodingBlock topics={filteredCodingTopics} showPracticeAll={false} />
       ) : null}

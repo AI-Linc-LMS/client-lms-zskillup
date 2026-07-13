@@ -14,7 +14,7 @@ interface Msg {
 const GREETING: Msg = {
   role: 'assistant',
   content:
-    "Hi! I'm Ziggy 👋 — your ZSkillup helper. Ask me anything about practice, pricing, mock interviews, the resume builder, or how to unlock topics.",
+    "Hi! I'm Ziggy 👋 - your ZSkillup helper. Ask me anything about practice, pricing, mock interviews, the resume builder, or how to unlock topics.",
 };
 const SUGGESTIONS = [
   'What can I use for free?',

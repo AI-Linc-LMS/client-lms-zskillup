@@ -13,7 +13,7 @@ export default function TpoInvitationsPage() {
       </span>
       <h1 className="mt-4 text-lg font-extrabold text-navy">Invitations are managed by your admin</h1>
       <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-500">
-        Student onboarding — cohorts and bulk invitations — is handled by the Platform Admin for your
+        Student onboarding - cohorts and bulk invitations - is handled by the Platform Admin for your
         college. Reach out to them to add students, then track everyone here as they engage.
       </p>
       <Link

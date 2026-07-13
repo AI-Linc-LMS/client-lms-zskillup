@@ -90,7 +90,7 @@ export function PlacementOutcomes({ cohortId, students }: { cohortId: string; st
   return (
     <BentoCard
       title="Placement Outcomes"
-      subtitle="Real offers recorded by your team — the funnel below is not the readiness proxy."
+      subtitle="Real offers recorded by your team - the funnel below is not the readiness proxy."
       source="TPO-recorded placements"
       action={
         <Button size="sm" onClick={() => setShowForm((s) => !s)}>
@@ -109,8 +109,8 @@ export function PlacementOutcomes({ cohortId, students }: { cohortId: string; st
             <Tile icon={Trophy} label="Placed" value={summary?.studentsPlaced ?? 0} />
             <Tile icon={TrendingUp} label="Placement rate" value={`${summary?.placementRatePct ?? 0}%`} />
             <Tile icon={Building2} label="Total offers" value={summary?.totalOffers ?? 0} />
-            <Tile icon={IndianRupee} label="Avg CTC" value={summary?.avgCtcLpa != null ? `${summary.avgCtcLpa} LPA` : '—'} />
-            <Tile icon={IndianRupee} label="Highest CTC" value={summary?.highestCtcLpa != null ? `${summary.highestCtcLpa} LPA` : '—'} />
+            <Tile icon={IndianRupee} label="Avg CTC" value={summary?.avgCtcLpa != null ? `${summary.avgCtcLpa} LPA` : '-'} />
+            <Tile icon={IndianRupee} label="Highest CTC" value={summary?.highestCtcLpa != null ? `${summary.highestCtcLpa} LPA` : '-'} />
           </div>
 
           {(summary?.byCompany.length ?? 0) > 0 && (
@@ -198,12 +198,12 @@ export function PlacementOutcomes({ cohortId, students }: { cohortId: string; st
                 <tbody className="divide-y divide-slate-100">
                   {list.map((p) => (
                     <tr key={p.id}>
-                      <td className="px-2 py-2 font-semibold text-navy">{p.studentName ?? '—'}</td>
+                      <td className="px-2 py-2 font-semibold text-navy">{p.studentName ?? '-'}</td>
                       <td className="px-2 py-2 text-slate-600">
                         {p.companyName}
                         {p.role ? <span className="text-slate-400"> · {p.role}</span> : null}
                       </td>
-                      <td className="px-2 py-2 tabular-nums text-slate-600">{p.ctcLpa != null ? `${p.ctcLpa} LPA` : '—'}</td>
+                      <td className="px-2 py-2 tabular-nums text-slate-600">{p.ctcLpa != null ? `${p.ctcLpa} LPA` : '-'}</td>
                       <td className="px-2 py-2">
                         <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">{p.status}</span>
                       </td>

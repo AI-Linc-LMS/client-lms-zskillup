@@ -92,10 +92,10 @@ export function CodingProblemsList({ company, topic }: { company?: string; topic
         <p className="text-sm font-semibold text-navy">No coding problems yet</p>
         <p className="mt-1 text-sm text-slate-500">
           {topic
-            ? `No coding problems tagged “${topic}” yet — check back soon.`
+            ? `No coding problems tagged “${topic}” yet - check back soon.`
             : company
-              ? 'No coding problems tagged for this company yet — check back soon.'
-              : 'Check back soon — new problems are on the way.'}
+              ? 'No coding problems tagged for this company yet - check back soon.'
+              : 'Check back soon - new problems are on the way.'}
         </p>
       </div>
     );
@@ -123,7 +123,7 @@ export function CodingProblemsList({ company, topic }: { company?: string; topic
                 Earn XP for every problem you solve for the first time.
               </p>
             </div>
-            {/* Search — filter by problem title or tag */}
+            {/* Search - filter by problem title or tag */}
             <div data-tour="coding:search" className="relative w-full sm:w-64">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
               <input

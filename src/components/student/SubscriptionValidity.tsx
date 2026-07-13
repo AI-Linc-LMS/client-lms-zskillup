@@ -57,7 +57,7 @@ export function SubscriptionValidity() {
     .filter((e) => e.status === 'ACTIVE')
     .sort((a, b) => (a.daysRemaining ?? Infinity) - (b.daysRemaining ?? Infinity));
 
-  if (active.length === 0) return null; // free tier — nothing to show
+  if (active.length === 0) return null; // free tier - nothing to show
 
   const expiring = active.filter((e) => e.daysRemaining != null && e.daysRemaining <= 7);
   const shown = active.slice(0, 4);
@@ -74,7 +74,7 @@ export function SubscriptionValidity() {
         </Link>
       </div>
 
-      {/* Renewal nudge — the in-app reminder shown in a plan's final week. */}
+      {/* Renewal nudge - the in-app reminder shown in a plan's final week. */}
       {expiring.length > 0 && (
         <div className="mb-3 rounded-2xl border border-amber-300 bg-amber-50/80 p-3">
           <p className="flex items-start gap-2 text-xs font-semibold text-amber-800">

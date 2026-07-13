@@ -139,7 +139,7 @@ export function AiBriefingHero() {
     (!isReturning
       ? `Kick off your first session today to start earning XP and build your skill profile.`
       : streak > 0
-        ? `You're on a roll — keep the streak alive and close in on Level ${level + 1}.`
+        ? `You're on a roll - keep the streak alive and close in on Level ${level + 1}.`
         : `One focused session today reignites your streak and pushes you toward Level ${level + 1}.`);
 
   const focusAreas = briefing?.focusAreas?.length ? briefing.focusAreas : DEFAULT_FOCUS;
@@ -162,7 +162,7 @@ export function AiBriefingHero() {
   // dropped (mocks come after the readiness test).
   const cards: FocusArea[] = showPlacementTest
     ? [
-        { title: 'Take the Placement Readiness Test', detail: 'Your first step — we map where you stand' },
+        { title: 'Take the Placement Readiness Test', detail: 'Your first step - we map where you stand' },
         ...focusAreas.filter((f) => !/mock/i.test(`${f.title} ${f.detail}`)),
       ].slice(0, 3)
     : focusAreas.slice(0, 3);
@@ -198,9 +198,9 @@ export function AiBriefingHero() {
     <section data-tour="dash:briefing-hero" className="relative isolate overflow-hidden rounded-[1.5rem] p-5 text-white sm:rounded-[2rem] sm:p-7">
       <BriefingHeroCanvas />
 
-      {/* Top bar — live level/XP/streak (right). The "Your AI briefing" pill was removed. */}
+      {/* Top bar - live level/XP/streak (right). The "Your AI briefing" pill was removed. */}
       <div className="relative z-10 flex flex-wrap items-start justify-end gap-4">
-        {/* live level/XP/streak — pinned top-right */}
+        {/* live level/XP/streak - pinned top-right */}
         <motion.div
           className="flex items-stretch gap-3"
           initial={reduce ? false : { opacity: 0, y: -8 }}
@@ -242,7 +242,7 @@ export function AiBriefingHero() {
 
       <div className="relative z-10 mt-2 max-w-3xl">
 
-        {/* greeting — the NAME rendered bold + yellow (benchmark). */}
+        {/* greeting - the NAME rendered bold + yellow (benchmark). */}
         <motion.p
           className="text-sm font-bold uppercase tracking-[0.22em] text-white/45"
           initial={reduce ? false : { opacity: 0, y: 10 }}
@@ -272,7 +272,7 @@ export function AiBriefingHero() {
           {subline}
         </motion.p>
 
-        {/* focus cards — a SINGLE horizontal row of up to 3; dark icon on a yellow disc. */}
+        {/* focus cards - a SINGLE horizontal row of up to 3; dark icon on a yellow disc. */}
         <div className="mt-5 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
           {cards.map((f, i) => {
             const isPlacement = i === 0 && showPlacementTest;

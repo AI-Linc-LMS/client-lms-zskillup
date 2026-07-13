@@ -78,7 +78,7 @@ export default function CompanyTopicPyqsPage({
           <p className="mt-4 text-sm text-slate-500">
             {result?.total ?? pyqs.length} previous-year question
             {(result?.total ?? pyqs.length) === 1 ? '' : 's'} asked by {companyName}
-            {lockedCount > 0 ? ` — showing your first ${pyqs.length} free.` : '.'}
+            {lockedCount > 0 ? ` - showing your first ${pyqs.length} free.` : '.'}
           </p>
           <div className="mt-4 space-y-4">
             {pyqs.map((q, i) => (

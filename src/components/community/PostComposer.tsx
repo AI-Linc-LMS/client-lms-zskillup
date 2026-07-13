@@ -149,7 +149,7 @@ export function PostComposer({
               <input
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
-                placeholder="Tags (comma separated) — e.g. dsa, interview, react"
+                placeholder="Tags (comma separated) - e.g. dsa, interview, react"
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
               />
             </div>

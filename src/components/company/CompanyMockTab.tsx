@@ -39,7 +39,7 @@ export function CompanyMockTab({ content }: { content: HubContent }) {
         </p>
       </div>
 
-      {/* Adaptive mock quiz — standout violet card */}
+      {/* Adaptive mock quiz - standout violet card */}
       <Link
         href="/mock-assessment"
         className="group relative flex items-center justify-between gap-3 overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_-30px_rgba(124,58,237,0.22)] transition-shadow hover:shadow-[0_24px_60px_-28px_rgba(124,58,237,0.35)] sm:gap-4 sm:p-6"
@@ -67,7 +67,7 @@ export function CompanyMockTab({ content }: { content: HubContent }) {
         </span>
       </Link>
 
-      {/* Scheduled proctored assessments for this company — standout violet card */}
+      {/* Scheduled proctored assessments for this company - standout violet card */}
       <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_-30px_rgba(124,58,237,0.22)] sm:p-6">
         <div
           aria-hidden
@@ -77,7 +77,7 @@ export function CompanyMockTab({ content }: { content: HubContent }) {
           <span className="grid size-8 place-items-center rounded-xl bg-violet-50 text-violet-600 ring-1 ring-inset ring-violet-100">
             <ShieldCheck className="size-4" />
           </span>
-          Proctored assessments — {name}
+          Proctored assessments - {name}
         </h3>
         {scheduled === null ? (
           <p className="mt-3 text-xs text-slate-400">Loading…</p>
@@ -87,7 +87,7 @@ export function CompanyMockTab({ content }: { content: HubContent }) {
             <Link href={`/dashboard/company/${slug}`} className="font-semibold text-violet-600 hover:underline">
               Register
             </Link>{' '}
-            to be notified when {name} schedules one — it&apos;ll appear on your calendar.
+            to be notified when {name} schedules one - it&apos;ll appear on your calendar.
           </p>
         ) : (
           <ul className="mt-4 grid gap-3 sm:grid-cols-2">

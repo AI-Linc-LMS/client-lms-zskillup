@@ -22,7 +22,7 @@ export default async function BlogIndexPage() {
 
       {posts.length === 0 ? (
         <p className="rounded-xl border border-[var(--color-line)] bg-white p-10 text-center text-sm text-[var(--color-text-muted)]">
-          No posts yet — check back soon.
+          No posts yet - check back soon.
         </p>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

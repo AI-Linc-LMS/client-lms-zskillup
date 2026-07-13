@@ -212,7 +212,7 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
         <Section title="Skill mastery" icon={Brain}>
           {results.skillMastery.length >= 3 ? (
             <div className="mb-4 space-y-4">
-              {/* Skill radar — its own prominent card so every skill + score is
+              {/* Skill radar - its own prominent card so every skill + score is
                   clearly visible (full names, no truncation). */}
               <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
                 <p className="mb-2 text-center text-[11px] font-bold uppercase tracking-widest text-slate-400">

@@ -135,7 +135,7 @@ export default function SkillGapAnalyticsPage() {
       {/* Campus weak areas summary */}
       <BentoCard
         title="Campus Weak Areas"
-        subtitle="The lowest-accuracy areas across your cohort — prioritize these for clinics."
+        subtitle="The lowest-accuracy areas across your cohort - prioritize these for clinics."
         source="Aggregated aptitude + coding performance"
       >
         {aptitudeGaps.length === 0 && (coding?.totalAttempted ?? 0) === 0 ? (

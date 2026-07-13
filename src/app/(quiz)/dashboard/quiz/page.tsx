@@ -26,7 +26,7 @@ export default async function FullMockQuizPage({
 
 function QuizLanding() {
   const points = [
-    { icon: Timer, text: 'A single server-enforced timer for the whole test — it auto-submits at zero.' },
+    { icon: Timer, text: 'A single server-enforced timer for the whole test - it auto-submits at zero.' },
     { icon: Target, text: 'Move between questions freely and change answers until you submit.' },
     { icon: BarChart3, text: 'A percentile, topic-by-topic breakdown, and full answer review at the end.' },
   ];

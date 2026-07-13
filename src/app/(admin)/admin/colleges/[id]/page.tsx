@@ -70,7 +70,7 @@ export default function AdminCollegeDetailPage({ params }: { params: Promise<{ i
                   {detail.college.name}
                 </h1>
                 <p className="text-sm text-slate-500">
-                  {[detail.college.city, detail.college.state].filter(Boolean).join(', ') || '—'}
+                  {[detail.college.city, detail.college.state].filter(Boolean).join(', ') || '-'}
                 </p>
               </div>
               <span
@@ -89,11 +89,11 @@ export default function AdminCollegeDetailPage({ params }: { params: Promise<{ i
               <Kpi label="Invited" value={detail.invitedStudentCount} />
               <Kpi label="Cohorts" value={detail.cohortCount} />
               <Kpi label="Mock attempts" value={detail.mockAttempts} />
-              <Kpi label="Avg %" value={detail.avgScorePct ?? '—'} />
+              <Kpi label="Avg %" value={detail.avgScorePct ?? '-'} />
             </dl>
           </section>
 
-          {/* Cohorts + student invitations — Platform Admin manages these (TPO is read-only). */}
+          {/* Cohorts + student invitations - Platform Admin manages these (TPO is read-only). */}
           <CollegeCohortsManager collegeId={id} onChange={() => void reload()} />
 
           <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
@@ -124,7 +124,7 @@ export default function AdminCollegeDetailPage({ params }: { params: Promise<{ i
                         <td className="px-4 py-3">
                           <Link href={`/admin/students/${s.id}`} className="group">
                             <p className="font-semibold text-navy group-hover:text-[#1a1d29]">
-                              {s.fullName ?? '—'}
+                              {s.fullName ?? '-'}
                             </p>
                             <p className="text-xs text-slate-400">{s.email}</p>
                           </Link>
@@ -133,10 +133,10 @@ export default function AdminCollegeDetailPage({ params }: { params: Promise<{ i
                           {s.attempts}
                         </td>
                         <td className="px-4 py-3 text-right tabular-nums text-slate-700">
-                          {s.avgScorePct ?? '—'}
+                          {s.avgScorePct ?? '-'}
                         </td>
                         <td className="px-4 py-3 text-right tabular-nums text-slate-700">
-                          {s.bestScorePct ?? '—'}
+                          {s.bestScorePct ?? '-'}
                         </td>
                         <td className="px-4 py-3 text-xs text-slate-400">
                           {s.lastAttemptAt
@@ -145,7 +145,7 @@ export default function AdminCollegeDetailPage({ params }: { params: Promise<{ i
                                 month: 'short',
                                 year: 'numeric',
                               })
-                            : '—'}
+                            : '-'}
                         </td>
                       </tr>
                     ))}

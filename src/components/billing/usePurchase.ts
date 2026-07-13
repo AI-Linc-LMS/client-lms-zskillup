@@ -40,7 +40,7 @@ export function usePurchase() {
         forCollege: args.forCollege,
       });
       if (res.ok) {
-        toast.success(`Unlocked — ${args.label}`);
+        toast.success(`Unlocked - ${args.label}`);
         args.onPurchased?.(res);
       } else if (!res.dismissed) {
         toast.error(res.error ?? 'Purchase could not be completed.');

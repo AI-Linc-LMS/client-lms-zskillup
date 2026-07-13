@@ -153,20 +153,20 @@ export function CompaniesExplorer() {
 
   return (
     <div>
-      {/* Filter bar — a crisp white control panel with layered depth */}
+      {/* Filter bar - a crisp white control panel with layered depth */}
       <div data-tour="company:filters" className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-3 shadow-[0_8px_30px_-20px_rgba(15,23,42,0.35)] sm:p-3.5">
         <span
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-50/70 via-transparent to-transparent"
         />
         <div className="relative z-10 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          {/* Type tabs — pill segmented control with sliding active state */}
+          {/* Type tabs - pill segmented control with sliding active state */}
           <div
             className="flex flex-wrap items-center gap-1"
             role="tablist"
             aria-label="Company type"
           >
-            {/* Hide a type tab with no companies — the featured set has no PRODUCT company,
+            {/* Hide a type tab with no companies - the featured set has no PRODUCT company,
                 so a "Product" tab would open onto an empty grid. "All" always shows. */}
             {TYPE_TABS.filter((t) => t.key === 'All' || typeCount(t.key) > 0).map((t) => {
               const active = type === t.key;
@@ -203,7 +203,7 @@ export function CompaniesExplorer() {
             })}
           </div>
 
-          {/* Result count — keeps the bar balanced now that difficulty is gone */}
+          {/* Result count - keeps the bar balanced now that difficulty is gone */}
           <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
             <Building2 className="size-3.5" aria-hidden="true" />
             <span className="tabular-nums text-navy">{filtered.length}</span>

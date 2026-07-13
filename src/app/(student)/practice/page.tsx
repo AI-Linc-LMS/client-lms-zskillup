@@ -96,7 +96,7 @@ export default async function PracticePage({ searchParams }: PageProps) {
               </div>
             </div>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/60">
-              Adaptive &amp; non-proctored — pick a company, a section, or a single topic. Questions you&apos;ve
+              Adaptive &amp; non-proctored - pick a company, a section, or a single topic. Questions you&apos;ve
               already seen won&apos;t repeat until you&apos;ve been through the bank, and you can leave and resume any time.
             </p>
             {activeCompany ? (

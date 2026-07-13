@@ -58,7 +58,7 @@ export default function AdminLiveSessionsPage() {
           <h1 className="mt-1 flex items-center gap-2 text-[28px] font-extrabold tracking-tight text-navy">
             <Video className="size-6 text-[#f5b400]" /> Live Sessions
           </h1>
-          <p className="mt-1 text-sm text-slate-500">Schedule Zoom / Meet sessions — students get notified and see them in-app.</p>
+          <p className="mt-1 text-sm text-slate-500">Schedule Zoom / Meet sessions - students get notified and see them in-app.</p>
         </div>
         <button onClick={openNew} className="inline-flex items-center gap-2 rounded-full btn-brand px-4 py-2.5 text-sm font-bold">
           <PlusCircle className="size-4" /> New session

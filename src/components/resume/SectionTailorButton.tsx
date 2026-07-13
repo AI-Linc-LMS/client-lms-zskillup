@@ -150,7 +150,7 @@ export function SectionTailorButton({
                           <p className="text-[11px] font-semibold text-slate-500">Suggested additions</p>
                           <ul className="mt-1 space-y-1">
                             {result.missingSkillSuggestions.map((s) => (
-                              <li key={s.name} className="text-sm text-slate-700"><span className="font-semibold">{s.name}</span> — <span className="text-slate-500">{s.reason}</span></li>
+                              <li key={s.name} className="text-sm text-slate-700"><span className="font-semibold">{s.name}</span> - <span className="text-slate-500">{s.reason}</span></li>
                             ))}
                           </ul>
                         </div>
@@ -206,7 +206,7 @@ function Panel({ title, text, muted }: { title: string; text: string; muted?: bo
 function ApplyBtn({ onClick, applied, label = 'Apply rewrite' }: { onClick: () => void; applied: boolean; label?: string }) {
   return (
     <button onClick={onClick} className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-700">
-      <Check className="size-3.5" /> {applied ? 'Applied — apply again' : label}
+      <Check className="size-3.5" /> {applied ? 'Applied - apply again' : label}
     </button>
   );
 }

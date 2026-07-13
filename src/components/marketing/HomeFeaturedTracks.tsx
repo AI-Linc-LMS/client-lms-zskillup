@@ -43,7 +43,7 @@ export function HomeFeaturedTracks() {
 
         const CardShell = locked
           ? ({ children, className }: { children: React.ReactNode; className: string }) => (
-              <div className={className} aria-label={`${t.company} — coming soon`}>
+              <div className={className} aria-label={`${t.company} - coming soon`}>
                 {children}
               </div>
             )

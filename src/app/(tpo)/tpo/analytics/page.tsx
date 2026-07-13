@@ -129,7 +129,7 @@ export default function StudentAnalyticsPage() {
       <div className="grid gap-5 lg:grid-cols-2">
         <BentoCard
           title="Student Performance Score"
-          subtitle="A weighted readiness composite — every signal, transparently."
+          subtitle="A weighted readiness composite - every signal, transparently."
           source="Aptitude + Coding + Mock + coverage"
         >
           <div className="space-y-2.5">
@@ -191,7 +191,7 @@ export default function StudentAnalyticsPage() {
             ))}
             {departments.length === 1 && departments[0].branch === 'Unspecified' && (
               <p className="pt-1 text-[11px] text-slate-400">
-                Branch isn&apos;t set for these students yet — capture it at invite to unlock a full department map.
+                Branch isn&apos;t set for these students yet - capture it at invite to unlock a full department map.
               </p>
             )}
           </div>
@@ -227,13 +227,13 @@ export default function StudentAnalyticsPage() {
       {/* Priority group + AI recommendations */}
       <div className="grid gap-5 lg:grid-cols-3">
         <BentoCard
-          title="Priority — high effort, needs support"
+          title="Priority - high effort, needs support"
           subtitle="Engaged students under-performing. Click to open a profile."
           source="Participation ≥ threshold + readiness < 50"
           className="lg:col-span-2"
         >
           {needsSupport.length === 0 ? (
-            <p className="text-sm text-slate-400">No students in this quadrant — nice work.</p>
+            <p className="text-sm text-slate-400">No students in this quadrant - nice work.</p>
           ) : (
             <ul className="divide-y divide-slate-100">
               {needsSupport.map((s) => (
@@ -245,7 +245,7 @@ export default function StudentAnalyticsPage() {
                   >
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold text-navy">{s.name ?? s.email}</p>
-                      <p className="truncate text-xs text-slate-400">{s.branch ?? '—'}</p>
+                      <p className="truncate text-xs text-slate-400">{s.branch ?? '-'}</p>
                     </div>
                     <div className="flex shrink-0 items-center gap-3">
                       <span className="text-xs text-slate-500">

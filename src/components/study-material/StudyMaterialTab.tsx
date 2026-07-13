@@ -95,7 +95,7 @@ export function StudyMaterialTab({ slug }: { slug: string }) {
         toast.error(
           /unlock|locked|previous module/i.test(msg)
             ? 'Complete the previous module to unlock this one.'
-            : "Couldn't update that just now — please try again.",
+            : "Couldn't update that just now - please try again.",
         );
       } finally {
         setBusy(null);
@@ -154,7 +154,7 @@ export function StudyMaterialTab({ slug }: { slug: string }) {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)]">
-        {/* Left rail — sections */}
+        {/* Left rail - sections */}
         <aside className="rounded-2xl border border-slate-200 bg-white p-2.5 lg:sticky lg:top-20 lg:self-start">
           <p className="px-2 pb-1.5 pt-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Topics</p>
           <ul className="space-y-1">
@@ -186,7 +186,7 @@ export function StudyMaterialTab({ slug }: { slug: string }) {
           </ul>
         </aside>
 
-        {/* Right — the selected section's topics */}
+        {/* Right - the selected section's topics */}
         <section className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
           <div className="mb-4 flex items-center justify-between gap-3">
             <h3 className="flex items-center gap-2.5 font-display text-base font-bold text-navy">

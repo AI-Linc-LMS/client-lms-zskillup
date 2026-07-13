@@ -49,7 +49,7 @@ export default function HowXpWorksPage() {
           <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-[40px]">How XP works</h1>
           <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-white/70">
             XP (experience points) reward consistent, quality practice. Here&apos;s exactly how every point,
-            level, streak, coin, and badge is earned across ZSkillup — no mystery.
+            level, streak, coin, and badge is earned across ZSkillup - no mystery.
           </p>
         </div>
       </section>
@@ -106,7 +106,7 @@ export default function HowXpWorksPage() {
             ['Coins reward', '+10 coins'],
             ['Resets', 'every day (IST)'],
           ]}
-          foot="One quick quest a day keeps your streak — and your coins — growing."
+          foot="One quick quest a day keeps your streak - and your coins - growing."
         />
       </div>
 
@@ -119,7 +119,7 @@ export default function HowXpWorksPage() {
           <div>
             <h3 className="text-base font-black text-navy">The 14-day streak multiplier</h3>
             <p className="mt-1 text-sm leading-relaxed text-slate-600">
-              Keep a streak going for <b>14 days</b> and <b>every XP you earn is multiplied by 1.5×</b> — practice,
+              Keep a streak going for <b>14 days</b> and <b>every XP you earn is multiplied by 1.5×</b> - practice,
               mocks, and quests all count more. Miss a day and the streak (and the bonus) resets, so consistency
               literally pays.
             </p>
@@ -150,7 +150,7 @@ export default function HowXpWorksPage() {
           </p>
           <p className="mt-1 leading-relaxed">
             At <b>4,922 XP</b> you&apos;re <b>Level 7</b> (level 7 starts at 4,900 XP). You need{' '}
-            <b>1,500 XP</b> to reach Level 8 — so your bar shows <b>22 / 1,500</b>.
+            <b>1,500 XP</b> to reach Level 8 - so your bar shows <b>22 / 1,500</b>.
           </p>
         </div>
       </div>
@@ -165,7 +165,7 @@ export default function HowXpWorksPage() {
             <h3 className="text-base font-black text-navy">Coins</h3>
           </div>
           <p className="mt-3 text-sm leading-relaxed text-slate-600">
-            You earn <b>10 coins</b> for each daily quest you complete. Coins are separate from XP — they don&apos;t
+            You earn <b>10 coins</b> for each daily quest you complete. Coins are separate from XP - they don&apos;t
             affect your level. Put them toward a plan in <Link href="/shop" className="font-semibold text-[#f5b400] hover:underline">Explore Plans</Link>.
           </p>
         </div>
@@ -193,7 +193,7 @@ export default function HowXpWorksPage() {
           <BookOpen className="size-4 text-slate-400" /> A note on the live points meter
         </h3>
         <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
-          During an adaptive quiz you&apos;ll see live points tick up as you answer — those reward <b>speed</b> (they
+          During an adaptive quiz you&apos;ll see live points tick up as you answer - those reward <b>speed</b> (they
           decay the longer you take, and dip a little for each hint). That meter is your in-quiz score; the XP that
           lands on your profile afterwards is credited from your <b>final result</b> using the rules above.
         </p>

@@ -185,7 +185,7 @@ export default function FullPlatformPage() {
                       )}
                       <span className="text-sm font-bold text-navy">{p.months}</span>
                       <span className="mt-2 text-2xl font-black tabular-nums text-navy">
-                        {entry ? formatPrice(entry.amountCents, 'INR') : '—'}
+                        {entry ? formatPrice(entry.amountCents, 'INR') : '-'}
                       </span>
                       {pct ? (
                         <span className="mt-1.5">
@@ -240,7 +240,7 @@ export default function FullPlatformPage() {
             <TrustBadges />
           </div>
 
-          {/* Sticky sidebar — Your Plan */}
+          {/* Sticky sidebar - Your Plan */}
           <aside className="lg:sticky lg:top-6 lg:self-start">
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="flex items-center gap-2.5">
@@ -270,7 +270,7 @@ export default function FullPlatformPage() {
               <div className="mt-2 flex items-end justify-between">
                 <span className="text-sm font-semibold text-slate-500">Total Amount</span>
                 <span className="text-2xl font-black tabular-nums text-indigo-600">
-                  {selected ? formatPrice(selected.amountCents, 'INR') : '—'}
+                  {selected ? formatPrice(selected.amountCents, 'INR') : '-'}
                 </span>
               </div>
               {savePct && saveAmt > 0 && (
@@ -290,7 +290,7 @@ export default function FullPlatformPage() {
                   </>
                 ) : inCart ? (
                   <>
-                    <Check className="size-4" /> In cart — review &amp; pay
+                    <Check className="size-4" /> In cart - review &amp; pay
                   </>
                 ) : (
                   <>

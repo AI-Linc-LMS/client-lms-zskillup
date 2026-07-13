@@ -45,7 +45,7 @@ function slugToLabel(ref: string | null): string {
 }
 
 function fmtDate(iso: string | null | undefined): string {
-  if (!iso) return '—';
+  if (!iso) return '-';
   return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
@@ -55,7 +55,7 @@ function historyPlanLabel(h: PurchaseHistoryItemDto): string {
     const distinct = new Set(h.items.map((i) => i.period));
     return distinct.size === 1 ? [...distinct][0].toLowerCase() : 'mixed';
   }
-  return '—';
+  return '-';
 }
 
 export default function UpgradeRenewPage() {
@@ -209,7 +209,7 @@ function PremiumView({
   const quickActions = [
     { icon: RefreshCw, label: 'Renew Plan', onClick: () => onRenew(BillingPeriod.ANNUAL) },
     { icon: Receipt, label: 'Payment History', onClick: openHistory },
-    { icon: FileText, label: 'Download Invoice', onClick: () => toast.info('GST invoices are available on request — contact support.') },
+    { icon: FileText, label: 'Download Invoice', onClick: () => toast.info('GST invoices are available on request - contact support.') },
     { icon: Gift, label: 'Gift Premium', onClick: () => toast.info('Gifting is coming soon.') },
     { icon: HelpCircle, label: 'Need Help?', href: '/support' },
   ];
@@ -303,10 +303,10 @@ function PremiumView({
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-lg font-black tracking-tight text-navy">Your Preparation at a Glance</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-4">
-          <StatTile icon={Building2} tint="bg-violet-50 text-violet-600" label="Companies Practised" value={companies ?? '—'} />
+          <StatTile icon={Building2} tint="bg-violet-50 text-violet-600" label="Companies Practised" value={companies ?? '-'} />
           <StatTile icon={Layers} tint="bg-amber-50 text-amber-600" label="Topics Practised" value={topics} />
           <StatTile icon={Target} tint="bg-emerald-50 text-emerald-600" label="Questions Attempted" value={attempted} />
-          <StatTile icon={TrendingUp} tint="bg-indigo-50 text-indigo-600" label="Readiness" value={score != null ? `${score}%` : '—'} />
+          <StatTile icon={TrendingUp} tint="bg-indigo-50 text-indigo-600" label="Readiness" value={score != null ? `${score}%` : '-'} />
         </div>
         <p className="mt-3 flex items-center gap-1.5 text-xs text-slate-400">
           <Sparkles className="size-3.5 text-indigo-400" /> New companies, mock tests &amp; questions are added every week.
@@ -316,7 +316,7 @@ function PremiumView({
       {/* Premium perks */}
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-lg font-black tracking-tight text-navy">Everything your Premium unlocks</h2>
-        <p className="mt-1 text-sm text-slate-500">It&apos;s all included — dive into any of it.</p>
+        <p className="mt-1 text-sm text-slate-500">It&apos;s all included - dive into any of it.</p>
         <IncludedGrid items={PLAN_INCLUDED} className="mt-4" />
       </section>
 
@@ -413,9 +413,9 @@ function CustomPlanView({
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
-            <PlanFacet icon={Building2} label="Companies" primary={`${companies.length} ${companies.length === 1 ? 'Company' : 'Companies'}`} sub={companies.map((e) => slugToLabel(e.scopeRef)).slice(0, 2).join(', ') || '—'} />
-            <PlanFacet icon={Layers} label="Sections" primary={`${sections.length} Section${sections.length === 1 ? '' : 's'}`} sub={sections.map((e) => slugToLabel(e.scopeRef)).slice(0, 2).join(', ') || '—'} />
-            <PlanFacet icon={Target} label="Sub-topics" primary={`${topics.length} Topic${topics.length === 1 ? '' : 's'}`} sub={topics.map((e) => slugToLabel(e.scopeRef)).slice(0, 2).join(', ') || '—'} />
+            <PlanFacet icon={Building2} label="Companies" primary={`${companies.length} ${companies.length === 1 ? 'Company' : 'Companies'}`} sub={companies.map((e) => slugToLabel(e.scopeRef)).slice(0, 2).join(', ') || '-'} />
+            <PlanFacet icon={Layers} label="Sections" primary={`${sections.length} Section${sections.length === 1 ? '' : 's'}`} sub={sections.map((e) => slugToLabel(e.scopeRef)).slice(0, 2).join(', ') || '-'} />
+            <PlanFacet icon={Target} label="Sub-topics" primary={`${topics.length} Topic${topics.length === 1 ? '' : 's'}`} sub={topics.map((e) => slugToLabel(e.scopeRef)).slice(0, 2).join(', ') || '-'} />
             <PlanFacet icon={Sparkles} label="Access" primary={`${granular.length} unlock${granular.length === 1 ? '' : 's'}`} sub="Practice + analytics" />
             <PlanFacet icon={Clock} label="Validity" primary={maxDays > 0 ? `${maxDays} days left` : 'Active'} sub="Renew any time" />
           </div>
@@ -490,7 +490,7 @@ function NoPlanView({ priceMap }: { priceMap: Map<string, PriceBookEntryDto> }) 
           </span>
           <h2 className="mt-4 text-3xl font-black tracking-tight text-navy sm:text-4xl">Start your placement prep</h2>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base">
-            You don&apos;t have a plan yet. Unlock companies, sections and topics — or go all-access
+            You don&apos;t have a plan yet. Unlock companies, sections and topics - or go all-access
             {platform ? ` from ${formatPrice(platform.amountCents, 'INR')}/month` : ''}.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
@@ -667,7 +667,7 @@ function ReadinessDonut({ score }: { score: number | null }) {
           className="text-emerald-500 transition-all"
         />
       </svg>
-      <span className="absolute text-sm font-black tabular-nums text-navy">{score != null ? `${score}%` : '—'}</span>
+      <span className="absolute text-sm font-black tabular-nums text-navy">{score != null ? `${score}%` : '-'}</span>
     </div>
   );
 }

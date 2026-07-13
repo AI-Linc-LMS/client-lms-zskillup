@@ -207,7 +207,7 @@ export function MocksAdmin() {
               label="Title"
               value={form.title}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-              placeholder="e.g. Infosys InfyTQ — Timed Mock"
+              placeholder="e.g. Infosys InfyTQ - Timed Mock"
             />
           </div>
           <FormField
@@ -240,7 +240,7 @@ export function MocksAdmin() {
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-bold text-navy">
               Questions{' '}
-              <span className="font-normal text-slate-400">— {selected.length} selected</span>
+              <span className="font-normal text-slate-400">- {selected.length} selected</span>
             </p>
             <div className="relative max-w-xs flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />

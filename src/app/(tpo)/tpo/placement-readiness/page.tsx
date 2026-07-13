@@ -117,7 +117,7 @@ export default function PlacementReadinessPage() {
                   </span>
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-navy">{s.name ?? s.email}</p>
-                    <p className="truncate text-xs text-slate-400">{s.branch ?? '—'}{s.rollNumber ? ` · ${s.rollNumber}` : ''}</p>
+                    <p className="truncate text-xs text-slate-400">{s.branch ?? '-'}{s.rollNumber ? ` · ${s.rollNumber}` : ''}</p>
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">

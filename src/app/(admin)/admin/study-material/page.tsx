@@ -14,7 +14,7 @@ export default function AdminStudyMaterialPage() {
         <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Catalog</p>
         <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Study Material</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Pick a company, then build its study material — sections, topics, and video / quiz / article items.
+          Pick a company, then build its study material - sections, topics, and video / quiz / article items.
           Paste a Vimeo, Google Drive or YouTube link for videos; changes appear on the student hub instantly.
         </p>
       </header>

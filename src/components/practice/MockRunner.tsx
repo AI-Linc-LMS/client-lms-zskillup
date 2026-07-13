@@ -343,7 +343,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] text-white">
-      {/* Free-mock allowance spent — the server refused the start. Portalled, so the dark
+      {/* Free-mock allowance spent - the server refused the start. Portalled, so the dark
           full-bleed runner backdrop can't clip or tint it. */}
       <UpgradeModal
         open={upgradeMsg !== null}
@@ -391,7 +391,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
               {proctored
                 ? 'This is a strict, server-timed assessment with camera + microphone proctoring. '
                 : 'The clock is enforced by the server. '}
-              When time runs out it submits automatically — your answers are saved as you go.
+              When time runs out it submits automatically - your answers are saved as you go.
             </p>
 
             <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -441,7 +441,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
                 </p>
                 <ul className="mt-3 space-y-2.5 text-[13px] leading-snug text-white/75">
                   <li className="flex gap-2.5"><Video className="mt-0.5 size-4 shrink-0 text-violet-300" /> Camera &amp; microphone stay on for the full {kind}.</li>
-                  <li className="flex gap-2.5"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-violet-300" /> Stay on this tab in fullscreen — switches are logged.</li>
+                  <li className="flex gap-2.5"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-violet-300" /> Stay on this tab in fullscreen - switches are logged.</li>
                 </ul>
                 <p className="mt-3 text-[11px] text-white/45">You&apos;ll grant camera/mic access right after you start.</p>
               </div>
@@ -449,7 +449,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
             <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-5 backdrop-blur">
               <p className="text-[10px] font-bold uppercase tracking-widest text-white/45">What to expect</p>
               <ul className="mt-3 space-y-3 text-[13px] leading-snug text-white/75">
-                <li className="flex gap-3"><Clock className="mt-0.5 size-4 shrink-0 text-[#ffb877]" /> A single countdown for the whole {kind} — pace yourself.</li>
+                <li className="flex gap-3"><Clock className="mt-0.5 size-4 shrink-0 text-[#ffb877]" /> A single countdown for the whole {kind} - pace yourself.</li>
                 <li className="flex gap-3"><Target className="mt-0.5 size-4 shrink-0 text-[#ffb877]" /> Jump between questions freely; change answers until you submit.</li>
                 <li className="flex gap-3"><BarChart3 className="mt-0.5 size-4 shrink-0 text-[#ffb877]" /> Get a percentile, topic breakdown, and full answer review.</li>
               </ul>
@@ -678,7 +678,7 @@ function MockRunningView({
         </div>
       </header>
 
-      {/* Section tabs (NTA-style) — one per section, coding last, with live
+      {/* Section tabs (NTA-style) - one per section, coding last, with live
           per-section progress. Horizontally scrollable so 5 tabs fit on phones. */}
       {sections.length > 1 ? (
         <div className="scroll-soft sticky top-14 z-10 flex gap-2 overflow-x-auto border-b border-slate-200 bg-white px-4 py-2.5 sm:px-6">
@@ -854,7 +854,7 @@ function MockRunningView({
                     type="button"
                     onClick={() => setIdx(() => i)}
                     aria-current={i === idx}
-                    aria-label={`Question ${local + 1} — ${STATUS_META[s].label}`}
+                    aria-label={`Question ${local + 1} - ${STATUS_META[s].label}`}
                     className={cn(
                       'relative grid size-9 place-items-center rounded-lg text-[12px] font-bold transition-colors',
                       STATUS_META[s].cell,
@@ -869,7 +869,7 @@ function MockRunningView({
                 );
               })}
             </div>
-            {/* legend — full NTA status set with live counts */}
+            {/* legend - full NTA status set with live counts */}
             <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-[10px] font-semibold text-slate-500">
               {STATUS_ORDER.map((s) => (
                 <span key={s} className="flex items-center gap-1.5">
@@ -892,7 +892,7 @@ function MockRunningView({
         </aside>
       </main>
 
-      {/* Review summary before submit (NTA-style) — tap a status to revisit */}
+      {/* Review summary before submit (NTA-style) - tap a status to revisit */}
       {confirming ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-navy/40 px-6">
           <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-lg">
@@ -900,7 +900,7 @@ function MockRunningView({
             <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
               You&apos;ve answered{' '}
               <span className="font-semibold text-navy">{counts.answered + counts.answeredMarked}</span> of{' '}
-              {total}. Tap a status to jump back and revisit those questions — submitting is final.
+              {total}. Tap a status to jump back and revisit those questions - submitting is final.
             </p>
             <div className="mt-4 grid grid-cols-2 gap-2">
               {STATUS_ORDER.map((s) => (
@@ -1020,7 +1020,7 @@ export function MockReportView({
           </span>
           {report.status === 'EXPIRED' ? (
             <p className="mt-3 text-xs font-medium text-amber-600">
-              Time expired — graded on the answers recorded before the deadline.
+              Time expired - graded on the answers recorded before the deadline.
             </p>
           ) : null}
 
@@ -1108,8 +1108,8 @@ export function MockReportView({
             </div>
             <p className="mt-3 text-xs text-slate-500">
               {report.proctoring.violations === 0
-                ? 'No integrity flags — this attempt was clean.'
-                : `${report.proctoring.violations} integrity event(s) logged (lenient — not penalised).`}
+                ? 'No integrity flags - this attempt was clean.'
+                : `${report.proctoring.violations} integrity event(s) logged (lenient - not penalised).`}
             </p>
           </section>
         ) : null}

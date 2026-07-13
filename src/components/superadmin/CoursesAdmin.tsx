@@ -734,7 +734,7 @@ export function CoursesAdmin() {
                   slug: slugTouched ? f.slug : slugify(e.target.value),
                 }))
               }
-              placeholder="e.g. Quantitative Aptitude — Foundations"
+              placeholder="e.g. Quantitative Aptitude - Foundations"
             />
           </div>
           <div className="sm:col-span-2">
@@ -1046,7 +1046,7 @@ function LessonForm({
             label="Lesson title"
             value={draft.title}
             onChange={(e) => onChange({ ...draft, title: e.target.value })}
-            placeholder="e.g. HCF and LCM — core techniques"
+            placeholder="e.g. HCF and LCM - core techniques"
           />
         </div>
         <div className="space-y-1.5">

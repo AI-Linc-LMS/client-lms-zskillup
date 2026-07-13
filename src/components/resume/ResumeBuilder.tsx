@@ -283,7 +283,7 @@ export function ResumeBuilder() {
           </button>
           {/* Always reachable (it used to be `hidden sm:inline-flex`, so on mobile
               there was NO way to keep a second resume). Emphasised once the name
-              has been changed — that's the moment users expect a separate file. */}
+              has been changed - that's the moment users expect a separate file. */}
           {currentId && (
             <button
               onClick={() => save(true)}

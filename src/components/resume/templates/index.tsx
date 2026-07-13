@@ -127,7 +127,7 @@ function ModernTemplate({ data }: TemplateProps) {
             <H>Certifications</H>
             {data.certifications.map((c) => (
               <p key={c.id} className="text-[12px] text-slate-700">
-                <span className="font-semibold">{c.name}</span> — {c.issuer} {c.date ? `(${c.date})` : ''}
+                <span className="font-semibold">{c.name}</span> - {c.issuer} {c.date ? `(${c.date})` : ''}
               </p>
             ))}
           </section>
@@ -158,7 +158,7 @@ function ClassicTemplate({ data }: TemplateProps) {
             {data.workExperience.map((w) => (
               <div key={w.id} className="mb-3">
                 <div className="flex items-baseline justify-between">
-                  <p className="text-[13px] font-bold">{w.position} — {w.company}</p>
+                  <p className="text-[13px] font-bold">{w.position} - {w.company}</p>
                   <span className="text-[11px] text-slate-500">{dateRange(w.startDate, w.endDate, w.current)}</span>
                 </div>
                 {w.location && <p className="text-[11.5px] italic text-slate-500">{w.location}</p>}
@@ -189,7 +189,7 @@ function ClassicTemplate({ data }: TemplateProps) {
             <H>Projects</H>
             {data.projects.map((p) => (
               <div key={p.id} className="mb-2">
-                <p className="text-[12.5px] font-bold">{p.name}{p.technologies.length ? <span className="font-normal text-slate-500"> — {p.technologies.join(', ')}</span> : null}</p>
+                <p className="text-[12.5px] font-bold">{p.name}{p.technologies.length ? <span className="font-normal text-slate-500"> - {p.technologies.join(', ')}</span> : null}</p>
                 <p className="text-[12px] text-slate-700">{p.description}</p>
               </div>
             ))}
@@ -197,7 +197,7 @@ function ClassicTemplate({ data }: TemplateProps) {
         )}
         {data.certifications.length > 0 && (
           <section><H>Certifications</H>{data.certifications.map((c) => (
-            <p key={c.id} className="text-[12px] text-slate-700"><span className="font-semibold">{c.name}</span> — {c.issuer} {c.date ? `(${c.date})` : ''}</p>
+            <p key={c.id} className="text-[12px] text-slate-700"><span className="font-semibold">{c.name}</span> - {c.issuer} {c.date ? `(${c.date})` : ''}</p>
           ))}</section>
         )}
       </div>
@@ -241,7 +241,7 @@ function MinimalTemplate({ data }: TemplateProps) {
           <section>
             <p className="mb-3 border-b border-slate-200 pb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Education</p>
             {data.education.map((e) => (
-              <div key={e.id} className="mb-2 flex items-baseline justify-between"><p className="text-[12.5px] text-slate-800">{e.degree} — {e.institution}</p><span className="text-[11px] text-slate-400">{dateRange(e.startDate, e.endDate)}</span></div>
+              <div key={e.id} className="mb-2 flex items-baseline justify-between"><p className="text-[12.5px] text-slate-800">{e.degree} - {e.institution}</p><span className="text-[11px] text-slate-400">{dateRange(e.startDate, e.endDate)}</span></div>
             ))}
           </section>
         )}
@@ -281,7 +281,7 @@ function CreativeTemplate({ data }: TemplateProps) {
         {data.certifications.length > 0 && (
           <div className="mt-6">
             <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-purple-200">Certifications</p>
-            {data.certifications.map((c) => (<p key={c.id} className="text-[11.5px] text-purple-50">{c.name} — {c.issuer}</p>))}
+            {data.certifications.map((c) => (<p key={c.id} className="text-[11.5px] text-purple-50">{c.name} - {c.issuer}</p>))}
           </div>
         )}
       </aside>

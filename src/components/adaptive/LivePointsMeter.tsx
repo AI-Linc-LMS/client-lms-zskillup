@@ -62,9 +62,9 @@ export function LivePointsMeter({
       </div>
       <p className="mt-1 text-[11px] font-medium text-slate-500">
         {inGrace ? (
-          <span className="text-emerald-600">Full points for {graceLeft}s — answer fast!</span>
+          <span className="text-emerald-600">Full points for {graceLeft}s - answer fast!</span>
         ) : atFloor ? (
-          <span className="text-rose-500">At the floor — still worth {worth}.</span>
+          <span className="text-rose-500">At the floor - still worth {worth}.</span>
         ) : (
           <span>Ticking down every {points.iv}s…</span>
         )}

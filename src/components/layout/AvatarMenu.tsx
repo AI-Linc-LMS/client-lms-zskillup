@@ -84,7 +84,7 @@ export function AvatarMenu({ initials = '··' }: { initials?: string }) {
     setBusy(true);
     setOpen(false);
     exitStudentPreview();
-    await logout(); // logout() never throws — it clears local state in its own finally
+    await logout(); // logout() never throws - it clears local state in its own finally
     // Session teardown uses a HARD navigation (not router.push) on purpose: it
     // tears down every piece of in-memory state — the access token, any cached
     // server data, the API-client circuit-breaker latch — instead of leaving it
@@ -190,7 +190,7 @@ export function AvatarMenu({ initials = '··' }: { initials?: string }) {
             style={{ transformOrigin: 'top right' }}
             className="absolute right-0 z-50 mt-3 w-64 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-[0_24px_60px_-24px_rgba(11,18,32,0.5)] ring-1 ring-black/[0.02]"
           >
-            {/* header — gradient-washed account card */}
+            {/* header - gradient-washed account card */}
             <div className="relative overflow-hidden rounded-xl border border-slate-100 bg-gradient-to-br from-slate-50 to-white p-3">
               <div
                 aria-hidden

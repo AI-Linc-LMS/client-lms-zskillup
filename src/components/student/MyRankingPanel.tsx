@@ -43,7 +43,7 @@ export function MyRankingPanel() {
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Your rank</p>
             <p className="mt-1 text-3xl font-black tabular-nums">
-              {data.myRank ? `#${data.myRank}` : '—'}
+              {data.myRank ? `#${data.myRank}` : '-'}
               {data.totalStudents ? (
                 <span className="ml-1 text-sm font-semibold text-white/50">of {data.totalStudents.toLocaleString()}</span>
               ) : null}

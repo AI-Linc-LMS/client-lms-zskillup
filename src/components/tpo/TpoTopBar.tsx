@@ -41,13 +41,13 @@ export function TpoTopBar() {
       <div className="min-w-0 flex-1">
         <h1 className="truncate text-lg font-black tracking-tight text-navy">{title}</h1>
         <p className="hidden truncate text-xs text-slate-400 sm:block">
-          Welcome back — here&apos;s what&apos;s happening across{' '}
+          Welcome back - here&apos;s what&apos;s happening across{' '}
           {summary?.collegeName ?? 'your campus'}.
         </p>
       </div>
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-        {/* Batch selector — scopes the whole console */}
+        {/* Batch selector - scopes the whole console */}
         <div className="relative hidden sm:block">
           <Users className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
           <select

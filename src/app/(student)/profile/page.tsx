@@ -271,7 +271,7 @@ export default function ProfilePage() {
               </Field>
               {/* Pre-loaded colleges. This must be a PICK, not free text: choosing a
                   college sets the real college_id, which is what the "My College"
-                  leaderboard (and cohort scoping) filter on. Typing it never did —
+                  leaderboard (and cohort scoping) filter on. Typing it never did -
                   which is why that board silently showed national rankings. */}
               <Field label="College" done={!!v.collegeId}>
                 <select

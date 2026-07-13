@@ -16,7 +16,7 @@ export function CalibrationRecommendations() {
   const data = useRecommendations();
   const cal = useCalibrationStatus();
 
-  if (!data) return null; // loading — avoid layout shift
+  if (!data) return null; // loading - avoid layout shift
 
   // ── Pre-calibration: unlock teaser ─────────────────────────────────────────
   if (!data.calibrated) {

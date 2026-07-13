@@ -103,18 +103,18 @@ export default function AdminStudentsPage() {
                     <td className="px-4 py-3">
                       <Link href={`/admin/students/${r.id}`} className="group">
                         <p className="font-semibold text-navy group-hover:text-[#1a1d29]">
-                          {r.fullName ?? '—'}
+                          {r.fullName ?? '-'}
                         </p>
                         <p className="text-xs text-slate-400">{r.email}</p>
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{r.collegeName ?? '—'}</td>
+                    <td className="px-4 py-3 text-slate-600">{r.collegeName ?? '-'}</td>
                     <td className="px-4 py-3 text-right tabular-nums text-slate-700">{r.attempts}</td>
                     <td className="px-4 py-3 text-right tabular-nums text-slate-700">
-                      {r.avgScorePct ?? '—'}
+                      {r.avgScorePct ?? '-'}
                     </td>
                     <td className="px-4 py-3 text-right tabular-nums text-slate-700">
-                      {r.bestScorePct ?? '—'}
+                      {r.bestScorePct ?? '-'}
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-400">
                       {r.lastAttemptAt
@@ -123,7 +123,7 @@ export default function AdminStudentsPage() {
                             month: 'short',
                             year: 'numeric',
                           })
-                        : '—'}
+                        : '-'}
                     </td>
                   </tr>
                 ))}

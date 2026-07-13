@@ -19,11 +19,11 @@ const TEMPLATE = [
 ].join('\n');
 
 const COLUMNS: Array<{ name: string; note: string }> = [
-  { name: 'stem', note: 'required — the question text' },
+  { name: 'stem', note: 'required - the question text' },
   { name: 'type', note: 'MCQ or MULTI_SELECT (default MCQ)' },
   { name: 'difficulty', note: 'EASY / MEDIUM / HARD (default MEDIUM)' },
-  { name: 'topic', note: 'required — topic slug, e.g. percentages' },
-  { name: 'company', note: 'optional — company slug, e.g. tcs' },
+  { name: 'topic', note: 'required - topic slug, e.g. percentages' },
+  { name: 'company', note: 'optional - company slug, e.g. tcs' },
   { name: 'hint, explanation', note: 'optional' },
   { name: 'optionA–optionD', note: 'option text (≥2 for choice questions)' },
   { name: 'correct', note: 'correct letter(s), e.g. B or A,C' },
@@ -57,7 +57,7 @@ export function QuestionImportPanel({ onDone }: { onDone: () => void }) {
 
   async function doImport() {
     if (!csv.trim()) {
-      setError('Add some CSV first — upload a file or paste rows below.');
+      setError('Add some CSV first - upload a file or paste rows below.');
       return;
     }
     setBusy(true);
@@ -78,7 +78,7 @@ export function QuestionImportPanel({ onDone }: { onDone: () => void }) {
         <div>
           <h2 className="text-base font-bold text-navy">Bulk import questions</h2>
           <p className="mt-0.5 text-sm text-slate-500">
-            Upload a CSV to publish many questions at once. Each row is validated independently —
+            Upload a CSV to publish many questions at once. Each row is validated independently -
             a bad row is reported, never blocks the rest.
           </p>
         </div>
@@ -96,7 +96,7 @@ export function QuestionImportPanel({ onDone }: { onDone: () => void }) {
           {COLUMNS.map((c) => (
             <li key={c.name}>
               <span className="font-semibold text-navy">{c.name}</span>
-              <span className="text-slate-400"> — {c.note}</span>
+              <span className="text-slate-400"> - {c.note}</span>
             </li>
           ))}
         </ul>
@@ -194,7 +194,7 @@ export function QuestionImportPanel({ onDone }: { onDone: () => void }) {
 
       <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
         {result ? (
-          <Button onClick={onDone}>Done — view questions</Button>
+          <Button onClick={onDone}>Done - view questions</Button>
         ) : (
           <Button onClick={doImport} disabled={busy}>
             {busy ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <Upload className="size-4" aria-hidden="true" />}

@@ -415,7 +415,7 @@ function ResultPanel({ result }: { result: CodingResult }) {
                     label="Got"
                     text={c.actualOutput}
                     tone={c.passed ? undefined : 'bad'}
-                    emptyLabel={c.stderr ? '(error — see below)' : '(no output)'}
+                    emptyLabel={c.stderr ? '(error - see below)' : '(no output)'}
                   />
                 </div>
               ) : null}
@@ -431,7 +431,7 @@ function ResultPanel({ result }: { result: CodingResult }) {
               ) : null}
               {!c.hidden && !c.passed && !c.stderr && (c.actualOutput == null || c.actualOutput.trim() === '') ? (
                 <p className="mt-2 text-[11px] font-medium text-amber-700">
-                  Your program produced no output — make sure you print the answer to stdout.
+                  Your program produced no output - make sure you print the answer to stdout.
                 </p>
               ) : null}
             </div>
@@ -468,7 +468,7 @@ function IoCell({
   label,
   text,
   tone,
-  emptyLabel = '—',
+  emptyLabel = '-',
 }: {
   label: string;
   text: string | null;

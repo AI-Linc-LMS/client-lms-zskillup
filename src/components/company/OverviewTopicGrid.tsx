@@ -28,7 +28,7 @@ export function OverviewTopicGrid({ slug }: { slug: string }) {
   if (topics.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
-        Previous-year questions for this company are being tagged — check back soon.
+        Previous-year questions for this company are being tagged - check back soon.
       </div>
     );
   }

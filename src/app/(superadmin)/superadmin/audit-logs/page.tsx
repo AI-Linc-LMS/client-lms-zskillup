@@ -140,10 +140,10 @@ export default function AuditLogsPage() {
                             {r.entityId ? ` · ${r.entityId.slice(0, 8)}…` : ''}
                           </span>
                         ) : (
-                          '—'
+                          '-'
                         )}
                       </td>
-                      <td className="px-4 py-3 text-xs tabular-nums text-slate-400">{r.ip ?? '—'}</td>
+                      <td className="px-4 py-3 text-xs tabular-nums text-slate-400">{r.ip ?? '-'}</td>
                     </tr>
                     {expanded === r.id && (
                       <tr className="bg-slate-50/60">

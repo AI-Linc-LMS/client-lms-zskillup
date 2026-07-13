@@ -165,7 +165,7 @@ export function GamifiedShowcase() {
       </div>
 
       <div className="relative mx-auto grid max-w-[1400px] items-center gap-10 px-5 md:px-8 lg:grid-cols-[1fr_1.1fr]">
-        {/* LEFT — staggered fade-up */}
+        {/* LEFT - staggered fade-up */}
         <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }}>
           <motion.span
             variants={fadeUp}
@@ -174,11 +174,11 @@ export function GamifiedShowcase() {
             <Sparkles className="h-3.5 w-3.5 text-amber-300" /> Gamified prep
           </motion.span>
           <motion.h2 variants={fadeUp} className="mt-5 text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-4xl">
-            Daily quests, streaks, levels — prep becomes a habit, not a grind
+            Daily quests, streaks, levels - prep becomes a habit, not a grind
           </motion.h2>
           <motion.p variants={fadeUp} className="mt-4 max-w-lg text-base text-white/75">
             Earn XP for every drill. Unlock badges, level up, and climb the national leaderboard. The
-            dopamine loop does the work — you just show up.
+            dopamine loop does the work - you just show up.
           </motion.p>
 
           <motion.ul variants={stagger} className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -215,9 +215,9 @@ export function GamifiedShowcase() {
           </motion.div>
         </motion.div>
 
-        {/* RIGHT — a different entrance per card */}
+        {/* RIGHT - a different entrance per card */}
         <div className="grid gap-4 sm:grid-cols-2">
-          {/* Today's focus — slides in from the right */}
+          {/* Today's focus - slides in from the right */}
           <motion.div
             variants={fromRight}
             initial="hidden"
@@ -235,7 +235,7 @@ export function GamifiedShowcase() {
             </Link>
           </motion.div>
 
-          {/* Active streak — pops in; the bars grow on reveal */}
+          {/* Active streak - pops in; the bars grow on reveal */}
           <motion.div
             variants={popScale}
             initial="hidden"
@@ -270,7 +270,7 @@ export function GamifiedShowcase() {
             </motion.div>
           </motion.div>
 
-          {/* Top of cohort — slides up */}
+          {/* Top of cohort - slides up */}
           <motion.div
             variants={fromBottom}
             initial="hidden"

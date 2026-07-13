@@ -83,7 +83,7 @@ export function RevenueCharts() {
         </div>
       ) : (
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-400">
-          No subscription revenue yet — charts appear once colleges or students are on paid plans.
+          No subscription revenue yet - charts appear once colleges or students are on paid plans.
         </div>
       )}
     </section>

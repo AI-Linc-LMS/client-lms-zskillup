@@ -100,7 +100,7 @@ function ResultsView({ data, onReview }: { data: CalibrationResultsDto; onReview
       </header>
 
       <main className="mx-auto w-full max-w-3xl flex-1 space-y-5 px-4 py-6 sm:px-6 sm:py-8">
-        {/* Hero — overall band + AI narrative */}
+        {/* Hero - overall band + AI narrative */}
         <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
           <div className="flex flex-col items-center gap-4 border-b border-slate-100 bg-gradient-to-br from-orange/[0.06] to-transparent px-6 py-7 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-left">
             <ScoreRing value={data.overall} tone={tone} />
@@ -133,14 +133,14 @@ function ResultsView({ data, onReview }: { data: CalibrationResultsDto; onReview
             icon={<TrendingUp className="size-4" aria-hidden="true" />}
             title="Your strengths"
             accent="emerald"
-            empty="Keep practising — your strengths will show here."
+            empty="Keep practising - your strengths will show here."
             rows={data.strengths}
           />
           <SectionCard
             icon={<Target className="size-4" aria-hidden="true" />}
             title="Focus areas"
             accent="orange"
-            empty="No major gaps — nicely balanced!"
+            empty="No major gaps - nicely balanced!"
             rows={data.gaps}
           />
         </div>
@@ -163,7 +163,7 @@ function ResultsView({ data, onReview }: { data: CalibrationResultsDto; onReview
               <h2 className="text-sm font-black uppercase tracking-wide text-slate-500">Company alignment</h2>
             </div>
             <p className="mb-4 text-[15px] font-semibold leading-relaxed text-navy">
-              You align best with <span className="text-[#f5b400]">{top.name}</span> — you're{' '}
+              You align best with <span className="text-[#f5b400]">{top.name}</span> - you're{' '}
               <span className="tabular-nums">{top.readiness}%</span> ready for their pattern.
             </p>
             <div className="space-y-3.5">

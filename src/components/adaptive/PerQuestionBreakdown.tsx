@@ -39,7 +39,7 @@ export function PerQuestionBreakdown({ questions, perQuestionNarration }: PerQue
               key={qq.questionId}
               type="button"
               onClick={() => setSel(i)}
-              aria-label={`Question ${i + 1} — ${qq.isCorrect ? 'correct' : 'wrong'}`}
+              aria-label={`Question ${i + 1} - ${qq.isCorrect ? 'correct' : 'wrong'}`}
               className={cn(
                 'grid size-9 place-items-center rounded-full text-[12px] font-extrabold transition-all',
                 active
@@ -101,7 +101,7 @@ export function PerQuestionBreakdown({ questions, perQuestionNarration }: PerQue
         <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
           <div className={cn('min-w-0 rounded-lg p-2.5 text-xs', q.isCorrect ? 'bg-emerald-100/70' : 'bg-rose-100/70')}>
             <p className="mb-0.5 font-bold text-slate-500">Your answer</p>
-            <p className={cn('break-words', q.isCorrect ? 'text-emerald-800' : 'text-rose-700')}>{q.selectedOption || '—'}</p>
+            <p className={cn('break-words', q.isCorrect ? 'text-emerald-800' : 'text-rose-700')}>{q.selectedOption || '-'}</p>
           </div>
           <div className="min-w-0 rounded-lg bg-emerald-100/70 p-2.5 text-xs">
             <p className="mb-0.5 font-bold text-slate-500">Correct answer</p>
@@ -109,7 +109,7 @@ export function PerQuestionBreakdown({ questions, perQuestionNarration }: PerQue
           </div>
         </div>
 
-        {/* AI rationale — types out word-by-word for the selected question */}
+        {/* AI rationale - types out word-by-word for the selected question */}
         {narration ? (
           <div className="mt-3 rounded-xl border border-indigo-100 bg-indigo-50/50 p-3">
             <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#6366f1] to-[#a855f7] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-white">

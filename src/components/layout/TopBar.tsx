@@ -77,7 +77,7 @@ export function TopBar() {
         </>
       ) : null}
 
-      {/* Right cluster — pushed right on mobile/tablet (search is hidden < lg, so
+      {/* Right cluster - pushed right on mobile/tablet (search is hidden < lg, so
           it can't provide the spacer); on lg+ the flex-1 search handles spacing. */}
       <div
         className={

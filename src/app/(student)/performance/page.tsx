@@ -24,7 +24,7 @@ export default function PerformancePage() {
         </span>
         <h1 className="mt-2.5 text-2xl font-black tracking-tight text-navy sm:text-3xl">Performance &amp; readiness</h1>
         <p className="mt-1.5 max-w-2xl text-sm text-slate-500 sm:text-base">
-          How placement-ready you are — overall, per company, and per topic — with your practice and
+          How placement-ready you are - overall, per company, and per topic - with your practice and
           assessment trends.
         </p>
       </div>

@@ -90,7 +90,7 @@ export function QuickStart() {
       {aiOk === false && (
         <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
           <Sparkles className="mt-0.5 size-4 shrink-0" />
-          AI isn&apos;t configured on this environment yet — interviews use a solid built-in question set and a
+          AI isn&apos;t configured on this environment yet - interviews use a solid built-in question set and a
           length-based score. Adaptive questions + rubric feedback switch on once the AI key is set.
         </div>
       )}
@@ -173,7 +173,7 @@ export function QuickStart() {
               ))}
             </div>
             <p className="mt-2.5 text-xs text-slate-400">
-              A <span className="font-semibold text-navy">{role}</span> interview — questions span what that role is hired for.
+              A <span className="font-semibold text-navy">{role}</span> interview - questions span what that role is hired for.
             </p>
           </>
         )}
@@ -249,7 +249,7 @@ export function QuickStart() {
             </button>
           ))}
         </div>
-        <p className="mt-2 text-xs text-slate-400">The AI paces itself to wrap up naturally within this window — you won&apos;t be cut off mid-answer.</p>
+        <p className="mt-2 text-xs text-slate-400">The AI paces itself to wrap up naturally within this window - you won&apos;t be cut off mid-answer.</p>
       </div>
 
       {error && <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}

@@ -155,7 +155,7 @@ export function SchedulingAdmin() {
           <div>
             <p className="text-sm font-bold text-navy">Build an assessment from the question bank</p>
             <p className="text-xs text-slate-500">
-              Pick a company, define sections by topic &amp; count — we auto-assemble it, preview, and schedule.
+              Pick a company, define sections by topic &amp; count - we auto-assemble it, preview, and schedule.
             </p>
           </div>
         </div>
@@ -190,14 +190,14 @@ export function SchedulingAdmin() {
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. TCS NQT — Round 1"
+              placeholder="e.g. TCS NQT - Round 1"
               className={inputCls}
             />
           </label>
           <label className="space-y-1">
             <span className={labelCls}>Mock test (optional)</span>
             <select value={mockTestId} onChange={(e) => setMockTestId(e.target.value)} className={inputCls}>
-              <option value="">— none —</option>
+              <option value="">- none -</option>
               {mocks.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.title}

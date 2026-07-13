@@ -10,7 +10,7 @@ export default function SuperadminStudyMaterialPage() {
         <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Catalog</p>
         <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Study Material</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Author each company&apos;s study material — sections, topics, and video / quiz / article items —
+          Author each company&apos;s study material - sections, topics, and video / quiz / article items -
           reflected on the student hub instantly.
         </p>
       </header>

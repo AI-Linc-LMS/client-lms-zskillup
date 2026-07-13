@@ -33,7 +33,7 @@ export default function ResumeBuilderPage() {
             </div>
           </div>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70">
-            Craft a polished, ATS-friendly resume from scratch — pick a template, edit with live preview, check
+            Craft a polished, ATS-friendly resume from scratch - pick a template, edit with live preview, check
             your ATS score, and export to PDF in one click.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">

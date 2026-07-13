@@ -34,7 +34,7 @@ const PILLARS = [
   {
     icon: Trophy,
     title: 'Gamified, but honest',
-    body: 'XP, streaks and badges are computed from a single append-only ledger — never edited, always reproducible. Every score the platform shows is the backend\'s honest answer, never invented in the browser.',
+    body: 'XP, streaks and badges are computed from a single append-only ledger - never edited, always reproducible. Every score the platform shows is the backend\'s honest answer, never invented in the browser.',
   },
   {
     icon: Users,
@@ -49,11 +49,11 @@ const PILLARS = [
 ];
 
 const PRINCIPLES = [
-  'Backend is the only source of truth — XP, PPS and rank are never invented client-side',
-  'Migrations only, never `synchronize: true` — the schema is reviewed code',
-  'Heavy work runs async — exports, recompute, leaderboards never block the request path',
+  'Backend is the only source of truth - XP, PPS and rank are never invented client-side',
+  'Migrations only, never `synchronize: true` - the schema is reviewed code',
+  'Heavy work runs async - exports, recompute, leaderboards never block the request path',
   'Every admin write produces an audit log',
-  'No payments, video DRM or institutional SSO in v1 — features land deliberately',
+  'No payments, video DRM or institutional SSO in v1 - features land deliberately',
 ];
 
 export default function AboutPage() {
@@ -70,7 +70,7 @@ export default function AboutPage() {
             About ZSkillup
           </p>
           <h1 className="mt-4 text-3xl font-extrabold leading-tight tracking-tight sm:text-[44px]">
-            A measurable, gamified readiness loop —
+            A measurable, gamified readiness loop -
             <br />
             <span className="text-orange">for the next generation of placements.</span>
           </h1>
@@ -153,11 +153,11 @@ export default function AboutPage() {
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-500">
               TPOs onboard their cohort with a single CSV upload, with tenant isolation that
               guarantees a TPO never sees another college&apos;s data. Cohort placement-readiness
-              analytics — PPS distribution, at-risk students, branch comparison and exports — are on
+              analytics - PPS distribution, at-risk students, branch comparison and exports - are on
               the roadmap.
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
-              {['Bulk student invite', 'Tenant isolation', 'Cohort analytics — roadmap', 'CSV / PDF export — roadmap'].map((tag) => (
+              {['Bulk student invite', 'Tenant isolation', 'Cohort analytics - roadmap', 'CSV / PDF export - roadmap'].map((tag) => (
                 <span
                   key={tag}
                   className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-semibold text-slate-600"
@@ -181,7 +181,7 @@ export default function AboutPage() {
           Engineering principles
         </p>
         <h2 className="mt-2 text-2xl font-bold text-navy sm:text-3xl">
-          We optimise for correctness, security and DevEx — never speed.
+          We optimise for correctness, security and DevEx - never speed.
         </h2>
         <ul className="mt-6 space-y-3">
           {PRINCIPLES.map((p) => (

@@ -58,7 +58,7 @@ export default function SuperAdminCollegeRequestsPage() {
     try {
       const updated = await approveCollegeRequest(selected.id);
       setSelected(updated);
-      setNotice('Approved — the college was created.');
+      setNotice('Approved - the college was created.');
       load();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not approve');
@@ -76,7 +76,7 @@ export default function SuperAdminCollegeRequestsPage() {
       setSelected(updated);
       setRejecting(false);
       setReason('');
-      setNotice('Rejected — the admin can correct and resubmit.');
+      setNotice('Rejected - the admin can correct and resubmit.');
       load();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not reject');
@@ -93,7 +93,7 @@ export default function SuperAdminCollegeRequestsPage() {
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Super Admin · Onboarding</p>
           <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">College Registration Requests</h1>
-          <p className="mt-1 text-sm text-slate-500">Review submitted requests — approve to create the college, or send back with a reason.</p>
+          <p className="mt-1 text-sm text-slate-500">Review submitted requests - approve to create the college, or send back with a reason.</p>
         </div>
         <div className="relative w-48">
           <select
@@ -182,8 +182,8 @@ export default function SuperAdminCollegeRequestsPage() {
                     {selected.students.slice(0, 100).map((s, i) => (
                       <tr key={`${s.email}-${i}`} className="border-t border-slate-100">
                         <td className="px-3 py-1.5 font-medium text-navy">{s.email}</td>
-                        <td className="px-3 py-1.5 text-slate-600">{s.fullName ?? '—'}</td>
-                        <td className="px-3 py-1.5 text-slate-500">{s.rollNumber ?? '—'}</td>
+                        <td className="px-3 py-1.5 text-slate-600">{s.fullName ?? '-'}</td>
+                        <td className="px-3 py-1.5 text-slate-500">{s.rollNumber ?? '-'}</td>
                       </tr>
                     ))}
                   </tbody>

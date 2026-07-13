@@ -162,7 +162,7 @@ export function FinancialsPaymentsBoard() {
 
             <Panel title="Revenue by college (B2B)">
               <p className="mb-3 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[11px] font-medium text-amber-700">
-                Booked plan value — college checkout isn&apos;t live yet, so this is contracted, not collected.
+                Booked plan value - college checkout isn&apos;t live yet, so this is contracted, not collected.
               </p>
               {data.revenueByCollege.length === 0 ? (
                 <p className="text-sm text-slate-400">No active college subscriptions.</p>

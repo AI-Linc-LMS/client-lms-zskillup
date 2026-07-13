@@ -6,7 +6,7 @@ import { Bot, ShieldCheck, Sparkles, Zap } from 'lucide-react';
 export const metadata = {
   title: 'Mock Interview · ZSkillup',
   description:
-    'Practise with an AI interviewer — adaptive questions, instant scored feedback, fullscreen proctoring, no camera.',
+    'Practise with an AI interviewer - adaptive questions, instant scored feedback, fullscreen proctoring, no camera.',
 };
 
 // The interview IS proctored: InterviewProctorGate puts it behind a fullscreen gate and
@@ -38,7 +38,7 @@ export default function MockInterviewPage() {
             </div>
           </div>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70">
-            Pick a topic and difficulty, then have a real, adaptive conversation with an AI interviewer — and get a
+            Pick a topic and difficulty, then have a real, adaptive conversation with an AI interviewer - and get a
             scored report with strengths and next steps at the end.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">

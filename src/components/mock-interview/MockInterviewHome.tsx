@@ -19,7 +19,7 @@ const STATUS_STYLE: Record<string, string> = {
 
 const STEPS = [
   { icon: Target, title: 'Pick a focus', text: 'Topic, style, difficulty & length' },
-  { icon: MessagesSquare, title: 'Talk it out', text: 'The interviewer speaks — you answer out loud' },
+  { icon: MessagesSquare, title: 'Talk it out', text: 'The interviewer speaks - you answer out loud' },
   { icon: Award, title: 'Get scored feedback', text: 'Strengths, gaps & a rubric score' },
 ];
 
@@ -172,7 +172,7 @@ function Stat({ icon: Icon, label, value, suffix, tint }: { icon: typeof Award; 
     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
       <Icon className={cn('mx-auto mb-1 size-4', tint)} />
       <p className={cn('text-center text-2xl font-black tabular-nums', tint)}>
-        {value === null ? '—' : <AnimatedNumber value={value} suffix={suffix} />}
+        {value === null ? '-' : <AnimatedNumber value={value} suffix={suffix} />}
       </p>
       <p className="text-center text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
     </div>

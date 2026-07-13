@@ -88,7 +88,7 @@ export function getHubContent(slug: string): HubContent {
     overview: {
       summary: `The ${company.name} drive is usually structured in ${company.rounds} online stages before interviews. Use the topic links below to practice each area; mock scores and difficulty adapt per company in the prep workspace.`,
       process: [
-        { stage: 'Online Assessment', detail: 'Aptitude, reasoning, and verbal sections — timed and sectional.' },
+        { stage: 'Online Assessment', detail: 'Aptitude, reasoning, and verbal sections - timed and sectional.' },
         { stage: 'Technical Round', detail: 'Coding / pseudocode, CS fundamentals, and domain questions.' },
         { stage: 'Technical + HR Interview', detail: 'Resume-driven discussion, projects, and behavioural fit.' },
       ],
@@ -121,7 +121,7 @@ export function getHubContent(slug: string): HubContent {
       { topic: 'CS Fundamentals', videos: 11, locked: true },
     ],
     quizzes: [
-      { title: 'Percentages & Ratios — Set 1', questions: 20, locked: false },
+      { title: 'Percentages & Ratios - Set 1', questions: 20, locked: false },
       { title: 'Time, Speed & Distance', questions: 20, locked: true },
       { title: 'Logical Puzzles', questions: 25, locked: true },
       { title: 'Reading Comprehension', questions: 15, locked: true },
@@ -133,7 +133,7 @@ export function getHubContent(slug: string): HubContent {
       { title: 'Full Mock 3', questions: 100, minutes: 90, kind: 'mock', locked: true },
       { title: 'Full Mock 4', questions: 100, minutes: 90, kind: 'mock', locked: true },
       { title: 'Full Mock 5', questions: 100, minutes: 90, kind: 'mock', locked: true },
-      { title: 'Live Contest — Weekend Drive', questions: 100, minutes: 90, kind: 'contest', locked: true },
+      { title: 'Live Contest - Weekend Drive', questions: 100, minutes: 90, kind: 'contest', locked: true },
     ],
     formulaSheets: [
       { topic: 'Percentages & Profit-Loss', locked: false },

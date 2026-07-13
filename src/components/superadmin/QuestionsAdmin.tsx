@@ -432,7 +432,7 @@ export function QuestionsAdmin() {
                       <Pill tone={DIFF_TONE[q.difficulty]}>{cap(q.difficulty)}</Pill>
                     </td>
                     <td className="px-4 py-3.5 text-slate-600">
-                      {q.subtopicId ? topicNames[q.subtopicId] ?? '—' : '—'}
+                      {q.subtopicId ? topicNames[q.subtopicId] ?? '-' : '-'}
                     </td>
                     <td className="px-4 py-3.5">
                       {q.source ? (
@@ -441,7 +441,7 @@ export function QuestionsAdmin() {
                           {q.yearTags && q.yearTags.length ? ` · ${q.yearTags.join(', ')}` : ''}
                         </Pill>
                       ) : (
-                        <span className="text-slate-400">—</span>
+                        <span className="text-slate-400">-</span>
                       )}
                     </td>
                     <td className="px-4 py-3.5">
@@ -451,7 +451,7 @@ export function QuestionsAdmin() {
                           {q.roleTags.length > 2 ? ` +${q.roleTags.length - 2}` : ''}
                         </span>
                       ) : (
-                        <span className="text-slate-400">—</span>
+                        <span className="text-slate-400">-</span>
                       )}
                     </td>
                     <td className="px-4 py-3.5">
@@ -658,7 +658,7 @@ function PyqSpotlight({
                 {companyNameBySlug[slug] ?? slug}
               </span>
               <span className="mt-1 text-2xl font-black tracking-tight text-navy tabular-nums">
-                {n === undefined ? '—' : n.toLocaleString()}
+                {n === undefined ? '-' : n.toLocaleString()}
               </span>
               <span className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-[#a16207]">
                 View PYQs <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
@@ -815,7 +815,7 @@ function QuestionDetailDrawer({
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Topic</p>
                 <p className="mt-1 text-sm text-slate-700">
-                  {q.subtopicId ? topicNames[q.subtopicId] ?? '—' : '—'}
+                  {q.subtopicId ? topicNames[q.subtopicId] ?? '-' : '-'}
                 </p>
               </div>
               <div>
@@ -827,7 +827,7 @@ function QuestionDetailDrawer({
                     ? detail.companyTags
                         .map((t) => companyNames[t.companyId] ?? t.companyId.slice(0, 6))
                         .join(', ')
-                    : '—'}
+                    : '-'}
                 </p>
               </div>
             </div>
@@ -1116,7 +1116,7 @@ function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
       ) : (
         <p className="mt-4 rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
           {type === QuestionType.NUMERIC ? 'Numeric' : 'Coding'} questions are stored without options
-          (answers are graded separately) — add the prompt above.
+          (answers are graded separately) - add the prompt above.
         </p>
       )}
 

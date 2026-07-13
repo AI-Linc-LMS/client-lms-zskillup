@@ -209,7 +209,7 @@ export default function AdminUsersPage() {
               {rows.map((user) => (
                 <tr key={user.id} className="hover:bg-slate-50">
                   <td className="px-4 py-3">
-                    <p className="font-semibold text-navy">{user.fullName ?? '—'}</p>
+                    <p className="font-semibold text-navy">{user.fullName ?? '-'}</p>
                     <p className="text-xs text-slate-400">{user.email}</p>
                   </td>
                   <td className="px-4 py-3">
@@ -236,7 +236,7 @@ export default function AdminUsersPage() {
                           month: 'short',
                           year: 'numeric',
                         })
-                      : '—'}
+                      : '-'}
                   </td>
                   <td className="px-4 py-3">
                     <RoleChanger

@@ -60,7 +60,7 @@ export function PremiumLockGate({
           {/* Leads with what they GET, not with the word "locked". */}
           <h2 className="mt-4 text-lg font-black text-navy">{feature} is a Premium feature</h2>
           <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
-            Upgrade to unlock it — everything else on your plan stays exactly as it is.
+            Upgrade to unlock it - everything else on your plan stays exactly as it is.
           </p>
 
           <ul className="mx-auto mt-4 max-w-xs space-y-1.5 text-left">

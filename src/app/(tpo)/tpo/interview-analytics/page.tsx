@@ -142,7 +142,7 @@ export default function InterviewAnalyticsPage() {
           <Mic className="mt-0.5 size-4 shrink-0 text-[#f5b400]" />
           <p>
             Communication &amp; confidence scores are graded by AI from each interview transcript. They fill
-            in for interviews completed after this scoring shipped — older interviews contribute only to
+            in for interviews completed after this scoring shipped - older interviews contribute only to
             interview readiness. <ProvenanceChip source="AI transcript scoring" className="ml-1 align-middle" />
           </p>
         </div>

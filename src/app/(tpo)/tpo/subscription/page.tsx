@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ProvenanceChip } from '@/components/tpo/ui';
 
 function fmtDate(iso: string | null) {
-  return iso ? new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+  return iso ? new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
 }
 
 const STATUS_STYLE: Record<string, string> = {
@@ -112,7 +112,7 @@ export default function SubscriptionPage() {
           <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
             <CreditCard className="size-3.5" /> College
           </span>
-          <p className="mt-2 text-sm font-bold text-navy">{sub.collegeName ?? '—'}</p>
+          <p className="mt-2 text-sm font-bold text-navy">{sub.collegeName ?? '-'}</p>
           <p className="text-xs text-slate-400">Since {fmtDate(sub.createdAt)}</p>
         </div>
       </div>

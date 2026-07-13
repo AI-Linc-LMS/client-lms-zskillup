@@ -125,7 +125,7 @@ export function CustomMockBuilder() {
       const short = built.mcqCount < effectiveCount;
       if (short) {
         toast.warning(
-          `Built with ${built.mcqCount} question${built.mcqCount === 1 ? '' : 's'} — that's all these topics could serve right now.`,
+          `Built with ${built.mcqCount} question${built.mcqCount === 1 ? '' : 's'} - that's all these topics could serve right now.`,
           { description: 'Pick more topics (or a whole section) for a longer mock.' },
         );
       }
@@ -160,7 +160,7 @@ export function CustomMockBuilder() {
         </div>
       ) : roots.length === 0 ? (
         <div className="rounded-2xl border border-slate-200/80 bg-white p-6 text-sm text-slate-500">
-          Topic catalog is unavailable right now — try again shortly.
+          Topic catalog is unavailable right now - try again shortly.
         </div>
       ) : (
         <div data-tour="mock:pick-scope" className="grid gap-4 lg:grid-cols-2">
@@ -213,7 +213,7 @@ export function CustomMockBuilder() {
         </div>
       )}
 
-      {/* Coding topics (optional) — pick the coding topics to mix in */}
+      {/* Coding topics (optional) - pick the coding topics to mix in */}
       {codingTopicList.length ? (
         <div data-tour="mock:coding-topics" className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
           <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
@@ -221,7 +221,7 @@ export function CustomMockBuilder() {
             <span className="font-medium normal-case tracking-normal text-slate-400">(optional)</span>
           </p>
 
-          {/* Whole coding section — parity with the MCQ "whole section" toggle. */}
+          {/* Whole coding section - parity with the MCQ "whole section" toggle. */}
           <button
             onClick={() => setCodingAll((v) => !v)}
             className={cn(
@@ -268,7 +268,7 @@ export function CustomMockBuilder() {
       {/* config bar */}
       <div data-tour="mock:config" className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
         <div className="grid gap-5 sm:grid-cols-3">
-          {/* max is the real pool for the current selection, not a flat 100 — asking for 20
+          {/* max is the real pool for the current selection, not a flat 100 - asking for 20
               from a topic that holds 1 was the reported bug. */}
           <Stepper
             label="MCQ questions"

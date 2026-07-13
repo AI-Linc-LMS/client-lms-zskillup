@@ -124,7 +124,7 @@ export function CompanyRegisterCard({
               </p>
               <p className="mt-1 text-xs leading-relaxed text-white/65">
                 {justRegistered
-                  ? `Registration successful — you're in for ${companyName}. Any scheduled assessment will appear on your calendar.`
+                  ? `Registration successful - you're in for ${companyName}. Any scheduled assessment will appear on your calendar.`
                   : `You're registered for the ${companyName} drive. Watch your calendar for the assessment slot.`}
               </p>
               <button

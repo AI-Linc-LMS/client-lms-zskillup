@@ -117,7 +117,7 @@ export default function TpoExecutiveDashboard() {
         <BentoCard
           n={1}
           title="Performance & Participation Map"
-          subtitle="Each dot is a student — target the high-effort, under-performing quadrant."
+          subtitle="Each dot is a student - target the high-effort, under-performing quadrant."
           source="Assessment scores + platform activity"
         >
           <ParticipationScatter students={data.students} />
@@ -153,10 +153,10 @@ export default function TpoExecutiveDashboard() {
                 {topStudents.map((s) => (
                   <tr key={s.id}>
                     <td className="px-1 py-2">
-                      <p className="font-semibold text-navy">{s.name ?? '—'}</p>
+                      <p className="font-semibold text-navy">{s.name ?? '-'}</p>
                       <p className="truncate text-xs text-slate-400">{s.email}</p>
                     </td>
-                    <td className="px-1 py-2 text-slate-600">{s.branch ?? '—'}</td>
+                    <td className="px-1 py-2 text-slate-600">{s.branch ?? '-'}</td>
                     <td className="px-1 py-2">
                       <div className="flex items-center gap-2">
                         <div className="h-1.5 w-14 overflow-hidden rounded-full bg-slate-100">
@@ -219,7 +219,7 @@ export default function TpoExecutiveDashboard() {
       <BentoCard
         n={5}
         title="Skill Gaps"
-        subtitle="Weakest topics across your campus — where to focus training."
+        subtitle="Weakest topics across your campus - where to focus training."
         source="Topic-level practice accuracy"
         action={
           <Link
@@ -249,7 +249,7 @@ export default function TpoExecutiveDashboard() {
         <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {['Total', 'Upcoming', 'Live', 'Completed', 'Students Assigned'].map((label) => (
             <div key={label} className="rounded-xl border border-dashed border-slate-200 bg-slate-50/40 p-3">
-              <p className="text-2xl font-black tabular-nums text-slate-300">—</p>
+              <p className="text-2xl font-black tabular-nums text-slate-300">-</p>
               <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
             </div>
           ))}

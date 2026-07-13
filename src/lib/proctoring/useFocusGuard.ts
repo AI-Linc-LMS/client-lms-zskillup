@@ -45,7 +45,7 @@ export function useFocusGuard(): FocusGuard {
   const onVisibility = useCallback(() => {
     if (document.visibilityState === 'hidden') {
       setTabSwitches((n) => n + 1);
-      warn('You switched away from the interview — this is logged.');
+      warn('You switched away from the interview - this is logged.');
     }
   }, [warn]);
 
@@ -54,7 +54,7 @@ export function useFocusGuard(): FocusGuard {
     setInFullscreen(fs);
     if (!fs) {
       setFullscreenExits((n) => n + 1);
-      warn('You exited fullscreen — please return to continue.');
+      warn('You exited fullscreen - please return to continue.');
     }
   }, [warn]);
 

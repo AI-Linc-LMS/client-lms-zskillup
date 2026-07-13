@@ -66,7 +66,7 @@ export function TopBarSearch() {
           aria-label="Search companies and topics"
           className="h-9 w-full rounded-full border border-slate-200/90 bg-white/70 pl-10 pr-14 text-sm text-slate-700 shadow-sm transition-colors placeholder:text-slate-400 hover:border-slate-300 focus-visible:border-transparent focus-visible:bg-white focus-visible:outline-none"
         />
-        {/* kbd hint — hides while typing/focused */}
+        {/* kbd hint - hides while typing/focused */}
         <kbd
           aria-hidden
           className={cn(

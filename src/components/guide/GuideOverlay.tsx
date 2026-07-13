@@ -188,7 +188,7 @@ export function GuideOverlay({
 
   return (
     <div className="fixed inset-0 z-[80]" aria-live="polite" role="dialog" aria-modal="true">
-      {/* Click blocker (transparent) — the dim comes from the spotlight box-shadow,
+      {/* Click blocker (transparent) - the dim comes from the spotlight box-shadow,
           or from this layer when there's no target. */}
       <div
         className={hasSpot ? 'absolute inset-0' : 'absolute inset-0 bg-slate-900/60 backdrop-blur-[2px]'}

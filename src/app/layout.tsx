@@ -26,7 +26,7 @@ const instrument = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: 'ZSkillup — Placement preparation, simplified',
+  title: 'ZSkillup - Placement preparation, simplified',
   description:
     'Real previous-year questions for TCS, Infosys, Wipro, Cognizant, Capgemini and Accenture. Live mock drives, expert instructors, and verified certificates accepted by 1,200+ campus placement cells.',
   icons: {

@@ -39,7 +39,7 @@ export function sectionTip(name: string, subs: ApiTopic[]): TipContent {
     body: `Unlocks the whole ${name} section, across every company.`,
     bullets: [
       subs.length
-        ? `All ${subs.length} sub-sections — ${shown.join(', ')}${subs.length > shown.length ? ' and more' : ''}`
+        ? `All ${subs.length} sub-sections - ${shown.join(', ')}${subs.length > shown.length ? ' and more' : ''}`
         : 'Every sub-section in this section',
       'Adaptive practice that adjusts to your level',
       'Timed section drills with step-by-step solutions',

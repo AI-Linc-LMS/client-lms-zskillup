@@ -56,7 +56,7 @@ export function MySubscriptionCard() {
         </p>
       ) : (
         <p className="mt-2 text-xs leading-relaxed text-slate-500">
-          You&apos;re on the free tier — the first 5 questions of any topic are on us.
+          You&apos;re on the free tier - the first 5 questions of any topic are on us.
         </p>
       )}
 

@@ -147,7 +147,7 @@ export function CompanyReadiness() {
           )}
         </div>
 
-        {/* Top company highlight — readiness ring + best/weak skill */}
+        {/* Top company highlight - readiness ring + best/weak skill */}
         {topCompany && (
           <motion.div
             whileHover={{ y: -2 }}
@@ -215,7 +215,7 @@ export function CompanyReadiness() {
           </motion.div>
         )}
 
-        {/* Other companies — gradient readiness bars */}
+        {/* Other companies - gradient readiness bars */}
         {data.length > 1 && (
           <div className="space-y-2.5">
             {data.slice(1).map((c, i) => {

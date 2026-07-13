@@ -88,7 +88,7 @@ export default function CollegeRequestDetailPage({ params }: { params: Promise<{
           {req.status === 'REJECTED' && req.rejectionReason ? (
             <p className="flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700 ring-1 ring-red-200">
               <AlertCircle className="mt-0.5 size-4 shrink-0" />
-              <span><span className="font-bold">Rejected:</span> {req.rejectionReason} — fix the details below and resubmit.</span>
+              <span><span className="font-bold">Rejected:</span> {req.rejectionReason} - fix the details below and resubmit.</span>
             </p>
           ) : null}
 
@@ -163,7 +163,7 @@ function ActivationPanel({
           <CheckCircle2 className="size-5" />
         </span>
         <div className="flex-1">
-          <p className="text-sm font-bold text-navy">Approved — college created</p>
+          <p className="text-sm font-bold text-navy">Approved - college created</p>
           {activated ? (
             <p className="mt-0.5 text-xs text-slate-600">
               Subscription activated
@@ -184,7 +184,7 @@ function ActivationPanel({
             {!activated ? (
               <Button
                 disabled={busy}
-                onClick={() => run(() => activateCollegeRequest(req.id), 'Activated — credentials emailed.')}
+                onClick={() => run(() => activateCollegeRequest(req.id), 'Activated - credentials emailed.')}
               >
                 {busy ? <Loader2 className="mr-1.5 size-4 animate-spin" /> : <KeyRound className="mr-1.5 size-4" />}
                 Activate subscription
@@ -243,7 +243,7 @@ function StudentImportPanel({
           <p className="text-sm font-bold text-navy">Import students</p>
           {imported ? (
             <p className="mt-0.5 text-xs text-slate-600">
-              Seeded on {req.studentsImportedAt ? new Date(req.studentsImportedAt).toLocaleDateString() : ''} —
+              Seeded on {req.studentsImportedAt ? new Date(req.studentsImportedAt).toLocaleDateString() : ''} -
               {' '}students were created and emailed their set-password links.
             </p>
           ) : (
@@ -267,7 +267,7 @@ function StudentImportPanel({
                 <input
                   value={cohortName}
                   onChange={(e) => setCohortName(e.target.value)}
-                  placeholder={`${req.collegeName} — ${new Date().getFullYear()}`}
+                  placeholder={`${req.collegeName} - ${new Date().getFullYear()}`}
                   className="mt-1 block w-64 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
                 />
               </label>
@@ -303,7 +303,7 @@ function ReadOnlyRequest({ req }: { req: CollegeRequestDetail }) {
           ))}
         </dl>
         {req.status === 'SUBMITTED' ? (
-          <p className="mt-4 text-xs text-slate-500">Awaiting Super Admin review — you&apos;ll be able to edit again if it&apos;s sent back.</p>
+          <p className="mt-4 text-xs text-slate-500">Awaiting Super Admin review - you&apos;ll be able to edit again if it&apos;s sent back.</p>
         ) : null}
       </section>
 
@@ -322,8 +322,8 @@ function ReadOnlyRequest({ req }: { req: CollegeRequestDetail }) {
               {req.students.map((s, i) => (
                 <tr key={`${s.email}-${i}`} className="border-t border-slate-100">
                   <td className="px-3 py-1.5 font-medium text-navy">{s.email}</td>
-                  <td className="px-3 py-1.5 text-slate-600">{s.fullName ?? '—'}</td>
-                  <td className="px-3 py-1.5 text-slate-500">{s.rollNumber ?? '—'}</td>
+                  <td className="px-3 py-1.5 text-slate-600">{s.fullName ?? '-'}</td>
+                  <td className="px-3 py-1.5 text-slate-500">{s.rollNumber ?? '-'}</td>
                 </tr>
               ))}
             </tbody>

@@ -244,7 +244,7 @@ export default function AdminTipsPage() {
             <Loader2 className="size-6 animate-spin text-slate-400" />
           </div>
         ) : tips.length === 0 ? (
-          <div className="py-16 text-center text-sm text-slate-400">No tips yet — create one.</div>
+          <div className="py-16 text-center text-sm text-slate-400">No tips yet - create one.</div>
         ) : (
           <ul className="divide-y divide-slate-100">
             {tips.map((t) => (

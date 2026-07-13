@@ -105,7 +105,7 @@ export function StudyPlanClient() {
       <Hero ov={ov!} />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
-        {/* Today + progress rail — fills the column beside the tall roadmap */}
+        {/* Today + progress rail - fills the column beside the tall roadmap */}
         <div data-tour="plan:today" className="space-y-5 lg:sticky lg:top-20 lg:self-start">
           {ov!.today && <TodayPanel today={ov!.today} onToggle={toggleToday} busyTask={busyTask} />}
           <ProgressPanel summary={ov!.summary} />
@@ -356,7 +356,7 @@ function TodayPanel({
           ))}
         </ul>
         <p className="mt-3 text-center text-[11px] text-slate-400">
-          Finishing the linked practice or mock ticks a task automatically — or check it off yourself.
+          Finishing the linked practice or mock ticks a task automatically - or check it off yourself.
         </p>
       </div>
     </section>
@@ -401,7 +401,7 @@ function NotCalibrated({ mockId }: { mockId: string | null }) {
       </span>
       <h2 className="mt-3 font-display text-xl font-black tracking-tight text-navy">Placement readiness test required</h2>
       <p className="mt-2 max-w-md text-sm text-slate-500">
-        Your 90-day roadmap is <em>generated</em> from one short placement readiness test — it finds your strong and weak areas
+        Your 90-day roadmap is <em>generated</em> from one short placement readiness test - it finds your strong and weak areas
         so every day targets exactly what will move your placement readiness fastest. Everything else on the platform is
         already open to you.
       </p>
@@ -426,7 +426,7 @@ function GenerateHero({ generating, onGenerate }: { generating: boolean; onGener
         Build your 90-day roadmap
       </h2>
       <p className="relative z-10 mx-auto mt-2 max-w-lg text-sm leading-relaxed text-white/70">
-        We’ll turn your placement readiness result into a fixed, day-by-day plan — front-loading your weak areas, with practice,
+        We’ll turn your placement readiness result into a fixed, day-by-day plan - front-loading your weak areas, with practice,
         timed quizzes, weekly mocks and coding, all the way to placement-ready. One day unlocks at a time.
       </p>
       <button

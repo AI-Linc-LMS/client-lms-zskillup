@@ -133,7 +133,7 @@ export function formatMonth(value: string): string {
 export function dateRange(start: string, end: string, current?: boolean): string {
   const s = formatMonth(start);
   const e = current ? 'Present' : formatMonth(end);
-  if (s && e) return `${s} — ${e}`;
+  if (s && e) return `${s} - ${e}`;
   return s || e || '';
 }
 

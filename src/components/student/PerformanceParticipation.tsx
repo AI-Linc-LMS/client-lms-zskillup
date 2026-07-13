@@ -48,10 +48,10 @@ const zoneOf = (p: ScatterPoint): ZoneKey => {
 function verdict(perf: number, part: number): { label: string; tip: string; tone: string } {
   const hiP = perf >= PERF_HIGH;
   const hiE = part >= PART_HIGH;
-  if (hiP && hiE) return { label: 'Thriving', tip: 'Strong performance on real volume — keep the streak alive.', tone: 'text-emerald-600' };
-  if (hiP && !hiE) return { label: 'Coasting', tip: 'Sharp on light practice — a bit more volume locks it in.', tone: 'text-sky-600' };
-  if (!hiP && hiE) return { label: 'Grinding', tip: 'Great effort — target your weak topics to convert it into results.', tone: 'text-amber-600' };
-  return { label: 'Getting started', tip: 'A little daily practice moves you up fast — start with one topic.', tone: 'text-rose-500' };
+  if (hiP && hiE) return { label: 'Thriving', tip: 'Strong performance on real volume - keep the streak alive.', tone: 'text-emerald-600' };
+  if (hiP && !hiE) return { label: 'Coasting', tip: 'Sharp on light practice - a bit more volume locks it in.', tone: 'text-sky-600' };
+  if (!hiP && hiE) return { label: 'Grinding', tip: 'Great effort - target your weak topics to convert it into results.', tone: 'text-amber-600' };
+  return { label: 'Getting started', tip: 'A little daily practice moves you up fast - start with one topic.', tone: 'text-rose-500' };
 }
 
 /** The concrete gap to reach the top (high accuracy AND high volume) zone. */
@@ -154,7 +154,7 @@ export function PerformanceParticipation() {
             Performance vs Participation
           </h2>
           <p className="mt-1 text-xs text-slate-500">
-            Performance vs effort — you against {data?.scope === 'college' ? 'your college' : 'everyone'}.
+            Performance vs effort - you against {data?.scope === 'college' ? 'your college' : 'everyone'}.
           </p>
         </div>
         <Link
@@ -179,7 +179,7 @@ export function PerformanceParticipation() {
         </div>
       ) : (
         <>
-          {/* Metric strip — your numbers + where they place you in the cohort */}
+          {/* Metric strip - your numbers + where they place you in the cohort */}
           <div className="mt-4 grid grid-cols-3 gap-2.5">
             <Metric
               label="Your performance"
@@ -211,7 +211,7 @@ export function PerformanceParticipation() {
 
             {/* Plot */}
             <div className="relative aspect-[2/1] w-full min-w-0 overflow-hidden rounded-2xl bg-slate-50/40 ring-1 ring-inset ring-slate-100">
-              {/* Quadrant tints — checkerboard intensity (diagonals match, adjacent
+              {/* Quadrant tints - checkerboard intensity (diagonals match, adjacent
                   differ) so every shared edge separates by both hue and strength. */}
               <div className="absolute bg-sky-500/[0.15]" style={{ left: 0, top: 0, width: `${vx}%`, height: `${hy}%` }} />
               <div className="absolute bg-emerald-500/[0.10]" style={{ left: `${vx}%`, top: 0, right: 0, height: `${hy}%` }} />
@@ -272,7 +272,7 @@ export function PerformanceParticipation() {
             </div>
           </div>
 
-          {/* X axis caption — mirrors the chart's y-rail gutter (w-6 + gap-2.5) so it
+          {/* X axis caption - mirrors the chart's y-rail gutter (w-6 + gap-2.5) so it
               centres exactly under the plot instead of a hand-tuned margin. */}
           <div className="mt-1.5 flex gap-2.5">
             <div className="w-6 shrink-0" aria-hidden />
@@ -333,7 +333,7 @@ export function PerformanceParticipation() {
                 </Link>
               ) : (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-bold text-emerald-700">
-                  <TrendingUp className="size-3.5" /> Top zone — keep the streak alive
+                  <TrendingUp className="size-3.5" /> Top zone - keep the streak alive
                 </span>
               )}
               <span className="flex shrink-0 items-center gap-2.5 text-[11px] font-semibold text-slate-400">

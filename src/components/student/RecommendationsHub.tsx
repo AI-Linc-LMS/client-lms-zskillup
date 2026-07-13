@@ -89,7 +89,7 @@ export function RecommendationsHub() {
         </span>
         <h2 className="mt-4 font-display text-xl font-bold text-navy">Unlock your recommendations</h2>
         <p className="mt-2 text-sm leading-relaxed text-slate-500">
-          Take your one-time placement readiness test — we&apos;ll map where you stand and recommend exactly the courses,
+          Take your one-time placement readiness test - we&apos;ll map where you stand and recommend exactly the courses,
           companies, sections and topics to focus on next.
         </p>
         <Link
@@ -118,7 +118,7 @@ export function RecommendationsHub() {
               Your personalized next steps
             </h1>
             <p className="mt-1 max-w-xl text-sm leading-relaxed text-slate-500">
-              Based on your placement readiness and the practice you&apos;ve done — the courses, companies, sections and topics
+              Based on your placement readiness and the practice you&apos;ve done - the courses, companies, sections and topics
               that move your readiness fastest.
             </p>
           </div>
@@ -189,7 +189,7 @@ export function RecommendationsHub() {
           </h2>
           {top && (
             <p className="mb-4 text-sm text-slate-500">
-              You align best with <span className="font-bold text-navy">{top.name}</span> — {top.readiness}% ready.
+              You align best with <span className="font-bold text-navy">{top.name}</span> - {top.readiness}% ready.
             </p>
           )}
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

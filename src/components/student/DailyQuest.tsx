@@ -42,7 +42,7 @@ export function DailyQuest() {
             </span>
             <div>
               <p className="text-lg font-extrabold text-[var(--color-ink)]">
-                Sharpen percentages — the most-tested NQT quant topic
+                Sharpen percentages - the most-tested NQT quant topic
               </p>
               <p className="mt-0.5 text-sm text-[var(--color-text-muted)]">
                 Server-graded questions with instant hints and step-by-step explanations.
@@ -82,7 +82,7 @@ export function DailyQuest() {
               {isCompleted
                 ? `Earned +${quest.xpReward} XP · +${quest.coinReward} coins`
                 : isMissed
-                  ? 'Quest expired — a new one arrives tomorrow'
+                  ? 'Quest expired - a new one arrives tomorrow'
                   : `Complete to earn +${quest.xpReward} XP · +${quest.coinReward} coins`}
             </p>
           </div>

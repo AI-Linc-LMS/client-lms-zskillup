@@ -121,7 +121,7 @@ export function CollegesAdmin() {
             ) : filtered.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-4 py-12 text-center text-sm text-slate-500">
-                  {search ? 'No colleges match that search.' : 'No colleges yet — add the first one above.'}
+                  {search ? 'No colleges match that search.' : 'No colleges yet - add the first one above.'}
                 </td>
               </tr>
             ) : (

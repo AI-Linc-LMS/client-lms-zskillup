@@ -274,7 +274,7 @@ export function InterviewRunner({ id }: { id: string }) {
     const rec = new MediaRecorder(audio, mime ? { mimeType: mime } : undefined);
     recorderRef.current = rec;
     rec.ondataavailable = (e) => e.data.size && chunksRef.current.push(e.data);
-    rec.start(1000); // 1s chunks — buffered for ONE Whisper pass at the end
+    rec.start(1000); // 1s chunks - buffered for ONE Whisper pass at the end
     setRecording(true);
     recordingRef.current = true;
 
@@ -465,7 +465,7 @@ export function InterviewRunner({ id }: { id: string }) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-28">
         <InterviewerBlob speaking />
-        <p className="text-sm text-slate-500">Setting up your interview — enabling camera &amp; mic…</p>
+        <p className="text-sm text-slate-500">Setting up your interview - enabling camera &amp; mic…</p>
       </div>
     );
   }
@@ -611,7 +611,7 @@ export function InterviewRunner({ id }: { id: string }) {
                 )}
               </p>
             ) : recording ? (
-              <span className="flex items-center gap-2 text-slate-400"><EqBars /> Listening — start speaking, your words appear here…</span>
+              <span className="flex items-center gap-2 text-slate-400"><EqBars /> Listening - start speaking, your words appear here…</span>
             ) : (
               <span className="text-slate-400">The interviewer will speak, then your answer records automatically.</span>
             )}
@@ -642,7 +642,7 @@ export function InterviewRunner({ id }: { id: string }) {
       </div>
 
       <p className="mt-3 text-center text-xs text-slate-400">
-        Your camera is a self-view for a real interview feel — nothing is uploaded, and there&apos;s no strict proctoring.
+        Your camera is a self-view for a real interview feel - nothing is uploaded, and there&apos;s no strict proctoring.
       </p>
 
       {/* Evaluating overlay */}

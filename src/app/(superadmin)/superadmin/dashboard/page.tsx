@@ -58,7 +58,7 @@ export default function SuperAdminDashboardPage() {
             Platform Overview
           </h1>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/70">
-            Everything happening across ZSkillup — users, assessments, content and system health,
+            Everything happening across ZSkillup - users, assessments, content and system health,
             updated live.
           </p>
 

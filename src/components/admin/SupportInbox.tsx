@@ -99,7 +99,7 @@ export function SupportInbox() {
                       {t.category && <p className="text-xs text-slate-400">{t.category}</p>}
                     </td>
                     <td className="px-4 py-3 text-slate-600">
-                      {t.requesterName ?? t.requesterEmail ?? '—'}
+                      {t.requesterName ?? t.requesterEmail ?? '-'}
                     </td>
                     <td className={cn('px-4 py-3 text-xs font-semibold', PRIORITY_STYLE[t.priority])}>{t.priority}</td>
                     <td className="px-4 py-3">

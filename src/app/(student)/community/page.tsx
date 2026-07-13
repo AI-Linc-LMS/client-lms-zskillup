@@ -190,7 +190,7 @@ export default function CommunityPage() {
             <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center">
               <MessagesSquare className="mx-auto size-10 text-slate-300" />
               <p className="mt-3 text-sm text-slate-500">
-                {search || tag || type ? 'No posts match your filters.' : 'No posts yet — be the first to start a discussion!'}
+                {search || tag || type ? 'No posts match your filters.' : 'No posts yet - be the first to start a discussion!'}
               </p>
               <button
                 onClick={() => setComposerOpen(true)}

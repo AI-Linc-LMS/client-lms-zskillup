@@ -96,7 +96,7 @@ export default function CartPage() {
             : 'Unlocked! Your new access is active.',
       });
     } else if (res.dismissed) {
-      setMsg({ kind: 'err', text: 'Checkout cancelled — your cart is saved.' });
+      setMsg({ kind: 'err', text: 'Checkout cancelled - your cart is saved.' });
     } else {
       setMsg({ kind: 'err', text: res.error ?? 'Something went wrong. Please try again.' });
     }
@@ -148,7 +148,7 @@ export default function CartPage() {
           </div>
 
           <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_340px]">
-            {/* Left — grouped items + footer */}
+            {/* Left - grouped items + footer */}
             <div className="space-y-4">
               {GROUPS.map((g) => {
                 const rows = byScope(g.scope);
@@ -197,7 +197,7 @@ export default function CartPage() {
                               ))}
                             </div>
                             <span className="w-20 text-right font-bold tabular-nums text-navy">
-                              {amt != null ? formatPrice(amt, 'INR') : '—'}
+                              {amt != null ? formatPrice(amt, 'INR') : '-'}
                             </span>
                             <button
                               type="button"
@@ -219,7 +219,7 @@ export default function CartPage() {
                 <Sparkles className="size-4" /> You can remove any item or change its access plan duration.
               </p>
 
-              {/* Footer — subtotal + pay */}
+              {/* Footer - subtotal + pay */}
               <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-slate-500">
@@ -247,7 +247,7 @@ export default function CartPage() {
               </div>
             </div>
 
-            {/* Right — order summary + unlocks + upgrade nudge */}
+            {/* Right - order summary + unlocks + upgrade nudge */}
             <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
               <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h2 className="text-base font-black text-navy">Order Summary</h2>

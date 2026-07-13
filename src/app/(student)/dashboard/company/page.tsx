@@ -27,12 +27,12 @@ export default async function CompaniesPage() {
     <div className="w-full">
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Companies' }]} />
 
-      {/* Hero — deep navy aurora canvas with glass stat cards */}
+      {/* Hero - deep navy aurora canvas with glass stat cards */}
       <Reveal>
         <section data-tour="company:hero" className="relative isolate mb-8 overflow-hidden rounded-[1.75rem] p-7 text-white sm:rounded-[2rem] sm:p-10">
           <AuroraBackground />
 
-          {/* layered depth — inner ring + top-edge highlight */}
+          {/* layered depth - inner ring + top-edge highlight */}
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 rounded-[1.75rem] ring-1 ring-inset ring-white/10 sm:rounded-[2rem]"
@@ -52,7 +52,7 @@ export default async function CompaniesPage() {
               Choose your <span className="text-[#ffc42d]">target company</span>.
             </h1>
             <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-white/65 sm:text-base">
-              Pick a recruiter and follow a guided track — process overview, topic-wise practice
+              Pick a recruiter and follow a guided track - process overview, topic-wise practice
               from the real question bank, and timed mocks pattern-matched to the actual drive.
             </p>
 
@@ -82,7 +82,7 @@ export default async function CompaniesPage() {
 
       <CompaniesExplorer />
 
-      {/* Once, under the grid — not repeated inside each card. */}
+      {/* Once, under the grid - not repeated inside each card. */}
       <Disclaimer className="mt-2" />
     </div>
   );

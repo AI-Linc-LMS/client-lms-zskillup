@@ -83,7 +83,7 @@ function RailCard({
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-50/70 via-transparent to-transparent"
       />
-      {/* colored glow blob — intensifies on hover */}
+      {/* colored glow blob - intensifies on hover */}
       <div
         aria-hidden
         className="pointer-events-none absolute -right-10 -top-12 size-32 rounded-full opacity-[0.08] blur-2xl transition-opacity duration-500 group-hover:opacity-20"
@@ -147,7 +147,7 @@ export function DashboardRightRail() {
 
   return (
     <Stagger className="space-y-5">
-      {/* Up next — live feature entry points */}
+      {/* Up next - live feature entry points */}
       <StaggerItem>
         <RailCard glow="#ffc42d">
           <RailLabel>Up Next</RailLabel>
@@ -163,7 +163,7 @@ export function DashboardRightRail() {
                   : item.href;
               const meta =
                 id === 'weak' && weakTopic
-                  ? `${weakTopic.name} · ${weakTopic.pct}% — drill to improve`
+                  ? `${weakTopic.name} · ${weakTopic.pct}% - drill to improve`
                   : item.meta;
               return (
               <motion.div key={title} whileHover={{ y: -2 }} transition={{ duration: 0.2 }}>
@@ -194,7 +194,7 @@ export function DashboardRightRail() {
         </RailCard>
       </StaggerItem>
 
-      {/* This Week — real calendar */}
+      {/* This Week - real calendar */}
       <StaggerItem>
         <RailCard glow="#2563eb">
           <RailLabel icon={Calendar}>This Week</RailLabel>
@@ -271,7 +271,7 @@ export function DashboardRightRail() {
         </RailCard>
       </StaggerItem>
 
-      {/* Recent Activity — real mock attempts */}
+      {/* Recent Activity - real mock attempts */}
       <StaggerItem>
         <RailCard glow="#6d3bf5">
           <RailLabel>Recent Activity</RailLabel>
@@ -289,7 +289,7 @@ export function DashboardRightRail() {
             </div>
           ) : history.length === 0 ? (
             <p className="text-xs leading-relaxed text-slate-500">
-              No assessments yet — your mock results will show up here.
+              No assessments yet - your mock results will show up here.
             </p>
           ) : (
             <Reveal>

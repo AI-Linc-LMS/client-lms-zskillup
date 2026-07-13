@@ -52,7 +52,7 @@ export function ActiveSubscriptions({ className }: { className?: string }) {
 
       {ents.length === 0 ? (
         <div className="mt-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 p-6 text-center">
-          <p className="text-sm text-slate-500">No active unlocks yet — you get the first 5 questions of anything free.</p>
+          <p className="text-sm text-slate-500">No active unlocks yet - you get the first 5 questions of anything free.</p>
           <Link
             href="/shop"
             className="mt-3 inline-block rounded-full bg-navy px-4 py-1.5 text-xs font-bold text-white"

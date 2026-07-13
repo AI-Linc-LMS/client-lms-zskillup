@@ -67,9 +67,9 @@ export function PerformanceDashboard() {
           <BarChart3 className="size-5 text-indigo-500" /> Practice analytics
         </h2>
 
-        {/* Bento grid — accuracy card spans 2 cols, trend fills the rest */}
+        {/* Bento grid - accuracy card spans 2 cols, trend fills the rest */}
         <div className="grid gap-5 lg:grid-cols-3">
-          {/* Practice accuracy — featured, spans 2 columns */}
+          {/* Practice accuracy - featured, spans 2 columns */}
           <div data-tour="perf:practice-accuracy" className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 lg:col-span-2">
             <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 to-indigo-400" />
             <span
@@ -162,7 +162,7 @@ export function PerformanceDashboard() {
             <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-amber-700 ring-1 ring-inset ring-amber-200">
               <AlertTriangle className="size-3.5" /> Under 60%
             </span>
-            <p className="mt-2.5 text-sm text-slate-600">Topics under 60% — drill these to lift your readiness.</p>
+            <p className="mt-2.5 text-sm text-slate-600">Topics under 60% - drill these to lift your readiness.</p>
             <div className="mt-4 flex flex-wrap gap-2">
               {weak.slice(0, 12).map((t) => (
                 <Link

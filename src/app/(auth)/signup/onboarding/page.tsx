@@ -193,7 +193,7 @@ export default function OnboardingPage() {
                 ? 'We use this to surface drives and benchmarks for your campus.'
                 : step === 3
                   ? 'This tailors your dashboard, recommended roles, and skill tracking.'
-                  : 'Choose all that interest you — we personalise your roadmap to these.'}
+                  : 'Choose all that interest you - we personalise your roadmap to these.'}
             </p>
           </div>
 

@@ -146,7 +146,7 @@ export async function startPurchase(params: StartPurchaseParams): Promise<Purcha
           } catch {
             done({
               ok: false,
-              error: 'Payment received but confirmation is still catching up — refresh in a moment to see your access.',
+              error: 'Payment received but confirmation is still catching up - refresh in a moment to see your access.',
             });
           }
         })();
@@ -155,7 +155,7 @@ export async function startPurchase(params: StartPurchaseParams): Promise<Purcha
     });
 
     rzp.on('payment.failed', () =>
-      done({ ok: false, error: 'Payment failed — no money was deducted. Please try again.' }),
+      done({ ok: false, error: 'Payment failed - no money was deducted. Please try again.' }),
     );
     rzp.open();
   });
@@ -223,7 +223,7 @@ export async function startCartPurchase(
           } catch {
             done({
               ok: false,
-              error: 'Payment received but confirmation is still catching up — refresh in a moment to see your access.',
+              error: 'Payment received but confirmation is still catching up - refresh in a moment to see your access.',
             });
           }
         })();
@@ -232,7 +232,7 @@ export async function startCartPurchase(
     });
 
     rzp.on('payment.failed', () =>
-      done({ ok: false, error: 'Payment failed — no money was deducted. Please try again.' }),
+      done({ ok: false, error: 'Payment failed - no money was deducted. Please try again.' }),
     );
     rzp.open();
   });

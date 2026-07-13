@@ -74,7 +74,7 @@ export default function ReviewPage() {
           </span>
           <div>
             <h1 className="text-xl font-black tracking-tight text-navy sm:text-2xl">Spaced review</h1>
-            <p className="text-sm text-slate-500">Re-test the questions you missed — correct ones come back less often.</p>
+            <p className="text-sm text-slate-500">Re-test the questions you missed - correct ones come back less often.</p>
           </div>
         </div>
         {questions && questions.length > 0 && !done ? (
@@ -98,7 +98,7 @@ export default function ReviewPage() {
             </h2>
             <p className="mt-1 text-sm text-slate-500">
               {reviewed === 0
-                ? 'Nothing is due for review right now. Keep practising — missed questions show up here.'
+                ? 'Nothing is due for review right now. Keep practising - missed questions show up here.'
                 : `You reviewed ${reviewed} question${reviewed === 1 ? '' : 's'} and got ${correct} right.`}
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">

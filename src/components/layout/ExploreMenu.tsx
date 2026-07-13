@@ -205,7 +205,7 @@ export function ExploreMenu() {
                   <SectionLabel icon={<Building2 className="size-3" />}>Top companies</SectionLabel>
                   <div className="space-y-0.5">
                     {/* The five LIVE featured companies, shared with the Explore grid and the
-                        landing tracks — not DEMO_COMPANIES.slice(0,5), which still led with
+                        landing tracks - not DEMO_COMPANIES.slice(0,5), which still led with
                         Wipro after it was delisted from the featured set. */}
                     {HOMEPAGE_FEATURED_TRACKS.filter((c) => !c.locked)
                       .slice(0, 5)

@@ -295,7 +295,7 @@ function ChallengeSolveModal({
             <div className="mt-4 flex items-center justify-between">
               {wrong ? (
                 <span className="inline-flex items-center gap-1 text-sm font-semibold text-red-600">
-                  <X className="size-4" /> Not quite — try again
+                  <X className="size-4" /> Not quite - try again
                 </span>
               ) : (
                 <span />

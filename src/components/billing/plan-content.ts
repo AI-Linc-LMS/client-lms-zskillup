@@ -56,11 +56,11 @@ export const PLAN_VALUES = [
 export const PLAN_FAQ = [
   {
     q: 'What’s the difference between the two plans?',
-    a: 'Full Platform Access unlocks everything on prephasz in one plan. Build Your Own lets you pick only the companies, sections or topics you need — and pay only for those.',
+    a: 'Full Platform Access unlocks everything on prephasz in one plan. Build Your Own lets you pick only the companies, sections or topics you need - and pay only for those.',
   },
   {
     q: 'Can I upgrade from a custom plan to Full Platform later?',
-    a: 'Yes. You can upgrade any time from the cart or Upgrade & Renew — Full Platform supersedes your granular purchases so nothing is wasted.',
+    a: 'Yes. You can upgrade any time from the cart or Upgrade & Renew - Full Platform supersedes your granular purchases so nothing is wasted.',
   },
   {
     q: 'Are Mock Interview & Resume Builder included?',
@@ -68,6 +68,6 @@ export const PLAN_FAQ = [
   },
   {
     q: 'Which payment methods do you accept?',
-    a: 'All major cards, UPI, RuPay and net-banking via Razorpay — 256-bit SSL encrypted. GST invoices are available on request.',
+    a: 'All major cards, UPI, RuPay and net-banking via Razorpay - 256-bit SSL encrypted. GST invoices are available on request.',
   },
 ];

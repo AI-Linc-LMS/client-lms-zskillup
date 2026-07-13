@@ -86,7 +86,7 @@ function CardCartAction({
       label: company.name,
     });
     toast.success(`${company.name} added to cart`, {
-      description: 'Keep browsing — change the plan length any time in your cart.',
+      description: 'Keep browsing - change the plan length any time in your cart.',
     });
   };
 
@@ -230,7 +230,7 @@ export function CompanyCard({
           {/* spacer keeps the footer pinned to the bottom for even card heights */}
           <div className="flex-1" />
 
-          {/* what's inside — content types available (no counts) */}
+          {/* what's inside - content types available (no counts) */}
           {feats.length > 0 ? (
             <div className="mt-5 flex flex-wrap gap-1.5 border-t border-slate-100 pt-4">
               {feats.map((f) => (

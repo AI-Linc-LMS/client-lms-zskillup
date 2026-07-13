@@ -170,7 +170,7 @@ function TopicCard({
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-50/70 via-transparent to-transparent"
         />
-        {/* band-colored glow blob — intensifies on hover-lift */}
+        {/* band-colored glow blob - intensifies on hover-lift */}
         <div
           aria-hidden
           className="pointer-events-none absolute -right-10 -top-12 size-32 rounded-full opacity-[0.1] blur-2xl transition-opacity duration-500 group-hover:opacity-25"
@@ -310,7 +310,7 @@ export function TopicAccuracyPanels() {
                   <p className="mt-1 max-w-md text-xs leading-relaxed text-slate-500">
                     {rows.length === 0
                       ? 'Attempt a few questions and your weakest topics will surface here automatically.'
-                      : 'Nice work — nothing has dropped under 60% across 3+ attempts. Topics appear here the moment one slips.'}
+                      : 'Nice work - nothing has dropped under 60% across 3+ attempts. Topics appear here the moment one slips.'}
                   </p>
                 </div>
               </div>

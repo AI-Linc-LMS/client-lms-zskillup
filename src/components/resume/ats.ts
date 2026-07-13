@@ -59,7 +59,7 @@ export function isFiller(raw: string | null | undefined): boolean {
   const s = (raw ?? '').trim().toLowerCase();
   if (!s) return true;
   if (s.length < 3) return true; // "ww", "aa"
-  if (!/[a-z]/.test(s)) return true; // "111", "111 — 111", "---"
+  if (!/[a-z]/.test(s)) return true; // "111", "111 - 111", "---"
   if (/^(.)\1+$/.test(s.replace(/[\s-]/g, ''))) return true; // "wwww", "aaaa"
   const words = s.split(/\s+/).filter(Boolean);
   // A one/two-word value that is just the field's placeholder word.
@@ -146,7 +146,7 @@ export function computeAtsScore(d: ResumeData, jobDescription = ''): AtsResult {
     (d.projects.length - projects.length) +
     (d.education.length - eduEntries.length);
   if (dropped > 0) {
-    suggestions.push('Replace placeholder text with real details — empty or filler entries earn no credit.');
+    suggestions.push('Replace placeholder text with real details - empty or filler entries earn no credit.');
   }
 
   // Bullets only count when they say something — a 1–2 word stub is not an
@@ -182,7 +182,7 @@ export function computeAtsScore(d: ResumeData, jobDescription = ''): AtsResult {
   else suggestions.push('Add a professional title.');
   const summaryWords = hasText(b.summary) ? words(b.summary).length : 0;
   if (summaryWords >= 40) completeness += 30;
-  else if (summaryWords >= 25) { completeness += 20; suggestions.push('Strengthen your summary — aim for 40+ words with a clear specialism.'); }
+  else if (summaryWords >= 25) { completeness += 20; suggestions.push('Strengthen your summary - aim for 40+ words with a clear specialism.'); }
   else if (summaryWords >= 12) { completeness += 10; suggestions.push('Expand your summary to 3–4 sentences (40+ words).'); }
   else suggestions.push('Write a professional summary (40+ words).');
   completeness = clamp(completeness);
@@ -193,7 +193,7 @@ export function computeAtsScore(d: ResumeData, jobDescription = ''): AtsResult {
   contentDepth += Math.min(skills.length, 8) * 2.5; // up to 20
   contentDepth += Math.min(projects.length, 2) * 5; // up to 10
   if (strong.length < 6) {
-    suggestions.push(`Add more substantive achievement bullets (aim for 3–5 per role, 6+ words each) — you have ${strong.length}.`);
+    suggestions.push(`Add more substantive achievement bullets (aim for 3–5 per role, 6+ words each) - you have ${strong.length}.`);
   }
   contentDepth = clamp(contentDepth);
 
@@ -205,7 +205,7 @@ export function computeAtsScore(d: ResumeData, jobDescription = ''): AtsResult {
     experience += (actionLed.length / strong.length) * 20;
   }
   if (roles.length > 0 && quantified.length === 0) {
-    suggestions.push('Quantify your impact with real metrics (e.g. "cut latency by 40%", "served 10k users") — dates don\'t count.');
+    suggestions.push('Quantify your impact with real metrics (e.g. "cut latency by 40%", "served 10k users") - dates don\'t count.');
   }
   if (strong.length > 0 && actionLed.length / strong.length < 0.5) {
     suggestions.push('Start bullets with strong action verbs (Built, Led, Reduced, Automated…).');

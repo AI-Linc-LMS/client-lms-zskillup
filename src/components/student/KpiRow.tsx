@@ -75,7 +75,7 @@ export function KpiRow() {
           />
           <p className="stat-label mt-1">{kpi.label}</p>
           <p className="stat-value num-tab">
-            {kpi.value === null ? '—' : <AnimatedNumber value={kpi.value} suffix={kpi.suffix} />}
+            {kpi.value === null ? '-' : <AnimatedNumber value={kpi.value} suffix={kpi.suffix} />}
           </p>
           <p className="stat-meta">{kpi.sub}</p>
         </div>

@@ -181,7 +181,7 @@ export function StudyMaterialAdmin() {
                             <div className="min-w-0 flex-1">
                               <p className="truncate text-sm font-semibold text-navy">{it.title}</p>
                               <p className="truncate text-[11px] text-slate-400">
-                                {it.kind === 'QUIZ' ? `quiz → ${it.quizTopicSlug ?? '—'}` : it.url ?? '—'}
+                                {it.kind === 'QUIZ' ? `quiz → ${it.quizTopicSlug ?? '-'}` : it.url ?? '-'}
                               </p>
                             </div>
                             <button type="button" onClick={() => setItemForm({ topicId: t.id, item: it })} className="text-[11px] font-bold text-slate-500 hover:text-navy">
@@ -315,7 +315,7 @@ function ItemForm({
           {kind !== 'QUIZ' ? (
             <>
               <Field label={kind === 'VIDEO' ? 'Video link (Vimeo / Google Drive / YouTube)' : 'Article link'}>
-                <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Paste the share link — provider is detected automatically" className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+                <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Paste the share link - provider is detected automatically" className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
               </Field>
               {kind === 'VIDEO' && (
                 <Field label="Duration label (optional)">

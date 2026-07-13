@@ -242,7 +242,7 @@ function AdaptiveQuizRunner({
         <div className="absolute -right-1/4 -top-1/3 size-[55vw] rounded-full bg-[#2563eb]/[0.05] blur-[120px]" />
       </div>
 
-      {/* points earned burst — stays mounted across questions so it fires on submit */}
+      {/* points earned burst - stays mounted across questions so it fires on submit */}
       <PointsBurst earned={lastPoints?.earned} nonce={lastPoints?.nonce ?? 0} />
 
       <div className="relative z-10 mx-auto max-w-[1200px] px-4 py-6 sm:px-6">
@@ -250,7 +250,7 @@ function AdaptiveQuizRunner({
         <div className="flex items-center justify-between gap-3">
           <button
             onClick={() => router.replace(exitHref)}
-            title="Your progress is saved — resume this quiz any time from where you left off."
+            title="Your progress is saved - resume this quiz any time from where you left off."
             className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 transition-colors hover:text-navy"
           >
             <ArrowLeft className="size-3.5" /> Save &amp; exit
@@ -277,7 +277,7 @@ function AdaptiveQuizRunner({
         {resumed ? (
           <div className="mt-3 flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2 text-[12px] font-medium text-indigo-700">
             <RotateCcw className="size-4 shrink-0" />
-            Picking up where you left off — the clock&apos;s been running.
+            Picking up where you left off - the clock&apos;s been running.
           </div>
         ) : null}
 
@@ -348,7 +348,7 @@ function AdaptiveQuizRunner({
 
         {/* 3-column work area */}
         <div className="mt-5 grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)_300px]">
-          {/* LEFT — live points + timer + skill confidence */}
+          {/* LEFT - live points + timer + skill confidence */}
           <aside className="order-2 space-y-4 lg:order-none">
             {revealed && lastAnswer ? (
               <EarnedCard earned={lastAnswer.pointsEarned} base={lastAnswer.pointsBase} correct={lastAnswer.isCorrect} />
@@ -397,7 +397,7 @@ function AdaptiveQuizRunner({
             </Panel>
           </aside>
 
-          {/* CENTER — question card */}
+          {/* CENTER - question card */}
           <motion.div
             key={q.questionId}
             initial={{ opacity: 0, y: 12 }}
@@ -498,7 +498,7 @@ function AdaptiveQuizRunner({
               </div>
             ) : null}
 
-            {/* Instant inline solution — revealed the moment you submit. */}
+            {/* Instant inline solution - revealed the moment you submit. */}
             {revealed && lastAnswer ? <SolutionReveal result={lastAnswer} questionId={q.questionId} /> : null}
 
             {!revealed && (
@@ -551,7 +551,7 @@ function AdaptiveQuizRunner({
             </div>
           </motion.div>
 
-          {/* RIGHT — coaching sidecar */}
+          {/* RIGHT - coaching sidecar */}
           <aside className="order-3 lg:order-none lg:sticky lg:top-6 lg:self-start">
             <Panel>
               <div className="flex items-center gap-2">
@@ -640,12 +640,12 @@ const SPEED_LABEL: Record<'fast' | 'on_par' | 'slow', string> = {
 /** One-line note tying the outcome + speed back to how the engine just adapted. */
 function adaptNote(correct: boolean, speed: 'fast' | 'on_par' | 'slow'): string {
   if (correct) {
-    if (speed === 'fast') return 'Quick and correct — the engine nudges your level up.';
-    if (speed === 'slow') return 'Correct, but it took a while — we hold the level steady.';
-    return 'Correct — your level ticks up.';
+    if (speed === 'fast') return 'Quick and correct - the engine nudges your level up.';
+    if (speed === 'slow') return 'Correct, but it took a while - we hold the level steady.';
+    return 'Correct - your level ticks up.';
   }
   if (speed === 'fast') return 'A fast miss reads as a slip, so it barely moves your level.';
-  if (speed === 'slow') return 'A tricky one — the engine eases the difficulty next.';
+  if (speed === 'slow') return 'A tricky one - the engine eases the difficulty next.';
   return 'We ease the difficulty on the next question.';
 }
 
@@ -754,7 +754,7 @@ function SolutionReveal({
             <SolLoading label="Working out the solution…" />
           ) : (
             <p className="text-[13px] text-slate-500">
-              {ok ? 'Nicely done — that was the correct option.' : 'The correct option is highlighted in green above.'}
+              {ok ? 'Nicely done - that was the correct option.' : 'The correct option is highlighted in green above.'}
             </p>
           ))}
 
@@ -771,17 +771,17 @@ function SolutionReveal({
             </div>
           ) : (
             <p className="text-[13px] text-slate-500">
-              No quicker route than the detailed method for this one — solve it step by step.
+              No quicker route than the detailed method for this one - solve it step by step.
             </p>
           ))}
 
-        {/* Concept video — coming soon */}
+        {/* Concept video - coming soon */}
         {tab === 'video' && (
           <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-slate-200 bg-white/60 py-7 text-center">
             <span className="grid size-11 place-items-center rounded-full bg-navy/5 text-navy">
               <PlayCircle className="size-6" />
             </span>
-            <p className="text-sm font-bold text-navy">Concept video — coming soon</p>
+            <p className="text-sm font-bold text-navy">Concept video - coming soon</p>
             <p className="max-w-xs text-xs text-slate-500">
               We&apos;re adding short concept videos for each topic. You&apos;ll be able to watch the idea behind this
               question right here.
@@ -816,7 +816,7 @@ function EarnedCard({ earned, base, correct }: { earned: number; base: number; c
         <span className="ml-1 text-sm font-bold text-slate-400">/ {base} pts</span>
       </p>
       <p className="mt-1 text-[11px] text-slate-400">
-        {correct ? 'Answer faster to bank more next time.' : 'No points this time — keep going.'}
+        {correct ? 'Answer faster to bank more next time.' : 'No points this time - keep going.'}
       </p>
     </div>
   );

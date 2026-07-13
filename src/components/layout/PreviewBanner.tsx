@@ -42,7 +42,7 @@ export function PreviewBanner() {
     <div className="sticky top-14 z-20 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b border-orange/30 bg-orange/10 px-4 py-2 text-center sm:px-6">
       <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-navy">
         <Eye className="size-3.5 text-orange" aria-hidden="true" />
-        Admin preview — viewing the student experience
+        Admin preview - viewing the student experience
         {previewUser.name ? <span className="font-normal text-slate-600">as {previewUser.name}</span> : null}
       </span>
       <button
