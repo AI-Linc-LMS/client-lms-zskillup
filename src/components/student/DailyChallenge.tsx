@@ -100,18 +100,18 @@ export function DailyChallenge() {
   };
 
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-sky-200/70 bg-white p-6 sm:p-7">
+    <section className="relative overflow-hidden rounded-3xl border border-[#e9edf5] bg-white p-6 sm:p-7">
       {reward ? (
         <RewardOverlay summary={reward} onClose={() => setReward(null)} passed />
       ) : null}
-      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-sky-500 via-cyan-500 to-sky-400" />
+      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#f5b400] via-[#ffc42d] to-[#ffd24d]" />
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-sky-300/25 blur-3xl"
+        className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-[#ffc42d]/20 blur-3xl"
       />
       <div className="relative mb-4 flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-2xl font-black tracking-tight text-navy">
-          <Calendar className="size-5 text-sky-500" /> Today&apos;s challenge
+          <Calendar className="size-5 text-[#f5b400]" /> Today&apos;s challenge
         </h3>
         {started && !completed ? (
           <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold tabular-nums text-slate-500">
@@ -145,7 +145,7 @@ export function DailyChallenge() {
               setStarted(true);
               setStartedAt(Date.now());
             }}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-sky-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_10px_24px_-12px_rgba(2,132,199,0.9)] hover:bg-sky-700"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#ffc42d] px-5 py-2.5 text-sm font-bold text-[#171717] hover:bg-[#f5b400]"
           >
             Start <ArrowRight className="size-4" />
           </button>
@@ -166,7 +166,7 @@ export function DailyChallenge() {
                     ? 'border-red-300 bg-red-50 text-red-900'
                     : 'border-slate-200 bg-white text-slate-500'
                 : isSel
-                  ? 'border-sky-400 bg-sky-50 text-navy'
+                  ? 'border-[#ffc42d] bg-[#fff5ea] text-navy'
                   : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300';
               return (
                 <button
@@ -187,7 +187,7 @@ export function DailyChallenge() {
                         : result && isSel
                           ? 'bg-red-500 text-white'
                           : isSel
-                            ? 'bg-sky-500 text-white'
+                            ? 'bg-[#ffc42d] text-[#171717]'
                             : 'bg-slate-100 text-slate-500',
                     )}
                   >
@@ -209,7 +209,7 @@ export function DailyChallenge() {
               <button
                 onClick={next}
                 disabled={busy}
-                className="inline-flex items-center gap-1.5 rounded-full bg-sky-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-sky-700 disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 rounded-full bg-[#ffc42d] px-5 py-2.5 text-sm font-bold text-[#171717] hover:bg-[#f5b400] disabled:opacity-60"
               >
                 {busy ? <Loader2 className="size-3.5 animate-spin" /> : null}
                 {idx + 1 < total ? 'Next' : 'Finish'}
@@ -219,7 +219,7 @@ export function DailyChallenge() {
               <button
                 onClick={check}
                 disabled={selected.length === 0 || busy}
-                className="inline-flex items-center gap-1.5 rounded-full bg-sky-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-sky-700 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-full bg-[#ffc42d] px-5 py-2.5 text-sm font-bold text-[#171717] hover:bg-[#f5b400] disabled:opacity-50"
               >
                 {busy ? <Loader2 className="size-3.5 animate-spin" /> : null} Check
               </button>

@@ -42,14 +42,14 @@ export function CodingPractice() {
 
   return (
     <section className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6">
-      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-400" />
+      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#f5b400] via-[#ffc42d] to-[#ffd24d]" />
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-indigo-300/25 blur-3xl"
+        className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-[#ffc42d]/20 blur-3xl"
       />
       <div className="relative mb-4 flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-2xl font-black tracking-tight text-navy">
-          <Code2 className="size-5 text-indigo-500" /> Coding practice
+          <Code2 className="size-5 text-[#f5b400]" /> Coding practice
         </h3>
         <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold tabular-nums text-slate-500">
           {solved} / {problems.length} solved
@@ -61,7 +61,7 @@ export function CodingPractice() {
           <Link
             key={p.id}
             href={`/coding/${p.slug}`}
-            className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-2.5 transition-colors hover:border-indigo-300 hover:bg-indigo-50/40"
+            className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-2.5 transition-colors hover:border-[#ffc42d]/40 hover:bg-[#fff5ea]"
           >
             <span className={cn('size-2 shrink-0 rounded-full', DIFF_DOT[p.difficulty] ?? DIFF_DOT.EASY)} />
             <span className="flex-1 truncate text-sm font-semibold text-navy">{p.title}</span>
@@ -76,7 +76,7 @@ export function CodingPractice() {
 
       <Link
         href="/dashboard/company"
-        className="relative mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-indigo-600 hover:text-indigo-700"
+        className="relative mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-[#1a1d29] hover:text-[#f5b400]"
       >
         Browse coding by company <ArrowRight className="size-4" />
       </Link>

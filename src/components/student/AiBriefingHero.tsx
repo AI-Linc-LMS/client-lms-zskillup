@@ -7,7 +7,6 @@ import {
   ArrowRight,
   Flame,
   Rocket,
-  Sparkles,
   Star,
   Target,
   Timer,
@@ -120,9 +119,9 @@ export function AiBriefingHero() {
   const isReturning = totalXp > 0 || streak > 0 || level > 1;
 
   // Derived, always-confident copy. The AI briefing wins when present; otherwise
-  // we build a strong personalized headline from name + stats.
-  const rawGreeting = briefing?.greeting ?? `${isReturning ? 'Welcome back' : 'Welcome'}, ${firstName}`;
-  const greeting = isReturning ? rawGreeting : rawGreeting.replace(/welcome back/i, 'Welcome');
+  // we build a strong personalized headline from name + stats. (The greeting line is
+  // rendered directly from firstName in the hero — "Welcome back, <name>" with the name
+  // in yellow — so no separate greeting string is needed.)
   const headline = useMemo(() => {
     if (briefing?.headline) return briefing.headline;
     if (!isReturning) return `Welcome aboard, ${firstName}`;
@@ -171,36 +170,37 @@ export function AiBriefingHero() {
 
   return (
     <section data-tour="dash:briefing-hero" className="relative isolate overflow-hidden rounded-[1.5rem] p-6 text-white sm:rounded-[2rem] sm:p-10">
-      <AuroraBackground />
+      {/* Black base → subtle dark-navy toward the right (benchmark). */}
+      <div aria-hidden className="absolute inset-0 bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e]" />
+      {/* Golden mesh illustration on the right — flowing arcs + glow, evoking the mockup. */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -right-24 bottom-[-30%] h-[42rem] w-[42rem] rounded-full bg-[radial-gradient(closest-side,rgba(245,180,0,0.22),transparent)] blur-2xl" />
+        <svg className="absolute right-0 top-0 h-full w-2/3 opacity-70" viewBox="0 0 600 400" fill="none" preserveAspectRatio="xMaxYMax slice">
+          <defs>
+            <linearGradient id="mesh" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#f6b51d" stopOpacity="0" />
+              <stop offset="70%" stopColor="#f6b51d" stopOpacity="0.5" />
+              <stop offset="100%" stopColor="#ffd24d" stopOpacity="0.9" />
+            </linearGradient>
+          </defs>
+          {[0, 26, 52, 78, 104, 130, 156].map((d) => (
+            <path
+              key={d}
+              d={`M ${620} ${420} q ${-260 - d} ${-120 - d * 0.5} ${-420 - d} ${-360 - d}`}
+              stroke="url(#mesh)"
+              strokeWidth="1.2"
+              fill="none"
+            />
+          ))}
+        </svg>
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{ backgroundImage: 'radial-gradient(rgb(255 255 255 / 0.8) 1px, transparent 1px)', backgroundSize: '24px 24px' }}
+        />
+      </div>
 
-      {/* Extra layered depth: a warm top-edge highlight + an inner ring so the
-          glass surface reads as crafted, not a flat tinted box. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-[1.5rem] ring-1 ring-inset ring-white/10 sm:rounded-[2rem]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"
-      />
-
-      {/* Top bar — eyebrow (left) + live level/XP/streak (right) */}
-      <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
-        {/* eyebrow — keeps the live dot */}
-        <motion.div
-          className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-white/75 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur"
-          initial={reduce ? false : { opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Sparkles className="size-3.5 text-[#ffb877]" />
-          {briefing?.generatedByAi ? 'Your AI briefing' : 'Your briefing'}
-          <span className="relative flex size-1.5">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-70" />
-            <span className="relative inline-flex size-1.5 rounded-full bg-emerald-400" />
-          </span>
-        </motion.div>
-
+      {/* Top bar — live level/XP/streak (right). The "Your AI briefing" pill was removed. */}
+      <div className="relative z-10 flex flex-wrap items-start justify-end gap-4">
         {/* live level/XP/streak — pinned top-right */}
         <motion.div
           className="flex items-stretch gap-3"
@@ -241,16 +241,16 @@ export function AiBriefingHero() {
         </motion.div>
       </div>
 
-      <div className="relative z-10 mt-6 max-w-3xl">
+      <div className="relative z-10 mt-2 max-w-3xl">
 
-        {/* greeting */}
+        {/* greeting — the NAME rendered bold + yellow (benchmark). */}
         <motion.p
-          className="mt-6 text-sm font-semibold uppercase tracking-[0.22em] text-white/45"
+          className="text-sm font-bold uppercase tracking-[0.22em] text-white/45"
           initial={reduce ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.04 }}
         >
-          {greeting}
+          Welcome back, <span className="text-[#ffc42d]">{firstName}</span>
         </motion.p>
 
         {/* headline */}
@@ -273,22 +273,22 @@ export function AiBriefingHero() {
           {subline}
         </motion.p>
 
-        {/* focus chips */}
-        <div className="mt-7 flex flex-wrap gap-2.5">
-          {focusAreas.map((f, i) => (
+        {/* focus cards — one row of up to 3, taller; dark target icon on a yellow disc. */}
+        <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {focusAreas.slice(0, 3).map((f, i) => (
             <motion.div
               key={f.title}
-              className="group flex max-w-full items-start gap-2.5 rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur transition-colors hover:border-white/20 hover:bg-white/[0.1]"
+              className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.05] p-4 backdrop-blur transition-colors hover:border-[#ffc42d]/30 hover:bg-white/[0.09]"
               initial={reduce ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.24 + i * 0.08 }}
             >
-              <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#ffd24d] to-[#f5b400]">
-                <Target className="size-3.5 text-white" />
+              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#ffc42d] ring-4 ring-[#ffc42d]/15">
+                <Target className="size-5 text-[#171717]" strokeWidth={2.4} />
               </span>
               <span className="min-w-0">
-                <span className="block text-sm font-bold leading-tight">{f.title}</span>
-                <span className="block truncate text-xs text-white/55">{f.detail}</span>
+                <span className="block text-[15px] font-bold leading-tight">{f.title}</span>
+                <span className="mt-0.5 block text-xs leading-snug text-white/55">{f.detail}</span>
               </span>
             </motion.div>
           ))}

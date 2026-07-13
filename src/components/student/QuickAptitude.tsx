@@ -82,15 +82,15 @@ export function QuickAptitude() {
   };
 
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-violet-200/70 bg-white p-6 sm:p-7">
-      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500 via-indigo-500 to-violet-400" />
+    <section className="relative overflow-hidden rounded-3xl border border-[#e9edf5] bg-white p-6 sm:p-7">
+      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#f5b400] via-[#ffc42d] to-[#ffd24d]" />
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-10 -top-10 size-36 rounded-full bg-violet-300/25 blur-3xl"
+        className="pointer-events-none absolute -right-10 -top-10 size-36 rounded-full bg-[#ffc42d]/20 blur-3xl"
       />
       <div className="relative mb-5 flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-2xl font-black tracking-tight text-navy">
-          <Zap className="size-5 text-violet-500" /> Quick aptitude
+          <Zap className="size-5 text-[#f5b400]" /> Quick aptitude
         </h3>
         {questions && questions.length > 0 && !done ? (
           <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold tabular-nums text-slate-500">
@@ -107,7 +107,7 @@ export function QuickAptitude() {
         <p className="py-6 text-center text-sm text-slate-400">No questions available right now.</p>
       ) : done ? (
         <div className="flex flex-col items-center gap-3 py-6 text-center">
-          <span className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white">
+          <span className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717]">
             <Sparkles className="size-6" />
           </span>
           <p className="text-sm font-bold text-navy">Warm-up complete!</p>
@@ -120,7 +120,7 @@ export function QuickAptitude() {
             </button>
             <Link
               href="/practice"
-              className="inline-flex items-center gap-1.5 rounded-full bg-violet-600 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-violet-700"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#ffc42d] px-3.5 py-1.5 text-xs font-bold text-[#171717] hover:bg-[#f5b400]"
             >
               Full practice <ArrowRight className="size-3.5" />
             </Link>
@@ -143,8 +143,8 @@ export function QuickAptitude() {
                     ? 'border-red-300 bg-red-50 text-red-900'
                     : 'border-slate-200 bg-white text-slate-500'
                 : isSel
-                  ? 'border-violet-400 bg-violet-50 text-navy ring-1 ring-violet-200'
-                  : 'border-slate-200 bg-white text-slate-700 hover:border-violet-300 hover:bg-violet-50/40';
+                  ? 'border-[#ffc42d] bg-[#fff5ea] text-navy ring-1 ring-[#ffc42d]/30'
+                  : 'border-slate-200 bg-white text-slate-700 hover:border-[#ffc42d]/40 hover:bg-[#fff5ea]';
               return (
                 <button
                   key={opt.id}
@@ -164,7 +164,7 @@ export function QuickAptitude() {
                         : result && isSel
                           ? 'bg-red-500 text-white'
                           : isSel
-                            ? 'bg-violet-500 text-white'
+                            ? 'bg-[#ffc42d] text-[#171717]'
                             : 'bg-slate-100 text-slate-500',
                     )}
                   >
@@ -222,7 +222,7 @@ export function QuickAptitude() {
             {result ? (
               <button
                 onClick={next}
-                className="inline-flex items-center gap-1.5 rounded-full bg-violet-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-violet-700"
+                className="inline-flex items-center gap-1.5 rounded-full bg-[#ffc42d] px-5 py-2.5 text-sm font-bold text-[#171717] hover:bg-[#f5b400]"
               >
                 {idx + 1 < (questions?.length ?? 0) ? 'Next' : 'Finish'}
                 <ArrowRight className="size-3.5" />
@@ -231,7 +231,7 @@ export function QuickAptitude() {
               <button
                 onClick={submit}
                 disabled={selected.length === 0 || submitting}
-                className="inline-flex items-center gap-1.5 rounded-full bg-violet-600 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-violet-700 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-full bg-[#ffc42d] px-5 py-2.5 text-sm font-bold text-[#171717] transition-colors hover:bg-[#f5b400] disabled:opacity-50"
               >
                 {submitting ? <Loader2 className="size-3.5 animate-spin" /> : null} Check
               </button>

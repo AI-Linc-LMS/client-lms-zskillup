@@ -99,7 +99,7 @@ function ChallengeCard({
             c.completed
               ? 'bg-gradient-to-br from-emerald-400 to-emerald-600'
               : coding
-                ? 'bg-gradient-to-br from-violet-500 to-indigo-600'
+                ? 'bg-gradient-to-br from-[#ffd24d] to-[#f5b400]'
                 : 'bg-gradient-to-br from-rose-400 to-rose-600',
           )}
         >
@@ -128,7 +128,7 @@ function ChallengeCard({
           </span>
         ) : null}
         {codingLink ? (
-          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600">
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#1a1d29]">
             Solve problem <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
           </span>
         ) : null}
