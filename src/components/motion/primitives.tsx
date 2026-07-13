@@ -118,17 +118,19 @@ export function AuroraBackground({ className = '' }: { className?: string }) {
     reduce ? undefined : { x, y, transition: { duration: 18, repeat: Infinity, repeatType: 'mirror' as const, ease: 'easeInOut' as const } };
   return (
     <div className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`} aria-hidden>
-      <div className="absolute inset-0 bg-[#0b1220]" />
+      {/* Prephasz 2026 hero base: deep ink → indigo (matches .night-hero) with a golden
+          mesh glow instead of the old orange/purple aurora. */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63]" />
       <motion.div
-        className="absolute -left-32 -top-40 h-[34rem] w-[34rem] rounded-full bg-[#f37021]/30 blur-[120px]"
+        className="absolute -left-32 -top-40 h-[34rem] w-[34rem] rounded-full bg-[#f6b51d]/[0.18] blur-[120px]"
         animate={drift([0, 60, -20, 0], [0, 40, 80, 0])}
       />
       <motion.div
-        className="absolute -right-32 top-10 h-[30rem] w-[30rem] rounded-full bg-[#6d3bf5]/30 blur-[120px]"
+        className="absolute -right-32 top-10 h-[30rem] w-[30rem] rounded-full bg-[#ffc42d]/[0.12] blur-[120px]"
         animate={drift([0, -50, 30, 0], [0, 60, -30, 0])}
       />
       <motion.div
-        className="absolute bottom-[-12rem] left-1/3 h-[28rem] w-[28rem] rounded-full bg-[#1e6ff5]/25 blur-[120px]"
+        className="absolute bottom-[-12rem] left-1/3 h-[28rem] w-[28rem] rounded-full bg-[#202b63]/40 blur-[120px]"
         animate={drift([0, 40, -40, 0], [0, -30, 30, 0])}
       />
       {/* dotted grid + top fade for depth */}

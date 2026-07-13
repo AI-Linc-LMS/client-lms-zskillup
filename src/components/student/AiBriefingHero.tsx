@@ -145,7 +145,7 @@ export function AiBriefingHero() {
   // First paint: a shimmering skeleton over the aurora — never the 0-state.
   if (!ready) {
     return (
-      <section data-tour="dash:briefing-hero" className="relative isolate overflow-hidden rounded-[1.5rem] p-6 text-white shadow-[0_30px_90px_-32px_rgba(11,18,32,0.85)] sm:rounded-[2rem] sm:p-10">
+      <section data-tour="dash:briefing-hero" className="relative isolate overflow-hidden rounded-[1.5rem] p-6 text-white sm:rounded-[2rem] sm:p-10">
         <AuroraBackground />
         <div aria-hidden className="pointer-events-none absolute inset-0 rounded-[1.5rem] ring-1 ring-inset ring-white/10 sm:rounded-[2rem]" />
         <div className="relative z-10 max-w-3xl animate-pulse" aria-busy="true" aria-label="Loading your briefing">
@@ -170,7 +170,7 @@ export function AiBriefingHero() {
   }
 
   return (
-    <section data-tour="dash:briefing-hero" className="relative isolate overflow-hidden rounded-[1.5rem] p-6 text-white shadow-[0_30px_90px_-32px_rgba(11,18,32,0.85)] sm:rounded-[2rem] sm:p-10">
+    <section data-tour="dash:briefing-hero" className="relative isolate overflow-hidden rounded-[1.5rem] p-6 text-white sm:rounded-[2rem] sm:p-10">
       <AuroraBackground />
 
       {/* Extra layered depth: a warm top-edge highlight + an inner ring so the
@@ -219,7 +219,7 @@ export function AiBriefingHero() {
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-white/10">
               <motion.div
-                className="h-full rounded-full bg-gradient-to-r from-[#f7a14e] via-[#f37021] to-[#f5491e]"
+                className="h-full rounded-full bg-gradient-to-r from-[#f5b400] via-[#ffc42d] to-[#ffd24d]"
                 initial={reduce ? false : { width: 0 }}
                 animate={{ width: `${nextPct}%` }}
                 transition={{ duration: 1.1, delay: 0.55, ease: 'easeOut' }}
@@ -283,7 +283,7 @@ export function AiBriefingHero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.24 + i * 0.08 }}
             >
-              <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#f7a14e] to-[#f37021] shadow-sm">
+              <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#ffd24d] to-[#f5b400]">
                 <Target className="size-3.5 text-white" />
               </span>
               <span className="min-w-0">
@@ -303,11 +303,11 @@ export function AiBriefingHero() {
         >
           <Link
             href={nextAction.href}
-            className="group relative inline-flex w-fit items-center gap-2 overflow-hidden rounded-full bg-gradient-to-b from-[#f7a14e] to-[#f37021] px-6 py-3 text-sm font-extrabold text-white shadow-[0_14px_34px_-10px_rgba(243,112,33,0.85)] transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
+            className="group relative inline-flex w-fit items-center gap-2 overflow-hidden rounded-full bg-gradient-to-br from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-6 py-3 text-sm font-extrabold text-[#171717] transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
           >
             <span
               aria-hidden
-              className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full"
+              className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/45 to-transparent transition-transform duration-700 group-hover:translate-x-full"
             />
             {nextAction.kind === 'mock' ? (
               <Timer className="size-4" />

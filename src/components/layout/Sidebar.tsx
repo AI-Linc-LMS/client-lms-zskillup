@@ -159,16 +159,16 @@ function NavAccordion({
                 }
                 className={cn(
                   'group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2.5 transition-colors',
-                  expanded ? 'bg-[#f37021]/[0.07]' : 'hover:bg-slate-50',
+                  expanded ? 'bg-[#fff5ea]' : 'hover:bg-[#fff5ea]',
                 )}
               >
                 <span
                   className={cn(
                     'grid size-8 shrink-0 place-items-center rounded-lg transition-all duration-200',
                     active
-                      ? 'bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_5px_14px_-5px_rgba(243,112,33,0.7)]'
+                      ? 'bg-[#1a1a1a] text-[#ffc42d] ring-1 ring-[#ffc42d]/40'
                       : expanded
-                        ? 'bg-[#f37021]/10 text-[var(--color-primary)]'
+                        ? 'bg-[#ffc42d]/15 text-[var(--color-primary)]'
                         : 'text-[var(--color-text-subtle)] group-hover:text-[var(--color-text)]',
                   )}
                 >
@@ -230,8 +230,9 @@ function SubNavLink({ item, active, locked }: { item: NavItem; active: boolean; 
       className={cn(
         'group flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm transition-colors',
         active
-          ? 'bg-gradient-to-r from-[#f37021]/[0.14] to-transparent font-semibold text-[var(--color-primary)]'
-          : 'font-medium text-[var(--color-text-muted)] hover:bg-slate-50 hover:text-[var(--color-text)]',
+          ? // Active = black pill, yellow ring accent, yellow label — high-contrast, per spec.
+            'bg-[#1a1a1a] font-semibold text-[#ffc42d] ring-1 ring-[#ffc42d]/40'
+          : 'font-medium text-[var(--color-text-muted)] hover:bg-[#fff5ea] hover:text-[var(--color-text)]',
       )}
     >
       <span
@@ -239,7 +240,7 @@ function SubNavLink({ item, active, locked }: { item: NavItem; active: boolean; 
         className={cn(
           'grid size-7 shrink-0 place-items-center rounded-lg transition-colors',
           active
-            ? 'bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_4px_12px_-4px_rgba(243,112,33,0.7)]'
+            ? 'text-[#ffc42d]'
             : 'text-[var(--color-text-subtle)] group-hover:text-[var(--color-text)]',
         )}
       >

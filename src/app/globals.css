@@ -92,11 +92,18 @@
   --color-line-soft: #f1f4f9;
   --xp-grad-from: #f5b400;         /* gold → yellow XP bar */
   --xp-grad-to: #ffc42d;
-  /* Shadows (spec) */
-  --shadow-card: 0 8px 24px rgb(16 24 40 / 0.06);
-  --shadow-card-lg: 0 16px 40px rgb(16 24 40 / 0.10);
-  --shadow-hero: 0 24px 60px rgb(16 24 40 / 0.15);
-  --shadow-button: 0 8px 24px rgb(255 196 45 / 0.30);
+  /* Elevation via BORDERS, not drop shadows — flat aesthetic (user: shadows "look cheap").
+     Cards read as elevated through the #e9edf5 border + hover-border, never an ambient
+     shadow. Overlays that must genuinely float (modals, dropdowns, toasts) keep their own
+     shadow at the component level; these tokens drive CARDS/PANELS only. */
+  --shadow-card: none;
+  --shadow-card-lg: none;
+  --shadow-hero: none;
+  --shadow-button: none;
+
+  /* Brand CTA gradient — yellow → gold, for primary buttons (dark #171717 text on top). */
+  --grad-brand: linear-gradient(135deg, #ffd24d 0%, #ffc42d 48%, #f5b400 100%);
+  --grad-brand-hover: linear-gradient(135deg, #ffc42d 0%, #f5b400 55%, #e6a600 100%);
   --radius-card: 1.25rem;          /* 20px */
   --radius-card-lg: 1.5rem;
 }
@@ -336,6 +343,21 @@
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card-lg);
   box-shadow: var(--shadow-card-lg);
+}
+/* Elevation on hover comes from the border deepening (#d7ddea), not a shadow. */
+.lms-card:hover,
+.lms-card-lg:hover {
+  border-color: #d7ddea;
+}
+
+/* Brand CTA — yellow→gold gradient with dark text. Use for the one primary action on a
+   screen (e.g. "Start Mock Assessment"). Elevation is the gradient itself, not a shadow. */
+.btn-brand {
+  background-image: var(--grad-brand);
+  color: #171717;
+}
+.btn-brand:hover {
+  background-image: var(--grad-brand-hover);
 }
 
 /* ── Stat card — KPI tiles ─────────────────────────────────── */

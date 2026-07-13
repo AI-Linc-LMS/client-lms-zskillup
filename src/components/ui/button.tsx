@@ -22,16 +22,21 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        // Primary CTA: yellow→gold gradient with DARK text — never white on yellow. Flat
+        // (no shadow); the gradient itself is the elevation.
         default:
-          'rounded-full bg-orange text-white shadow-sm hover:bg-orange/90 active:translate-y-px',
+          'btn-brand rounded-full font-bold active:translate-y-px',
+        // Secondary: black pill, white text (17:1) — for the "look here" that isn't the CTA.
         secondary:
-          'rounded-full bg-navy text-white shadow-sm hover:bg-navy/90 active:translate-y-px',
+          'rounded-full bg-navy text-white hover:bg-navy/90 active:translate-y-px',
         outline:
-          'rounded-full border border-slate-200 bg-white text-navy hover:border-slate-300 hover:bg-slate-50',
+          'rounded-full border border-slate-200 bg-white text-navy hover:border-[#d7ddea] hover:bg-slate-50',
         ghost: 'rounded-full text-slate-500 hover:bg-slate-100 hover:text-navy',
         destructive:
-          'rounded-full bg-red-600 text-white shadow-sm hover:bg-red-700 active:translate-y-px',
-        link: 'text-orange underline-offset-4 hover:underline',
+          'rounded-full bg-red-600 text-white hover:bg-red-700 active:translate-y-px',
+        // Link: dark readable text with a GOLD underline accent — gold/yellow as TEXT on
+        // white is illegible (1.8:1), so brand shows in the decoration, not the ink.
+        link: 'text-[var(--color-text)] underline-offset-4 decoration-[#f5b400] decoration-2 hover:underline',
       },
       size: {
         default: 'h-10 px-5',
