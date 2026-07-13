@@ -8,11 +8,12 @@ import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
 import { cn } from '@/lib/utils';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
+/* Band tone for the dark hero (ring + bars): value-band coloured, Prephasz brand.
+ * low <40 → danger red · mid 40–70 → gold · high >70 → success green. */
 function tone(pct: number): string {
-  if (pct >= 80) return '#34d399';
-  if (pct >= 60) return '#818cf8';
-  if (pct >= 40) return '#fbbf24';
-  return '#f87171';
+  if (pct > 70) return '#16c79a';
+  if (pct >= 40) return '#f5b400';
+  return '#ef4444';
 }
 function useCountUp(target: number, ms = 1100) {
   const [n, setN] = useState(0);
@@ -30,9 +31,9 @@ function useCountUp(target: number, ms = 1100) {
   return n;
 }
 
-/* Big hero gauge with gradient stroke + glow — tuned for a dark navy hero. */
-function HeroGauge({ score, size = 188 }: { score: number; size?: number }) {
-  const r = size / 2 - 16;
+/* Compact band-coloured readiness gauge — tuned for a dark navy hero. */
+function HeroGauge({ score, size = 140 }: { score: number; size?: number }) {
+  const r = size / 2 - 11;
   const circ = 2 * Math.PI * r;
   const c = tone(score);
   const n = useCountUp(score);
@@ -41,54 +42,54 @@ function HeroGauge({ score, size = 188 }: { score: number; size?: number }) {
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
         <defs>
           <linearGradient id="rdyGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor={c} stopOpacity="0.55" />
+            <stop offset="0%" stopColor={c} stopOpacity="0.6" />
             <stop offset="100%" stopColor={c} />
           </linearGradient>
         </defs>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={14} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.09)" strokeWidth={11} />
         <motion.circle
           cx={size / 2}
           cy={size / 2}
           r={r}
           fill="none"
           stroke="url(#rdyGrad)"
-          strokeWidth={14}
+          strokeWidth={11}
           strokeLinecap="round"
           strokeDasharray={circ}
           initial={{ strokeDashoffset: circ }}
           animate={{ strokeDashoffset: circ - (score / 100) * circ }}
           transition={{ duration: 1.1, ease: EASE }}
-          style={{ filter: `drop-shadow(0 0 10px ${c}88)` }}
+          style={{ filter: `drop-shadow(0 0 5px ${c}55)` }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-[64px] font-black leading-none tabular-nums text-white">{n}</span>
-        <span className="mt-2 text-[11px] font-bold uppercase tracking-[0.28em] text-white/45">readiness</span>
+        <span className="text-[46px] font-black leading-none tabular-nums text-white">{n}</span>
+        <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.26em] text-white/45">readiness</span>
       </div>
     </div>
   );
 }
 
-/* Bold horizontal stat bar for a component score — dark-hero variant. */
+/* Compact band-coloured stat bar for a component score — dark-hero variant. */
 function StatBar({ label, pct, icon: Icon, active, delay = 0 }: { label: string; pct: number; icon: LucideIcon; active: boolean; delay?: number }) {
   const c = active ? tone(pct) : 'rgba(255,255,255,0.28)';
   const n = useCountUp(pct);
   return (
     <div className={cn('select-none', !active && 'opacity-60')}>
       <div className="flex items-baseline justify-between gap-3">
-        <span className="flex items-center gap-2 text-[13px] font-bold tracking-tight text-white/85">
-          <Icon className="size-4 shrink-0" style={{ color: c }} aria-hidden />
+        <span className="flex items-center gap-1.5 text-[13px] font-bold tracking-tight text-white/85">
+          <Icon className="size-3.5 shrink-0" style={{ color: c }} aria-hidden />
           {label}
         </span>
         <span className="font-black leading-none tabular-nums" style={{ color: active ? '#ffffff' : 'rgba(255,255,255,0.45)' }}>
-          <span className="text-[26px]">{n}</span>
-          <span className="text-base text-white/40">%</span>
+          <span className="text-[19px]">{n}</span>
+          <span className="text-xs text-white/40">%</span>
         </span>
       </div>
-      <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-white/10">
+      <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-white/[0.08]">
         <motion.div
           className="h-full rounded-full"
-          style={{ background: c, boxShadow: active ? `0 0 12px ${c}66` : 'none' }}
+          style={{ background: active ? `linear-gradient(90deg, ${c}cc, ${c})` : c }}
           initial={{ width: 0 }}
           animate={{ width: `${active ? pct : Math.max(pct, 2)}%` }}
           transition={{ duration: 1, ease: EASE, delay }}
@@ -130,7 +131,7 @@ export function ReadinessPanel({
 
   if (err) return null;
   if (!data) {
-    return <div className="grid h-52 animate-pulse place-items-center rounded-2xl border border-slate-200 bg-white" />;
+    return <div className="grid h-44 animate-pulse place-items-center rounded-2xl border border-slate-200 bg-white" />;
   }
 
   const c = tone(data.overall.score);
@@ -144,12 +145,12 @@ export function ReadinessPanel({
       {/* ── Navy premium hero band ──────────────────────────────────────── */}
       <div
         data-tour={tour === 'performance' ? 'perf:readiness-hero' : undefined}
-        className="relative overflow-hidden bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] p-6 sm:p-8"
+        className="relative overflow-hidden bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] px-6 py-5 sm:px-7 sm:py-6"
       >
         <span aria-hidden className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full opacity-25 blur-3xl" style={{ background: c }} />
         <span aria-hidden className="pointer-events-none absolute -bottom-20 left-1/4 size-56 rounded-full bg-[#2563eb]/20 blur-3xl" />
         <div className="relative flex items-center justify-between gap-2">
-          <h2 className="flex items-center gap-2 text-2xl font-black tracking-tight text-white">
+          <h2 className="flex items-center gap-2 text-xl font-black tracking-tight text-white">
             <Target className="size-5 text-[#ffc42d]" /> Placement readiness
           </h2>
           <button
@@ -191,15 +192,15 @@ export function ReadinessPanel({
             </p>
           </motion.div>
         ) : null}
-        <div className="relative mt-6 flex flex-col items-center gap-8 sm:flex-row sm:items-center sm:gap-10">
-          <div className="flex shrink-0 flex-col items-center gap-3.5">
+        <div className="relative mt-5 flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:gap-8">
+          <div className="flex shrink-0 flex-col items-center gap-2.5">
             <HeroGauge score={data.overall.score} />
-            <span className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[13px] font-extrabold" style={{ background: `${c}1f`, color: c, boxShadow: `inset 0 0 0 1px ${c}3d` }}>
+            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-extrabold" style={{ background: `${c}1f`, color: c, boxShadow: `inset 0 0 0 1px ${c}3d` }}>
               <span className="size-1.5 rounded-full" style={{ background: c }} />
               {data.overall.level}
             </span>
           </div>
-          <div className="grid w-full flex-1 gap-4 sm:gap-[18px]">
+          <div className="grid w-full flex-1 gap-3 sm:gap-3.5">
             {data.overall.components.map((comp, i) => (
               <StatBar key={comp.label} label={comp.label} pct={comp.score} active={comp.active} icon={COMP_ICON[comp.label] ?? Compass} delay={0.15 + i * 0.08} />
             ))}
