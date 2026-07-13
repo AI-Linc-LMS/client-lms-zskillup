@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, Loader2, Target, TrendingUp } from 'lucide-react';
 import { getMyPerformanceScatter, type PerformanceParticipationDto, type ScatterPoint } from '@/lib/api/readiness';
 
@@ -75,6 +76,7 @@ function pathToTop(perf: number, part: number): string | null {
  * squashing on sparse data.
  */
 export function PerformanceParticipation() {
+  const reduce = useReducedMotion();
   const [data, setData] = useState<PerformanceParticipationDto | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -148,7 +150,7 @@ export function PerformanceParticipation() {
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <h2 className="flex items-center gap-2 font-display text-base font-bold tracking-tight text-navy">
-            <span className="grid size-7 shrink-0 place-items-center rounded-full bg-orange/10 text-orange">
+            <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[#fff5ea] text-[#f5b400] ring-1 ring-[#ffc42d]/25">
               <Target className="size-4" />
             </span>
             Performance vs Participation
@@ -159,7 +161,7 @@ export function PerformanceParticipation() {
         </div>
         <Link
           href="/performance"
-          className="inline-flex shrink-0 items-center gap-1 rounded-full bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-orange/10 hover:text-orange"
+          className="inline-flex shrink-0 items-center gap-1 rounded-full bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-[#fff5ea] hover:text-[#a16207]"
         >
           Details <ArrowRight className="size-3.5" />
         </Link>
@@ -200,27 +202,59 @@ export function PerformanceParticipation() {
 
           {/* Chart: y-axis rail + plot area */}
           <div className="mt-4 flex gap-2.5">
-            {/* Y axis */}
-            <div className="flex w-6 shrink-0 flex-col items-end justify-between py-1">
-              <span className="text-[10px] font-semibold tabular-nums text-slate-300">100</span>
-              <span className="-rotate-90 whitespace-nowrap text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+            {/* Y axis - labels pinned to the plot's actual inset gridlines (top=100,
+                bottom=0) so they line up exactly with the data, not the box edge. */}
+            <div className="relative w-7 shrink-0 self-stretch">
+              <span className="absolute right-0 -translate-y-1/2 text-[10px] font-semibold tabular-nums text-slate-300" style={{ top: `${INSET}%` }}>100</span>
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90 whitespace-nowrap text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                 Performance
               </span>
-              <span className="text-[10px] font-semibold tabular-nums text-slate-300">0</span>
+              <span className="absolute right-0 -translate-y-1/2 text-[10px] font-semibold tabular-nums text-slate-300" style={{ top: `${100 - INSET}%` }}>0</span>
             </div>
 
             {/* Plot */}
-            <div className="relative aspect-[2/1] w-full min-w-0 overflow-hidden rounded-2xl bg-slate-50/40 ring-1 ring-inset ring-slate-100">
+            <div className="relative aspect-[2/1] w-full min-w-0 overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50/60 to-white ring-1 ring-inset ring-slate-100">
+              {/* faint dot-grid for a live, charted texture */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 opacity-[0.5]"
+                style={{ backgroundImage: 'radial-gradient(rgb(148 163 184 / 0.18) 0.8px, transparent 0.8px)', backgroundSize: '16px 16px' }}
+              />
               {/* Quadrant tints - checkerboard intensity (diagonals match, adjacent
-                  differ) so every shared edge separates by both hue and strength. */}
-              <div className="absolute bg-sky-500/[0.15]" style={{ left: 0, top: 0, width: `${vx}%`, height: `${hy}%` }} />
-              <div className="absolute bg-emerald-500/[0.10]" style={{ left: `${vx}%`, top: 0, right: 0, height: `${hy}%` }} />
-              <div className="absolute bg-rose-500/[0.10]" style={{ left: 0, top: `${hy}%`, width: `${vx}%`, bottom: 0 }} />
-              <div className="absolute bg-amber-400/[0.16]" style={{ left: `${vx}%`, top: `${hy}%`, right: 0, bottom: 0 }} />
+                  differ) so every shared edge separates by both hue and strength. Fade in. */}
+              {(
+                [
+                  { c: 'bg-sky-500/[0.15]', s: { left: 0, top: 0, width: `${vx}%`, height: `${hy}%` } },
+                  { c: 'bg-emerald-500/[0.10]', s: { left: `${vx}%`, top: 0, right: 0, height: `${hy}%` } },
+                  { c: 'bg-rose-500/[0.10]', s: { left: 0, top: `${hy}%`, width: `${vx}%`, bottom: 0 } },
+                  { c: 'bg-amber-400/[0.16]', s: { left: `${vx}%`, top: `${hy}%`, right: 0, bottom: 0 } },
+                ] as const
+              ).map((q, i) => (
+                <motion.div
+                  key={i}
+                  className={`absolute ${q.c}`}
+                  style={q.s}
+                  initial={reduce ? false : { opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, delay: i * 0.06 }}
+                />
+              ))}
 
-              {/* Dividers */}
-              <div className="absolute top-0 bottom-0 border-l border-dashed border-slate-400/60" style={{ left: `${vx}%` }} />
-              <div className="absolute right-0 left-0 border-t border-dashed border-slate-400/60" style={{ top: `${hy}%` }} />
+              {/* Dividers - draw in from the corner */}
+              <motion.div
+                className="absolute top-0 bottom-0 origin-top border-l border-dashed border-slate-400/60"
+                style={{ left: `${vx}%` }}
+                initial={reduce ? false : { scaleY: 0 }}
+                animate={{ scaleY: 1 }}
+                transition={{ duration: 0.5, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+              />
+              <motion.div
+                className="absolute right-0 left-0 origin-left border-t border-dashed border-slate-400/60"
+                style={{ top: `${hy}%` }}
+                initial={reduce ? false : { scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 0.5, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+              />
 
               {/* Quadrant captions */}
               <span className="absolute left-2.5 top-2 text-[11px] font-bold text-sky-500/90">Coasting</span>
@@ -228,33 +262,49 @@ export function PerformanceParticipation() {
               <span className="absolute left-2.5 bottom-2 text-[11px] font-bold text-rose-400/90">Start here</span>
               <span className="absolute right-2.5 bottom-2 text-[11px] font-bold text-amber-500/90">Grinding</span>
 
-              {/* Peers */}
+              {/* Peers - pop in on a stagger, lift + darken on hover */}
               {data.peers.map((p, i) => (
-                <span
+                <motion.span
                   key={i}
-                  className="absolute size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-slate-400/45"
+                  className="absolute size-2 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full bg-slate-400/50 transition-colors hover:z-10 hover:bg-slate-500"
                   style={{ left: `${xPct(p.participation)}%`, top: `${yPct(p.performance)}%` }}
+                  initial={reduce ? false : { scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.3 + Math.min(i, 26) * 0.018, type: 'spring', stiffness: 320, damping: 22 }}
+                  whileHover={{ scale: 1.9 }}
+                  title={`${p.performance}% performance · ${p.participation} activity`}
                 />
               ))}
 
               {/* Cohort average marker (hollow diamond) */}
               {peerCount > 0 && (
-                <div
+                <motion.div
                   className="absolute -translate-x-1/2 -translate-y-1/2"
                   style={{ left: `${xPct(stats.avgPart)}%`, top: `${yPct(stats.avgPerf)}%` }}
+                  initial={reduce ? false : { scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.55, type: 'spring', stiffness: 260, damping: 18 }}
                 >
                   <span className="block size-2.5 rotate-45 border border-navy/55 bg-white/80 shadow-sm">
                     <span className="sr-only">Cohort average</span>
                   </span>
-                </div>
+                </motion.div>
               )}
 
-              {/* You */}
-              <div
-                className="absolute -translate-x-1/2 -translate-y-1/2"
+              {/* You - springs in, then breathes */}
+              <motion.div
+                className="absolute z-20 -translate-x-1/2 -translate-y-1/2"
                 style={{ left: `${youX}%`, top: `${youY}%` }}
+                initial={reduce ? false : { scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.62, type: 'spring', stiffness: 260, damping: 16 }}
               >
-                <span className="absolute left-1/2 top-1/2 size-7 -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange/20" />
+                <motion.span
+                  aria-hidden
+                  className="absolute left-1/2 top-1/2 size-9 -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange/25 blur-[3px]"
+                  animate={reduce ? undefined : { scale: [1, 1.35, 1], opacity: [0.55, 0.2, 0.55] }}
+                  transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
+                />
                 <span className="absolute left-1/2 top-1/2 size-7 -translate-x-1/2 -translate-y-1/2 animate-ping rounded-full bg-orange/25" />
                 <span className="relative block size-3.5 rounded-full bg-orange shadow-md ring-2 ring-white">
                   <span className="sr-only">
@@ -268,7 +318,7 @@ export function PerformanceParticipation() {
                 >
                   You
                 </span>
-              </div>
+              </motion.div>
             </div>
           </div>
 
