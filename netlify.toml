@@ -8,21 +8,22 @@
 # for any path the edge layer doesn't capture.)
 #
 # Keep the host below in sync with the backend ALB DNS.
+# Backend runs in the zskillup AWS account (511974511619); ALB below is its LB.
 
 [[redirects]]
   from = "/api/v1/*"
-  to = "http://zskillup-backend-alb-576289254.ap-south-1.elb.amazonaws.com/api/v1/:splat"
+  to = "http://zskillup-load-balancer-122235018.ap-south-1.elb.amazonaws.com/api/v1/:splat"
   status = 200
   force = true
 
 [[redirects]]
   from = "/ready"
-  to = "http://zskillup-backend-alb-576289254.ap-south-1.elb.amazonaws.com/ready"
+  to = "http://zskillup-load-balancer-122235018.ap-south-1.elb.amazonaws.com/ready"
   status = 200
   force = true
 
 [[redirects]]
   from = "/health"
-  to = "http://zskillup-backend-alb-576289254.ap-south-1.elb.amazonaws.com/health"
+  to = "http://zskillup-load-balancer-122235018.ap-south-1.elb.amazonaws.com/health"
   status = 200
   force = true

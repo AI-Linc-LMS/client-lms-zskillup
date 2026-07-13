@@ -7,7 +7,7 @@ import type { BlogPostDto, TestimonialDto } from '@/shared/dto/content.dto';
  */
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ??
-  'http://zskillup-backend-alb-576289254.ap-south-1.elb.amazonaws.com';
+  'http://zskillup-load-balancer-122235018.ap-south-1.elb.amazonaws.com';
 
 async function getJson<T>(path: string): Promise<T | null> {
   try {
