@@ -61,7 +61,7 @@ const TAB_ICONS: Record<HubTab, typeof BookOpen> = {
  * Fails soft: any error, or no session yet, leaves `pct` null and the hero shows a "start
  * practising" state instead of a fake number.
  */
-function useMyReadiness(slug: string): { loading: boolean; pct: number | null } {
+function useMyReadiness(slug: string, name: string): { loading: boolean; pct: number | null } {
   const [state, setState] = useState<{ loading: boolean; pct: number | null }>({
     loading: true,
     pct: null,
@@ -71,7 +71,13 @@ function useMyReadiness(slug: string): { loading: boolean; pct: number | null } 
     getCompanyReadiness()
       .then((rows) => {
         if (cancelled) return;
-        const mine = rows.find((r) => r.companySlug === slug);
+        // Match on slug OR name (case-insensitive) so a slug-format difference
+        // between the hub catalog and the readiness API doesn't blank the ring —
+        // this is the same figure the dashboard shows, keyed reliably.
+        const target = name.trim().toLowerCase();
+        const mine = rows.find(
+          (r) => r.companySlug === slug || (r.companyName ?? '').trim().toLowerCase() === target,
+        );
         setState({ loading: false, pct: mine ? Math.round(mine.readinessPct) : null });
       })
       .catch(() => {
@@ -80,7 +86,7 @@ function useMyReadiness(slug: string): { loading: boolean; pct: number | null } 
     return () => {
       cancelled = true;
     };
-  }, [slug]);
+  }, [slug, name]);
   return state;
 }
 
@@ -186,7 +192,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
                 onClick={() => selectTab(t)}
                 className={cn(
                   'relative flex shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-semibold transition-colors',
-                  active ? 'text-white' : 'text-slate-500 hover:text-navy',
+                  active ? 'text-white' : 'text-slate-600 hover:text-navy',
                 )}
               >
                 {active && (
@@ -197,7 +203,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
                   />
                 )}
                 <Icon
-                  className={cn('size-4 transition-colors', active ? 'text-[#ffb877]' : 'text-slate-400')}
+                  className={cn('size-4 transition-colors', active ? 'text-[#ffb877]' : 'text-slate-500')}
                   aria-hidden="true"
                 />
                 {t}
@@ -233,7 +239,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
                   <h2 className="mt-3 text-lg font-extrabold tracking-tight text-navy sm:text-xl">
                     {content.company.name} coding questions
                   </h2>
-                  <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
+                  <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
                     Problems this company has asked - solve in your language, run the samples, then
                     submit to grade against the full test set and earn XP.
                   </p>
@@ -281,7 +287,7 @@ function CompanyHero({ content, reduce }: { content: HubContent; reduce: boolean
   const initials = c.name.slice(0, 2).toUpperCase();
   const [logoError, setLogoError] = useState(false);
   const hasLogo = !!c.logoUrl && !logoError;
-  const mine = useMyReadiness(c.slug);
+  const mine = useMyReadiness(c.slug, c.name);
 
   const facts: Array<{ icon: typeof Star; label: string; value: string }> = [
     { icon: Star, label: 'Rating', value: c.rating.toFixed(1) },
@@ -562,7 +568,7 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
         accent ? 'border-violet-200 bg-violet-50/70' : 'border-slate-200/80 bg-slate-50/60',
       )}
     >
-      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
+      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{label}</p>
       <p
         className={cn(
           'mt-0.5 break-words leading-snug',
@@ -596,7 +602,7 @@ function OverviewTab({ content }: { content: HubContent }) {
           <h2 className="mt-3 text-lg font-extrabold tracking-tight text-navy sm:text-xl">
             {content.company.name} hiring process
           </h2>
-          <p className="mt-2 text-sm leading-relaxed text-slate-500 sm:text-base">{content.overview.summary}</p>
+          <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">{content.overview.summary}</p>
 
           {/* Process timeline */}
           <ol className="relative mt-6 space-y-5">
@@ -611,7 +617,7 @@ function OverviewTab({ content }: { content: HubContent }) {
                 </span>
                 <div className="pt-0.5">
                   <p className="text-sm font-bold text-navy sm:text-base">{p.stage}</p>
-                  <p className="mt-0.5 text-xs leading-relaxed text-slate-500 sm:text-sm">{p.detail}</p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-slate-600 sm:text-sm">{p.detail}</p>
                 </div>
               </li>
             ))}
@@ -630,7 +636,7 @@ function SyllabusTab({ content }: { content: HubContent }) {
         <h2 className="mt-3 text-lg font-extrabold tracking-tight text-navy sm:text-xl">
           {content.company.name} syllabus
         </h2>
-        <p className="mt-2 text-sm leading-relaxed text-slate-500 sm:text-base">
+        <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">
           The drive is usually structured in {roundCounts(content).onlineStages} online stages before
           interviews, then a final interview round.
         </p>
@@ -663,7 +669,7 @@ function SyllabusTab({ content }: { content: HubContent }) {
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-bold text-navy sm:text-base">{r.round}</p>
-                    <p className="mt-0.5 text-xs text-slate-500">{r.info}</p>
+                    <p className="mt-0.5 text-xs text-slate-600">{r.info}</p>
                   </div>
                   <span
                     className={cn(
