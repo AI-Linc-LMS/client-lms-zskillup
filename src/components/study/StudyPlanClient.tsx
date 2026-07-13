@@ -397,10 +397,11 @@ function NotCalibrated({ mockId }: { mockId: string | null }) {
       <span className="grid size-14 place-items-center rounded-2xl bg-orange/10 text-orange">
         <Brain className="size-7" />
       </span>
-      <h2 className="mt-3 font-display text-xl font-black tracking-tight text-navy">First, take your calibration</h2>
+      <h2 className="mt-3 font-display text-xl font-black tracking-tight text-navy">Initial assessment required</h2>
       <p className="mt-2 max-w-md text-sm text-slate-500">
-        Your 90-day roadmap is built from one short calibration assessment — it finds your strong and weak areas so every
-        day targets exactly what will move your placement readiness fastest.
+        Your 90-day roadmap is <em>generated</em> from one short initial assessment — it finds your strong and weak areas
+        so every day targets exactly what will move your placement readiness fastest. Everything else on the platform is
+        already open to you.
       </p>
       <Link
         href={mockId ? `/dashboard/quiz?mock=${mockId}` : '/dashboard'}

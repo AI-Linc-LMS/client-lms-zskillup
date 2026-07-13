@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { CalibrationLockGate } from '@/components/student/CalibrationLockGate';
+import { ProfileLockGate } from '@/components/student/ProfileLockGate';
 import {
   CalendarDays,
   CalendarClock,
@@ -129,7 +129,7 @@ export default function AssessmentsPage() {
     <div className="w-full">
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Assessments' }]} />
 
-      <CalibrationLockGate feature="Assessments">
+      <ProfileLockGate feature="Assessments">
       {/* ── Premium navy hero with live stats ─────────────────────────────── */}
       <Reveal>
         <section data-tour="assess:hero" className="relative mt-4 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-sm sm:p-8">
@@ -469,7 +469,7 @@ export default function AssessmentsPage() {
           <MyRankingPanel />
         </aside>
       </div>
-      </CalibrationLockGate>
+      </ProfileLockGate>
     </div>
   );
 }

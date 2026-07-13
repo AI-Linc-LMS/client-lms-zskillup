@@ -57,9 +57,11 @@ export function ProfileLockGate({
           <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.8)]">
             <Lock className="size-6" />
           </span>
-          <h2 className="mt-4 text-lg font-black text-navy">{feature} is locked</h2>
+          {/* Leads with the ACTION, not the wall. "{feature} is locked" told a brand-new
+              student what they couldn't do; it never told them what to do next. */}
+          <h2 className="mt-4 text-lg font-black text-navy">Complete your profile</h2>
           <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
-            Finish your profile to 100% to unlock {feature}. It takes a minute and sharpens everything we recommend.
+            One minute of setup and {feature} opens up — it also sharpens everything we recommend to you.
           </p>
 
           <div className="mx-auto mt-4 max-w-xs">

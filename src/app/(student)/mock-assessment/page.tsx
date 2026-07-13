@@ -2,7 +2,7 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { Brain, ShieldCheck, Timer } from 'lucide-react';
 import { CustomMockBuilder } from '@/components/practice/CustomMockBuilder';
 import { MockHistory } from '@/components/practice/MockHistory';
-import { CalibrationLockGate } from '@/components/student/CalibrationLockGate';
+import { ProfileLockGate } from '@/components/student/ProfileLockGate';
 import { Reveal } from '@/components/motion/primitives';
 
 /**
@@ -21,7 +21,7 @@ export default function MockAssessmentPage() {
         ]}
       />
 
-      <CalibrationLockGate feature="Mock Assessment" contentClassName="space-y-8">
+      <ProfileLockGate feature="Mock Assessment" contentClassName="space-y-8">
       <Reveal>
         <section data-tour="mock:hero" className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#12324a] via-[#0f2740] to-[#0a1a2c] p-6 text-white shadow-sm sm:p-8">
           <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#38bdf8]/25 blur-3xl" />
@@ -50,7 +50,7 @@ export default function MockAssessmentPage() {
         <h2 className="mb-3 text-lg font-extrabold tracking-tight text-navy sm:text-xl">Your past mock attempts</h2>
         <MockHistory scope="custom" />
       </section>
-      </CalibrationLockGate>
+      </ProfileLockGate>
     </div>
   );
 }
