@@ -13,7 +13,6 @@ import { TopBarSearch } from './TopBarSearch';
 import { NotificationsBell } from './NotificationsBell';
 import { GuideLauncher } from './GuideLauncher';
 import { CartButton } from '@/components/billing/CartProvider';
-import { workspaceLabelForPath } from './nav-config';
 
 /**
  * Persistent top bar, route-aware. The workspace label and the primary nav
@@ -49,11 +48,11 @@ export function TopBar() {
       {/* aurora accent hairline along the bottom edge */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#f37021]/40 to-transparent"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#ffc42d]/40 to-transparent"
       />
 
       <MobileNav />
-      <Logo workspaceLabel={workspaceLabelForPath(pathname)} className="relative z-10" />
+      <Logo className="relative z-10" />
 
       {isStudentZone ? (
         <>
