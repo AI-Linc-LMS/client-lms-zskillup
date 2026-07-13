@@ -45,7 +45,7 @@ export function ActiveSubscriptions({ className }: { className?: string }) {
         <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-500">
           <BadgeCheck className="size-4 text-emerald-500" /> Active subscriptions
         </h2>
-        <Link href="/upgrade" className="text-xs font-bold text-orange hover:underline">
+        <Link href="/upgrade" className="text-xs font-bold text-[#a16207] hover:underline">
           Manage →
         </Link>
       </div>
@@ -71,7 +71,7 @@ export function ActiveSubscriptions({ className }: { className?: string }) {
                 className="rounded-2xl border border-slate-100 bg-white p-3 shadow-sm transition hover:border-slate-200"
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-orange/10 text-orange">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#fff5ea] text-[#f5b400]">
                     <Icon className="size-4" />
                   </span>
                   <span className="min-w-0 flex-1">

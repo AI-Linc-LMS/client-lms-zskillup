@@ -7,6 +7,7 @@ import {
   Briefcase,
   Building2,
   Check,
+  Crown,
   GraduationCap,
   Loader2,
   Mail,
@@ -17,6 +18,7 @@ import {
   X,
 } from 'lucide-react';
 import { getMe, updateMe, type ApiMe } from '@/lib/api/me';
+import { useMySubscription } from '@/hooks/useMySubscription';
 import { listColleges, type College } from '@/lib/api/auth';
 import { getMyRegistrations, type ApiRegistration } from '@/lib/api/registrations';
 import { ApiRequestError } from '@/lib/api/types';
@@ -70,6 +72,8 @@ const snap = (v: Values) =>
 /** Profile view + edit — grouped sections, skills chip input, completion
  *  checklist and a sticky unsaved-changes bar. */
 export default function ProfilePage() {
+  const { planStatus } = useMySubscription(true);
+  const isPremium = planStatus !== 'none';
   const [me, setMe] = useState<ApiMe | null>(null);
   const [regs, setRegs] = useState<ApiRegistration[]>([]);
   /** Pre-loaded colleges for the picker (public endpoint, same list as signup). */
@@ -217,11 +221,16 @@ export default function ProfilePage() {
       <section data-tour="profile:hero" className="relative mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] p-6 text-white sm:p-7">
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div className="absolute -left-1/4 -top-1/2 size-[40vw] rounded-full bg-[#ffc42d]/20 blur-[110px]" />
-          <div className="absolute -right-1/4 -bottom-1/2 size-[36vw] rounded-full bg-[#2563eb]/20 blur-[110px]" />
+          <div className="absolute -right-1/4 -bottom-1/2 size-[36vw] rounded-full bg-[#f5b400]/15 blur-[110px]" />
         </div>
         <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center">
           <Avatar src={me?.avatarUrl ?? null} name={me?.fullName ?? me?.email ?? '?'} />
           <div className="min-w-0 flex-1">
+            {isPremium ? (
+              <span className="mb-1.5 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-[#171717] shadow-[0_2px_10px_-2px_rgba(245,180,0,0.7)]">
+                <Crown className="size-3" strokeWidth={2.75} /> Premium Member
+              </span>
+            ) : null}
             <h1 className="truncate text-2xl font-black tracking-tight sm:text-3xl">
               {v.fullName || 'Your profile'}
             </h1>
