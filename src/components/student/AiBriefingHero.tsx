@@ -198,11 +198,45 @@ export function AiBriefingHero() {
     <section data-tour="dash:briefing-hero" className="relative isolate overflow-hidden rounded-[1.5rem] p-5 text-white sm:rounded-[2rem] sm:p-7">
       <BriefingHeroCanvas />
 
-      {/* Top bar - live level/XP/streak (right). The "Your AI briefing" pill was removed. */}
-      <div className="relative z-10 flex flex-wrap items-start justify-end gap-4">
-        {/* live level/XP/streak - pinned top-right */}
+      {/* Top row: greeting/headline/subline (left) + live level/XP/streak (right),
+          so there's no empty band above the greeting. */}
+      <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+        <div className="min-w-0 max-w-2xl">
+
+        {/* greeting - the NAME rendered bold + yellow (benchmark). */}
+        <motion.p
+          className="text-base font-bold uppercase tracking-[0.2em] text-white/55 sm:text-lg"
+          initial={reduce ? false : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.04 }}
+        >
+          {isReturning ? 'Welcome back' : 'Welcome'}, <span className="text-[#ffc42d]">{firstName}</span>
+        </motion.p>
+
+        {/* headline */}
+        <motion.h1
+          className="mt-1.5 bg-gradient-to-b from-white to-white/70 bg-clip-text text-[28px] font-extrabold leading-[1.06] tracking-tight text-transparent sm:text-[34px]"
+          initial={reduce ? false : { opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, delay: 0.08 }}
+        >
+          {headline}
+        </motion.h1>
+
+        {/* subline */}
+        <motion.p
+          className="mt-2 max-w-2xl text-sm leading-relaxed text-white/65"
+          initial={reduce ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.16 }}
+        >
+          {subline}
+        </motion.p>
+        </div>
+
+        {/* live level/XP/streak */}
         <motion.div
-          className="flex items-stretch gap-3"
+          className="flex shrink-0 items-stretch gap-3"
           initial={reduce ? false : { opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.06 }}
@@ -240,40 +274,10 @@ export function AiBriefingHero() {
         </motion.div>
       </div>
 
-      <div className="relative z-10 mt-2 max-w-3xl">
-
-        {/* greeting - the NAME rendered bold + yellow (benchmark). */}
-        <motion.p
-          className="text-sm font-bold uppercase tracking-[0.22em] text-white/45"
-          initial={reduce ? false : { opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.04 }}
-        >
-          {isReturning ? 'Welcome back' : 'Welcome'}, <span className="text-[#ffc42d]">{firstName}</span>
-        </motion.p>
-
-        {/* headline */}
-        <motion.h1
-          className="mt-1.5 bg-gradient-to-b from-white to-white/70 bg-clip-text text-[28px] font-extrabold leading-[1.06] tracking-tight text-transparent sm:text-[34px]"
-          initial={reduce ? false : { opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, delay: 0.08 }}
-        >
-          {headline}
-        </motion.h1>
-
-        {/* subline */}
-        <motion.p
-          className="mt-2 max-w-2xl text-sm leading-relaxed text-white/65"
-          initial={reduce ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.16 }}
-        >
-          {subline}
-        </motion.p>
-
+      {/* focus cards + CTA - full width below the top row */}
+      <div className="relative z-10 mt-6 max-w-4xl">
         {/* focus cards - a SINGLE horizontal row of up to 3; dark icon on a yellow disc. */}
-        <div className="mt-5 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
           {cards.map((f, i) => {
             const isPlacement = i === 0 && showPlacementTest;
             return (
