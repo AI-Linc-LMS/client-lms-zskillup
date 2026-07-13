@@ -26,6 +26,7 @@ import { cn } from '@/lib/utils';
 import { HUB_TABS, type HubContent, type HubTab } from '@/lib/hub-data';
 import { getCompanyReadiness } from '@/lib/api/adaptive';
 import { InfoTip } from '@/components/ui/InfoTip';
+import { Disclaimer } from '@/components/legal/Disclaimer';
 import { AnimatedNumber, AuroraBackground, Reveal, Stagger, StaggerItem } from '@/components/motion/primitives';
 import { CompanyPrepPanel } from './CompanyPrepPanel';
 import { CompanyMockTab as MockTab } from './CompanyMockTab';
@@ -262,6 +263,11 @@ export function CompanyHub({ content }: { content: HubContent }) {
           </AuroraCard>
         </aside>
       </div>
+
+      {/* Mounted on the hub itself, not on the grid cards: this way it appears on EVERY
+          company, once, where the company's name and logo are actually being used — rather
+          than as a 60-word legal paragraph crammed into each tile of a card grid. */}
+      <Disclaimer className="mt-8" />
     </div>
   );
 }

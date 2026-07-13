@@ -1,5 +1,6 @@
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { CompaniesExplorer } from '@/components/company/CompaniesExplorer';
+import { Disclaimer } from '@/components/legal/Disclaimer';
 import { listCompanies, listTopics } from '@/lib/api/catalog';
 import { AnimatedNumber, AuroraBackground, Reveal } from '@/components/motion/primitives';
 import { Building2, ListChecks, Sparkles } from 'lucide-react';
@@ -80,6 +81,9 @@ export default async function CompaniesPage() {
       </Reveal>
 
       <CompaniesExplorer />
+
+      {/* Once, under the grid — not repeated inside each card. */}
+      <Disclaimer className="mt-2" />
     </div>
   );
 }

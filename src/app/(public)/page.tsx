@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { HOMEPAGE_COMPANY_LOGOS } from '@/lib/demo-data-extra';
 import { PublicMobileMenu } from '@/components/marketing/PublicMobileMenu';
+import { Disclaimer } from '@/components/legal/Disclaimer';
 import { PublicAuthCta } from '@/components/marketing/PublicAuthCta';
 import { BrandLogo } from '@/components/layout/BrandLogo';
 import { HomeFeaturedTracks } from '@/components/marketing/HomeFeaturedTracks';
@@ -690,7 +691,12 @@ export default async function HomePage() {
             </ul>
           </div>
         </div>
-        <div className="mx-auto mt-10 max-w-[1400px] border-t border-[var(--color-line)] pt-6 text-center text-xs text-[var(--color-text-subtle)]">
+        {/* The landing page names TCS, Infosys, Wipro, Cognizant, Capgemini and Accenture and
+            shows their logos, so the affiliation disclaimer belongs here, above the © line. */}
+        <div className="mx-auto mt-10 max-w-[1400px]">
+          <Disclaimer />
+        </div>
+        <div className="mx-auto mt-6 max-w-[1400px] border-t border-[var(--color-line)] pt-6 text-center text-xs text-[var(--color-text-subtle)]">
           © 2026 prephasz · Powered by ZSkillup · Future-ready graduates, future-strong institutions
         </div>
       </footer>
