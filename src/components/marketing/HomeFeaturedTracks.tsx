@@ -2,21 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, ClipboardList, Code2, History, Lock } from 'lucide-react';
+import { ArrowRight, Lock } from 'lucide-react';
 import { HOMEPAGE_FEATURED_TRACKS } from '@/lib/demo-data-extra';
 import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
 
-/** Compact integer formatting: 1240 → "1.2k". */
-function compact(n: number): string {
-  if (n >= 1000) return `${(n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, '')}k`;
-  return String(n);
-}
-
 /**
- * Homepage featured tracks. The accent / blurb are curated presentation assets,
- * but the LOGO and ALL metrics (questions, PYQs, coding problems, rounds) now
- * come live from GET /companies — real bank counts, no fabricated numbers. Falls
- * back to the curated logo until the live catalog resolves.
+ * Homepage featured tracks. The card shows the logo, name, blurb and a CTA — no inventory
+ * counts (removed; see the note by the CTA). `GET /companies` is still read for two things:
+ * the live logo, and the unlock signal — a `locked` track whose catalog row is published
+ * flips to a normal "Prepare now" card automatically.
  */
 export function HomeFeaturedTracks() {
   const [live, setLive] = useState<Map<string, ApiCompany> | null>(null);
@@ -43,7 +37,6 @@ export function HomeFeaturedTracks() {
       {tracks.map((t) => {
         const co = live?.get(t.slug);
         const logoSrc = co?.logoUrl ?? t.logoSrc;
-        const rounds = co?.rounds ?? t.rounds;
         // Locked unless the catalog says otherwise. A published row (co present) always
         // wins, so a real hub can never be hidden behind a stale `locked` flag.
         const locked = !!t.locked && !co;
@@ -96,36 +89,18 @@ export function HomeFeaturedTracks() {
                 {t.description}
               </p>
 
+              {/* The raw question / PYQ / coding / rounds counts were removed from these
+                  cards: leading with an inventory tally is the framing PR #29 took off the
+                  student side, and the founder didn't want it on the marketing cards either.
+                  The card now leads with what the track IS, then the CTA. */}
               {locked ? (
                 <div className="mt-4 flex flex-1 items-end text-xs font-semibold text-[var(--color-text-muted)]">
                   Hub coming soon
                 </div>
               ) : (
-                <>
-                  <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-[var(--color-text-muted)]">
-                    <span className="inline-flex items-center gap-1 font-medium">
-                      {/* Live count when the catalog resolves; else the curated figure —
-                          never a bare "0" when /companies is slow/unavailable. */}
-                      <ClipboardList className="h-3 w-3" /> {co?.questionCount ? compact(co.questionCount) : t.mcqs}{' '}
-                      questions
-                    </span>
-                    {co?.pyqCount ? (
-                      <span className="inline-flex items-center gap-1 font-medium text-[var(--color-brand-strong)]">
-                        <History className="h-3 w-3" /> {compact(co.pyqCount)} PYQs
-                      </span>
-                    ) : null}
-                    {co?.codingCount ? (
-                      <span className="inline-flex items-center gap-1">
-                        <Code2 className="h-3 w-3" /> {compact(co.codingCount)} coding
-                      </span>
-                    ) : null}
-                    {rounds ? <span>{rounds} rounds</span> : null}
-                  </div>
-
-                  <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-[var(--color-brand)] transition-colors group-hover:text-[var(--color-brand-strong)]">
-                    Prepare now <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                  </div>
-                </>
+                <div className="mt-4 flex flex-1 items-end gap-1 text-xs font-semibold text-[var(--color-brand)] transition-colors group-hover:text-[var(--color-brand-strong)]">
+                  Prepare now <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                </div>
               )}
             </div>
           </CardShell>
