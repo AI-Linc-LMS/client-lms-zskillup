@@ -136,7 +136,16 @@ export function CustomMockBuilder() {
       if (e instanceof ApiRequestError && e.code === 'PAYWALL') {
         setUpgradeMsg(e.message);
       } else {
-        setError(e instanceof Error ? e.message : 'Could not build the mock. Try different topics.');
+        // Surface the EXACT backend message in a popup — never a bare "Something
+        // went wrong". Include the support reference (requestId) on a server fault
+        // so it isn't a dead end.
+        const msg =
+          e instanceof Error && e.message ? e.message : 'Could not build the mock. Try different topics.';
+        const ref = e instanceof ApiRequestError ? e.requestId : undefined;
+        setError(msg);
+        toast.error("Couldn't start the mock assessment", {
+          description: ref ? `${msg}  ·  ref ${ref}` : msg,
+        });
       }
       setBusy(false);
     }
@@ -172,7 +181,7 @@ export function CustomMockBuilder() {
                       whole section
                     </span>
                   </span>
-                  <span className={cn('grid size-5 place-items-center rounded-md border', sectionOn ? 'border-orange bg-orange text-white' : 'border-slate-300')}>
+                  <span className={cn('grid size-5 place-items-center rounded-md border', sectionOn ? 'border-orange bg-orange text-[#171717]' : 'border-slate-300')}>
                     {sectionOn ? <Check className="size-3.5" /> : null}
                   </span>
                 </button>
@@ -226,7 +235,7 @@ export function CustomMockBuilder() {
                 all {codingTopicList.length} topics
               </span>
             </span>
-            <span className={cn('grid size-5 place-items-center rounded-md border', codingAll ? 'border-orange bg-orange text-white' : 'border-slate-300')}>
+            <span className={cn('grid size-5 place-items-center rounded-md border', codingAll ? 'border-orange bg-orange text-[#171717]' : 'border-slate-300')}>
               {codingAll ? <Check className="size-3.5" /> : null}
             </span>
           </button>
@@ -297,7 +306,7 @@ export function CustomMockBuilder() {
           <button
             onClick={start}
             disabled={!hasScope || busy}
-            className="inline-flex items-center gap-2 rounded-full bg-orange px-6 py-2.5 text-sm font-extrabold text-white transition enabled:hover:brightness-105 disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-full bg-orange px-6 py-2.5 text-sm font-extrabold text-[#171717] transition enabled:hover:brightness-105 disabled:opacity-40"
           >
             {busy ? <Loader2 className="size-4 animate-spin" /> : null}
             {busy ? 'Building…' : 'Start mock assessment'}
