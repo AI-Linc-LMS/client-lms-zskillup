@@ -8,7 +8,7 @@ import { getMyPerformanceScatter, type PerformanceParticipationDto, type Scatter
 
 const PART_HIGH = 15; // participation threshold (effort divider)
 const PERF_HIGH = 50; // accuracy threshold (performance divider)
-const KNEE = 0.4; // the effort divider always sits at 40% of the plot width
+const KNEE = 0.5; // the effort divider sits at the MIDPOINT → four equal quadrants
 const INSET = 5; // % padding so points never clip the plot edges
 
 type ZoneKey = 'thriving' | 'coasting' | 'grinding' | 'start';
@@ -72,8 +72,8 @@ function pathToTop(perf: number, part: number): string | null {
  * anonymized peers (grey), with the cohort-average marker, your percentile on each
  * axis, how the cohort splits across the four zones, and the concrete gap to the
  * top zone. A responsive HTML/CSS chart (not a stretched SVG) so every label stays
- * crisp at any dashboard width; a fixed 40% effort divider keeps the quadrants from
- * squashing on sparse data.
+ * crisp at any dashboard width; the effort divider is pinned at the midpoint so all
+ * four quadrants stay equal regardless of how the cohort's activity is spread.
  */
 export function PerformanceParticipation() {
   const reduce = useReducedMotion();
@@ -124,8 +124,8 @@ export function PerformanceParticipation() {
     };
   }, [data]);
 
-  // Piecewise x: 0→PART_HIGH maps to the left 40%, PART_HIGH→partMax to the right
-  // 60% — the effort divider is pinned at 40% regardless of the data spread.
+  // Piecewise x: 0→PART_HIGH maps to the left half, PART_HIGH→partMax to the right
+  // half — the effort divider is pinned at the midpoint (50%) regardless of spread.
   const xNorm = (p: number) =>
     p <= PART_HIGH
       ? (p / PART_HIGH) * KNEE
