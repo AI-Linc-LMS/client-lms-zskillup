@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
   ArrowRight,
+  ClipboardCheck,
   Flame,
   Rocket,
   Star,
@@ -15,6 +16,8 @@ import {
 import { getBriefing, type StudentBriefing } from '@/lib/api/personalization';
 import { getStudentStats, type ApiStudentStats } from '@/lib/api/gamification';
 import { getMe, type ApiMe } from '@/lib/api/me';
+import { useCalibrationStatus } from '@/hooks/useCalibrationStatus';
+import { BriefingHeroCanvas } from '@/components/student/BriefingHeroCanvas';
 import { AnimatedNumber, AuroraBackground } from '@/components/motion/primitives';
 import { onXpUpdated } from '@/lib/xp-events';
 
@@ -54,6 +57,7 @@ function firstNameOf(fullName: string | null | undefined): string {
 
 export function AiBriefingHero() {
   const reduce = useReducedMotion();
+  const calibration = useCalibrationStatus();
   const [me, setMe] = useState<ApiMe | null>(null);
   const [stats, setStats] = useState<ApiStudentStats | null>(null);
   const [briefing, setBriefing] = useState<StudentBriefing | null>(null);
@@ -141,6 +145,28 @@ export function AiBriefingHero() {
   const focusAreas = briefing?.focusAreas?.length ? briefing.focusAreas : DEFAULT_FOCUS;
   const nextAction = briefing?.nextAction ?? DEFAULT_ACTION;
 
+  // The one-time Placement Readiness Test (the former "calibration") is the very
+  // first step of the journey — so an un-calibrated student is steered straight
+  // to it: it replaces both the "Try a mock" reco card and the mock CTA below.
+  const showPlacementTest = calibration.required && !!calibration.mockTestId;
+  const placementHref = calibration.mockTestId
+    ? `/dashboard/quiz?mock=${calibration.mockTestId}`
+    : '/dashboard';
+
+  const cta = showPlacementTest
+    ? { label: 'Take Placement Readiness Test', href: placementHref, kind: 'placement' as const }
+    : { label: nextAction.label, href: nextAction.href, kind: nextAction.kind };
+
+  // Focus cards, capped to 3 so they stay on ONE horizontal row. For un-calibrated
+  // students the Placement Readiness Test leads, and any "take a mock" card is
+  // dropped (mocks come after the readiness test).
+  const cards: FocusArea[] = showPlacementTest
+    ? [
+        { title: 'Take the Placement Readiness Test', detail: 'Your first step — we map where you stand' },
+        ...focusAreas.filter((f) => !/mock/i.test(`${f.title} ${f.detail}`)),
+      ].slice(0, 3)
+    : focusAreas.slice(0, 3);
+
   // First paint: a shimmering skeleton over the aurora — never the 0-state.
   if (!ready) {
     return (
@@ -169,35 +195,8 @@ export function AiBriefingHero() {
   }
 
   return (
-    <section data-tour="dash:briefing-hero" className="relative isolate overflow-hidden rounded-[1.5rem] p-6 text-white sm:rounded-[2rem] sm:p-10">
-      {/* Black base → subtle dark-navy toward the right (benchmark). */}
-      <div aria-hidden className="absolute inset-0 bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e]" />
-      {/* Golden mesh illustration on the right — flowing arcs + glow, evoking the mockup. */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -right-24 bottom-[-30%] h-[42rem] w-[42rem] rounded-full bg-[radial-gradient(closest-side,rgba(245,180,0,0.22),transparent)] blur-2xl" />
-        <svg className="absolute right-0 top-0 h-full w-2/3 opacity-70" viewBox="0 0 600 400" fill="none" preserveAspectRatio="xMaxYMax slice">
-          <defs>
-            <linearGradient id="mesh" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#f6b51d" stopOpacity="0" />
-              <stop offset="70%" stopColor="#f6b51d" stopOpacity="0.5" />
-              <stop offset="100%" stopColor="#ffd24d" stopOpacity="0.9" />
-            </linearGradient>
-          </defs>
-          {[0, 26, 52, 78, 104, 130, 156].map((d) => (
-            <path
-              key={d}
-              d={`M ${620} ${420} q ${-260 - d} ${-120 - d * 0.5} ${-420 - d} ${-360 - d}`}
-              stroke="url(#mesh)"
-              strokeWidth="1.2"
-              fill="none"
-            />
-          ))}
-        </svg>
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{ backgroundImage: 'radial-gradient(rgb(255 255 255 / 0.8) 1px, transparent 1px)', backgroundSize: '24px 24px' }}
-        />
-      </div>
+    <section data-tour="dash:briefing-hero" className="relative isolate overflow-hidden rounded-[1.5rem] p-5 text-white sm:rounded-[2rem] sm:p-7">
+      <BriefingHeroCanvas />
 
       {/* Top bar — live level/XP/streak (right). The "Your AI briefing" pill was removed. */}
       <div className="relative z-10 flex flex-wrap items-start justify-end gap-4">
@@ -250,12 +249,12 @@ export function AiBriefingHero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.04 }}
         >
-          Welcome back, <span className="text-[#ffc42d]">{firstName}</span>
+          {isReturning ? 'Welcome back' : 'Welcome'}, <span className="text-[#ffc42d]">{firstName}</span>
         </motion.p>
 
         {/* headline */}
         <motion.h1
-          className="mt-2 bg-gradient-to-b from-white to-white/70 bg-clip-text text-3xl font-extrabold leading-[1.08] tracking-tight text-transparent sm:text-[42px]"
+          className="mt-1.5 bg-gradient-to-b from-white to-white/70 bg-clip-text text-[28px] font-extrabold leading-[1.06] tracking-tight text-transparent sm:text-[34px]"
           initial={reduce ? false : { opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, delay: 0.08 }}
@@ -265,7 +264,7 @@ export function AiBriefingHero() {
 
         {/* subline */}
         <motion.p
-          className="mt-3 max-w-2xl text-[15px] leading-relaxed text-white/65 sm:text-base"
+          className="mt-2 max-w-2xl text-sm leading-relaxed text-white/65"
           initial={reduce ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.16 }}
@@ -273,50 +272,63 @@ export function AiBriefingHero() {
           {subline}
         </motion.p>
 
-        {/* focus cards — one row of up to 3, taller; dark target icon on a yellow disc. */}
-        <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {focusAreas.slice(0, 3).map((f, i) => (
-            <motion.div
-              key={f.title}
-              className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.05] p-4 backdrop-blur transition-colors hover:border-[#ffc42d]/30 hover:bg-white/[0.09]"
-              initial={reduce ? false : { opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.24 + i * 0.08 }}
-            >
-              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#ffc42d] ring-4 ring-[#ffc42d]/15">
-                <Target className="size-5 text-[#171717]" strokeWidth={2.4} />
-              </span>
-              <span className="min-w-0">
-                <span className="block text-[15px] font-bold leading-tight">{f.title}</span>
-                <span className="mt-0.5 block text-xs leading-snug text-white/55">{f.detail}</span>
-              </span>
-            </motion.div>
-          ))}
+        {/* focus cards — a SINGLE horizontal row of up to 3; dark icon on a yellow disc. */}
+        <div className="mt-5 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+          {cards.map((f, i) => {
+            const isPlacement = i === 0 && showPlacementTest;
+            return (
+              <motion.div
+                key={f.title}
+                className={`group flex items-center gap-2.5 rounded-2xl border p-3 backdrop-blur transition-colors ${
+                  isPlacement
+                    ? 'border-[#ffc42d]/40 bg-[#ffc42d]/[0.08] hover:bg-[#ffc42d]/[0.12]'
+                    : 'border-white/10 bg-white/[0.05] hover:border-[#ffc42d]/30 hover:bg-white/[0.09]'
+                }`}
+                initial={reduce ? false : { opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.24 + i * 0.08 }}
+              >
+                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[#ffc42d] ring-4 ring-[#ffc42d]/15">
+                  {isPlacement ? (
+                    <ClipboardCheck className="size-4 text-[#171717]" strokeWidth={2.4} />
+                  ) : (
+                    <Target className="size-4 text-[#171717]" strokeWidth={2.4} />
+                  )}
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[13px] font-bold leading-tight">{f.title}</span>
+                  <span className="mt-0.5 block text-[11px] leading-snug text-white/55">{f.detail}</span>
+                </span>
+              </motion.div>
+            );
+          })}
         </div>
 
         {/* CTA */}
         <motion.div
-          className="mt-8"
+          className="mt-6"
           initial={reduce ? false : { opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.42 }}
         >
           <Link
-            href={nextAction.href}
-            className="group relative inline-flex w-fit items-center gap-2 overflow-hidden rounded-full bg-gradient-to-br from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-6 py-3 text-sm font-extrabold text-[#171717] transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
+            href={cta.href}
+            className="group relative inline-flex w-fit items-center gap-2 overflow-hidden rounded-full bg-gradient-to-br from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-6 py-2.5 text-sm font-extrabold text-[#171717] transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
           >
             <span
               aria-hidden
               className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/45 to-transparent transition-transform duration-700 group-hover:translate-x-full"
             />
-            {nextAction.kind === 'mock' ? (
+            {cta.kind === 'placement' ? (
+              <ClipboardCheck className="size-4" />
+            ) : cta.kind === 'mock' ? (
               <Timer className="size-4" />
-            ) : nextAction.kind === 'practice' ? (
+            ) : cta.kind === 'practice' ? (
               <Zap className="size-4" />
             ) : (
               <Rocket className="size-4" />
             )}
-            {nextAction.label}
+            {cta.label}
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </motion.div>

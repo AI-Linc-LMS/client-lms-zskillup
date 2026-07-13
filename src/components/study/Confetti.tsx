@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 
-const COLORS = ['#f37021', '#ffb877', '#0ea5e9', '#8b5cf6', '#10b981', '#f59e0b'];
+const COLORS = ['#f5b400', '#ffd24d', '#0ea5e9', '#8b5cf6', '#10b981', '#f59e0b'];
 
 /** A one-shot confetti burst from screen centre. Self-contained (no libs/canvas),
  *  pointer-events-none, and a no-op under prefers-reduced-motion. */

@@ -44,8 +44,8 @@ export function ProgressRing({
         />
         <defs>
           <linearGradient id="sp-ring-grad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#ffb877" />
-            <stop offset="1" stopColor="#f37021" />
+            <stop offset="0" stopColor="#ffd24d" />
+            <stop offset="1" stopColor="#f5b400" />
           </linearGradient>
         </defs>
       </svg>

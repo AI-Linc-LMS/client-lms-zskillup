@@ -26,9 +26,9 @@ export const PHASE_META: Record<
   practice: {
     label: 'Practice',
     tagline: 'Sharpen & apply',
-    accent: '#f37021',
+    accent: '#f5b400',
     text: 'text-orange-600',
-    grad: 'from-[#f7a14e] to-[#f37021]',
+    grad: 'from-[#ffd24d] to-[#f5b400]',
     dot: 'bg-orange-500',
     soft: 'bg-orange-50',
   },

@@ -1,6 +1,6 @@
 /**
  * Branded inline-SVG illustrations for the Study Plan. Self-contained (no external
- * assets), theme-consistent (navy #1e3a8a / orange #f37021 + sky / violet / emerald
+ * assets), theme-consistent (navy #1e3a8a / orange #f5b400 + sky / violet / emerald
  * accents). `RoadmapJourney` reads on the dark navy hero; `CalibrationScope` reads
  * on light. Purely decorative — always aria-hidden.
  */
@@ -16,12 +16,12 @@ export function RoadmapJourney({ className }: { className?: string }) {
           <stop offset="1" stopColor="#5b76b8" />
         </linearGradient>
         <linearGradient id="rj-flag" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#ffb877" />
-          <stop offset="1" stopColor="#f37021" />
+          <stop offset="0" stopColor="#ffd24d" />
+          <stop offset="1" stopColor="#f5b400" />
         </linearGradient>
         <radialGradient id="rj-sun" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0" stopColor="#ffb877" stopOpacity="0.85" />
-          <stop offset="1" stopColor="#ffb877" stopOpacity="0" />
+          <stop offset="0" stopColor="#ffd24d" stopOpacity="0.85" />
+          <stop offset="1" stopColor="#ffd24d" stopOpacity="0" />
         </radialGradient>
       </defs>
       <circle cx="210" cy="46" r="48" fill="url(#rj-sun)" />
@@ -46,7 +46,7 @@ export function RoadmapJourney({ className }: { className?: string }) {
       {/* milestones */}
       {[
         [96, 116, '#38bdf8'],
-        [158, 86, '#f37021'],
+        [158, 86, '#f5b400'],
         [205, 58, '#a78bfa'],
       ].map(([x, y, c], i) => (
         <g key={i}>
@@ -58,8 +58,8 @@ export function RoadmapJourney({ className }: { className?: string }) {
       <rect x="213" y="28" width="2.4" height="27" rx="1.2" fill="#fff" />
       <path d="M215.4,29 L231,33.5 L215.4,38.5 Z" fill="url(#rj-flag)" />
       {/* start marker */}
-      <circle cx="18" cy="168" r="7" fill="#f37021" opacity="0.25" />
-      <circle cx="18" cy="168" r="4" fill="#f37021" stroke="#0b1220" strokeWidth="1.5" />
+      <circle cx="18" cy="168" r="7" fill="#f5b400" opacity="0.25" />
+      <circle cx="18" cy="168" r="4" fill="#f5b400" stroke="#0b1220" strokeWidth="1.5" />
     </svg>
   );
 }
@@ -70,8 +70,8 @@ export function CalibrationScope({ className }: { className?: string }) {
     <svg viewBox="0 0 200 200" className={className} fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
       <defs>
         <linearGradient id="cs-sweep" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#f37021" stopOpacity="0.32" />
-          <stop offset="1" stopColor="#f37021" stopOpacity="0" />
+          <stop offset="0" stopColor="#f5b400" stopOpacity="0.32" />
+          <stop offset="1" stopColor="#f5b400" stopOpacity="0" />
         </linearGradient>
       </defs>
       {[80, 58, 36].map((r, i) => (
@@ -89,10 +89,10 @@ export function CalibrationScope({ className }: { className?: string }) {
       <line x1="100" y1="16" x2="100" y2="184" stroke="#1e3a8a" strokeOpacity="0.09" />
       <line x1="16" y1="100" x2="184" y2="100" stroke="#1e3a8a" strokeOpacity="0.09" />
       <path d="M100,100 L100,20 A80,80 0 0 1 168,138 Z" fill="url(#cs-sweep)" />
-      <line x1="100" y1="100" x2="168" y2="138" stroke="#f37021" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="100" y1="100" x2="168" y2="138" stroke="#f5b400" strokeWidth="2.5" strokeLinecap="round" />
       {[
         [70, 72, '#38bdf8'],
-        [132, 82, '#f37021'],
+        [132, 82, '#f5b400'],
         [114, 140, '#a78bfa'],
         [64, 122, '#34d399'],
       ].map(([x, y, c], i) => (

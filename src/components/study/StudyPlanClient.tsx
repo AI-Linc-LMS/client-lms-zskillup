@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCalibrationStatus } from '@/hooks/useCalibrationStatus';
+import { BriefingHeroCanvas } from '@/components/student/BriefingHeroCanvas';
 import {
   generateRoadmap,
   getRoadmap,
@@ -113,14 +114,15 @@ export function StudyPlanClient() {
 
         {/* The roadmap */}
         <section data-tour="plan:roadmap" className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-          <div className="relative overflow-hidden bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] px-5 py-4 text-white">
+          <div className="relative overflow-hidden bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] px-5 py-4 text-white">
+            <span aria-hidden className="pointer-events-none absolute -right-8 -top-8 size-32 rounded-full bg-[radial-gradient(closest-side,rgba(245,180,0,0.20),transparent)] blur-2xl" />
             <span
               aria-hidden
-              className="pointer-events-none absolute inset-0 opacity-[0.12]"
+              className="pointer-events-none absolute inset-0 opacity-[0.10]"
               style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #fff 1px, transparent 0)', backgroundSize: '16px 16px' }}
             />
             <div className="relative">
-              <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[#ffb877]">
+              <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[#ffc42d]">
                 <Trophy className="size-3.5" /> The journey
               </p>
               <h2 className="mt-1 font-display text-lg font-black tracking-tight">Your 90-day roadmap</h2>
@@ -148,8 +150,8 @@ export function StudyPlanClient() {
             exit={{ opacity: 0, y: 24, scale: 0.9 }}
             transition={{ type: 'spring', stiffness: 320, damping: 24 }}
           >
-            <div className="flex items-center gap-3 rounded-2xl bg-gradient-to-br from-[#1f2d4d] to-[#0b1220] px-5 py-3 text-white shadow-2xl">
-              <span className="grid size-9 place-items-center rounded-full bg-orange text-white">
+            <div className="flex items-center gap-3 rounded-2xl bg-gradient-to-br from-[#0f1117] to-[#202b63] px-5 py-3 text-white shadow-2xl">
+              <span className="grid size-9 place-items-center rounded-full bg-orange text-[#171717]">
                 <Sparkles className="size-4" />
               </span>
               <div>
@@ -169,12 +171,11 @@ function Hero({ ov }: { ov: StudyPlanOverviewDto }) {
   const s = ov.summary;
   const phase = s.currentPhase ? PHASE_META[s.currentPhase] : PHASE_META.foundation;
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-[0_24px_60px_-30px_rgba(11,18,32,0.85)] sm:p-8">
-      <span aria-hidden className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-[#f37021]/20 blur-3xl" />
-      <span aria-hidden className="pointer-events-none absolute -bottom-24 -left-10 size-56 rounded-full bg-sky-500/10 blur-3xl" />
-      <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center">
+    <section className="relative isolate overflow-hidden rounded-3xl border border-white/10 p-6 text-white sm:p-8">
+      <BriefingHeroCanvas />
+      <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-center">
         <div className="min-w-0 flex-1">
-          <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#ffb877]">
+          <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#ffc42d]">
             <Sparkles className="size-3.5" /> Your 90-day placement roadmap
             {s.generatedByAi && <span className="rounded-full bg-white/10 px-2 py-0.5 text-[9px] tracking-normal text-white/70">AI-personalised</span>}
           </p>
@@ -206,7 +207,7 @@ function ProgressPanel({ summary }: { summary: StudyPlanOverviewDto['summary'] }
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-center gap-3">
-        <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#ffb877] to-[#f37021] text-white shadow-[0_8px_20px_-8px_rgba(243,112,33,0.8)]">
+        <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#ffa04d] to-[#ff7a1a] text-white">
           <Flame className="size-6" />
         </span>
         <div className="min-w-0">
@@ -317,15 +318,16 @@ function TodayPanel({
   const allDone = today.doneCount >= today.taskCount && today.taskCount > 0;
   return (
     <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <div className={cn('relative overflow-hidden bg-gradient-to-br p-5 text-white', meta.grad)}>
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] p-5 text-white">
+        <span aria-hidden className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-[radial-gradient(closest-side,rgba(245,180,0,0.22),transparent)] blur-2xl" />
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-[0.14]"
+          className="pointer-events-none absolute inset-0 opacity-[0.10]"
           style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #fff 1.1px, transparent 0)', backgroundSize: '15px 15px' }}
         />
         <div className="relative flex items-center gap-3">
           <div className="min-w-0 flex-1">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em]">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#ffc42d]/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#ffc42d]">
               <Sparkles className="size-3" /> Today · Day {today.dayNumber}
             </span>
             <h2 className="mt-2 text-xl font-black tracking-tight drop-shadow-sm">{today.theme}</h2>
@@ -394,20 +396,20 @@ function DayRing({ done, total }: { done: number; total: number }) {
 function NotCalibrated({ mockId }: { mockId: string | null }) {
   return (
     <div className="mt-4 grid place-items-center rounded-3xl border border-dashed border-slate-200 bg-gradient-to-b from-white to-slate-50/60 p-10 text-center">
-      <span className="grid size-14 place-items-center rounded-2xl bg-orange/10 text-orange">
-        <Brain className="size-7" />
+      <span className="grid size-14 place-items-center rounded-2xl bg-[#ffc42d] ring-4 ring-[#ffc42d]/15">
+        <Brain className="size-7 text-[#171717]" strokeWidth={2.2} />
       </span>
-      <h2 className="mt-3 font-display text-xl font-black tracking-tight text-navy">Initial assessment required</h2>
+      <h2 className="mt-3 font-display text-xl font-black tracking-tight text-navy">Placement readiness test required</h2>
       <p className="mt-2 max-w-md text-sm text-slate-500">
-        Your 90-day roadmap is <em>generated</em> from one short initial assessment — it finds your strong and weak areas
+        Your 90-day roadmap is <em>generated</em> from one short placement readiness test — it finds your strong and weak areas
         so every day targets exactly what will move your placement readiness fastest. Everything else on the platform is
         already open to you.
       </p>
       <Link
         href={mockId ? `/dashboard/quiz?mock=${mockId}` : '/dashboard'}
-        className="mt-5 inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2.5 text-sm font-bold text-white transition hover:bg-orange/90"
+        className="mt-5 inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2.5 text-sm font-bold text-[#171717] transition hover:bg-orange/90"
       >
-        Start calibration <ArrowRight className="size-4" />
+        Start the placement readiness test <ArrowRight className="size-4" />
       </Link>
     </div>
   );
@@ -415,23 +417,23 @@ function NotCalibrated({ mockId }: { mockId: string | null }) {
 
 function GenerateHero({ generating, onGenerate }: { generating: boolean; onGenerate: () => void }) {
   return (
-    <div className="mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-8 text-center text-white shadow-[0_24px_60px_-30px_rgba(11,18,32,0.85)] sm:p-12">
-      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 mx-auto size-64 rounded-full bg-[#f37021]/20 blur-3xl" />
-      <span className="relative mx-auto grid size-16 place-items-center rounded-2xl bg-white/10 text-[#ffb877] ring-1 ring-white/15">
-        <Sparkles className="size-8" />
+    <div className="relative isolate mt-4 overflow-hidden rounded-3xl border border-white/10 p-8 text-center text-white sm:p-12">
+      <BriefingHeroCanvas />
+      <span className="relative z-10 mx-auto grid size-16 place-items-center rounded-2xl bg-[#ffc42d] ring-4 ring-[#ffc42d]/15">
+        <Sparkles className="size-8 text-[#171717]" strokeWidth={2.2} />
       </span>
-      <h2 className="relative mt-4 font-display text-2xl font-black tracking-tight sm:text-3xl">
+      <h2 className="relative z-10 mt-4 font-display text-2xl font-black tracking-tight sm:text-3xl">
         Build your 90-day roadmap
       </h2>
-      <p className="relative mx-auto mt-2 max-w-lg text-sm leading-relaxed text-white/70">
-        We’ll turn your calibration result into a fixed, day-by-day plan — front-loading your weak areas, with practice,
+      <p className="relative z-10 mx-auto mt-2 max-w-lg text-sm leading-relaxed text-white/70">
+        We’ll turn your placement readiness result into a fixed, day-by-day plan — front-loading your weak areas, with practice,
         timed quizzes, weekly mocks and coding, all the way to placement-ready. One day unlocks at a time.
       </p>
       <button
         type="button"
         onClick={onGenerate}
         disabled={generating}
-        className="relative mt-6 inline-flex items-center gap-2 rounded-full bg-orange px-6 py-3 text-sm font-black text-white transition hover:bg-orange/90 disabled:opacity-70"
+        className="relative z-10 mt-6 inline-flex items-center gap-2 rounded-full bg-orange px-6 py-3 text-sm font-black text-[#171717] transition hover:bg-orange/90 disabled:opacity-70"
       >
         {generating ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
         {generating ? 'Generating your plan…' : 'Generate my roadmap'}

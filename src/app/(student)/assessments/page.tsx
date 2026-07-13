@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ProfileLockGate } from '@/components/student/ProfileLockGate';
+import { BriefingHeroCanvas } from '@/components/student/BriefingHeroCanvas';
 import {
   CalendarDays,
   CalendarClock,
@@ -130,21 +131,14 @@ export default function AssessmentsPage() {
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Assessments' }]} />
 
       <ProfileLockGate feature="Assessments">
-      {/* ── Premium navy hero with live stats ─────────────────────────────── */}
+      {/* ── AI-Briefing black hero + golden mesh, with live stats ─────────── */}
       <Reveal>
-        <section data-tour="assess:hero" className="relative mt-4 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] p-6 text-white sm:p-8">
-          <span
-            aria-hidden
-            className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#ffc42d]/20 blur-3xl"
-          />
-          <span
-            aria-hidden
-            className="pointer-events-none absolute -bottom-20 left-1/3 size-56 rounded-full bg-[#2563eb]/20 blur-3xl"
-          />
-          <div className="relative">
+        <section data-tour="assess:hero" className="relative isolate mt-4 overflow-hidden rounded-2xl border border-white/10 p-6 text-white sm:p-8">
+          <BriefingHeroCanvas />
+          <div className="relative z-10">
             <div className="flex items-center gap-3">
-              <span className="grid size-11 place-items-center rounded-2xl border border-white/10 bg-white/5 text-[#ffc42d]">
-                <CalendarDays className="size-5" />
+              <span className="grid size-11 place-items-center rounded-2xl bg-[#ffc42d] ring-4 ring-[#ffc42d]/15">
+                <CalendarDays className="size-5 text-[#171717]" strokeWidth={2.4} />
               </span>
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-white/50">
@@ -489,9 +483,9 @@ function HeroStat({
   className?: string;
 }) {
   return (
-    <div className={cn('flex flex-col rounded-xl border border-white/10 bg-white/5 p-4', className)}>
+    <div className={cn('flex flex-col rounded-xl border border-white/10 bg-white/[0.06] p-4 backdrop-blur transition-colors hover:border-[#ffc42d]/30', className)}>
       <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/40">
-        <Icon className="size-3.5" /> {label}
+        <Icon className="size-3.5 text-[#ffc42d]" /> {label}
       </span>
       <span className="mt-1.5 truncate text-lg font-extrabold leading-none text-white">{value}</span>
       <span className="mt-1 truncate text-[11px] text-white/45">{sub}</span>
