@@ -140,7 +140,7 @@ export default function LeaderboardPage() {
   const visibleRows = showAll ? rest : rest.slice(0, 7);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <div className="space-y-6">
       {/* ── Hero rank card ─────────────────────────────────────────────────── */}
       <section data-tour="lb:rank-hero" className="overflow-hidden rounded-3xl border border-orange/20 bg-gradient-to-br from-orange-50 via-amber-50/60 to-white p-6 sm:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
