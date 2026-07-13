@@ -16,7 +16,31 @@ import { describeError } from '@/lib/api/errors';
 import { Bot, Keyboard, Loader2, Mic, Send, Sparkles, Video, VideoOff, Volume2, VolumeX, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const WHISPER_EVERY_MS = 3500; // progressive re-transcription cadence
+/**
+ * Whisper hallucinates a short phrase repeated over and over when it's fed silence or
+ * background noise ("angry bird sounds angry bird sounds …", "Thank you. Thank you. …").
+ * That garbage was being committed as the candidate's answer even when they said nothing.
+ * Reject a transcript that is mostly one short phrase repeated.
+ */
+function looksHallucinated(raw: string): boolean {
+  const text = raw.trim();
+  if (!text) return false;
+  const words = text.toLowerCase().replace(/[^\w\s]/g, ' ').split(/\s+/).filter(Boolean);
+  if (words.length < 6) return false;
+  // Try phrase lengths 1..4: is the text just this phrase repeated back-to-back?
+  for (let n = 1; n <= 4; n++) {
+    const first = words.slice(0, n).join(' ');
+    let reps = 0;
+    for (let i = 0; i + n <= words.length; i += n) {
+      if (words.slice(i, i + n).join(' ') === first) reps++;
+      else break;
+    }
+    if (reps * n >= words.length * 0.8 && reps >= 3) return true;
+  }
+  // Also catch low lexical diversity (e.g. the same 2 words filling the whole thing).
+  const unique = new Set(words).size;
+  return words.length >= 10 && unique / words.length < 0.25;
+}
 
 /** Minimal browser SpeechRecognition typing (Web Speech API) for instant interim words. */
 interface SpeechRec {
@@ -75,9 +99,9 @@ export function InterviewRunner({ id }: { id: string }) {
   const streamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
-  const lastSentRef = useRef(0);
   const whisperBusyRef = useRef(false);
-  const progressTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  /** Committed Web-Speech transcript for the CURRENT answer (near-real-time, no server). */
+  const srFinalRef = useRef('');
   const recognitionRef = useRef<SpeechRec | null>(null);
   const recordingRef = useRef(false); // sync flag so SR onend can auto-restart while recording
   const voiceOnRef = useRef(voiceOn);
@@ -206,28 +230,36 @@ export function InterviewRunner({ id }: { id: string }) {
     }
   }, []);
 
-  // ── recording + progressive Whisper ──────────────────────────────────────
-  const runWhisper = useCallback(async (final: boolean) => {
-    if (whisperBusyRef.current) return;
-    if (!chunksRef.current.length) return;
-    if (!final && chunksRef.current.length === lastSentRef.current) return; // nothing new
+  // ── final Whisper refinement (ONE pass, on stop) ─────────────────────────
+  //
+  // The old pipeline re-transcribed the ENTIRE growing recording every 3.5s. Each pass
+  // re-uploaded and re-processed all prior audio, so at 30s into an answer it was
+  // transcribing a 30s clip on repeat — the confirmed text lagged 15-30s behind speech
+  // (bug 1), and the partial/near-silent passes are exactly what made Whisper hallucinate
+  // repeated phrases into the answer (bug 3).
+  //
+  // Now: the LIVE transcript comes from the browser's SpeechRecognition (instant, no server
+  // — see startRecording), and Whisper runs ONCE when the candidate stops, purely to refine
+  // the full answer. If Whisper hallucinates or fails, the Web-Speech transcript stands.
+  const runWhisper = useCallback(async () => {
+    if (whisperBusyRef.current || !chunksRef.current.length) return;
     whisperBusyRef.current = true;
-    lastSentRef.current = chunksRef.current.length;
-    if (final) setTranscribing(true);
+    setTranscribing(true);
     try {
       const type = recorderRef.current?.mimeType || 'audio/webm';
       const ext = type.includes('mp4') ? 'mp4' : type.includes('ogg') ? 'ogg' : 'webm';
       const blob = new Blob(chunksRef.current, { type });
       if (blob.size > 1200) {
-        const text = await transcribeAnswer(blob, `answer.${ext}`);
-        // Progressive: only accept if it meaningfully grew (Whisper is stable on a prefix).
-        if (text && (final || text.length >= answerRef.current.length - 4)) setAnswer(text);
+        const text = (await transcribeAnswer(blob, `answer.${ext}`)).trim();
+        // Accept only a clean transcript. A hallucinated repeat, or empty text, leaves the
+        // live Web-Speech answer untouched rather than overwriting it with garbage.
+        if (text && !looksHallucinated(text)) setAnswer(text);
       }
     } catch {
-      /* transient — keep going; the final pass or typing covers it */
+      /* transient — the live Web-Speech transcript already stands; typing is the fallback */
     } finally {
       whisperBusyRef.current = false;
-      if (final) setTranscribing(false);
+      setTranscribing(false);
     }
   }, []);
 
@@ -237,18 +269,20 @@ export function InterviewRunner({ id }: { id: string }) {
     const audio = new MediaStream(stream.getAudioTracks());
     if (!audio.getAudioTracks().length) return;
     chunksRef.current = [];
-    lastSentRef.current = 0;
+    srFinalRef.current = '';
     const mime = ['audio/webm', 'audio/mp4', 'audio/ogg'].find((m) => MediaRecorder.isTypeSupported?.(m));
     const rec = new MediaRecorder(audio, mime ? { mimeType: mime } : undefined);
     recorderRef.current = rec;
     rec.ondataavailable = (e) => e.data.size && chunksRef.current.push(e.data);
-    rec.start(1000); // 1s chunks
+    rec.start(1000); // 1s chunks — buffered for ONE Whisper pass at the end
     setRecording(true);
     recordingRef.current = true;
-    progressTimerRef.current = setInterval(() => void runWhisper(false), WHISPER_EVERY_MS);
 
-    // Instant word-level preview via the browser's SpeechRecognition (grey interim),
-    // running alongside Whisper — Whisper still owns the accurate confirmed text.
+    // Near-real-time transcript via the browser's SpeechRecognition: FINAL segments are
+    // committed to the answer as they're recognised (no server round-trip → no latency),
+    // and non-final words show as a grey interim preview. Whisper refines the whole thing
+    // once at the end. On browsers without SpeechRecognition, the answer fills in on stop
+    // from the single Whisper pass — still far better than the old 15-30s progressive lag.
     const w = window as unknown as {
       SpeechRecognition?: new () => SpeechRec;
       webkitSpeechRecognition?: new () => SpeechRec;
@@ -263,8 +297,11 @@ export function InterviewRunner({ id }: { id: string }) {
         sr.onresult = (e) => {
           let live = '';
           for (let i = e.resultIndex; i < e.results.length; i++) {
-            if (!e.results[i].isFinal) live += e.results[i][0].transcript;
+            const seg = e.results[i][0].transcript;
+            if (e.results[i].isFinal) srFinalRef.current = `${srFinalRef.current} ${seg}`.trim();
+            else live += seg;
           }
+          setAnswer(srFinalRef.current);
           setInterim(live.trim());
         };
         sr.onend = () => {
@@ -296,10 +333,6 @@ export function InterviewRunner({ id }: { id: string }) {
       recognitionRef.current = null;
     }
     setInterim('');
-    if (progressTimerRef.current) {
-      clearInterval(progressTimerRef.current);
-      progressTimerRef.current = null;
-    }
     const rec = recorderRef.current;
     if (!rec || rec.state === 'inactive') {
       setRecording(false);
@@ -310,7 +343,7 @@ export function InterviewRunner({ id }: { id: string }) {
       rec.stop();
     });
     setRecording(false);
-    await runWhisper(true); // final accurate pass
+    await runWhisper(); // single accurate refinement pass
   }, [runWhisper]);
 
   // Speak each new question, then auto-arm recording when it finishes.
@@ -342,7 +375,6 @@ export function InterviewRunner({ id }: { id: string }) {
   useEffect(
     () => () => {
       stopSpeaking();
-      if (progressTimerRef.current) clearInterval(progressTimerRef.current);
       recordingRef.current = false;
       try {
         recognitionRef.current?.stop();
@@ -413,7 +445,6 @@ export function InterviewRunner({ id }: { id: string }) {
   const quit = () => {
     if (!window.confirm('Leave this interview? Your progress is saved and you can resume it.')) return;
     stopSpeaking();
-    if (progressTimerRef.current) clearInterval(progressTimerRef.current);
     try {
       if (recorderRef.current && recorderRef.current.state !== 'inactive') recorderRef.current.stop();
     } catch {
