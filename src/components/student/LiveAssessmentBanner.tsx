@@ -92,7 +92,7 @@ export function LiveAssessmentBanner() {
               </span>
             )}
             <h3 className="mt-1 truncate text-lg font-black tracking-tight text-navy sm:text-xl">{a.title}</h3>
-            <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs font-semibold text-slate-500">
+            <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs font-semibold text-slate-600">
               <span className="truncate">{a.companyName}</span>
               <span className="flex items-center gap-1"><Clock className="size-3" /> {a.durationMinutes}m</span>
               {a.proctored ? (
@@ -109,7 +109,7 @@ export function LiveAssessmentBanner() {
 
         <div className="flex shrink-0 items-center gap-3">
           {live.length > 1 ? (
-            <Link href="/assessments" className="text-xs font-bold text-slate-500 hover:text-navy">
+            <Link href="/assessments" className="text-xs font-bold text-slate-600 hover:text-navy">
               +{live.length - 1} more live
             </Link>
           ) : null}

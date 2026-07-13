@@ -33,13 +33,13 @@ export default function AdminAnalyticsPage() {
     <div className="space-y-6">
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Platform Admin', href: '/admin/dashboard' }, { label: 'Platform Analytics' }]} />
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Insights</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Insights</p>
         <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Platform Analytics</h1>
-        <p className="mt-1 text-sm text-slate-500">Distributions and trends across the platform - headline KPIs live on the dashboard.</p>
+        <p className="mt-1 text-sm text-slate-600">Distributions and trends across the platform - headline KPIs live on the dashboard.</p>
       </header>
 
       {loading ? (
-        <div className="flex items-center justify-center py-24"><Loader2 className="size-7 animate-spin text-slate-400" /></div>
+        <div className="flex items-center justify-center py-24"><Loader2 className="size-7 animate-spin text-slate-500" /></div>
       ) : error ? (
         <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">{error}</div>
       ) : (
@@ -58,7 +58,7 @@ export default function AdminAnalyticsPage() {
               {stats?.signups && stats.signups.length > 0 ? (
                 <AreaChart id="signups-admin-analytics" color="#f5b400" data={stats.signups} />
               ) : (
-                <p className="text-sm text-slate-400">No signup data.</p>
+                <p className="text-sm text-slate-500">No signup data.</p>
               )}
             </Panel>
             <Panel title="Question bank by difficulty">
@@ -73,7 +73,7 @@ export default function AdminAnalyticsPage() {
                   centerBottom="Questions"
                 />
               ) : (
-                <p className="text-sm text-slate-400">No question data.</p>
+                <p className="text-sm text-slate-500">No question data.</p>
               )}
             </Panel>
           </div>
@@ -81,7 +81,7 @@ export default function AdminAnalyticsPage() {
           <div className="grid gap-6 lg:grid-cols-2">
             <Panel title="Top companies by student registrations">
               {topCompanies.length === 0 ? (
-                <p className="text-sm text-slate-400">No company activity yet.</p>
+                <p className="text-sm text-slate-500">No company activity yet.</p>
               ) : (
                 <div className="space-y-3">
                   {topCompanies.map((c) => (

@@ -56,13 +56,13 @@ export default function AuditLogsPage() {
       />
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Security</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Security</p>
           <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Audit log</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-600">
             {total.toLocaleString()} recorded events · every privileged write, append-only
           </p>
         </div>
-        <ScrollText className="size-6 text-slate-300" />
+        <ScrollText className="size-6 text-slate-400" />
       </header>
 
       <div className="relative w-56">
@@ -81,22 +81,22 @@ export default function AuditLogsPage() {
             </option>
           ))}
         </select>
-        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
       </div>
 
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="size-6 animate-spin text-slate-400" />
+            <Loader2 className="size-6 animate-spin text-slate-500" />
           </div>
         ) : error ? (
           <div className="py-16 text-center text-sm text-red-500">{error}</div>
         ) : rows.length === 0 ? (
-          <div className="py-16 text-center text-sm text-slate-400">No audit events found.</div>
+          <div className="py-16 text-center text-sm text-slate-500">No audit events found.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-sm">
-              <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+              <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                 <tr>
                   <th className="px-4 py-3">When</th>
                   <th className="px-4 py-3">Actor</th>
@@ -112,7 +112,7 @@ export default function AuditLogsPage() {
                       onClick={() => setExpanded(expanded === r.id ? null : r.id)}
                       className="cursor-pointer hover:bg-slate-50"
                     >
-                      <td className="px-4 py-3 text-xs text-slate-500">
+                      <td className="px-4 py-3 text-xs text-slate-600">
                         {new Date(r.createdAt).toLocaleString('en-IN', {
                           day: 'numeric',
                           month: 'short',
@@ -125,7 +125,7 @@ export default function AuditLogsPage() {
                           {r.actorName ?? r.actorEmail ?? (r.actorId ? 'Unknown' : 'System')}
                         </p>
                         {r.actorEmail && r.actorName && (
-                          <p className="text-xs text-slate-400">{r.actorEmail}</p>
+                          <p className="text-xs text-slate-500">{r.actorEmail}</p>
                         )}
                       </td>
                       <td className="px-4 py-3">
@@ -133,7 +133,7 @@ export default function AuditLogsPage() {
                           {ACTION_LABEL[r.action] ?? r.action}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-xs text-slate-500">
+                      <td className="px-4 py-3 text-xs text-slate-600">
                         {r.entity ? (
                           <span>
                             {r.entity}
@@ -143,7 +143,7 @@ export default function AuditLogsPage() {
                           '-'
                         )}
                       </td>
-                      <td className="px-4 py-3 text-xs tabular-nums text-slate-400">{r.ip ?? '-'}</td>
+                      <td className="px-4 py-3 text-xs tabular-nums text-slate-500">{r.ip ?? '-'}</td>
                     </tr>
                     {expanded === r.id && (
                       <tr className="bg-slate-50/60">
@@ -164,7 +164,7 @@ export default function AuditLogsPage() {
 
         {totalPages > 1 && (
           <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3">
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500">
               Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, total)} of {total}
             </p>
             <div className="flex gap-2">

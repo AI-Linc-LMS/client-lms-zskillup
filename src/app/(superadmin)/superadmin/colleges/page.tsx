@@ -29,13 +29,13 @@ export default function AdminCollegesPage() {
       />
 
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
           Tenants
         </p>
         <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">
           Colleges
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-600">
           Onboard a new partner institution or suspend an existing one. Suspended
           colleges keep their data - student profiles aren&rsquo;t deleted - but new
           sign-ins from their cohort are blocked.

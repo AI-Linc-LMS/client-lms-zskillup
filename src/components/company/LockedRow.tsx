@@ -53,7 +53,7 @@ export function LockedRow({
       )}
     >
       {children}
-      <Lock className="size-4 shrink-0 text-slate-400" aria-hidden="true" />
+      <Lock className="size-4 shrink-0 text-slate-500" aria-hidden="true" />
     </button>
   );
 }

@@ -10,7 +10,7 @@ export default function NotFound() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background px-6 text-center">
       <BrandLogo variant="dark" className="h-7" />
-      <span className="mt-10 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+      <span className="mt-10 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
         Error 404
       </span>
       <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-navy sm:text-4xl">

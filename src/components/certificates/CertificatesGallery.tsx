@@ -267,17 +267,17 @@ function CertificateCard({
                 {theme.metalLabel}
               </span>
             </div>
-            <p className="text-xs text-slate-400">{cert.xp.toLocaleString()} XP</p>
+            <p className="text-xs text-slate-500">{cert.xp.toLocaleString()} XP</p>
           </div>
           {cert.unlocked ? (
             <button onClick={onOpen} className="inline-flex shrink-0 items-center gap-1 rounded-full bg-navy px-3 py-1.5 text-xs font-bold text-white transition hover:bg-navy/90">
               <Download className="size-3.5" /> Get
             </button>
           ) : (
-            <Lock className="size-4 shrink-0 text-slate-300" />
+            <Lock className="size-4 shrink-0 text-slate-400" />
           )}
         </div>
-        <p className="mt-1 line-clamp-1 text-[11px] text-slate-400">{cert.tagline}</p>
+        <p className="mt-1 line-clamp-1 text-[11px] text-slate-500">{cert.tagline}</p>
       </div>
     </div>
   );
@@ -356,7 +356,7 @@ function CertificateModal({
     <div className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto p-4">
       <div aria-hidden onClick={onClose} className="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" />
       <div className="relative my-auto w-full max-w-[940px] rounded-3xl border border-slate-200 bg-white p-4 shadow-2xl sm:p-6">
-        <button onClick={onClose} className="absolute right-3 top-3 z-10 grid size-8 place-items-center rounded-full bg-white/90 text-slate-500 shadow ring-1 ring-slate-200 transition hover:text-navy" aria-label="Close">
+        <button onClick={onClose} className="absolute right-3 top-3 z-10 grid size-8 place-items-center rounded-full bg-white/90 text-slate-600 shadow ring-1 ring-slate-200 transition hover:text-navy" aria-label="Close">
           <X className="size-4" />
         </button>
 
@@ -375,7 +375,7 @@ function CertificateModal({
         {error && <p className="mt-3 text-center text-sm font-semibold text-red-500">{error}</p>}
 
         <div className="mt-4 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
-          <div className="flex items-center gap-2 text-xs text-slate-500">
+          <div className="flex items-center gap-2 text-xs text-slate-600">
             <ShieldCheck className="size-4 text-emerald-500" />
             <span>
               Certificate ID <strong className="font-mono text-navy">{issued?.certificateId ?? '…'}</strong>

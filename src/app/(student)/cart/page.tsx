@@ -123,11 +123,11 @@ export default function CartPage() {
         </div>
       ) : count === 0 ? (
         <div className="mx-auto mt-8 max-w-lg rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm">
-          <div className="mx-auto grid size-12 place-items-center rounded-2xl bg-slate-100 text-slate-400">
+          <div className="mx-auto grid size-12 place-items-center rounded-2xl bg-slate-100 text-slate-500">
             <ShoppingCart className="size-6" />
           </div>
           <p className="mt-4 font-bold text-navy">Your cart is empty</p>
-          <p className="mt-1 text-sm text-slate-500">Choose a plan to start unlocking your preparation.</p>
+          <p className="mt-1 text-sm text-slate-600">Choose a plan to start unlocking your preparation.</p>
           <Link href="/shop" className="mt-6 inline-block rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white">
             Explore Plans
           </Link>
@@ -141,7 +141,7 @@ export default function CartPage() {
               </span>
               <div>
                 <h1 className="text-2xl font-black tracking-tight text-navy">Review Your Preparation Plan</h1>
-                <p className="text-sm text-slate-500">Review your selections before checkout.</p>
+                <p className="text-sm text-slate-600">Review your selections before checkout.</p>
               </div>
             </div>
             <PlanPill tone="emerald">{hasPlatform ? 'Full Platform' : '100% Custom Plan'}</PlanPill>
@@ -160,7 +160,7 @@ export default function CartPage() {
                         <g.icon className="size-5" />
                       </span>
                       <h2 className="flex-1 text-sm font-black text-navy">
-                        {g.title} <span className="text-slate-400">({rows.length})</span>
+                        {g.title} <span className="text-slate-500">({rows.length})</span>
                       </h2>
                     </div>
                     <div className="space-y-3">
@@ -174,7 +174,7 @@ export default function CartPage() {
                           >
                             <div className="min-w-0 flex-1">
                               <p className="truncate font-bold text-navy">{i.label}</p>
-                              <p className="text-xs uppercase tracking-wide text-slate-400">
+                              <p className="text-xs uppercase tracking-wide text-slate-500">
                                 {i.scope === EntitlementScope.PLATFORM
                                   ? 'All-access'
                                   : `${i.scope.charAt(0)}${i.scope.slice(1).toLowerCase()} access`}
@@ -189,7 +189,7 @@ export default function CartPage() {
                                   className={`rounded-md px-2.5 py-1 text-xs font-bold transition ${
                                     i.period === p.period
                                       ? 'bg-indigo-600 text-white'
-                                      : 'text-slate-500 hover:text-navy'
+                                      : 'text-slate-600 hover:text-navy'
                                   }`}
                                 >
                                   {p.label}
@@ -202,7 +202,7 @@ export default function CartPage() {
                             <button
                               type="button"
                               onClick={() => remove(key)}
-                              className="rounded-lg p-2 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600"
+                              className="rounded-lg p-2 text-slate-500 transition hover:bg-rose-50 hover:text-rose-600"
                               aria-label={`Remove ${i.label}`}
                             >
                               <Trash2 className="size-4" />
@@ -222,7 +222,7 @@ export default function CartPage() {
               {/* Footer - subtotal + pay */}
               <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-slate-500">
+                  <span className="text-sm font-semibold text-slate-600">
                     Subtotal ({count} item{count === 1 ? '' : 's'})
                   </span>
                   <span className="text-2xl font-black tabular-nums text-navy">{formatPrice(total, 'INR')}</span>
@@ -241,7 +241,7 @@ export default function CartPage() {
                   {busy ? <Loader2 className="size-5 animate-spin" /> : <Lock className="size-5" />}
                   {busy ? 'Opening checkout…' : 'Proceed to Payment'}
                 </button>
-                <p className="mt-2.5 flex items-center justify-center gap-1.5 text-center text-xs text-slate-400">
+                <p className="mt-2.5 flex items-center justify-center gap-1.5 text-center text-xs text-slate-500">
                   <ShieldCheck className="size-3.5 text-emerald-500" /> Secured by Razorpay · 256-bit SSL Encrypted
                 </p>
               </div>
@@ -264,11 +264,11 @@ export default function CartPage() {
                 </dl>
                 <div className="mt-4 space-y-2 border-t border-slate-100 pt-4 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Subtotal</span>
+                    <span className="text-slate-600">Subtotal</span>
                     <span className="font-bold tabular-nums text-navy">{formatPrice(total, 'INR')}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">GST (Included)</span>
+                    <span className="text-slate-600">GST (Included)</span>
                     <span className="font-bold tabular-nums text-navy">₹0</span>
                   </div>
                 </div>
@@ -324,7 +324,7 @@ export default function CartPage() {
 
               <Link
                 href="/shop"
-                className="flex items-center justify-center gap-1.5 text-sm font-semibold text-slate-500 transition hover:text-navy"
+                className="flex items-center justify-center gap-1.5 text-sm font-semibold text-slate-600 transition hover:text-navy"
               >
                 Add more to your plan <ArrowRight className="size-4" />
               </Link>
@@ -339,7 +339,7 @@ export default function CartPage() {
 function Row({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="flex items-center gap-2 text-slate-500">
+      <span className="flex items-center gap-2 text-slate-600">
         {icon} {label}
       </span>
       <span className="font-bold tabular-nums text-navy">{value}</span>

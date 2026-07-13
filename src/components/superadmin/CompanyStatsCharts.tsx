@@ -23,13 +23,13 @@ export function CompanyStatsCharts() {
   if (stats === null) {
     return (
       <div className="grid h-56 place-items-center rounded-2xl border border-slate-200 bg-white">
-        <Loader2 className="size-6 animate-spin text-slate-400" />
+        <Loader2 className="size-6 animate-spin text-slate-500" />
       </div>
     );
   }
   if (stats.length === 0) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-600">
         No company data yet.
       </div>
     );
@@ -67,7 +67,7 @@ export function CompanyStatsCharts() {
               <div key={c.id}>
                 <div className="mb-1 flex items-center justify-between text-xs">
                   <span className="font-semibold text-navy">{c.name}</span>
-                  <span className="font-bold tabular-nums text-slate-500">
+                  <span className="font-bold tabular-nums text-slate-600">
                     {c.registrations}
                     {c.assessments > 0 ? (
                       <span className="ml-2 font-medium text-violet-500">· {c.assessments} drive{c.assessments === 1 ? '' : 's'}</span>
@@ -93,7 +93,7 @@ export function CompanyStatsCharts() {
           <h3 className="flex items-center gap-2 text-sm font-bold text-navy">
             <ClipboardList className="size-4 text-emerald-500" /> Question-bank coverage
           </h3>
-          <p className="mt-1 text-[11px] text-slate-400">
+          <p className="mt-1 text-[11px] text-slate-500">
             Practice questions <span className="text-emerald-600">▮</span> + coding{' '}
             <span className="text-indigo-500">▮</span> per company.
           </p>
@@ -104,7 +104,7 @@ export function CompanyStatsCharts() {
                 <div key={c.id}>
                   <div className="mb-1 flex items-center justify-between text-xs">
                     <span className="font-semibold text-navy">{c.name}</span>
-                    <span className="font-bold tabular-nums text-slate-500">
+                    <span className="font-bold tabular-nums text-slate-600">
                       {c.questionCount.toLocaleString()} · {c.codingCount}
                     </span>
                   </div>
@@ -122,7 +122,7 @@ export function CompanyStatsCharts() {
                       transition={{ duration: 0.7, delay: i * 0.05 + 0.1 }}
                     />
                   </div>
-                  {total === 0 ? <span className="text-[10px] text-slate-300">no bank yet</span> : null}
+                  {total === 0 ? <span className="text-[10px] text-slate-400">no bank yet</span> : null}
                 </div>
               );
             })}
@@ -148,7 +148,7 @@ function Kpi({
     <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3.5">
       <Icon className={`size-4 ${tone}`} />
       <p className={`mt-2 text-2xl font-black tabular-nums ${tone}`}>{value.toLocaleString()}</p>
-      <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
+      <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</p>
     </div>
   );
 }

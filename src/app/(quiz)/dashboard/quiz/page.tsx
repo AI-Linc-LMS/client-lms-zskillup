@@ -44,7 +44,7 @@ function QuizLanding() {
           <ArrowLeft className="size-3.5" aria-hidden="true" />
           Exit to dashboard
         </Link>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-slate-500 shadow-sm">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-slate-600 shadow-sm">
           <Sparkles className="size-3 text-orange" aria-hidden="true" /> Assessment mode
         </span>
       </div>

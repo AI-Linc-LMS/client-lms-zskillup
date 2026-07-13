@@ -40,7 +40,7 @@ export function TpoTopBar() {
       <TpoMobileNav />
       <div className="min-w-0 flex-1">
         <h1 className="truncate text-lg font-black tracking-tight text-navy">{title}</h1>
-        <p className="hidden truncate text-xs text-slate-400 sm:block">
+        <p className="hidden truncate text-xs text-slate-500 sm:block">
           Welcome back - here&apos;s what&apos;s happening across{' '}
           {summary?.collegeName ?? 'your campus'}.
         </p>
@@ -49,7 +49,7 @@ export function TpoTopBar() {
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         {/* Batch selector - scopes the whole console */}
         <div className="relative hidden sm:block">
-          <Users className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
+          <Users className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-slate-500" />
           <select
             value={cohortId}
             onChange={(e) => setCohortId(e.target.value)}
@@ -63,12 +63,12 @@ export function TpoTopBar() {
               </option>
             ))}
           </select>
-          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
+          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2 text-slate-500" />
         </div>
 
         {/* Data-freshness chip (analytics are point-in-time; date-range trends land with the snapshot pipeline) */}
-        <span className="hidden items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-semibold text-slate-500 lg:inline-flex">
-          <CalendarDays className="size-3.5 text-slate-400" /> As of {asOf}
+        <span className="hidden items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-semibold text-slate-600 lg:inline-flex">
+          <CalendarDays className="size-3.5 text-slate-500" /> As of {asOf}
         </span>
 
         <NotificationsBell />

@@ -68,7 +68,7 @@ export default function CollegeRequestDetailPage({ params }: { params: Promise<{
         ]}
       />
 
-      <Link href="/admin/college-requests" className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-navy">
+      <Link href="/admin/college-requests" className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-navy">
         <ArrowLeft className="size-4" /> All requests
       </Link>
 
@@ -76,7 +76,7 @@ export default function CollegeRequestDetailPage({ params }: { params: Promise<{
         <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700 ring-1 ring-red-200">{loadError}</p>
       ) : !req ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="size-6 animate-spin text-slate-400" />
+          <Loader2 className="size-6 animate-spin text-slate-500" />
         </div>
       ) : (
         <>
@@ -263,7 +263,7 @@ function StudentImportPanel({
           {!imported ? (
             <div className="mt-3 flex flex-wrap items-end gap-2">
               <label className="block">
-                <span className="text-[11px] font-semibold text-slate-500">Cohort name (optional)</span>
+                <span className="text-[11px] font-semibold text-slate-600">Cohort name (optional)</span>
                 <input
                   value={cohortName}
                   onChange={(e) => setCohortName(e.target.value)}
@@ -297,13 +297,13 @@ function ReadOnlyRequest({ req }: { req: CollegeRequestDetail }) {
         <dl className="grid gap-3 sm:grid-cols-2">
           {rows.map(([k, v]) => (
             <div key={k}>
-              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">{k}</dt>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">{k}</dt>
               <dd className="mt-0.5 text-sm text-navy">{v}</dd>
             </div>
           ))}
         </dl>
         {req.status === 'SUBMITTED' ? (
-          <p className="mt-4 text-xs text-slate-500">Awaiting Super Admin review - you&apos;ll be able to edit again if it&apos;s sent back.</p>
+          <p className="mt-4 text-xs text-slate-600">Awaiting Super Admin review - you&apos;ll be able to edit again if it&apos;s sent back.</p>
         ) : null}
       </section>
 
@@ -311,7 +311,7 @@ function ReadOnlyRequest({ req }: { req: CollegeRequestDetail }) {
         <h2 className="text-sm font-bold text-navy">Student list ({req.students.length})</h2>
         <div className="mt-3 max-h-72 overflow-auto rounded-lg border border-slate-200">
           <table className="w-full text-xs">
-            <thead className="sticky top-0 bg-slate-50 text-[10px] uppercase tracking-widest text-slate-400">
+            <thead className="sticky top-0 bg-slate-50 text-[10px] uppercase tracking-widest text-slate-500">
               <tr>
                 <th className="px-3 py-1.5 text-left">Email</th>
                 <th className="px-3 py-1.5 text-left">Name</th>
@@ -323,7 +323,7 @@ function ReadOnlyRequest({ req }: { req: CollegeRequestDetail }) {
                 <tr key={`${s.email}-${i}`} className="border-t border-slate-100">
                   <td className="px-3 py-1.5 font-medium text-navy">{s.email}</td>
                   <td className="px-3 py-1.5 text-slate-600">{s.fullName ?? '-'}</td>
-                  <td className="px-3 py-1.5 text-slate-500">{s.rollNumber ?? '-'}</td>
+                  <td className="px-3 py-1.5 text-slate-600">{s.rollNumber ?? '-'}</td>
                 </tr>
               ))}
             </tbody>

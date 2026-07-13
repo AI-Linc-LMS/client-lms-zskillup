@@ -114,11 +114,11 @@ export default function AdminTipsPage() {
 
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
             Super Admin · ZSkillup
           </p>
           <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Today&apos;s Tips</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-600">
             {tips.length} tips · rotated per student per day on the dashboard
           </p>
         </div>
@@ -139,7 +139,7 @@ export default function AdminTipsPage() {
         <div className="rounded-2xl border border-slate-200 bg-white p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-base font-bold text-navy">{editing ? 'Edit tip' : 'New tip'}</h2>
-            <button onClick={() => setDraft(null)} className="text-slate-400 hover:text-slate-600">
+            <button onClick={() => setDraft(null)} className="text-slate-500 hover:text-slate-600">
               <X className="size-5" />
             </button>
           </div>
@@ -149,7 +149,7 @@ export default function AdminTipsPage() {
                 value={draft.code ?? ''}
                 disabled={!!editing}
                 onChange={(e) => setDraft({ ...draft, code: e.target.value })}
-                className={`${INPUT} disabled:bg-slate-50 disabled:text-slate-400`}
+                className={`${INPUT} disabled:bg-slate-50 disabled:text-slate-500`}
                 placeholder="consistency-beats-cramming"
               />
             </Field>
@@ -241,10 +241,10 @@ export default function AdminTipsPage() {
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="size-6 animate-spin text-slate-400" />
+            <Loader2 className="size-6 animate-spin text-slate-500" />
           </div>
         ) : tips.length === 0 ? (
-          <div className="py-16 text-center text-sm text-slate-400">No tips yet - create one.</div>
+          <div className="py-16 text-center text-sm text-slate-500">No tips yet - create one.</div>
         ) : (
           <ul className="divide-y divide-slate-100">
             {tips.map((t) => (
@@ -256,37 +256,37 @@ export default function AdminTipsPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="font-semibold text-navy">{t.title}</p>
                     {t.category ? (
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
                         {t.category}
                       </span>
                     ) : null}
                     <span
                       className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                        t.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-400'
+                        t.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
                       }`}
                     >
                       {t.isActive ? 'Active' : 'Inactive'}
                     </span>
-                    <span className="text-[10px] text-slate-400">prio {t.priority}</span>
+                    <span className="text-[10px] text-slate-500">prio {t.priority}</span>
                   </div>
-                  <p className="mt-0.5 line-clamp-2 text-sm text-slate-500">{t.body}</p>
+                  <p className="mt-0.5 line-clamp-2 text-sm text-slate-600">{t.body}</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   <button
                     onClick={() => toggleActive(t)}
-                    className="rounded-lg px-2.5 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100"
+                    className="rounded-lg px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100"
                   >
                     {t.isActive ? 'Disable' : 'Enable'}
                   </button>
                   <button
                     onClick={() => openEdit(t)}
-                    className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-navy"
+                    className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-navy"
                   >
                     <Pencil className="size-4" />
                   </button>
                   <button
                     onClick={() => remove(t)}
-                    className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-500"
+                    className="rounded-lg p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-500"
                   >
                     <Trash2 className="size-4" />
                   </button>
@@ -303,7 +303,7 @@ export default function AdminTipsPage() {
 function Field({ label, full, children }: { label: string; full?: boolean; children: React.ReactNode }) {
   return (
     <label className={`flex flex-col gap-1 ${full ? 'sm:col-span-2' : ''}`}>
-      <span className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">{label}</span>
+      <span className="text-[11px] font-semibold uppercase tracking-widest text-slate-500">{label}</span>
       {children}
     </label>
   );

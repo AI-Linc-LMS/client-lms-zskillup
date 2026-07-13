@@ -59,13 +59,13 @@ export function PremiumLockGate({
           </span>
           {/* Leads with what they GET, not with the word "locked". */}
           <h2 className="mt-4 text-lg font-black text-navy">{feature} is a Premium feature</h2>
-          <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
+          <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
             Upgrade to unlock it - everything else on your plan stays exactly as it is.
           </p>
 
           <ul className="mx-auto mt-4 max-w-xs space-y-1.5 text-left">
             {INCLUDED.map((line) => (
-              <li key={line} className="flex items-start gap-2 text-xs text-slate-500">
+              <li key={line} className="flex items-start gap-2 text-xs text-slate-600">
                 <Check className="mt-0.5 size-3.5 shrink-0 text-emerald-500" />
                 <span>{line}</span>
               </li>

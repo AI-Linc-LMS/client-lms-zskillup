@@ -73,14 +73,14 @@ export function CodingProblemsList({ company, topic }: { company?: string; topic
 
   if (errored) {
     return (
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-10 text-center text-sm text-slate-500 shadow-sm">
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-10 text-center text-sm text-slate-600 shadow-sm">
         Couldn&apos;t load problems. Please refresh.
       </div>
     );
   }
   if (!problems) {
     return (
-      <div className="flex h-48 items-center justify-center text-slate-400">
+      <div className="flex h-48 items-center justify-center text-slate-500">
         <Loader2 className="size-6 animate-spin" />
       </div>
     );
@@ -88,9 +88,9 @@ export function CodingProblemsList({ company, topic }: { company?: string; topic
   if (problems.length === 0) {
     return (
       <div className="rounded-2xl border border-slate-200/80 bg-white p-10 text-center shadow-sm">
-        <Code2 className="mx-auto mb-3 size-8 text-slate-300" />
+        <Code2 className="mx-auto mb-3 size-8 text-slate-400" />
         <p className="text-sm font-semibold text-navy">No coding problems yet</p>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-600">
           {topic
             ? `No coding problems tagged “${topic}” yet - check back soon.`
             : company
@@ -119,13 +119,13 @@ export function CodingProblemsList({ company, topic }: { company?: string; topic
               <p className="text-sm font-bold text-navy">
                 {solvedCount} / {filtered.length} solved
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-600">
                 Earn XP for every problem you solve for the first time.
               </p>
             </div>
             {/* Search - filter by problem title or tag */}
             <div data-tour="coding:search" className="relative w-full sm:w-64">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
@@ -140,7 +140,7 @@ export function CodingProblemsList({ company, topic }: { company?: string; topic
 
       {filtered.length === 0 && (
         <div className="rounded-2xl border border-slate-200/80 bg-white p-10 text-center shadow-sm">
-          <Search className="mx-auto mb-3 size-8 text-slate-300" />
+          <Search className="mx-auto mb-3 size-8 text-slate-400" />
           <p className="text-sm font-semibold text-navy">No problems match “{q}”</p>
           <button
             type="button"
@@ -161,7 +161,7 @@ export function CodingProblemsList({ company, topic }: { company?: string; topic
               <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-indigo-600 ring-1 ring-inset ring-indigo-100">
                 <Code2 className="size-3.5" /> {topic}
               </span>
-              <span className="text-[11px] font-semibold text-slate-400">
+              <span className="text-[11px] font-semibold text-slate-500">
                 {groupSolved}/{items.length} solved
               </span>
               <span className="h-px flex-1 bg-slate-100" />
@@ -212,7 +212,7 @@ function ProblemCard({ p }: { p: CodingProblemListItem }) {
             <CheckCircle2 className="size-3.5" /> Solved
           </span>
         ) : (
-          <Code2 className="size-5 text-slate-300" />
+          <Code2 className="size-5 text-slate-400" />
         )}
       </div>
       <h3 className="relative mt-3 text-[15px] font-extrabold leading-snug text-navy">{p.title}</h3>
@@ -223,7 +223,7 @@ function ProblemCard({ p }: { p: CodingProblemListItem }) {
               key={t}
               className={cn(
                 'rounded-md px-2 py-0.5 text-[10px] font-medium',
-                p.solved ? 'bg-emerald-100/70 text-emerald-700' : 'bg-slate-100 text-slate-500',
+                p.solved ? 'bg-emerald-100/70 text-emerald-700' : 'bg-slate-100 text-slate-600',
               )}
             >
               {t}
@@ -236,7 +236,7 @@ function ProblemCard({ p }: { p: CodingProblemListItem }) {
         <span
           className={cn(
             'inline-flex items-center gap-1 text-[12px] font-bold group-hover:text-navy',
-            p.solved ? 'text-emerald-600' : 'text-slate-400',
+            p.solved ? 'text-emerald-600' : 'text-slate-500',
           )}
         >
           {p.solved ? 'Review' : 'Solve'}{' '}

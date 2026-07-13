@@ -99,7 +99,7 @@ export function MagicLoader({ messages = LOADER_MESSAGES }: { messages?: string[
             key={i}
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-xs text-slate-500"
+            className="text-xs text-slate-600"
           >
             {messages[i]}
           </motion.p>

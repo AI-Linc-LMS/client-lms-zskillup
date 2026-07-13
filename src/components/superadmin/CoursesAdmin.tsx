@@ -467,7 +467,7 @@ export function CoursesAdmin() {
               setMode('list');
               setDetail(null);
             }}
-            className="flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors hover:text-navy"
+            className="flex items-center gap-1.5 text-sm font-medium text-slate-600 transition-colors hover:text-navy"
           >
             <X className="size-4" aria-hidden="true" /> Back to courses
           </button>
@@ -487,7 +487,7 @@ export function CoursesAdmin() {
 
         {detailLoading || !detail ? (
           <div className="flex justify-center rounded-xl border border-slate-200 bg-white p-12">
-            <Loader2 className="size-5 animate-spin text-slate-400" aria-hidden="true" />
+            <Loader2 className="size-5 animate-spin text-slate-500" aria-hidden="true" />
           </div>
         ) : (
           <>
@@ -495,11 +495,11 @@ export function CoursesAdmin() {
             <div className="rounded-2xl border border-slate-200 bg-white p-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                     {CATEGORY_LABEL[detail.category] ?? detail.category}
                   </p>
                   <h2 className="mt-1 text-lg font-bold text-navy">{detail.title}</h2>
-                  <p className="mt-0.5 text-xs text-slate-400">/{detail.slug}</p>
+                  <p className="mt-0.5 text-xs text-slate-500">/{detail.slug}</p>
                 </div>
                 {detail.isPublished ? (
                   <StatusPill tone="positive" label="Published" />
@@ -526,7 +526,7 @@ export function CoursesAdmin() {
 
             {/* Modules */}
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                 Curriculum
               </p>
               <Button size="sm" onClick={startAddModule} disabled={!!moduleDraft || !!lessonDraft}>
@@ -560,7 +560,7 @@ export function CoursesAdmin() {
                   <Layers className="size-5" aria-hidden="true" />
                 </span>
                 <p className="mt-3 text-sm font-semibold text-navy">No modules yet.</p>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-slate-600">
                   Add your first module to start building the curriculum.
                 </p>
               </div>
@@ -592,7 +592,7 @@ export function CoursesAdmin() {
                         <div className="min-w-0">
                           <p className="text-sm font-bold text-navy">{m.title}</p>
                           {m.summary ? (
-                            <p className="mt-0.5 text-xs text-slate-500">{m.summary}</p>
+                            <p className="mt-0.5 text-xs text-slate-600">{m.summary}</p>
                           ) : null}
                         </div>
                       </div>
@@ -602,7 +602,7 @@ export function CoursesAdmin() {
                           onClick={() => startEditModule(m)}
                           disabled={!!moduleDraft || !!lessonDraft}
                           aria-label={`Edit module ${m.title}`}
-                          className="grid size-8 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-slate-200 hover:text-navy disabled:opacity-40"
+                          className="grid size-8 place-items-center rounded-lg text-slate-500 transition-colors hover:bg-slate-200 hover:text-navy disabled:opacity-40"
                         >
                           <Pencil className="size-4" aria-hidden="true" />
                         </button>
@@ -611,7 +611,7 @@ export function CoursesAdmin() {
                           onClick={() => removeModule(m)}
                           disabled={busyId === m.id || !!moduleDraft || !!lessonDraft}
                           aria-label={`Delete module ${m.title}`}
-                          className="grid size-8 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
+                          className="grid size-8 place-items-center rounded-lg text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
                         >
                           <Trash2 className="size-4" aria-hidden="true" />
                         </button>
@@ -639,7 +639,7 @@ export function CoursesAdmin() {
                         >
                           <div className="flex min-w-0 items-center gap-2.5">
                             <GripVertical
-                              className="size-4 shrink-0 text-slate-300"
+                              className="size-4 shrink-0 text-slate-400"
                               aria-hidden="true"
                             />
                             <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-orange/10 text-[#f5b400] ring-1 ring-orange/20">
@@ -647,7 +647,7 @@ export function CoursesAdmin() {
                             </span>
                             <div className="min-w-0">
                               <p className="truncate text-sm font-medium text-navy">{l.title}</p>
-                              <p className="text-[11px] text-slate-400">
+                              <p className="text-[11px] text-slate-500">
                                 {KIND_LABEL[l.kind]} · {l.durationMinutes} min
                                 {l.isFree ? ' · Free preview' : ''}
                               </p>
@@ -659,7 +659,7 @@ export function CoursesAdmin() {
                               onClick={() => startEditLesson(m, l.id)}
                               disabled={!!moduleDraft || !!lessonDraft}
                               aria-label={`Edit lesson ${l.title}`}
-                              className="grid size-8 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-navy disabled:opacity-40"
+                              className="grid size-8 place-items-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-navy disabled:opacity-40"
                             >
                               <Pencil className="size-4" aria-hidden="true" />
                             </button>
@@ -668,7 +668,7 @@ export function CoursesAdmin() {
                               onClick={() => removeLesson(m, l.id, l.title)}
                               disabled={busyId === l.id || !!moduleDraft || !!lessonDraft}
                               aria-label={`Delete lesson ${l.title}`}
-                              className="grid size-8 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
+                              className="grid size-8 place-items-center rounded-lg text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
                             >
                               <Trash2 className="size-4" aria-hidden="true" />
                             </button>
@@ -693,7 +693,7 @@ export function CoursesAdmin() {
                         type="button"
                         onClick={() => startAddLesson(m)}
                         disabled={!!moduleDraft || !!lessonDraft}
-                        className="flex w-full items-center gap-2 px-5 py-3 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-navy disabled:opacity-40"
+                        className="flex w-full items-center gap-2 px-5 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-navy disabled:opacity-40"
                       >
                         <Plus className="size-4" aria-hidden="true" /> Add lesson
                       </button>
@@ -821,7 +821,7 @@ export function CoursesAdmin() {
               onChange={(e) => setForm((f) => ({ ...f, summary: e.target.value }))}
               rows={3}
               placeholder="What this course covers and who it's for."
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy placeholder:text-slate-400 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy placeholder:text-slate-500 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
             />
           </div>
 
@@ -862,7 +862,7 @@ export function CoursesAdmin() {
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-slate-600">
           {courses ? `${courses.length} course${courses.length === 1 ? '' : 's'}` : 'Loading…'}
         </p>
         <Button onClick={openCreate} size="sm">
@@ -874,7 +874,7 @@ export function CoursesAdmin() {
         <p className="rounded-md bg-red-50 p-3 text-sm text-red-700">{loadError}</p>
       ) : courses === null ? (
         <div className="flex justify-center rounded-xl border border-slate-200 bg-white p-12">
-          <Loader2 className="size-5 animate-spin text-slate-400" aria-hidden="true" />
+          <Loader2 className="size-5 animate-spin text-slate-500" aria-hidden="true" />
         </div>
       ) : courses.length === 0 ? (
         <div className="rounded-xl border border-slate-200 bg-white p-10 text-center">
@@ -882,7 +882,7 @@ export function CoursesAdmin() {
             <BookOpen className="size-5" aria-hidden="true" />
           </span>
           <p className="mt-3 text-sm font-semibold text-navy">No courses yet.</p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-slate-600">
             Create your first course, then build out its modules and lessons.
           </p>
         </div>
@@ -892,7 +892,7 @@ export function CoursesAdmin() {
             {['Course', 'Category', 'Content', 'Status', 'Actions'].map((h) => (
               <span
                 key={h}
-                className="text-[10px] font-semibold uppercase tracking-widest text-slate-400"
+                className="text-[10px] font-semibold uppercase tracking-widest text-slate-500"
               >
                 {h}
               </span>
@@ -905,7 +905,7 @@ export function CoursesAdmin() {
             >
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-navy">{c.title}</p>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-slate-500">
                   /{c.slug} · {DIFFICULTY_TONE[c.difficulty]?.label ?? c.difficulty}
                 </p>
               </div>
@@ -950,7 +950,7 @@ export function CoursesAdmin() {
                   onClick={() => removeCourse(c)}
                   disabled={busyId === c.id}
                   aria-label={`Delete ${c.title}`}
-                  className="grid size-8 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                  className="grid size-8 place-items-center rounded-lg text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
                 >
                   <Trash2 className="size-4" aria-hidden="true" />
                 </button>
@@ -1006,7 +1006,7 @@ function ModuleForm({
           value={draft.summary}
           onChange={(e) => onChange({ ...draft, summary: e.target.value })}
           rows={2}
-          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy placeholder:text-slate-400 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy placeholder:text-slate-500 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
         />
       </div>
       <div className="flex items-center justify-end gap-2">
@@ -1096,7 +1096,7 @@ function LessonForm({
             value={draft.body}
             onChange={(e) => onChange({ ...draft, body: e.target.value })}
             rows={3}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy placeholder:text-slate-400 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy placeholder:text-slate-500 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
           />
         </div>
         <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-600 sm:col-span-2">

@@ -36,7 +36,7 @@ export default function CompanyReadinessPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="size-7 animate-spin text-slate-400" />
+        <Loader2 className="size-7 animate-spin text-slate-500" />
       </div>
     );
   }
@@ -46,7 +46,7 @@ export default function CompanyReadinessPage() {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm font-semibold text-slate-500">
+      <p className="text-sm font-semibold text-slate-600">
         Company readiness · <span className="text-navy">{cohortLabel}</span>
       </p>
 
@@ -64,7 +64,7 @@ export default function CompanyReadinessPage() {
         source="Company-tagged practice"
       >
         {(data?.companyReadiness.length ?? 0) === 0 ? (
-          <p className="text-sm text-slate-400">No company-tagged practice yet.</p>
+          <p className="text-sm text-slate-500">No company-tagged practice yet.</p>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {data!.companyReadiness.map((c) => (
@@ -76,7 +76,7 @@ export default function CompanyReadinessPage() {
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200">
                   <div className="h-full rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400]" style={{ width: `${c.readiness}%` }} />
                 </div>
-                <p className="mt-1 text-[11px] text-slate-400">{c.attempted} attempts</p>
+                <p className="mt-1 text-[11px] text-slate-500">{c.attempted} attempts</p>
               </div>
             ))}
           </div>

@@ -13,9 +13,9 @@ export default function AdminBroadcastsPage() {
         ]}
       />
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Engagement</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Engagement</p>
         <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Broadcasts</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-600">
           Send an in-app notification to all students or a specific college.
         </p>
       </header>

@@ -45,7 +45,7 @@ export default function AssessmentLeaderboardPage({ params }: { params: Promise<
     );
   }
   if (!lb) {
-    return <div className="grid h-72 place-items-center"><Loader2 className="size-6 animate-spin text-slate-400" /></div>;
+    return <div className="grid h-72 place-items-center"><Loader2 className="size-6 animate-spin text-slate-500" /></div>;
   }
 
   const podium = lb.entries.slice(0, 3);
@@ -103,12 +103,12 @@ export default function AssessmentLeaderboardPage({ params }: { params: Promise<
                   place === 1 ? 'border-amber-300 sm:-translate-y-2' : 'border-slate-200',
                 )}
               >
-                <span className={cn('mb-1 text-xs font-black', place === 1 ? 'text-amber-500' : 'text-slate-400')}>#{place}</span>
+                <span className={cn('mb-1 text-xs font-black', place === 1 ? 'text-amber-500' : 'text-slate-500')}>#{place}</span>
                 <Avatar src={e.avatarUrl} name={e.name} size={place === 1 ? 56 : 46} />
                 <p className="mt-2 truncate text-sm font-bold text-navy">{e.name}</p>
-                <p className="truncate text-[11px] text-slate-400">{e.collegeName ?? '-'}</p>
+                <p className="truncate text-[11px] text-slate-500">{e.collegeName ?? '-'}</p>
                 <p className="mt-1 text-lg font-black" style={{ color: toneFor(e.scorePct) }}>{e.scorePct}%</p>
-                <p className="text-[10px] font-semibold text-slate-400">{e.percentile}th pct · Lv {e.level}</p>
+                <p className="text-[10px] font-semibold text-slate-500">{e.percentile}th pct · Lv {e.level}</p>
               </div>
             );
           })}
@@ -118,13 +118,13 @@ export default function AssessmentLeaderboardPage({ params }: { params: Promise<
       {/* Section-wise percentile */}
       {lb.sections.length ? (
         <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Your section-wise percentile</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Your section-wise percentile</p>
           <ul className="mt-3 space-y-3">
             {lb.sections.map((s) => (
               <li key={s.section}>
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-semibold text-navy">{s.section}</span>
-                  <span className="text-slate-500">
+                  <span className="text-slate-600">
                     {s.correct}/{s.total} · {s.accuracyPct}% ·{' '}
                     <b style={{ color: toneFor(s.percentile) }}>{s.percentile}th pct</b>
                   </span>
@@ -141,13 +141,13 @@ export default function AssessmentLeaderboardPage({ params }: { params: Promise<
       {/* Full ranking */}
       <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Rankings</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Rankings</p>
           <Link href="/assessments" className="inline-flex items-center gap-1 text-xs font-bold text-[#f5b400] hover:underline">
             <ArrowLeft className="size-3.5" /> Calendar
           </Link>
         </div>
         {lb.entries.length === 0 ? (
-          <p className="px-5 py-10 text-center text-sm text-slate-500">No submissions yet.</p>
+          <p className="px-5 py-10 text-center text-sm text-slate-600">No submissions yet.</p>
         ) : (
           <ul className="divide-y divide-slate-100">
             {(podium.length >= 3 ? rest : lb.entries).map((e) => (
@@ -161,7 +161,7 @@ export default function AssessmentLeaderboardPage({ params }: { params: Promise<
                     e.rank === 1 ? 'bg-amber-100 text-amber-700'
                       : e.rank === 2 ? 'bg-slate-200 text-slate-600'
                       : e.rank === 3 ? 'bg-orange-100 text-orange-700'
-                      : 'text-slate-400',
+                      : 'text-slate-500',
                   )}
                 >
                   {e.rank}
@@ -171,12 +171,12 @@ export default function AssessmentLeaderboardPage({ params }: { params: Promise<
                   <p className="truncate text-sm font-bold text-navy">
                     {e.name} {e.isYou ? <span className="ml-1 rounded-full bg-sky-100 px-1.5 py-0.5 text-[10px] font-bold text-sky-700">You</span> : null}
                   </p>
-                  <p className="truncate text-[11px] text-slate-400">{e.collegeName ?? '-'}</p>
+                  <p className="truncate text-[11px] text-slate-500">{e.collegeName ?? '-'}</p>
                 </div>
                 <span className="hidden items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-600 sm:inline-flex" title="Streak"><Flame className="size-3" /> {e.currentStreakDays}d</span>
                 <span className="hidden items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-bold text-violet-600 sm:inline-flex" title="Badges"><Award className="size-3" /> {e.badgesEarned}</span>
                 <span className="hidden items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-600 sm:inline-flex" title="Level"><Star className="size-3 text-amber-400" /> Lv {e.level}</span>
-                <span className="hidden w-14 shrink-0 text-right text-[11px] font-semibold text-slate-400 sm:inline-block" title="Percentile">{e.percentile}th pct</span>
+                <span className="hidden w-14 shrink-0 text-right text-[11px] font-semibold text-slate-500 sm:inline-block" title="Percentile">{e.percentile}th pct</span>
                 <span className="w-12 shrink-0 text-right text-base font-black tabular-nums" style={{ color: toneFor(e.scorePct) }}>{e.scorePct}%</span>
               </li>
             ))}

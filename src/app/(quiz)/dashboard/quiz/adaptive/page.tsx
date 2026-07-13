@@ -154,7 +154,7 @@ function AdaptiveQuizRunner({
   if (phase === 'loading' || phase === 'complete') {
     return (
       <div className="grid min-h-screen place-items-center bg-background">
-        <div className="flex flex-col items-center gap-3 text-slate-500">
+        <div className="flex flex-col items-center gap-3 text-slate-600">
           <QuizMark size={44} />
           <p className="text-sm">{phase === 'complete' ? 'Composing your results…' : 'Starting your practice…'}</p>
         </div>
@@ -251,7 +251,7 @@ function AdaptiveQuizRunner({
           <button
             onClick={() => router.replace(exitHref)}
             title="Your progress is saved - resume this quiz any time from where you left off."
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 transition-colors hover:text-navy"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 transition-colors hover:text-navy"
           >
             <ArrowLeft className="size-3.5" /> Save &amp; exit
           </button>
@@ -268,7 +268,7 @@ function AdaptiveQuizRunner({
                 <Flag className="size-3.5" /> I&apos;m done
               </button>
             ) : (
-              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">{modeLabel}</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{modeLabel}</span>
             )}
           </div>
         </div>
@@ -299,10 +299,10 @@ function AdaptiveQuizRunner({
           <div className="flex items-center justify-between text-[11px]">
             <span className="text-slate-600">
               Question <span className="font-extrabold text-navy">{questionNumber}</span>
-              <span className="text-slate-400"> · {unbounded ? 'unlimited' : `~${minQ}–${maxQ}`}</span>
+              <span className="text-slate-500"> · {unbounded ? 'unlimited' : `~${minQ}–${maxQ}`}</span>
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="text-slate-400">Difficulty read:</span>
+              <span className="text-slate-500">Difficulty read:</span>
               <span className="font-bold" style={{ color: cert.color }}>{cert.label}</span>
             </span>
           </div>
@@ -340,7 +340,7 @@ function AdaptiveQuizRunner({
                 style={{ marginLeft: -7 }}
               />
             </div>
-            <div className="mt-1 flex justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400">
+            <div className="mt-1 flex justify-between text-[9px] font-bold uppercase tracking-wider text-slate-500">
               <span>Easy</span><span>Hard</span>
             </div>
           </div>
@@ -356,7 +356,7 @@ function AdaptiveQuizRunner({
               <LivePointsMeter points={q.points} servedAt={q.servedAt} hinted={!!hintState} />
             )}
             <Panel>
-              <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
                 <Clock className="size-3.5" /> {revealed ? 'Time on this question' : 'On this question'}
               </div>
               <p className="mt-2 text-2xl font-black tabular-nums">
@@ -364,7 +364,7 @@ function AdaptiveQuizRunner({
               </p>
             </Panel>
             <Panel>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Skill confidence</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Skill confidence</p>
               <div className="mt-3 space-y-3">
                 {Object.entries(abilityState).map(([skill, theta]) => {
                   const pct = masteryPct(theta);
@@ -391,7 +391,7 @@ function AdaptiveQuizRunner({
                   );
                 })}
                 {Object.keys(abilityState).length === 0 ? (
-                  <p className="text-[11px] text-slate-400">Building your skill profile…</p>
+                  <p className="text-[11px] text-slate-500">Building your skill profile…</p>
                 ) : null}
               </div>
             </Panel>
@@ -463,7 +463,7 @@ function AdaptiveQuizRunner({
                           ? 'bg-rose-100 text-rose-700 ring-rose-300'
                           : isSel && !revealed
                             ? 'bg-orange/15 text-orange ring-orange/40'
-                            : 'text-slate-400 ring-slate-200',
+                            : 'text-slate-500 ring-slate-200',
                     )}>
                       {isCorrectOpt ? (
                         <CheckCircle2 className="size-4" />
@@ -503,9 +503,9 @@ function AdaptiveQuizRunner({
 
             {!revealed && (
             <div className="mt-5">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
                 How confident are you before submitting?
-                {!confidenceRequired ? <span className="ml-1 font-semibold normal-case tracking-normal text-slate-300">(optional)</span> : null}
+                {!confidenceRequired ? <span className="ml-1 font-semibold normal-case tracking-normal text-slate-400">(optional)</span> : null}
               </p>
               <div className="mt-2 grid grid-cols-4 gap-2">
                 {CONFIDENCE.map((c) => (
@@ -595,8 +595,8 @@ function AdaptiveQuizRunner({
                 </div>
               </div>
               {q.selectorRationale ? (
-                <p className="mt-2 flex items-start gap-1.5 text-[11px] leading-relaxed text-slate-400">
-                  <TrendingUp className="mt-0.5 size-3 shrink-0 text-slate-300" />
+                <p className="mt-2 flex items-start gap-1.5 text-[11px] leading-relaxed text-slate-500">
+                  <TrendingUp className="mt-0.5 size-3 shrink-0 text-slate-400" />
                   {q.selectorRationale}
                 </p>
               ) : null}
@@ -614,7 +614,7 @@ function AdaptiveQuizRunner({
                 </>
               ) : null}
 
-              <p className="mt-4 text-center text-[10px] italic text-slate-400">
+              <p className="mt-4 text-center text-[10px] italic text-slate-500">
                 Difficulty tunes to your level as you answer.
               </p>
             </Panel>
@@ -737,7 +737,7 @@ function SolutionReveal({
                 onClick={() => setTab(t.key)}
                 className={cn(
                   'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-colors',
-                  active ? 'bg-navy text-white shadow-sm' : 'bg-white text-slate-500 ring-1 ring-inset ring-slate-200 hover:text-navy',
+                  active ? 'bg-navy text-white shadow-sm' : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-200 hover:text-navy',
                 )}
               >
                 <Icon className="size-3.5" /> {t.label}
@@ -753,7 +753,7 @@ function SolutionReveal({
           ) : loading ? (
             <SolLoading label="Working out the solution…" />
           ) : (
-            <p className="text-[13px] text-slate-500">
+            <p className="text-[13px] text-slate-600">
               {ok ? 'Nicely done - that was the correct option.' : 'The correct option is highlighted in green above.'}
             </p>
           ))}
@@ -770,7 +770,7 @@ function SolutionReveal({
               <MarkdownLite text={sol.shortcut} />
             </div>
           ) : (
-            <p className="text-[13px] text-slate-500">
+            <p className="text-[13px] text-slate-600">
               No quicker route than the detailed method for this one - solve it step by step.
             </p>
           ))}
@@ -782,15 +782,15 @@ function SolutionReveal({
               <PlayCircle className="size-6" />
             </span>
             <p className="text-sm font-bold text-navy">Concept video - coming soon</p>
-            <p className="max-w-xs text-xs text-slate-500">
+            <p className="max-w-xs text-xs text-slate-600">
               We&apos;re adding short concept videos for each topic. You&apos;ll be able to watch the idea behind this
               question right here.
             </p>
           </div>
         )}
 
-        <p className="mt-3 flex items-center gap-1.5 border-t border-slate-100 pt-2.5 text-[11.5px] font-medium text-slate-500">
-          <TrendingUp className="size-3.5 shrink-0 text-slate-400" />
+        <p className="mt-3 flex items-center gap-1.5 border-t border-slate-100 pt-2.5 text-[11.5px] font-medium text-slate-600">
+          <TrendingUp className="size-3.5 shrink-0 text-slate-500" />
           {adaptNote(ok, result.speedLabel)}
         </p>
       </div>
@@ -800,8 +800,8 @@ function SolutionReveal({
 
 function SolLoading({ label }: { label: string }) {
   return (
-    <div className="flex items-center gap-2 py-4 text-[13px] text-slate-500">
-      <Loader2 className="size-4 animate-spin text-slate-400" /> {label}
+    <div className="flex items-center gap-2 py-4 text-[13px] text-slate-600">
+      <Loader2 className="size-4 animate-spin text-slate-500" /> {label}
     </div>
   );
 }
@@ -810,12 +810,12 @@ function SolLoading({ label }: { label: string }) {
 function EarnedCard({ earned, base, correct }: { earned: number; base: number; correct: boolean }) {
   return (
     <div className={cn('rounded-2xl border p-4 shadow-sm', correct ? 'border-emerald-200 bg-emerald-50/70' : 'border-slate-200 bg-white')}>
-      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Earned this question</p>
-      <p className={cn('mt-1 text-3xl font-black tabular-nums', correct ? 'text-emerald-600' : 'text-slate-400')}>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Earned this question</p>
+      <p className={cn('mt-1 text-3xl font-black tabular-nums', correct ? 'text-emerald-600' : 'text-slate-500')}>
         {correct ? `+${earned}` : '0'}
-        <span className="ml-1 text-sm font-bold text-slate-400">/ {base} pts</span>
+        <span className="ml-1 text-sm font-bold text-slate-500">/ {base} pts</span>
       </p>
-      <p className="mt-1 text-[11px] text-slate-400">
+      <p className="mt-1 text-[11px] text-slate-500">
         {correct ? 'Answer faster to bank more next time.' : 'No points this time - keep going.'}
       </p>
     </div>
@@ -855,7 +855,7 @@ function AdaptiveQuizLanding() {
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background px-6 text-center text-navy">
       <QuizMark size={48} />
       <h1 className="text-2xl font-black">Adaptive</h1>
-      <p className="max-w-sm text-sm text-slate-500">
+      <p className="max-w-sm text-sm text-slate-600">
         No practice scope selected. Choose a company, topic or section to begin.
       </p>
       <Button onClick={() => router.replace('/practice')}>Choose what to practice</Button>
@@ -891,7 +891,7 @@ export default function AdaptiveQuizPage() {
     <Suspense
       fallback={
         <div className="grid min-h-screen place-items-center bg-background">
-          <Loader2 className="size-8 animate-spin text-slate-400" />
+          <Loader2 className="size-8 animate-spin text-slate-500" />
         </div>
       }
     >

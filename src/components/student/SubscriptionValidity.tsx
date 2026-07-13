@@ -113,7 +113,7 @@ export function SubscriptionValidity() {
                 <span className="block truncate text-xs font-semibold text-navy">
                   {entitlementLabel(e.scopeType, e.scopeRef)}
                 </span>
-                <span className={cn('text-[11px]', urgent ? 'font-semibold text-amber-600' : 'text-slate-400')}>
+                <span className={cn('text-[11px]', urgent ? 'font-semibold text-amber-600' : 'text-slate-500')}>
                   {e.daysRemaining != null
                     ? `${e.daysRemaining} day${e.daysRemaining === 1 ? '' : 's'} left${date ? ` · ${date}` : ''}`
                     : 'Lifetime access'}
@@ -127,7 +127,7 @@ export function SubscriptionValidity() {
       {extra > 0 && (
         <Link
           href="/upgrade"
-          className="mt-2 block text-center text-[11px] font-semibold text-slate-400 transition-colors hover:text-orange"
+          className="mt-2 block text-center text-[11px] font-semibold text-slate-500 transition-colors hover:text-orange"
         >
           +{extra} more subscription{extra === 1 ? '' : 's'}
         </Link>

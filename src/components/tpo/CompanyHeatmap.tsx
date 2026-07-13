@@ -12,7 +12,7 @@ const BAND_COLORS = ['#dc2626', '#f59e0b', '#0284c7', '#059669'];
 export function CompanyHeatmap({ rows }: { rows: TpoCompanyHeatmapRow[] }) {
   if (rows.length === 0) {
     return (
-      <p className="text-sm text-slate-400">
+      <p className="text-sm text-slate-500">
         Not enough company-tagged practice yet to build a distribution.
       </p>
     );
@@ -22,7 +22,7 @@ export function CompanyHeatmap({ rows }: { rows: TpoCompanyHeatmapRow[] }) {
       <table className="w-full min-w-[560px] border-separate border-spacing-1">
         <thead>
           <tr>
-            <th className="w-40 px-2 py-1 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            <th className="w-40 px-2 py-1 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-500">
               Company
             </th>
             {BAND_LABELS.map((b, i) => (
@@ -30,7 +30,7 @@ export function CompanyHeatmap({ rows }: { rows: TpoCompanyHeatmapRow[] }) {
                 {b}
               </th>
             ))}
-            <th className="px-2 py-1 text-right text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            <th className="px-2 py-1 text-right text-[10px] font-semibold uppercase tracking-widest text-slate-500">
               Students
             </th>
           </tr>
@@ -66,7 +66,7 @@ export function CompanyHeatmap({ rows }: { rows: TpoCompanyHeatmapRow[] }) {
           })}
         </tbody>
       </table>
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-500">
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-600">
         {BAND_LABELS.map((b, i) => (
           <span key={b} className="flex items-center gap-1.5">
             <span className="size-2.5 rounded-sm" style={{ background: BAND_COLORS[i] }} /> {b} accuracy

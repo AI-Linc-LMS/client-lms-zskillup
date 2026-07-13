@@ -16,7 +16,7 @@ const STATUS_STYLE: Record<string, string> = {
   ACTIVE: 'bg-emerald-100 text-emerald-700',
   TRIAL: 'bg-amber-100 text-amber-700',
   EXPIRED: 'bg-red-100 text-red-700',
-  CANCELLED: 'bg-slate-100 text-slate-500',
+  CANCELLED: 'bg-slate-100 text-slate-600',
   SUSPENDED: 'bg-red-100 text-red-700',
 };
 
@@ -35,7 +35,7 @@ export default function SubscriptionPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="size-7 animate-spin text-slate-400" />
+        <Loader2 className="size-7 animate-spin text-slate-500" />
       </div>
     );
   }
@@ -49,7 +49,7 @@ export default function SubscriptionPage() {
           <CreditCard className="size-6" />
         </span>
         <h2 className="mt-4 text-lg font-extrabold text-navy">No active subscription</h2>
-        <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">
+        <p className="mx-auto mt-1 max-w-md text-sm text-slate-600">
           Your college doesn&apos;t have an active plan yet. Explore Cohort Access to unlock company
           question banks for your students.
         </p>
@@ -87,33 +87,33 @@ export default function SubscriptionPage() {
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-slate-200 bg-white p-5">
-          <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+          <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
             <Users className="size-3.5" /> Seats
           </span>
           <p className="mt-2 text-2xl font-black tabular-nums text-navy">
             {sub.seatsUsed.toLocaleString('en-IN')}{' '}
-            <span className="text-base font-semibold text-slate-400">/ {sub.seatLimit.toLocaleString('en-IN')}</span>
+            <span className="text-base font-semibold text-slate-500">/ {sub.seatLimit.toLocaleString('en-IN')}</span>
           </p>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
             <div className={`h-full rounded-full ${seatPct >= 90 ? 'bg-red-500' : 'bg-navy'}`} style={{ width: `${seatPct}%` }} />
           </div>
-          <p className="mt-1.5 text-[11px] text-slate-400">{seatPct}% of seats used</p>
+          <p className="mt-1.5 text-[11px] text-slate-500">{seatPct}% of seats used</p>
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-5">
-          <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+          <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
             <CalendarClock className="size-3.5" /> Validity
           </span>
           <p className="mt-2 text-sm font-bold text-navy">{fmtDate(sub.startsAt)}</p>
-          <p className="text-xs text-slate-400">to {sub.expiresAt ? fmtDate(sub.expiresAt) : 'no expiry'}</p>
+          <p className="text-xs text-slate-500">to {sub.expiresAt ? fmtDate(sub.expiresAt) : 'no expiry'}</p>
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-5">
-          <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+          <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
             <CreditCard className="size-3.5" /> College
           </span>
           <p className="mt-2 text-sm font-bold text-navy">{sub.collegeName ?? '-'}</p>
-          <p className="text-xs text-slate-400">Since {fmtDate(sub.createdAt)}</p>
+          <p className="text-xs text-slate-500">Since {fmtDate(sub.createdAt)}</p>
         </div>
       </div>
 

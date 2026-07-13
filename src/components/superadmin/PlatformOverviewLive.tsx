@@ -159,7 +159,7 @@ export function PlatformOverviewLive() {
     <div className="space-y-6">
       {/* Refresh control */}
       <div className="flex items-center justify-between">
-        <p className="flex items-center gap-1.5 text-xs text-slate-400">
+        <p className="flex items-center gap-1.5 text-xs text-slate-500">
           <span className="relative flex size-2">
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60" />
             <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
@@ -169,7 +169,7 @@ export function PlatformOverviewLive() {
         <button
           onClick={() => void load()}
           disabled={refreshing}
-          className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-navy disabled:opacity-60"
+          className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-navy disabled:opacity-60"
         >
           <RefreshCw className={`size-3.5 ${refreshing ? 'animate-spin' : ''}`} aria-hidden />
           Refresh
@@ -240,7 +240,7 @@ export function PlatformOverviewLive() {
           ) : (
             <div className="flex items-center gap-4">
               <p className="text-3xl font-extrabold text-navy">{stats.questionsTotal.toLocaleString()}</p>
-              <p className="text-xs text-slate-400">total questions</p>
+              <p className="text-xs text-slate-500">total questions</p>
             </div>
           )}
           <div className="mt-5 border-t border-slate-100 pt-4">
@@ -290,7 +290,7 @@ export function PlatformOverviewLive() {
                 </span>
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-navy">{h.label}</p>
-                  <p className="text-xs capitalize text-slate-400">{h.detail}</p>
+                  <p className="text-xs capitalize text-slate-500">{h.detail}</p>
                 </div>
                 <span className={`size-2.5 rounded-full ${h.ok ? 'bg-emerald-500' : 'bg-amber-500'}`} />
               </div>
@@ -306,8 +306,8 @@ export function PlatformOverviewLive() {
 function EmptyChart({ label }: { label: string }) {
   return (
     <div className="flex h-[210px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 text-center">
-      <TrendingUp className="size-6 text-slate-300" />
-      <p className="max-w-xs text-xs text-slate-400">{label}</p>
+      <TrendingUp className="size-6 text-slate-400" />
+      <p className="max-w-xs text-xs text-slate-500">{label}</p>
     </div>
   );
 }

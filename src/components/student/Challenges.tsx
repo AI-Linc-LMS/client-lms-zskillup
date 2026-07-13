@@ -51,7 +51,7 @@ export function Challenges() {
 
       {!list ? (
         <div className="flex items-center justify-center py-8">
-          <Loader2 className="size-5 animate-spin text-slate-400" />
+          <Loader2 className="size-5 animate-spin text-slate-500" />
         </div>
       ) : (
         <div className="relative grid gap-3 sm:grid-cols-2">
@@ -117,7 +117,7 @@ function ChallengeCard({
       </div>
       <p className="mt-2.5 text-sm font-bold text-navy">{c.title}</p>
       {c.description ? (
-        <p className="mt-0.5 line-clamp-2 text-xs text-slate-500">{c.description}</p>
+        <p className="mt-0.5 line-clamp-2 text-xs text-slate-600">{c.description}</p>
       ) : null}
       <div className="mt-2 flex items-center gap-1.5">
         {c.difficulty ? (
@@ -133,7 +133,7 @@ function ChallengeCard({
           </span>
         ) : null}
         {coding && !c.completed && !c.codingProblemSlug ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-400">
+          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
             <Code2 className="size-2.5" /> Coding
           </span>
         ) : null}
@@ -247,23 +247,23 @@ function ChallengeSolveModal({
           <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-rose-500">
             <Swords className="size-3.5" /> {detail?.title ?? 'Challenge'}
           </p>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-600">
             <X className="size-5" />
           </button>
         </div>
 
         {!detail ? (
           <div className="flex items-center justify-center py-10">
-            <Loader2 className="size-5 animate-spin text-slate-400" />
+            <Loader2 className="size-5 animate-spin text-slate-500" />
           </div>
         ) : !q ? (
-          <p className="py-8 text-center text-sm text-slate-400">
+          <p className="py-8 text-center text-sm text-slate-500">
             This challenge isn&apos;t answerable here yet.
           </p>
         ) : (
           <>
             <p className="text-[15px] font-semibold leading-relaxed text-navy">{q.stem}</p>
-            {multi ? <p className="mt-1 text-xs text-slate-400">Select all that apply.</p> : null}
+            {multi ? <p className="mt-1 text-xs text-slate-500">Select all that apply.</p> : null}
             <div className="mt-3 space-y-2">
               {q.options.map((opt, i) => {
                 const isSel = selected.includes(opt.id);
@@ -282,7 +282,7 @@ function ChallengeSolveModal({
                     <span
                       className={cn(
                         'grid size-6 shrink-0 place-items-center rounded-full text-[11px] font-bold',
-                        isSel ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-500',
+                        isSel ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600',
                       )}
                     >
                       {String.fromCharCode(65 + i)}

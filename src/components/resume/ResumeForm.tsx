@@ -27,7 +27,7 @@ import { cn } from '@/lib/utils';
 
 const input =
   'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange';
-const lbl = 'mb-1 block text-[11px] font-medium text-slate-500';
+const lbl = 'mb-1 block text-[11px] font-medium text-slate-600';
 
 interface Props {
   data: ResumeData;
@@ -222,14 +222,14 @@ function Section({
     <div className={cn('overflow-hidden rounded-xl border bg-white shadow-sm transition-colors', open ? 'border-orange/30' : 'border-slate-200')}>
       <div className="flex items-center justify-between px-3 py-2.5">
         <button onClick={() => setOpen((o) => !o)} className="flex flex-1 items-center gap-2.5 text-left">
-          <span className={cn('grid size-7 shrink-0 place-items-center rounded-lg transition-colors', open ? 'bg-orange/10 text-orange' : 'bg-slate-100 text-slate-500')}>{icon}</span>
+          <span className={cn('grid size-7 shrink-0 place-items-center rounded-lg transition-colors', open ? 'bg-orange/10 text-orange' : 'bg-slate-100 text-slate-600')}>{icon}</span>
           <span className="text-sm font-bold text-navy">{title}</span>
-          {count !== undefined && count > 0 && <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">{count}</span>}
+          {count !== undefined && count > 0 && <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">{count}</span>}
         </button>
         <div className="flex items-center gap-2">
           {action}
           <button onClick={() => setOpen((o) => !o)} className="rounded-lg p-1 hover:bg-slate-50">
-            <ChevronDown className={cn('size-4 text-slate-400 transition-transform', open && 'rotate-180')} />
+            <ChevronDown className={cn('size-4 text-slate-500 transition-transform', open && 'rotate-180')} />
           </button>
         </div>
       </div>

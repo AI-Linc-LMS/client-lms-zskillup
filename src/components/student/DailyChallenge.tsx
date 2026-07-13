@@ -114,7 +114,7 @@ export function DailyChallenge() {
           <Calendar className="size-5 text-[#f5b400]" /> Today&apos;s challenge
         </h3>
         {started && !completed ? (
-          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold tabular-nums text-slate-500">
+          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold tabular-nums text-slate-600">
             {idx + 1} / {total}
           </span>
         ) : null}
@@ -127,7 +127,7 @@ export function DailyChallenge() {
           </span>
           <div>
             <p className="text-lg font-black text-navy">Challenge complete! 🎉</p>
-            <p className="text-sm text-slate-500">Come back tomorrow for a fresh set.</p>
+            <p className="text-sm text-slate-600">Come back tomorrow for a fresh set.</p>
           </div>
         </div>
       ) : !started ? (
@@ -136,7 +136,7 @@ export function DailyChallenge() {
             <p className="text-lg font-black text-navy">
               {total} questions · +{ch.xpReward} XP bonus
             </p>
-            <p className="mt-0.5 text-sm text-slate-500">
+            <p className="mt-0.5 text-sm text-slate-600">
               Finish today&apos;s set to keep your streak and bank bonus XP.
             </p>
           </div>
@@ -154,7 +154,7 @@ export function DailyChallenge() {
         <div className="relative">
           <PyqTag companyIds={q.companyTags.map((t) => t.companyId)} years={q.yearTags ?? []} className="mb-2" />
           <p className="text-lg font-bold leading-relaxed text-navy">{q.stem}</p>
-          {multi ? <p className="mt-1 text-xs text-slate-400">Select all that apply.</p> : null}
+          {multi ? <p className="mt-1 text-xs text-slate-500">Select all that apply.</p> : null}
           <div className="mt-3 space-y-2">
             {q.options.map((opt, i) => {
               const isSel = selected.includes(opt.id);
@@ -164,7 +164,7 @@ export function DailyChallenge() {
                   ? 'border-emerald-300 bg-emerald-50 text-emerald-900'
                   : isSel
                     ? 'border-red-300 bg-red-50 text-red-900'
-                    : 'border-slate-200 bg-white text-slate-500'
+                    : 'border-slate-200 bg-white text-slate-600'
                 : isSel
                   ? 'border-[#ffc42d] bg-[#fff5ea] text-navy'
                   : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300';
@@ -188,7 +188,7 @@ export function DailyChallenge() {
                           ? 'bg-red-500 text-white'
                           : isSel
                             ? 'bg-[#ffc42d] text-[#171717]'
-                            : 'bg-slate-100 text-slate-500',
+                            : 'bg-slate-100 text-slate-600',
                     )}
                   >
                     {result && isCorrect ? (

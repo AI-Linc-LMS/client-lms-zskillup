@@ -140,35 +140,35 @@ export function BlogsManager() {
           {editing ? 'Edit post' : 'New post'}
         </p>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-500">Title</span>
+          <span className="mb-1 block text-xs font-medium text-slate-600">Title</span>
           <input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className={inputCls} />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-500">Slug (blank = from title)</span>
+          <span className="mb-1 block text-xs font-medium text-slate-600">Slug (blank = from title)</span>
           <input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className={inputCls} placeholder="my-post" />
         </label>
         <label className="block sm:col-span-2">
-          <span className="mb-1 block text-xs font-medium text-slate-500">Excerpt</span>
+          <span className="mb-1 block text-xs font-medium text-slate-600">Excerpt</span>
           <input value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} className={inputCls} />
         </label>
         <label className="block sm:col-span-2">
-          <span className="mb-1 block text-xs font-medium text-slate-500">Body (markdown)</span>
+          <span className="mb-1 block text-xs font-medium text-slate-600">Body (markdown)</span>
           <textarea rows={6} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} className={inputCls} />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-500">Cover image URL</span>
+          <span className="mb-1 block text-xs font-medium text-slate-600">Cover image URL</span>
           <input value={form.coverUrl} onChange={(e) => setForm({ ...form, coverUrl: e.target.value })} className={inputCls} />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-500">Author</span>
+          <span className="mb-1 block text-xs font-medium text-slate-600">Author</span>
           <input value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} className={inputCls} />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-500">Tags (comma-separated)</span>
+          <span className="mb-1 block text-xs font-medium text-slate-600">Tags (comma-separated)</span>
           <input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} className={inputCls} />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-500">Status</span>
+          <span className="mb-1 block text-xs font-medium text-slate-600">Status</span>
           <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as 'DRAFT' | 'PUBLISHED' })} className={inputCls}>
             <option value="DRAFT">Draft</option>
             <option value="PUBLISHED">Published</option>
@@ -189,13 +189,13 @@ export function BlogsManager() {
 
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         {loading ? (
-          <div className="flex items-center justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-400" /></div>
+          <div className="flex items-center justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-500" /></div>
         ) : posts.length === 0 ? (
-          <div className="py-12 text-center text-sm text-slate-400">No posts yet.</div>
+          <div className="py-12 text-center text-sm text-slate-500">No posts yet.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[560px] text-sm">
-              <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+              <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                 <tr>
                   <th className="px-4 py-3">Post</th>
                   <th className="px-4 py-3">Status</th>
@@ -208,14 +208,14 @@ export function BlogsManager() {
                   <tr key={p.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3">
                       <p className="font-semibold text-navy">{p.title}</p>
-                      <p className="text-xs text-slate-400">/{p.slug}</p>
+                      <p className="text-xs text-slate-500">/{p.slug}</p>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={cn('rounded-full px-2.5 py-0.5 text-[11px] font-semibold', p.status === 'PUBLISHED' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500')}>
+                      <span className={cn('rounded-full px-2.5 py-0.5 text-[11px] font-semibold', p.status === 'PUBLISHED' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600')}>
                         {p.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs text-slate-400">
+                    <td className="px-4 py-3 text-xs text-slate-500">
                       {p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
                     </td>
                     <td className="px-4 py-3 text-right">

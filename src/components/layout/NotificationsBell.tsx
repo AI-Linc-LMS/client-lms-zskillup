@@ -124,7 +124,7 @@ export function NotificationsBell() {
         whileTap={reduce ? undefined : { scale: 0.92 }}
         className={cn(
           'group relative grid size-9 place-items-center rounded-full border transition-all duration-200',
-          'text-slate-500 hover:text-[#f37021]',
+          'text-slate-600 hover:text-[#f37021]',
           open
             ? 'border-[#f37021]/30 bg-[#f37021]/10 text-[#f37021] ring-2 ring-[#f37021]/15'
             : 'border-slate-200/80 bg-white hover:-translate-y-px hover:border-[#f37021]/30 hover:bg-[#f37021]/5 hover:shadow-sm',
@@ -197,7 +197,7 @@ export function NotificationsBell() {
                     <Bell className="size-4" aria-hidden="true" />
                   </span>
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+                    <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                       Notifications
                     </p>
                     <p className="text-[13px] font-bold leading-tight text-navy">
@@ -260,10 +260,10 @@ export function NotificationsBell() {
                               />
                             ) : null}
                           </div>
-                          <p className="mt-0.5 line-clamp-2 text-[12px] leading-snug text-slate-500">
+                          <p className="mt-0.5 line-clamp-2 text-[12px] leading-snug text-slate-600">
                             {n.body}
                           </p>
-                          <p className="mt-1 text-[11px] font-medium text-slate-400">
+                          <p className="mt-1 text-[11px] font-medium text-slate-500">
                             {timeAgo(n.createdAt)}
                           </p>
                         </div>
@@ -305,7 +305,7 @@ function EmptyState({ reduce }: { reduce: boolean }) {
       </motion.div>
 
       <p className="relative mt-4 text-sm font-bold text-navy">You&apos;re all caught up</p>
-      <p className="relative mx-auto mt-1 max-w-[15rem] text-xs leading-relaxed text-slate-400">
+      <p className="relative mx-auto mt-1 max-w-[15rem] text-xs leading-relaxed text-slate-500">
         Badges, quest results, and drive invites will land here.
       </p>
 
@@ -318,7 +318,7 @@ function EmptyState({ reduce }: { reduce: boolean }) {
         ].map(({ icon: Icon, from, to, label }) => (
           <span
             key={label}
-            className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white py-1 pl-1 pr-2.5 text-[11px] font-semibold text-slate-500 shadow-sm"
+            className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white py-1 pl-1 pr-2.5 text-[11px] font-semibold text-slate-600 shadow-sm"
           >
             <span
               className="flex size-5 items-center justify-center rounded-full text-white"

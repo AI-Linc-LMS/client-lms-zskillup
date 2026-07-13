@@ -9,7 +9,7 @@ import { ArrowRight, GraduationCap, Loader2, Search } from 'lucide-react';
 const PAGE_SIZE = 20;
 
 function pctTone(pct: number | null): string {
-  if (pct === null) return 'text-slate-400';
+  if (pct === null) return 'text-slate-500';
   if (pct >= 70) return 'text-emerald-600';
   if (pct >= 40) return 'text-amber-600';
   return 'text-red-500';
@@ -64,25 +64,25 @@ export default function AdminStudentsReportPage() {
 
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
             Super Admin · ZSkillup
           </p>
           <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">
             Student Reports
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-600">
             {total.toLocaleString()} students · marks &amp; attempts across every quiz
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <GraduationCap className="size-5 text-slate-400" />
+          <GraduationCap className="size-5 text-slate-500" />
           <span className="text-sm font-semibold text-slate-600">{total} students</span>
         </div>
       </div>
 
       {/* Search */}
       <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
         <input
           type="search"
           placeholder="Search by name or email…"
@@ -99,16 +99,16 @@ export default function AdminStudentsReportPage() {
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="size-6 animate-spin text-slate-400" />
+            <Loader2 className="size-6 animate-spin text-slate-500" />
           </div>
         ) : error ? (
           <div className="py-16 text-center text-sm text-red-500">{error}</div>
         ) : rows.length === 0 ? (
-          <div className="py-16 text-center text-sm text-slate-400">No students found.</div>
+          <div className="py-16 text-center text-sm text-slate-500">No students found.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-sm">
-              <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+              <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                 <tr>
                   <th className="px-4 py-3">Student</th>
                   <th className="px-4 py-3">College</th>
@@ -127,7 +127,7 @@ export default function AdminStudentsReportPage() {
                         <p className="font-semibold text-navy group-hover:underline">
                           {s.fullName ?? '-'}
                         </p>
-                        <p className="text-xs text-slate-400">{s.email}</p>
+                        <p className="text-xs text-slate-500">{s.email}</p>
                       </Link>
                     </td>
                     <td className="px-4 py-3 text-slate-600">{s.collegeName ?? '-'}</td>
@@ -138,7 +138,7 @@ export default function AdminStudentsReportPage() {
                     <td className={`px-4 py-3 text-center font-semibold ${pctTone(s.bestScorePct)}`}>
                       {s.bestScorePct === null ? '-' : `${s.bestScorePct}%`}
                     </td>
-                    <td className="px-4 py-3 text-xs text-slate-400">{fmtDate(s.lastAttemptAt)}</td>
+                    <td className="px-4 py-3 text-xs text-slate-500">{fmtDate(s.lastAttemptAt)}</td>
                     <td className="px-4 py-3 text-right">
                       <Link
                         href={`/superadmin/students/${s.id}`}
@@ -156,7 +156,7 @@ export default function AdminStudentsReportPage() {
 
         {totalPages > 1 && (
           <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3">
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500">
               Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, total)} of {total}
             </p>
             <div className="flex gap-2">

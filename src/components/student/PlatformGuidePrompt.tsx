@@ -45,7 +45,7 @@ export function PlatformGuidePrompt() {
           <Compass className="size-7" />
         </span>
         <h2 className="mt-4 font-display text-xl font-bold tracking-tight text-navy">Take a quick tour?</h2>
-        <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-500">
+        <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-600">
           New here? We&apos;ll show you around - where every module lives and what each one does, with a guided
           walkthrough you can follow in one go. It takes about a minute.
         </p>
@@ -77,7 +77,7 @@ export function PlatformGuidePrompt() {
             Maybe later
           </button>
         </div>
-        <p className="mt-3 text-[11px] text-slate-400">You can replay the tour anytime from the “?” button in the top bar.</p>
+        <p className="mt-3 text-[11px] text-slate-500">You can replay the tour anytime from the “?” button in the top bar.</p>
       </div>
     </Modal>
   );

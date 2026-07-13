@@ -99,14 +99,14 @@ export default function CommunityPostPage({ params }: { params: Promise<{ id: st
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="size-6 animate-spin text-slate-400" />
+        <Loader2 className="size-6 animate-spin text-slate-500" />
       </div>
     );
   }
   if (error || !post) {
     return (
       <div className="py-24 text-center">
-        <p className="text-sm text-slate-500">This post could not be found.</p>
+        <p className="text-sm text-slate-600">This post could not be found.</p>
         <Link href="/community" className="mt-3 inline-block text-sm font-semibold text-orange hover:underline">
           ← Back to community
         </Link>
@@ -127,7 +127,7 @@ export default function CommunityPostPage({ params }: { params: Promise<{ id: st
       />
       <Link
         href="/community"
-        className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-navy"
+        className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-navy"
       >
         <ArrowLeft className="size-4" /> Back to community
       </Link>
@@ -172,7 +172,7 @@ export default function CommunityPostPage({ params }: { params: Promise<{ id: st
               <Link
                 key={t}
                 href={`/community?tag=${encodeURIComponent(t)}`}
-                className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-500 hover:bg-slate-200"
+                className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 hover:bg-slate-200"
               >
                 #{t}
               </Link>
@@ -182,13 +182,13 @@ export default function CommunityPostPage({ params }: { params: Promise<{ id: st
 
         <div className="mt-4 flex items-center gap-1 border-t border-slate-100 pt-3">
           <LikeButton liked={liked} count={likeCount} onToggle={toggleLike} />
-          <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold text-slate-500">
+          <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold text-slate-600">
             <MessageCircle className="size-4" /> {post.comments.length} comment{post.comments.length === 1 ? '' : 's'}
           </span>
           {canPin && (
             <button
               onClick={togglePin}
-              className="ml-auto inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-semibold text-slate-400 hover:bg-orange/10 hover:text-orange"
+              className="ml-auto inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-semibold text-slate-500 hover:bg-orange/10 hover:text-orange"
               title={post.isPinned ? 'Unpin' : 'Pin'}
             >
               <Pin className="size-3.5" />
@@ -225,7 +225,7 @@ export default function CommunityPostPage({ params }: { params: Promise<{ id: st
 
       {/* Comments */}
       <div className="mt-5">
-        <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-slate-400">
+        <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-slate-500">
           {post.comments.length} comment{post.comments.length === 1 ? '' : 's'}
         </h2>
         <CommentThread postId={id} comments={post.comments} onChanged={load} />
@@ -236,5 +236,5 @@ export default function CommunityPostPage({ params }: { params: Promise<{ id: st
 
 /** Delete button classes — pushed to the far right only when no pin button precedes it. */
 function cnMod(hasPinBefore: boolean): string {
-  return `${hasPinBefore ? '' : 'ml-auto '}inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-semibold text-slate-400 hover:bg-red-50 hover:text-red-500`;
+  return `${hasPinBefore ? '' : 'ml-auto '}inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-semibold text-slate-500 hover:bg-red-50 hover:text-red-500`;
 }

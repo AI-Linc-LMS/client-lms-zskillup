@@ -36,7 +36,7 @@ export function CertificateVerifyForm({ initialId = '' }: { initialId?: string }
             <ShieldCheck className="size-7" />
           </span>
           <h1 className="mt-4 font-display text-2xl font-bold tracking-tight text-navy">Verify a certificate</h1>
-          <p className="mx-auto mt-1.5 max-w-sm text-sm text-slate-500">
+          <p className="mx-auto mt-1.5 max-w-sm text-sm text-slate-600">
             Enter the certificate ID (e.g. <span className="font-mono">ZS-PM-4K7Q2X9A</span>) printed on any ZSkillup certificate.
           </p>
         </div>
@@ -84,7 +84,7 @@ export function CertificateVerifyForm({ initialId = '' }: { initialId?: string }
                   <AlertTriangle className="size-6" />
                 </span>
                 <p className="mt-3 text-sm font-bold text-navy">No certificate matches that ID</p>
-                <p className="mt-1 text-xs text-slate-500">Double-check the ID exactly as printed and try again.</p>
+                <p className="mt-1 text-xs text-slate-600">Double-check the ID exactly as printed and try again.</p>
               </div>
             )}
           </div>
@@ -97,7 +97,7 @@ export function CertificateVerifyForm({ initialId = '' }: { initialId?: string }
 function Row({ label, value, strong, mono }: { label: string; value: string; strong?: boolean; mono?: boolean }) {
   return (
     <div className="flex items-baseline justify-between gap-3 border-b border-slate-100 pb-2 last:border-0">
-      <dt className="text-xs font-semibold uppercase tracking-wider text-slate-400">{label}</dt>
+      <dt className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</dt>
       <dd className={`text-right ${strong ? 'text-base font-black text-navy' : 'font-semibold text-navy'} ${mono ? 'font-mono text-xs' : ''}`}>{value}</dd>
     </div>
   );

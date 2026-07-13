@@ -180,14 +180,14 @@ export default function PracticeWishPage() {
             </h2>
           </div>
           {topics !== null && (
-            <span className="text-sm font-semibold text-slate-400">
+            <span className="text-sm font-semibold text-slate-500">
               {totalTopics} topics · {sections.length} sections
             </span>
           )}
         </div>
 
         {topics === null ? (
-          <div className="flex items-center gap-2 py-10 text-sm text-slate-400">
+          <div className="flex items-center gap-2 py-10 text-sm text-slate-500">
             <Loader2 className="size-4 animate-spin" /> Loading topics…
           </div>
         ) : visible.length > 0 ? (
@@ -207,11 +207,11 @@ export default function PracticeWishPage() {
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block font-black text-navy">{section.name}</span>
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs text-slate-500">
                         {subs.length} topic{subs.length === 1 ? '' : 's'}
                       </span>
                     </span>
-                    <ChevronDown className={`size-4 shrink-0 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`size-4 shrink-0 text-slate-500 transition-transform ${open ? 'rotate-180' : ''}`} />
                   </button>
                   {open && (
                     <div className="flex flex-wrap gap-2 border-t border-slate-100 bg-slate-50/40 p-4">
@@ -226,7 +226,7 @@ export default function PracticeWishPage() {
                           >
                             {busy ? <Loader2 className="size-3 animate-spin text-violet-500" /> : null}
                             {t.name}
-                            <ArrowRight className="size-3 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-violet-500" />
+                            <ArrowRight className="size-3 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-violet-500" />
                           </button>
                         );
                       })}

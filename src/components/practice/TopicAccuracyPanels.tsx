@@ -199,7 +199,7 @@ function TopicCard({
               />
               <span className={cn('text-base font-bold', theme.text)}>%</span>
             </p>
-            <span className="text-[11px] font-medium text-slate-400">accuracy</span>
+            <span className="text-[11px] font-medium text-slate-500">accuracy</span>
           </div>
           <AccuracyMeter
             pct={topic.accuracyPct}
@@ -207,9 +207,9 @@ function TopicCard({
             label={`${topic.topicName} accuracy`}
           />
 
-          <div className="mb-4 mt-2 flex items-center justify-between gap-2 text-xs text-slate-400">
+          <div className="mb-4 mt-2 flex items-center justify-between gap-2 text-xs text-slate-500">
             <span>
-              <span className="font-semibold text-slate-500 tabular-nums">{topic.correct}</span>/
+              <span className="font-semibold text-slate-600 tabular-nums">{topic.correct}</span>/
               <span className="tabular-nums">{topic.total}</span> correct
             </span>
             {trailing}
@@ -307,7 +307,7 @@ export function TopicAccuracyPanels() {
                   <p className="text-sm font-bold text-navy">
                     {rows.length === 0 ? 'No practice data yet.' : 'No weak topics detected.'}
                   </p>
-                  <p className="mt-1 max-w-md text-xs leading-relaxed text-slate-500">
+                  <p className="mt-1 max-w-md text-xs leading-relaxed text-slate-600">
                     {rows.length === 0
                       ? 'Attempt a few questions and your weakest topics will surface here automatically.'
                       : 'Nice work - nothing has dropped under 60% across 3+ attempts. Topics appear here the moment one slips.'}
@@ -349,7 +349,7 @@ export function TopicAccuracyPanels() {
                   cta="Continue"
                   ctaVariant="ghost"
                   trailing={
-                    <span className="inline-flex items-center gap-1 text-slate-400">
+                    <span className="inline-flex items-center gap-1 text-slate-500">
                       <Calendar className="size-3" aria-hidden="true" />
                       {formatRelative(topic.lastAttemptAt)}
                     </span>

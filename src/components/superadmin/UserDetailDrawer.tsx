@@ -183,10 +183,10 @@ export function UserDetailDrawer({
       />
       <div className="relative flex h-full w-full max-w-md flex-col overflow-y-auto bg-white shadow-2xl">
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-5 py-4">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400">User detail</h2>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">User detail</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-600"
             aria-label="Close"
           >
             <X className="size-5" />
@@ -195,7 +195,7 @@ export function UserDetailDrawer({
 
         {loading ? (
           <div className="flex flex-1 items-center justify-center">
-            <Loader2 className="size-6 animate-spin text-slate-400" />
+            <Loader2 className="size-6 animate-spin text-slate-500" />
           </div>
         ) : !user ? (
           <div className="flex flex-1 items-center justify-center p-6 text-center text-sm text-red-500">
@@ -230,7 +230,7 @@ export function UserDetailDrawer({
                       </button>
                       <button
                         onClick={() => setEditingName(false)}
-                        className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"
+                        className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100"
                         aria-label="Cancel"
                       >
                         <X className="size-4" />
@@ -246,14 +246,14 @@ export function UserDetailDrawer({
                           setNameDraft(user.fullName ?? '');
                           setEditingName(true);
                         }}
-                        className="shrink-0 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                        className="shrink-0 rounded-md p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-600"
                         aria-label="Edit name"
                       >
                         <Pencil className="size-3.5" />
                       </button>
                     </div>
                   )}
-                  <p className="truncate text-sm text-slate-500">{user.email}</p>
+                  <p className="truncate text-sm text-slate-600">{user.email}</p>
                 </div>
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -273,7 +273,7 @@ export function UserDetailDrawer({
                     'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
                     user.isEmailVerified
                       ? 'bg-green-50 text-green-700'
-                      : 'bg-slate-100 text-slate-500',
+                      : 'bg-slate-100 text-slate-600',
                   )}
                 >
                   {user.isEmailVerified ? (
@@ -289,7 +289,7 @@ export function UserDetailDrawer({
                   A TPO with no college can't open the placement console. */}
               {(user.role === 'STUDENT' || user.role === 'COLLEGE_ADMIN') && (
                 <div className="mt-4">
-                  <label className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+                  <label className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                     <School className="size-3.5" /> College
                     {!user.collegeId && (
                       <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-amber-700">
@@ -321,11 +321,11 @@ export function UserDetailDrawer({
 
               <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
                 <div>
-                  <dt className="text-slate-400">Joined</dt>
+                  <dt className="text-slate-500">Joined</dt>
                   <dd className="font-medium text-slate-700">{fmt(user.createdAt)}</dd>
                 </div>
                 <div>
-                  <dt className="text-slate-400">Last login</dt>
+                  <dt className="text-slate-500">Last login</dt>
                   <dd className="font-medium text-slate-700">{fmt(user.lastLoginAt)}</dd>
                 </div>
               </dl>
@@ -347,7 +347,7 @@ export function UserDetailDrawer({
 
             {/* Account actions */}
             <div>
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                 Account actions
               </p>
               <div className="grid grid-cols-1 gap-2">
@@ -413,7 +413,7 @@ export function UserDetailDrawer({
             {/* Capabilities (ADMIN only) */}
             {user.role === 'ADMIN' && (
               <div>
-                <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+                <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                   <ShieldCheck className="size-3.5" /> Capabilities
                 </p>
                 <div className="space-y-1.5">
@@ -428,7 +428,7 @@ export function UserDetailDrawer({
                         <span className="block text-sm font-semibold text-navy">
                           {ADMIN_CAPABILITY_LABELS[key]}
                         </span>
-                        <span className="block text-[11px] text-slate-400">
+                        <span className="block text-[11px] text-slate-500">
                           {ADMIN_CAPABILITY_DESCRIPTIONS[key]}
                         </span>
                       </span>
@@ -457,11 +457,11 @@ export function UserDetailDrawer({
 
             {/* Login history */}
             <div>
-              <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+              <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                 <LogIn className="size-3.5" /> Recent sign-ins
               </p>
               {history.length === 0 ? (
-                <p className="rounded-lg border border-dashed border-slate-200 p-3 text-center text-xs text-slate-400">
+                <p className="rounded-lg border border-dashed border-slate-200 p-3 text-center text-xs text-slate-500">
                   No sign-ins recorded yet.
                 </p>
               ) : (
@@ -472,7 +472,7 @@ export function UserDetailDrawer({
                       className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 px-3 py-2 text-xs"
                     >
                       <span className="font-medium text-slate-700">{fmt(h.at)}</span>
-                      <span className="flex items-center gap-2 text-slate-400">
+                      <span className="flex items-center gap-2 text-slate-500">
                         {h.method && (
                           <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase">
                             {h.method}

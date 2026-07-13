@@ -21,7 +21,7 @@ function GapBar({ label, value }: { label: string; value: number }) {
       <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
         <div className="h-full rounded-full bg-gradient-to-r from-amber-400 to-red-500" style={{ width: `${value}%` }} />
       </div>
-      <span className="w-10 text-right text-xs font-semibold tabular-nums text-slate-500">{value}%</span>
+      <span className="w-10 text-right text-xs font-semibold tabular-nums text-slate-600">{value}%</span>
     </div>
   );
 }
@@ -58,7 +58,7 @@ export default function SkillGapAnalyticsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="size-7 animate-spin text-slate-400" />
+        <Loader2 className="size-7 animate-spin text-slate-500" />
       </div>
     );
   }
@@ -70,7 +70,7 @@ export default function SkillGapAnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm font-semibold text-slate-500">
+      <p className="text-sm font-semibold text-slate-600">
         Skill gap analytics · <span className="text-navy">{cohortLabel}</span>
       </p>
 
@@ -85,7 +85,7 @@ export default function SkillGapAnalyticsPage() {
             <Target className="size-4" /> Aptitude
           </div>
           {aptitudeGaps.length === 0 ? (
-            <p className="text-sm text-slate-400">Not enough practice data yet.</p>
+            <p className="text-sm text-slate-500">Not enough practice data yet.</p>
           ) : (
             <div className="space-y-2.5">
               {aptitudeGaps.map((g) => (
@@ -105,7 +105,7 @@ export default function SkillGapAnalyticsPage() {
             <Code2 className="size-4" /> Coding
           </div>
           {(coding?.totalAttempted ?? 0) === 0 ? (
-            <p className="text-sm text-slate-400">No coding activity yet.</p>
+            <p className="text-sm text-slate-500">No coding activity yet.</p>
           ) : (
             <div className="space-y-4">
               <div className="space-y-2.5">
@@ -117,7 +117,7 @@ export default function SkillGapAnalyticsPage() {
               </div>
               {codingWeakCompanies.length > 0 && (
                 <div className="border-t border-slate-100 pt-3">
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                     Weakest company patterns
                   </p>
                   <div className="space-y-2.5">
@@ -139,7 +139,7 @@ export default function SkillGapAnalyticsPage() {
         source="Aggregated aptitude + coding performance"
       >
         {aptitudeGaps.length === 0 && (coding?.totalAttempted ?? 0) === 0 ? (
-          <p className="text-sm text-slate-400">Weak-area ranking appears as students practise.</p>
+          <p className="text-sm text-slate-500">Weak-area ranking appears as students practise.</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {aptitudeGaps.slice(0, 5).map((g) => (

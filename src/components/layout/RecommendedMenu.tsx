@@ -82,7 +82,7 @@ export function RecommendedMenu() {
         )}
       >
         <span className="relative">
-          <Wand2 className={cn('size-4 transition-colors', open ? 'text-orange' : 'text-slate-400 group-hover:text-orange')} aria-hidden />
+          <Wand2 className={cn('size-4 transition-colors', open ? 'text-orange' : 'text-slate-500 group-hover:text-orange')} aria-hidden />
           {hasPicks && !open ? (
             <span className="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-orange ring-2 ring-white" />
           ) : null}
@@ -113,7 +113,7 @@ export function RecommendedMenu() {
                   <Sparkles className="size-3.5" /> Recommended for you
                 </span>
                 {calibrated && data?.overall != null ? (
-                  <span className="text-[11px] font-semibold text-slate-400">
+                  <span className="text-[11px] font-semibold text-slate-500">
                     Placement readiness <span className="font-black tabular-nums text-navy">{data.overall}%</span>
                   </span>
                 ) : null}
@@ -122,7 +122,7 @@ export function RecommendedMenu() {
               {/* Body */}
               {!data ? (
                 <div className="grid h-24 place-items-center">
-                  <Loader2 className="size-5 animate-spin text-slate-300" />
+                  <Loader2 className="size-5 animate-spin text-slate-400" />
                 </div>
               ) : !calibrated ? (
                 /* Unlock teaser — before the first calibration assessment. */
@@ -131,7 +131,7 @@ export function RecommendedMenu() {
                     <Lock className="size-5" />
                   </span>
                   <p className="mt-3 text-sm font-black text-navy">Unlock your recommendations</p>
-                  <p className="mx-auto mt-1 max-w-[19rem] text-xs leading-relaxed text-slate-500">
+                  <p className="mx-auto mt-1 max-w-[19rem] text-xs leading-relaxed text-slate-600">
                     Take the quick placement readiness test and we&apos;ll pick the exact company tracks,
                     sections and topics to focus on next.
                   </p>
@@ -150,7 +150,7 @@ export function RecommendedMenu() {
                       <RecoScopeChip r={best} />
                       <p className="mt-1.5 text-[13px] font-semibold leading-snug text-navy">{best.message}</p>
                       {best.reason ? (
-                        <p className="mt-1 text-[11px] text-slate-400">Why: {best.reason}</p>
+                        <p className="mt-1 text-[11px] text-slate-500">Why: {best.reason}</p>
                       ) : null}
                       <div className="mt-2.5">
                         <RecoAction r={best} block />
@@ -189,7 +189,7 @@ export function RecommendedMenu() {
                 <Link
                   href="/cart"
                   onClick={closeNow}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 transition-colors hover:text-navy"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 transition-colors hover:text-navy"
                 >
                   <ShoppingCart className="size-3.5" /> Cart
                 </Link>

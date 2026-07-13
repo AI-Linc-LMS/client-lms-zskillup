@@ -28,7 +28,7 @@ function Ring({ pct, size = 128, label }: { pct: number; size?: number; label: s
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-2xl font-black tabular-nums text-navy">{pct}%</span>
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</span>
       </div>
     </div>
   );
@@ -48,7 +48,7 @@ export function PerformanceDashboard() {
   }, []);
 
   if (mocks === null) {
-    return <div className="grid h-64 place-items-center"><Loader2 className="size-6 animate-spin text-slate-400" /></div>;
+    return <div className="grid h-64 place-items-center"><Loader2 className="size-6 animate-spin text-slate-500" /></div>;
   }
 
   const accuracyPct = acc?.accuracyPct ?? 0;
@@ -98,12 +98,12 @@ export function PerformanceDashboard() {
                 <TrendingUp className="size-3.5" /> Scores
               </span>
               {mocks.length ? (
-                <span className="text-xs font-semibold text-slate-400">best {bestPct}% · avg {avgPct}%</span>
+                <span className="text-xs font-semibold text-slate-500">best {bestPct}% · avg {avgPct}%</span>
               ) : null}
             </div>
             {chrono.length === 0 ? (
               <div className="mt-6 grid place-items-center rounded-2xl border border-dashed border-slate-200 py-10 text-center">
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-slate-600">
                   No mock/assessment attempts yet.{' '}
                   <Link href="/mock-assessment" className="font-semibold text-indigo-600 hover:underline">Take a mock quiz →</Link>
                 </p>
@@ -128,7 +128,7 @@ export function PerformanceDashboard() {
                         className="group relative flex h-full flex-1 flex-col items-center justify-end"
                         title={`${m.title}: ${m.pct}%`}
                       >
-                        <span className="mb-1 text-[9px] font-bold tabular-nums text-slate-500 opacity-0 transition-opacity group-hover:opacity-100">
+                        <span className="mb-1 text-[9px] font-bold tabular-nums text-slate-600 opacity-0 transition-opacity group-hover:opacity-100">
                           {m.pct}
                         </span>
                         <motion.div
@@ -142,7 +142,7 @@ export function PerformanceDashboard() {
                     ))}
                   </div>
                 </div>
-                <p className="mt-2 text-right text-[10px] font-medium text-slate-400">
+                <p className="mt-2 text-right text-[10px] font-medium text-slate-500">
                   last {Math.min(14, chrono.length)} attempts →
                 </p>
               </div>
@@ -187,7 +187,7 @@ function Kpi({ icon: Icon, label, value, tone: t }: { icon: typeof Target; label
     <div className="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3.5 transition-colors hover:border-indigo-200 hover:bg-indigo-50/40">
       <Icon className={cn('size-4', t)} />
       <p className={cn('mt-1.5 text-2xl font-black tabular-nums sm:text-3xl', t)}>{value}</p>
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</p>
     </div>
   );
 }

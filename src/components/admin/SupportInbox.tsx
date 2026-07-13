@@ -23,13 +23,13 @@ const STATUS_STYLE: Record<string, string> = {
   OPEN: 'bg-blue-100 text-blue-700',
   IN_PROGRESS: 'bg-amber-100 text-amber-700',
   RESOLVED: 'bg-green-100 text-green-700',
-  CLOSED: 'bg-slate-100 text-slate-500',
+  CLOSED: 'bg-slate-100 text-slate-600',
 };
 const PRIORITY_STYLE: Record<string, string> = {
   URGENT: 'text-red-600',
   HIGH: 'text-[#dc2626]',
-  NORMAL: 'text-slate-500',
-  LOW: 'text-slate-400',
+  NORMAL: 'text-slate-600',
+  LOW: 'text-slate-500',
 };
 const inputCls =
   'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange';
@@ -69,20 +69,20 @@ export function SupportInbox() {
             <option key={s} value={s}>{s.replace('_', ' ')}</option>
           ))}
         </select>
-        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
       </div>
 
       {error && <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
 
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         {loading ? (
-          <div className="flex items-center justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-400" /></div>
+          <div className="flex items-center justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-500" /></div>
         ) : tickets.length === 0 ? (
-          <div className="py-12 text-center text-sm text-slate-400">No tickets.</div>
+          <div className="py-12 text-center text-sm text-slate-500">No tickets.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] text-sm">
-              <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+              <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                 <tr>
                   <th className="px-4 py-3">Subject</th>
                   <th className="px-4 py-3">Requester</th>
@@ -96,7 +96,7 @@ export function SupportInbox() {
                   <tr key={t.id} onClick={() => setOpenId(t.id)} className="cursor-pointer hover:bg-slate-50">
                     <td className="px-4 py-3">
                       <p className="font-semibold text-navy">{t.subject}</p>
-                      {t.category && <p className="text-xs text-slate-400">{t.category}</p>}
+                      {t.category && <p className="text-xs text-slate-500">{t.category}</p>}
                     </td>
                     <td className="px-4 py-3 text-slate-600">
                       {t.requesterName ?? t.requesterEmail ?? '-'}
@@ -107,7 +107,7 @@ export function SupportInbox() {
                         {t.status.replace('_', ' ')}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs text-slate-400">
+                    <td className="px-4 py-3 text-xs text-slate-500">
                       {new Date(t.lastMessageAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                     </td>
                   </tr>
@@ -172,11 +172,11 @@ function StaffThread({ id, onBack }: { id: string; onBack: () => void }) {
 
   return (
     <div className="space-y-4">
-      <button onClick={onBack} className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-navy">
+      <button onClick={onBack} className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-navy">
         <ArrowLeft className="size-4" /> Back to inbox
       </button>
       {loading ? (
-        <div className="flex items-center justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-400" /></div>
+        <div className="flex items-center justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-500" /></div>
       ) : !ticket ? (
         <p className="text-sm text-red-500">{error ?? 'Not found.'}</p>
       ) : (
@@ -184,19 +184,19 @@ function StaffThread({ id, onBack }: { id: string; onBack: () => void }) {
           <div className="space-y-3 border-b border-slate-100 p-4">
             <div>
               <h2 className="font-bold text-navy">{ticket.subject}</h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500">
                 {ticket.requesterName ?? ticket.requesterEmail ?? 'Unknown'} · opened{' '}
                 {new Date(ticket.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <label className="text-xs text-slate-500">
+              <label className="text-xs text-slate-600">
                 Status
                 <select value={ticket.status} onChange={(e) => setField({ status: e.target.value as TicketStatusValue })} disabled={busy} className={cn(inputCls, 'mt-1 w-40')}>
                   {TICKET_STATUSES.map((s) => (<option key={s} value={s}>{s.replace('_', ' ')}</option>))}
                 </select>
               </label>
-              <label className="text-xs text-slate-500">
+              <label className="text-xs text-slate-600">
                 Priority
                 <select value={ticket.priority} onChange={(e) => setField({ priority: e.target.value as TicketPriorityValue })} disabled={busy} className={cn(inputCls, 'mt-1 w-40')}>
                   {TICKET_PRIORITIES.map((p) => (<option key={p} value={p}>{p}</option>))}
@@ -208,7 +208,7 @@ function StaffThread({ id, onBack }: { id: string; onBack: () => void }) {
             {ticket.messages.map((m) => (
               <div key={m.id} className={cn('flex', m.isStaff ? 'justify-end' : 'justify-start')}>
                 <div className={cn('max-w-[80%] rounded-2xl px-4 py-2.5 text-sm', m.isStaff ? 'bg-orange/10 text-navy' : 'bg-slate-100 text-slate-700')}>
-                  <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                  <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
                     {m.isStaff ? (m.authorName ?? 'Support') : (m.authorName ?? 'User')} · {new Date(m.createdAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                   </p>
                   <p className="whitespace-pre-wrap">{m.body}</p>

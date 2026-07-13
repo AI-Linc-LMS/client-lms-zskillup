@@ -77,7 +77,7 @@ export function QuestionImportPanel({ onDone }: { onDone: () => void }) {
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-bold text-navy">Bulk import questions</h2>
-          <p className="mt-0.5 text-sm text-slate-500">
+          <p className="mt-0.5 text-sm text-slate-600">
             Upload a CSV to publish many questions at once. Each row is validated independently -
             a bad row is reported, never blocks the rest.
           </p>
@@ -89,14 +89,14 @@ export function QuestionImportPanel({ onDone }: { onDone: () => void }) {
 
       {/* Column reference */}
       <div className="rounded-lg bg-slate-50 p-4">
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
           CSV columns (header row required)
         </p>
         <ul className="grid gap-x-6 gap-y-1 text-xs text-slate-600 sm:grid-cols-2">
           {COLUMNS.map((c) => (
             <li key={c.name}>
               <span className="font-semibold text-navy">{c.name}</span>
-              <span className="text-slate-400"> - {c.note}</span>
+              <span className="text-slate-500"> - {c.note}</span>
             </li>
           ))}
         </ul>
@@ -116,12 +116,12 @@ export function QuestionImportPanel({ onDone }: { onDone: () => void }) {
             <FileUp className="size-4" aria-hidden="true" /> Choose CSV file
           </Button>
           {fileName ? (
-            <span className="inline-flex items-center gap-1.5 text-sm text-slate-500">
+            <span className="inline-flex items-center gap-1.5 text-sm text-slate-600">
               <CheckCircle2 className="size-4 text-emerald-500" aria-hidden="true" />
               {fileName}
             </span>
           ) : (
-            <span className="text-sm text-slate-400">…or paste rows below</span>
+            <span className="text-sm text-slate-500">…or paste rows below</span>
           )}
         </div>
 
@@ -135,7 +135,7 @@ export function QuestionImportPanel({ onDone }: { onDone: () => void }) {
           rows={6}
           placeholder={TEMPLATE}
           spellCheck={false}
-          className="w-full rounded-lg border border-slate-200 bg-white p-3 font-mono text-xs leading-relaxed text-navy placeholder:text-slate-300 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+          className="w-full rounded-lg border border-slate-200 bg-white p-3 font-mono text-xs leading-relaxed text-navy placeholder:text-slate-400 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
         />
       </div>
 
@@ -162,7 +162,7 @@ export function QuestionImportPanel({ onDone }: { onDone: () => void }) {
           {result.rows.some((r) => r.status === 'invalid') ? (
             <div className="overflow-hidden rounded-lg border border-slate-200">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                <thead className="bg-slate-50 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                   <tr>
                     <th className="px-3 py-2">Line</th>
                     <th className="px-3 py-2">Question</th>
@@ -174,7 +174,7 @@ export function QuestionImportPanel({ onDone }: { onDone: () => void }) {
                     .filter((r) => r.status === 'invalid')
                     .map((r) => (
                       <tr key={r.line} className="border-t border-slate-100">
-                        <td className="px-3 py-2 text-slate-400">{r.line}</td>
+                        <td className="px-3 py-2 text-slate-500">{r.line}</td>
                         <td className="px-3 py-2 text-slate-600">{r.stem}</td>
                         <td className="px-3 py-2">
                           <span className="text-red-600">{r.reason}</span>

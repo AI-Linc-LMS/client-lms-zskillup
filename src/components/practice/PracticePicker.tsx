@@ -107,17 +107,17 @@ export function PracticePicker({
     <div className="space-y-8">
       {/* search bar */}
       <div data-tour="practice:search" className="relative max-w-xl">
-        <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+        <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search companies, sections or topics…"
-          className="w-full rounded-2xl border border-slate-200 bg-white px-10 py-3 text-sm text-navy shadow-sm placeholder:text-slate-400 focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+          className="w-full rounded-2xl border border-slate-200 bg-white px-10 py-3 text-sm text-navy shadow-sm placeholder:text-slate-500 focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-100"
         />
       </div>
 
       {nothing ? (
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-6 text-sm text-slate-500">
+        <div className="rounded-3xl border border-slate-200/80 bg-white p-6 text-sm text-slate-600">
           No companies, sections or topics match &ldquo;{query.trim()}&rdquo;.
         </div>
       ) : null}
@@ -187,7 +187,7 @@ function SectionBlock({
           </span>
           <div>
             <p className="text-base font-bold leading-snug text-navy">{root.name}</p>
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="mt-0.5 text-xs text-slate-600">
               {root.children.length} topic{root.children.length === 1 ? '' : 's'}
             </p>
           </div>

@@ -110,18 +110,18 @@ export default function AdminUsersPage() {
 
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
             Super Admin · ZSkillup
           </p>
           <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">
             User Management
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-600">
             {total.toLocaleString()} total accounts · view, search, and change roles
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Users className="size-5 text-slate-400" />
+          <Users className="size-5 text-slate-500" />
           <span className="text-sm font-semibold text-slate-600">{total} users</span>
         </div>
       </div>
@@ -129,7 +129,7 @@ export default function AdminUsersPage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
           <input
             type="search"
             placeholder="Search by name or email…"
@@ -150,7 +150,7 @@ export default function AdminUsersPage() {
             <option value="ADMIN">Admin</option>
             <option value="SUPER_ADMIN">Super Admin</option>
           </select>
-          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
         </div>
         <div className="relative">
           <select
@@ -163,7 +163,7 @@ export default function AdminUsersPage() {
             <option value="INVITED">Invited</option>
             <option value="SUSPENDED">Suspended</option>
           </select>
-          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
         </div>
       </div>
 
@@ -185,16 +185,16 @@ export default function AdminUsersPage() {
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="size-6 animate-spin text-slate-400" />
+            <Loader2 className="size-6 animate-spin text-slate-500" />
           </div>
         ) : error ? (
           <div className="py-16 text-center text-sm text-red-500">{error}</div>
         ) : rows.length === 0 ? (
-          <div className="py-16 text-center text-sm text-slate-400">No users found.</div>
+          <div className="py-16 text-center text-sm text-slate-500">No users found.</div>
         ) : (
           <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] text-sm">
-            <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+            <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500">
               <tr>
                 <th className="px-4 py-3">User</th>
                 <th className="px-4 py-3">Status</th>
@@ -210,7 +210,7 @@ export default function AdminUsersPage() {
                 <tr key={user.id} className="hover:bg-slate-50">
                   <td className="px-4 py-3">
                     <p className="font-semibold text-navy">{user.fullName ?? '-'}</p>
-                    <p className="text-xs text-slate-400">{user.email}</p>
+                    <p className="text-xs text-slate-500">{user.email}</p>
                   </td>
                   <td className="px-4 py-3">
                     <span className={cn('text-xs font-semibold', STATUS_COLORS[user.status])}>
@@ -226,10 +226,10 @@ export default function AdminUsersPage() {
                     {user.isEmailVerified ? (
                       <BadgeCheck className="size-4 text-green-500" />
                     ) : (
-                      <XCircle className="size-4 text-slate-300" />
+                      <XCircle className="size-4 text-slate-400" />
                     )}
                   </td>
-                  <td className="px-4 py-3 text-xs text-slate-400">
+                  <td className="px-4 py-3 text-xs text-slate-500">
                     {user.lastLoginAt
                       ? new Date(user.lastLoginAt).toLocaleDateString('en-IN', {
                           day: 'numeric',
@@ -264,7 +264,7 @@ export default function AdminUsersPage() {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3">
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500">
               Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, total)} of {total}
             </p>
             <div className="flex gap-2">
@@ -316,7 +316,7 @@ function RoleChanger({
   return (
     <div className="flex flex-wrap gap-1.5">
       {promoting ? (
-        <Loader2 className="size-4 animate-spin text-slate-400" />
+        <Loader2 className="size-4 animate-spin text-slate-500" />
       ) : (
         otherRoles.map((role) => (
           <button

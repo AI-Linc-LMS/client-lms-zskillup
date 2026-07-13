@@ -83,13 +83,13 @@ export function CompaniesAdmin() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="relative max-w-md flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-500" aria-hidden="true" />
           <input
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name or slug"
-            className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-navy placeholder:text-slate-400 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+            className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-navy placeholder:text-slate-500 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
             aria-label="Search companies"
           />
         </div>
@@ -117,7 +117,7 @@ export function CompaniesAdmin() {
         <div className="overflow-x-auto">
         <table className="w-full min-w-[620px] text-left text-sm">
           <thead className="bg-slate-50">
-            <tr className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            <tr className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
               <th className="px-4 py-3">Company</th>
               <th className="px-4 py-3">Slug</th>
               <th className="px-4 py-3">Type</th>
@@ -130,12 +130,12 @@ export function CompaniesAdmin() {
             {companies === null ? (
               <tr>
                 <td colSpan={6} className="px-4 py-12 text-center">
-                  <Loader2 className="mx-auto size-5 animate-spin text-slate-400" aria-hidden="true" />
+                  <Loader2 className="mx-auto size-5 animate-spin text-slate-500" aria-hidden="true" />
                 </td>
               </tr>
             ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-12 text-center text-sm text-slate-500">
+                <td colSpan={6} className="px-4 py-12 text-center text-sm text-slate-600">
                   {search ? 'No companies match that search.' : 'No companies yet - add the first one above.'}
                 </td>
               </tr>
@@ -143,7 +143,7 @@ export function CompaniesAdmin() {
               filtered.map((c) => (
                 <tr key={c.id} className="border-t border-slate-100">
                   <td className="px-4 py-3 font-semibold text-navy">{c.name}</td>
-                  <td className="px-4 py-3 font-mono text-xs text-slate-500">{c.slug}</td>
+                  <td className="px-4 py-3 font-mono text-xs text-slate-600">{c.slug}</td>
                   <td className="px-4 py-3 text-slate-600">{c.type}</td>
                   <td className="px-4 py-3 text-slate-600">{c.displayOrder}</td>
                   <td className="px-4 py-3">
@@ -164,7 +164,7 @@ export function CompaniesAdmin() {
                         disabled={busyId === c.id}
                         onClick={() => removeCompany(c)}
                         aria-label={`Remove ${c.name}`}
-                        className="text-slate-300 transition-colors hover:text-red-500 disabled:opacity-50"
+                        className="text-slate-400 transition-colors hover:text-red-500 disabled:opacity-50"
                       >
                         <Trash2 className="size-4" />
                       </button>
@@ -178,7 +178,7 @@ export function CompaniesAdmin() {
         </div>
       </div>
 
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-slate-500">
         {companies?.length ?? 0} compan{(companies?.length ?? 0) === 1 ? 'y' : 'ies'} total
         {search ? ` · ${filtered.length} matching` : ''}
       </p>
@@ -212,7 +212,7 @@ function AddCompanyForm({ onCreated }: { onCreated: () => void }) {
 
   return (
     <form onSubmit={onSubmit} className="rounded-xl border border-slate-200 bg-white p-5" noValidate>
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">New company</p>
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">New company</p>
       <h2 className="mb-4 text-base font-bold text-navy">Add a recruiter hub</h2>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

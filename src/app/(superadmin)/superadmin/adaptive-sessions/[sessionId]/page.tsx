@@ -42,7 +42,7 @@ export default function AdminAdaptiveSessionDetailPage({
 
   if (!result) {
     return (
-      <div className="flex items-center gap-3 p-8 text-sm text-slate-400">
+      <div className="flex items-center gap-3 p-8 text-sm text-slate-500">
         <Loader2 className="size-5 animate-spin text-[#f5b400]" />
         Loading session…
       </div>
@@ -56,7 +56,7 @@ export default function AdminAdaptiveSessionDetailPage({
       <header className="flex items-start gap-4">
         <Link
           href="/superadmin/adaptive-sessions"
-          className="mt-1 inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-[#1a1d29]"
+          className="mt-1 inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-[#1a1d29]"
         >
           <ArrowLeft className="size-3.5" /> All sessions
         </Link>
@@ -65,7 +65,7 @@ export default function AdminAdaptiveSessionDetailPage({
             <Brain className="size-5 text-[#f5b400]" />
             <h1 className="text-2xl font-extrabold text-navy">Session Report</h1>
           </div>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-slate-600 mt-1">
             Student <span className="font-mono">{result.userId}</span> ·{' '}
             {result.total} questions answered ·{' '}
             <span className="font-semibold text-navy">{result.accuracy}% accuracy</span>
@@ -82,7 +82,7 @@ export default function AdminAdaptiveSessionDetailPage({
           { label: 'Hints used', value: String(result.questions.filter((q) => q.confidence !== null).length) },
         ].map(({ label, value }) => (
           <div key={label} className="rounded-xl border bg-white p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">{label}</p>
             <p className="mt-1 text-xl font-extrabold text-navy">{value}</p>
           </div>
         ))}

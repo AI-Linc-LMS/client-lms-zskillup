@@ -222,7 +222,7 @@ export function AvatarMenu({ initials = '··' }: { initials?: string }) {
                       Previewing as student
                     </p>
                   ) : (
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                       Signed in
                     </p>
                   )}
@@ -230,7 +230,7 @@ export function AvatarMenu({ initials = '··' }: { initials?: string }) {
                     {headerName ?? 'Your account'}
                   </p>
                   {!isPreviewing && email ? (
-                    <p className="truncate text-xs text-slate-400">{email}</p>
+                    <p className="truncate text-xs text-slate-500">{email}</p>
                   ) : null}
                 </div>
               </div>
@@ -332,7 +332,7 @@ function MenuRow({
     danger: 'text-red-600 hover:bg-red-50',
   };
   const chipClasses: Record<RowTone, string> = {
-    default: 'bg-slate-100 text-slate-500 group-hover:bg-white group-hover:text-navy',
+    default: 'bg-slate-100 text-slate-600 group-hover:bg-white group-hover:text-navy',
     sky: 'bg-sky-100 text-sky-600 group-hover:bg-white',
     danger: 'bg-red-100 text-red-600 group-hover:bg-white',
   };
@@ -357,7 +357,7 @@ function MenuRow({
       </span>
       <span className="flex-1">{label}</span>
       {trailing ? (
-        <ChevronRight className="size-3.5 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-400" aria-hidden="true" />
+        <ChevronRight className="size-3.5 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-500" aria-hidden="true" />
       ) : null}
     </button>
   );

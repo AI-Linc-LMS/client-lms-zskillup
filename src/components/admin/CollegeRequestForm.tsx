@@ -88,7 +88,7 @@ function Field({
     <label className="block">
       <span className="text-xs font-semibold text-slate-600">{label}</span>
       {children}
-      {hint ? <span className="mt-0.5 block text-[11px] text-slate-400">{hint}</span> : null}
+      {hint ? <span className="mt-0.5 block text-[11px] text-slate-500">{hint}</span> : null}
     </label>
   );
 }
@@ -187,7 +187,7 @@ export function CollegeRequestForm({
       {/* TPO contact */}
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-bold text-navy">TPO contact</h2>
-        <p className="mt-1 text-xs text-slate-500">Receives the college login credentials once the subscription is activated.</p>
+        <p className="mt-1 text-xs text-slate-600">Receives the college login credentials once the subscription is activated.</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <Field label="Contact name">
             <input className={inputCls} value={v.contactName} onChange={(e) => set('contactName', e.target.value)} placeholder="Dr. Placement Officer" />
@@ -225,7 +225,7 @@ export function CollegeRequestForm({
         <div className="flex items-center justify-between gap-2">
           <div>
             <h2 className="text-sm font-bold text-navy">Student list</h2>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-slate-600">
               CSV columns: <code className="rounded bg-slate-100 px-1 text-[11px]">email,fullName,rollNumber</code> (header optional).
             </p>
           </div>
@@ -238,7 +238,7 @@ export function CollegeRequestForm({
           <Button type="button" variant="outline" onClick={() => fileRef.current?.click()}>
             <Upload className="mr-1.5 size-4" /> Upload CSV
           </Button>
-          <span className="text-xs text-slate-400">or paste below</span>
+          <span className="text-xs text-slate-500">or paste below</span>
         </div>
         <textarea
           className={`${inputCls} mt-3 h-28 font-mono text-xs`}
@@ -256,7 +256,7 @@ export function CollegeRequestForm({
         {v.students.length > 0 ? (
           <div className="mt-3 max-h-40 overflow-auto rounded-lg border border-slate-200">
             <table className="w-full text-xs">
-              <thead className="sticky top-0 bg-slate-50 text-[10px] uppercase tracking-widest text-slate-400">
+              <thead className="sticky top-0 bg-slate-50 text-[10px] uppercase tracking-widest text-slate-500">
                 <tr>
                   <th className="px-3 py-1.5 text-left">Email</th>
                   <th className="px-3 py-1.5 text-left">Name</th>
@@ -268,7 +268,7 @@ export function CollegeRequestForm({
                   <tr key={`${s.email}-${i}`} className="border-t border-slate-100">
                     <td className="px-3 py-1.5 font-medium text-navy">{s.email}</td>
                     <td className="px-3 py-1.5 text-slate-600">{s.fullName ?? '-'}</td>
-                    <td className="px-3 py-1.5 text-slate-500">{s.rollNumber ?? '-'}</td>
+                    <td className="px-3 py-1.5 text-slate-600">{s.rollNumber ?? '-'}</td>
                   </tr>
                 ))}
               </tbody>

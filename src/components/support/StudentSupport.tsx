@@ -20,7 +20,7 @@ const STATUS_STYLE: Record<string, string> = {
   OPEN: 'bg-blue-100 text-blue-700',
   IN_PROGRESS: 'bg-amber-100 text-amber-700',
   RESOLVED: 'bg-green-100 text-green-700',
-  CLOSED: 'bg-slate-100 text-slate-500',
+  CLOSED: 'bg-slate-100 text-slate-600',
 };
 
 const HELP_TOPICS = [
@@ -84,7 +84,7 @@ export function StudentSupport() {
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
       {/* Quick help */}
       <div data-tour="support:topics">
-        <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-widest text-slate-400">What do you need help with?</p>
+        <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-widest text-slate-500">What do you need help with?</p>
         <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
           {HELP_TOPICS.map((h) => {
             const Icon = h.icon;
@@ -122,13 +122,13 @@ export function StudentSupport() {
 
       <div data-tour="support:tickets" className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         {loading ? (
-          <div className="flex items-center justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-400" /></div>
+          <div className="flex items-center justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-500" /></div>
         ) : tickets.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-14 text-center">
-            <div className="grid size-12 place-items-center rounded-full bg-slate-50"><Headset className="size-6 text-slate-300" /></div>
+            <div className="grid size-12 place-items-center rounded-full bg-slate-50"><Headset className="size-6 text-slate-400" /></div>
             <div>
               <p className="text-sm font-semibold text-navy">No tickets yet</p>
-              <p className="mt-0.5 text-xs text-slate-400">Pick a topic above or open a ticket - we usually reply within a day.</p>
+              <p className="mt-0.5 text-xs text-slate-500">Pick a topic above or open a ticket - we usually reply within a day.</p>
             </div>
           </div>
         ) : (
@@ -136,12 +136,12 @@ export function StudentSupport() {
             {tickets.map((t) => (
               <li key={t.id}>
                 <button onClick={() => setView({ mode: 'thread', id: t.id })} className="flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-slate-50/70">
-                  <span className="grid size-10 shrink-0 place-items-center rounded-full bg-slate-100 text-slate-400">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-full bg-slate-100 text-slate-500">
                     <MessagesSquare className="size-5" />
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold text-navy">{t.subject}</p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-slate-500">
                       {timeAgo(t.lastMessageAt)}{t.category ? ` · ${t.category}` : ''}
                     </p>
                   </div>
@@ -181,22 +181,22 @@ function NewTicket({ initialCategory, onDone, onCancel }: { initialCategory?: st
 
   return (
     <motion.form initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} onSubmit={submit} className="space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-      <button type="button" onClick={onCancel} className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-navy">
+      <button type="button" onClick={onCancel} className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-navy">
         <ArrowLeft className="size-4" /> Back
       </button>
       <div>
         <h2 className="text-lg font-bold text-navy">Open a support ticket</h2>
-        <p className="mt-0.5 text-sm text-slate-500">Tell us what&apos;s going on - we usually reply within a day.</p>
+        <p className="mt-0.5 text-sm text-slate-600">Tell us what&apos;s going on - we usually reply within a day.</p>
       </div>
       {error && <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
 
       <label className="block">
-        <span className="mb-1 block text-xs font-medium text-slate-500">Subject</span>
+        <span className="mb-1 block text-xs font-medium text-slate-600">Subject</span>
         <input required value={subject} onChange={(e) => setSubject(e.target.value)} className={inputCls} placeholder="Briefly, what's the issue?" />
       </label>
 
       <div>
-        <span className="mb-1.5 block text-xs font-medium text-slate-500">Category</span>
+        <span className="mb-1.5 block text-xs font-medium text-slate-600">Category</span>
         <div className="flex flex-wrap gap-2">
           {CATEGORIES.map((c) => (
             <button
@@ -215,7 +215,7 @@ function NewTicket({ initialCategory, onDone, onCancel }: { initialCategory?: st
       </div>
 
       <label className="block">
-        <span className="mb-1 block text-xs font-medium text-slate-500">Describe your issue</span>
+        <span className="mb-1 block text-xs font-medium text-slate-600">Describe your issue</span>
         <textarea required rows={6} value={body} onChange={(e) => setBody(e.target.value)} className={inputCls} placeholder="Steps you took, what you expected, and what happened…" />
       </label>
 
@@ -272,11 +272,11 @@ function Thread({ id, onBack }: { id: string; onBack: () => void }) {
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-      <button onClick={onBack} className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-navy">
+      <button onClick={onBack} className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-navy">
         <ArrowLeft className="size-4" /> Back to tickets
       </button>
       {loading ? (
-        <div className="flex items-center justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-400" /></div>
+        <div className="flex items-center justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-500" /></div>
       ) : !ticket ? (
         <p className="text-sm text-red-500">{error ?? 'Not found.'}</p>
       ) : (
@@ -284,7 +284,7 @@ function Thread({ id, onBack }: { id: string; onBack: () => void }) {
           <div className="flex items-center justify-between gap-3 border-b border-slate-100 p-4">
             <div className="min-w-0">
               <h2 className="truncate font-bold text-navy">{ticket.subject}</h2>
-              {ticket.category && <p className="text-xs text-slate-400">{ticket.category}</p>}
+              {ticket.category && <p className="text-xs text-slate-500">{ticket.category}</p>}
             </div>
             <span className={cn('shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold', STATUS_STYLE[ticket.status] ?? 'bg-slate-100 text-slate-600')}>
               {ticket.status.replace('_', ' ')}
@@ -297,7 +297,7 @@ function Thread({ id, onBack }: { id: string; onBack: () => void }) {
                   {m.isStaff ? <Headset className="size-3.5" /> : 'You'}
                 </span>
                 <div className={cn('max-w-[78%] rounded-2xl px-4 py-2.5 text-sm shadow-sm', m.isStaff ? 'rounded-bl-sm bg-white text-slate-700' : 'rounded-br-sm bg-orange/10 text-navy')}>
-                  <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                  <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
                     {m.isStaff ? 'Support' : 'You'} · {new Date(m.createdAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                   </p>
                   <p className="whitespace-pre-wrap">{m.body}</p>

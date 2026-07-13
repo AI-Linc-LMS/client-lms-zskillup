@@ -178,7 +178,7 @@ export function CompaniesExplorer() {
                   onClick={() => setType(t.key)}
                   className={cn(
                     'relative flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-semibold transition-colors',
-                    active ? 'text-white' : 'text-slate-500 hover:text-navy',
+                    active ? 'text-white' : 'text-slate-600 hover:text-navy',
                   )}
                 >
                   {active && (
@@ -193,7 +193,7 @@ export function CompaniesExplorer() {
                   <span
                     className={cn(
                       'relative z-10 rounded-full px-1.5 py-px text-[10px] font-bold tabular-nums',
-                      active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500',
+                      active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600',
                     )}
                   >
                     {typeCount(t.key)}
@@ -204,10 +204,10 @@ export function CompaniesExplorer() {
           </div>
 
           {/* Result count - keeps the bar balanced now that difficulty is gone */}
-          <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+          <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
             <Building2 className="size-3.5" aria-hidden="true" />
             <span className="tabular-nums text-navy">{filtered.length}</span>
-            <span className="text-slate-300">/</span>
+            <span className="text-slate-400">/</span>
             <span className="tabular-nums">{companies?.length ?? 0}</span>
             companies
           </span>
@@ -226,11 +226,11 @@ export function CompaniesExplorer() {
             aria-hidden
             className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-orange/10 blur-3xl"
           />
-          <span className="relative mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400">
+          <span className="relative mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-500">
             <Building2 className="size-6" aria-hidden="true" />
           </span>
           <p className="relative mt-4 text-sm font-bold text-navy">No companies match these filters.</p>
-          <p className="relative mt-1 text-xs text-slate-500">
+          <p className="relative mt-1 text-xs text-slate-600">
             Try a different type or difficulty to see more hubs.
           </p>
         </div>

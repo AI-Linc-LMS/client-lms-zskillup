@@ -86,7 +86,7 @@ export function SectionTopicPicker({
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold text-slate-600">
           Sections &amp; topics{' '}
-          <span className="font-normal text-slate-400">
+          <span className="font-normal text-slate-500">
             · {selected.size ? `${selected.size} selected` : 'all sections (leave empty to mix)'}
           </span>
         </span>
@@ -99,10 +99,10 @@ export function SectionTopicPicker({
 
       {loading ? (
         <div className="flex justify-center py-6">
-          <Loader2 className="size-5 animate-spin text-slate-400" />
+          <Loader2 className="size-5 animate-spin text-slate-500" />
         </div>
       ) : sections.length === 0 ? (
-        <p className="py-4 text-center text-xs text-slate-400">No sections available.</p>
+        <p className="py-4 text-center text-xs text-slate-500">No sections available.</p>
       ) : (
         <div className="mt-2 max-h-64 space-y-1 overflow-y-auto pr-1">
           {sections.map(({ section, topics: subs }) => {
@@ -125,8 +125,8 @@ export function SectionTopicPicker({
                     aria-expanded={isOpen}
                   >
                     <span className="truncate text-sm font-semibold text-navy">{section.name}</span>
-                    <span className="text-[11px] text-slate-400">{subs.length}</span>
-                    <ChevronDown className={`ml-auto size-3.5 shrink-0 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                    <span className="text-[11px] text-slate-500">{subs.length}</span>
+                    <ChevronDown className={`ml-auto size-3.5 shrink-0 text-slate-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
                 {isOpen && (
@@ -141,7 +141,7 @@ export function SectionTopicPicker({
                           className="size-3.5 accent-[#ffc42d] disabled:opacity-50"
                         />
                         <span className="truncate">{t.name}</span>
-                        <span className="ml-auto text-[11px] text-slate-300">{t.questionCount}</span>
+                        <span className="ml-auto text-[11px] text-slate-400">{t.questionCount}</span>
                       </label>
                     ))}
                   </div>

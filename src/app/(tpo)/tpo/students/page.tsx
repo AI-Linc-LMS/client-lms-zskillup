@@ -104,7 +104,7 @@ export default function StudentManagementPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="size-7 animate-spin text-slate-400" />
+        <Loader2 className="size-7 animate-spin text-slate-500" />
       </div>
     );
   }
@@ -115,7 +115,7 @@ export default function StudentManagementPage() {
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-slate-500">
+        <p className="text-sm font-semibold text-slate-600">
           Student Directory · <span className="text-navy">{filtered.length}</span> students
         </p>
         <Button asChild size="sm" variant="outline">
@@ -128,7 +128,7 @@ export default function StudentManagementPage() {
       {/* Filters */}
       <div className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="relative sm:col-span-2 lg:col-span-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -158,7 +158,7 @@ export default function StudentManagementPage() {
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[820px] text-sm">
-            <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+            <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500">
               <tr>
                 <Th label="Student" onClick={() => toggleSort('name')} active={sort.key === 'name'} />
                 <th className="px-4 py-2.5">Roll no.</th>
@@ -175,7 +175,7 @@ export default function StudentManagementPage() {
               ))}
               {pageRows.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-10 text-center text-sm text-slate-400">
+                  <td colSpan={7} className="px-4 py-10 text-center text-sm text-slate-500">
                     No students match these filters.
                   </td>
                 </tr>
@@ -184,7 +184,7 @@ export default function StudentManagementPage() {
           </table>
         </div>
         {/* Pagination */}
-        <div className="flex items-center justify-between gap-3 border-t border-slate-100 px-4 py-3 text-xs text-slate-500">
+        <div className="flex items-center justify-between gap-3 border-t border-slate-100 px-4 py-3 text-xs text-slate-600">
           <span>
             Page <span className="font-bold text-navy">{page}</span> of {pageCount}
           </span>
@@ -193,7 +193,7 @@ export default function StudentManagementPage() {
               type="button"
               disabled={page <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="grid size-8 place-items-center rounded-lg border border-slate-200 text-slate-500 disabled:opacity-40 hover:enabled:bg-slate-50"
+              className="grid size-8 place-items-center rounded-lg border border-slate-200 text-slate-600 disabled:opacity-40 hover:enabled:bg-slate-50"
             >
               <ChevronLeft className="size-4" />
             </button>
@@ -201,7 +201,7 @@ export default function StudentManagementPage() {
               type="button"
               disabled={page >= pageCount}
               onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
-              className="grid size-8 place-items-center rounded-lg border border-slate-200 text-slate-500 disabled:opacity-40 hover:enabled:bg-slate-50"
+              className="grid size-8 place-items-center rounded-lg border border-slate-200 text-slate-600 disabled:opacity-40 hover:enabled:bg-slate-50"
             >
               <ChevronRight className="size-4" />
             </button>
@@ -209,7 +209,7 @@ export default function StudentManagementPage() {
         </div>
       </div>
       {data?.truncated ? (
-        <p className="text-[11px] text-slate-400">Showing the first 5,000 students for this scope.</p>
+        <p className="text-[11px] text-slate-500">Showing the first 5,000 students for this scope.</p>
       ) : null}
     </div>
   );
@@ -238,12 +238,12 @@ function StudentRow({ s, cohortName }: { s: TpoStudentRow; cohortName: string | 
       <td className="px-4 py-2.5">
         <Link href={`/tpo/students/${s.id}`} className="group block">
           <p className="font-semibold text-navy group-hover:text-[#1a1d29]">{s.name ?? '-'}</p>
-          <p className="truncate text-xs text-slate-400">{s.email}</p>
+          <p className="truncate text-xs text-slate-500">{s.email}</p>
         </Link>
       </td>
-      <td className="px-4 py-2.5 text-slate-500">{s.rollNumber ?? '-'}</td>
+      <td className="px-4 py-2.5 text-slate-600">{s.rollNumber ?? '-'}</td>
       <td className="px-4 py-2.5 text-slate-600">{s.branch ?? '-'}</td>
-      <td className="px-4 py-2.5 text-slate-500">{cohortName ?? '-'}</td>
+      <td className="px-4 py-2.5 text-slate-600">{cohortName ?? '-'}</td>
       <td className="px-4 py-2.5">
         <div className="flex items-center gap-2">
           <div className="h-1.5 w-16 overflow-hidden rounded-full bg-slate-100">
@@ -255,7 +255,7 @@ function StudentRow({ s, cohortName }: { s: TpoStudentRow; cohortName: string | 
       <td className="px-4 py-2.5">
         <ReadinessBadge band={s.band} />
       </td>
-      <td className="px-4 py-2.5 text-xs text-slate-400">
+      <td className="px-4 py-2.5 text-xs text-slate-500">
         {s.lastActiveDate ? new Date(s.lastActiveDate).toLocaleDateString('en-IN') : 'Never'}
       </td>
     </tr>

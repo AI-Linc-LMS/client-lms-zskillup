@@ -67,23 +67,23 @@ export function CommandPalette() {
           >
             <Command label="Command palette" loop>
               <div className="flex items-center gap-2.5 border-b border-slate-100 px-4">
-                <Search className="size-4 shrink-0 text-slate-400" />
+                <Search className="size-4 shrink-0 text-slate-500" />
                 <Command.Input
                   autoFocus
                   placeholder="Jump to anything…"
-                  className="w-full bg-transparent py-3.5 text-sm text-navy placeholder:text-slate-400 focus:outline-none"
+                  className="w-full bg-transparent py-3.5 text-sm text-navy placeholder:text-slate-500 focus:outline-none"
                 />
-                <kbd className="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-semibold text-slate-400">esc</kbd>
+                <kbd className="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">esc</kbd>
               </div>
               <Command.List className="scroll-soft max-h-[46vh] overflow-y-auto p-2">
-                <Command.Empty className="py-8 text-center text-sm text-slate-400">
+                <Command.Empty className="py-8 text-center text-sm text-slate-500">
                   Nothing matches - try a page or company name.
                 </Command.Empty>
                 {sections.map((section) => (
                   <Command.Group
                     key={section.heading}
                     heading={section.heading}
-                    className="mb-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-widest [&_[cmdk-group-heading]]:text-slate-400"
+                    className="mb-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-widest [&_[cmdk-group-heading]]:text-slate-500"
                   >
                     {section.items.map((item) => {
                       const Icon = item.icon;
@@ -94,11 +94,11 @@ export function CommandPalette() {
                           onSelect={() => go(item.href)}
                           className="group flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium text-slate-600 data-[selected=true]:bg-orange-50 data-[selected=true]:text-navy"
                         >
-                          <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-500 group-data-[selected=true]:bg-orange group-data-[selected=true]:text-[#171717]">
+                          <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-600 group-data-[selected=true]:bg-orange group-data-[selected=true]:text-[#171717]">
                             <Icon className="size-4" />
                           </span>
                           <span className="flex-1">{item.label}</span>
-                          <ArrowRight className="size-3.5 text-slate-300 opacity-0 group-data-[selected=true]:opacity-100" />
+                          <ArrowRight className="size-3.5 text-slate-400 opacity-0 group-data-[selected=true]:opacity-100" />
                         </Command.Item>
                       );
                     })}
@@ -108,7 +108,7 @@ export function CommandPalette() {
                 {!pathname.startsWith('/superadmin') && !pathname.startsWith('/admin') && !pathname.startsWith('/tpo') && (
                   <Command.Group
                     heading="COMPANY HUBS"
-                    className="mb-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-widest [&_[cmdk-group-heading]]:text-slate-400"
+                    className="mb-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-widest [&_[cmdk-group-heading]]:text-slate-500"
                   >
                     {COMPANIES.map((slug) => (
                       <Command.Item
@@ -117,17 +117,17 @@ export function CommandPalette() {
                         onSelect={() => go(`/dashboard/company/${slug}`)}
                         className="group flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium capitalize text-slate-600 data-[selected=true]:bg-orange-50 data-[selected=true]:text-navy"
                       >
-                        <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-500 group-data-[selected=true]:bg-orange group-data-[selected=true]:text-[#171717]">
+                        <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-600 group-data-[selected=true]:bg-orange group-data-[selected=true]:text-[#171717]">
                           <Building2 className="size-4" />
                         </span>
                         <span className="flex-1">{slug === 'tcs' ? 'TCS' : slug}</span>
-                        <ArrowRight className="size-3.5 text-slate-300 opacity-0 group-data-[selected=true]:opacity-100" />
+                        <ArrowRight className="size-3.5 text-slate-400 opacity-0 group-data-[selected=true]:opacity-100" />
                       </Command.Item>
                     ))}
                   </Command.Group>
                 )}
               </Command.List>
-              <div className="flex items-center justify-between border-t border-slate-100 px-4 py-2 text-[10px] text-slate-400">
+              <div className="flex items-center justify-between border-t border-slate-100 px-4 py-2 text-[10px] text-slate-500">
                 <span>↑↓ navigate · ↵ open</span>
                 <span className="font-semibold">ZSkillup</span>
               </div>

@@ -89,7 +89,7 @@ export function PostComposer({
           >
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
               <h2 className="text-base font-black text-navy">Create a post</h2>
-              <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100" aria-label="Close">
+              <button onClick={onClose} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100" aria-label="Close">
                 <X className="size-5" />
               </button>
             </div>
@@ -107,7 +107,7 @@ export function PostComposer({
                       onClick={() => setType(t)}
                       className={cn(
                         'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold transition-colors',
-                        active ? cfg.chip : 'border-slate-200 text-slate-500 hover:bg-slate-50',
+                        active ? cfg.chip : 'border-slate-200 text-slate-600 hover:bg-slate-50',
                       )}
                     >
                       <Icon className="size-3.5" /> {cfg.label}
@@ -155,7 +155,7 @@ export function PostComposer({
             </div>
 
             <div className="flex items-center justify-end gap-2 border-t border-slate-100 px-5 py-4">
-              <button onClick={onClose} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100">
+              <button onClick={onClose} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">
                 Cancel
               </button>
               <button

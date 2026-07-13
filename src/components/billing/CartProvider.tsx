@@ -143,7 +143,7 @@ export function CartButton({ className }: { className?: string }) {
       aria-label={`Cart (${cart.count} item${cart.count === 1 ? '' : 's'})`}
       className={
         className ??
-        'relative grid size-9 place-items-center rounded-xl text-slate-500 transition-colors hover:bg-slate-100 hover:text-navy'
+        'relative grid size-9 place-items-center rounded-xl text-slate-600 transition-colors hover:bg-slate-100 hover:text-navy'
       }
     >
       <ShoppingCart className="size-[18px]" />

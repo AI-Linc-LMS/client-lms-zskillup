@@ -255,7 +255,7 @@ export function ResumeBuilder() {
       {/* Row 1: title + primary actions */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
         <div className="flex min-w-[200px] flex-1 items-center gap-2 rounded-lg border border-slate-200 px-3 focus-within:border-orange focus-within:ring-1 focus-within:ring-orange">
-          <FileText className="size-4 shrink-0 text-slate-400" />
+          <FileText className="size-4 shrink-0 text-slate-500" />
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -308,7 +308,7 @@ export function ResumeBuilder() {
       {/* Row 2: template picker + sample/clear */}
       <div data-tour="resume:templates" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
         <div className="flex min-w-0 flex-1 items-center gap-2">
-          <span className="inline-flex shrink-0 items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+          <span className="inline-flex shrink-0 items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
             <LayoutTemplate className="size-3.5" /> Template
           </span>
           <div className="flex flex-1 gap-1.5 overflow-x-auto pb-1 [scrollbar-width:thin]">
@@ -367,16 +367,16 @@ export function ResumeBuilder() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowResumes(false)} aria-hidden />
             <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'tween', duration: 0.25 }} className="relative flex h-full w-full max-w-sm flex-col bg-white shadow-2xl">
               <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-                <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-400"><FolderOpen className="size-4" /> My Resumes</h2>
-                <button onClick={() => setShowResumes(false)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"><X className="size-5" /></button>
+                <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-500"><FolderOpen className="size-4" /> My Resumes</h2>
+                <button onClick={() => setShowResumes(false)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100"><X className="size-5" /></button>
               </div>
               <div className="flex-1 overflow-y-auto p-4">
                 {listLoading ? (
-                  <div className="flex justify-center py-10"><Loader2 className="size-6 animate-spin text-slate-400" /></div>
+                  <div className="flex justify-center py-10"><Loader2 className="size-6 animate-spin text-slate-500" /></div>
                 ) : resumes.length === 0 ? (
                   <div className="flex flex-col items-center gap-2 py-12 text-center">
-                    <FolderOpen className="size-8 text-slate-300" />
-                    <p className="text-sm text-slate-400">No saved resumes yet.<br />Click Save to store one.</p>
+                    <FolderOpen className="size-8 text-slate-400" />
+                    <p className="text-sm text-slate-500">No saved resumes yet.<br />Click Save to store one.</p>
                   </div>
                 ) : (
                   <ul className="space-y-2">
@@ -386,10 +386,10 @@ export function ResumeBuilder() {
                           <span className="size-2.5 shrink-0 rounded-full ring-1 ring-black/10" style={{ background: TEMPLATES.find((t) => t.key === r.template)?.accent ?? '#64748b' }} />
                           <span className="min-w-0">
                             <span className="block truncate text-sm font-semibold text-navy">{r.title}</span>
-                            <span className="block text-xs text-slate-400">{TEMPLATES.find((t) => t.key === r.template)?.name ?? r.template} · {new Date(r.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                            <span className="block text-xs text-slate-500">{TEMPLATES.find((t) => t.key === r.template)?.name ?? r.template} · {new Date(r.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                           </span>
                         </button>
-                        <button onClick={() => remove(r.id, r.title)} className="rounded-lg border border-slate-200 p-1.5 text-slate-400 hover:border-red-200 hover:bg-red-50 hover:text-red-500"><Trash2 className="size-4" /></button>
+                        <button onClick={() => remove(r.id, r.title)} className="rounded-lg border border-slate-200 p-1.5 text-slate-500 hover:border-red-200 hover:bg-red-50 hover:text-red-500"><Trash2 className="size-4" /></button>
                       </li>
                     ))}
                   </ul>

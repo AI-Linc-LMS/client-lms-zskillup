@@ -50,14 +50,14 @@ export default function AdminCollegeDetailPage({ params }: { params: Promise<{ i
       />
       <Link
         href="/admin/colleges"
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-navy"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-navy"
       >
         <ArrowLeft className="size-4" /> Back to colleges
       </Link>
 
       {loading ? (
         <div className="flex items-center justify-center py-24">
-          <Loader2 className="size-6 animate-spin text-slate-400" />
+          <Loader2 className="size-6 animate-spin text-slate-500" />
         </div>
       ) : error || !detail ? (
         <div className="py-24 text-center text-sm text-red-500">{error ?? 'Not found.'}</div>
@@ -69,7 +69,7 @@ export default function AdminCollegeDetailPage({ params }: { params: Promise<{ i
                 <h1 className="text-2xl font-black tracking-tight text-navy">
                   {detail.college.name}
                 </h1>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-slate-600">
                   {[detail.college.city, detail.college.state].filter(Boolean).join(', ') || '-'}
                 </p>
               </div>
@@ -103,13 +103,13 @@ export default function AdminCollegeDetailPage({ params }: { params: Promise<{ i
               </h2>
             </div>
             {students.length === 0 ? (
-              <div className="py-12 text-center text-sm text-slate-400">
+              <div className="py-12 text-center text-sm text-slate-500">
                 No students enrolled at this college yet.
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[640px] text-sm">
-                  <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+                  <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                     <tr>
                       <th className="px-4 py-3">Student</th>
                       <th className="px-4 py-3 text-right">Attempts</th>
@@ -126,7 +126,7 @@ export default function AdminCollegeDetailPage({ params }: { params: Promise<{ i
                             <p className="font-semibold text-navy group-hover:text-[#1a1d29]">
                               {s.fullName ?? '-'}
                             </p>
-                            <p className="text-xs text-slate-400">{s.email}</p>
+                            <p className="text-xs text-slate-500">{s.email}</p>
                           </Link>
                         </td>
                         <td className="px-4 py-3 text-right tabular-nums text-slate-700">
@@ -138,7 +138,7 @@ export default function AdminCollegeDetailPage({ params }: { params: Promise<{ i
                         <td className="px-4 py-3 text-right tabular-nums text-slate-700">
                           {s.bestScorePct ?? '-'}
                         </td>
-                        <td className="px-4 py-3 text-xs text-slate-400">
+                        <td className="px-4 py-3 text-xs text-slate-500">
                           {s.lastAttemptAt
                             ? new Date(s.lastAttemptAt).toLocaleDateString('en-IN', {
                                 day: 'numeric',
@@ -163,7 +163,7 @@ export default function AdminCollegeDetailPage({ params }: { params: Promise<{ i
 function Kpi({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">{label}</p>
       <p className="mt-1 text-lg font-extrabold text-navy tabular-nums">{value}</p>
     </div>
   );

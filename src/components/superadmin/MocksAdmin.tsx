@@ -240,16 +240,16 @@ export function MocksAdmin() {
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-bold text-navy">
               Questions{' '}
-              <span className="font-normal text-slate-400">- {selected.length} selected</span>
+              <span className="font-normal text-slate-500">- {selected.length} selected</span>
             </p>
             <div className="relative max-w-xs flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-500" aria-hidden="true" />
               <input
                 type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search published questions"
-                className="h-9 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-navy placeholder:text-slate-400 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+                className="h-9 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-navy placeholder:text-slate-500 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
                 aria-label="Search questions"
               />
             </div>
@@ -257,10 +257,10 @@ export function MocksAdmin() {
 
           {questions === null ? (
             <div className="flex justify-center py-8">
-              <Loader2 className="size-5 animate-spin text-slate-400" aria-hidden="true" />
+              <Loader2 className="size-5 animate-spin text-slate-500" aria-hidden="true" />
             </div>
           ) : filteredQuestions.length === 0 ? (
-            <p className="py-6 text-center text-sm text-slate-400">
+            <p className="py-6 text-center text-sm text-slate-500">
               No published questions match. Author questions in the Question Bank first.
             </p>
           ) : (
@@ -285,7 +285,7 @@ export function MocksAdmin() {
                       <span
                         className={cn(
                           'mt-0.5 grid size-5 shrink-0 place-items-center rounded text-[10px] font-bold',
-                          isSelected ? 'bg-orange text-[#171717]' : 'bg-slate-100 text-slate-400',
+                          isSelected ? 'bg-orange text-[#171717]' : 'bg-slate-100 text-slate-500',
                         )}
                       >
                         {isSelected ? order : ''}
@@ -294,7 +294,7 @@ export function MocksAdmin() {
                         <span className="block text-sm font-medium leading-snug text-navy">
                           {q.stem}
                         </span>
-                        <span className="mt-1 flex items-center gap-2 text-[11px] text-slate-400">
+                        <span className="mt-1 flex items-center gap-2 text-[11px] text-slate-500">
                           <StatusPill tone={diff.tone} label={diff.label} />
                           {q.subtopicId && topicNames[q.subtopicId] ? (
                             <span>{topicNames[q.subtopicId]}</span>
@@ -332,7 +332,7 @@ export function MocksAdmin() {
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-slate-600">
           {mocks ? `${mocks.length} mock test${mocks.length === 1 ? '' : 's'}` : 'Loading…'}
         </p>
         <div className="flex items-center gap-2">
@@ -363,7 +363,7 @@ export function MocksAdmin() {
         <p className="rounded-md bg-red-50 p-3 text-sm text-red-700">{loadError}</p>
       ) : mocks === null ? (
         <div className="flex justify-center rounded-xl border border-slate-200 bg-white p-12">
-          <Loader2 className="size-5 animate-spin text-slate-400" aria-hidden="true" />
+          <Loader2 className="size-5 animate-spin text-slate-500" aria-hidden="true" />
         </div>
       ) : mocks.length === 0 ? (
         <div className="rounded-xl border border-slate-200 bg-white p-10 text-center">
@@ -371,13 +371,13 @@ export function MocksAdmin() {
             <FileText className="size-5" aria-hidden="true" />
           </span>
           <p className="mt-3 text-sm font-semibold text-navy">No mock tests yet.</p>
-          <p className="mt-1 text-xs text-slate-500">Create one from your published question bank.</p>
+          <p className="mt-1 text-xs text-slate-600">Create one from your published question bank.</p>
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
           <div className="hidden grid-cols-[2.4fr_1fr_1fr_1fr_auto] gap-4 border-b border-slate-100 bg-slate-50 px-5 py-3 md:grid">
             {['Title', 'Questions', 'Duration', 'Status', 'Actions'].map((h) => (
-              <span key={h} className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              <span key={h} className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                 {h}
               </span>
             ))}
@@ -389,14 +389,14 @@ export function MocksAdmin() {
             >
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-navy">{m.title}</p>
-                <p className="text-[11px] text-slate-400">Pass {m.passingScore}%</p>
+                <p className="text-[11px] text-slate-500">Pass {m.passingScore}%</p>
               </div>
               <p className="flex items-center gap-1.5 text-sm text-slate-600">
-                <FileText className="size-3.5 text-slate-400 md:hidden" aria-hidden="true" />
+                <FileText className="size-3.5 text-slate-500 md:hidden" aria-hidden="true" />
                 {m.totalQuestions} questions
               </p>
               <p className="flex items-center gap-1.5 text-sm text-slate-600">
-                <Clock className="size-3.5 text-slate-400 md:hidden" aria-hidden="true" />
+                <Clock className="size-3.5 text-slate-500 md:hidden" aria-hidden="true" />
                 {m.durationMinutes} min
               </p>
               <div>
@@ -418,7 +418,7 @@ export function MocksAdmin() {
                   onClick={() => remove(m)}
                   disabled={busyId === m.id}
                   aria-label={`Delete ${m.title}`}
-                  className="grid size-8 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                  className="grid size-8 place-items-center rounded-lg text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
                 >
                   <Trash2 className="size-4" aria-hidden="true" />
                 </button>

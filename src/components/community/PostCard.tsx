@@ -99,7 +99,7 @@ export function PostCard({
       {post.tags.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {post.tags.map((t) => (
-            <span key={t} className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">
+            <span key={t} className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
               #{t}
             </span>
           ))}
@@ -110,7 +110,7 @@ export function PostCard({
         <LikeButton liked={liked} count={likeCount} onToggle={toggleLike} />
         <Link
           href={`/community/${post.id}`}
-          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold text-slate-500 hover:bg-slate-100"
+          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-100"
         >
           <MessageCircle className="size-4" /> {post.commentCount > 0 && <span>{post.commentCount}</span>}
           <span className={post.commentCount > 0 ? 'sr-only' : ''}>Comment</span>
@@ -119,7 +119,7 @@ export function PostCard({
           <button
             onClick={remove}
             disabled={busy}
-            className="ml-auto inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-semibold text-slate-400 hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
+            className="ml-auto inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-semibold text-slate-500 hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
           >
             <Trash2 className="size-3.5" />
           </button>

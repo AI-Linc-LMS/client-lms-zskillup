@@ -100,7 +100,7 @@ export function PlacementOutcomes({ cohortId, students }: { cohortId: string; st
     >
       {loading ? (
         <div className="flex items-center justify-center py-8">
-          <Loader2 className="size-5 animate-spin text-slate-400" />
+          <Loader2 className="size-5 animate-spin text-slate-500" />
         </div>
       ) : (
         <div className="space-y-5">
@@ -117,7 +117,7 @@ export function PlacementOutcomes({ cohortId, students }: { cohortId: string; st
             <div className="flex flex-wrap gap-2">
               {summary!.byCompany.map((c) => (
                 <span key={c.company} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-navy">
-                  <Building2 className="size-3 text-slate-400" /> {c.company} · {c.offers}
+                  <Building2 className="size-3 text-slate-500" /> {c.company} · {c.offers}
                 </span>
               ))}
             </div>
@@ -182,11 +182,11 @@ export function PlacementOutcomes({ cohortId, students }: { cohortId: string; st
 
           {/* Recent list */}
           {list.length === 0 ? (
-            <p className="py-2 text-sm text-slate-400">No placements recorded yet.</p>
+            <p className="py-2 text-sm text-slate-500">No placements recorded yet.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[560px] text-sm">
-                <thead className="text-left text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+                <thead className="text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                   <tr>
                     <th className="px-2 pb-2">Student</th>
                     <th className="px-2 pb-2">Company</th>
@@ -201,14 +201,14 @@ export function PlacementOutcomes({ cohortId, students }: { cohortId: string; st
                       <td className="px-2 py-2 font-semibold text-navy">{p.studentName ?? '-'}</td>
                       <td className="px-2 py-2 text-slate-600">
                         {p.companyName}
-                        {p.role ? <span className="text-slate-400"> · {p.role}</span> : null}
+                        {p.role ? <span className="text-slate-500"> · {p.role}</span> : null}
                       </td>
                       <td className="px-2 py-2 tabular-nums text-slate-600">{p.ctcLpa != null ? `${p.ctcLpa} LPA` : '-'}</td>
                       <td className="px-2 py-2">
                         <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">{p.status}</span>
                       </td>
                       <td className="px-2 py-2 text-right">
-                        <button type="button" onClick={() => remove(p.id)} className="text-slate-300 hover:text-red-500" aria-label="Delete">
+                        <button type="button" onClick={() => remove(p.id)} className="text-slate-400 hover:text-red-500" aria-label="Delete">
                           <Trash2 className="size-4" />
                         </button>
                       </td>
@@ -227,7 +227,7 @@ export function PlacementOutcomes({ cohortId, students }: { cohortId: string; st
 function Tile({ icon: Icon, label, value }: { icon: typeof Trophy; label: string; value: number | string }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-3">
-      <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+      <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
         <Icon className="size-3.5" /> {label}
       </span>
       <p className="mt-1 text-xl font-black tabular-nums text-navy">{typeof value === 'number' ? value.toLocaleString('en-IN') : value}</p>

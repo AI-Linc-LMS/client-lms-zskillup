@@ -465,7 +465,7 @@ export function InterviewRunner({ id }: { id: string }) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-28">
         <InterviewerBlob speaking />
-        <p className="text-sm text-slate-500">Setting up your interview - enabling camera &amp; mic…</p>
+        <p className="text-sm text-slate-600">Setting up your interview - enabling camera &amp; mic…</p>
       </div>
     );
   }
@@ -490,14 +490,14 @@ export function InterviewRunner({ id }: { id: string }) {
                 if (!nv) stopSpeaking();
                 else if (question) speak(question.question_text);
               }}
-              className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-xs font-semibold transition-colors', voiceOn ? 'border-navy/20 bg-navy/5 text-navy' : 'border-slate-200 text-slate-400 hover:bg-slate-50')}
+              className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-xs font-semibold transition-colors', voiceOn ? 'border-navy/20 bg-navy/5 text-navy' : 'border-slate-200 text-slate-500 hover:bg-slate-50')}
               title={voiceOn ? 'Interviewer voice on' : 'Interviewer voice off'}
             >
               {voiceOn ? <Volume2 className="size-3.5" /> : <VolumeX className="size-3.5" />}
               <span className="hidden sm:inline">Voice</span>
             </button>
             {secondsLeft !== null && <TimerRing frac={timeFrac} label={`${mm}:${String(ss).padStart(2, '0')}`} low={low} />}
-            <button onClick={quit} className="rounded-lg border border-slate-200 p-2 text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600" aria-label="Leave"><X className="size-4" /></button>
+            <button onClick={quit} className="rounded-lg border border-slate-200 p-2 text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-600" aria-label="Leave"><X className="size-4" /></button>
           </div>
         </div>
       </div>
@@ -521,7 +521,7 @@ export function InterviewRunner({ id }: { id: string }) {
           {camOn ? (
             <video ref={videoRef} autoPlay muted playsInline className="size-full object-cover" style={{ transform: 'scaleX(-1)' }} />
           ) : (
-            <div className="flex size-full flex-col items-center justify-center gap-2 text-slate-400">
+            <div className="flex size-full flex-col items-center justify-center gap-2 text-slate-500">
               <VideoOff className="size-8" />
               <p className="text-xs">{camError ? 'Camera unavailable' : 'Camera off'}</p>
             </div>
@@ -546,11 +546,11 @@ export function InterviewRunner({ id }: { id: string }) {
       {/* Question */}
       <div className="relative mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500">
             Question{isFinal ? ' · final' : ''}
           </p>
           {question && !busy && (
-            <button onClick={() => speak(question.question_text)} className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400 transition-colors hover:text-navy" title="Replay">
+            <button onClick={() => speak(question.question_text)} className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 transition-colors hover:text-navy" title="Replay">
               <Volume2 className="size-3.5" /> Replay
             </button>
           )}
@@ -558,7 +558,7 @@ export function InterviewRunner({ id }: { id: string }) {
         <div className="mt-1 min-h-[2rem]">
           <AnimatePresence mode="wait">
             {busy ? (
-              <motion.div key="thinking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2 text-slate-400"><span className="text-[15px]">Thinking</span><ThinkingDots /></motion.div>
+              <motion.div key="thinking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2 text-slate-500"><span className="text-[15px]">Thinking</span><ThinkingDots /></motion.div>
             ) : (
               <motion.p key={question?.id ?? 'q'} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.28 }} className="text-[16px] font-medium leading-relaxed text-navy">
                 {question?.question_text}
@@ -571,17 +571,17 @@ export function InterviewRunner({ id }: { id: string }) {
       {/* Live transcript */}
       <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="mb-2 flex items-center justify-between">
-          <label className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+          <label className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
             Your answer
             {recording && (
               <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-bold text-orange">
                 <Mic className="size-3" /> live · Whisper
               </span>
             )}
-            {transcribing && <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-400"><Loader2 className="size-3 animate-spin" /> finalising</span>}
+            {transcribing && <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-500"><Loader2 className="size-3 animate-spin" /> finalising</span>}
           </label>
           {voiceCapable && (
-            <button onClick={() => setTyping((t) => !t)} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-500 transition-colors hover:bg-slate-50">
+            <button onClick={() => setTyping((t) => !t)} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50">
               {typing ? <><Mic className="size-3.5" /> Use voice</> : <><Keyboard className="size-3.5" /> Type</>}
             </button>
           )}
@@ -604,30 +604,30 @@ export function InterviewRunner({ id }: { id: string }) {
               <p className="whitespace-pre-wrap">
                 {answer}
                 {interim && (
-                  <span className="text-slate-400">
+                  <span className="text-slate-500">
                     {answer ? ' ' : ''}
                     {interim}
                   </span>
                 )}
               </p>
             ) : recording ? (
-              <span className="flex items-center gap-2 text-slate-400"><EqBars /> Listening - start speaking, your words appear here…</span>
+              <span className="flex items-center gap-2 text-slate-500"><EqBars /> Listening - start speaking, your words appear here…</span>
             ) : (
-              <span className="text-slate-400">The interviewer will speak, then your answer records automatically.</span>
+              <span className="text-slate-500">The interviewer will speak, then your answer records automatically.</span>
             )}
           </div>
         )}
         {answer && !typing && voiceCapable && (
-          <button onClick={() => setTyping(true)} className="mt-2 text-xs font-medium text-slate-400 transition-colors hover:text-navy">Edit transcript</button>
+          <button onClick={() => setTyping(true)} className="mt-2 text-xs font-medium text-slate-500 transition-colors hover:text-navy">Edit transcript</button>
         )}
 
         {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
 
         <div className="mt-3 flex items-center justify-between">
-          <span className="text-[11px] text-slate-400">{wordCount} word{wordCount === 1 ? '' : 's'}</span>
+          <span className="text-[11px] text-slate-500">{wordCount} word{wordCount === 1 ? '' : 's'}</span>
           <div className="flex items-center gap-3">
             {!isFinal && (
-              <button onClick={doSubmit} disabled={submitting || busy || transcribing} className="text-xs font-medium text-slate-400 transition-colors hover:text-slate-600 disabled:opacity-50">End early</button>
+              <button onClick={doSubmit} disabled={submitting || busy || transcribing} className="text-xs font-medium text-slate-500 transition-colors hover:text-slate-600 disabled:opacity-50">End early</button>
             )}
             <button
               onClick={doNext}
@@ -641,7 +641,7 @@ export function InterviewRunner({ id }: { id: string }) {
         </div>
       </div>
 
-      <p className="mt-3 text-center text-xs text-slate-400">
+      <p className="mt-3 text-center text-xs text-slate-500">
         Your camera is a self-view for a real interview feel - nothing is uploaded, and there&apos;s no strict proctoring.
       </p>
 
@@ -652,7 +652,7 @@ export function InterviewRunner({ id }: { id: string }) {
             <InterviewerBlob speaking big />
             <div className="text-center">
               <p className="text-lg font-bold text-navy">Reviewing your interview…</p>
-              <p className="mt-1 text-sm text-slate-500">Scoring your answers and writing feedback.</p>
+              <p className="mt-1 text-sm text-slate-600">Scoring your answers and writing feedback.</p>
             </div>
           </motion.div>
         )}

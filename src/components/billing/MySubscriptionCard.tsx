@@ -45,17 +45,17 @@ export function MySubscriptionCard() {
           <p className="flex items-center gap-1.5 text-sm font-extrabold text-navy">
             <Sparkles className="size-4 text-orange" /> Full platform
           </p>
-          <p className="mt-0.5 text-xs text-slate-500">
+          <p className="mt-0.5 text-xs text-slate-600">
             {platform?.daysRemaining != null ? `${platform.daysRemaining} days remaining` : 'Active'}
           </p>
         </div>
       ) : activeCount > 0 ? (
-        <p className="mt-2 text-xs leading-relaxed text-slate-500">
+        <p className="mt-2 text-xs leading-relaxed text-slate-600">
           You have <span className="font-bold text-navy">{activeCount}</span> active unlock
           {activeCount === 1 ? '' : 's'}. Go full-platform to open everything.
         </p>
       ) : (
-        <p className="mt-2 text-xs leading-relaxed text-slate-500">
+        <p className="mt-2 text-xs leading-relaxed text-slate-600">
           You&apos;re on the free tier - the first 5 questions of any topic are on us.
         </p>
       )}

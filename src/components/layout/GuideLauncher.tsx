@@ -53,7 +53,7 @@ export function GuideLauncher() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-label="Platform guide"
-        className="grid size-9 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-navy"
+        className="grid size-9 place-items-center rounded-full text-slate-600 transition hover:bg-slate-100 hover:text-navy"
       >
         <HelpCircle className="size-[18px]" />
       </button>
@@ -67,7 +67,7 @@ export function GuideLauncher() {
             transition={{ duration: 0.16 }}
             className="absolute right-0 top-full z-40 mt-2 w-60 overflow-hidden rounded-2xl border border-slate-200 bg-white p-1.5 shadow-[0_24px_60px_-24px_rgba(11,18,32,0.5)]"
           >
-            <p className="px-3 pb-1 pt-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Platform guide</p>
+            <p className="px-3 pb-1 pt-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">Platform guide</p>
             <button
               type="button"
               onClick={() => {
@@ -81,7 +81,7 @@ export function GuideLauncher() {
               </span>
               <span className="min-w-0">
                 <span className="block text-sm font-bold text-navy">Take the full tour</span>
-                <span className="block text-xs text-slate-500">Walk through every module</span>
+                <span className="block text-xs text-slate-600">Walk through every module</span>
               </span>
             </button>
             {pageTourAvailable && (
@@ -98,7 +98,7 @@ export function GuideLauncher() {
                 </span>
                 <span className="min-w-0">
                   <span className="block text-sm font-bold text-navy">Explore this page</span>
-                  <span className="block text-xs text-slate-500">A quick tour of what&apos;s here</span>
+                  <span className="block text-xs text-slate-600">A quick tour of what&apos;s here</span>
                 </span>
               </button>
             )}

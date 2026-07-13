@@ -74,7 +74,7 @@ export default function ReviewPage() {
           </span>
           <div>
             <h1 className="text-xl font-black tracking-tight text-navy sm:text-2xl">Spaced review</h1>
-            <p className="text-sm text-slate-500">Re-test the questions you missed - correct ones come back less often.</p>
+            <p className="text-sm text-slate-600">Re-test the questions you missed - correct ones come back less often.</p>
           </div>
         </div>
         {questions && questions.length > 0 && !done ? (
@@ -87,7 +87,7 @@ export default function ReviewPage() {
       {/* Body */}
       <section className="mt-5">
         {!questions ? (
-          <div className="grid h-60 place-items-center"><Loader2 className="size-6 animate-spin text-slate-400" /></div>
+          <div className="grid h-60 place-items-center"><Loader2 className="size-6 animate-spin text-slate-500" /></div>
         ) : done ? (
           <div className="rounded-3xl border border-slate-200/80 bg-white p-7 text-center sm:p-10">
             <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
@@ -96,7 +96,7 @@ export default function ReviewPage() {
             <h2 className="mt-4 text-xl font-black text-navy">
               {reviewed === 0 ? 'All caught up!' : 'Review complete'}
             </h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-600">
               {reviewed === 0
                 ? 'Nothing is due for review right now. Keep practising - missed questions show up here.'
                 : `You reviewed ${reviewed} question${reviewed === 1 ? '' : 's'} and got ${correct} right.`}
@@ -116,11 +116,11 @@ export default function ReviewPage() {
               <span className={cn('rounded-full px-2.5 py-0.5 text-[11px] font-semibold capitalize ring-1', q.difficulty === 'EASY' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : q.difficulty === 'HARD' ? 'bg-rose-50 text-rose-700 ring-rose-200' : 'bg-amber-50 text-amber-700 ring-amber-200')}>
                 {q.difficulty.toLowerCase()}
               </span>
-              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold tabular-nums text-slate-500">{idx + 1} / {questions.length}</span>
+              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold tabular-nums text-slate-600">{idx + 1} / {questions.length}</span>
             </div>
             <PyqTag companyIds={q.companyTags.map((t) => t.companyId)} years={q.yearTags ?? []} className="mt-3" />
             <p className="mt-2 text-lg font-bold leading-relaxed text-navy">{q.stem}</p>
-            {multi ? <p className="mt-1 text-xs text-slate-400">Select all that apply.</p> : null}
+            {multi ? <p className="mt-1 text-xs text-slate-500">Select all that apply.</p> : null}
 
             <div className="mt-4 space-y-2.5">
               {q.options.map((opt, i) => {
@@ -131,7 +131,7 @@ export default function ReviewPage() {
                     ? 'border-emerald-300 bg-emerald-50 text-emerald-900'
                     : isSel
                       ? 'border-rose-300 bg-rose-50 text-rose-900'
-                      : 'border-slate-200 bg-white text-slate-500'
+                      : 'border-slate-200 bg-white text-slate-600'
                   : isSel
                     ? 'border-emerald-400 bg-emerald-50 text-navy ring-1 ring-emerald-200'
                     : 'border-slate-200 bg-white text-slate-700 hover:border-emerald-300 hover:bg-emerald-50/40';
@@ -143,7 +143,7 @@ export default function ReviewPage() {
                     onClick={() => toggle(opt.id)}
                     className={cn('flex w-full items-center gap-3 rounded-xl border p-3.5 text-left text-[15px] font-medium transition-colors', tone)}
                   >
-                    <span className={cn('grid size-7 shrink-0 place-items-center rounded-lg text-xs font-bold', result && isCorrect ? 'bg-emerald-500 text-white' : result && isSel ? 'bg-rose-500 text-white' : isSel ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500')}>
+                    <span className={cn('grid size-7 shrink-0 place-items-center rounded-lg text-xs font-bold', result && isCorrect ? 'bg-emerald-500 text-white' : result && isSel ? 'bg-rose-500 text-white' : isSel ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600')}>
                       {result && isCorrect ? <Check className="size-3.5" /> : result && isSel ? <X className="size-3.5" /> : String.fromCharCode(65 + i)}
                     </span>
                     <span className="flex-1">{opt.text}</span>
@@ -179,7 +179,7 @@ export default function ReviewPage() {
       </section>
 
       <div className="mt-4">
-        <Link href="/study-plan" className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-500 hover:text-navy">
+        <Link href="/study-plan" className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-navy">
           <ArrowLeft className="size-4" /> Study plan
         </Link>
       </div>

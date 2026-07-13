@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
               <Mail className="size-5 text-orange" aria-hidden="true" />
             </span>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                 Account recovery
               </p>
               <h1 className="text-xl font-bold text-navy">Reset your password</h1>
@@ -66,7 +66,7 @@ export default function ForgotPasswordPage() {
               <p className="rounded-md bg-emerald-50 p-3 text-sm font-medium text-emerald-700 ring-1 ring-emerald-200">
                 If an account exists for that email, a reset link has been sent. It expires in 1 hour.
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-600">
                 Didn&apos;t get the email? Check spam, or try again in a few minutes.
               </p>
               <Link
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
             </div>
           ) : (
             <form onSubmit={onSubmit} className="space-y-4" noValidate>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-slate-600">
                 Enter the email you registered with and we&apos;ll send you a link to set a new password.
               </p>
               <FormField
@@ -107,7 +107,7 @@ export default function ForgotPasswordPage() {
               <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? 'Sending…' : 'Send reset link'}
               </Button>
-              <p className="text-center text-sm text-slate-500">
+              <p className="text-center text-sm text-slate-600">
                 Remembered it?{' '}
                 <Link href="/login" className="font-semibold text-orange hover:underline">
                   Sign in

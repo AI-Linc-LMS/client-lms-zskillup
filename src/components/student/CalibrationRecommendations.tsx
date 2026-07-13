@@ -35,7 +35,7 @@ export function CalibrationRecommendations() {
             <h2 className="mt-1.5 text-base font-black tracking-tight text-navy">
               Unlock your personalized recommendations
             </h2>
-            <p className="mt-0.5 text-xs leading-relaxed text-slate-500">
+            <p className="mt-0.5 text-xs leading-relaxed text-slate-600">
               Take the quick placement readiness test and we&apos;ll pick the exact company tracks,
               sections and topics to focus on next.
             </p>
@@ -65,7 +65,7 @@ export function CalibrationRecommendations() {
           <h2 className="mt-1.5 text-lg font-black tracking-tight text-navy">Your next steps</h2>
         </div>
         {data.overall != null && (
-          <span className="shrink-0 text-right text-[11px] font-semibold text-slate-400">
+          <span className="shrink-0 text-right text-[11px] font-semibold text-slate-500">
             Placement readiness
             <span className="block text-base font-black tabular-nums text-navy">{data.overall}%</span>
           </span>
@@ -76,7 +76,7 @@ export function CalibrationRecommendations() {
         <div className="rounded-2xl border border-orange/30 bg-gradient-to-br from-orange/[0.07] to-transparent p-4">
           <RecoScopeChip r={best} />
           <p className="mt-1.5 text-sm font-semibold leading-relaxed text-navy">{best.message}</p>
-          {best.reason ? <p className="mt-1 text-[11px] text-slate-400">Why: {best.reason}</p> : null}
+          {best.reason ? <p className="mt-1 text-[11px] text-slate-500">Why: {best.reason}</p> : null}
           <div className="mt-3">
             <RecoAction r={best} />
           </div>

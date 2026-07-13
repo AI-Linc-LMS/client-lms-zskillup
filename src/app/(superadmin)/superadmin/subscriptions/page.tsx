@@ -13,9 +13,9 @@ export default function SuperadminSubscriptionsPage() {
         ]}
       />
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Commercial</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Commercial</p>
         <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Subscriptions</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-600">
           Manage the plan catalog and each college&apos;s subscription lifecycle.
         </p>
       </header>

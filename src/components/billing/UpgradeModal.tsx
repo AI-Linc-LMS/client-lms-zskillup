@@ -99,7 +99,7 @@ export function UpgradeModal({
         </div>
 
         <div className="px-6 py-5">
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-400">What you unlock</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-500">What you unlock</p>
           <ul className="mt-2.5 space-y-1.5">
             {INCLUDED.map((line) => (
               <li key={line} className="flex items-start gap-2 text-sm text-slate-600">
@@ -126,7 +126,7 @@ export function UpgradeModal({
             </Link>
           </div>
 
-          <p className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
+          <p className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-slate-500">
             <Lock className="size-3" /> You keep your placement readiness results and progress either way.
           </p>
         </div>

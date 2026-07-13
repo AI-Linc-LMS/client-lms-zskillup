@@ -97,7 +97,7 @@ export function GoogleSignInButton({ onSuccess, onError, text = 'signin_with' }:
       <div className="relative w-full">
         {loading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center rounded-md bg-white/80">
-            <Loader2 className="size-5 animate-spin text-slate-400" />
+            <Loader2 className="size-5 animate-spin text-slate-500" />
           </div>
         )}
         <div ref={containerRef} className="w-full" aria-label="Sign in with Google" />

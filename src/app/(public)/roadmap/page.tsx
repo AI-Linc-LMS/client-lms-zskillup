@@ -13,7 +13,7 @@ import { getStudentStats, type ApiStudentStats } from '@/lib/api/gamification';
 const STATUS_CONFIG: Record<RoadmapStatus, { icon: typeof CheckCircle2; label: string; style: string }> = {
   done: { icon: CheckCircle2, label: 'Done', style: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
   active: { icon: Circle, label: 'Active', style: 'text-sky-700 bg-sky-50 border-sky-200' },
-  locked: { icon: Lock, label: 'Locked', style: 'text-slate-400 bg-slate-50 border-slate-200' },
+  locked: { icon: Lock, label: 'Locked', style: 'text-slate-500 bg-slate-50 border-slate-200' },
 };
 
 const ROADMAP_TOTAL_XP = 7000;
@@ -164,7 +164,7 @@ export default function RoadmapPage() {
                         ? 'border-emerald-500 bg-emerald-500 text-white'
                         : step.status === 'active'
                         ? 'border-blue-500 bg-blue-500 text-white'
-                        : 'border-slate-200 bg-white text-slate-400',
+                        : 'border-slate-200 bg-white text-slate-500',
                     )}
                   >
                     {step.status === 'done' ? (

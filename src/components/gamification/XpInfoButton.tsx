@@ -24,7 +24,7 @@ export function XpInfoButton({
         href="/how-xp-works"
         className={cn(
           'inline-flex items-center gap-1 text-xs font-semibold transition-colors',
-          tone === 'light' ? 'text-white/70 hover:text-white' : 'text-slate-400 hover:text-orange',
+          tone === 'light' ? 'text-white/70 hover:text-white' : 'text-slate-500 hover:text-orange',
           className,
         )}
       >
@@ -41,7 +41,7 @@ export function XpInfoButton({
         'inline-grid size-5 place-items-center rounded-full ring-1 ring-inset transition-colors',
         tone === 'light'
           ? 'text-white/60 ring-white/20 hover:bg-white/10 hover:text-white'
-          : 'text-slate-400 ring-slate-200 hover:bg-orange/10 hover:text-orange hover:ring-orange/30',
+          : 'text-slate-500 ring-slate-200 hover:bg-orange/10 hover:text-orange hover:ring-orange/30',
         className,
       )}
     >

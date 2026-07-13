@@ -38,7 +38,7 @@ export default function CodingAnalyticsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="size-7 animate-spin text-slate-400" />
+        <Loader2 className="size-7 animate-spin text-slate-500" />
       </div>
     );
   }
@@ -55,7 +55,7 @@ export default function CodingAnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm font-semibold text-slate-500">
+      <p className="text-sm font-semibold text-slate-600">
         Coding analytics · <span className="text-navy">{cohortLabel}</span>
       </p>
 
@@ -69,7 +69,7 @@ export default function CodingAnalyticsPage() {
       <div className="grid gap-5 lg:grid-cols-2">
         <BentoCard title="Difficulty Breakdown" subtitle="Solved problems by difficulty." source="Coding submissions × problem difficulty">
           {data.totalSolved === 0 ? (
-            <p className="text-sm text-slate-400">No coding activity yet.</p>
+            <p className="text-sm text-slate-500">No coding activity yet.</p>
           ) : (
             <div className="space-y-4">
               <Donut segments={donutSegments} centerTop={data.totalSolved} centerBottom="Solved" />
@@ -83,7 +83,7 @@ export default function CodingAnalyticsPage() {
                       <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
                         <div className="h-full rounded-full" style={{ width: `${rate}%`, background: d.color }} />
                       </div>
-                      <span className="w-24 text-right text-xs text-slate-500">
+                      <span className="w-24 text-right text-xs text-slate-600">
                         <span className="font-bold text-navy">{b.solved}</span>/{b.attempted} · {rate}%
                       </span>
                     </div>
@@ -96,14 +96,14 @@ export default function CodingAnalyticsPage() {
 
         <BentoCard title="Company-Tagged Performance" subtitle="Solve rate on each company's pattern problems." source="Coding submissions × company tags">
           {data.companies.length === 0 ? (
-            <p className="text-sm text-slate-400">No company-tagged coding activity yet.</p>
+            <p className="text-sm text-slate-500">No company-tagged coding activity yet.</p>
           ) : (
             <div className="space-y-3">
               {data.companies.map((c) => (
                 <div key={c.slug}>
                   <div className="mb-1 flex items-center justify-between gap-2 text-sm">
                     <span className="truncate font-semibold text-navy">{c.name}</span>
-                    <span className="shrink-0 text-xs text-slate-500">
+                    <span className="shrink-0 text-xs text-slate-600">
                       <span className="font-bold text-navy">{c.solveRate}%</span> · {c.solved}/{c.attempted}
                     </span>
                   </div>

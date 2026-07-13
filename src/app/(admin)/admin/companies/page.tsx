@@ -8,9 +8,9 @@ export default function AdminCompaniesPage() {
     <div className="space-y-6">
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Platform Admin', href: '/admin/dashboard' }, { label: 'Companies' }]} />
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Catalog</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Catalog</p>
         <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Companies</h1>
-        <p className="mt-1 text-sm text-slate-500">Add a recruiter hub or change what students can see. Drafts stay hidden until published.</p>
+        <p className="mt-1 text-sm text-slate-600">Add a recruiter hub or change what students can see. Drafts stay hidden until published.</p>
       </header>
       <Suspense fallback={<div className="h-96 animate-pulse rounded-xl border border-slate-200 bg-white shadow-sm" />}>
         <CompaniesAdmin />

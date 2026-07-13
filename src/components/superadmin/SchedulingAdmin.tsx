@@ -154,7 +154,7 @@ export function SchedulingAdmin() {
           </span>
           <div>
             <p className="text-sm font-bold text-navy">Build an assessment from the question bank</p>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-600">
               Pick a company, define sections by topic &amp; count - we auto-assemble it, preview, and schedule.
             </p>
           </div>
@@ -250,7 +250,7 @@ export function SchedulingAdmin() {
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Filter</span>
+        <span className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Filter</span>
         <select value={fCompany} onChange={(e) => setFCompany(e.target.value)} className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-navy focus:border-[#ffc42d] focus:outline-none">
           <option value="">All companies</option>
           {companies.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -273,7 +273,7 @@ export function SchedulingAdmin() {
             Clear
           </button>
         ) : null}
-        {rows ? <span className="ml-auto text-xs font-medium text-slate-400">{filtered.length} of {rows.length}</span> : null}
+        {rows ? <span className="ml-auto text-xs font-medium text-slate-500">{filtered.length} of {rows.length}</span> : null}
       </div>
 
       {/* List */}
@@ -281,7 +281,7 @@ export function SchedulingAdmin() {
         <div className="overflow-x-auto">
         <table className="w-full min-w-[860px] text-left text-sm">
           <thead className="bg-slate-50/90">
-            <tr className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+            <tr className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
               <th className="px-4 py-4">Assessment</th>
               <th className="px-4 py-4">Company</th>
               <th className="px-4 py-4">When</th>
@@ -295,12 +295,12 @@ export function SchedulingAdmin() {
             {rows === null ? (
               <tr>
                 <td colSpan={7} className="px-4 py-12 text-center">
-                  <Loader2 className="mx-auto size-5 animate-spin text-slate-400" />
+                  <Loader2 className="mx-auto size-5 animate-spin text-slate-500" />
                 </td>
               </tr>
             ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-sm text-slate-500">
+                <td colSpan={7} className="px-4 py-12 text-center text-sm text-slate-600">
                   {rows.length === 0 ? 'No assessments scheduled yet.' : 'No assessments match these filters.'}
                 </td>
               </tr>
@@ -325,7 +325,7 @@ export function SchedulingAdmin() {
                         <Video className="size-3.5" /> Yes
                       </span>
                     ) : (
-                      <span className="text-[11px] text-slate-400">No</span>
+                      <span className="text-[11px] text-slate-500">No</span>
                     )}
                   </td>
                   <td className="px-4 py-3.5">
@@ -337,7 +337,7 @@ export function SchedulingAdmin() {
                         'rounded-full px-2.5 py-1 text-[11px] font-bold ring-1 ring-inset disabled:opacity-50',
                         r.isActive
                           ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                          : 'bg-slate-100 text-slate-500 ring-slate-200',
+                          : 'bg-slate-100 text-slate-600 ring-slate-200',
                       )}
                     >
                       {r.isActive ? 'Active' : 'Inactive'}
@@ -363,7 +363,7 @@ export function SchedulingAdmin() {
                         type="button"
                         disabled={busyId === r.id}
                         onClick={() => remove(r.id)}
-                        className="grid size-8 place-items-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
+                        className="grid size-8 place-items-center rounded-lg text-slate-500 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
                       >
                         <Trash2 className="size-4" />
                       </button>
@@ -389,14 +389,14 @@ export function SchedulingAdmin() {
           <div className="relative flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
             {resultsLoading || !results ? (
               <div className="grid h-64 place-items-center">
-                <Loader2 className="size-6 animate-spin text-slate-400" />
+                <Loader2 className="size-6 animate-spin text-slate-500" />
               </div>
             ) : (
               <>
                 <div className="flex items-start justify-between border-b border-slate-100 px-6 py-4">
                   <div>
                     <h3 className="text-lg font-extrabold text-navy">{results.assessment.title}</h3>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-600">
                       {results.assessment.companyName} ·{' '}
                       {new Date(results.assessment.scheduledAt).toLocaleString([], {
                         month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true,
@@ -406,7 +406,7 @@ export function SchedulingAdmin() {
                   <button
                     type="button"
                     onClick={() => setResults(null)}
-                    className="grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100"
+                    className="grid size-8 place-items-center rounded-full text-slate-500 hover:bg-slate-100"
                   >
                     <X className="size-4" />
                   </button>
@@ -422,18 +422,18 @@ export function SchedulingAdmin() {
                   ].map((s) => (
                     <div key={s.label} className="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
                       <p className="text-xl font-black text-navy tabular-nums">{s.value}</p>
-                      <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">{s.label}</p>
+                      <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">{s.label}</p>
                     </div>
                   ))}
                 </div>
 
                 <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6">
                   {results.rows.length === 0 ? (
-                    <p className="py-8 text-center text-sm text-slate-500">No attempts yet.</p>
+                    <p className="py-8 text-center text-sm text-slate-600">No attempts yet.</p>
                   ) : (
                     <table className="w-full text-left text-sm">
                       <thead className="sticky top-0 bg-white">
-                        <tr className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                        <tr className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                           <th className="py-2">Student</th>
                           <th className="py-2">Score</th>
                           <th className="py-2">%ile</th>
@@ -445,10 +445,10 @@ export function SchedulingAdmin() {
                           <tr key={r.userId} className="border-t border-slate-100">
                             <td className="py-2.5">
                               <span className="block font-semibold text-navy">{r.fullName ?? r.email}</span>
-                              <span className="text-[11px] text-slate-400">{r.email}</span>
+                              <span className="text-[11px] text-slate-500">{r.email}</span>
                             </td>
                             <td className="py-2.5 font-semibold text-navy">
-                              {r.score}/{r.total} <span className="text-slate-400">({r.scorePct}%)</span>
+                              {r.score}/{r.total} <span className="text-slate-500">({r.scorePct}%)</span>
                             </td>
                             <td className="py-2.5 text-slate-600">{r.percentile}th</td>
                             <td className="py-2.5">
@@ -475,6 +475,6 @@ export function SchedulingAdmin() {
   );
 }
 
-const labelCls = 'text-[10px] font-bold uppercase tracking-widest text-slate-400';
+const labelCls = 'text-[10px] font-bold uppercase tracking-widest text-slate-500';
 const inputCls =
   'flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors focus:border-[#ffc42d] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ffc42d]/30';

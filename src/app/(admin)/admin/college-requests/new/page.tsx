@@ -40,7 +40,7 @@ export default function NewCollegeRequestPage() {
       />
       <div>
         <h1 className="text-[28px] font-extrabold tracking-tight text-navy">New college registration request</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-600">
           Save as a draft to finish later, or submit for Super Admin review.
         </p>
       </div>

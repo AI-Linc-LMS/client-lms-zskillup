@@ -98,21 +98,21 @@ export function QuickStart() {
       {/* Topic or job role */}
       <div data-tour="mi:focus">
         <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
-          <label className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+          <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
             {focus === 'role' ? 'Interview for a role' : 'Practice a topic'}
           </label>
           <div className="inline-flex rounded-full border border-slate-200 bg-slate-50 p-0.5 text-xs font-semibold">
             <button
               type="button"
               onClick={() => setFocus('topic')}
-              className={cn('rounded-full px-3 py-1 transition-colors', focus === 'topic' ? 'bg-white text-navy shadow-sm' : 'text-slate-500')}
+              className={cn('rounded-full px-3 py-1 transition-colors', focus === 'topic' ? 'bg-white text-navy shadow-sm' : 'text-slate-600')}
             >
               By topic
             </button>
             <button
               type="button"
               onClick={() => setFocus('role')}
-              className={cn('rounded-full px-3 py-1 transition-colors', focus === 'role' ? 'bg-white text-navy shadow-sm' : 'text-slate-500')}
+              className={cn('rounded-full px-3 py-1 transition-colors', focus === 'role' ? 'bg-white text-navy shadow-sm' : 'text-slate-600')}
             >
               By job role
             </button>
@@ -138,7 +138,7 @@ export function QuickStart() {
                 onClick={() => setTopic('__custom')}
                 className={cn(
                   'inline-flex items-center gap-1 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-all',
-                  isCustom ? 'border-orange bg-orange/10 text-orange shadow-sm' : 'border-dashed border-slate-300 text-slate-500 hover:bg-slate-50',
+                  isCustom ? 'border-orange bg-orange/10 text-orange shadow-sm' : 'border-dashed border-slate-300 text-slate-600 hover:bg-slate-50',
                 )}
               >
                 <Plus className="size-3.5" /> Custom
@@ -172,7 +172,7 @@ export function QuickStart() {
                 </button>
               ))}
             </div>
-            <p className="mt-2.5 text-xs text-slate-400">
+            <p className="mt-2.5 text-xs text-slate-500">
               A <span className="font-semibold text-navy">{role}</span> interview - questions span what that role is hired for.
             </p>
           </>
@@ -181,7 +181,7 @@ export function QuickStart() {
 
       {/* Style */}
       <div data-tour="mi:style">
-        <label className="mb-2.5 block text-xs font-semibold uppercase tracking-widest text-slate-400">Interview style</label>
+        <label className="mb-2.5 block text-xs font-semibold uppercase tracking-widest text-slate-500">Interview style</label>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           {TYPES.map((t) => {
             const active = interviewType === t.value;
@@ -195,10 +195,10 @@ export function QuickStart() {
                   active ? 'border-orange bg-orange/5 ring-1 ring-orange/30' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50',
                 )}
               >
-                <Icon className={cn('size-4 shrink-0', active ? 'text-orange' : 'text-slate-400')} />
+                <Icon className={cn('size-4 shrink-0', active ? 'text-orange' : 'text-slate-500')} />
                 <div>
                   <p className={cn('text-sm font-semibold', active ? 'text-orange' : 'text-navy')}>{t.label}</p>
-                  <p className="text-[11px] text-slate-400">{t.hint}</p>
+                  <p className="text-[11px] text-slate-500">{t.hint}</p>
                 </div>
               </button>
             );
@@ -208,7 +208,7 @@ export function QuickStart() {
 
       {/* Difficulty */}
       <div>
-        <label className="mb-2.5 block text-xs font-semibold uppercase tracking-widest text-slate-400">Difficulty</label>
+        <label className="mb-2.5 block text-xs font-semibold uppercase tracking-widest text-slate-500">Difficulty</label>
         <div className="grid grid-cols-3 gap-2">
           {DIFFICULTIES.map((d) => {
             const active = difficulty === d.value;
@@ -222,7 +222,7 @@ export function QuickStart() {
                 )}
               >
                 <p className="text-sm font-bold">{d.value}</p>
-                <p className={cn('mt-0.5 text-[11px]', active ? 'text-white/70' : 'text-slate-400')}>{d.hint}</p>
+                <p className={cn('mt-0.5 text-[11px]', active ? 'text-white/70' : 'text-slate-500')}>{d.hint}</p>
               </button>
             );
           })}
@@ -231,7 +231,7 @@ export function QuickStart() {
 
       {/* Length */}
       <div>
-        <label className="mb-2.5 block text-xs font-semibold uppercase tracking-widest text-slate-400">Length</label>
+        <label className="mb-2.5 block text-xs font-semibold uppercase tracking-widest text-slate-500">Length</label>
         <div className="flex flex-wrap gap-2">
           {INTERVIEW_DURATIONS.map((m) => (
             <button
@@ -249,19 +249,19 @@ export function QuickStart() {
             </button>
           ))}
         </div>
-        <p className="mt-2 text-xs text-slate-400">The AI paces itself to wrap up naturally within this window - you won&apos;t be cut off mid-answer.</p>
+        <p className="mt-2 text-xs text-slate-500">The AI paces itself to wrap up naturally within this window - you won&apos;t be cut off mid-answer.</p>
       </div>
 
       {error && <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
 
       {/* Summary + CTA */}
       <div data-tour="mi:start" className="flex flex-col gap-4 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-slate-600">
           <span className="font-semibold text-navy">{effectiveTopic || 'Your topic'}</span> · {interviewType} · {difficulty} ·{' '}
           <span className="whitespace-nowrap">~{estQuestions} questions</span>
         </p>
         <div className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-1 text-xs text-slate-400"><Mic className="size-3.5" /> Spoken interview · mic recommended</span>
+          <span className="inline-flex items-center gap-1 text-xs text-slate-500"><Mic className="size-3.5" /> Spoken interview · mic recommended</span>
           <button
             onClick={start}
             disabled={creating}

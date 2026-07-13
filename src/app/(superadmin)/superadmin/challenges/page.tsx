@@ -118,11 +118,11 @@ export default function AdminChallengesPage() {
       />
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
             Super Admin · ZSkillup
           </p>
           <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Challenges</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-600">
             {rows.length} challenges · MCQ, Coding (Judge0) & free-form
           </p>
         </div>
@@ -145,7 +145,7 @@ export default function AdminChallengesPage() {
         <div className="rounded-2xl border border-slate-200 bg-white p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-base font-bold text-navy">{editing ? 'Edit' : 'New'} challenge</h2>
-            <button onClick={() => setDraft(null)} className="text-slate-400 hover:text-slate-600">
+            <button onClick={() => setDraft(null)} className="text-slate-500 hover:text-slate-600">
               <X className="size-5" />
             </button>
           </div>
@@ -155,7 +155,7 @@ export default function AdminChallengesPage() {
                 value={draft.code ?? ''}
                 disabled={!!editing}
                 onChange={(e) => setDraft({ ...draft, code: e.target.value })}
-                className={`${INPUT} disabled:bg-slate-50 disabled:text-slate-400`}
+                className={`${INPUT} disabled:bg-slate-50 disabled:text-slate-500`}
               />
             </Field>
             <Field label="Type">
@@ -261,10 +261,10 @@ export default function AdminChallengesPage() {
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="size-6 animate-spin text-slate-400" />
+            <Loader2 className="size-6 animate-spin text-slate-500" />
           </div>
         ) : rows.length === 0 ? (
-          <div className="py-16 text-center text-sm text-slate-400">No challenges yet - create one.</div>
+          <div className="py-16 text-center text-sm text-slate-500">No challenges yet - create one.</div>
         ) : (
           <ul className="divide-y divide-slate-100">
             {rows.map((c) => (
@@ -283,37 +283,37 @@ export default function AdminChallengesPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="font-semibold text-navy">{c.title}</p>
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
                       {c.type}
                     </span>
                     {c.difficulty ? (
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
                         {c.difficulty}
                       </span>
                     ) : null}
                     <span className="text-[10px] font-bold text-[#a16207]">+{c.xpReward} XP</span>
                     <span
                       className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                        c.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-400'
+                        c.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
                       }`}
                     >
                       {c.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </div>
                   {c.description ? (
-                    <p className="mt-0.5 line-clamp-1 text-sm text-slate-500">{c.description}</p>
+                    <p className="mt-0.5 line-clamp-1 text-sm text-slate-600">{c.description}</p>
                   ) : null}
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   <button
                     onClick={() => openEdit(c)}
-                    className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-navy"
+                    className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-navy"
                   >
                     <Pencil className="size-4" />
                   </button>
                   <button
                     onClick={() => remove(c)}
-                    className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-500"
+                    className="rounded-lg p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-500"
                   >
                     <Trash2 className="size-4" />
                   </button>
@@ -330,7 +330,7 @@ export default function AdminChallengesPage() {
 function Field({ label, full, children }: { label: string; full?: boolean; children: React.ReactNode }) {
   return (
     <label className={`flex flex-col gap-1 ${full ? 'sm:col-span-2' : ''}`}>
-      <span className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">{label}</span>
+      <span className="text-[11px] font-semibold uppercase tracking-widest text-slate-500">{label}</span>
       {children}
     </label>
   );

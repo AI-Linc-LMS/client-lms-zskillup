@@ -137,7 +137,7 @@ export function InfoTip({
           if (open) hide();
           else show(true);
         }}
-        className={`${dotClassName} z-10 grid size-4 place-items-center rounded-full text-slate-300 transition hover:text-indigo-500 focus-visible:text-indigo-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40`}
+        className={`${dotClassName} z-10 grid size-4 place-items-center rounded-full text-slate-400 transition hover:text-indigo-500 focus-visible:text-indigo-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40`}
       >
         <Info className="size-3.5" />
       </button>
@@ -155,7 +155,7 @@ export function InfoTip({
             }`}
           >
             <p className="text-xs font-black text-white">{content.title}</p>
-            {content.body && <p className="mt-1 text-[11px] leading-relaxed text-slate-300">{content.body}</p>}
+            {content.body && <p className="mt-1 text-[11px] leading-relaxed text-slate-400">{content.body}</p>}
             {content.bullets?.length ? (
               <ul className="mt-2 space-y-1">
                 {content.bullets.map((b) => (

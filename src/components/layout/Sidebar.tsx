@@ -214,7 +214,7 @@ function NavAccordion({
                   <ChevronDown
                     aria-hidden
                     className={cn(
-                      'size-4 shrink-0 text-slate-400 transition-transform duration-200',
+                      'size-4 shrink-0 text-slate-500 transition-transform duration-200',
                       expanded && 'rotate-180',
                     )}
                   />
@@ -276,7 +276,7 @@ function SubNavLink({ item, active, locked }: { item: NavItem; active: boolean; 
         <Icon className="size-4" />
       </span>
       <span className="flex-1 truncate">{item.label}</span>
-      {locked && <Lock className="size-3.5 shrink-0 text-slate-300" aria-label="Locked" />}
+      {locked && <Lock className="size-3.5 shrink-0 text-slate-400" aria-label="Locked" />}
     </Link>
   );
 }

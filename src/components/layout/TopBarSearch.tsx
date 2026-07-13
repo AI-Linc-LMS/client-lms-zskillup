@@ -52,7 +52,7 @@ export function TopBarSearch() {
         <Search
           className={cn(
             'pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 transition-colors duration-200',
-            focused ? 'text-orange' : 'text-slate-400',
+            focused ? 'text-orange' : 'text-slate-500',
           )}
           aria-hidden="true"
         />
@@ -64,13 +64,13 @@ export function TopBarSearch() {
           onBlur={() => setFocused(false)}
           placeholder="Search companies, topics…"
           aria-label="Search companies and topics"
-          className="h-9 w-full rounded-full border border-slate-200/90 bg-white/70 pl-10 pr-14 text-sm text-slate-700 shadow-sm transition-colors placeholder:text-slate-400 hover:border-slate-300 focus-visible:border-transparent focus-visible:bg-white focus-visible:outline-none"
+          className="h-9 w-full rounded-full border border-slate-200/90 bg-white/70 pl-10 pr-14 text-sm text-slate-700 shadow-sm transition-colors placeholder:text-slate-500 hover:border-slate-300 focus-visible:border-transparent focus-visible:bg-white focus-visible:outline-none"
         />
         {/* kbd hint - hides while typing/focused */}
         <kbd
           aria-hidden
           className={cn(
-            'pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 select-none items-center gap-0.5 rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-400 transition-opacity duration-200 xl:inline-flex',
+            'pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 select-none items-center gap-0.5 rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-500 transition-opacity duration-200 xl:inline-flex',
             focused || q ? 'opacity-0' : 'opacity-100',
           )}
         >

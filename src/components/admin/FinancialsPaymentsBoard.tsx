@@ -87,8 +87,8 @@ export function FinancialsPaymentsBoard() {
     <div className="space-y-5">
       {/* Date filter */}
       <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200/80 bg-white p-3">
-        <span className="flex items-center gap-1.5 px-1 text-xs font-semibold text-slate-500">
-          <CalendarClock className="size-4 text-slate-400" /> Period
+        <span className="flex items-center gap-1.5 px-1 text-xs font-semibold text-slate-600">
+          <CalendarClock className="size-4 text-slate-500" /> Period
         </span>
         {PRESETS.map((p) => (
           <button
@@ -105,18 +105,18 @@ export function FinancialsPaymentsBoard() {
         {preset === 'custom' && (
           <span className="flex items-center gap-2">
             <input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} className="rounded-lg border border-slate-200 px-2 py-1 text-xs" />
-            <span className="text-slate-400">→</span>
+            <span className="text-slate-500">→</span>
             <input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} className="rounded-lg border border-slate-200 px-2 py-1 text-xs" />
           </span>
         )}
         {data && (
-          <span className="ml-auto text-[11px] text-slate-400">{fmtRange(data.rangeFrom, data.rangeTo)}</span>
+          <span className="ml-auto text-[11px] text-slate-500">{fmtRange(data.rangeFrom, data.rangeTo)}</span>
         )}
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="size-6 animate-spin text-slate-400" />
+          <Loader2 className="size-6 animate-spin text-slate-500" />
         </div>
       ) : error ? (
         <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">{error}</div>
@@ -143,7 +143,7 @@ export function FinancialsPaymentsBoard() {
           <div className="grid gap-5 lg:grid-cols-2">
             <Panel title="Revenue by product (B2C, period)">
               {data.rangeRevenueByScope.length === 0 ? (
-                <p className="text-sm text-slate-400">No captured B2C revenue in this period.</p>
+                <p className="text-sm text-slate-500">No captured B2C revenue in this period.</p>
               ) : (
                 <div className="space-y-3">
                   {data.rangeRevenueByScope.map((s) => (
@@ -165,7 +165,7 @@ export function FinancialsPaymentsBoard() {
                 Booked plan value - college checkout isn&apos;t live yet, so this is contracted, not collected.
               </p>
               {data.revenueByCollege.length === 0 ? (
-                <p className="text-sm text-slate-400">No active college subscriptions.</p>
+                <p className="text-sm text-slate-500">No active college subscriptions.</p>
               ) : (
                 <div className="space-y-3">
                   {data.revenueByCollege.map((c) => (
@@ -183,7 +183,7 @@ export function FinancialsPaymentsBoard() {
             </Panel>
           </div>
 
-          <p className="flex items-center gap-1.5 text-[11px] text-slate-400">
+          <p className="flex items-center gap-1.5 text-[11px] text-slate-500">
             <Building2 className="size-3.5" /> &ldquo;Period&rdquo; figures follow the date filter above; month/year/lifetime and
             subscription counts are always current.
           </p>

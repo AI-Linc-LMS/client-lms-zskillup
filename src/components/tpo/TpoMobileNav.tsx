@@ -21,7 +21,7 @@ export function TpoMobileNav() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open menu"
-        className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-navy md:hidden"
+        className="rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 hover:text-navy md:hidden"
       >
         <Menu className="size-5" />
       </button>
@@ -52,7 +52,7 @@ export function TpoMobileNav() {
                   type="button"
                   onClick={() => setOpen(false)}
                   aria-label="Close menu"
-                  className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100"
+                  className="rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100"
                 >
                   <X className="size-5" />
                 </button>
@@ -61,7 +61,7 @@ export function TpoMobileNav() {
               <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
                 {TPO_NAV.map((section) => (
                   <div key={section.heading}>
-                    <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                    <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                       {section.heading}
                     </p>
                     <ul className="space-y-0.5">
@@ -86,7 +86,7 @@ export function TpoMobileNav() {
                                   'grid size-7 shrink-0 place-items-center rounded-lg',
                                   active
                                     ? 'text-[#ffc42d]'
-                                    : 'text-slate-400',
+                                    : 'text-slate-500',
                                 )}
                               >
                                 <Icon className="size-4" />

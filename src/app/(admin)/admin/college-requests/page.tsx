@@ -38,9 +38,9 @@ export default function AdminCollegeRequestsPage() {
 
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Platform Admin</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Platform Admin</p>
           <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">College Registration Requests</h1>
-          <p className="mt-1 text-sm text-slate-500">Draft a college onboarding request and submit it for Super Admin review.</p>
+          <p className="mt-1 text-sm text-slate-600">Draft a college onboarding request and submit it for Super Admin review.</p>
         </div>
         <Link href="/admin/college-requests/new">
           <Button>
@@ -61,22 +61,22 @@ export default function AdminCollegeRequestsPage() {
           <option value="APPROVED">Approved</option>
           <option value="REJECTED">Rejected</option>
         </select>
-        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
       </div>
 
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         {rows === null ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="size-6 animate-spin text-slate-400" />
+            <Loader2 className="size-6 animate-spin text-slate-500" />
           </div>
         ) : error ? (
           <div className="py-16 text-center text-sm text-red-500">{error}</div>
         ) : rows.length === 0 ? (
-          <div className="py-16 text-center text-sm text-slate-400">No requests yet. Create one to get started.</div>
+          <div className="py-16 text-center text-sm text-slate-500">No requests yet. Create one to get started.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] text-sm">
-              <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+              <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                 <tr>
                   <th className="px-4 py-3">College</th>
                   <th className="px-4 py-3">Plan</th>
@@ -91,10 +91,10 @@ export default function AdminCollegeRequestsPage() {
                   <tr key={r.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3">
                       <p className="font-semibold text-navy">{r.collegeName}</p>
-                      <p className="text-xs text-slate-400">{r.city}, {r.state}</p>
+                      <p className="text-xs text-slate-500">{r.city}, {r.state}</p>
                     </td>
                     <td className="px-4 py-3 text-slate-600">
-                      {r.planName} <span className="text-xs text-slate-400">· {r.seatLimit} seats</span>
+                      {r.planName} <span className="text-xs text-slate-500">· {r.seatLimit} seats</span>
                     </td>
                     <td className="px-4 py-3 tabular-nums text-slate-600">{r.studentCount}</td>
                     <td className="px-4 py-3">
@@ -102,7 +102,7 @@ export default function AdminCollegeRequestsPage() {
                         {r.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs text-slate-400">{new Date(r.updatedAt).toLocaleDateString()}</td>
+                    <td className="px-4 py-3 text-xs text-slate-500">{new Date(r.updatedAt).toLocaleDateString()}</td>
                     <td className="px-4 py-3 text-right">
                       <Link href={`/admin/college-requests/${r.id}`} className="text-sm font-semibold text-[#1a1d29] hover:underline">
                         View

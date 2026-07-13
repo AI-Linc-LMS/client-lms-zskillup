@@ -114,7 +114,7 @@ export default function ReportsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="size-7 animate-spin text-slate-400" />
+        <Loader2 className="size-7 animate-spin text-slate-500" />
       </div>
     );
   }
@@ -125,7 +125,7 @@ export default function ReportsPage() {
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-slate-500">
+        <p className="text-sm font-semibold text-slate-600">
           Reports &amp; exports · <span className="text-navy">{cohortId ? cohorts.find((c) => c.id === cohortId)?.name : 'All batches'}</span>
         </p>
         <Button size="sm" variant="outline" onClick={() => window.print()}>
@@ -188,8 +188,8 @@ function ReportCard({
         <Icon className="size-5" />
       </span>
       <h2 className="mt-3 text-base font-black text-navy">{title}</h2>
-      <p className="mt-1 flex-1 text-xs leading-relaxed text-slate-500">{desc}</p>
-      <p className="mt-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{meta}</p>
+      <p className="mt-1 flex-1 text-xs leading-relaxed text-slate-600">{desc}</p>
+      <p className="mt-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">{meta}</p>
       <Button size="sm" className="mt-3 w-full" onClick={onExport}>
         <Download className="size-4" /> Download CSV
       </Button>
@@ -201,7 +201,7 @@ function Glance({ label, value }: { label: string; value: number | string }) {
   return (
     <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
       <p className="text-xl font-black tabular-nums text-navy">{typeof value === 'number' ? value.toLocaleString('en-IN') : value}</p>
-      <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+      <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
     </div>
   );
 }

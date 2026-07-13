@@ -52,17 +52,17 @@ export default function AdminCollegesPage() {
       />
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Insights</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Insights</p>
           <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Colleges</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-600">
             {rows.length.toLocaleString()} colleges · click a row for enrolment + performance
           </p>
         </div>
-        <School className="size-6 text-slate-300" />
+        <School className="size-6 text-slate-400" />
       </header>
 
       <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
         <input
           type="search"
           placeholder="Search by name, city or state…"
@@ -75,16 +75,16 @@ export default function AdminCollegesPage() {
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="size-6 animate-spin text-slate-400" />
+            <Loader2 className="size-6 animate-spin text-slate-500" />
           </div>
         ) : error ? (
           <div className="py-16 text-center text-sm text-red-500">{error}</div>
         ) : filtered.length === 0 ? (
-          <div className="py-16 text-center text-sm text-slate-400">No colleges found.</div>
+          <div className="py-16 text-center text-sm text-slate-500">No colleges found.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[560px] text-sm">
-              <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+              <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                 <tr>
                   <th className="px-4 py-3">College</th>
                   <th className="px-4 py-3">Location</th>
@@ -98,7 +98,7 @@ export default function AdminCollegesPage() {
                     <td className="px-4 py-3">
                       <Link href={`/admin/colleges/${c.id}`} className="group">
                         <p className="font-semibold text-navy group-hover:text-[#1a1d29]">{c.name}</p>
-                        <p className="text-xs text-slate-400">{c.slug}</p>
+                        <p className="text-xs text-slate-500">{c.slug}</p>
                       </Link>
                     </td>
                     <td className="px-4 py-3 text-slate-600">
@@ -115,7 +115,7 @@ export default function AdminCollegesPage() {
                         {c.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs text-slate-400">
+                    <td className="px-4 py-3 text-xs text-slate-500">
                       {new Date(c.createdAt).toLocaleDateString('en-IN', {
                         day: 'numeric',
                         month: 'short',

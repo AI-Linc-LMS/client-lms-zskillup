@@ -107,17 +107,17 @@ export function CollegeCohortsManager({ collegeId, onChange }: { collegeId: stri
         </h2>
         {cohorts === null ? (
           <div className="grid h-24 place-items-center">
-            <Loader2 className="size-5 animate-spin text-slate-300" />
+            <Loader2 className="size-5 animate-spin text-slate-400" />
           </div>
         ) : cohorts.length === 0 ? (
-          <p className="mt-3 text-sm text-slate-400">No cohorts yet - create the first batch below.</p>
+          <p className="mt-3 text-sm text-slate-500">No cohorts yet - create the first batch below.</p>
         ) : (
           <ul className="mt-3 divide-y divide-slate-100">
             {cohorts.map((c) => (
               <li key={c.id} className="flex items-center justify-between gap-3 py-2">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-navy">{c.name}</p>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-500">
                     {[c.branch, c.year].filter(Boolean).join(' · ') || 'All branches'}
                   </p>
                 </div>
@@ -130,15 +130,15 @@ export function CollegeCohortsManager({ collegeId, onChange }: { collegeId: stri
         )}
 
         <div className="mt-4 flex flex-wrap items-end gap-2 border-t border-slate-100 pt-4">
-          <label className="text-xs font-semibold text-slate-500">
+          <label className="text-xs font-semibold text-slate-600">
             Name
             <input className={`mt-1 block w-44 ${inputCls}`} value={name} onChange={(e) => setName(e.target.value)} placeholder="B.Tech CSE 2026" />
           </label>
-          <label className="text-xs font-semibold text-slate-500">
+          <label className="text-xs font-semibold text-slate-600">
             Year
             <input type="number" className={`mt-1 block w-24 ${inputCls}`} value={year} onChange={(e) => setYear(e.target.value)} placeholder="2026" />
           </label>
-          <label className="text-xs font-semibold text-slate-500">
+          <label className="text-xs font-semibold text-slate-600">
             Branch
             <input className={`mt-1 block w-28 ${inputCls}`} value={branch} onChange={(e) => setBranch(e.target.value)} placeholder="CSE" />
           </label>
@@ -158,7 +158,7 @@ export function CollegeCohortsManager({ collegeId, onChange }: { collegeId: stri
         <h2 className="flex items-center gap-2 text-sm font-bold text-navy">
           <Mail className="size-4 text-[#f5b400]" /> Invite students
         </h2>
-        <p className="mt-1 text-xs text-slate-400">
+        <p className="mt-1 text-xs text-slate-500">
           One per line: <code className="rounded bg-slate-100 px-1">email, name, roll, branch</code> (name/roll/branch optional).
         </p>
         <textarea

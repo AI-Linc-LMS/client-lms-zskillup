@@ -85,7 +85,7 @@ export function ProfileCompletionBanner() {
           </span>
         </div>
       </div>
-      <p className="mt-2 text-xs leading-relaxed text-slate-500">
+      <p className="mt-2 text-xs leading-relaxed text-slate-600">
         Add your {missingText} to sharpen recommendations and auto-fill your resume.
       </p>
       {/* progress bar */}

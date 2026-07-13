@@ -8,9 +8,9 @@ export default function AdminMocksPage() {
     <div className="space-y-6">
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Platform Admin', href: '/admin/dashboard' }, { label: 'Mock tests' }]} />
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Assessment library</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Assessment library</p>
         <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Mock tests</h1>
-        <p className="mt-1 text-sm text-slate-500">Assemble timed mock assessments from the question + coding banks.</p>
+        <p className="mt-1 text-sm text-slate-600">Assemble timed mock assessments from the question + coding banks.</p>
       </header>
       <Suspense fallback={<div className="h-96 animate-pulse rounded-xl border border-slate-200 bg-white shadow-sm" />}>
         <MocksAdmin />

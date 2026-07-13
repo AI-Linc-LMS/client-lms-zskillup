@@ -13,7 +13,7 @@ export default function TpoCohortsPage() {
         <GraduationCap className="size-6" aria-hidden />
       </span>
       <h1 className="mt-4 text-lg font-extrabold text-navy">Cohorts are managed by your admin</h1>
-      <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-500">
+      <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-600">
         Your batches and student roster are configured by the Platform Admin. You can still segment
         your dashboards and reports by batch using the <span className="font-semibold">All batches</span> filter.
       </p>

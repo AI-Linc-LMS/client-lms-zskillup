@@ -35,7 +35,7 @@
 
   /* Neutrals tuned to slate scale */
   --muted: 220 14% 96%;
-  --muted-foreground: 215 16% 47%;
+  --muted-foreground: 215 19% 35%;
   --accent: 220 14% 96%;
   --accent-foreground: 222 47% 11%;
   --destructive: 0 84% 60%;    /* error #ef4444 */
@@ -60,9 +60,9 @@
   --color-surface-3: #e2e8f0;
   --color-ink: #14161f;            /* deep hero ink */
   --color-ink-2: #1a1a1a;          /* black — active nav */
-  --color-text: #1a1d29;           /* primary text */
-  --color-text-muted: #667085;     /* secondary text */
-  --color-text-subtle: #98a2b3;    /* muted text */
+  --color-text: #101322;           /* primary text (darker for contrast) */
+  --color-text-muted: #475569;     /* secondary text (darker for contrast) */
+  --color-text-subtle: #64748b;    /* muted text (darker for contrast) */
   --color-primary: #1a1a1a;        /* identity = black */
   --color-primary-highlight: #fff5ea;  /* soft yellow (sidebar hover) */
   --color-accent: #1a1a1a;         /* readable link ink; hover goes gold */

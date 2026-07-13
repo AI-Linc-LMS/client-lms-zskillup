@@ -187,7 +187,7 @@ export function ChatWidget() {
               }}
               rows={1}
               placeholder="Ask about pricing, practice, interviews…"
-              className="max-h-28 flex-1 resize-none rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-navy outline-none placeholder:text-slate-400 focus:border-orange/50"
+              className="max-h-28 flex-1 resize-none rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-navy outline-none placeholder:text-slate-500 focus:border-orange/50"
             />
             <button
               type="submit"

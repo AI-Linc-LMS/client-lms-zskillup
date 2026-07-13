@@ -28,7 +28,7 @@ export function FeatureItem({
   className?: string;
 }) {
   const tick =
-    tone === 'emerald' ? 'text-emerald-500' : tone === 'slate' ? 'text-slate-400' : 'text-indigo-500';
+    tone === 'emerald' ? 'text-emerald-500' : tone === 'slate' ? 'text-slate-500' : 'text-indigo-500';
   return (
     <li className={cn('flex items-start gap-2.5 text-sm text-slate-600', className)}>
       <CheckCircle2 className={cn('mt-0.5 size-4 shrink-0', tick)} />
@@ -79,7 +79,7 @@ export function TrustBadges({ className }: { className?: string }) {
           </span>
           <div className="min-w-0">
             <p className="text-sm font-bold text-navy">{it.title}</p>
-            <p className="text-xs text-slate-500">{it.sub}</p>
+            <p className="text-xs text-slate-600">{it.sub}</p>
           </div>
         </div>
       ))}
@@ -91,7 +91,7 @@ export function TrustBadges({ className }: { className?: string }) {
 export function SecurePaymentsNote({ className }: { className?: string }) {
   return (
     <div className={cn('flex items-center justify-center', className)}>
-      <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-500">
+      <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-600">
         <ShieldCheck className="size-4 text-emerald-500" /> 100% Secure Payments
       </span>
     </div>
@@ -120,7 +120,7 @@ export function StatBand({
           </span>
           <div className="min-w-0">
             <p className="text-xl font-black tabular-nums tracking-tight text-navy">{s.value}</p>
-            <p className="truncate text-xs font-medium text-slate-500">{s.label}</p>
+            <p className="truncate text-xs font-medium text-slate-600">{s.label}</p>
           </div>
         </div>
       ))}
@@ -148,7 +148,7 @@ export function IncludedGrid({
           </span>
           <div className="min-w-0">
             <p className="text-sm font-bold text-navy">{it.title}</p>
-            <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{it.desc}</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-slate-600">{it.desc}</p>
           </div>
         </div>
       ))}
@@ -172,7 +172,7 @@ export function ValueProps({
             <v.icon className="size-5" />
           </span>
           <p className="mt-3 text-sm font-black text-navy">{v.title}</p>
-          <p className="mt-1 text-xs leading-relaxed text-slate-500">{v.desc}</p>
+          <p className="mt-1 text-xs leading-relaxed text-slate-600">{v.desc}</p>
         </div>
       ))}
     </div>
@@ -195,9 +195,9 @@ export function FaqAccordion({ items, className }: { items: { q: string; a: stri
               className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition hover:bg-slate-50/60"
             >
               <span className="text-sm font-bold text-navy">{it.q}</span>
-              <ChevronDown className={cn('size-4 shrink-0 text-slate-400 transition-transform', isOpen && 'rotate-180')} />
+              <ChevronDown className={cn('size-4 shrink-0 text-slate-500 transition-transform', isOpen && 'rotate-180')} />
             </button>
-            {isOpen && <p className="px-5 pb-4 text-sm leading-relaxed text-slate-500">{it.a}</p>}
+            {isOpen && <p className="px-5 pb-4 text-sm leading-relaxed text-slate-600">{it.a}</p>}
           </div>
         );
       })}

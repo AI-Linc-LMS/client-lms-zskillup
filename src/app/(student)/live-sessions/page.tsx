@@ -26,21 +26,21 @@ export default function StudentLiveSessionsPage() {
         <h1 className="flex items-center gap-2 text-2xl font-black tracking-tight text-navy">
           <Video className="size-6 text-orange" /> Live Sessions
         </h1>
-        <p className="mt-0.5 text-sm text-slate-500">Masterclasses & webinars scheduled for you. Join right from here.</p>
+        <p className="mt-0.5 text-sm text-slate-600">Masterclasses & webinars scheduled for you. Join right from here.</p>
       </header>
 
       {loading ? (
-        <div className="flex items-center justify-center py-24"><Loader2 className="size-7 animate-spin text-slate-400" /></div>
+        <div className="flex items-center justify-center py-24"><Loader2 className="size-7 animate-spin text-slate-500" /></div>
       ) : !data || (data.upcoming.length === 0 && data.past.length === 0) ? (
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center">
-          <CalendarClock className="mx-auto size-10 text-slate-300" />
-          <p className="mt-3 text-sm text-slate-500">No live sessions scheduled yet. We&apos;ll notify you when one is set up.</p>
+          <CalendarClock className="mx-auto size-10 text-slate-400" />
+          <p className="mt-3 text-sm text-slate-600">No live sessions scheduled yet. We&apos;ll notify you when one is set up.</p>
         </div>
       ) : (
         <>
           {data.upcoming.length > 0 && (
             <section className="space-y-3" data-tour="live:upcoming">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400">Upcoming</h2>
+              <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">Upcoming</h2>
               <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
                 {data.upcoming.map((s) => <StudentCard key={s.id} s={s} />)}
               </div>
@@ -48,7 +48,7 @@ export default function StudentLiveSessionsPage() {
           )}
           {data.past.length > 0 && (
             <section className="space-y-3" data-tour="live:past">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400">Past</h2>
+              <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">Past</h2>
               <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
                 {data.past.map((s) => <StudentCard key={s.id} s={s} past />)}
               </div>
@@ -69,14 +69,14 @@ function StudentCard({ s, past }: { s: LiveSessionDto; past?: boolean }) {
       <div className="flex flex-wrap items-center gap-2">
         <StatusBadge status={s.status} />
         <AudiencePill audience={s.audience} companyName={s.companyName} />
-        {!past && <span className="text-xs font-semibold text-slate-400">· {relWhen(s.scheduledAt)}</span>}
+        {!past && <span className="text-xs font-semibold text-slate-500">· {relWhen(s.scheduledAt)}</span>}
       </div>
 
       <h3 className="mt-2.5 text-lg font-black text-navy">{s.title}</h3>
       {s.description && <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-600">{s.description}</p>}
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
           <span className="inline-flex items-center gap-1"><Clock className="size-3.5" /> {fmtWhen(s.scheduledAt)}</span>
           <span>{s.durationMinutes} min</span>
         </div>
@@ -102,7 +102,7 @@ function StudentCard({ s, past }: { s: LiveSessionDto; past?: boolean }) {
             <PlayCircle className="size-4" /> Watch recording
           </a>
         ) : past ? (
-          <span className="text-xs font-semibold text-slate-400">Session ended</span>
+          <span className="text-xs font-semibold text-slate-500">Session ended</span>
         ) : null}
       </div>
     </div>

@@ -202,7 +202,7 @@ export default function BuildYourOwnPage() {
 
   const periodOptions = (scope: EntitlementScope, current: BillingPeriod, onPick: (p: BillingPeriod) => void) => (
     <div className="mt-3">
-      <p className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-400">Access Plan (Validity)</p>
+      <p className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-500">Access Plan (Validity)</p>
       <div className="grid gap-2.5 sm:grid-cols-3">
         {PERIODS.map((p) => {
           const amt = priceOf(scope, p.period);
@@ -224,7 +224,7 @@ export default function BuildYourOwnPage() {
                   {p.months}
                   {pct ? <PlanPill tone="emerald">Save {pct}%</PlanPill> : null}
                 </span>
-                <span className="text-sm font-semibold tabular-nums text-slate-500">
+                <span className="text-sm font-semibold tabular-nums text-slate-600">
                   {amt != null ? formatPrice(amt, 'INR') : '-'}
                 </span>
               </span>
@@ -251,16 +251,16 @@ export default function BuildYourOwnPage() {
         <div>
           <Link
             href="/shop"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 transition hover:text-navy"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 transition hover:text-navy"
           >
             <ArrowLeft className="size-4" /> Back to Explore Plans
           </Link>
           <h1 className="mt-3 text-2xl font-black tracking-tight text-navy">Build Your Own Plan</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-600">
             Choose what you want to prepare and select your access plan.
           </p>
         </div>
-        <div className="hidden max-w-xs items-start gap-2 rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-500 shadow-sm sm:flex">
+        <div className="hidden max-w-xs items-start gap-2 rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-600 shadow-sm sm:flex">
           <HelpCircle className="mt-0.5 size-4 shrink-0 text-indigo-500" />
           <span>
             <b className="text-navy">How it works?</b> Pick a company, section or sub-section, then choose an
@@ -363,7 +363,7 @@ export default function BuildYourOwnPage() {
                       className={`rounded-full px-3 py-1 text-xs font-bold transition ${
                         activeSection === section.id
                           ? 'bg-navy text-white'
-                          : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
                     >
                       {section.name}
@@ -404,7 +404,7 @@ export default function BuildYourOwnPage() {
                     </span>
                     <div>
                       <p className="text-sm font-bold text-navy">{w.title}</p>
-                      <p className="text-xs text-slate-500">{w.sub}</p>
+                      <p className="text-xs text-slate-600">{w.sub}</p>
                     </div>
                   </div>
                 ))}
@@ -421,7 +421,7 @@ export default function BuildYourOwnPage() {
                   <button
                     type="button"
                     onClick={() => setStaged({})}
-                    className="text-xs font-bold text-slate-400 transition hover:text-rose-500"
+                    className="text-xs font-bold text-slate-500 transition hover:text-rose-500"
                   >
                     Clear All
                   </button>
@@ -429,7 +429,7 @@ export default function BuildYourOwnPage() {
               </div>
 
               {items.length === 0 ? (
-                <p className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-8 text-center text-sm text-slate-400">
+                <p className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-8 text-center text-sm text-slate-500">
                   Pick a company, section or sub-topic to start building your plan.
                 </p>
               ) : (
@@ -447,10 +447,10 @@ export default function BuildYourOwnPage() {
 
               {items.length > 0 && (
                 <div className="mt-3 rounded-2xl bg-slate-50 p-3">
-                  <p className="text-xs font-bold text-slate-500">You&apos;ll get access to:</p>
+                  <p className="text-xs font-bold text-slate-600">You&apos;ll get access to:</p>
                   <ul className="mt-1.5 space-y-1">
                     {UNLOCKS.map((u) => (
-                      <li key={u} className="flex items-center gap-1.5 text-xs text-slate-500">
+                      <li key={u} className="flex items-center gap-1.5 text-xs text-slate-600">
                         <Check className="size-3.5 text-emerald-500" /> {u}
                       </li>
                     ))}
@@ -497,7 +497,7 @@ export default function BuildYourOwnPage() {
         <div className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
             <div>
-              <p className="text-xs text-slate-400">{items.length} selected</p>
+              <p className="text-xs text-slate-500">{items.length} selected</p>
               <p className="text-lg font-black tabular-nums text-navy">{formatPrice(total, 'INR')}</p>
             </div>
             <button
@@ -614,7 +614,7 @@ function PickCard({
               ? 'bg-white ring-1 ring-slate-200/80'
               : selected
                 ? 'bg-indigo-100 text-indigo-600'
-                : 'bg-slate-100 text-slate-500'
+                : 'bg-slate-100 text-slate-600'
           }`}
         >
           {icon}
@@ -646,11 +646,11 @@ function SubTable({
       <table className="w-full min-w-[440px] border-collapse text-sm">
         <thead>
           <tr className="border-b border-slate-100 text-left">
-            <th className="py-2 pr-3 text-xs font-bold uppercase tracking-widest text-slate-400">Sub-sections</th>
+            <th className="py-2 pr-3 text-xs font-bold uppercase tracking-widest text-slate-500">Sub-sections</th>
             {PERIODS.map((p) => {
               const pct = periodSavingsPct(priceMap, EntitlementScope.TOPIC, p.period);
               return (
-                <th key={p.period} className="px-2 py-2 text-center text-xs font-bold text-slate-500">
+                <th key={p.period} className="px-2 py-2 text-center text-xs font-bold text-slate-600">
                   <span className="flex flex-col items-center">
                     {p.months}
                     {pct ? <span className="text-[10px] font-bold text-emerald-600">Save {pct}%</span> : null}
@@ -695,7 +695,7 @@ function SubTable({
                         >
                           {active && <span className="size-1.5 rounded-full bg-white" />}
                         </span>
-                        <span className="text-xs font-semibold tabular-nums text-slate-500">
+                        <span className="text-xs font-semibold tabular-nums text-slate-600">
                           {amt != null ? formatPrice(amt, 'INR') : '-'}
                         </span>
                       </button>
@@ -728,7 +728,7 @@ function SelGroup({
   const months = (p: BillingPeriod) => PERIODS.find((x) => x.period === p)?.months ?? '';
   return (
     <div>
-      <p className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-slate-400">
+      <p className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-slate-500">
         {icon} {title}
         {rows.length > 1 ? ` (${rows.length})` : ''}
       </p>
@@ -740,7 +740,7 @@ function SelGroup({
           >
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-bold text-navy">{it.label}</p>
-              <p className="text-xs text-slate-400">Plan: {months(it.period)}</p>
+              <p className="text-xs text-slate-500">Plan: {months(it.period)}</p>
             </div>
             <span className="text-sm font-bold tabular-nums text-navy">
               {formatPrice(priceOf(it.scope, it.period) ?? 0, 'INR')}
@@ -749,7 +749,7 @@ function SelGroup({
               type="button"
               onClick={() => onRemove(it)}
               aria-label={`Remove ${it.label}`}
-              className="grid size-6 place-items-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-500"
+              className="grid size-6 place-items-center rounded-lg text-slate-500 transition hover:bg-rose-50 hover:text-rose-500"
             >
               <X className="size-3.5" />
             </button>

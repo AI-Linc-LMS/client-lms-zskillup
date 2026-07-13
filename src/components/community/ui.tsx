@@ -120,7 +120,7 @@ export function LikeButton({
       className={cn(
         'inline-flex items-center gap-1.5 rounded-full font-semibold transition-colors',
         size === 'sm' ? 'px-2 py-1 text-xs' : 'px-3 py-1.5 text-sm',
-        liked ? 'bg-rose-50 text-rose-600' : 'text-slate-500 hover:bg-slate-100 hover:text-rose-500',
+        liked ? 'bg-rose-50 text-rose-600' : 'text-slate-600 hover:bg-slate-100 hover:text-rose-500',
       )}
       aria-pressed={liked}
     >
@@ -139,7 +139,7 @@ export function AuthorMeta({ author, at }: { author: CommunityAuthorDto; at: str
         ? 'Placement Officer'
         : null;
   return (
-    <p className="truncate text-xs text-slate-400">
+    <p className="truncate text-xs text-slate-500">
       {author.collegeName ?? 'ZSkillup'} · {timeAgo(at)}
       {roleLabel && (
         <span className="ml-1.5 rounded bg-navy/10 px-1.5 py-0.5 text-[10px] font-bold text-navy">{roleLabel}</span>

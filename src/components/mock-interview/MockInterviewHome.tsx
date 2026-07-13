@@ -14,7 +14,7 @@ const STATUS_STYLE: Record<string, string> = {
   scheduled: 'bg-blue-100 text-blue-700',
   in_progress: 'bg-amber-100 text-amber-700',
   completed: 'bg-green-100 text-green-700',
-  abandoned: 'bg-slate-100 text-slate-500',
+  abandoned: 'bg-slate-100 text-slate-600',
 };
 
 const STEPS = [
@@ -77,7 +77,7 @@ export function MockInterviewHome() {
       {/* Tabs */}
       <div data-tour="mi:tabs" className="flex gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1 text-sm font-semibold">
         {(['new', 'previous'] as Tab[]).map((t) => (
-          <button key={t} onClick={() => setTab(t)} className={cn('flex-1 rounded-lg px-4 py-2 transition-colors', tab === t ? 'bg-white text-navy shadow-sm' : 'text-slate-500 hover:text-slate-700')}>
+          <button key={t} onClick={() => setTab(t)} className={cn('flex-1 rounded-lg px-4 py-2 transition-colors', tab === t ? 'bg-white text-navy shadow-sm' : 'text-slate-600 hover:text-slate-700')}>
             {t === 'new' ? 'New interview' : `Previous${rows.length ? ` (${rows.length})` : ''}`}
           </button>
         ))}
@@ -102,7 +102,7 @@ export function MockInterviewHome() {
                   </div>
                   <div className="min-w-0">
                     <p className="text-[13px] font-bold text-navy">{s.title}</p>
-                    <p className="truncate text-[11px] text-slate-400">{s.text}</p>
+                    <p className="truncate text-[11px] text-slate-500">{s.text}</p>
                   </div>
                 </motion.div>
               );
@@ -113,15 +113,15 @@ export function MockInterviewHome() {
       ) : (
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
           {loading ? (
-            <div className="flex justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-400" /></div>
+            <div className="flex justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-500" /></div>
           ) : rows.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-14 text-center">
               <div className="grid size-12 place-items-center rounded-full bg-slate-50">
-                <Sparkles className="size-6 text-slate-300" />
+                <Sparkles className="size-6 text-slate-400" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-navy">No interviews yet</p>
-                <p className="mt-0.5 text-xs text-slate-400">Start your first mock from the New tab.</p>
+                <p className="mt-0.5 text-xs text-slate-500">Start your first mock from the New tab.</p>
               </div>
               <button onClick={() => setTab('new')} className="mt-1 inline-flex items-center gap-1.5 rounded-lg bg-orange px-4 py-2 text-xs font-bold text-[#171717] hover:bg-orange/90">
                 <Play className="size-3.5" /> Start an interview
@@ -137,13 +137,13 @@ export function MockInterviewHome() {
                         {r.overallPercentage}
                       </div>
                     ) : (
-                      <div className="grid size-11 shrink-0 place-items-center rounded-full bg-slate-100 text-slate-400">
+                      <div className="grid size-11 shrink-0 place-items-center rounded-full bg-slate-100 text-slate-500">
                         <MessagesSquare className="size-5" />
                       </div>
                     )}
                     <div className="min-w-0">
                       <p className="truncate font-semibold text-navy">{r.topic}</p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-slate-500">
                         {r.difficulty} · {r.durationMinutes} min · {new Date(r.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </p>
                     </div>
@@ -155,7 +155,7 @@ export function MockInterviewHome() {
                     ) : r.status === 'scheduled' || r.status === 'in_progress' ? (
                       <Link href={`/mock-interview/${r.id}/take`} className="inline-flex items-center gap-1 rounded-lg bg-orange px-3 py-1.5 text-xs font-semibold text-[#171717] hover:bg-orange/90"><Play className="size-3.5" /> Resume</Link>
                     ) : null}
-                    <button onClick={() => remove(r.id, r.topic)} className="rounded-lg border border-slate-200 p-1.5 text-slate-400 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-500" aria-label="Delete"><Trash2 className="size-4" /></button>
+                    <button onClick={() => remove(r.id, r.topic)} className="rounded-lg border border-slate-200 p-1.5 text-slate-500 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-500" aria-label="Delete"><Trash2 className="size-4" /></button>
                   </div>
                 </li>
               ))}
@@ -174,7 +174,7 @@ function Stat({ icon: Icon, label, value, suffix, tint }: { icon: typeof Award; 
       <p className={cn('text-center text-2xl font-black tabular-nums', tint)}>
         {value === null ? '-' : <AnimatedNumber value={value} suffix={suffix} />}
       </p>
-      <p className="text-center text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
+      <p className="text-center text-[10px] font-semibold uppercase tracking-widest text-slate-500">{label}</p>
     </div>
   );
 }

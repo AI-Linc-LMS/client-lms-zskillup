@@ -36,7 +36,7 @@ export function DashboardCompanies() {
   };
 
   if (companies === null) {
-    return <div className="grid h-40 place-items-center rounded-3xl border border-slate-200 bg-white"><Loader2 className="size-5 animate-spin text-slate-400" /></div>;
+    return <div className="grid h-40 place-items-center rounded-3xl border border-slate-200 bg-white"><Loader2 className="size-5 animate-spin text-slate-500" /></div>;
   }
   if (companies.length === 0) return null;
 
@@ -47,7 +47,7 @@ export function DashboardCompanies() {
           <h3 aria-label="Company Assessments" className="flex items-center gap-2 text-2xl font-black tracking-tight text-navy">
             <Building2 className="size-5 text-[#f5b400]" /> Company Assessments
           </h3>
-          <p className="mt-1 text-sm leading-relaxed text-slate-500">
+          <p className="mt-1 text-sm leading-relaxed text-slate-600">
             Company-specific practice &amp; mock assessments crafted by Prephasz - train on each company&apos;s pattern before the real thing.
           </p>
         </div>
@@ -77,7 +77,7 @@ export function DashboardCompanies() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={c.logoUrl} alt={c.name} className="max-h-full max-w-full object-contain" />
                   ) : (
-                    <span className="text-sm font-black text-slate-500">{c.name.slice(0, 2).toUpperCase()}</span>
+                    <span className="text-sm font-black text-slate-600">{c.name.slice(0, 2).toUpperCase()}</span>
                   )}
                 </Link>
                 <div className="min-w-0 flex-1">
@@ -103,7 +103,7 @@ export function DashboardCompanies() {
               {/* what's inside - content types available (no counts) */}
               {(() => {
                 const feats: Array<{ icon: typeof ClipboardList; label: string; tone: string }> = [];
-                if ((c.questionCount ?? 0) > 0) feats.push({ icon: ClipboardList, label: 'Practice', tone: 'text-slate-400' });
+                if ((c.questionCount ?? 0) > 0) feats.push({ icon: ClipboardList, label: 'Practice', tone: 'text-slate-500' });
                 if ((c.pyqCount ?? 0) > 0) feats.push({ icon: History, label: 'Previous-year', tone: 'text-[#f5b400]' });
                 if ((c.codingCount ?? 0) > 0) feats.push({ icon: Code2, label: 'Coding', tone: 'text-emerald-500' });
                 return feats.length ? (
@@ -152,11 +152,11 @@ export function DashboardCompanies() {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={confirm.logoUrl} alt={confirm.name} className="max-h-full max-w-full object-contain" />
               ) : (
-                <span className="text-sm font-black text-slate-500">{confirm.name.slice(0, 2).toUpperCase()}</span>
+                <span className="text-sm font-black text-slate-600">{confirm.name.slice(0, 2).toUpperCase()}</span>
               )}
             </span>
             <h3 className="mt-3 text-lg font-black text-navy">Register for {confirm.name}?</h3>
-            <p className="mt-1 text-sm leading-relaxed text-slate-500">
+            <p className="mt-1 text-sm leading-relaxed text-slate-600">
               You&apos;ll get {confirm.name}&apos;s scheduled assessments on your calendar and reminders before each one.
             </p>
             <div className="mt-5 flex gap-2">

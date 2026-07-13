@@ -23,7 +23,7 @@ function StatusBadge({ status }: { status: string }) {
   }
   if (status === 'abandoned') {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 border border-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+      <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 border border-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
         <XCircle className="size-3" /> Abandoned
       </span>
     );
@@ -50,12 +50,12 @@ export default function AdminAdaptiveSessionsPage() {
       <Breadcrumb items={CRUMBS} />
 
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Admin</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Admin</p>
         <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy flex items-center gap-2">
           <Brain className="size-7 text-[#f5b400]" />
           Adaptive Sessions
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-600">
           All student adaptive mock quiz sessions with IRT-derived skill profiles.
         </p>
       </header>
@@ -65,7 +65,7 @@ export default function AdminAdaptiveSessionsPage() {
       )}
 
       {!sessions && !error && (
-        <div className="flex items-center gap-3 rounded-xl border bg-white p-8 text-sm text-slate-400">
+        <div className="flex items-center gap-3 rounded-xl border bg-white p-8 text-sm text-slate-500">
           <Loader2 className="size-5 animate-spin text-[#f5b400]" />
           Loading sessions…
         </div>
@@ -74,7 +74,7 @@ export default function AdminAdaptiveSessionsPage() {
       {sessions && sessions.length === 0 && (
         <div className="rounded-xl border bg-white p-10 text-center">
           <p className="text-sm font-semibold text-navy">No adaptive sessions yet.</p>
-          <p className="mt-1 text-xs text-slate-500">Sessions appear here once students start an adaptive mock.</p>
+          <p className="mt-1 text-xs text-slate-600">Sessions appear here once students start an adaptive mock.</p>
         </div>
       )}
 
@@ -85,7 +85,7 @@ export default function AdminAdaptiveSessionsPage() {
             <thead className="border-b bg-slate-50">
               <tr>
                 {['Student ID', 'Mock Test', 'Status', 'Questions', 'Accuracy', 'Started', ''].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                  <th key={h} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-600">
                     {h}
                   </th>
                 ))}
@@ -94,7 +94,7 @@ export default function AdminAdaptiveSessionsPage() {
             <tbody className="divide-y divide-slate-100">
               {sessions.map((s) => (
                 <tr key={s.sessionId} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-4 py-3 font-mono text-xs text-slate-500">{s.userId.slice(0, 8)}…</td>
+                  <td className="px-4 py-3 font-mono text-xs text-slate-600">{s.userId.slice(0, 8)}…</td>
                   <td className="px-4 py-3 font-medium text-navy">{s.mockTitle}</td>
                   <td className="px-4 py-3">
                     <StatusBadge status={s.status} />
@@ -111,10 +111,10 @@ export default function AdminAdaptiveSessionsPage() {
                         {s.accuracy}%
                       </span>
                     ) : (
-                      <span className="text-slate-400">-</span>
+                      <span className="text-slate-500">-</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-xs text-slate-400">
+                  <td className="px-4 py-3 text-xs text-slate-500">
                     {new Date(s.startedAt).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3">

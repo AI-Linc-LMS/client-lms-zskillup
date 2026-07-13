@@ -245,13 +245,13 @@ export function QuestionsAdmin() {
             <MetricCard label="Matching" value={counts.all} accent="text-navy" />
             <MetricCard label="Published" value={counts.published} accent="text-emerald-700" />
             <MetricCard label="Drafts" value={counts.draft} accent="text-amber-700" />
-            <MetricCard label="Archived" value={counts.archived} accent="text-slate-500" />
+            <MetricCard label="Archived" value={counts.archived} accent="text-slate-600" />
           </div>
 
           <div className="mt-5 flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3">
             <div className="relative min-w-0 flex-1">
               <Search
-                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-500"
                 aria-hidden="true"
               />
               <input
@@ -259,7 +259,7 @@ export function QuestionsAdmin() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search question text…"
-                className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm text-navy placeholder:text-slate-400 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+                className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm text-navy placeholder:text-slate-500 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
                 aria-label="Search questions"
               />
             </div>
@@ -389,7 +389,7 @@ export function QuestionsAdmin() {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] text-left text-sm">
             <thead className="bg-slate-50/90">
-              <tr className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              <tr className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                 <th className="px-4 py-4">Question</th>
                 <th className="px-4 py-4">Type</th>
                 <th className="px-4 py-4">Difficulty</th>
@@ -404,12 +404,12 @@ export function QuestionsAdmin() {
               {rows === null ? (
                 <tr>
                   <td colSpan={8} className="px-4 py-12 text-center">
-                    <Loader2 className="mx-auto size-5 animate-spin text-slate-400" aria-hidden="true" />
+                    <Loader2 className="mx-auto size-5 animate-spin text-slate-500" aria-hidden="true" />
                   </td>
                 </tr>
               ) : rows.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-sm text-slate-500">
+                  <td colSpan={8} className="px-4 py-12 text-center text-sm text-slate-600">
                     No questions match this view.
                   </td>
                 </tr>
@@ -441,17 +441,17 @@ export function QuestionsAdmin() {
                           {q.yearTags && q.yearTags.length ? ` · ${q.yearTags.join(', ')}` : ''}
                         </Pill>
                       ) : (
-                        <span className="text-slate-400">-</span>
+                        <span className="text-slate-500">-</span>
                       )}
                     </td>
                     <td className="px-4 py-3.5">
                       {q.roleTags && q.roleTags.length ? (
-                        <span className="text-[11px] text-slate-500">
+                        <span className="text-[11px] text-slate-600">
                           {q.roleTags.slice(0, 2).join(', ')}
                           {q.roleTags.length > 2 ? ` +${q.roleTags.length - 2}` : ''}
                         </span>
                       ) : (
-                        <span className="text-slate-400">-</span>
+                        <span className="text-slate-500">-</span>
                       )}
                     </td>
                     <td className="px-4 py-3.5">
@@ -498,7 +498,7 @@ export function QuestionsAdmin() {
                             <Trash2 className="size-4" aria-hidden="true" />
                           </button>
                         ) : (
-                          <span className="text-xs text-slate-400">Archived</span>
+                          <span className="text-xs text-slate-500">Archived</span>
                         )}
                       </div>
                     </td>
@@ -510,7 +510,7 @@ export function QuestionsAdmin() {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-4 py-4">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-600">
             {total === 0 ? 'No rows.' : `Showing ${visibleStart}–${visibleEnd} of ${total}`}
           </p>
           <div className="flex items-center gap-2">
@@ -522,7 +522,7 @@ export function QuestionsAdmin() {
             >
               <ChevronLeft className="size-4" /> Previous
             </Button>
-            <span className="rounded-full bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-500">
+            <span className="rounded-full bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600">
               Page {Math.min(page, pageCount)} of {pageCount}
             </span>
             <Button
@@ -631,7 +631,7 @@ function PyqSpotlight({
         </span>
         <div>
           <p className="text-sm font-extrabold text-navy">Previous Year Questions</p>
-          <p className="text-[12px] text-slate-500">
+          <p className="text-[12px] text-slate-600">
             Genuinely sourced PYQs with year + citation
             {totalPyq !== null ? ` · ${totalPyq} total` : ''}
           </p>
@@ -654,7 +654,7 @@ function PyqSpotlight({
                   : 'border-slate-200 bg-white/70 hover:border-[#ffc42d] hover:bg-white')
               }
             >
-              <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
+              <span className="text-[11px] font-bold uppercase tracking-wide text-slate-600">
                 {companyNameBySlug[slug] ?? slug}
               </span>
               <span className="mt-1 text-2xl font-black tracking-tight text-navy tabular-nums">
@@ -674,7 +674,7 @@ function PyqSpotlight({
 function MetricCard({ label, value, accent }: { label: string; value: number; accent: string }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">{label}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">{label}</p>
       <p className={`mt-2 text-2xl font-black tracking-tight ${accent}`}>
         {value.toLocaleString()}
       </p>
@@ -724,13 +724,13 @@ function QuestionDetailDrawer({
       />
       <aside className="relative h-full w-full max-w-xl overflow-y-auto border-l border-slate-200 bg-white shadow-2xl">
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white/95 px-5 py-3.5 backdrop-blur">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
             Question detail
           </p>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-navy"
+            className="rounded-full p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-navy"
           >
             <X className="size-4" />
           </button>
@@ -740,7 +740,7 @@ function QuestionDetailDrawer({
           <p className="m-5 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>
         ) : !detail || !q ? (
           <div className="flex h-40 items-center justify-center">
-            <Loader2 className="size-5 animate-spin text-slate-400" />
+            <Loader2 className="size-5 animate-spin text-slate-500" />
           </div>
         ) : (
           <div className="space-y-5 px-5 py-5">
@@ -765,7 +765,7 @@ function QuestionDetailDrawer({
             </div>
 
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Question</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Question</p>
               <p className="mt-1 whitespace-pre-wrap text-[15px] font-semibold leading-relaxed text-navy">
                 {q.stem}
               </p>
@@ -773,7 +773,7 @@ function QuestionDetailDrawer({
 
             {detail.options.length ? (
               <div>
-                <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
                   Options
                 </p>
                 <div className="space-y-2">
@@ -790,7 +790,7 @@ function QuestionDetailDrawer({
                       <span
                         className={
                           'grid size-6 shrink-0 place-items-center rounded-full text-[11px] font-bold ' +
-                          (o.isCorrect ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500')
+                          (o.isCorrect ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600')
                         }
                       >
                         {String.fromCharCode(65 + i)}
@@ -813,13 +813,13 @@ function QuestionDetailDrawer({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Topic</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Topic</p>
                 <p className="mt-1 text-sm text-slate-700">
                   {q.subtopicId ? topicNames[q.subtopicId] ?? '-' : '-'}
                 </p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
                   Companies
                 </p>
                 <p className="mt-1 text-sm text-slate-700">
@@ -834,7 +834,7 @@ function QuestionDetailDrawer({
 
             {q.sourceRef ? (
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
                   Source citation
                 </p>
                 {/^https?:\/\//.test(q.sourceRef) ? (
@@ -854,7 +854,7 @@ function QuestionDetailDrawer({
 
             {q.roleTags && q.roleTags.length ? (
               <div>
-                <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-500">
                   Target roles
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -872,7 +872,7 @@ function QuestionDetailDrawer({
 
             {detail.contentUsage.length ? (
               <div>
-                <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-500">
                   Used in
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -897,7 +897,7 @@ function QuestionDetailDrawer({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{label}</p>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{label}</p>
       <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{children}</p>
     </div>
   );
@@ -995,7 +995,7 @@ function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
 
   return (
     <form onSubmit={submit} className="rounded-xl border border-slate-200 bg-white p-5" noValidate>
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">New question</p>
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">New question</p>
       <h2 className="mb-4 text-base font-bold text-navy">Author a practice question</h2>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -1032,7 +1032,7 @@ function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
           onChange={(e) => setStem(e.target.value)}
           rows={3}
           placeholder="What is 15% of 240?"
-          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy placeholder:text-slate-400 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy placeholder:text-slate-500 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
         />
       </div>
 
@@ -1062,7 +1062,7 @@ function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
           <div className="mb-2 flex items-center justify-between">
             <label className="block text-sm font-medium text-navy">
               Options{' '}
-              <span className="text-xs font-normal text-slate-400">
+              <span className="text-xs font-normal text-slate-500">
                 ({type === QuestionType.MCQ ? 'pick one correct' : 'mark all correct'})
               </span>
             </label>
@@ -1086,7 +1086,7 @@ function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
                     'grid size-7 shrink-0 place-items-center rounded-full text-[11px] font-bold transition-colors ' +
                     (o.isCorrect
                       ? 'bg-emerald-600 text-white'
-                      : 'bg-slate-100 text-slate-400 hover:bg-slate-200')
+                      : 'bg-slate-100 text-slate-500 hover:bg-slate-200')
                   }
                 >
                   {String.fromCharCode(65 + i)}
@@ -1097,14 +1097,14 @@ function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
                     setOptions((p) => p.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))
                   }
                   placeholder={`Option ${String.fromCharCode(65 + i)}`}
-                  className="h-9 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy placeholder:text-slate-400 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+                  className="h-9 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy placeholder:text-slate-500 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
                 />
                 {options.length > 2 ? (
                   <button
                     type="button"
                     onClick={() => setOptions((p) => p.filter((_, j) => j !== i))}
                     aria-label="Remove option"
-                    className="text-slate-400 transition-colors hover:text-red-600"
+                    className="text-slate-500 transition-colors hover:text-red-600"
                   >
                     <X className="size-4" aria-hidden="true" />
                   </button>
@@ -1114,7 +1114,7 @@ function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
           </div>
         </div>
       ) : (
-        <p className="mt-4 rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
+        <p className="mt-4 rounded-lg bg-slate-50 p-3 text-xs text-slate-600">
           {type === QuestionType.NUMERIC ? 'Numeric' : 'Coding'} questions are stored without options
           (answers are graded separately) - add the prompt above.
         </p>

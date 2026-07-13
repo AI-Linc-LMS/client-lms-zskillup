@@ -96,7 +96,7 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
   }
   if (!results) {
     return (
-      <div className="grid min-h-screen place-items-center bg-background text-slate-400">
+      <div className="grid min-h-screen place-items-center bg-background text-slate-500">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="size-7 animate-spin" /> Loading your results…
         </div>
@@ -196,7 +196,7 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
                     ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
                     : s.error
                       ? 'bg-rose-50 text-rose-700 ring-rose-200'
-                      : 'bg-slate-50 text-slate-500 ring-slate-200',
+                      : 'bg-slate-50 text-slate-600 ring-slate-200',
                 )}
               >
                 {s.data ? <CheckCircle2 className="size-3.5" /> : s.loading ? <Loader2 className="size-3.5 animate-spin" /> : null}
@@ -215,7 +215,7 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
               {/* Skill radar - its own prominent card so every skill + score is
                   clearly visible (full names, no truncation). */}
               <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-                <p className="mb-2 text-center text-[11px] font-bold uppercase tracking-widest text-slate-400">
+                <p className="mb-2 text-center text-[11px] font-bold uppercase tracking-widest text-slate-500">
                   Skill radar
                 </p>
                 <SkillRadar skills={results.skillMastery} size={380} />
@@ -256,7 +256,7 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
         <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-bold text-navy">Ready to close the gap?</p>
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="mt-0.5 text-xs text-slate-600">
               Re-quiz your weakest skill{weakSkills[0] ? ` (${prettySkill(weakSkills[0].skill)})` : ''} or head back to Practice.
             </p>
           </div>
@@ -309,7 +309,7 @@ function Section({ title, icon: Icon, children }: { title: string; icon: typeof 
 }
 function Loading({ text }: { text: string }) {
   return (
-    <div className="flex items-center gap-2 py-4 text-sm text-slate-500">
+    <div className="flex items-center gap-2 py-4 text-sm text-slate-600">
       <Loader2 className="size-4 animate-spin text-orange" /> {text}
     </div>
   );
@@ -324,7 +324,7 @@ function ResultsPage() {
   if (!sessionId) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background text-navy">
-        <p className="text-slate-400">No session specified.</p>
+        <p className="text-slate-500">No session specified.</p>
         <Button asChild variant="secondary"><Link href="/practice">Back to Practice</Link></Button>
       </div>
     );
@@ -337,7 +337,7 @@ export default function AdaptiveResultsPage() {
     <Suspense
       fallback={
         <div className="grid min-h-screen place-items-center bg-background">
-          <Loader2 className="size-8 animate-spin text-slate-400" />
+          <Loader2 className="size-8 animate-spin text-slate-500" />
         </div>
       }
     >

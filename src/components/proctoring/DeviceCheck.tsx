@@ -56,7 +56,7 @@ export function DeviceCheck({
           <ShieldCheck className="size-6" />
         </span>
         <h1 className="mt-4 text-xl font-extrabold">Device check</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-600">
           <span className="font-semibold text-navy">{title}</span> is proctored. We&apos;ll show
           your camera while you take it. Monitoring is lenient - switching tabs or leaving fullscreen
           is only logged, not blocked.

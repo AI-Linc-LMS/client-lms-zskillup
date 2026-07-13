@@ -54,7 +54,7 @@ const UP_NEXT = [
 /** Tiny uppercase section eyebrow shared across the rail's cards. */
 function RailLabel({ icon: Icon, children }: { icon?: typeof Calendar; children: React.ReactNode }) {
   return (
-    <h2 className="mb-4 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+    <h2 className="mb-4 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
       {Icon ? <Icon className="size-3.5" aria-hidden="true" /> : null}
       {children}
     </h2>
@@ -180,10 +180,10 @@ export function DashboardRightRail() {
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-bold leading-snug text-navy">{title}</span>
-                    <span className="mt-0.5 block text-xs leading-snug text-slate-500">{meta}</span>
+                    <span className="mt-0.5 block text-xs leading-snug text-slate-600">{meta}</span>
                   </span>
                   <ArrowUpRight
-                    className="size-4 shrink-0 -translate-x-1 text-slate-300 opacity-0 transition-all duration-200 group-hover/item:translate-x-0 group-hover/item:text-[#f5b400] group-hover/item:opacity-100"
+                    className="size-4 shrink-0 -translate-x-1 text-slate-400 opacity-0 transition-all duration-200 group-hover/item:translate-x-0 group-hover/item:text-[#f5b400] group-hover/item:opacity-100"
                     aria-hidden="true"
                   />
                 </Link>
@@ -208,7 +208,7 @@ export function DashboardRightRail() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.35, delay: i * 0.04 }}
               >
-                <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
                   {day.d}
                 </span>
                 <span
@@ -252,7 +252,7 @@ export function DashboardRightRail() {
                   </div>
                 ) : null}
                 <div className="rounded-xl border border-slate-100 bg-slate-50/70 px-3 py-2.5">
-                  <p className="text-[11px] leading-relaxed text-slate-500">
+                  <p className="text-[11px] leading-relaxed text-slate-600">
                     {accuracy && accuracy.total > 0 ? (
                       <>
                         <span className="font-bold text-navy tabular-nums">{accuracy.total}</span> questions
@@ -288,7 +288,7 @@ export function DashboardRightRail() {
               ))}
             </div>
           ) : history.length === 0 ? (
-            <p className="text-xs leading-relaxed text-slate-500">
+            <p className="text-xs leading-relaxed text-slate-600">
               No assessments yet - your mock results will show up here.
             </p>
           ) : (
@@ -334,7 +334,7 @@ export function DashboardRightRail() {
                               {a.pct}%
                             </span>
                           </p>
-                          <p className="mt-0.5 text-[11px] text-slate-400">
+                          <p className="mt-0.5 text-[11px] text-slate-500">
                             {formatDateIN(a.submittedAt, { year: false })} · {a.percentile}th
                             percentile
                           </p>

@@ -31,7 +31,7 @@ const buttonVariants = cva(
           'rounded-full bg-navy text-white hover:bg-navy/90 active:translate-y-px',
         outline:
           'rounded-full border border-slate-200 bg-white text-navy hover:border-[#d7ddea] hover:bg-slate-50',
-        ghost: 'rounded-full text-slate-500 hover:bg-slate-100 hover:text-navy',
+        ghost: 'rounded-full text-slate-600 hover:bg-slate-100 hover:text-navy',
         destructive:
           'rounded-full bg-red-600 text-white hover:bg-red-700 active:translate-y-px',
         // Link: dark readable text with a GOLD underline accent — gold/yellow as TEXT on

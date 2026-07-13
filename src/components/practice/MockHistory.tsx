@@ -54,7 +54,7 @@ export function MockHistory({ scope = 'all' }: { scope?: 'all' | 'custom' | 'ass
     return (
       <div className="flex items-center justify-center gap-3 rounded-3xl border border-slate-200/80 bg-white p-12 shadow-sm">
         <Loader2 className="size-5 animate-spin text-orange" aria-hidden="true" />
-        <span className="text-sm text-slate-400">Loading your results…</span>
+        <span className="text-sm text-slate-500">Loading your results…</span>
       </div>
     );
   }
@@ -119,7 +119,7 @@ export function MockHistory({ scope = 'all' }: { scope?: 'all' | 'custom' | 'ass
               />
               <div className="relative z-10">
                 <div className="flex items-start justify-between">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                     {kpi.label}
                   </p>
                   <span
@@ -146,7 +146,7 @@ export function MockHistory({ scope = 'all' }: { scope?: 'all' | 'custom' | 'ass
       {/* Past results */}
       <section className="mt-8">
         <header className="mb-4">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500">
             History
           </p>
           <h2 className="mt-1 text-xl font-extrabold tracking-tight text-navy">Past Results</h2>
@@ -163,7 +163,7 @@ export function MockHistory({ scope = 'all' }: { scope?: 'all' | 'custom' | 'ass
                 <Clock className="size-5" aria-hidden="true" />
               </span>
               <p className="mt-4 text-base font-bold text-navy">No results yet.</p>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-slate-600">
                 Finish your first mock test and your score history will appear here.
               </p>
             </div>
@@ -211,7 +211,7 @@ function ResultRow({ row }: { row: ApiMockAttemptHistory }) {
           {/* Title + meta */}
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-bold text-navy">{row.title}</p>
-            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400">
+            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
               <span className="flex items-center gap-1">
                 <Calendar className="size-3.5" aria-hidden="true" />
                 {formatDateIN(row.submittedAt)}
@@ -226,7 +226,7 @@ function ResultRow({ row }: { row: ApiMockAttemptHistory }) {
           {/* Score with bar */}
           <div className="w-full md:w-44 md:shrink-0">
             <div className="mb-1.5 flex items-baseline justify-between">
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                 Score
               </span>
               <span className={cn('text-base font-extrabold tabular-nums', accent.text)}>
@@ -260,7 +260,7 @@ function ResultRow({ row }: { row: ApiMockAttemptHistory }) {
             ) : (
               <StatusPill tone="negative" label="Below pass mark" />
             )}
-            <span className="flex items-center gap-1 text-xs font-bold text-slate-400 transition-colors group-hover:text-orange">
+            <span className="flex items-center gap-1 text-xs font-bold text-slate-500 transition-colors group-hover:text-orange">
               Report
               <ArrowUpRight
                 className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"

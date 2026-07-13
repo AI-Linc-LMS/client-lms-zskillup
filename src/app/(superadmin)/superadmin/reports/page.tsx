@@ -94,13 +94,13 @@ export default function SuperadminReportsPage() {
     <div className="space-y-6">
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Super Admin', href: '/superadmin/dashboard' }, { label: 'Reports' }]} />
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Operations</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Operations</p>
         <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Reports &amp; Exports</h1>
-        <p className="mt-1 text-sm text-slate-500">Platform, financial and company reports - download as CSV.</p>
+        <p className="mt-1 text-sm text-slate-600">Platform, financial and company reports - download as CSV.</p>
       </header>
 
       {loading ? (
-        <div className="flex items-center justify-center py-24"><Loader2 className="size-7 animate-spin text-slate-400" /></div>
+        <div className="flex items-center justify-center py-24"><Loader2 className="size-7 animate-spin text-slate-500" /></div>
       ) : error ? (
         <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">{error}</div>
       ) : (
@@ -151,8 +151,8 @@ function ReportCard({
         <Icon className="size-5" />
       </span>
       <h2 className="mt-3 text-base font-black text-navy">{title}</h2>
-      <p className="mt-1 flex-1 text-xs leading-relaxed text-slate-500">{desc}</p>
-      <p className="mt-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{meta}</p>
+      <p className="mt-1 flex-1 text-xs leading-relaxed text-slate-600">{desc}</p>
+      <p className="mt-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">{meta}</p>
       <Button size="sm" className="mt-3 w-full" onClick={onExport}>
         <Download className="size-4" /> Download CSV
       </Button>

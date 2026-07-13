@@ -34,7 +34,7 @@ export function CompanyMockTab({ content }: { content: HubContent }) {
         <h2 className="mt-3 text-lg font-extrabold tracking-tight text-navy sm:text-xl">
           {name} mock assessments
         </h2>
-        <p className="mt-1.5 text-sm leading-relaxed text-slate-500 sm:text-base">
+        <p className="mt-1.5 text-sm leading-relaxed text-slate-600 sm:text-base">
           Warm up with adaptive practice, then sit the real proctored drives this company schedules.
         </p>
       </div>
@@ -59,7 +59,7 @@ export function CompanyMockTab({ content }: { content: HubContent }) {
                 <Sparkles className="size-3" /> AI
               </span>
             </p>
-            <p className="mt-0.5 text-sm text-slate-500">AI-evaluated, non-proctored practice that adapts to you.</p>
+            <p className="mt-0.5 text-sm text-slate-600">AI-evaluated, non-proctored practice that adapts to you.</p>
           </div>
         </div>
         <span className="relative flex shrink-0 items-center gap-1 text-sm font-extrabold text-violet-600">
@@ -80,9 +80,9 @@ export function CompanyMockTab({ content }: { content: HubContent }) {
           Proctored assessments - {name}
         </h3>
         {scheduled === null ? (
-          <p className="mt-3 text-xs text-slate-400">Loading…</p>
+          <p className="mt-3 text-xs text-slate-500">Loading…</p>
         ) : scheduled.length === 0 ? (
-          <p className="mt-3 text-sm text-slate-500">
+          <p className="mt-3 text-sm text-slate-600">
             No assessment scheduled yet.{' '}
             <Link href={`/dashboard/company/${slug}`} className="font-semibold text-violet-600 hover:underline">
               Register
@@ -95,7 +95,7 @@ export function CompanyMockTab({ content }: { content: HubContent }) {
               <li key={s.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4 transition-colors hover:border-violet-300 hover:bg-violet-50/40">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-bold text-navy">{s.title}</p>
-                  <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] font-medium text-slate-500">
+                  <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] font-medium text-slate-600">
                     <span className="flex items-center gap-1">
                       <CalendarClock className="size-3" />
                       {new Date(s.scheduledAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}

@@ -41,7 +41,7 @@ export function RoadmapRail({
               <div className="min-w-0 flex-1">
                 <p className="flex flex-wrap items-baseline gap-x-2 font-display text-sm font-black tracking-tight text-navy">
                   {meta.label}
-                  <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                  <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                     Days {list[0].dayNumber}–{list[list.length - 1].dayNumber} · {meta.tagline}
                   </span>
                 </p>
@@ -97,7 +97,7 @@ function RoadNode({ day, phase, onSelect }: { day: DayNode; phase: StudyPhase; o
         completed && cn('border-transparent bg-gradient-to-br text-white shadow-lg ring-4', meta.grad, ringSoft(phase)),
         today && 'border-orange bg-white text-orange shadow-[0_0_0_5px_rgba(243,112,33,0.15)]',
         day.status === 'available' && cn('border-current bg-white shadow-sm hover:scale-110', meta.text),
-        locked && 'cursor-not-allowed border-slate-200 bg-white text-slate-300',
+        locked && 'cursor-not-allowed border-slate-200 bg-white text-slate-400',
       )}
     >
       {today && <span aria-hidden className="absolute inset-0 -z-10 animate-ping rounded-full bg-orange/25" />}
@@ -136,21 +136,21 @@ function RoadCard({ day, phase, onSelect }: { day: DayNode; phase: StudyPhase; o
       {!locked && <span aria-hidden className={cn('h-9 w-1 shrink-0 rounded-full bg-gradient-to-b', meta.grad, completed ? 'opacity-100' : 'opacity-70')} />}
       <div className="min-w-0 flex-1">
         <p className="flex items-center gap-2">
-          <span className={cn('text-[10px] font-black uppercase tracking-wide', locked ? 'text-slate-300' : meta.text)}>Day {day.dayNumber}</span>
+          <span className={cn('text-[10px] font-black uppercase tracking-wide', locked ? 'text-slate-400' : meta.text)}>Day {day.dayNumber}</span>
           {today && <span className="rounded-full bg-orange px-1.5 py-px text-[9px] font-black uppercase tracking-wide text-[#171717] shadow-sm">Today</span>}
           {isCheckpoint(day) && !locked && <span className="rounded-full bg-amber-100 px-1.5 py-px text-[9px] font-black uppercase tracking-wide text-amber-700">Checkpoint</span>}
         </p>
-        <p className={cn('truncate text-sm font-bold', locked ? 'text-slate-400' : 'text-navy')}>{day.theme}</p>
+        <p className={cn('truncate text-sm font-bold', locked ? 'text-slate-500' : 'text-navy')}>{day.theme}</p>
       </div>
       <div className="shrink-0 text-right">
         {locked ? (
-          <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-bold text-slate-400 ring-1 ring-slate-200">{unlockCopy(day.unlockDate)}</span>
+          <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-bold text-slate-500 ring-1 ring-slate-200">{unlockCopy(day.unlockDate)}</span>
         ) : completed ? (
           <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-600">
             <Check className="size-3" /> Done
           </span>
         ) : (
-          <span className="text-[11px] font-semibold tabular-nums text-slate-400">{day.doneCount}/{day.taskCount} · {day.xp} XP</span>
+          <span className="text-[11px] font-semibold tabular-nums text-slate-500">{day.doneCount}/{day.taskCount} · {day.xp} XP</span>
         )}
       </div>
     </button>

@@ -92,25 +92,25 @@ export function TaskRow({
           (disabled || busy) && 'cursor-not-allowed opacity-60',
         )}
       >
-        {busy ? <Loader2 className="size-3.5 animate-spin text-slate-400" /> : <Check className="size-4" />}
+        {busy ? <Loader2 className="size-3.5 animate-spin text-slate-500" /> : <Check className="size-4" />}
       </button>
       <span className={cn('grid size-9 shrink-0 place-items-center rounded-xl', meta.bg, meta.text)}>
         <Icon className="size-4" />
       </span>
       <div className="min-w-0 flex-1">
-        <p className={cn('truncate text-sm font-semibold', task.done ? 'text-slate-400 line-through' : 'text-navy')}>
+        <p className={cn('truncate text-sm font-semibold', task.done ? 'text-slate-500 line-through' : 'text-navy')}>
           {task.title}
         </p>
-        <p className="truncate text-xs text-slate-500">{task.detail}</p>
+        <p className="truncate text-xs text-slate-600">{task.detail}</p>
       </div>
-      <span className="hidden shrink-0 text-[11px] font-semibold tabular-nums text-slate-400 sm:block">
+      <span className="hidden shrink-0 text-[11px] font-semibold tabular-nums text-slate-500 sm:block">
         ~{task.estMinutes}m
       </span>
       <Link
         href={task.href}
         className={cn(
           'shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition',
-          task.done ? 'bg-slate-100 text-slate-500 hover:bg-slate-200' : 'bg-navy text-white hover:bg-navy/90',
+          task.done ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' : 'bg-navy text-white hover:bg-navy/90',
         )}
       >
         {task.cta}

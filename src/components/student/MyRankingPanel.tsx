@@ -29,7 +29,7 @@ export function MyRankingPanel() {
   if (!data) {
     return (
       <div className="flex h-40 items-center justify-center rounded-3xl border border-slate-200/80 bg-white">
-        <Loader2 className="size-5 animate-spin text-slate-400" />
+        <Loader2 className="size-5 animate-spin text-slate-500" />
       </div>
     );
   }
@@ -75,7 +75,7 @@ export function MyRankingPanel() {
       {/* Top of the board */}
       <div className="rounded-3xl border border-slate-200/80 bg-white p-4">
         <div className="mb-2 flex items-center justify-between">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Top students</p>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Top students</p>
           <Link href="/leaderboard" className="inline-flex items-center gap-1 text-[11px] font-bold text-orange-600 hover:underline">
             Full leaderboard <ArrowUpRight className="size-3" />
           </Link>
@@ -87,7 +87,7 @@ export function MyRankingPanel() {
           {/* If you're outside the top 10, show your row pinned at the bottom. */}
           {data.myEntry && !data.entries.some((e) => e.isYou) ? (
             <>
-              <li className="py-1 text-center text-[10px] font-bold text-slate-300">···</li>
+              <li className="py-1 text-center text-[10px] font-bold text-slate-400">···</li>
               <RankRow e={data.myEntry} />
             </>
           ) : null}
@@ -114,7 +114,7 @@ function RankRow({ e }: { e: ApiLeaderboardEntry }) {
               ? 'bg-slate-200 text-slate-600'
               : e.rank === 3
                 ? 'bg-orange-100 text-orange-700'
-                : 'bg-slate-100 text-slate-500',
+                : 'bg-slate-100 text-slate-600',
         )}
       >
         {e.rank}

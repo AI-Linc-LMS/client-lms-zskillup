@@ -19,7 +19,7 @@ export function PerQuestionBreakdown({ questions, perQuestionNarration }: PerQue
   const [sel, setSel] = useState(0);
   if (questions.length === 0) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-600">
         No questions to review.
       </div>
     );
@@ -30,7 +30,7 @@ export function PerQuestionBreakdown({ questions, perQuestionNarration }: PerQue
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       {/* number pills */}
-      <p className="mb-2 text-[11px] text-slate-400">Tap a question to see the explanation.</p>
+      <p className="mb-2 text-[11px] text-slate-500">Tap a question to see the explanation.</p>
       <div className="flex flex-wrap gap-2">
         {questions.map((qq, i) => {
           const active = i === sel;
@@ -56,7 +56,7 @@ export function PerQuestionBreakdown({ questions, perQuestionNarration }: PerQue
           );
         })}
       </div>
-      <div className="mt-2.5 flex gap-3 text-[11px] text-slate-400">
+      <div className="mt-2.5 flex gap-3 text-[11px] text-slate-500">
         <span className="flex items-center gap-1">
           <span className="size-2 rounded-full bg-emerald-500" /> Correct
         </span>
@@ -83,7 +83,7 @@ export function PerQuestionBreakdown({ questions, perQuestionNarration }: PerQue
             {q.isCorrect ? <CheckCircle2 className="size-3.5" /> : <XCircle className="size-3.5" />}
             Question {sel + 1}
           </span>
-          <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-400">
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
             <span>{q.difficulty}</span>
             <span className="flex items-center gap-1">
               <Target className="size-3" /> {prettySkill(q.targetSkill)}
@@ -100,11 +100,11 @@ export function PerQuestionBreakdown({ questions, perQuestionNarration }: PerQue
 
         <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
           <div className={cn('min-w-0 rounded-lg p-2.5 text-xs', q.isCorrect ? 'bg-emerald-100/70' : 'bg-rose-100/70')}>
-            <p className="mb-0.5 font-bold text-slate-500">Your answer</p>
+            <p className="mb-0.5 font-bold text-slate-600">Your answer</p>
             <p className={cn('break-words', q.isCorrect ? 'text-emerald-800' : 'text-rose-700')}>{q.selectedOption || '-'}</p>
           </div>
           <div className="min-w-0 rounded-lg bg-emerald-100/70 p-2.5 text-xs">
-            <p className="mb-0.5 font-bold text-slate-500">Correct answer</p>
+            <p className="mb-0.5 font-bold text-slate-600">Correct answer</p>
             <p className="text-emerald-800 break-words">{q.correctOption}</p>
           </div>
         </div>
@@ -136,7 +136,7 @@ export function PerQuestionBreakdown({ questions, perQuestionNarration }: PerQue
             {q.explanation}
           </div>
         ) : (
-          <p className="mt-3 text-xs text-slate-400">No explanation was authored for this question.</p>
+          <p className="mt-3 text-xs text-slate-500">No explanation was authored for this question.</p>
         )}
       </motion.div>
     </div>

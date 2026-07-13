@@ -86,7 +86,7 @@ function ModernTemplate({ data }: TemplateProps) {
               <div key={w.id} className="mb-3">
                 <div className="flex items-baseline justify-between">
                   <p className="text-[13px] font-bold text-slate-900">{w.position}</p>
-                  <span className="text-[11px] text-slate-500">{dateRange(w.startDate, w.endDate, w.current)}</span>
+                  <span className="text-[11px] text-slate-600">{dateRange(w.startDate, w.endDate, w.current)}</span>
                 </div>
                 <p className="text-[12px] font-medium text-[#0f2544]">{[w.company, w.location].filter(Boolean).join(' · ')}</p>
                 <Bullets items={w.description} />
@@ -102,7 +102,7 @@ function ModernTemplate({ data }: TemplateProps) {
                 <p className="text-[12.5px] font-bold text-slate-900">{p.name}</p>
                 <p className="text-[12px] text-slate-700">{p.description}</p>
                 {p.technologies.length > 0 && (
-                  <p className="text-[11px] text-slate-500">{p.technologies.join(' · ')}</p>
+                  <p className="text-[11px] text-slate-600">{p.technologies.join(' · ')}</p>
                 )}
               </div>
             ))}
@@ -115,7 +115,7 @@ function ModernTemplate({ data }: TemplateProps) {
               <div key={e.id} className="mb-2">
                 <div className="flex items-baseline justify-between">
                   <p className="text-[12.5px] font-bold text-slate-900">{e.degree}</p>
-                  <span className="text-[11px] text-slate-500">{dateRange(e.startDate, e.endDate)}</span>
+                  <span className="text-[11px] text-slate-600">{dateRange(e.startDate, e.endDate)}</span>
                 </div>
                 <p className="text-[12px] text-slate-700">{[e.institution, e.location].filter(Boolean).join(' · ')}{e.gpa ? ` · ${e.gpa}` : ''}</p>
               </div>
@@ -159,9 +159,9 @@ function ClassicTemplate({ data }: TemplateProps) {
               <div key={w.id} className="mb-3">
                 <div className="flex items-baseline justify-between">
                   <p className="text-[13px] font-bold">{w.position} - {w.company}</p>
-                  <span className="text-[11px] text-slate-500">{dateRange(w.startDate, w.endDate, w.current)}</span>
+                  <span className="text-[11px] text-slate-600">{dateRange(w.startDate, w.endDate, w.current)}</span>
                 </div>
-                {w.location && <p className="text-[11.5px] italic text-slate-500">{w.location}</p>}
+                {w.location && <p className="text-[11.5px] italic text-slate-600">{w.location}</p>}
                 <Bullets items={w.description} />
               </div>
             ))}
@@ -176,7 +176,7 @@ function ClassicTemplate({ data }: TemplateProps) {
                   <p className="text-[12.5px] font-bold">{e.degree}</p>
                   <p className="text-[12px] text-slate-700">{e.institution}{e.gpa ? ` · ${e.gpa}` : ''}</p>
                 </div>
-                <span className="text-[11px] text-slate-500">{dateRange(e.startDate, e.endDate)}</span>
+                <span className="text-[11px] text-slate-600">{dateRange(e.startDate, e.endDate)}</span>
               </div>
             ))}
           </section>
@@ -189,7 +189,7 @@ function ClassicTemplate({ data }: TemplateProps) {
             <H>Projects</H>
             {data.projects.map((p) => (
               <div key={p.id} className="mb-2">
-                <p className="text-[12.5px] font-bold">{p.name}{p.technologies.length ? <span className="font-normal text-slate-500"> - {p.technologies.join(', ')}</span> : null}</p>
+                <p className="text-[12.5px] font-bold">{p.name}{p.technologies.length ? <span className="font-normal text-slate-600"> - {p.technologies.join(', ')}</span> : null}</p>
                 <p className="text-[12px] text-slate-700">{p.description}</p>
               </div>
             ))}
@@ -211,18 +211,18 @@ function MinimalTemplate({ data }: TemplateProps) {
   return (
     <div className="px-12 py-12 text-slate-800">
       <h1 className="text-[32px] font-light tracking-tight text-slate-900">{fullName(b) || 'Your Name'}</h1>
-      <p className="text-sm tracking-wide text-slate-500">{b.professionalTitle}</p>
-      <p className="mt-2 text-[11.5px] text-slate-500">{socialList(data).map((s) => s.value).join('   /   ')}</p>
+      <p className="text-sm tracking-wide text-slate-600">{b.professionalTitle}</p>
+      <p className="mt-2 text-[11.5px] text-slate-600">{socialList(data).map((s) => s.value).join('   /   ')}</p>
       <div className="mt-8 space-y-6">
         {b.summary && <p className="text-[13px] leading-relaxed text-slate-700">{b.summary}</p>}
         {data.workExperience.length > 0 && (
           <section>
-            <p className="mb-3 border-b border-slate-200 pb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Experience</p>
+            <p className="mb-3 border-b border-slate-200 pb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Experience</p>
             {data.workExperience.map((w) => (
               <div key={w.id} className="mb-4">
                 <div className="flex items-baseline justify-between">
                   <p className="text-[13px] font-semibold text-slate-900">{w.position}, {w.company}</p>
-                  <span className="text-[11px] text-slate-400">{dateRange(w.startDate, w.endDate, w.current)}</span>
+                  <span className="text-[11px] text-slate-500">{dateRange(w.startDate, w.endDate, w.current)}</span>
                 </div>
                 <Bullets items={w.description} />
               </div>
@@ -231,23 +231,23 @@ function MinimalTemplate({ data }: TemplateProps) {
         )}
         {data.projects.length > 0 && (
           <section>
-            <p className="mb-3 border-b border-slate-200 pb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Projects</p>
+            <p className="mb-3 border-b border-slate-200 pb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Projects</p>
             {data.projects.map((p) => (
-              <div key={p.id} className="mb-3"><p className="text-[13px] font-semibold text-slate-900">{p.name}</p><p className="text-[12.5px] text-slate-700">{p.description}</p><p className="text-[11px] text-slate-400">{p.technologies.join(' · ')}</p></div>
+              <div key={p.id} className="mb-3"><p className="text-[13px] font-semibold text-slate-900">{p.name}</p><p className="text-[12.5px] text-slate-700">{p.description}</p><p className="text-[11px] text-slate-500">{p.technologies.join(' · ')}</p></div>
             ))}
           </section>
         )}
         {data.education.length > 0 && (
           <section>
-            <p className="mb-3 border-b border-slate-200 pb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Education</p>
+            <p className="mb-3 border-b border-slate-200 pb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Education</p>
             {data.education.map((e) => (
-              <div key={e.id} className="mb-2 flex items-baseline justify-between"><p className="text-[12.5px] text-slate-800">{e.degree} - {e.institution}</p><span className="text-[11px] text-slate-400">{dateRange(e.startDate, e.endDate)}</span></div>
+              <div key={e.id} className="mb-2 flex items-baseline justify-between"><p className="text-[12.5px] text-slate-800">{e.degree} - {e.institution}</p><span className="text-[11px] text-slate-500">{dateRange(e.startDate, e.endDate)}</span></div>
             ))}
           </section>
         )}
         {data.skills.length > 0 && (
           <section>
-            <p className="mb-3 border-b border-slate-200 pb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Skills</p>
+            <p className="mb-3 border-b border-slate-200 pb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Skills</p>
             <p className="text-[12.5px] text-slate-700">{data.skills.map((s) => s.name).join('   ·   ')}</p>
           </section>
         )}
@@ -290,13 +290,13 @@ function CreativeTemplate({ data }: TemplateProps) {
         {data.workExperience.length > 0 && (
           <section className="mb-5"><H color="#6d3bf5">Experience</H>
             {data.workExperience.map((w) => (
-              <div key={w.id} className="mb-3"><div className="flex items-baseline justify-between"><p className="text-[13px] font-bold">{w.position}</p><span className="text-[11px] text-slate-500">{dateRange(w.startDate, w.endDate, w.current)}</span></div><p className="text-[12px] font-medium text-[#6d3bf5]">{w.company}</p><Bullets items={w.description} /></div>
+              <div key={w.id} className="mb-3"><div className="flex items-baseline justify-between"><p className="text-[13px] font-bold">{w.position}</p><span className="text-[11px] text-slate-600">{dateRange(w.startDate, w.endDate, w.current)}</span></div><p className="text-[12px] font-medium text-[#6d3bf5]">{w.company}</p><Bullets items={w.description} /></div>
             ))}
           </section>
         )}
         {data.projects.length > 0 && (
           <section className="mb-5"><H color="#6d3bf5">Projects</H>
-            {data.projects.map((p) => (<div key={p.id} className="mb-2"><p className="text-[12.5px] font-bold">{p.name}</p><p className="text-[12px] text-slate-700">{p.description}</p><p className="text-[11px] text-slate-500">{p.technologies.join(' · ')}</p></div>))}
+            {data.projects.map((p) => (<div key={p.id} className="mb-2"><p className="text-[12.5px] font-bold">{p.name}</p><p className="text-[12px] text-slate-700">{p.description}</p><p className="text-[11px] text-slate-600">{p.technologies.join(' · ')}</p></div>))}
           </section>
         )}
         {data.education.length > 0 && (
@@ -317,7 +317,7 @@ function ExecutiveTemplate({ data }: TemplateProps) {
       <header className="bg-slate-900 px-12 py-8 text-white">
         <h1 className="text-3xl font-black tracking-tight">{fullName(b) || 'Your Name'}</h1>
         <p className="mt-1 text-sm font-medium uppercase tracking-[0.22em] text-amber-300">{b.professionalTitle}</p>
-        <p className="mt-3 text-[11.5px] text-slate-300">{socialList(data).map((s) => s.value).join('   |   ')}</p>
+        <p className="mt-3 text-[11.5px] text-slate-400">{socialList(data).map((s) => s.value).join('   |   ')}</p>
       </header>
       <div className="space-y-5 px-12 py-8">
         {b.summary && (<section><H color="#0f172a">Executive Summary</H><p className="text-[12.5px] leading-snug text-slate-700">{b.summary}</p></section>)}
@@ -325,7 +325,7 @@ function ExecutiveTemplate({ data }: TemplateProps) {
           <section><H color="#0f172a">Professional Experience</H>
             {data.workExperience.map((w) => (
               <div key={w.id} className="mb-3 border-l-2 border-amber-400 pl-3">
-                <div className="flex items-baseline justify-between"><p className="text-[13px] font-bold">{w.position}</p><span className="text-[11px] text-slate-500">{dateRange(w.startDate, w.endDate, w.current)}</span></div>
+                <div className="flex items-baseline justify-between"><p className="text-[13px] font-bold">{w.position}</p><span className="text-[11px] text-slate-600">{dateRange(w.startDate, w.endDate, w.current)}</span></div>
                 <p className="text-[12px] font-semibold text-slate-600">{[w.company, w.location].filter(Boolean).join(' · ')}</p>
                 <Bullets items={w.description} />
               </div>
@@ -357,14 +357,14 @@ function TwoColumnTemplate({ data }: TemplateProps) {
       <header className="mb-5 border-b border-slate-300 pb-3">
         <h1 className="text-[28px] font-black tracking-tight text-slate-900">{fullName(b) || 'Your Name'}</h1>
         <p className="text-sm font-semibold text-teal-700">{b.professionalTitle}</p>
-        <p className="mt-1 text-[11px] text-slate-500">{socialList(data).map((s) => s.value).join('  •  ')}</p>
+        <p className="mt-1 text-[11px] text-slate-600">{socialList(data).map((s) => s.value).join('  •  ')}</p>
       </header>
       <div className="grid grid-cols-[1.5fr_1fr] gap-7">
         <div>
           {b.summary && (<section className="mb-4"><H color="#0f766e">Summary</H><p className="text-[12.5px] leading-snug text-slate-700">{b.summary}</p></section>)}
           {data.workExperience.length > 0 && (
             <section className="mb-4"><H color="#0f766e">Experience</H>
-              {data.workExperience.map((w) => (<div key={w.id} className="mb-3"><div className="flex items-baseline justify-between"><p className="text-[12.5px] font-bold">{w.position}</p><span className="text-[10.5px] text-slate-500">{dateRange(w.startDate, w.endDate, w.current)}</span></div><p className="text-[11.5px] font-medium text-teal-700">{w.company}</p><Bullets items={w.description} /></div>))}
+              {data.workExperience.map((w) => (<div key={w.id} className="mb-3"><div className="flex items-baseline justify-between"><p className="text-[12.5px] font-bold">{w.position}</p><span className="text-[10.5px] text-slate-600">{dateRange(w.startDate, w.endDate, w.current)}</span></div><p className="text-[11.5px] font-medium text-teal-700">{w.company}</p><Bullets items={w.description} /></div>))}
             </section>
           )}
           {data.projects.length > 0 && (
@@ -376,7 +376,7 @@ function TwoColumnTemplate({ data }: TemplateProps) {
             <section className="mb-4"><H color="#0f766e">Skills</H>{Object.entries(grouped).map(([cat, list]) => (<div key={cat} className="mb-2"><p className="text-[11px] font-semibold text-slate-600">{cat}</p><p className="text-[11.5px] text-slate-700">{list.map((s) => s.name).join(', ')}</p></div>))}</section>
           )}
           {data.education.length > 0 && (
-            <section className="mb-4"><H color="#0f766e">Education</H>{data.education.map((e) => (<div key={e.id} className="mb-2"><p className="text-[11.5px] font-bold">{e.degree}</p><p className="text-[11px] text-slate-700">{e.institution}</p><p className="text-[10.5px] text-slate-500">{dateRange(e.startDate, e.endDate)}{e.gpa ? ` · ${e.gpa}` : ''}</p></div>))}</section>
+            <section className="mb-4"><H color="#0f766e">Education</H>{data.education.map((e) => (<div key={e.id} className="mb-2"><p className="text-[11.5px] font-bold">{e.degree}</p><p className="text-[11px] text-slate-700">{e.institution}</p><p className="text-[10.5px] text-slate-600">{dateRange(e.startDate, e.endDate)}{e.gpa ? ` · ${e.gpa}` : ''}</p></div>))}</section>
           )}
           {data.certifications.length > 0 && (
             <section><H color="#0f766e">Certifications</H>{data.certifications.map((c) => (<p key={c.id} className="mb-1 text-[11px] text-slate-700"><span className="font-semibold">{c.name}</span><br />{c.issuer}{c.date ? ` · ${c.date}` : ''}</p>))}</section>

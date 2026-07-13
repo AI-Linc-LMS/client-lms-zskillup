@@ -52,14 +52,14 @@ export default function AdminStudentDetailPage({ params }: { params: Promise<{ i
       />
       <Link
         href="/admin/students"
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-navy"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-navy"
       >
         <ArrowLeft className="size-4" /> Back to student reports
       </Link>
 
       {loading ? (
         <div className="flex items-center justify-center py-24">
-          <Loader2 className="size-6 animate-spin text-slate-400" />
+          <Loader2 className="size-6 animate-spin text-slate-500" />
         </div>
       ) : error || !report ? (
         <div className="py-24 text-center text-sm text-red-500">{error ?? 'Not found.'}</div>
@@ -71,7 +71,7 @@ export default function AdminStudentDetailPage({ params }: { params: Promise<{ i
                 <h1 className="text-2xl font-black tracking-tight text-navy">
                   {report.student.fullName ?? '-'}
                 </h1>
-                <p className="text-sm text-slate-500">{report.student.email}</p>
+                <p className="text-sm text-slate-600">{report.student.email}</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
                   <span className="rounded-full bg-slate-100 px-2.5 py-0.5 font-semibold text-slate-600">
                     {report.student.status}
@@ -80,7 +80,7 @@ export default function AdminStudentDetailPage({ params }: { params: Promise<{ i
                     className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-semibold ${
                       report.student.isEmailVerified
                         ? 'bg-green-50 text-green-700'
-                        : 'bg-slate-100 text-slate-500'
+                        : 'bg-slate-100 text-slate-600'
                     }`}
                   >
                     {report.student.isEmailVerified ? (
@@ -91,7 +91,7 @@ export default function AdminStudentDetailPage({ params }: { params: Promise<{ i
                     {report.student.isEmailVerified ? 'Verified' : 'Unverified'}
                   </span>
                   {report.student.collegeName && (
-                    <span className="text-slate-500">{report.student.collegeName}</span>
+                    <span className="text-slate-600">{report.student.collegeName}</span>
                   )}
                 </div>
               </div>
@@ -134,11 +134,11 @@ export default function AdminStudentDetailPage({ params }: { params: Promise<{ i
               <h2 className="text-sm font-bold text-navy">Quiz attempts</h2>
             </div>
             {report.mockAttempts.length === 0 ? (
-              <div className="py-12 text-center text-sm text-slate-400">No attempts yet.</div>
+              <div className="py-12 text-center text-sm text-slate-500">No attempts yet.</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[640px] text-sm">
-                  <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+                  <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                     <tr>
                       <th className="px-4 py-3">Mock</th>
                       <th className="px-4 py-3 text-right">Score</th>
@@ -162,8 +162,8 @@ export default function AdminStudentDetailPage({ params }: { params: Promise<{ i
                         <td className="px-4 py-3 text-right tabular-nums text-slate-700">
                           {a.percentile ?? '-'}
                         </td>
-                        <td className="px-4 py-3 text-xs text-slate-500">{a.status}</td>
-                        <td className="px-4 py-3 text-xs text-slate-400">
+                        <td className="px-4 py-3 text-xs text-slate-600">{a.status}</td>
+                        <td className="px-4 py-3 text-xs text-slate-500">
                           {a.submittedAt
                             ? new Date(a.submittedAt).toLocaleDateString('en-IN', {
                                 day: 'numeric',
@@ -188,7 +188,7 @@ export default function AdminStudentDetailPage({ params }: { params: Promise<{ i
 function Kpi({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">{label}</p>
       <p className="mt-1 text-lg font-extrabold text-navy tabular-nums">{value}</p>
     </div>
   );

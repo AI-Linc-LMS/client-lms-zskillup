@@ -29,7 +29,7 @@ export function ProfileLockGate({
   if (loading) {
     return (
       <div className="grid min-h-[45vh] place-items-center">
-        <Loader2 className="size-6 animate-spin text-slate-300" />
+        <Loader2 className="size-6 animate-spin text-slate-400" />
       </div>
     );
   }
@@ -60,13 +60,13 @@ export function ProfileLockGate({
           {/* Leads with the ACTION, not the wall. "{feature} is locked" told a brand-new
               student what they couldn't do; it never told them what to do next. */}
           <h2 className="mt-4 text-lg font-black text-navy">Complete your profile</h2>
-          <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
+          <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
             One minute of setup and {feature} opens up - it also sharpens everything we recommend to you.
           </p>
 
           <div className="mx-auto mt-4 max-w-xs">
             <div className="flex items-center justify-between text-[11px] font-bold">
-              <span className="uppercase tracking-wider text-slate-400">Profile</span>
+              <span className="uppercase tracking-wider text-slate-500">Profile</span>
               <span className="tabular-nums text-[#f5b400]">{percent}%</span>
             </div>
             <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100">
@@ -76,7 +76,7 @@ export function ProfileLockGate({
               />
             </div>
             {missing.length > 0 ? (
-              <p className="mt-2 text-[11px] text-slate-400">Still needed: {missingText}</p>
+              <p className="mt-2 text-[11px] text-slate-500">Still needed: {missingText}</p>
             ) : null}
           </div>
 

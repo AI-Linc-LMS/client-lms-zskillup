@@ -58,7 +58,7 @@ export function SidebarUpcoming() {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="mb-2.5 flex items-center justify-between">
-        <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-slate-400">
+        <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-slate-500">
           <CalendarClock className="size-3.5 text-orange" /> Upcoming
         </p>
         <Link href="/assessments" className="text-[11px] font-bold text-orange hover:underline">
@@ -91,11 +91,11 @@ export function SidebarUpcoming() {
                   <span className="truncate">{a.title}</span>
                 </p>
                 <p className="mt-0.5 flex items-center justify-between gap-2 text-[10px] font-semibold">
-                  <span className="truncate text-slate-400">{a.companyName}</span>
+                  <span className="truncate text-slate-500">{a.companyName}</span>
                   <span
                     className={cn(
                       'shrink-0',
-                      completed ? 'text-emerald-600' : liveOpen ? 'text-emerald-600' : 'text-slate-500',
+                      completed ? 'text-emerald-600' : liveOpen ? 'text-emerald-600' : 'text-slate-600',
                     )}
                   >
                     {completed ? '✓ Done' : liveOpen ? '● Live' : `Due ${dueLabel(a.scheduledAt)}`}

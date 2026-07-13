@@ -86,7 +86,7 @@ export function StudyMaterialAdmin() {
     <div className="space-y-4">
       {/* Company picker */}
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4">
-        <label className="text-xs font-bold uppercase tracking-wide text-slate-500">Company</label>
+        <label className="text-xs font-bold uppercase tracking-wide text-slate-600">Company</label>
         <select
           value={companyId}
           onChange={(e) => setCompanyId(e.target.value)}
@@ -98,8 +98,8 @@ export function StudyMaterialAdmin() {
             </option>
           ))}
         </select>
-        {tree && <span className="text-xs text-slate-400">{tree.sections.length} sections · edits show instantly on the student side</span>}
-        {(loading || busy) && <Loader2 className="size-4 animate-spin text-slate-300" />}
+        {tree && <span className="text-xs text-slate-500">{tree.sections.length} sections · edits show instantly on the student side</span>}
+        {(loading || busy) && <Loader2 className="size-4 animate-spin text-slate-400" />}
         <button
           type="button"
           onClick={async () => {
@@ -138,7 +138,7 @@ export function StudyMaterialAdmin() {
                   onSave={(title) => run(() => updateSection(s.id, { title }))}
                   className="flex-1 text-base font-bold text-navy"
                 />
-                <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+                <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
                   <input
                     type="checkbox"
                     checked={s.isPublished}
@@ -180,11 +180,11 @@ export function StudyMaterialAdmin() {
                             </span>
                             <div className="min-w-0 flex-1">
                               <p className="truncate text-sm font-semibold text-navy">{it.title}</p>
-                              <p className="truncate text-[11px] text-slate-400">
+                              <p className="truncate text-[11px] text-slate-500">
                                 {it.kind === 'QUIZ' ? `quiz → ${it.quizTopicSlug ?? '-'}` : it.url ?? '-'}
                               </p>
                             </div>
-                            <button type="button" onClick={() => setItemForm({ topicId: t.id, item: it })} className="text-[11px] font-bold text-slate-500 hover:text-navy">
+                            <button type="button" onClick={() => setItemForm({ topicId: t.id, item: it })} className="text-[11px] font-bold text-slate-600 hover:text-navy">
                               Edit
                             </button>
                             <IconBtn label="Delete item" onClick={() => run(() => deleteItem(it.id))}>
@@ -193,7 +193,7 @@ export function StudyMaterialAdmin() {
                           </li>
                         );
                       })}
-                      {t.items.length === 0 && <li className="px-1 text-[11px] text-slate-400">No items yet.</li>}
+                      {t.items.length === 0 && <li className="px-1 text-[11px] text-slate-500">No items yet.</li>}
                     </ul>
                   </div>
                 ))}
@@ -286,7 +286,7 @@ function ItemForm({
       >
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-base font-bold text-navy">{item ? 'Edit item' : 'Add item'}</h3>
-          <button type="button" onClick={onClose} aria-label="Close" className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100">
+          <button type="button" onClick={onClose} aria-label="Close" className="rounded-full p-1.5 text-slate-500 hover:bg-slate-100">
             <X className="size-4" />
           </button>
         </div>
@@ -298,7 +298,7 @@ function ItemForm({
                 key={k}
                 type="button"
                 onClick={() => setKind(k)}
-                className={cn('flex-1 rounded-xl border px-3 py-2 text-sm font-bold transition', kind === k ? 'border-[#ffc42d] bg-[#fff5ea] text-[#1a1d29]' : 'border-slate-200 text-slate-500 hover:border-slate-300')}
+                className={cn('flex-1 rounded-xl border px-3 py-2 text-sm font-bold transition', kind === k ? 'border-[#ffc42d] bg-[#fff5ea] text-[#1a1d29]' : 'border-slate-200 text-slate-600 hover:border-slate-300')}
               >
                 {KIND_META[k].label}
               </button>
@@ -343,7 +343,7 @@ function ItemForm({
         </div>
 
         <div className="mt-5 flex justify-end gap-2">
-          <button type="button" onClick={onClose} className="rounded-full px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100">
+          <button type="button" onClick={onClose} className="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">
             Cancel
           </button>
           <button type="button" onClick={submit} disabled={busy || !title.trim()} className="inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2 text-sm font-bold text-[#171717] disabled:opacity-50">
@@ -359,14 +359,14 @@ function ItemForm({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-slate-400">{label}</span>
+      <span className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-slate-500">{label}</span>
       {children}
     </label>
   );
 }
 function IconBtn({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button type="button" aria-label={label} onClick={onClick} className="rounded-lg p-1.5 text-slate-400 transition hover:bg-rose-50 hover:text-rose-500">
+    <button type="button" aria-label={label} onClick={onClick} className="rounded-lg p-1.5 text-slate-500 transition hover:bg-rose-50 hover:text-rose-500">
       {children}
     </button>
   );

@@ -57,7 +57,7 @@ export default function PlacementReadinessPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="size-7 animate-spin text-slate-400" />
+        <Loader2 className="size-7 animate-spin text-slate-500" />
       </div>
     );
   }
@@ -66,7 +66,7 @@ export default function PlacementReadinessPage() {
   }
   if (!data || data.overview.totalStudents === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
+      <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center text-sm text-slate-600">
         No readiness data yet. Invite your cohort to get started.
       </div>
     );
@@ -74,7 +74,7 @@ export default function PlacementReadinessPage() {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm font-semibold text-slate-500">
+      <p className="text-sm font-semibold text-slate-600">
         Placement readiness · <span className="text-navy">{cohortLabel}</span>
       </p>
 
@@ -95,9 +95,9 @@ export default function PlacementReadinessPage() {
             />
           ) : (
             <div className="flex h-full min-h-[180px] flex-col items-center justify-center gap-2 text-center">
-              <TrendingUp className="size-8 text-slate-300" />
+              <TrendingUp className="size-8 text-slate-400" />
               <p className="text-sm font-semibold text-navy">Collecting history</p>
-              <p className="max-w-xs text-xs text-slate-500">
+              <p className="max-w-xs text-xs text-slate-600">
                 A snapshot of campus readiness is recorded each week. The trend line appears once a
                 couple of weeks of data accrue.
               </p>
@@ -112,12 +112,12 @@ export default function PlacementReadinessPage() {
             <li key={s.id}>
               <Link href={`/tpo/students/${s.id}`} className="flex items-center justify-between gap-3 py-2.5 transition-colors hover:bg-slate-50">
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className={`grid size-7 shrink-0 place-items-center rounded-lg text-xs font-black tabular-nums ${MEDAL[i] ?? 'bg-slate-100 text-slate-400'}`}>
+                  <span className={`grid size-7 shrink-0 place-items-center rounded-lg text-xs font-black tabular-nums ${MEDAL[i] ?? 'bg-slate-100 text-slate-500'}`}>
                     {i + 1}
                   </span>
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-navy">{s.name ?? s.email}</p>
-                    <p className="truncate text-xs text-slate-400">{s.branch ?? '-'}{s.rollNumber ? ` · ${s.rollNumber}` : ''}</p>
+                    <p className="truncate text-xs text-slate-500">{s.branch ?? '-'}{s.rollNumber ? ` · ${s.rollNumber}` : ''}</p>
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
@@ -133,7 +133,7 @@ export default function PlacementReadinessPage() {
         </ul>
       </BentoCard>
 
-      <p className="text-[11px] text-slate-400">
+      <p className="text-[11px] text-slate-500">
         &ldquo;Placement-ready&rdquo; reflects a readiness composite (aptitude, coding, mock &amp; coverage), not
         confirmed offers. Confirmed placement outcomes are tracked below.
       </p>

@@ -53,7 +53,7 @@ export default function TpoBillingPage() {
     });
 
   if (loading) {
-    return <div className="grid place-items-center py-24"><Loader2 className="size-6 animate-spin text-slate-400" /></div>;
+    return <div className="grid place-items-center py-24"><Loader2 className="size-6 animate-spin text-slate-500" /></div>;
   }
 
   return (
@@ -62,7 +62,7 @@ export default function TpoBillingPage() {
       <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-black tracking-tight text-navy">Cohort access</h1>
-          <p className="max-w-xl text-sm text-slate-500">
+          <p className="max-w-xl text-sm text-slate-600">
             Buy a company&apos;s question bank at the B2B rate - every student in your college gets it, no per-seat setup.
           </p>
         </div>
@@ -74,7 +74,7 @@ export default function TpoBillingPage() {
               onClick={() => setPeriod(p)}
               className={cn(
                 'rounded-full px-3 py-1.5 text-xs font-bold transition-colors',
-                period === p ? 'bg-navy text-white' : 'text-slate-500 hover:text-navy',
+                period === p ? 'bg-navy text-white' : 'text-slate-600 hover:text-navy',
               )}
             >
               {label}
@@ -88,7 +88,7 @@ export default function TpoBillingPage() {
       </div>
 
       {companies.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
+        <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center text-sm text-slate-600">
           No companies available yet.
         </div>
       ) : (
@@ -103,12 +103,12 @@ export default function TpoBillingPage() {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={c.logoUrl} alt="" className="max-h-6 max-w-full object-contain" />
                     ) : (
-                      <Building2 className="size-4 text-slate-400" />
+                      <Building2 className="size-4 text-slate-500" />
                     )}
                   </span>
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-extrabold text-navy">{c.name}</span>
-                    <span className="text-xs text-slate-400">{price ? formatPrice(price.amountCents, price.currency) : '-'}</span>
+                    <span className="text-xs text-slate-500">{price ? formatPrice(price.amountCents, price.currency) : '-'}</span>
                   </span>
                 </div>
                 <button

@@ -35,7 +35,7 @@ export function UpgradeBanner() {
       </span>
       <span className="relative min-w-0 flex-1">
         <span className="block text-sm font-extrabold text-navy">Unlock the full question bank</span>
-        <span className="block text-xs text-slate-500">
+        <span className="block text-xs text-slate-600">
           The first 5 questions of any topic are free - go full platform for unlimited access.
         </span>
       </span>

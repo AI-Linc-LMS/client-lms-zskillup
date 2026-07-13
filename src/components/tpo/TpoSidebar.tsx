@@ -69,7 +69,7 @@ export function TpoSidebar() {
             <p className="truncate text-sm font-black leading-tight tracking-tight text-navy">
               TPO Platform
             </p>
-            <p className="truncate text-[11px] font-medium text-slate-400">
+            <p className="truncate text-[11px] font-medium text-slate-500">
               {summary?.collegeName ?? 'Placement Office'}
             </p>
           </div>
@@ -99,7 +99,7 @@ export function TpoSidebar() {
                 aria-expanded={expanded}
                 className={cn(
                   'mb-1 flex w-full items-center gap-1.5 rounded-lg px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest transition-colors',
-                  sectionActive ? 'text-[#1a1d29]' : 'text-slate-400 hover:text-navy',
+                  sectionActive ? 'text-[#1a1d29]' : 'text-slate-500 hover:text-navy',
                 )}
               >
                 <span className="flex-1 text-left">{section.heading}</span>
@@ -130,7 +130,7 @@ export function TpoSidebar() {
                         collapsed && 'justify-center px-0',
                         active
                           ? 'font-semibold text-white'
-                          : 'font-medium text-slate-500 hover:text-navy',
+                          : 'font-medium text-slate-600 hover:text-navy',
                       )}
                     >
                       {active && (
@@ -155,7 +155,7 @@ export function TpoSidebar() {
                           'relative z-10 flex size-7 shrink-0 items-center justify-center rounded-lg transition-all duration-200',
                           active
                             ? 'text-[#ffc42d]'
-                            : 'text-slate-400 group-hover:text-navy',
+                            : 'text-slate-500 group-hover:text-navy',
                         )}
                       >
                         <Icon className="size-4" />
@@ -175,7 +175,7 @@ export function TpoSidebar() {
         {/* Quick actions */}
         <div>
           {!collapsed && (
-            <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
               Quick Actions
             </p>
           )}
@@ -208,7 +208,7 @@ export function TpoSidebar() {
           type="button"
           onClick={toggleCollapsed}
           className={cn(
-            'flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-navy',
+            'flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-navy',
             collapsed && 'justify-center px-0',
           )}
           aria-label={collapsed ? 'Expand menu' : 'Collapse menu'}

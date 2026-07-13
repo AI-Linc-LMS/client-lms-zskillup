@@ -76,7 +76,7 @@ export function InterviewProctorGate({ id }: { id: string }) {
               <Monitor className="size-7" />
             </span>
             <h2 className="mt-4 text-lg font-black text-navy">You left fullscreen</h2>
-            <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
+            <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
               Your interview is proctored. Return to fullscreen to continue - this exit has been logged.
             </p>
             <button
@@ -98,7 +98,7 @@ function Counter({ icon, label, value }: { icon: React.ReactNode; label: string;
   return (
     <span
       title={label}
-      className={`inline-flex items-center gap-1 tabular-nums ${bad ? 'text-orange' : 'text-slate-400'}`}
+      className={`inline-flex items-center gap-1 tabular-nums ${bad ? 'text-orange' : 'text-slate-500'}`}
     >
       {icon} {value}
     </span>
@@ -132,7 +132,7 @@ function IntroGate({ onStart, starting }: { onStart: () => void; starting: boole
             {starting ? <Loader2 className="size-4 animate-spin" /> : <Maximize2 className="size-4" />}
             Enter fullscreen &amp; start interview
           </button>
-          <p className="text-center text-[11px] text-slate-400">A microphone is recommended - the interview is spoken.</p>
+          <p className="text-center text-[11px] text-slate-500">A microphone is recommended - the interview is spoken.</p>
         </div>
       </div>
     </div>
@@ -145,7 +145,7 @@ function Rule({ icon, title, body }: { icon: React.ReactNode; title: string; bod
       <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-orange/10 text-orange">{icon}</span>
       <span className="min-w-0">
         <span className="block text-sm font-bold text-navy">{title}</span>
-        <span className="block text-xs text-slate-500">{body}</span>
+        <span className="block text-xs text-slate-600">{body}</span>
       </span>
     </div>
   );

@@ -34,11 +34,11 @@ export function Disclaimer({
         'flex items-start gap-2.5 rounded-2xl border px-4 py-3',
         dark
           ? 'border-white/10 bg-white/[0.04] text-white/60'
-          : 'border-slate-200 bg-slate-50/70 text-slate-500',
+          : 'border-slate-200 bg-slate-50/70 text-slate-600',
         className,
       )}
     >
-      <Info className={cn('mt-0.5 size-3.5 shrink-0', dark ? 'text-white/40' : 'text-slate-400')} />
+      <Info className={cn('mt-0.5 size-3.5 shrink-0', dark ? 'text-white/40' : 'text-slate-500')} />
       <p className="text-[11px] leading-relaxed">
         <span className={cn('font-bold', dark ? 'text-white/75' : 'text-slate-600')}>Disclaimer:</span>{' '}
         {DISCLAIMER_TEXT}

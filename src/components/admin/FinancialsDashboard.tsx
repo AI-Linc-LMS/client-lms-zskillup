@@ -55,15 +55,15 @@ export function FinancialsDashboard() {
   if (allowed === null) {
     return (
       <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white py-16">
-        <Loader2 className="size-6 animate-spin text-slate-400" />
+        <Loader2 className="size-6 animate-spin text-slate-500" />
       </div>
     );
   }
   if (!allowed) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white py-16 text-center">
-        <Lock className="size-8 text-slate-300" />
-        <p className="max-w-sm text-sm text-slate-500">
+        <Lock className="size-8 text-slate-400" />
+        <p className="max-w-sm text-sm text-slate-600">
           You don&apos;t have the <span className="font-semibold">View financials</span> capability.
           Ask a super-admin to grant it.
         </p>
@@ -73,7 +73,7 @@ export function FinancialsDashboard() {
   if (!data) {
     return (
       <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white py-16">
-        <Loader2 className="size-6 animate-spin text-slate-400" />
+        <Loader2 className="size-6 animate-spin text-slate-500" />
       </div>
     );
   }
@@ -95,7 +95,7 @@ export function FinancialsDashboard() {
         <MiniStat label="Cancelled" value={data.cancelled} />
       </div>
 
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-slate-600">
         <span className="font-semibold text-navy">{data.newActivations30d}</span> paying activation
         {data.newActivations30d === 1 ? '' : 's'} in the last 30 days.
       </p>
@@ -105,12 +105,12 @@ export function FinancialsDashboard() {
           <h2 className="text-sm font-bold text-navy">Revenue by plan</h2>
         </div>
         {data.byPlan.length === 0 ? (
-          <div className="py-10 text-center text-sm text-slate-400">
+          <div className="py-10 text-center text-sm text-slate-500">
             No paying subscriptions yet.
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+            <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500">
               <tr>
                 <th className="px-4 py-3">Plan</th>
                 <th className="px-4 py-3 text-right">Active</th>
@@ -130,7 +130,7 @@ export function FinancialsDashboard() {
         )}
       </div>
 
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-slate-500">
         Lightweight estimate derived from plan prices × active subscriptions. MRR normalises dated
         plans to 30 days; perpetual plans count toward booked value only. Not a billing system.
       </p>
@@ -154,7 +154,7 @@ function Kpi({
       <span className={`inline-flex size-9 items-center justify-center rounded-xl bg-gradient-to-br ${accent} text-white`}>
         {icon}
       </span>
-      <p className="mt-3 text-[11px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
+      <p className="mt-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500">{label}</p>
       <p className="mt-1 text-2xl font-black tracking-tight text-navy">{value}</p>
     </div>
   );
@@ -164,7 +164,7 @@ function MiniStat({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-3 text-center">
       <p className="text-lg font-extrabold text-navy tabular-nums">{value}</p>
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">{label}</p>
     </div>
   );
 }

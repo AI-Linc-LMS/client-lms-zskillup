@@ -179,7 +179,7 @@ export default function AssessmentsPage() {
 
       {items === null ? (
         <div className="grid place-items-center py-24">
-          <Loader2 className="size-6 animate-spin text-slate-400" />
+          <Loader2 className="size-6 animate-spin text-slate-500" />
         </div>
       ) : (
         <div className="mt-6 flex flex-col gap-6">
@@ -188,7 +188,7 @@ export default function AssessmentsPage() {
             <div data-tour="assess:calendar" className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                     Month view
                   </p>
                   <h2 className="text-lg font-extrabold text-navy">
@@ -213,7 +213,7 @@ export default function AssessmentsPage() {
                         c.month === 0 ? { year: c.year - 1, month: 11 } : { ...c, month: c.month - 1 },
                       )
                     }
-                    className="grid size-8 place-items-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-50 hover:text-navy"
+                    className="grid size-8 place-items-center rounded-lg border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50 hover:text-navy"
                   >
                     <ChevronLeft className="size-4" />
                   </button>
@@ -225,7 +225,7 @@ export default function AssessmentsPage() {
                         c.month === 11 ? { year: c.year + 1, month: 0 } : { ...c, month: c.month + 1 },
                       )
                     }
-                    className="grid size-8 place-items-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-50 hover:text-navy"
+                    className="grid size-8 place-items-center rounded-lg border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50 hover:text-navy"
                   >
                     <ChevronRight className="size-4" />
                   </button>
@@ -236,7 +236,7 @@ export default function AssessmentsPage() {
                 {DOW.map((d) => (
                   <div
                     key={d}
-                    className="pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400"
+                    className="pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500"
                   >
                     {d}
                   </div>
@@ -273,8 +273,8 @@ export default function AssessmentsPage() {
                               : has
                                 ? 'text-[#f5b400]'
                                 : isWeekend
-                                  ? 'text-slate-300'
-                                  : 'text-slate-500',
+                                  ? 'text-slate-400'
+                                  : 'text-slate-600',
                           )}
                         >
                           {date.getDate()}
@@ -294,7 +294,7 @@ export default function AssessmentsPage() {
                 })}
               </div>
 
-              <div className="mt-4 flex items-center gap-4 border-t border-slate-100 pt-3 text-[11px] font-medium text-slate-400">
+              <div className="mt-4 flex items-center gap-4 border-t border-slate-100 pt-3 text-[11px] font-medium text-slate-500">
                 <span className="flex items-center gap-1.5">
                   <span className="size-2 rounded-full bg-orange" /> Drive scheduled
                 </span>
@@ -316,16 +316,16 @@ export default function AssessmentsPage() {
 
           {/* ── Upcoming timeline ───────────────────────────────────────── */}
           <aside data-tour="assess:upcoming" className="order-1 space-y-3">
-            <h2 className="px-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            <h2 className="px-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
               {selectedDay ? fmtDate(`${selectedDay}T00:00:00`) : 'Upcoming drives'}
             </h2>
             {upcoming.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center">
-                <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-slate-50 text-slate-300 ring-1 ring-slate-100">
+                <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-slate-50 text-slate-400 ring-1 ring-slate-100">
                   <CalendarDays className="size-6" />
                 </span>
                 <p className="mt-3 text-sm font-bold text-navy">No assessments scheduled</p>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-slate-600">
                   Register for a company drive to see it blocked here.
                 </p>
                 <Link
@@ -372,17 +372,17 @@ export default function AssessmentsPage() {
                                 className="max-h-5 max-w-full object-contain"
                               />
                             ) : (
-                              <span className="text-[10px] font-bold text-slate-500">
+                              <span className="text-[10px] font-bold text-slate-600">
                                 {it.companyName.slice(0, 2).toUpperCase()}
                               </span>
                             )}
                           </span>
                           <div className="min-w-0">
                             <p className="truncate text-sm font-bold text-navy">{it.companyName}</p>
-                            <p className="truncate text-xs text-slate-500">{it.title}</p>
+                            <p className="truncate text-xs text-slate-600">{it.title}</p>
                           </div>
                         </div>
-                        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium text-slate-500">
+                        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium text-slate-600">
                           <span className="flex items-center gap-1">
                             <CalendarDays className="size-3.5" /> {fmtDate(it.scheduledAt)}
                           </span>

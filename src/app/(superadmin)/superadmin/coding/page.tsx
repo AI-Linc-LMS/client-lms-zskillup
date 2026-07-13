@@ -21,11 +21,11 @@ export default function AdminCodingPage() {
       <header className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white px-5 py-6 shadow-sm sm:px-6">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(249,115,22,0.12),_transparent_30%),linear-gradient(135deg,_rgba(15,23,42,0.03),_rgba(248,250,252,1))]" />
         <div className="relative max-w-3xl">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500">
             Catalog
           </p>
           <h1 className="mt-2 text-[28px] font-extrabold tracking-tight text-navy">Coding bank</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
             Company-tagged coding problems. Each shows its provenance, Judge0 verification status,
             and - for sourced/PYQ problems - the citation link to where it came from.
           </p>

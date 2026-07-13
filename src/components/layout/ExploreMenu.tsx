@@ -128,7 +128,7 @@ export function ExploreMenu() {
         <Compass
           className={cn(
             'size-4 transition-colors',
-            open ? 'text-orange' : 'text-slate-400 group-hover:text-orange',
+            open ? 'text-orange' : 'text-slate-500 group-hover:text-orange',
           )}
           aria-hidden="true"
         />
@@ -221,7 +221,7 @@ export function ExploreMenu() {
                           <span className="block truncate text-sm font-semibold text-slate-700 group-hover:text-navy">
                             {c.company}
                           </span>
-                          <span className="block truncate text-[10px] text-slate-400">{c.description}</span>
+                          <span className="block truncate text-[10px] text-slate-500">{c.description}</span>
                         </span>
                         <ArrowRight className="size-3.5 shrink-0 -translate-x-1 text-orange opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
                       </Link>
@@ -326,7 +326,7 @@ function DestRow({ d, onClick }: { d: Dest; onClick: () => void }) {
       onClick={onClick}
       className="group flex items-start gap-3 rounded-xl px-2.5 py-2 transition-colors hover:bg-orange/[0.06]"
     >
-      <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-500 transition-colors group-hover:bg-orange/10 group-hover:text-orange">
+      <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-600 transition-colors group-hover:bg-orange/10 group-hover:text-orange">
         <Icon className="size-[18px]" />
       </span>
       <span className="min-w-0">
@@ -334,7 +334,7 @@ function DestRow({ d, onClick }: { d: Dest; onClick: () => void }) {
           {d.label}
           <ArrowRight className="size-3 -translate-x-1 text-orange opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
         </span>
-        <span className="mt-0.5 block text-[11px] leading-snug text-slate-400">{d.desc}</span>
+        <span className="mt-0.5 block text-[11px] leading-snug text-slate-500">{d.desc}</span>
       </span>
     </Link>
   );
@@ -358,7 +358,7 @@ function Column({ children, className }: { children: React.ReactNode; className?
 /** Tiny uppercase section label with a gradient icon chip. */
 function SectionLabel({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
   return (
-    <p className="mb-3 flex items-center gap-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+    <p className="mb-3 flex items-center gap-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
       <span className="grid size-4 place-items-center rounded text-orange">{icon}</span>
       {children}
     </p>

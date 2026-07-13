@@ -29,12 +29,12 @@ export function CompanyHeatmap({ cohortId }: { cohortId?: string }) {
   if (rows === null) {
     return (
       <div className="grid h-40 place-items-center">
-        <Loader2 className="size-5 animate-spin text-slate-300" />
+        <Loader2 className="size-5 animate-spin text-slate-400" />
       </div>
     );
   }
   if (rows.length === 0) {
-    return <p className="py-6 text-center text-sm text-slate-400">No company-tagged practice yet.</p>;
+    return <p className="py-6 text-center text-sm text-slate-500">No company-tagged practice yet.</p>;
   }
 
   const max = Math.max(1, ...rows.flatMap((r) => r.bands));
@@ -44,11 +44,11 @@ export function CompanyHeatmap({ cohortId }: { cohortId?: string }) {
       <table className="w-full min-w-[420px] border-separate border-spacing-1 text-sm">
         <thead>
           <tr>
-            <th className="px-2 pb-1 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+            <th className="px-2 pb-1 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-500">
               Company
             </th>
             {BAND_LABELS.map((b, i) => (
-              <th key={b} className="px-1 pb-1 text-center text-[11px] font-semibold text-slate-500">
+              <th key={b} className="px-1 pb-1 text-center text-[11px] font-semibold text-slate-600">
                 <span
                   className="inline-block size-2 rounded-full align-middle"
                   style={{ background: `rgb(${BAND_RGB[i]})` }}

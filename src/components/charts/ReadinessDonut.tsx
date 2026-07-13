@@ -49,7 +49,7 @@ export function ReadinessDonut({
         </ResponsiveContainer>
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-2xl font-black tabular-nums text-navy">{centerValue}</span>
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{centerLabel}</span>
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{centerLabel}</span>
         </div>
       </div>
 
@@ -59,7 +59,7 @@ export function ReadinessDonut({
             <span className="size-2.5 shrink-0 rounded-full" style={{ background: s.color }} />
             <span className="flex-1 truncate text-slate-600">{s.label}</span>
             <span className="font-bold tabular-nums text-navy">{formatValue(s.value)}</span>
-            <span className="w-9 text-right text-xs tabular-nums text-slate-400">
+            <span className="w-9 text-right text-xs tabular-nums text-slate-500">
               {total ? Math.round((s.value / total) * 100) : 0}%
             </span>
           </li>

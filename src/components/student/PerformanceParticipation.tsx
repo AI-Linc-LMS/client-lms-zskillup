@@ -155,7 +155,7 @@ export function PerformanceParticipation() {
             </span>
             Performance vs Participation
           </h2>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-slate-600">
             Performance vs effort - you against {data?.scope === 'college' ? 'your college' : 'everyone'}.
           </p>
         </div>
@@ -169,12 +169,12 @@ export function PerformanceParticipation() {
 
       {loading ? (
         <div className="flex h-56 items-center justify-center">
-          <Loader2 className="size-5 animate-spin text-slate-300" />
+          <Loader2 className="size-5 animate-spin text-slate-400" />
         </div>
       ) : !data || !data.you || !stats ? (
         <div className="mt-4 flex h-56 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-200 text-center">
-          <Target className="size-7 text-slate-300" />
-          <p className="max-w-xs text-sm text-slate-500">Answer a few practice questions to see where you land on the map.</p>
+          <Target className="size-7 text-slate-400" />
+          <p className="max-w-xs text-sm text-slate-600">Answer a few practice questions to see where you land on the map.</p>
           <Link href="/practice" className="mt-1 rounded-full bg-orange px-4 py-1.5 text-xs font-bold text-[#171717] transition hover:bg-orange/90">
             Start practising
           </Link>
@@ -205,11 +205,11 @@ export function PerformanceParticipation() {
             {/* Y axis - labels pinned to the plot's actual inset gridlines (top=100,
                 bottom=0) so they line up exactly with the data, not the box edge. */}
             <div className="relative w-7 shrink-0 self-stretch">
-              <span className="absolute right-0 -translate-y-1/2 text-[10px] font-semibold tabular-nums text-slate-300" style={{ top: `${INSET}%` }}>100</span>
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90 whitespace-nowrap text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+              <span className="absolute right-0 -translate-y-1/2 text-[10px] font-semibold tabular-nums text-slate-400" style={{ top: `${INSET}%` }}>100</span>
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90 whitespace-nowrap text-[10px] font-semibold uppercase tracking-wide text-slate-500">
                 Performance
               </span>
-              <span className="absolute right-0 -translate-y-1/2 text-[10px] font-semibold tabular-nums text-slate-300" style={{ top: `${100 - INSET}%` }}>0</span>
+              <span className="absolute right-0 -translate-y-1/2 text-[10px] font-semibold tabular-nums text-slate-400" style={{ top: `${100 - INSET}%` }}>0</span>
             </div>
 
             {/* Plot */}
@@ -326,7 +326,7 @@ export function PerformanceParticipation() {
               centres exactly under the plot instead of a hand-tuned margin. */}
           <div className="mt-1.5 flex gap-2.5">
             <div className="w-6 shrink-0" aria-hidden />
-            <p className="w-full min-w-0 text-center text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+            <p className="w-full min-w-0 text-center text-[10px] font-semibold uppercase tracking-wide text-slate-500">
               Participation →
             </p>
           </div>
@@ -334,9 +334,9 @@ export function PerformanceParticipation() {
           {/* Cohort distribution across the four zones */}
           {peerCount > 0 && (
             <div className="mt-4">
-              <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+              <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wide text-slate-500">
                 <span>Where the cohort sits</span>
-                <span className="normal-case tracking-normal text-slate-400">
+                <span className="normal-case tracking-normal text-slate-500">
                   You&apos;re <span className={ZONES.find((z) => z.key === stats.yourZone)!.tone}>
                     {stats.yourZone === 'start' ? 'getting started' : ZONES.find((z) => z.key === stats.yourZone)!.label.toLowerCase()}
                   </span>
@@ -356,10 +356,10 @@ export function PerformanceParticipation() {
               </div>
               <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5">
                 {ZONES.map((z) => (
-                  <span key={z.key} className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-500">
+                  <span key={z.key} className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600">
                     <span className={`size-2 rounded-full ${z.dot}`} />
                     {z.label}
-                    <span className="tabular-nums text-slate-400">{stats.counts[z.key]}</span>
+                    <span className="tabular-nums text-slate-500">{stats.counts[z.key]}</span>
                     {stats.yourZone === z.key && <span className="font-bold text-navy">· you</span>}
                   </span>
                 ))}
@@ -386,7 +386,7 @@ export function PerformanceParticipation() {
                   <TrendingUp className="size-3.5" /> Top zone - keep the streak alive
                 </span>
               )}
-              <span className="flex shrink-0 items-center gap-2.5 text-[11px] font-semibold text-slate-400">
+              <span className="flex shrink-0 items-center gap-2.5 text-[11px] font-semibold text-slate-500">
                 <span className="inline-flex items-center gap-1">
                   <span className="size-2 rounded-full bg-orange" /> You
                 </span>
@@ -413,9 +413,9 @@ export function PerformanceParticipation() {
 function Metric({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
     <div className="rounded-2xl border border-slate-100 bg-slate-50/60 px-3 py-2.5">
-      <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+      <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
       <p className="mt-0.5 font-display text-lg font-bold leading-none tabular-nums text-navy">{value}</p>
-      <p className="mt-1 truncate text-[10px] font-medium text-slate-400">{sub}</p>
+      <p className="mt-1 truncate text-[10px] font-medium text-slate-500">{sub}</p>
     </div>
   );
 }

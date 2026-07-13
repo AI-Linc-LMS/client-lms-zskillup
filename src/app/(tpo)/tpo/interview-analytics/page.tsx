@@ -26,16 +26,16 @@ function ScoreTile({
       {value != null ? (
         <>
           <p className="mt-3 text-2xl font-black tabular-nums text-navy">{value}%</p>
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
         </>
       ) : (
         <>
-          <p className="mt-3 text-sm font-bold text-slate-400">Needs data</p>
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
-          <p className="mt-1 text-[10px] text-slate-400">Populates as interviews are graded</p>
+          <p className="mt-3 text-sm font-bold text-slate-500">Needs data</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
+          <p className="mt-1 text-[10px] text-slate-500">Populates as interviews are graded</p>
         </>
       )}
-      <p className="mt-2 flex items-center gap-1 text-[10px] text-slate-400">{source}</p>
+      <p className="mt-2 flex items-center gap-1 text-[10px] text-slate-500">{source}</p>
     </div>
   );
 }
@@ -64,7 +64,7 @@ export default function InterviewAnalyticsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="size-7 animate-spin text-slate-400" />
+        <Loader2 className="size-7 animate-spin text-slate-500" />
       </div>
     );
   }
@@ -75,7 +75,7 @@ export default function InterviewAnalyticsPage() {
   if (!data || data.totalInterviews === 0) {
     return (
       <div className="space-y-4">
-        <p className="text-sm font-semibold text-slate-500">
+        <p className="text-sm font-semibold text-slate-600">
           Interview analytics · <span className="text-navy">{cohortLabel}</span>
         </p>
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center">
@@ -83,7 +83,7 @@ export default function InterviewAnalyticsPage() {
             <MessageSquare className="size-6" />
           </span>
           <h2 className="mt-4 text-lg font-extrabold text-navy">No mock interviews yet</h2>
-          <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">
+          <p className="mx-auto mt-1 max-w-md text-sm text-slate-600">
             Once students complete AI mock interviews, campus interview readiness, communication and
             confidence scores, and the most common weak areas appear here.
           </p>
@@ -94,9 +94,9 @@ export default function InterviewAnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm font-semibold text-slate-500">
+      <p className="text-sm font-semibold text-slate-600">
         Interview analytics · <span className="text-navy">{cohortLabel}</span> ·{' '}
-        <span className="text-slate-400">{data.studentsAttempted} students · {data.totalInterviews} interviews</span>
+        <span className="text-slate-500">{data.studentsAttempted} students · {data.totalInterviews} interviews</span>
       </p>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -108,7 +108,7 @@ export default function InterviewAnalyticsPage() {
             <Users className="size-5" />
           </span>
           <p className="mt-3 text-2xl font-black tabular-nums text-navy">{data.studentsAttempted}</p>
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Students Practised</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Students Practised</p>
         </div>
       </div>
 
@@ -118,7 +118,7 @@ export default function InterviewAnalyticsPage() {
         source="Mock-interview evaluations"
       >
         {data.commonWeaknesses.length === 0 ? (
-          <p className="text-sm text-slate-400">Not enough graded interviews yet.</p>
+          <p className="text-sm text-slate-500">Not enough graded interviews yet.</p>
         ) : (
           <div className="space-y-2.5">
             {data.commonWeaknesses.map((w) => {
@@ -129,7 +129,7 @@ export default function InterviewAnalyticsPage() {
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
                     <div className="h-full rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400]" style={{ width: `${(w.count / max) * 100}%` }} />
                   </div>
-                  <span className="w-8 text-right text-xs font-semibold tabular-nums text-slate-500">{w.count}</span>
+                  <span className="w-8 text-right text-xs font-semibold tabular-nums text-slate-600">{w.count}</span>
                 </div>
               );
             })}

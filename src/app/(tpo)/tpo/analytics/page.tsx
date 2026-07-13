@@ -89,7 +89,7 @@ export default function StudentAnalyticsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="size-7 animate-spin text-slate-400" />
+        <Loader2 className="size-7 animate-spin text-slate-500" />
       </div>
     );
   }
@@ -98,7 +98,7 @@ export default function StudentAnalyticsPage() {
   }
   if (!data || data.students.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
+      <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center text-sm text-slate-600">
         No student activity to analyse yet. Invite your cohort to populate this view.
       </div>
     );
@@ -106,7 +106,7 @@ export default function StudentAnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm font-semibold text-slate-500">
+      <p className="text-sm font-semibold text-slate-600">
         Performance &amp; participation · <span className="text-navy">{cohortLabel}</span>
       </p>
 
@@ -139,7 +139,7 @@ export default function StudentAnalyticsPage() {
                 <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
                   <div className="h-full rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400]" style={{ width: `${w.weight}%` }} />
                 </div>
-                <span className="w-10 text-right text-xs font-semibold tabular-nums text-slate-500">{w.weight}%</span>
+                <span className="w-10 text-right text-xs font-semibold tabular-nums text-slate-600">{w.weight}%</span>
               </div>
             ))}
           </div>
@@ -157,7 +157,7 @@ export default function StudentAnalyticsPage() {
                 <span className="text-[#1a1d29]">+ 2×</span> coding problems
               </p>
             </div>
-            <p className="flex items-center gap-1.5 text-xs text-slate-500">
+            <p className="flex items-center gap-1.5 text-xs text-slate-600">
               <Activity className="size-3.5 text-[#f5b400]" /> A student at <span className="font-bold text-navy">{PART_HIGH}+</span> counts
               as high participation.
             </p>
@@ -177,10 +177,10 @@ export default function StudentAnalyticsPage() {
               <div key={d.branch}>
                 <div className="mb-1 flex items-center justify-between gap-2 text-sm">
                   <span className="flex items-center gap-1.5 font-semibold text-navy">
-                    <GraduationCap className="size-3.5 text-slate-400" /> {d.branch}
-                    <span className="text-xs font-normal text-slate-400">({d.count})</span>
+                    <GraduationCap className="size-3.5 text-slate-500" /> {d.branch}
+                    <span className="text-xs font-normal text-slate-500">({d.count})</span>
                   </span>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-slate-600">
                     <span className="font-bold text-navy">{d.avgReadiness}%</span> avg readiness
                   </span>
                 </div>
@@ -190,7 +190,7 @@ export default function StudentAnalyticsPage() {
               </div>
             ))}
             {departments.length === 1 && departments[0].branch === 'Unspecified' && (
-              <p className="pt-1 text-[11px] text-slate-400">
+              <p className="pt-1 text-[11px] text-slate-500">
                 Branch isn&apos;t set for these students yet - capture it at invite to unlock a full department map.
               </p>
             )}
@@ -203,14 +203,14 @@ export default function StudentAnalyticsPage() {
           source="Company-tagged practice"
         >
           {data.companyReadiness.length === 0 ? (
-            <p className="text-sm text-slate-400">No company-tagged practice yet.</p>
+            <p className="text-sm text-slate-500">No company-tagged practice yet.</p>
           ) : (
             <div className="space-y-3">
               {data.companyReadiness.slice(0, 8).map((c) => (
                 <div key={c.slug}>
                   <div className="mb-1 flex items-center justify-between gap-2 text-sm">
                     <span className="truncate font-semibold text-navy">{c.name}</span>
-                    <span className="shrink-0 text-xs text-slate-500">
+                    <span className="shrink-0 text-xs text-slate-600">
                       <span className="font-bold text-navy">{c.readiness}%</span> · {c.attempted} attempts
                     </span>
                   </div>
@@ -233,7 +233,7 @@ export default function StudentAnalyticsPage() {
           className="lg:col-span-2"
         >
           {needsSupport.length === 0 ? (
-            <p className="text-sm text-slate-400">No students in this quadrant - nice work.</p>
+            <p className="text-sm text-slate-500">No students in this quadrant - nice work.</p>
           ) : (
             <ul className="divide-y divide-slate-100">
               {needsSupport.map((s) => (
@@ -245,16 +245,16 @@ export default function StudentAnalyticsPage() {
                   >
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold text-navy">{s.name ?? s.email}</p>
-                      <p className="truncate text-xs text-slate-400">{s.branch ?? '-'}</p>
+                      <p className="truncate text-xs text-slate-500">{s.branch ?? '-'}</p>
                     </div>
                     <div className="flex shrink-0 items-center gap-3">
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-slate-600">
                         <Activity className="mr-1 inline size-3" />
                         {s.participation}
                       </span>
                       <span className="w-10 text-right text-sm font-bold tabular-nums text-navy">{s.readiness}%</span>
                       <ReadinessBadge band={s.band} />
-                      <ArrowRight className="size-4 text-slate-300" />
+                      <ArrowRight className="size-4 text-slate-400" />
                     </div>
                   </button>
                 </li>
@@ -271,7 +271,7 @@ export default function StudentAnalyticsPage() {
             recs && !recsLoading ? (
               <span
                 className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                  recs.generatedByAi ? 'bg-[#fff5ea] text-[#a16207]' : 'bg-slate-100 text-slate-500'
+                  recs.generatedByAi ? 'bg-[#fff5ea] text-[#a16207]' : 'bg-slate-100 text-slate-600'
                 }`}
               >
                 <Sparkles className="size-3" /> {recs.generatedByAi ? 'AI' : 'Rules'}
@@ -280,11 +280,11 @@ export default function StudentAnalyticsPage() {
           }
         >
           {recsLoading ? (
-            <div className="flex items-center justify-center gap-2 py-10 text-sm text-slate-400">
+            <div className="flex items-center justify-center gap-2 py-10 text-sm text-slate-500">
               <Loader2 className="size-4 animate-spin" /> Analysing cohort…
             </div>
           ) : !recs || recs.actions.length === 0 ? (
-            <p className="py-6 text-center text-sm text-slate-400">
+            <p className="py-6 text-center text-sm text-slate-500">
               Recommendations appear as your cohort builds activity.
             </p>
           ) : (
@@ -295,8 +295,8 @@ export default function StudentAnalyticsPage() {
                     <p className="text-sm font-bold text-navy">{a.title}</p>
                     <PriorityChip priority={a.priority} />
                   </div>
-                  <p className="mt-0.5 text-xs leading-snug text-slate-500">{a.detail}</p>
-                  <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">{a.group}</p>
+                  <p className="mt-0.5 text-xs leading-snug text-slate-600">{a.detail}</p>
+                  <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500">{a.group}</p>
                 </li>
               ))}
             </ul>
@@ -304,7 +304,7 @@ export default function StudentAnalyticsPage() {
         </BentoCard>
       </div>
 
-      <div className="flex items-center gap-1.5 text-xs text-slate-400">
+      <div className="flex items-center gap-1.5 text-xs text-slate-500">
         <TrendingUp className="size-3.5" /> Tip: the top-left quadrant (engaged but under-performing) is where
         coaching moves the needle fastest.
       </div>
@@ -318,7 +318,7 @@ function PriorityChip({ priority }: { priority: TpoRecommendation['priority'] })
   const map = {
     high: 'bg-red-100 text-red-700',
     medium: 'bg-amber-100 text-amber-700',
-    low: 'bg-slate-100 text-slate-500',
+    low: 'bg-slate-100 text-slate-600',
   } as const;
   return (
     <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${map[priority]}`}>

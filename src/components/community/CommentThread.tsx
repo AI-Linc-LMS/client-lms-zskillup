@@ -24,7 +24,7 @@ export function CommentThread({
 }) {
   if (comments.length === 0) {
     return (
-      <p className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-400">
+      <p className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500">
         No comments yet. Start the conversation.
       </p>
     );
@@ -104,7 +104,7 @@ function CommentItem({
           <div className="rounded-2xl rounded-tl-sm bg-slate-50 px-3 py-2">
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold text-navy">{comment.author.name}</span>
-              <span className="text-[11px] text-slate-400">{timeAgo(comment.createdAt)}</span>
+              <span className="text-[11px] text-slate-500">{timeAgo(comment.createdAt)}</span>
             </div>
             <p className="mt-0.5 whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{comment.body}</p>
           </div>
@@ -113,7 +113,7 @@ function CommentItem({
             {depth === 0 && (
               <button
                 onClick={() => setReplying((r) => !r)}
-                className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100"
+                className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100"
               >
                 <CornerDownRight className="size-3.5" /> Reply
               </button>
@@ -122,7 +122,7 @@ function CommentItem({
               <button
                 onClick={remove}
                 disabled={busy}
-                className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold text-slate-400 hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
+                className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold text-slate-500 hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
               >
                 <Trash2 className="size-3.5" />
               </button>

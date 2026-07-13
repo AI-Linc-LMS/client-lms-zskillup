@@ -67,7 +67,7 @@ export function CourseTable() {
                   'flex items-center gap-1.5 border-b-2 pb-3 pr-1 text-[13px] font-medium transition-colors',
                   tab === t.key
                     ? 'border-orange font-semibold text-navy'
-                    : 'border-transparent text-slate-400 hover:text-slate-600',
+                    : 'border-transparent text-slate-500 hover:text-slate-600',
                 )}
               >
                 {t.label}
@@ -75,7 +75,7 @@ export function CourseTable() {
                   <span
                     className={cn(
                       'rounded-full px-1.5 py-px text-[10px] font-bold',
-                      tab === t.key ? 'bg-orange text-[#171717]' : 'bg-slate-100 text-slate-500',
+                      tab === t.key ? 'bg-orange text-[#171717]' : 'bg-slate-100 text-slate-600',
                     )}
                   >
                     {count}
@@ -97,11 +97,11 @@ export function CourseTable() {
         <p className="px-5 py-8 text-sm text-red-600">{error}</p>
       ) : courses === null ? (
         <div className="flex items-center justify-center px-5 py-12">
-          <Loader2 className="size-5 animate-spin text-slate-400" aria-hidden="true" />
+          <Loader2 className="size-5 animate-spin text-slate-500" aria-hidden="true" />
         </div>
       ) : (
         <>
-          <p className="px-5 pt-3 text-[11px] text-slate-400">
+          <p className="px-5 pt-3 text-[11px] text-slate-500">
             Showing {rows.length} of {courses.length} prep tracks
           </p>
 
@@ -112,7 +112,7 @@ export function CourseTable() {
                   {['Course', 'Category', 'Difficulty', 'Duration'].map((h) => (
                     <th
                       key={h}
-                      className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400"
+                      className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-slate-500"
                     >
                       {h}
                     </th>
@@ -122,7 +122,7 @@ export function CourseTable() {
               <tbody>
                 {rows.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-5 py-10 text-center text-sm text-slate-400">
+                    <td colSpan={4} className="px-5 py-10 text-center text-sm text-slate-500">
                       No tracks in this category yet.
                     </td>
                   </tr>
@@ -140,12 +140,12 @@ export function CourseTable() {
                         <td className="px-5 py-3.5">
                           <p className="font-semibold text-navy">{c.title}</p>
                           {c.summary ? (
-                            <p className="mt-0.5 line-clamp-1 text-[11px] text-slate-400">
+                            <p className="mt-0.5 line-clamp-1 text-[11px] text-slate-500">
                               {c.summary}
                             </p>
                           ) : null}
                         </td>
-                        <td className="px-5 py-3.5 text-[12px] text-slate-500">
+                        <td className="px-5 py-3.5 text-[12px] text-slate-600">
                           {CATEGORY_LABEL[c.category] ?? c.category}
                         </td>
                         <td className="px-5 py-3.5">

@@ -38,7 +38,7 @@ export function PracticeHub() {
                 <Icon className="size-5" aria-hidden="true" />
               </span>
               <h3 className="mt-4 text-base font-bold text-navy">{card.title}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{card.body}</p>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{card.body}</p>
               <Link
                 href={card.href}
                 className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-navy transition-colors hover:text-[#f5b400]"

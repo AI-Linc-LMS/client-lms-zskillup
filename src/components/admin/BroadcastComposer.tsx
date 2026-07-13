@@ -128,7 +128,7 @@ export function BroadcastComposer() {
   if (allowed === null) {
     return (
       <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white py-16">
-        <Loader2 className="size-6 animate-spin text-slate-400" />
+        <Loader2 className="size-6 animate-spin text-slate-500" />
       </div>
     );
   }
@@ -136,8 +136,8 @@ export function BroadcastComposer() {
   if (!allowed) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white py-16 text-center">
-        <Lock className="size-8 text-slate-300" />
-        <p className="max-w-sm text-sm text-slate-500">
+        <Lock className="size-8 text-slate-400" />
+        <p className="max-w-sm text-sm text-slate-600">
           You don&apos;t have the <span className="font-semibold">Broadcast</span> capability. Ask a
           super-admin to grant it from your account&apos;s capabilities.
         </p>
@@ -159,7 +159,7 @@ export function BroadcastComposer() {
       )}
 
       <div>
-        <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-400">
+        <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
           Audience
         </label>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -175,7 +175,7 @@ export function BroadcastComposer() {
               }`}
             >
               <p className="text-sm font-semibold text-navy">{s.label}</p>
-              <p className="text-xs text-slate-400">{s.hint}</p>
+              <p className="text-xs text-slate-500">{s.hint}</p>
             </button>
           ))}
         </div>
@@ -183,7 +183,7 @@ export function BroadcastComposer() {
 
       {(scope === 'COLLEGE' || scope === 'COHORT') && (
         <div>
-          <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-400">
+          <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
             College
           </label>
           <select
@@ -203,15 +203,15 @@ export function BroadcastComposer() {
 
       {scope === 'COHORT' && collegeId && (
         <div>
-          <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-400">
+          <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
             Cohort
           </label>
           {cohortsLoading ? (
-            <div className="flex items-center gap-2 py-2 text-sm text-slate-400">
+            <div className="flex items-center gap-2 py-2 text-sm text-slate-500">
               <Loader2 className="size-4 animate-spin" /> Loading cohorts…
             </div>
           ) : cohorts.length === 0 ? (
-            <p className="py-2 text-sm text-slate-400">No cohorts at this college yet.</p>
+            <p className="py-2 text-sm text-slate-500">No cohorts at this college yet.</p>
           ) : (
             <select
               value={cohortId}
@@ -232,7 +232,7 @@ export function BroadcastComposer() {
       )}
 
       <div>
-        <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-400">
+        <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
           Title
         </label>
         <input
@@ -245,7 +245,7 @@ export function BroadcastComposer() {
       </div>
 
       <div>
-        <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-400">
+        <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
           Message
         </label>
         <textarea
@@ -259,8 +259,8 @@ export function BroadcastComposer() {
       </div>
 
       <div>
-        <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-400">
-          Link <span className="font-normal text-slate-400">(optional)</span>
+        <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+          Link <span className="font-normal text-slate-500">(optional)</span>
         </label>
         <input
           value={link}

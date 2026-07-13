@@ -51,7 +51,7 @@ function ResetForm() {
     return (
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h1 className="text-xl font-bold text-navy">Reset link missing</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-600">
           Open the link from your reset email, or request a new one.
         </p>
         <Link
@@ -71,7 +71,7 @@ function ResetForm() {
           <Lock className="size-5 text-orange" aria-hidden="true" />
         </span>
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
             Account recovery
           </p>
           <h1 className="text-xl font-bold text-navy">Set a new password</h1>
@@ -108,7 +108,7 @@ function ResetForm() {
           {isSubmitting ? 'Saving…' : 'Set new password'}
         </Button>
       </form>
-      <p className="mt-4 text-center text-xs text-slate-400">
+      <p className="mt-4 text-center text-xs text-slate-500">
         Once your password is updated, all active sessions are signed out.
       </p>
     </div>

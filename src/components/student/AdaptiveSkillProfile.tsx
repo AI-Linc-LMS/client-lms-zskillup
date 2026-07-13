@@ -110,7 +110,7 @@ export function AdaptiveSkillProfile() {
 
   if (state.loading) {
     return (
-      <div className="flex items-center gap-3 rounded-3xl border border-slate-200/80 bg-white p-5 text-sm text-slate-400">
+      <div className="flex items-center gap-3 rounded-3xl border border-slate-200/80 bg-white p-5 text-sm text-slate-500">
         <Loader2 className="size-4 animate-spin text-[#f5b400]" />
         Loading your skill profile…
       </div>
@@ -140,7 +140,7 @@ export function AdaptiveSkillProfile() {
           </span>
           <div>
             <p className="text-sm font-bold text-[#1a1d29]">Discover your skill level</p>
-            <p className="mt-0.5 text-xs leading-relaxed text-slate-500">
+            <p className="mt-0.5 text-xs leading-relaxed text-slate-600">
               Take an AI adaptive quiz to get a personalised skill profile and study plan.
             </p>
             <Link
@@ -185,7 +185,7 @@ export function AdaptiveSkillProfile() {
               <Brain className="size-5" />
             </span>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                 Adaptive
               </p>
               <p className="flex items-center gap-1.5 text-sm font-bold text-[#1a1d29]">
@@ -195,7 +195,7 @@ export function AdaptiveSkillProfile() {
                   onClick={() => setShowInfo((v) => !v)}
                   aria-label="How is this calculated?"
                   aria-expanded={showInfo}
-                  className="grid size-4 place-items-center rounded-full text-slate-300 transition-colors hover:bg-slate-100 hover:text-slate-500"
+                  className="grid size-4 place-items-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
                 >
                   <Info className="size-3.5" />
                 </button>
@@ -219,8 +219,8 @@ export function AdaptiveSkillProfile() {
             className="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/80 p-3.5 text-[11px] leading-relaxed text-slate-600"
           >
             <div className="mb-1 flex items-center justify-between">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">How this is calculated</p>
-              <button type="button" onClick={() => setShowInfo(false)} aria-label="Close" className="text-slate-300 hover:text-slate-500"><X className="size-3.5" /></button>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">How this is calculated</p>
+              <button type="button" onClick={() => setShowInfo(false)} aria-label="Close" className="text-slate-400 hover:text-slate-600"><X className="size-3.5" /></button>
             </div>
             <p>
               This is an <span className="font-semibold text-[#1a1d29]">adaptive (IRT) estimate</span>. Each
@@ -239,14 +239,14 @@ export function AdaptiveSkillProfile() {
         {/* Overall mastery */}
         <div className="mb-5 flex items-end justify-between rounded-2xl border border-slate-200/70 bg-slate-50/60 px-4 py-3">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
               Overall mastery
             </p>
             <p className="mt-0.5 text-3xl font-black leading-none tracking-tight text-[#1a1d29]">
               <AnimatedNumber value={overallMastery} format={(n) => `${n}%`} />
             </p>
           </div>
-          <span className="text-[11px] font-semibold text-slate-400 tabular-nums">
+          <span className="text-[11px] font-semibold text-slate-500 tabular-nums">
             {state.skills.length} skill{state.skills.length !== 1 ? 's' : ''} tracked
           </span>
         </div>
@@ -325,7 +325,7 @@ export function AdaptiveSkillProfile() {
           )}
         </div>
 
-        <p className="mt-3 text-[10px] font-medium text-slate-400">
+        <p className="mt-3 text-[10px] font-medium text-slate-500">
           Based on {state.sessionCount} adaptive session{state.sessionCount !== 1 ? 's' : ''}
         </p>
       </div>

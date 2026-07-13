@@ -104,7 +104,7 @@ export default function CommunityPage() {
               <h1 className="flex items-center gap-2 text-2xl font-black tracking-tight text-navy">
                 <MessagesSquare className="size-6 text-orange" /> Community
               </h1>
-              <p className="mt-0.5 text-sm text-slate-500">
+              <p className="mt-0.5 text-sm text-slate-600">
                 Ask, share, and discuss with fellow learners across ZSkillup.
               </p>
             </div>
@@ -124,7 +124,7 @@ export default function CommunityPage() {
             <span className="grid size-9 shrink-0 place-items-center rounded-full bg-orange/10 text-orange">
               <PenSquare className="size-4" />
             </span>
-            <span className="text-sm text-slate-400">Start a discussion, ask a question, share a resource…</span>
+            <span className="text-sm text-slate-500">Start a discussion, ask a question, share a resource…</span>
           </button>
 
           {/* Filters */}
@@ -136,7 +136,7 @@ export default function CommunityPage() {
                   onClick={() => setType(t.key)}
                   className={cn(
                     'rounded-full px-3 py-1.5 text-sm font-semibold transition-colors',
-                    type === t.key ? 'bg-navy text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200',
+                    type === t.key ? 'bg-navy text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
                   )}
                 >
                   {t.label}
@@ -145,7 +145,7 @@ export default function CommunityPage() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <div className="relative min-w-[200px] flex-1">
-                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -160,7 +160,7 @@ export default function CommunityPage() {
                     onClick={() => setSort(s)}
                     className={cn(
                       'rounded-full px-3 py-1 text-xs font-bold capitalize transition-colors',
-                      sort === s ? 'bg-white text-navy shadow-sm' : 'text-slate-500',
+                      sort === s ? 'bg-white text-navy shadow-sm' : 'text-slate-600',
                     )}
                   >
                     {s === 'top' ? 'Top' : 'Recent'}
@@ -169,10 +169,10 @@ export default function CommunityPage() {
               </div>
             </div>
             {tag && (
-              <div className="flex items-center gap-2 text-sm text-slate-500">
+              <div className="flex items-center gap-2 text-sm text-slate-600">
                 Filtering by
                 <span className="rounded-full bg-orange/10 px-2 py-0.5 font-bold text-orange">#{tag}</span>
-                <button onClick={() => setTag('')} className="text-xs font-semibold text-slate-400 underline hover:text-navy">
+                <button onClick={() => setTag('')} className="text-xs font-semibold text-slate-500 underline hover:text-navy">
                   clear
                 </button>
               </div>
@@ -188,8 +188,8 @@ export default function CommunityPage() {
             </div>
           ) : posts.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center">
-              <MessagesSquare className="mx-auto size-10 text-slate-300" />
-              <p className="mt-3 text-sm text-slate-500">
+              <MessagesSquare className="mx-auto size-10 text-slate-400" />
+              <p className="mt-3 text-sm text-slate-600">
                 {search || tag || type ? 'No posts match your filters.' : 'No posts yet - be the first to start a discussion!'}
               </p>
               <button
@@ -220,7 +220,7 @@ export default function CommunityPage() {
         {/* Right rail */}
         <aside className="hidden space-y-4 xl:block">
           <div data-tour="community:stats" className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400">Community</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500">Community</h2>
             <div className="mt-3 grid grid-cols-3 gap-2 text-center">
               <Stat label="Posts" value={stats?.totalPosts ?? 0} />
               <Stat label="Replies" value={stats?.totalComments ?? 0} />
@@ -230,7 +230,7 @@ export default function CommunityPage() {
 
           {stats && stats.topTags.length > 0 && (
             <div data-tour="community:tags" className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-              <h2 className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-slate-400">
+              <h2 className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-slate-500">
                 <Sparkles className="size-3.5" /> Popular tags
               </h2>
               <div className="mt-3 flex flex-wrap gap-1.5">
@@ -242,10 +242,10 @@ export default function CommunityPage() {
                       'rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors',
                       tag === t.tag
                         ? 'border-orange bg-orange/10 text-orange'
-                        : 'border-slate-200 text-slate-500 hover:bg-slate-50',
+                        : 'border-slate-200 text-slate-600 hover:bg-slate-50',
                     )}
                   >
-                    #{t.tag} <span className="text-slate-400">{t.count}</span>
+                    #{t.tag} <span className="text-slate-500">{t.count}</span>
                   </button>
                 ))}
               </div>
@@ -278,7 +278,7 @@ function Stat({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-xl bg-slate-50 py-2">
       <p className="text-lg font-black text-navy tabular-nums">{value.toLocaleString()}</p>
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
     </div>
   );
 }

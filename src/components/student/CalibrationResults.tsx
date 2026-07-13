@@ -62,7 +62,7 @@ export function CalibrationResults({
   if (!data) {
     return (
       <div className="grid min-h-screen place-items-center bg-background">
-        <div className="flex flex-col items-center gap-3 text-slate-400">
+        <div className="flex flex-col items-center gap-3 text-slate-500">
           <Loader2 className="size-6 animate-spin" aria-hidden="true" />
           <p className="text-xs font-semibold">Analysing your placement readiness…</p>
         </div>
@@ -147,7 +147,7 @@ function ResultsView({ data, onReview }: { data: CalibrationResultsDto; onReview
 
         {/* Full section breakdown */}
         <section className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
-          <h2 className="mb-4 text-sm font-black uppercase tracking-wide text-slate-500">Section breakdown</h2>
+          <h2 className="mb-4 text-sm font-black uppercase tracking-wide text-slate-600">Section breakdown</h2>
           <div className="space-y-3.5">
             {data.sections.map((s) => (
               <ScoreBar key={s.key} label={s.label} value={s.score} />
@@ -160,7 +160,7 @@ function ResultsView({ data, onReview }: { data: CalibrationResultsDto; onReview
           <section className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
             <div className="mb-1 flex items-center gap-2">
               <Building2 className="size-4 text-navy" aria-hidden="true" />
-              <h2 className="text-sm font-black uppercase tracking-wide text-slate-500">Company alignment</h2>
+              <h2 className="text-sm font-black uppercase tracking-wide text-slate-600">Company alignment</h2>
             </div>
             <p className="mb-4 text-[15px] font-semibold leading-relaxed text-navy">
               You align best with <span className="text-[#f5b400]">{top.name}</span> - you're{' '}
@@ -189,7 +189,7 @@ function ResultsView({ data, onReview }: { data: CalibrationResultsDto; onReview
               <span className="text-[10px] font-bold uppercase tracking-widest text-[#f5b400]">{best.category}</span>
               <p className="mt-1 text-[15px] font-semibold leading-relaxed text-navy">{best.message}</p>
               {top && (
-                <p className="mt-1.5 text-xs font-semibold text-slate-500">
+                <p className="mt-1.5 text-xs font-semibold text-slate-600">
                   Unlock this to get <span className="text-navy">{top.name}</span>-ready faster.
                 </p>
               )}
@@ -207,7 +207,7 @@ function ResultsView({ data, onReview }: { data: CalibrationResultsDto; onReview
                       className="group flex items-center gap-3 rounded-2xl border border-slate-100 p-3 transition hover:border-slate-200 hover:bg-slate-50/60"
                     >
                       <span className="min-w-0 flex-1">
-                        <span className="block text-[10px] font-bold uppercase tracking-widest text-slate-400">{r.category}</span>
+                        <span className="block text-[10px] font-bold uppercase tracking-widest text-slate-500">{r.category}</span>
                         <span className="mt-0.5 block text-sm leading-snug text-slate-600">{r.message}</span>
                       </span>
                       <span className="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-[#f5b400] transition-colors group-hover:text-[#cc9600]">
@@ -226,7 +226,7 @@ function ResultsView({ data, onReview }: { data: CalibrationResultsDto; onReview
           <button
             type="button"
             onClick={onReview}
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 transition-colors hover:text-navy"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 transition-colors hover:text-navy"
           >
             <ChevronDown className="size-4" aria-hidden="true" /> Review your answers
           </button>
@@ -267,7 +267,7 @@ function ScoreRing({ value, tone }: { value: number; tone: 'emerald' | 'amber' |
       </svg>
       <div className="absolute flex flex-col items-center leading-none">
         <span className="text-2xl font-black tabular-nums text-navy">{value}%</span>
-        <span className="mt-0.5 text-[9px] font-bold uppercase tracking-wider text-slate-400">Overall</span>
+        <span className="mt-0.5 text-[9px] font-bold uppercase tracking-wider text-slate-500">Overall</span>
       </div>
     </div>
   );
@@ -327,7 +327,7 @@ function SectionCard({
           ))}
         </div>
       ) : (
-        <p className="text-sm leading-relaxed text-slate-500">{empty}</p>
+        <p className="text-sm leading-relaxed text-slate-600">{empty}</p>
       )}
     </section>
   );

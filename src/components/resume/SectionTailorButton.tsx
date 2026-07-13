@@ -112,13 +112,13 @@ export function SectionTailorButton({
           <div className="relative flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
               <h3 className="flex items-center gap-2 text-sm font-bold text-navy"><Sparkles className="size-4 text-[#6d3bf5]" /> Tailor {LABELS[section]} to a job</h3>
-              <button onClick={() => setOpen(false)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"><X className="size-5" /></button>
+              <button onClick={() => setOpen(false)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100"><X className="size-5" /></button>
             </div>
             <div className="space-y-4 overflow-y-auto p-5">
               <div>
-                <label className="mb-1 block text-[11px] font-medium text-slate-500">Paste the job description</label>
+                <label className="mb-1 block text-[11px] font-medium text-slate-600">Paste the job description</label>
                 <textarea rows={5} value={jd} onChange={(e) => setJd(e.target.value)} maxLength={12000} placeholder="Paste the role's responsibilities and requirements…" className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange" />
-                <p className="mt-1 text-[11px] text-slate-400">{jd.trim().length < 15 ? 'At least 15 characters.' : `${jd.length} characters`}</p>
+                <p className="mt-1 text-[11px] text-slate-500">{jd.trim().length < 15 ? 'At least 15 characters.' : `${jd.length} characters`}</p>
               </div>
               <button onClick={generate} disabled={loading || jd.trim().length < 15} className="inline-flex items-center gap-2 rounded-lg bg-[#6d3bf5] px-4 py-2 text-sm font-semibold text-white hover:bg-[#5b2fd6] disabled:opacity-50">
                 {loading ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />} Generate
@@ -143,14 +143,14 @@ export function SectionTailorButton({
                   {section === 'skills' && (
                     <div className="space-y-2">
                       {result.reorderedSkillNames && result.reorderedSkillNames.length > 0 && (
-                        <div><p className="text-[11px] font-semibold text-slate-500">Reordered</p><p className="text-sm text-slate-700">{result.reorderedSkillNames.join(' · ')}</p></div>
+                        <div><p className="text-[11px] font-semibold text-slate-600">Reordered</p><p className="text-sm text-slate-700">{result.reorderedSkillNames.join(' · ')}</p></div>
                       )}
                       {result.missingSkillSuggestions && result.missingSkillSuggestions.length > 0 && (
                         <div>
-                          <p className="text-[11px] font-semibold text-slate-500">Suggested additions</p>
+                          <p className="text-[11px] font-semibold text-slate-600">Suggested additions</p>
                           <ul className="mt-1 space-y-1">
                             {result.missingSkillSuggestions.map((s) => (
-                              <li key={s.name} className="text-sm text-slate-700"><span className="font-semibold">{s.name}</span> - <span className="text-slate-500">{s.reason}</span></li>
+                              <li key={s.name} className="text-sm text-slate-700"><span className="font-semibold">{s.name}</span> - <span className="text-slate-600">{s.reason}</span></li>
                             ))}
                           </ul>
                         </div>
@@ -163,8 +163,8 @@ export function SectionTailorButton({
                     <div className="space-y-2">
                       {result.bulletChanges.map((c, i) => (
                         <div key={i} className="rounded-lg border border-slate-200 p-2">
-                          <p className="text-[11px] font-semibold text-slate-500">{c.position} · {c.company}</p>
-                          <p className="mt-1 text-xs text-slate-400 line-through">{c.before}</p>
+                          <p className="text-[11px] font-semibold text-slate-600">{c.position} · {c.company}</p>
+                          <p className="mt-1 text-xs text-slate-500 line-through">{c.before}</p>
                           <p className="text-sm text-slate-800">{c.after}</p>
                         </div>
                       ))}
@@ -176,8 +176,8 @@ export function SectionTailorButton({
                     <div className="space-y-2">
                       {result.projectChanges.map((c, i) => (
                         <div key={i} className="rounded-lg border border-slate-200 p-2">
-                          <p className="text-[11px] font-semibold text-slate-500">{c.name}</p>
-                          <p className="mt-1 text-xs text-slate-400 line-through">{c.beforeDescription}</p>
+                          <p className="text-[11px] font-semibold text-slate-600">{c.name}</p>
+                          <p className="mt-1 text-xs text-slate-500 line-through">{c.beforeDescription}</p>
                           <p className="text-sm text-slate-800">{c.afterDescription}</p>
                         </div>
                       ))}
@@ -197,8 +197,8 @@ export function SectionTailorButton({
 function Panel({ title, text, muted }: { title: string; text: string; muted?: boolean }) {
   return (
     <div className={`rounded-lg border p-2 ${muted ? 'border-slate-200 bg-slate-50' : 'border-green-200 bg-green-50'}`}>
-      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{title}</p>
-      <p className={`mt-0.5 whitespace-pre-wrap text-sm ${muted ? 'text-slate-500' : 'text-slate-800'}`}>{text}</p>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{title}</p>
+      <p className={`mt-0.5 whitespace-pre-wrap text-sm ${muted ? 'text-slate-600' : 'text-slate-800'}`}>{text}</p>
     </div>
   );
 }

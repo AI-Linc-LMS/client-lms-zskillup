@@ -119,13 +119,13 @@ function VerifyForm() {
           <Mail className="size-5 text-orange" aria-hidden="true" />
         </span>
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
             Step 1b · Email verification
           </p>
           <h1 className="text-xl font-bold text-navy">Verify your email</h1>
         </div>
       </div>
-      <p className="mb-4 text-sm text-slate-500">
+      <p className="mb-4 text-sm text-slate-600">
         Enter the 6-digit code we sent to{' '}
         <span className="font-semibold text-navy">{email || 'your email'}</span>.
       </p>
@@ -160,7 +160,7 @@ function VerifyForm() {
       </form>
 
       {/* Resend section */}
-      <div className="mt-4 flex items-center justify-center gap-1.5 text-sm text-slate-500">
+      <div className="mt-4 flex items-center justify-center gap-1.5 text-sm text-slate-600">
         <span>Didn&apos;t get a code?</span>
         <button
           type="button"

@@ -62,7 +62,7 @@ interface GenState {
   error?: string;
 }
 
-const labelCls = 'block text-[11px] font-bold uppercase tracking-widest text-slate-400';
+const labelCls = 'block text-[11px] font-bold uppercase tracking-widest text-slate-500';
 const inputCls =
   'mt-1 h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30';
 
@@ -270,12 +270,12 @@ export function AssessmentWizard({
             </span>
             <div>
               <h2 className="text-base font-black text-navy">{editId ? 'Edit assessment' : 'Build an assessment'}</h2>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-slate-500">
                 {editId ? 'Edit details + append question sections (pre-submission only)' : 'AI-sourced from your bank · generates the rest'}
               </p>
             </div>
           </div>
-          <button type="button" onClick={onClose} className="grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100">
+          <button type="button" onClick={onClose} className="grid size-8 place-items-center rounded-full text-slate-500 hover:bg-slate-100">
             <X className="size-4" />
           </button>
         </div>
@@ -285,10 +285,10 @@ export function AssessmentWizard({
           <div className="flex items-center gap-2 border-b border-slate-100 px-6 py-3">
             {STEPS.map((s, i) => (
               <div key={s} className="flex items-center gap-2">
-                <span className={cn('grid size-6 place-items-center rounded-full text-[11px] font-bold', i < step ? 'bg-emerald-500 text-white' : i === step ? 'bg-orange text-[#171717]' : 'bg-slate-100 text-slate-400')}>
+                <span className={cn('grid size-6 place-items-center rounded-full text-[11px] font-bold', i < step ? 'bg-emerald-500 text-white' : i === step ? 'bg-orange text-[#171717]' : 'bg-slate-100 text-slate-500')}>
                   {i < step ? <Check className="size-3.5" /> : i + 1}
                 </span>
-                <span className={cn('text-xs font-semibold', i === step ? 'text-navy' : 'text-slate-400')}>{s}</span>
+                <span className={cn('text-xs font-semibold', i === step ? 'text-navy' : 'text-slate-500')}>{s}</span>
                 {i < STEPS.length - 1 ? <span className="mx-1 h-px w-6 bg-slate-200" /> : null}
               </div>
             ))}
@@ -303,7 +303,7 @@ export function AssessmentWizard({
                 <CheckCircle2 className="size-7" />
               </span>
               <h3 className="mt-4 text-lg font-black text-navy">Assessment published</h3>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-slate-600">
                 {created.totalQuestions} questions ({created.mcqCount} MCQ · {created.codingCount} coding) for{' '}
                 {created.companyName}. It&apos;s now on the calendars of registered students.
               </p>
@@ -368,7 +368,7 @@ export function AssessmentWizard({
                   )}
                   {existing.items.length ? (
                     <div className="rounded-xl border border-slate-200 bg-white">
-                      <p className="border-b border-slate-100 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                      <p className="border-b border-slate-100 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
                         Current questions ({existing.items.length})
                       </p>
                       <ul className="max-h-44 space-y-0.5 overflow-y-auto p-2">
@@ -378,8 +378,8 @@ export function AssessmentWizard({
                               {it.type === 'MCQ' ? <Brain className="size-3" /> : <Code2 className="size-3" />}
                             </span>
                             <span className="min-w-0 flex-1 truncate text-slate-600">{it.label}</span>
-                            <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500">{it.difficulty?.[0]}</span>
-                            <span className="text-[10px] font-medium text-slate-400">{it.marks}m</span>
+                            <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600">{it.difficulty?.[0]}</span>
+                            <span className="text-[10px] font-medium text-slate-500">{it.marks}m</span>
                           </li>
                         ))}
                       </ul>
@@ -400,7 +400,7 @@ export function AssessmentWizard({
               <button
                 type="button"
                 onClick={() => setSections((p) => [...p, { name: `Section ${p.length + 1}`, items: [] }])}
-                className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-slate-300 px-4 py-2 text-sm font-bold text-slate-500 hover:border-orange hover:text-[#1a1d29]"
+                className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-slate-300 px-4 py-2 text-sm font-bold text-slate-600 hover:border-orange hover:text-[#1a1d29]"
               >
                 <Plus className="size-4" /> Add section
               </button>
@@ -422,18 +422,18 @@ export function AssessmentWizard({
                 <div className="flex-1 rounded-2xl border border-slate-200 p-4 text-center">
                   <Brain className="mx-auto size-5 text-indigo-500" />
                   <p className="mt-1 text-2xl font-black text-navy">{totals.mcq}</p>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">MCQ questions</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">MCQ questions</p>
                 </div>
                 <div className="flex-1 rounded-2xl border border-slate-200 p-4 text-center">
                   <Code2 className="mx-auto size-5 text-emerald-500" />
                   <p className="mt-1 text-2xl font-black text-navy">{totals.coding}</p>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Coding problems</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Coding problems</p>
                 </div>
               </div>
               {sections.filter((s) => s.items.length).map((s, i) => (
                 <div key={i} className="rounded-xl border border-slate-100 p-3">
                   <p className="text-sm font-bold text-navy">{s.name}</p>
-                  <ul className="mt-1 space-y-0.5 text-xs text-slate-500">
+                  <ul className="mt-1 space-y-0.5 text-xs text-slate-600">
                     {s.items.map((it) => (
                       <li key={it.key}>· {it.topicName} - {it.ids.length} {it.type === 'MCQ' ? 'MCQ' : 'coding'} ({it.fromBank} bank + {it.generated} AI)</li>
                     ))}
@@ -448,7 +448,7 @@ export function AssessmentWizard({
         {/* footer */}
         {!created ? (
           <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4">
-            <button type="button" onClick={() => (step === 0 ? onClose() : setStep(step - 1))} className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100">
+            <button type="button" onClick={() => (step === 0 ? onClose() : setStep(step - 1))} className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100">
               <ArrowLeft className="size-4" /> {step === 0 ? 'Cancel' : 'Back'}
             </button>
             {step === 0 ? (
@@ -505,7 +505,7 @@ function SectionEditor({
       <div className="flex items-center justify-between gap-2">
         <input value={section.name} onChange={(e) => onRename(e.target.value)} className="w-40 rounded-lg border border-transparent px-1 text-sm font-black text-navy hover:border-slate-200 focus:border-orange focus:outline-none" />
         {onRemoveSection ? (
-          <button type="button" onClick={onRemoveSection} className="text-slate-300 hover:text-rose-500"><Trash2 className="size-4" /></button>
+          <button type="button" onClick={onRemoveSection} className="text-slate-400 hover:text-rose-500"><Trash2 className="size-4" /></button>
         ) : null}
       </div>
 
@@ -518,9 +518,9 @@ function SectionEditor({
                 {it.type === 'MCQ' ? <Brain className="size-3.5" /> : <Code2 className="size-3.5" />}
               </span>
               <span className="min-w-0 flex-1 truncate font-semibold text-navy">{it.topicName}</span>
-              <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500">{it.difficulty[0]}</span>
-              <span className="text-slate-400">{it.ids.length} {it.type === 'MCQ' ? 'Q' : 'coding'} · {it.marks}m · {it.fromBank}+{it.generated}AI</span>
-              <button type="button" onClick={() => onRemoveItem(it.key)} className="text-slate-300 hover:text-rose-500"><X className="size-3.5" /></button>
+              <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600">{it.difficulty[0]}</span>
+              <span className="text-slate-500">{it.ids.length} {it.type === 'MCQ' ? 'Q' : 'coding'} · {it.marks}m · {it.fromBank}+{it.generated}AI</span>
+              <button type="button" onClick={() => onRemoveItem(it.key)} className="text-slate-400 hover:text-rose-500"><X className="size-3.5" /></button>
             </div>
           ))}
         </div>
@@ -537,7 +537,7 @@ function SectionEditor({
         />
         <div className="inline-flex overflow-hidden rounded-lg border border-slate-200">
           {(['MCQ', 'CODING'] as const).map((t) => (
-            <button key={t} type="button" onClick={() => setType(t)} className={cn('px-3 py-2 text-xs font-bold', type === t ? 'bg-navy text-white' : 'bg-white text-slate-500')}>
+            <button key={t} type="button" onClick={() => setType(t)} className={cn('px-3 py-2 text-xs font-bold', type === t ? 'bg-navy text-white' : 'bg-white text-slate-600')}>
               {t === 'MCQ' ? 'Quiz' : 'Coding'}
             </button>
           ))}
@@ -552,11 +552,11 @@ function SectionEditor({
           <option value="MEDIUM">Medium</option>
           <option value="HARD">Hard</option>
         </select>
-        <label className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-slate-400" title="Number of questions">
+        <label className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-slate-500" title="Number of questions">
           Qs
           <input type="number" min={1} max={50} value={count} onChange={(e) => setCount(Number(e.target.value))} className="h-10 w-14 rounded-lg border border-slate-200 bg-white px-2 text-sm text-navy focus:border-orange focus:outline-none" />
         </label>
-        <label className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-slate-400" title="Marks per question">
+        <label className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-slate-500" title="Marks per question">
           Marks
           <input type="number" min={1} max={20} value={marks} onChange={(e) => setMarks(Number(e.target.value))} className="h-10 w-14 rounded-lg border border-slate-200 bg-white px-2 text-sm text-navy focus:border-orange focus:outline-none" />
         </label>
@@ -604,14 +604,14 @@ function GenerationModal({ gen, onClose }: { gen: GenState; onClose: () => void 
             <ul className="space-y-1.5">
               {gen.labels.map((l, i) => (
                 <motion.li key={i} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} className="flex items-start gap-2 text-xs">
-                  <span className={cn('mt-0.5 grid size-4 shrink-0 place-items-center rounded-full', i < gen.bankCount ? 'bg-slate-200 text-slate-500' : 'bg-emerald-500 text-white')}>
+                  <span className={cn('mt-0.5 grid size-4 shrink-0 place-items-center rounded-full', i < gen.bankCount ? 'bg-slate-200 text-slate-600' : 'bg-emerald-500 text-white')}>
                     {i < gen.bankCount ? <Check className="size-2.5" /> : <Sparkles className="size-2.5" />}
                   </span>
                   <span className="line-clamp-2 text-slate-600">{l}</span>
                 </motion.li>
               ))}
               {(gen.phase === 'sourcing' || gen.phase === 'generating') ? (
-                <li className="flex items-center gap-2 text-xs text-slate-400"><Loader2 className="size-3.5 animate-spin" /> working…</li>
+                <li className="flex items-center gap-2 text-xs text-slate-500"><Loader2 className="size-3.5 animate-spin" /> working…</li>
               ) : null}
             </ul>
           )}

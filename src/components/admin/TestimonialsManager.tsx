@@ -137,27 +137,27 @@ export function TestimonialsManager() {
           {editing ? 'Edit testimonial' : 'New testimonial'}
         </p>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-500">Author name</span>
+          <span className="mb-1 block text-xs font-medium text-slate-600">Author name</span>
           <input required value={form.authorName} onChange={(e) => setForm({ ...form, authorName: e.target.value })} className={inputCls} />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-500">Author title / company</span>
+          <span className="mb-1 block text-xs font-medium text-slate-600">Author title / company</span>
           <input value={form.authorTitle} onChange={(e) => setForm({ ...form, authorTitle: e.target.value })} className={inputCls} />
         </label>
         <label className="block sm:col-span-2">
-          <span className="mb-1 block text-xs font-medium text-slate-500">Quote</span>
+          <span className="mb-1 block text-xs font-medium text-slate-600">Quote</span>
           <textarea required rows={3} value={form.quote} onChange={(e) => setForm({ ...form, quote: e.target.value })} className={inputCls} />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-500">Avatar URL</span>
+          <span className="mb-1 block text-xs font-medium text-slate-600">Avatar URL</span>
           <input value={form.avatarUrl} onChange={(e) => setForm({ ...form, avatarUrl: e.target.value })} className={inputCls} />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-500">Rating (1–5)</span>
+          <span className="mb-1 block text-xs font-medium text-slate-600">Rating (1–5)</span>
           <input type="number" min={1} max={5} value={form.rating} onChange={(e) => setForm({ ...form, rating: e.target.value === '' ? '' : Number(e.target.value) })} className={inputCls} />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-500">Sort order</span>
+          <span className="mb-1 block text-xs font-medium text-slate-600">Sort order</span>
           <input type="number" value={form.sortOrder} onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })} className={inputCls} />
         </label>
         <label className="flex items-center gap-2 pt-6">
@@ -177,9 +177,9 @@ export function TestimonialsManager() {
 
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         {loading ? (
-          <div className="flex items-center justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-400" /></div>
+          <div className="flex items-center justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-500" /></div>
         ) : items.length === 0 ? (
-          <div className="py-12 text-center text-sm text-slate-400">No testimonials yet.</div>
+          <div className="py-12 text-center text-sm text-slate-500">No testimonials yet.</div>
         ) : (
           <ul className="divide-y divide-slate-100">
             {items.map((t) => (
@@ -187,8 +187,8 @@ export function TestimonialsManager() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="font-semibold text-navy">{t.authorName}</p>
-                    {t.authorTitle && <span className="text-xs text-slate-400">· {t.authorTitle}</span>}
-                    {!t.isPublished && <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">HIDDEN</span>}
+                    {t.authorTitle && <span className="text-xs text-slate-500">· {t.authorTitle}</span>}
+                    {!t.isPublished && <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">HIDDEN</span>}
                   </div>
                   <p className="mt-1 line-clamp-2 text-sm text-slate-600">“{t.quote}”</p>
                   {t.rating != null && (

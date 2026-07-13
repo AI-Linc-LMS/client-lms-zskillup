@@ -53,14 +53,14 @@ export function LivePointsMeter({
 
   return (
     <div className={cn('rounded-2xl border border-slate-200/80 bg-white p-3', className)}>
-      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Worth right now</p>
+      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Worth right now</p>
       <div className="mt-1 flex items-baseline gap-2">
         <span className={cn('inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-2xl font-black tabular-nums ring-1 ring-inset', tone)}>
           <Zap className="size-4" /> {worth}
         </span>
-        <span className="text-xs font-medium text-slate-400">/ {points.base} pts</span>
+        <span className="text-xs font-medium text-slate-500">/ {points.base} pts</span>
       </div>
-      <p className="mt-1 text-[11px] font-medium text-slate-500">
+      <p className="mt-1 text-[11px] font-medium text-slate-600">
         {inGrace ? (
           <span className="text-emerald-600">Full points for {graceLeft}s - answer fast!</span>
         ) : atFloor ? (

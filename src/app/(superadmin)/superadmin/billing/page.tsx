@@ -35,7 +35,7 @@ export default function SuperAdminBillingPage() {
       <Breadcrumb items={[{ label: 'Dashboard', href: '/superadmin/dashboard' }, { label: 'Billing' }]} />
       <div className="mt-4">
         <h1 className="text-2xl font-black tracking-tight text-navy">Billing &amp; revenue</h1>
-        <p className="text-sm text-slate-500">Real payments, configurable pricing, and student access - Super Admin.</p>
+        <p className="text-sm text-slate-600">Real payments, configurable pricing, and student access - Super Admin.</p>
       </div>
       <PaymentsSection />
       <PricingSection />
@@ -59,7 +59,7 @@ function PaymentsSection() {
     return <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">{err}</div>;
   }
   if (!data) {
-    return <div className="mt-6 grid h-40 place-items-center"><Loader2 className="size-5 animate-spin text-slate-400" /></div>;
+    return <div className="mt-6 grid h-40 place-items-center"><Loader2 className="size-5 animate-spin text-slate-500" /></div>;
   }
 
   return (
@@ -153,11 +153,11 @@ function PricingSection() {
   return (
     <section className="mt-8">
       <h2 className="text-lg font-black tracking-tight text-navy">Pricing</h2>
-      <p className="text-sm text-slate-500">Edit any price - it applies to new purchases immediately.</p>
+      <p className="text-sm text-slate-600">Edit any price - it applies to new purchases immediately.</p>
       <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
         <table className="w-full min-w-[640px] text-sm">
           <thead>
-            <tr className="border-b border-slate-100 text-left text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <tr className="border-b border-slate-100 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
               <th className="p-3">Scope</th>
               <th className="p-3">Tier</th>
               <th className="p-3">Period</th>
@@ -169,15 +169,15 @@ function PricingSection() {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {rows === null ? (
-              <tr><td colSpan={7} className="p-8 text-center"><Loader2 className="mx-auto size-5 animate-spin text-slate-400" /></td></tr>
+              <tr><td colSpan={7} className="p-8 text-center"><Loader2 className="mx-auto size-5 animate-spin text-slate-500" /></td></tr>
             ) : (
               rows.map((p) => {
                 const d = draft[p.id] ?? { rupees: '', days: '', active: p.isActive };
                 return (
                   <tr key={p.id} className="text-navy">
                     <td className="p-3 font-semibold">{scopeName(p.scopeType)}</td>
-                    <td className="p-3 text-slate-500">{p.tier}</td>
-                    <td className="p-3 capitalize text-slate-500">{p.period.toLowerCase()}</td>
+                    <td className="p-3 text-slate-600">{p.tier}</td>
+                    <td className="p-3 capitalize text-slate-600">{p.period.toLowerCase()}</td>
                     <td className="p-3">
                       <input
                         value={d.rupees}
@@ -255,11 +255,11 @@ function EntitlementsSection() {
   return (
     <section className="mt-8">
       <h2 className="text-lg font-black tracking-tight text-navy">Entitlements</h2>
-      <p className="text-sm text-slate-500">Look up and manage what a student or college can access.</p>
+      <p className="text-sm text-slate-600">Look up and manage what a student or college can access.</p>
 
       <div className="mt-4 flex flex-wrap items-end gap-2">
         <div>
-          <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400">Student user ID</label>
+          <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-500">Student user ID</label>
           <input
             value={userId}
             onChange={(e) => setUserId(e.target.value)}
@@ -283,7 +283,7 @@ function EntitlementsSection() {
         <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
           <table className="w-full min-w-[560px] text-sm">
             <thead>
-              <tr className="border-b border-slate-100 text-left text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              <tr className="border-b border-slate-100 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 <th className="p-3">Scope</th>
                 <th className="p-3">Source</th>
                 <th className="p-3">Status</th>
@@ -293,21 +293,21 @@ function EntitlementsSection() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {rows.length === 0 ? (
-                <tr><td colSpan={5} className="p-6 text-center text-slate-400">No entitlements for this user.</td></tr>
+                <tr><td colSpan={5} className="p-6 text-center text-slate-500">No entitlements for this user.</td></tr>
               ) : (
                 rows.map((e) => (
                   <tr key={e.id} className="text-navy">
                     <td className="p-3 font-semibold">
                       {scopeName(e.scopeType)}
-                      {e.scopeRef ? <span className="text-slate-400"> · {e.scopeRef}</span> : null}
+                      {e.scopeRef ? <span className="text-slate-500"> · {e.scopeRef}</span> : null}
                     </td>
-                    <td className="p-3 text-slate-500">{e.source}</td>
+                    <td className="p-3 text-slate-600">{e.source}</td>
                     <td className="p-3">
-                      <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-bold', e.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500')}>
+                      <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-bold', e.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600')}>
                         {e.status}
                       </span>
                     </td>
-                    <td className="p-3 tabular-nums text-slate-500">
+                    <td className="p-3 tabular-nums text-slate-600">
                       {e.daysRemaining != null ? `${e.daysRemaining}d` : e.expiresAt ? new Date(e.expiresAt).toLocaleDateString() : 'Lifetime'}
                     </td>
                     <td className="p-3">
@@ -386,7 +386,7 @@ function GrantForm({ onGranted }: { onGranted: () => void }) {
       <button type="button" onClick={() => void submit()} disabled={busy || !uid.trim()} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-orange px-4 text-sm font-bold text-[#171717] disabled:opacity-60">
         {busy ? <Loader2 className="size-4 animate-spin" /> : 'Grant'}
       </button>
-      <button type="button" onClick={() => setOpen(false)} className="h-9 px-2 text-sm font-semibold text-slate-500">Cancel</button>
+      <button type="button" onClick={() => setOpen(false)} className="h-9 px-2 text-sm font-semibold text-slate-600">Cancel</button>
     </div>
   );
 }
@@ -405,7 +405,7 @@ function scopeName(scope: string): string {
 function Kpi({ icon: Icon, label, value, tone }: { icon: typeof CreditCard; label: string; value: string; tone: 'orange' | 'navy' }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4">
-      <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-slate-400">
+      <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-slate-500">
         <span className={cn('grid size-6 place-items-center rounded-lg', tone === 'orange' ? 'bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717]' : 'bg-navy text-white')}>
           <Icon className="size-3.5" />
         </span>
@@ -417,14 +417,14 @@ function Kpi({ icon: Icon, label, value, tone }: { icon: typeof CreditCard; labe
 }
 
 const MINI_TONE: Record<string, string> = {
-  emerald: 'text-emerald-600', rose: 'text-rose-600', amber: 'text-amber-600', slate: 'text-slate-500',
+  emerald: 'text-emerald-600', rose: 'text-rose-600', amber: 'text-amber-600', slate: 'text-slate-600',
 };
 function Mini({ icon: Icon, label, value, tone }: { icon: typeof CreditCard; label: string; value: number; tone: string }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-3 text-center">
       <Icon className={cn('mx-auto size-4', MINI_TONE[tone])} />
       <p className="mt-1 text-lg font-black tabular-nums text-navy">{value}</p>
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</p>
     </div>
   );
 }
@@ -432,7 +432,7 @@ function Mini({ icon: Icon, label, value, tone }: { icon: typeof CreditCard; lab
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5">
-      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400">{title}</h3>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500">{title}</h3>
       <div className="mt-3">{children}</div>
     </div>
   );
@@ -445,7 +445,7 @@ function BreakdownTable({ rows }: { rows: { label: string; sub: string; value: s
         <li key={i} className="flex items-center justify-between gap-3 border-b border-slate-50 pb-2 last:border-0">
           <span className="min-w-0">
             <span className="block truncate text-sm font-semibold text-navy">{r.label}</span>
-            <span className="text-xs text-slate-400">{r.sub}</span>
+            <span className="text-xs text-slate-500">{r.sub}</span>
           </span>
           <span className="shrink-0 text-sm font-black tabular-nums text-navy">{r.value}</span>
         </li>
@@ -455,5 +455,5 @@ function BreakdownTable({ rows }: { rows: { label: string; sub: string; value: s
 }
 
 function Empty({ children }: { children: React.ReactNode }) {
-  return <p className="py-6 text-center text-sm text-slate-400">{children}</p>;
+  return <p className="py-6 text-center text-sm text-slate-500">{children}</p>;
 }

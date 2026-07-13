@@ -14,7 +14,7 @@ function Kpi({ icon: Icon, label, value, tone }: { icon: typeof IndianRupee; lab
     <div className="rounded-2xl border border-slate-200 bg-white p-4">
       <Icon className={`size-5 ${tone}`} />
       <p className="mt-2 text-xl font-black tabular-nums text-navy">{value}</p>
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
     </div>
   );
 }
@@ -41,7 +41,7 @@ export function RevenueCharts() {
   if (d === null) {
     return (
       <div className="grid h-40 place-items-center rounded-2xl border border-slate-200 bg-white">
-        <Loader2 className="size-6 animate-spin text-slate-300" />
+        <Loader2 className="size-6 animate-spin text-slate-400" />
       </div>
     );
   }
@@ -74,7 +74,7 @@ export function RevenueCharts() {
             {planSegments.length ? (
               <ReadinessDonut segments={planSegments} centerValue={inr(d.mrrCents)} centerLabel="MRR / mo" formatValue={(v) => inr(v)} />
             ) : (
-              <p className="py-6 text-center text-sm text-slate-400">No priced plans active yet.</p>
+              <p className="py-6 text-center text-sm text-slate-500">No priced plans active yet.</p>
             )}
           </Card>
           <Card title="Subscription mix">
@@ -82,7 +82,7 @@ export function RevenueCharts() {
           </Card>
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-400">
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
           No subscription revenue yet - charts appear once colleges or students are on paid plans.
         </div>
       )}

@@ -95,22 +95,22 @@ export function DayDrawer({
         <div className="flex-1 overflow-y-auto p-5">
           {locked ? (
             <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
-              <span className="grid size-14 place-items-center rounded-2xl bg-slate-100 text-slate-400">
+              <span className="grid size-14 place-items-center rounded-2xl bg-slate-100 text-slate-500">
                 <Lock className="size-6" />
               </span>
               <p className="text-sm font-bold text-navy">This day is still locked</p>
-              <p className="max-w-xs text-xs text-slate-500">
+              <p className="max-w-xs text-xs text-slate-600">
                 Your roadmap unlocks one day at a time. {locked.unlockDate ? unlockCopy(locked.unlockDate) : 'Come back soon'}.
               </p>
             </div>
           ) : !day ? (
             <div className="grid h-full place-items-center">
-              <Loader2 className="size-5 animate-spin text-slate-300" />
+              <Loader2 className="size-5 animate-spin text-slate-400" />
             </div>
           ) : (
             <>
               <div className="mb-3 flex items-center justify-between">
-                <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
                   {day.doneCount}/{day.taskCount} done
                 </p>
                 {day.status === 'completed' && (
@@ -124,7 +124,7 @@ export function DayDrawer({
                   </li>
                 ))}
               </ul>
-              <p className="mt-4 text-center text-[11px] text-slate-400">
+              <p className="mt-4 text-center text-[11px] text-slate-500">
                 Tasks tick off automatically when you finish the linked practice or mock - or check them yourself.
               </p>
             </>

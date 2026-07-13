@@ -90,7 +90,7 @@ export function AuroraStats() {
                 <p className="text-[28px] font-black leading-none tracking-tight text-[#1a1d29] sm:text-[34px]">
                   <AnimatedNumber value={t.value} />
                 </p>
-                <p className="mt-2 text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                <p className="mt-2 text-[11px] font-bold uppercase tracking-widest text-slate-600">
                   {t.label}
                 </p>
                 {t.sub ? (

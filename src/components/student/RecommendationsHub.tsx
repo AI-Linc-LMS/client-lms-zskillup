@@ -65,7 +65,7 @@ export function RecommendationsHub() {
   if (loading) {
     return (
       <div className="grid h-64 place-items-center">
-        <Loader2 className="size-6 animate-spin text-slate-300" />
+        <Loader2 className="size-6 animate-spin text-slate-400" />
       </div>
     );
   }
@@ -75,7 +75,7 @@ export function RecommendationsHub() {
     return (
       <div className="mx-auto max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center">
         <h2 className="font-display text-lg font-bold text-navy">Couldn&apos;t load your recommendations</h2>
-        <p className="mt-1.5 text-sm text-slate-500">Something went wrong. Please refresh and try again.</p>
+        <p className="mt-1.5 text-sm text-slate-600">Something went wrong. Please refresh and try again.</p>
       </div>
     );
   }
@@ -88,7 +88,7 @@ export function RecommendationsHub() {
           <ClipboardCheck className="size-7" />
         </span>
         <h2 className="mt-4 font-display text-xl font-bold text-navy">Unlock your recommendations</h2>
-        <p className="mt-2 text-sm leading-relaxed text-slate-500">
+        <p className="mt-2 text-sm leading-relaxed text-slate-600">
           Take your one-time placement readiness test - we&apos;ll map where you stand and recommend exactly the courses,
           companies, sections and topics to focus on next.
         </p>
@@ -117,7 +117,7 @@ export function RecommendationsHub() {
             <h1 className="mt-2 font-display text-2xl font-bold tracking-tight text-navy">
               Your personalized next steps
             </h1>
-            <p className="mt-1 max-w-xl text-sm leading-relaxed text-slate-500">
+            <p className="mt-1 max-w-xl text-sm leading-relaxed text-slate-600">
               Based on your placement readiness and the practice you&apos;ve done - the courses, companies, sections and topics
               that move your readiness fastest.
             </p>
@@ -130,7 +130,7 @@ export function RecommendationsHub() {
             >
               {data.overall}%
             </div>
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{data.bandLabel}</div>
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{data.bandLabel}</div>
           </div>
         </div>
         {data.aiSummary && <p className="px-6 py-5 text-[15px] font-medium leading-relaxed text-slate-700 sm:px-7">{data.aiSummary}</p>}
@@ -156,7 +156,7 @@ export function RecommendationsHub() {
       {/* Grouped product recommendations */}
       {groups.map(([label, g]) => (
         <section key={label} className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
-          <h2 className="mb-3 flex items-center gap-2 text-sm font-black uppercase tracking-wide text-slate-500">
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-black uppercase tracking-wide text-slate-600">
             <ShoppingBag className="size-4 text-[#f5b400]" /> {label}
           </h2>
           <ul className="grid gap-3 sm:grid-cols-2">
@@ -168,7 +168,7 @@ export function RecommendationsHub() {
                   className="group flex h-full items-start gap-3 rounded-2xl border border-slate-100 p-4 transition hover:border-[#ffc42d]/40 hover:bg-[#ffc42d]/[0.06]"
                 >
                   <span className="min-w-0 flex-1">
-                    <span className="block text-[10px] font-bold uppercase tracking-widest text-slate-400">{r.category}</span>
+                    <span className="block text-[10px] font-bold uppercase tracking-widest text-slate-500">{r.category}</span>
                     <span className="mt-1 block text-sm leading-snug text-slate-600">{r.message}</span>
                     <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-[#f5b400]">
                       {r.cta} <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
@@ -184,11 +184,11 @@ export function RecommendationsHub() {
       {/* Company alignment */}
       {data.companies.length > 0 && (
         <section className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
-          <h2 className="mb-1 flex items-center gap-2 text-sm font-black uppercase tracking-wide text-slate-500">
+          <h2 className="mb-1 flex items-center gap-2 text-sm font-black uppercase tracking-wide text-slate-600">
             <Building2 className="size-4 text-navy" /> Companies you align with
           </h2>
           {top && (
-            <p className="mb-4 text-sm text-slate-500">
+            <p className="mb-4 text-sm text-slate-600">
               You align best with <span className="font-bold text-navy">{top.name}</span> - {top.readiness}% ready.
             </p>
           )}
@@ -220,7 +220,7 @@ export function RecommendationsHub() {
       {/* Focus areas */}
       {data.gaps.length > 0 && (
         <section className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
-          <h2 className="mb-3 flex items-center gap-2 text-sm font-black uppercase tracking-wide text-slate-500">
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-black uppercase tracking-wide text-slate-600">
             <Target className="size-4 text-[#f5b400]" /> Focus areas to close first
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -241,7 +241,7 @@ export function RecommendationsHub() {
 
       {/* Browse everything */}
       <div className="flex flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-slate-200 p-6 text-center sm:flex-row">
-        <p className="text-sm text-slate-500">Want to explore everything available?</p>
+        <p className="text-sm text-slate-600">Want to explore everything available?</p>
         <div className="flex gap-2">
           <Link href="/shop" className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-50">
             <ShoppingBag className="size-4" /> Browse shop

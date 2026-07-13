@@ -102,7 +102,7 @@ export default function AboutPage() {
         <div className="mx-auto grid max-w-5xl grid-cols-2 gap-6 px-4 py-10 sm:grid-cols-4 sm:px-6">
           {STATS.map((s) => (
             <div key={s.label}>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                 {s.label}
               </p>
               <p className="mt-1 flex items-center gap-1.5 text-2xl font-extrabold text-navy sm:text-3xl">
@@ -118,7 +118,7 @@ export default function AboutPage() {
 
       {/* Pillars */}
       <section className="mx-auto max-w-5xl px-6 py-16">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
           Why ZSkillup
         </p>
         <h2 className="mt-2 text-2xl font-bold text-navy sm:text-3xl">
@@ -134,7 +134,7 @@ export default function AboutPage() {
                 <Icon className="size-5" aria-hidden="true" />
               </span>
               <h3 className="mt-4 text-base font-bold text-navy">{title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-500">{body}</p>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">{body}</p>
             </article>
           ))}
         </div>
@@ -144,13 +144,13 @@ export default function AboutPage() {
       <section className="border-y border-slate-200 bg-white">
         <div className="mx-auto grid max-w-5xl gap-8 px-6 py-16 lg:grid-cols-[1fr_1fr]">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
               For Training & Placement Officers
             </p>
             <h2 className="mt-2 text-2xl font-bold text-navy sm:text-3xl">
               Decisions, not dashboards.
             </h2>
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-500">
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600">
               TPOs onboard their cohort with a single CSV upload, with tenant isolation that
               guarantees a TPO never sees another college&apos;s data. Cohort placement-readiness
               analytics - PPS distribution, at-risk students, branch comparison and exports - are on
@@ -177,7 +177,7 @@ export default function AboutPage() {
 
       {/* Engineering principles */}
       <section className="mx-auto max-w-5xl px-6 py-16">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
           Engineering principles
         </p>
         <h2 className="mt-2 text-2xl font-bold text-navy sm:text-3xl">
@@ -204,7 +204,7 @@ export default function AboutPage() {
           <h2 className="text-2xl font-bold text-navy sm:text-3xl">
             Ready to start your placement journey?
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-500">
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-600">
             Create a free account in under a minute. We&apos;ll match you to the right tracks for
             your campus drives.
           </p>

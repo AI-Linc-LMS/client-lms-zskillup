@@ -102,7 +102,7 @@ export default function FullPlatformPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <Link
         href="/shop"
-        className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 transition hover:text-navy"
+        className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 transition hover:text-navy"
       >
         <ArrowLeft className="size-4" /> Back to Explore Plans
       </Link>
@@ -113,7 +113,7 @@ export default function FullPlatformPage() {
         </span>
         <div>
           <h1 className="text-2xl font-black tracking-tight text-navy">Full Platform Access</h1>
-          <p className="text-sm text-slate-500">Get unlimited access to everything on prephasz</p>
+          <p className="text-sm text-slate-600">Get unlimited access to everything on prephasz</p>
         </div>
       </header>
 
@@ -145,7 +145,7 @@ export default function FullPlatformPage() {
                 </div>
                 <div>
                   <h2 className="text-xl font-black tracking-tight text-navy">Everything. Unlimited.</h2>
-                  <p className="mt-0.5 text-sm text-slate-500">One plan. All features. No limits.</p>
+                  <p className="mt-0.5 text-sm text-slate-600">One plan. All features. No limits.</p>
                   <ul className="mt-4 grid gap-2 sm:grid-cols-2">
                     {UNLIMITED.map((f) => (
                       <FeatureItem key={f} tone="violet">
@@ -192,10 +192,10 @@ export default function FullPlatformPage() {
                           <PlanPill tone="emerald">Save {pct}%</PlanPill>
                         </span>
                       ) : (
-                        <span className="mt-1.5 text-xs text-slate-400">Billed monthly</span>
+                        <span className="mt-1.5 text-xs text-slate-500">Billed monthly</span>
                       )}
                       {perMo != null && p.period !== BillingPeriod.MONTHLY && (
-                        <span className="mt-2 text-xs font-semibold text-slate-500">
+                        <span className="mt-2 text-xs font-semibold text-slate-600">
                           Just {formatPrice(perMo, 'INR')}/month
                         </span>
                       )}
@@ -222,14 +222,14 @@ export default function FullPlatformPage() {
                 </span>
                 <div>
                   <p className="text-sm font-bold text-navy">100% Secure Payments</p>
-                  <p className="text-xs text-slate-500">Your payment information is safe with us.</p>
+                  <p className="text-xs text-slate-600">Your payment information is safe with us.</p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-1.5">
                 {['Visa', 'Mastercard', 'UPI', 'RuPay', '& more'].map((m) => (
                   <span
                     key={m}
-                    className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-bold text-slate-500"
+                    className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-bold text-slate-600"
                   >
                     {m}
                   </span>
@@ -249,7 +249,7 @@ export default function FullPlatformPage() {
                 </span>
                 <div>
                   <p className="text-sm font-black text-navy">Full Platform Access</p>
-                  <p className="text-xs text-slate-500">Unlimited access to all features</p>
+                  <p className="text-xs text-slate-600">Unlimited access to all features</p>
                 </div>
               </div>
 
@@ -264,11 +264,11 @@ export default function FullPlatformPage() {
               </ul>
 
               <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4 text-sm">
-                <span className="font-semibold text-slate-500">Plan</span>
+                <span className="font-semibold text-slate-600">Plan</span>
                 <span className="font-bold text-navy">{periodMonths(period)}</span>
               </div>
               <div className="mt-2 flex items-end justify-between">
-                <span className="text-sm font-semibold text-slate-500">Total Amount</span>
+                <span className="text-sm font-semibold text-slate-600">Total Amount</span>
                 <span className="text-2xl font-black tabular-nums text-indigo-600">
                   {selected ? formatPrice(selected.amountCents, 'INR') : '-'}
                 </span>
@@ -298,7 +298,7 @@ export default function FullPlatformPage() {
                   </>
                 )}
               </button>
-              <p className="mt-2 flex items-center justify-center gap-1.5 text-center text-xs text-slate-400">
+              <p className="mt-2 flex items-center justify-center gap-1.5 text-center text-xs text-slate-500">
                 <Zap className="size-3.5 text-indigo-400" /> Instant access after payment
               </p>
             </div>

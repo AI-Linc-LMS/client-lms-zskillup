@@ -62,7 +62,7 @@ export function SkillMasteryHeatmap({ skillMastery }: SkillMasteryHeatmapProps) 
                 style={{ width: `${s.masteryPct}%` }}
               />
             </div>
-            <div className="mt-1.5 flex justify-between text-[10px] text-slate-500">
+            <div className="mt-1.5 flex justify-between text-[10px] text-slate-600">
               <span>θ = {s.theta.toFixed(2)}</span>
               <span>SE = ±{s.se.toFixed(2)}</span>
             </div>

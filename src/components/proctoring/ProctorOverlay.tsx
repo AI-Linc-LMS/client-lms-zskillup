@@ -38,7 +38,7 @@ export function ProctorOverlay({ controller }: { controller: ProctoringControlle
             </span>
             LIVE
           </span>
-          <span className="hidden text-[11px] font-semibold text-slate-500 sm:inline">You&apos;re being monitored</span>
+          <span className="hidden text-[11px] font-semibold text-slate-600 sm:inline">You&apos;re being monitored</span>
           <span aria-hidden className="h-4 w-px bg-slate-200" />
           <span className="flex items-center gap-1.5">
             <span className={cameraGranted ? 'text-emerald-500' : 'text-rose-500'}>
@@ -48,7 +48,7 @@ export function ProctorOverlay({ controller }: { controller: ProctoringControlle
               {micGranted ? <Mic className="size-3.5" /> : <MicOff className="size-3.5" />}
             </span>
           </span>
-          <span className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
+          <span className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
             <span className="inline-flex items-center gap-0.5" title="Tab switches"><Repeat className="size-3" /> {tabSwitches}</span>
             <span className="inline-flex items-center gap-0.5" title="Fullscreen exits"><Maximize2 className="size-3" /> {fullscreenExits}</span>
           </span>

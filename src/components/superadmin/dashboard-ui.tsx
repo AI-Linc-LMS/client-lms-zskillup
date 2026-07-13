@@ -35,7 +35,7 @@ export function StatCard({
         style={{ background: accent }}
       />
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">{label}</p>
         <span
           className="flex size-9 items-center justify-center rounded-xl"
           style={{ background: `color-mix(in srgb, ${accent} 12%, white)`, color: accent }}
@@ -50,7 +50,7 @@ export function StatCard({
         {trend && (
           <span
             className={`mb-0.5 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
-              up ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
+              up ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600'
             }`}
           >
             <span aria-hidden>{up ? '▲' : '▾'}</span>
@@ -60,7 +60,7 @@ export function StatCard({
           </span>
         )}
       </div>
-      {sub && <p className="mt-1.5 text-xs text-slate-400">{sub}</p>}
+      {sub && <p className="mt-1.5 text-xs text-slate-500">{sub}</p>}
     </div>
   );
 }
@@ -81,7 +81,7 @@ export function Panel({
   return (
     <section className={`rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm ${className}`}>
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{title}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">{title}</p>
         {action}
       </div>
       {children}
@@ -152,9 +152,9 @@ export function AreaChart({
         <circle cx={x(peak)} cy={y(data[peak].count)} r={4} fill={color} />
         <circle cx={x(peak)} cy={y(data[peak].count)} r={8} fill={color} opacity={0.18} />
       </svg>
-      <div className="mt-1 flex justify-between px-1 text-[10px] text-slate-400">
+      <div className="mt-1 flex justify-between px-1 text-[10px] text-slate-500">
         <span>{fmtDay(data[0]?.date)}</span>
-        <span className="font-semibold text-slate-500">peak {data[peak]?.count} · {fmtDay(data[peak]?.date)}</span>
+        <span className="font-semibold text-slate-600">peak {data[peak]?.count} · {fmtDay(data[peak]?.date)}</span>
         <span>{fmtDay(data[n - 1]?.date)}</span>
       </div>
     </div>
@@ -214,7 +214,7 @@ export function Donut({
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           {centerTop && <span className="text-2xl font-extrabold leading-none text-navy">{centerTop}</span>}
-          {centerBottom && <span className="mt-1 text-[10px] uppercase tracking-widest text-slate-400">{centerBottom}</span>}
+          {centerBottom && <span className="mt-1 text-[10px] uppercase tracking-widest text-slate-500">{centerBottom}</span>}
         </div>
       </div>
       <ul className="space-y-2">
@@ -250,7 +250,7 @@ export function ProgressRow({
     <div>
       <div className="mb-1.5 flex items-baseline justify-between">
         <span className="text-sm font-medium text-slate-600">{label}</span>
-        <span className="text-xs text-slate-400">
+        <span className="text-xs text-slate-500">
           <span className="font-bold text-navy">{value.toLocaleString()}</span>
           {hint ? ` ${hint}` : ` / ${total.toLocaleString()}`}
         </span>
@@ -284,7 +284,7 @@ export function MiniStat({
         {icon}
       </span>
       <p className="text-xl font-extrabold leading-none text-navy">{value.toLocaleString()}</p>
-      <p className="mt-1 text-[11px] text-slate-400">{label}</p>
+      <p className="mt-1 text-[11px] text-slate-500">{label}</p>
     </div>
   );
 }

@@ -114,11 +114,11 @@ export function CompanyPrepPanel({
   }, [prep, accBySlug, query, filter]);
 
   if (errored) {
-    return <p className="text-sm text-slate-500">Couldn&apos;t load practice content. Please refresh.</p>;
+    return <p className="text-sm text-slate-600">Couldn&apos;t load practice content. Please refresh.</p>;
   }
   if (!prep) {
     return (
-      <div className="flex h-40 items-center justify-center text-slate-400">
+      <div className="flex h-40 items-center justify-center text-slate-500">
         <Loader2 className="size-5 animate-spin" />
       </div>
     );
@@ -134,7 +134,7 @@ export function CompanyPrepPanel({
         <h2 className="mt-3 text-lg font-extrabold tracking-tight text-navy sm:text-xl">
           Practice {companyName}
         </h2>
-        <p className="mt-1.5 text-sm leading-relaxed text-slate-500 sm:text-base">
+        <p className="mt-1.5 text-sm leading-relaxed text-slate-600 sm:text-base">
           Real questions from the live bank - by year and by topic. Every card drops you straight into
           the practice engine.
         </p>
@@ -178,7 +178,7 @@ export function CompanyPrepPanel({
           {/* Toolbar: search + filter */}
           <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="relative w-full lg:max-w-xs">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" aria-hidden />
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-500" aria-hidden />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -211,7 +211,7 @@ export function CompanyPrepPanel({
             </div>
           </div>
 
-          <p className="mb-3 text-xs font-medium text-slate-400">
+          <p className="mb-3 text-xs font-medium text-slate-500">
             <span className="tabular-nums font-bold text-navy">{filteredTopics.length}</span> of{' '}
             <span className="tabular-nums">{prep.topics.length}</span> topics
           </p>
@@ -248,7 +248,7 @@ export function CompanyPrepPanel({
       ) : null}
 
       {prep.years.length === 0 && prep.topics.length === 0 ? (
-        <p className="text-sm text-slate-500">No practice content yet for {companyName}.</p>
+        <p className="text-sm text-slate-600">No practice content yet for {companyName}.</p>
       ) : null}
     </div>
   );
@@ -273,7 +273,7 @@ function ProgressCard({
         </span>
         <div>
           <h3 className="text-base font-extrabold tracking-tight text-navy sm:text-lg">Your progress</h3>
-          <p className="text-[12px] leading-relaxed text-slate-500">
+          <p className="text-[12px] leading-relaxed text-slate-600">
             {started
               ? `Your practice across ${companyName}'s topics`
               : `Start practicing to track your progress across ${companyName}'s topics`}
@@ -289,7 +289,7 @@ function ProgressCard({
 
       <div className="mt-4">
         <div className="flex items-center justify-between text-[11px] font-semibold">
-          <span className="text-slate-500">Topic coverage</span>
+          <span className="text-slate-600">Topic coverage</span>
           <span className="tabular-nums text-navy">{coverage}%</span>
         </div>
         <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-violet-100">
@@ -307,7 +307,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl bg-white/70 p-3 ring-1 ring-inset ring-violet-100">
       <p className="text-lg font-black tracking-tight tabular-nums text-navy sm:text-xl">{value}</p>
-      <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
+      <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</p>
     </div>
   );
 }
@@ -337,12 +337,12 @@ function TopicCard({
       <div className="flex items-start justify-between gap-3">
         <span className="min-w-0">
           <span className="block truncate text-sm font-bold text-navy">{name}</span>
-          <span className="mt-0.5 block text-[11px] text-slate-400">
+          <span className="mt-0.5 block text-[11px] text-slate-500">
             {count} question{count === 1 ? '' : 's'}
             {pyqCount > 0 ? ` · ${pyqCount} PYQ` : ''}
           </span>
         </span>
-        <ArrowRight className="size-4 shrink-0 text-slate-300 transition-colors group-hover:text-violet-600" />
+        <ArrowRight className="size-4 shrink-0 text-slate-400 transition-colors group-hover:text-violet-600" />
       </div>
 
       <div className="mt-3">
@@ -350,14 +350,14 @@ function TopicCard({
           <>
             <div className="flex items-center justify-between text-[11px]">
               <span className={cn('font-bold', tone.text)}>{pct}% accuracy</span>
-              <span className="text-slate-400">{attempts} attempted</span>
+              <span className="text-slate-500">{attempts} attempted</span>
             </div>
             <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100">
               <div className={cn('h-full rounded-full', tone.bar)} style={{ width: `${Math.max(4, pct)}%` }} />
             </div>
           </>
         ) : (
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-500">
             <span className="size-1.5 rounded-full bg-slate-300" /> Not started
           </span>
         )}
@@ -383,7 +383,7 @@ function SectionHead({
         </span>
         <h3 className="text-lg font-extrabold tracking-tight text-navy sm:text-xl">{title}</h3>
       </div>
-      <p className="mt-2 text-[13px] leading-relaxed text-slate-500">{sub}</p>
+      <p className="mt-2 text-[13px] leading-relaxed text-slate-600">{sub}</p>
     </div>
   );
 }

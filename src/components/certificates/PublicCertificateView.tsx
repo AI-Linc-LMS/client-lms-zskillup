@@ -51,7 +51,7 @@ export function PublicCertificateView({ id }: { id: string }) {
       <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:py-12">
         {loading ? (
           <div className="grid h-72 place-items-center">
-            <Loader2 className="size-7 animate-spin text-slate-300" />
+            <Loader2 className="size-7 animate-spin text-slate-400" />
           </div>
         ) : data?.valid ? (
           <>
@@ -90,7 +90,7 @@ export function PublicCertificateView({ id }: { id: string }) {
               </Link>
             </div>
             {dlError && <p className="mt-3 text-center text-sm font-semibold text-red-500">{dlError}</p>}
-            <p className="mt-4 text-center text-xs text-slate-400">
+            <p className="mt-4 text-center text-xs text-slate-500">
               Certificate ID <span className="font-mono font-semibold text-slate-600">{data.certificateId}</span>
             </p>
           </>
@@ -100,7 +100,7 @@ export function PublicCertificateView({ id }: { id: string }) {
               <AlertTriangle className="size-7" />
             </span>
             <h1 className="mt-4 text-lg font-black text-navy">Certificate not found</h1>
-            <p className="mt-1.5 text-sm text-slate-500">
+            <p className="mt-1.5 text-sm text-slate-600">
               We couldn&apos;t verify <span className="font-mono font-semibold text-slate-700">{id}</span>. Please check the ID and try again.
             </p>
             <Link href="/verify" className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-navy px-5 py-2.5 text-sm font-bold text-white transition hover:bg-navy/90">

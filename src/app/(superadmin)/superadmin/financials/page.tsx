@@ -17,9 +17,9 @@ export default function SuperadminFinancialsPage() {
         ]}
       />
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Commercial</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Commercial</p>
         <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Financials</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-600">
           Collected revenue from real payments, with a date filter - plus a projected (MRR/ARR) view.
         </p>
       </header>
@@ -38,7 +38,7 @@ export default function SuperadminFinancialsPage() {
             className={`-mb-px border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${
               tab === t.key
                 ? 'border-orange text-navy'
-                : 'border-transparent text-slate-400 hover:text-slate-600'
+                : 'border-transparent text-slate-500 hover:text-slate-600'
             }`}
           >
             {t.label}

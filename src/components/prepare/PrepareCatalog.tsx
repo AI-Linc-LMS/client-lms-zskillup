@@ -74,14 +74,14 @@ export function PrepareHero() {
         <div className="mt-7 flex flex-col gap-3 sm:flex-row">
           <div className="relative flex-1">
             <Search
-              className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+              className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-slate-500"
               aria-hidden="true"
             />
             <input
               type="search"
               placeholder="What do you want to learn? E.g. TCS NQT, Aptitude, DSA…"
               aria-label="Search tracks"
-              className="h-12 w-full rounded-full border-0 bg-white pl-11 pr-32 text-sm text-navy placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/40"
+              className="h-12 w-full rounded-full border-0 bg-white pl-11 pr-32 text-sm text-navy placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/40"
             />
             <Button
               type="button"
@@ -184,7 +184,7 @@ export function PrepareCatalog() {
                 'flex shrink-0 items-center gap-1.5 border-b-2 px-3 pb-3 pt-2 text-sm font-medium transition-colors',
                 active
                   ? 'border-orange font-semibold text-navy'
-                  : 'border-transparent text-slate-400 hover:text-slate-600',
+                  : 'border-transparent text-slate-500 hover:text-slate-600',
               )}
             >
               {t.label}
@@ -199,7 +199,7 @@ export function PrepareCatalog() {
           <div className="space-y-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <p className="text-sm font-bold text-navy">Refine results</p>
             <div>
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                 Difficulty
               </p>
               <div className="flex flex-col gap-1.5">
@@ -228,10 +228,10 @@ export function PrepareCatalog() {
         {/* Results */}
         <div>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-600">
               Showing <span className="font-semibold text-navy">{filtered.length}</span> of {courses?.length ?? 0} tracks
             </p>
-            <label className="flex items-center gap-2 text-xs text-slate-500">
+            <label className="flex items-center gap-2 text-xs text-slate-600">
               Sort by
               <select className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30">
                 <option>Best match</option>
@@ -243,14 +243,14 @@ export function PrepareCatalog() {
 
           {loading ? (
             <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white p-16">
-              <Loader2 className="size-5 animate-spin text-slate-400" aria-hidden="true" />
+              <Loader2 className="size-5 animate-spin text-slate-500" aria-hidden="true" />
             </div>
           ) : error ? (
             <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
               Could not load tracks: {error}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="rounded-xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
+            <div className="rounded-xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-600">
               No tracks match these filters yet.
             </div>
           ) : (
@@ -269,7 +269,7 @@ export function PrepareCatalog() {
 function FilterGroup({ title, options }: { title: string; options: string[] }) {
   return (
     <div>
-      <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
         {title}
       </p>
       <ul className="space-y-2">
@@ -301,14 +301,14 @@ function TrackCard({ course }: { course: ApiCourseSummary }) {
         </span>
       </div>
       <div className="flex flex-1 flex-col p-5">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
           {CATEGORY_LABEL[course.category]} · {course.difficulty.charAt(0) + course.difficulty.slice(1).toLowerCase()}
         </p>
         <p className="mt-1 text-sm font-bold leading-snug text-navy">{course.title}</p>
         {course.summary ? (
-          <p className="mt-1 text-xs leading-relaxed text-slate-500 line-clamp-2">{course.summary}</p>
+          <p className="mt-1 text-xs leading-relaxed text-slate-600 line-clamp-2">{course.summary}</p>
         ) : null}
-        <div className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 pt-4 text-xs text-slate-500">
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 pt-4 text-xs text-slate-600">
           <span className="flex items-center gap-1">
             <Star className="size-3 fill-amber-400 text-amber-400" aria-hidden="true" />
             <span className="font-semibold text-navy">4.7</span>

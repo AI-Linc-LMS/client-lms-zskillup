@@ -17,7 +17,7 @@ export function SkillGapBars({ gaps }: { gaps: TpoSkillGap[] }) {
     .map((g) => ({ name: g.topic, accuracy: Math.round(g.accuracy), attempts: g.attempts }));
 
   if (data.length === 0) {
-    return <p className="py-6 text-center text-sm text-slate-400">Not enough practice data yet.</p>;
+    return <p className="py-6 text-center text-sm text-slate-500">Not enough practice data yet.</p>;
   }
 
   return (

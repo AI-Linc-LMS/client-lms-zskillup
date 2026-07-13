@@ -7,7 +7,7 @@ import { LiveSessionAudience, type LiveSessionStatus } from '@/lib/api/live-sess
 export const STATUS_CFG: Record<LiveSessionStatus, { label: string; chip: string; dot: string }> = {
   UPCOMING: { label: 'Upcoming', chip: 'bg-blue-50 text-blue-700 border-blue-200', dot: 'bg-blue-500' },
   LIVE: { label: 'Live now', chip: 'bg-red-50 text-red-600 border-red-200', dot: 'bg-red-500' },
-  ENDED: { label: 'Ended', chip: 'bg-slate-100 text-slate-500 border-slate-200', dot: 'bg-slate-400' },
+  ENDED: { label: 'Ended', chip: 'bg-slate-100 text-slate-600 border-slate-200', dot: 'bg-slate-400' },
 };
 
 /** Full date + time in IST (server + users are India-based). */

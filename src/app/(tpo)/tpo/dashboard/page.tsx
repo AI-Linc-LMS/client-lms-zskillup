@@ -76,7 +76,7 @@ export default function TpoExecutiveDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="size-7 animate-spin text-slate-400" />
+        <Loader2 className="size-7 animate-spin text-slate-500" />
       </div>
     );
   }
@@ -93,7 +93,7 @@ export default function TpoExecutiveDashboard() {
     <div className="space-y-6">
       {/* Contextual header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-slate-500">
+        <p className="text-sm font-semibold text-slate-600">
           Campus overview · <span className="text-navy">{cohortLabel}</span>
         </p>
         <Button asChild size="sm" variant="outline">
@@ -140,7 +140,7 @@ export default function TpoExecutiveDashboard() {
         >
           <div className="-mx-1 overflow-x-auto">
             <table className="w-full min-w-[520px] text-sm">
-              <thead className="text-left text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+              <thead className="text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                 <tr>
                   <th className="px-1 pb-2">Student</th>
                   <th className="px-1 pb-2">Branch</th>
@@ -154,7 +154,7 @@ export default function TpoExecutiveDashboard() {
                   <tr key={s.id}>
                     <td className="px-1 py-2">
                       <p className="font-semibold text-navy">{s.name ?? '-'}</p>
-                      <p className="truncate text-xs text-slate-400">{s.email}</p>
+                      <p className="truncate text-xs text-slate-500">{s.email}</p>
                     </td>
                     <td className="px-1 py-2 text-slate-600">{s.branch ?? '-'}</td>
                     <td className="px-1 py-2">
@@ -168,7 +168,7 @@ export default function TpoExecutiveDashboard() {
                     <td className="px-1 py-2">
                       <ReadinessBadge band={s.band} />
                     </td>
-                    <td className="px-1 py-2 text-xs text-slate-400">
+                    <td className="px-1 py-2 text-xs text-slate-500">
                       {s.lastActiveDate ? new Date(s.lastActiveDate).toLocaleDateString('en-IN') : 'Never'}
                     </td>
                   </tr>
@@ -249,12 +249,12 @@ export default function TpoExecutiveDashboard() {
         <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {['Total', 'Upcoming', 'Live', 'Completed', 'Students Assigned'].map((label) => (
             <div key={label} className="rounded-xl border border-dashed border-slate-200 bg-slate-50/40 p-3">
-              <p className="text-2xl font-black tabular-nums text-slate-300">-</p>
-              <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+              <p className="text-2xl font-black tabular-nums text-slate-400">-</p>
+              <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
             </div>
           ))}
         </div>
-        <p className="mt-3 flex items-center gap-1.5 text-xs text-slate-400">
+        <p className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
           <ClipboardCheck className="size-3.5" /> Live counts appear once you create your first assessment.
         </p>
         <div className="mt-3">
@@ -272,7 +272,7 @@ function EmptyState() {
         <Upload className="size-6" aria-hidden="true" />
       </span>
       <h2 className="mt-4 text-lg font-extrabold text-navy">Your cohort is being onboarded</h2>
-      <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">
+      <p className="mx-auto mt-1 max-w-md text-sm text-slate-600">
         Your Platform Admin adds your college&apos;s batches and students. Once they join and start
         practising, campus readiness, participation quadrants, company readiness and skill gaps
         populate this console automatically.
@@ -284,7 +284,7 @@ function EmptyState() {
           </Link>
         </Button>
       </div>
-      <p className="mt-6 inline-flex items-center gap-1.5 text-xs text-slate-400">
+      <p className="mt-6 inline-flex items-center gap-1.5 text-xs text-slate-500">
         <BarChart3 className="size-3.5" /> Interview, coding &amp; placement modules populate as students engage.
       </p>
     </section>

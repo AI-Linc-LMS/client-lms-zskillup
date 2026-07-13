@@ -163,7 +163,7 @@ export default function AssessmentCenterPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="size-7 animate-spin text-slate-400" />
+        <Loader2 className="size-7 animate-spin text-slate-500" />
       </div>
     );
   }
@@ -177,7 +177,7 @@ export default function AssessmentCenterPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-slate-500">
+        <p className="text-sm font-semibold text-slate-600">
           Assessment Center · <span className="text-navy">{data?.activeCount ?? 0}/{data?.activeCap ?? 10} active</span>
         </p>
         <Button size="sm" onClick={() => setShowForm((v) => !v)} disabled={capReached}>
@@ -225,14 +225,14 @@ export default function AssessmentCenterPage() {
                   </option>
                 ))}
               </select>
-              <span className="mt-1 block text-[11px] font-normal text-slate-400">
+              <span className="mt-1 block text-[11px] font-normal text-slate-500">
                 Questions are drawn from this company&apos;s pattern &amp; previous papers.
               </span>
             </label>
           )}
           <div className="sm:col-span-2 lg:col-span-3">
             {form.mode === 'COMPANY' && (
-              <p className="mb-1.5 text-[11px] font-medium text-slate-400">
+              <p className="mb-1.5 text-[11px] font-medium text-slate-500">
                 Optional - narrow the company&apos;s bank to specific sections/topics (leave empty to use the whole bank).
               </p>
             )}
@@ -304,11 +304,11 @@ export default function AssessmentCenterPage() {
           <h2 className="text-sm font-bold text-navy">Scheduled Assessments</h2>
         </div>
         {(data?.assessments.length ?? 0) === 0 ? (
-          <p className="px-5 py-10 text-center text-sm text-slate-400">No assessments yet. Create your first drive above.</p>
+          <p className="px-5 py-10 text-center text-sm text-slate-500">No assessments yet. Create your first drive above.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[820px] text-sm">
-              <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+              <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                 <tr>
                   <th className="px-4 py-2.5">Assessment</th>
                   <th className="px-4 py-2.5">Company</th>
@@ -327,22 +327,22 @@ export default function AssessmentCenterPage() {
                         {a.proctored && <Video className="size-3 text-[#f5b400]" />}
                         {a.title}
                       </p>
-                      <p className="text-xs text-slate-400">{a.durationMinutes} min</p>
+                      <p className="text-xs text-slate-500">{a.durationMinutes} min</p>
                     </td>
                     <td className="px-4 py-2.5 text-slate-600">{a.companyName ?? 'Sectional'}</td>
                     <td className="px-4 py-2.5 tabular-nums text-slate-600">{a.assigned}</td>
                     <td className="px-4 py-2.5 tabular-nums text-slate-600">{a.attempted}</td>
-                    <td className="px-4 py-2.5 text-xs text-slate-500">{fmtDateTime(a.scheduledAt)}</td>
+                    <td className="px-4 py-2.5 text-xs text-slate-600">{fmtDateTime(a.scheduledAt)}</td>
                     <td className="px-4 py-2.5">
                       <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${STATUS_STYLE[a.status]}`}>{a.status}</span>
                       {a.resultsReleased && <span className="ml-1 text-[10px] font-semibold text-emerald-600">· released</span>}
                     </td>
                     <td className="px-4 py-2.5">
                       <div className="flex items-center gap-2">
-                        <button type="button" onClick={() => setResultsFor(a)} className="text-slate-400 hover:text-navy" title="Results">
+                        <button type="button" onClick={() => setResultsFor(a)} className="text-slate-500 hover:text-navy" title="Results">
                           <BarChart3 className="size-4" />
                         </button>
-                        <button type="button" onClick={() => remove(a)} className="text-slate-300 hover:text-red-500" title="Delete">
+                        <button type="button" onClick={() => remove(a)} className="text-slate-400 hover:text-red-500" title="Delete">
                           <Trash2 className="size-4" />
                         </button>
                       </div>
@@ -355,7 +355,7 @@ export default function AssessmentCenterPage() {
         )}
       </div>
 
-      <p className="text-[11px] text-slate-400">
+      <p className="text-[11px] text-slate-500">
         Content is sampled from the question bank by mode. Templates, a calendar view, per-student custom
         assignment and auto-reminders are on the roadmap.
       </p>
@@ -395,15 +395,15 @@ function ResultsModal({ assessment, onClose, onReleased }: { assessment: TpoAsse
         <div className="flex items-start justify-between gap-3 border-b border-slate-100 p-5">
           <div>
             <h2 className="text-lg font-black text-navy">{assessment.title}</h2>
-            <p className="text-xs text-slate-400">Results &amp; participation</p>
+            <p className="text-xs text-slate-500">Results &amp; participation</p>
           </div>
-          <button type="button" onClick={onClose} className="grid size-8 place-items-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50">
+          <button type="button" onClick={onClose} className="grid size-8 place-items-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50">
             <X className="size-4" />
           </button>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto p-5">
           {loading ? (
-            <div className="flex items-center justify-center py-12"><Loader2 className="size-5 animate-spin text-slate-400" /></div>
+            <div className="flex items-center justify-center py-12"><Loader2 className="size-5 animate-spin text-slate-500" /></div>
           ) : results ? (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -414,7 +414,7 @@ function ResultsModal({ assessment, onClose, onReleased }: { assessment: TpoAsse
               </div>
               <div className="overflow-x-auto rounded-xl border border-slate-100">
                 <table className="w-full min-w-[420px] text-sm">
-                  <thead className="bg-slate-50 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                  <thead className="bg-slate-50 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                     <tr><th className="px-3 py-2">Student</th><th className="px-3 py-2">Score</th><th className="px-3 py-2">Status</th></tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -422,18 +422,18 @@ function ResultsModal({ assessment, onClose, onReleased }: { assessment: TpoAsse
                       <tr key={r.userId}>
                         <td className="px-3 py-2 font-medium text-navy">{r.fullName ?? r.email}</td>
                         <td className="px-3 py-2 tabular-nums text-slate-600">{r.scorePct}%</td>
-                        <td className="px-3 py-2 text-xs text-slate-500">{r.status}</td>
+                        <td className="px-3 py-2 text-xs text-slate-600">{r.status}</td>
                       </tr>
                     ))}
                     {results.rows.length === 0 && (
-                      <tr><td colSpan={3} className="px-3 py-6 text-center text-slate-400">No submissions yet.</td></tr>
+                      <tr><td colSpan={3} className="px-3 py-6 text-center text-slate-500">No submissions yet.</td></tr>
                     )}
                   </tbody>
                 </table>
               </div>
             </div>
           ) : (
-            <p className="py-8 text-center text-sm text-slate-400">Results unavailable.</p>
+            <p className="py-8 text-center text-sm text-slate-500">Results unavailable.</p>
           )}
         </div>
         <div className="flex items-center justify-end gap-2 border-t border-slate-100 p-4">
@@ -452,7 +452,7 @@ function Stat({ label, value }: { label: string; value: number | string }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
       <p className="text-xl font-black tabular-nums text-navy">{value}</p>
-      <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+      <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
     </div>
   );
 }

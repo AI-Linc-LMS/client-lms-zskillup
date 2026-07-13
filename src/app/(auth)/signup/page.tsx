@@ -58,11 +58,11 @@ export default function SignupPage() {
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="mb-4">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
               Step 1 of 3
             </p>
             <h1 className="mt-1 text-xl font-bold text-navy">Create your account</h1>
-            <p className="mt-0.5 text-sm text-slate-500">Personal details - takes under a minute.</p>
+            <p className="mt-0.5 text-sm text-slate-600">Personal details - takes under a minute.</p>
           </div>
           <div>
             <form onSubmit={onSubmit} className="space-y-4" noValidate>
@@ -145,7 +145,7 @@ export default function SignupPage() {
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-slate-200" />
                 </div>
-                <div className="relative flex justify-center text-xs text-slate-400">
+                <div className="relative flex justify-center text-xs text-slate-500">
                   <span className="bg-white px-3">or sign up with Google</span>
                 </div>
               </div>
@@ -156,7 +156,7 @@ export default function SignupPage() {
               />
             </div>
 
-            <p className="mt-4 text-center text-sm text-slate-500">
+            <p className="mt-4 text-center text-sm text-slate-600">
               Already have an account?{' '}
               <Link href="/login" className="font-semibold text-orange hover:underline">
                 Log in

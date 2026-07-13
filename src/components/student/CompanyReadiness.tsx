@@ -81,7 +81,7 @@ export function CompanyReadiness() {
   if (loading) {
     return (
       <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5">
-        <div className="flex items-center gap-3 text-sm text-slate-400">
+        <div className="flex items-center gap-3 text-sm text-slate-500">
           <Loader2 className="size-4 animate-spin text-[#f5b400]" />
           Checking company readiness…
         </div>
@@ -133,7 +133,7 @@ export function CompanyReadiness() {
               <Building2 className="size-4" />
             </span>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                 Career readiness
               </p>
               <p className="-mt-0.5 text-sm font-bold text-navy">Companies</p>
@@ -171,7 +171,7 @@ export function CompanyReadiness() {
               />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold text-navy">{topCompany.companyName}</p>
-                <p className="truncate text-[11px] text-slate-500">{topCompany.companyType}</p>
+                <p className="truncate text-[11px] text-slate-600">{topCompany.companyType}</p>
                 <span
                   className={cn(
                     'mt-1.5 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ring-1',
@@ -252,7 +252,7 @@ export function CompanyReadiness() {
         {/* Improve CTA */}
         {notReady.length > 0 && (
           <div className="border-t border-slate-100 pt-3.5">
-            <p className="mb-2.5 text-[11px] leading-relaxed text-slate-500">
+            <p className="mb-2.5 text-[11px] leading-relaxed text-slate-600">
               Practice weak skills to boost readiness for{' '}
               <span className="font-semibold text-slate-600">
                 {notReady.map((c) => c.companyName).join(', ')}
@@ -327,7 +327,7 @@ function SkillPill({
     <div className="rounded-xl border border-slate-200/70 bg-slate-50/70 px-2.5 py-2">
       <div className="flex items-center gap-1">
         {icon}
-        <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
+        <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500">
           {label}
         </span>
       </div>
@@ -368,11 +368,11 @@ function EmptyState() {
           <Building2 className="size-6" />
         </motion.span>
 
-        <p className="mt-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+        <p className="mt-4 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
           Career readiness
         </p>
         <p className="mt-0.5 text-base font-bold text-navy">See which companies you&apos;re ready for</p>
-        <p className="mx-auto mt-1.5 max-w-[15rem] text-xs leading-relaxed text-slate-500">
+        <p className="mx-auto mt-1.5 max-w-[15rem] text-xs leading-relaxed text-slate-600">
           Take an adaptive mock test and we&apos;ll match your skills to real company hiring bars.
         </p>
 

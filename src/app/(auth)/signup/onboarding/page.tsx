@@ -178,7 +178,7 @@ export default function OnboardingPage() {
 
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="mb-5">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
               Step {step} of 4
             </p>
             <h1 className="mt-1 text-xl font-bold text-navy">
@@ -188,7 +188,7 @@ export default function OnboardingPage() {
                   ? 'Complete your profile'
                   : 'Pick your target companies'}
             </h1>
-            <p className="mt-0.5 text-sm text-slate-500">
+            <p className="mt-0.5 text-sm text-slate-600">
               {step === 2
                 ? 'We use this to surface drives and benchmarks for your campus.'
                 : step === 3
@@ -250,7 +250,7 @@ export default function OnboardingPage() {
                   disabled={!city}
                   onChange={(e) => setCollegeName(e.target.value)}
                   placeholder="Select or type your college"
-                  className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors placeholder:text-slate-400 focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-60"
+                  className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors placeholder:text-slate-500 focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-60"
                 />
                 <datalist id="college-options">
                   {colleges.map((c) => (
@@ -300,7 +300,7 @@ export default function OnboardingPage() {
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="10-digit number"
                     inputMode="tel"
-                    className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors placeholder:text-slate-400 focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+                    className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors placeholder:text-slate-500 focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -328,7 +328,7 @@ export default function OnboardingPage() {
                   value={course}
                   onChange={(e) => setCourse(e.target.value)}
                   placeholder="e.g. B.Tech Computer Science"
-                  className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors placeholder:text-slate-400 focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+                  className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors placeholder:text-slate-500 focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
                 />
               </div>
 
@@ -339,7 +339,7 @@ export default function OnboardingPage() {
                   value={skillsInput}
                   onChange={(e) => setSkillsInput(e.target.value)}
                   placeholder="Comma-separated, e.g. Java, SQL, React, DSA"
-                  className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors placeholder:text-slate-400 focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+                  className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors placeholder:text-slate-500 focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
                 />
               </div>
 
@@ -441,7 +441,7 @@ function StepBubble({ num, active, done }: { num: number; active: boolean; done:
           ? 'bg-emerald-500 text-white'
           : active
             ? 'bg-orange text-[#171717] shadow-sm'
-            : 'bg-slate-100 text-slate-400',
+            : 'bg-slate-100 text-slate-500',
       )}
     >
       {done ? <Check className="size-3.5" aria-hidden="true" /> : num}
@@ -462,7 +462,7 @@ function CompanyGroup({
 }) {
   return (
     <fieldset className="space-y-2">
-      <legend className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+      <legend className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
         {title}
       </legend>
       <div className="grid grid-cols-2 gap-2">

@@ -63,7 +63,7 @@ export default function ExplorePlansPage() {
           <h1 className="mt-4 text-3xl font-black tracking-tight text-navy sm:text-4xl">
             Everything you need to get placed
           </h1>
-          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base">
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base">
             Go all-access, or build a plan around exactly the companies and topics you&apos;re targeting.
             Practice, mocks, analytics and AI career tools - all in one place.
           </p>
@@ -103,7 +103,7 @@ export default function ExplorePlansPage() {
         <div className="text-center">
           <h2 className="inline-block text-2xl font-black tracking-tight text-navy">How would you like to prepare?</h2>
           <div className="mx-auto mt-2 h-1 w-16 rounded-full bg-indigo-500" />
-          <p className="mx-auto mt-3 max-w-lg text-sm text-slate-500">Pick the path that fits you - you can always add more later.</p>
+          <p className="mx-auto mt-3 max-w-lg text-sm text-slate-600">Pick the path that fits you - you can always add more later.</p>
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
@@ -121,16 +121,16 @@ export default function ExplorePlansPage() {
               </span>
               <div>
                 <h3 className="text-xl font-black tracking-tight text-navy">Full Platform Access</h3>
-                <p className="text-sm text-slate-500">Unlimited access to everything</p>
+                <p className="text-sm text-slate-600">Unlimited access to everything</p>
               </div>
             </div>
             {platformFrom && (
-              <p className="mt-5 text-sm text-slate-500">
+              <p className="mt-5 text-sm text-slate-600">
                 From{' '}
                 <span className="text-2xl font-black tabular-nums text-navy">
                   {formatPrice(platformFrom.amountCents, 'INR')}
                 </span>
-                <span className="text-slate-400">/month</span>
+                <span className="text-slate-500">/month</span>
               </p>
             )}
             <ul className="mt-5 grid gap-2.5 sm:grid-cols-2">
@@ -159,16 +159,16 @@ export default function ExplorePlansPage() {
               </span>
               <div>
                 <h3 className="text-xl font-black tracking-tight text-navy">Build Your Own Plan</h3>
-                <p className="text-sm text-slate-500">Pay only for what you need</p>
+                <p className="text-sm text-slate-600">Pay only for what you need</p>
               </div>
             </div>
             {topicFrom && (
-              <p className="mt-5 text-sm text-slate-500">
+              <p className="mt-5 text-sm text-slate-600">
                 Topics from{' '}
                 <span className="text-2xl font-black tabular-nums text-navy">
                   {formatPrice(topicFrom.amountCents, 'INR')}
                 </span>
-                <span className="text-slate-400">/month</span>
+                <span className="text-slate-500">/month</span>
               </p>
             )}
             <ul className="mt-5 grid gap-2.5 sm:grid-cols-2">
@@ -178,7 +178,7 @@ export default function ExplorePlansPage() {
                 </FeatureItem>
               ))}
             </ul>
-            <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-slate-400">
+            <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-slate-500">
               <Check className="size-3.5 text-emerald-500" /> Mix &amp; match - different validity per item
             </div>
             <Link
@@ -195,7 +195,7 @@ export default function ExplorePlansPage() {
       <section className="mt-12">
         <div className="mb-5 text-center">
           <h2 className="text-xl font-black tracking-tight text-navy">Everything you unlock</h2>
-          <p className="mt-1 text-sm text-slate-500">Every plan is packed with the tools recruiters test on.</p>
+          <p className="mt-1 text-sm text-slate-600">Every plan is packed with the tools recruiters test on.</p>
         </div>
         <IncludedGrid items={INCLUDED} />
       </section>
@@ -209,7 +209,7 @@ export default function ExplorePlansPage() {
       <section className="mt-12 grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
         <div>
           <h2 className="text-xl font-black tracking-tight text-navy">Frequently asked</h2>
-          <p className="mt-2 text-sm leading-relaxed text-slate-500">
+          <p className="mt-2 text-sm leading-relaxed text-slate-600">
             Everything you need to know before you pick a plan. Still unsure?{' '}
             <Link href="/support" className="font-semibold text-indigo-600 hover:underline">
               Talk to us
@@ -223,7 +223,7 @@ export default function ExplorePlansPage() {
       <SecurePaymentsNote className="mt-12" />
       <TrustBadges className="mt-4" />
 
-      <p className="mt-6 flex items-center justify-center gap-1.5 text-center text-xs text-slate-400">
+      <p className="mt-6 flex items-center justify-center gap-1.5 text-center text-xs text-slate-500">
         <ShieldCheck className="size-3.5 text-emerald-500" />
         Prices are shown before you pay - no charge until you review and confirm.
       </p>

@@ -57,15 +57,15 @@ export function SubscriptionsManager() {
   if (allowed === null) {
     return (
       <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white py-16">
-        <Loader2 className="size-6 animate-spin text-slate-400" />
+        <Loader2 className="size-6 animate-spin text-slate-500" />
       </div>
     );
   }
   if (!allowed) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white py-16 text-center">
-        <Lock className="size-8 text-slate-300" />
-        <p className="max-w-sm text-sm text-slate-500">
+        <Lock className="size-8 text-slate-400" />
+        <p className="max-w-sm text-sm text-slate-600">
           You don&apos;t have the <span className="font-semibold">Manage subscriptions</span>{' '}
           capability. Ask a super-admin to grant it.
         </p>
@@ -82,7 +82,7 @@ export function SubscriptionsManager() {
             onClick={() => setTab(t)}
             className={cn(
               'flex-1 rounded-md px-4 py-2 capitalize transition-colors',
-              tab === t ? 'bg-white text-navy' : 'text-slate-500 hover:text-slate-700',
+              tab === t ? 'bg-white text-navy' : 'text-slate-600 hover:text-slate-700',
             )}
           >
             {t}
@@ -230,13 +230,13 @@ function PlansTab({
 
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         {loading ? (
-          <div className="flex items-center justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-400" /></div>
+          <div className="flex items-center justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-500" /></div>
         ) : plans.length === 0 ? (
-          <div className="py-12 text-center text-sm text-slate-400">No plans yet. Create one to get started.</div>
+          <div className="py-12 text-center text-sm text-slate-500">No plans yet. Create one to get started.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-sm">
-              <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+              <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                 <tr>
                   <th className="px-4 py-3">Plan</th>
                   <th className="px-4 py-3 text-right">Price</th>
@@ -251,13 +251,13 @@ function PlansTab({
                   <tr key={p.id} className={cn('hover:bg-slate-50', !p.isActive && 'opacity-60')}>
                     <td className="px-4 py-3">
                       <p className="font-semibold text-navy">{p.name}</p>
-                      {p.description && <p className="text-xs text-slate-400">{p.description}</p>}
+                      {p.description && <p className="text-xs text-slate-500">{p.description}</p>}
                     </td>
                     <td className="px-4 py-3 text-right tabular-nums text-slate-700">{formatPrice(p.priceCents, p.currency)}</td>
                     <td className="px-4 py-3 text-right tabular-nums text-slate-700">{p.seatLimit === 0 ? '∞' : p.seatLimit}</td>
                     <td className="px-4 py-3 text-slate-600">{p.durationDays ? `${p.durationDays}d` : 'Perpetual'}</td>
                     <td className="px-4 py-3">
-                      <span className={cn('rounded-full px-2.5 py-0.5 text-[11px] font-semibold', p.isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500')}>
+                      <span className={cn('rounded-full px-2.5 py-0.5 text-[11px] font-semibold', p.isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600')}>
                         {p.isActive ? 'Active' : 'Archived'}
                       </span>
                     </td>
@@ -351,10 +351,10 @@ function SubscriptionsTab({
     <div className="space-y-4">
       {/* Assign / trial panel */}
       <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-slate-400">Assign or trial a college</p>
+        <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500">Assign or trial a college</p>
         <div className="flex flex-wrap items-end gap-3">
           <div className="min-w-[200px] flex-1">
-            <label className="mb-1 block text-xs text-slate-500">College</label>
+            <label className="mb-1 block text-xs text-slate-600">College</label>
             <select value={collegeId} onChange={(e) => setCollegeId(e.target.value)} className={inputCls}>
               <option value="">Select…</option>
               {colleges.map((c) => (
@@ -363,7 +363,7 @@ function SubscriptionsTab({
             </select>
           </div>
           <div className="min-w-[160px] flex-1">
-            <label className="mb-1 block text-xs text-slate-500">Plan</label>
+            <label className="mb-1 block text-xs text-slate-600">Plan</label>
             <select value={planId} onChange={(e) => setPlanId(e.target.value)} className={inputCls}>
               <option value="">{'Select…'}</option>
               {plans.map((p) => (
@@ -380,7 +380,7 @@ function SubscriptionsTab({
           </button>
           <div className="flex items-end gap-1.5">
             <div className="w-20">
-              <label className="mb-1 block text-xs text-slate-500">Trial days</label>
+              <label className="mb-1 block text-xs text-slate-600">Trial days</label>
               <input type="number" min={1} value={trialDays} onChange={(e) => setTrialDays(Number(e.target.value))} className={inputCls} />
             </div>
             <button
@@ -396,13 +396,13 @@ function SubscriptionsTab({
 
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         {loading ? (
-          <div className="flex items-center justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-400" /></div>
+          <div className="flex items-center justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-500" /></div>
         ) : subs.length === 0 ? (
-          <div className="py-12 text-center text-sm text-slate-400">No college subscriptions yet.</div>
+          <div className="py-12 text-center text-sm text-slate-500">No college subscriptions yet.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[820px] text-sm">
-              <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+              <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                 <tr>
                   <th className="px-4 py-3">College</th>
                   <th className="px-4 py-3">Plan</th>
@@ -429,7 +429,7 @@ function SubscriptionsTab({
                       {s.seatsUsed}
                       {s.seatLimit > 0 ? ` / ${s.seatLimit}` : ''}
                     </td>
-                    <td className="px-4 py-3 text-xs text-slate-400">
+                    <td className="px-4 py-3 text-xs text-slate-500">
                       {s.expiresAt ? new Date(s.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
                     </td>
                     <td className="px-4 py-3">
@@ -473,7 +473,7 @@ const inputCls =
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-medium text-slate-500">{label}</span>
+      <span className="mb-1 block text-xs font-medium text-slate-600">{label}</span>
       {children}
     </label>
   );

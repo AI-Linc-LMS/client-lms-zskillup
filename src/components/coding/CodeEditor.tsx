@@ -67,7 +67,7 @@ export function CodeEditor({
       onMount={handleMount}
       onChange={(v) => onChange?.(v ?? '')}
       loading={
-        <div className="flex h-full items-center justify-center text-slate-400">
+        <div className="flex h-full items-center justify-center text-slate-500">
           <Loader2 className="size-5 animate-spin" />
         </div>
       }

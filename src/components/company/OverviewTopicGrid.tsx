@@ -19,7 +19,7 @@ export function OverviewTopicGrid({ slug }: { slug: string }) {
   }, [slug]);
 
   if (!prep) {
-    return <div className="grid h-28 place-items-center rounded-2xl border border-slate-200 bg-white"><Loader2 className="size-5 animate-spin text-slate-400" /></div>;
+    return <div className="grid h-28 place-items-center rounded-2xl border border-slate-200 bg-white"><Loader2 className="size-5 animate-spin text-slate-500" /></div>;
   }
   // Only surface topics that actually have previous-year questions — this grid
   // links straight to the PYQ page, so a topic with zero PYQs would dead-end on
@@ -27,7 +27,7 @@ export function OverviewTopicGrid({ slug }: { slug: string }) {
   const topics = prep.topics.filter((t) => (t.pyqCount ?? 0) > 0).sort((a, b) => b.pyqCount - a.pyqCount);
   if (topics.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
+      <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-600">
         Previous-year questions for this company are being tagged - check back soon.
       </div>
     );
@@ -38,7 +38,7 @@ export function OverviewTopicGrid({ slug }: { slug: string }) {
       <h3 className="mb-1 flex items-center gap-2 text-lg font-extrabold tracking-tight text-navy">
         <Target className="size-4 text-orange" aria-hidden="true" /> Topics &amp; previous-year questions
       </h3>
-      <p className="mb-3 text-sm text-slate-500">Tap a topic to see this company&apos;s previous-year questions for it.</p>
+      <p className="mb-3 text-sm text-slate-600">Tap a topic to see this company&apos;s previous-year questions for it.</p>
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
         {topics.map((t, i) => (
           <motion.div
@@ -53,11 +53,11 @@ export function OverviewTopicGrid({ slug }: { slug: string }) {
             >
               <span className="min-w-0">
                 <span className="block truncate text-sm font-semibold text-navy group-hover:text-orange">{t.name}</span>
-                <span className="flex items-center gap-1 text-[11px] font-medium text-slate-400">
+                <span className="flex items-center gap-1 text-[11px] font-medium text-slate-500">
                   <History className="size-3 text-orange" /> Previous-year questions
                 </span>
               </span>
-              <span className="grid size-7 shrink-0 place-items-center rounded-full border border-slate-200 text-slate-400 transition-colors group-hover:border-orange group-hover:bg-orange group-hover:text-[#171717]">
+              <span className="grid size-7 shrink-0 place-items-center rounded-full border border-slate-200 text-slate-500 transition-colors group-hover:border-orange group-hover:bg-orange group-hover:text-[#171717]">
                 →
               </span>
             </Link>

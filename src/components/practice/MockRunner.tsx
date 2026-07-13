@@ -278,7 +278,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
   if (loading) {
     return (
       <div className="grid min-h-screen place-items-center bg-background">
-        <Loader2 className="size-6 animate-spin text-slate-400" aria-hidden="true" />
+        <Loader2 className="size-6 animate-spin text-slate-500" aria-hidden="true" />
       </div>
     );
   }
@@ -472,7 +472,7 @@ const STATUS_META: Record<QStatus, { label: string; cell: string; swatch: string
   notAnswered: { label: 'Not answered', cell: 'bg-rose-500 text-white', swatch: 'bg-rose-500' },
   notVisited: {
     label: 'Not visited',
-    cell: 'bg-slate-100 text-slate-500 ring-1 ring-inset ring-slate-200',
+    cell: 'bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200',
     swatch: 'bg-slate-200',
   },
 };
@@ -674,7 +674,7 @@ function MockRunningView({
           >
             <Clock className="size-3.5" aria-hidden="true" /> {formatClock(remaining)}
           </span>
-          <span className="hidden text-[11px] font-semibold text-slate-500 sm:inline">Q {idx + 1} / {total}</span>
+          <span className="hidden text-[11px] font-semibold text-slate-600 sm:inline">Q {idx + 1} / {total}</span>
         </div>
       </header>
 
@@ -696,14 +696,14 @@ function MockRunningView({
                   'relative flex shrink-0 items-center gap-2 overflow-hidden rounded-xl px-4 py-2 text-sm font-bold transition-all',
                   active
                     ? 'bg-gradient-to-r from-[#f7a14e] to-[#f37021] text-white shadow-[0_8px_20px_-8px_rgba(243,112,33,0.7)]'
-                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200',
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
                 )}
               >
                 {s.label}
                 <span
                   className={cn(
                     'rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums',
-                    active ? 'bg-white/25 text-white' : complete ? 'bg-emerald-100 text-emerald-700' : 'bg-white text-slate-500',
+                    active ? 'bg-white/25 text-white' : complete ? 'bg-emerald-100 text-emerald-700' : 'bg-white text-slate-600',
                   )}
                 >
                   {done}/{s.items.length}
@@ -730,7 +730,7 @@ function MockRunningView({
         {/* Question card (left/main) */}
         <article className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
               {sections.length > 1 ? `${activeLabel} · ` : ''}
               Question {posInSec + 1} of {activeItems.length}
             </p>
@@ -743,7 +743,7 @@ function MockRunningView({
                   'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1 ring-inset transition-colors',
                   marked.has(question.id)
                     ? 'bg-violet-100 text-violet-700 ring-violet-300'
-                    : 'bg-white text-slate-500 ring-slate-200 hover:bg-slate-50',
+                    : 'bg-white text-slate-600 ring-slate-200 hover:bg-slate-50',
                 )}
               >
                 <Flag className={cn('size-3', marked.has(question.id) && 'fill-violet-500 text-violet-600')} aria-hidden="true" />
@@ -759,7 +759,7 @@ function MockRunningView({
           ) : null}
           <PyqTag companyIds={question.companyIds ?? []} years={question.yearTags ?? []} className="mt-2" />
           <p className="mt-2 text-base font-semibold leading-relaxed text-navy">{question.stem}</p>
-          {question.type === 'MULTI_SELECT' ? <p className="mt-1 text-xs text-slate-400">Select all that apply.</p> : null}
+          {question.type === 'MULTI_SELECT' ? <p className="mt-1 text-xs text-slate-500">Select all that apply.</p> : null}
 
           {question.type === 'CODING' && question.coding ? (
             // key={question.id} remounts per problem so run/submit results never
@@ -790,7 +790,7 @@ function MockRunningView({
                       isSelected ? 'border-orange bg-orange/5 text-navy' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
                     )}
                   >
-                    <span className={cn('grid size-7 shrink-0 place-items-center rounded-full text-xs font-bold', isSelected ? 'bg-orange text-[#171717]' : 'bg-slate-100 text-slate-500')}>
+                    <span className={cn('grid size-7 shrink-0 place-items-center rounded-full text-xs font-bold', isSelected ? 'bg-orange text-[#171717]' : 'bg-slate-100 text-slate-600')}>
                       {String.fromCharCode(65 + i)}
                     </span>
                     <span className="flex-1">{opt.text}</span>
@@ -840,10 +840,10 @@ function MockRunningView({
         <aside className="lg:sticky lg:top-[7.5rem] lg:self-start">
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
                 {sections.length > 1 ? activeLabel : 'Questions'}
               </p>
-              <span className="text-[11px] font-bold text-slate-500">{answeredCount}/{total} answered</span>
+              <span className="text-[11px] font-bold text-slate-600">{answeredCount}/{total} answered</span>
             </div>
             <div className="mt-3 grid max-h-[14rem] grid-cols-5 gap-2 overflow-y-auto pr-1">
               {activeItems.map(({ q, i }, local) => {
@@ -870,7 +870,7 @@ function MockRunningView({
               })}
             </div>
             {/* legend - full NTA status set with live counts */}
-            <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-[10px] font-semibold text-slate-500">
+            <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-[10px] font-semibold text-slate-600">
               {STATUS_ORDER.map((s) => (
                 <span key={s} className="flex items-center gap-1.5">
                   <span className={cn('relative size-2.5 shrink-0 rounded', STATUS_META[s].swatch)}>
@@ -983,7 +983,7 @@ export function MockReportView({
       <main className="mx-auto w-full max-w-3xl flex-1 space-y-6 px-4 py-6 sm:px-6 sm:py-8">
         {/* Score hero */}
         <section className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm sm:p-8">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
             {report.title}
           </p>
           <span
@@ -997,7 +997,7 @@ export function MockReportView({
             <Trophy className="size-7" aria-hidden="true" />
           </span>
           <h1 className="mt-4 text-[44px] font-extrabold leading-none text-navy">{report.pct}%</h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-slate-600">
             {report.score} of {report.total} correct
           </p>
           <span
@@ -1052,7 +1052,7 @@ export function MockReportView({
               ) : null}
               <button
                 onClick={() => setShowReward(true)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-500 transition-colors hover:bg-slate-50"
+                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50"
               >
                 <Sparkles className="size-4" aria-hidden="true" /> Replay
               </button>
@@ -1063,7 +1063,7 @@ export function MockReportView({
         {/* Topic breakdown */}
         {report.topicBreakdown.length > 0 ? (
           <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
               Topic breakdown
             </p>
             <ul className="mt-4 space-y-4">
@@ -1073,7 +1073,7 @@ export function MockReportView({
                   <li key={t.topic}>
                     <div className="flex items-center justify-between text-sm">
                       <span className="font-semibold text-navy">{t.topic}</span>
-                      <span className="text-slate-500">
+                      <span className="text-slate-600">
                         {t.correct}/{t.total} · {pct}%
                       </span>
                     </div>
@@ -1088,7 +1088,7 @@ export function MockReportView({
         {/* Proctoring / integrity summary (proctored assessments only) */}
         {report.proctoring?.proctored ? (
           <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
               Proctoring &amp; integrity
             </p>
             <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -1102,11 +1102,11 @@ export function MockReportView({
                   <p className={cn('text-lg font-extrabold tabular-nums', s.bad ? 'text-amber-600' : 'text-emerald-600')}>
                     {s.value}
                   </p>
-                  <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">{s.label}</p>
+                  <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">{s.label}</p>
                 </div>
               ))}
             </div>
-            <p className="mt-3 text-xs text-slate-500">
+            <p className="mt-3 text-xs text-slate-600">
               {report.proctoring.violations === 0
                 ? 'No integrity flags - this attempt was clean.'
                 : `${report.proctoring.violations} integrity event(s) logged (lenient - not penalised).`}
@@ -1116,7 +1116,7 @@ export function MockReportView({
 
         {/* Question review */}
         <section>
-          <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+          <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
             Answer review
           </p>
           <div className="space-y-4">
@@ -1124,7 +1124,7 @@ export function MockReportView({
               <article key={q.id} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="flex items-start justify-between gap-3">
                   <p className="text-sm font-semibold leading-relaxed text-navy">
-                    <span className="text-slate-400">{qi + 1}.</span> {q.stem}
+                    <span className="text-slate-500">{qi + 1}.</span> {q.stem}
                   </p>
                   <span
                     className={cn(
@@ -1150,7 +1150,7 @@ export function MockReportView({
                   <div className="mt-3 space-y-2">
                     <div className="flex flex-wrap items-center gap-2 text-xs">
                       <span className="rounded-full bg-indigo-50 px-2 py-0.5 font-bold text-indigo-600">Coding problem</span>
-                      <span className="text-slate-500">
+                      <span className="text-slate-600">
                         {q.coding.passed}/{q.coding.total} tests passed
                         {q.coding.verdict ? ` · ${q.coding.verdict}` : ''}
                         {q.coding.language ? ` · ${q.coding.language}` : ''}
@@ -1161,13 +1161,13 @@ export function MockReportView({
                         {q.coding.sourceCode}
                       </pre>
                     ) : (
-                      <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-500">No solution submitted.</p>
+                      <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">No solution submitted.</p>
                     )}
                   </div>
                 ) : (
                   <>
                     {/* Your-answer summary */}
-                    <p className="mt-2 text-xs text-slate-500">
+                    <p className="mt-2 text-xs text-slate-600">
                       <span className="font-bold text-navy">Your answer: </span>
                       {q.yourOptionIds.length ? (
                         q.options.filter((o) => q.yourOptionIds.includes(o.id)).map((o) => o.text).join(', ')
@@ -1194,7 +1194,7 @@ export function MockReportView({
                                 'grid size-6 shrink-0 place-items-center rounded-full text-[11px] font-bold',
                                 correct && 'bg-emerald-600 text-white',
                                 chosen && !correct && 'bg-red-600 text-white',
-                                !correct && !chosen && 'bg-slate-100 text-slate-500',
+                                !correct && !chosen && 'bg-slate-100 text-slate-600',
                               )}
                             >
                               {String.fromCharCode(65 + i)}
@@ -1280,7 +1280,7 @@ export function MockReportLoader({ attemptId }: { attemptId: string }) {
   if (!report) {
     return (
       <div className="grid min-h-screen place-items-center bg-background">
-        <Loader2 className="size-6 animate-spin text-slate-400" aria-hidden="true" />
+        <Loader2 className="size-6 animate-spin text-slate-500" aria-hidden="true" />
       </div>
     );
   }

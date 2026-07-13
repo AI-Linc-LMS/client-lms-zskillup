@@ -42,7 +42,7 @@ export function ActiveSubscriptions({ className }: { className?: string }) {
   return (
     <section className={className}>
       <div className="flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-400">
+        <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-500">
           <BadgeCheck className="size-4 text-emerald-500" /> Active subscriptions
         </h2>
         <Link href="/upgrade" className="text-xs font-bold text-orange hover:underline">
@@ -52,7 +52,7 @@ export function ActiveSubscriptions({ className }: { className?: string }) {
 
       {ents.length === 0 ? (
         <div className="mt-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 p-6 text-center">
-          <p className="text-sm text-slate-500">No active unlocks yet - you get the first 5 questions of anything free.</p>
+          <p className="text-sm text-slate-600">No active unlocks yet - you get the first 5 questions of anything free.</p>
           <Link
             href="/shop"
             className="mt-3 inline-block rounded-full bg-navy px-4 py-1.5 text-xs font-bold text-white"
@@ -78,7 +78,7 @@ export function ActiveSubscriptions({ className }: { className?: string }) {
                     <span className="block truncate text-sm font-semibold text-navy">
                       {entitlementLabel(e.scopeType, e.scopeRef)}
                     </span>
-                    <span className="text-xs text-slate-500">
+                    <span className="text-xs text-slate-600">
                       {e.daysRemaining != null ? `${e.daysRemaining} days left` : 'Lifetime access'}
                     </span>
                   </span>

@@ -111,7 +111,7 @@ export function CodingWorkspace({ slug }: { slug: string }) {
   if (missing) {
     return (
       <div className="rounded-2xl border border-slate-200/80 bg-white p-10 text-center shadow-sm">
-        <CircleSlash className="mx-auto mb-3 size-8 text-slate-300" />
+        <CircleSlash className="mx-auto mb-3 size-8 text-slate-400" />
         <p className="text-sm font-semibold text-navy">Problem not found</p>
         <button type="button" onClick={goBack} className="mt-3 inline-block text-sm font-bold text-orange">
           ← Back
@@ -121,7 +121,7 @@ export function CodingWorkspace({ slug }: { slug: string }) {
   }
   if (!problem) {
     return (
-      <div className="flex h-[60vh] items-center justify-center text-slate-400">
+      <div className="flex h-[60vh] items-center justify-center text-slate-500">
         <Loader2 className="size-6 animate-spin" />
       </div>
     );
@@ -181,7 +181,7 @@ export function CodingWorkspace({ slug }: { slug: string }) {
         <button
           type="button"
           onClick={goBack}
-          className="inline-flex items-center gap-1 text-sm font-semibold text-slate-500 hover:text-navy"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-slate-600 hover:text-navy"
         >
           <ChevronLeft className="size-4" /> Back
         </button>
@@ -218,7 +218,7 @@ export function CodingWorkspace({ slug }: { slug: string }) {
               {problem.tags.map((t) => (
                 <span
                   key={t}
-                  className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500"
+                  className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600"
                 >
                   {t}
                 </span>
@@ -242,7 +242,7 @@ export function CodingWorkspace({ slug }: { slug: string }) {
 
           {problem.sampleCases.length ? (
             <div className="relative mt-5 space-y-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
                 Examples
               </p>
               {problem.sampleCases.map((c, i) => (
@@ -272,7 +272,7 @@ export function CodingWorkspace({ slug }: { slug: string }) {
               </select>
               <button
                 onClick={reset}
-                className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-400 hover:text-slate-100"
+                className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-100"
               >
                 <RotateCcw className="size-3.5" /> Reset
               </button>
@@ -361,7 +361,7 @@ function ResultPanel({ result }: { result: CodingResult }) {
               {label}
             </p>
             {result.total > 0 ? (
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-600">
                 {result.passed} / {result.total} test cases passed
               </p>
             ) : null}
@@ -399,10 +399,10 @@ function ResultPanel({ result }: { result: CodingResult }) {
                     <XCircle className="size-3.5 text-rose-600" />
                   )}
                   {c.hidden ? `Hidden case ${c.index}` : `Case ${c.index}`}
-                  <span className="font-medium text-slate-400">· {c.status}</span>
+                  <span className="font-medium text-slate-500">· {c.status}</span>
                 </span>
                 {c.timeSec != null ? (
-                  <span className="text-[11px] font-medium text-slate-400">
+                  <span className="text-[11px] font-medium text-slate-500">
                     {(c.timeSec * 1000).toFixed(0)} ms
                   </span>
                 ) : null}
@@ -445,7 +445,7 @@ function ResultPanel({ result }: { result: CodingResult }) {
 function Block({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="relative mt-4">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{label}</p>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{label}</p>
       <p className="mt-1 whitespace-pre-wrap text-[13.5px] leading-relaxed text-slate-600">
         {children}
       </p>
@@ -456,7 +456,7 @@ function Block({ label, children }: { label: string; children: React.ReactNode }
 function Sample({ label, text }: { label: string; text: string }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-2.5">
-      <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">{label}</p>
+      <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">{label}</p>
       <pre className="overflow-auto whitespace-pre-wrap break-words font-mono text-[12.5px] text-slate-700">
         {text}
       </pre>
@@ -478,12 +478,12 @@ function IoCell({
   const isEmpty = text == null || text.trim() === '';
   return (
     <div>
-      <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">{label}</p>
+      <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">{label}</p>
       <pre
         className={cn(
           'min-h-[2rem] overflow-auto whitespace-pre-wrap break-words rounded-md border px-2 py-1.5 font-mono text-[12px]',
           isEmpty
-            ? 'border-slate-200 bg-slate-50 italic text-slate-400'
+            ? 'border-slate-200 bg-slate-50 italic text-slate-500'
             : tone === 'bad'
               ? 'border-rose-200 bg-white text-rose-700'
               : 'border-slate-200 bg-white text-slate-700',

@@ -60,7 +60,7 @@ export function StudentDrawer({ studentId, onClose }: { studentId: string | null
                   {detail?.name ?? (loading ? 'Loading…' : 'Student')}
                 </h2>
                 {detail && (
-                  <p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-slate-400">
+                  <p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-slate-500">
                     <Mail className="size-3" /> {detail.email}
                   </p>
                 )}
@@ -68,7 +68,7 @@ export function StudentDrawer({ studentId, onClose }: { studentId: string | null
               <button
                 type="button"
                 onClick={onClose}
-                className="grid size-8 shrink-0 place-items-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50"
+                className="grid size-8 shrink-0 place-items-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
               >
                 <X className="size-4" />
               </button>
@@ -76,7 +76,7 @@ export function StudentDrawer({ studentId, onClose }: { studentId: string | null
 
             {loading ? (
               <div className="flex flex-1 items-center justify-center py-24">
-                <Loader2 className="size-6 animate-spin text-slate-400" />
+                <Loader2 className="size-6 animate-spin text-slate-500" />
               </div>
             ) : error ? (
               <div className="m-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
@@ -84,7 +84,7 @@ export function StudentDrawer({ studentId, onClose }: { studentId: string | null
               <div className="space-y-6 p-5">
                 {/* Identity + readiness hero */}
                 <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-4">
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
                     <ReadinessBadge band={detail.band} />
                     {detail.branch && <span className="rounded-full bg-slate-100 px-2 py-0.5 font-medium">{detail.branch}</span>}
                     <span className="flex items-center gap-1">
@@ -93,16 +93,16 @@ export function StudentDrawer({ studentId, onClose }: { studentId: string | null
                   </div>
                   <div className="mt-3 flex items-end gap-3">
                     <span className="text-4xl font-black tabular-nums leading-none text-navy">{detail.readiness}%</span>
-                    <span className="mb-1 text-sm font-semibold text-slate-500">{detail.level} readiness</span>
+                    <span className="mb-1 text-sm font-semibold text-slate-600">{detail.level} readiness</span>
                   </div>
-                  <p className="mt-2 text-[11px] text-slate-400">
+                  <p className="mt-2 text-[11px] text-slate-500">
                     Last active {detail.lastActiveDate ? new Date(detail.lastActiveDate).toLocaleDateString('en-IN') : 'never'}
                   </p>
                 </div>
 
                 {/* Composite components */}
                 <section>
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Readiness composite</p>
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Readiness composite</p>
                   <div className="space-y-2.5">
                     {detail.components.map((c) => (
                       <div key={c.label} className="flex items-center gap-3">
@@ -113,7 +113,7 @@ export function StudentDrawer({ studentId, onClose }: { studentId: string | null
                             style={{ width: `${c.score}%` }}
                           />
                         </div>
-                        <span className="w-14 text-right text-xs font-semibold tabular-nums text-slate-500">
+                        <span className="w-14 text-right text-xs font-semibold tabular-nums text-slate-600">
                           {c.active ? `${c.score}%` : 'no data'}
                         </span>
                       </div>
@@ -123,11 +123,11 @@ export function StudentDrawer({ studentId, onClose }: { studentId: string | null
 
                 {/* Per-company */}
                 <section>
-                  <p className="mb-2 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                  <p className="mb-2 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                     <Building2 className="size-3" /> Company readiness
                   </p>
                   {detail.companies.length === 0 ? (
-                    <p className="text-sm text-slate-400">No company-tagged practice yet.</p>
+                    <p className="text-sm text-slate-500">No company-tagged practice yet.</p>
                   ) : (
                     <div className="space-y-2">
                       {detail.companies.slice(0, 8).map((c) => (
@@ -136,7 +136,7 @@ export function StudentDrawer({ studentId, onClose }: { studentId: string | null
                             <span className="truncate text-sm font-semibold text-navy">{c.name}</span>
                             <span className="shrink-0 text-sm font-bold tabular-nums text-navy">{c.readiness}%</span>
                           </div>
-                          <p className="mt-0.5 text-[11px] text-slate-400">
+                          <p className="mt-0.5 text-[11px] text-slate-500">
                             {c.questionsAttempted} Qs · {c.questionAccuracy}% acc
                             {c.codingTotal > 0 ? ` · ${c.codingSolved}/${c.codingTotal} coding` : ''}
                           </p>
@@ -148,9 +148,9 @@ export function StudentDrawer({ studentId, onClose }: { studentId: string | null
 
                 {/* Weak topics */}
                 <section>
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Weakest topics</p>
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Weakest topics</p>
                   {detail.topics.length === 0 ? (
-                    <p className="text-sm text-slate-400">Not enough practice data yet.</p>
+                    <p className="text-sm text-slate-500">Not enough practice data yet.</p>
                   ) : (
                     <div className="space-y-2">
                       {[...detail.topics]
@@ -162,7 +162,7 @@ export function StudentDrawer({ studentId, onClose }: { studentId: string | null
                             <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
                               <div className="h-full rounded-full bg-gradient-to-r from-amber-400 to-red-500" style={{ width: `${t.accuracy}%` }} />
                             </div>
-                            <span className="w-10 text-right text-xs font-semibold tabular-nums text-slate-500">{t.accuracy}%</span>
+                            <span className="w-10 text-right text-xs font-semibold tabular-nums text-slate-600">{t.accuracy}%</span>
                           </div>
                         ))}
                     </div>

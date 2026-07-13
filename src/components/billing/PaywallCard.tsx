@@ -94,7 +94,7 @@ export function PaywallCard({
       <h2 className="mt-4 text-xl font-black tracking-tight text-navy sm:text-2xl">
         You&apos;ve used your {paywall.freeLimit} free questions
       </h2>
-      <p className="mx-auto mt-1.5 max-w-sm text-sm text-slate-500">
+      <p className="mx-auto mt-1.5 max-w-sm text-sm text-slate-600">
         Unlock <span className="font-semibold text-navy">{name}</span> to keep practising - every
         question, hint and prediction in this {noun}.
       </p>
@@ -116,14 +116,14 @@ export function PaywallCard({
                 best ? 'border-orange bg-orange/5' : 'border-slate-200 hover:border-orange/50',
               )}
             >
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{label}</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">{label}</span>
               <span className="mt-0.5 text-lg font-black text-navy">
                 {busyKey === key ? (
                   <Loader2 className="size-5 animate-spin" />
                 ) : price ? (
                   <>
                     {formatPrice(price.amountCents, price.currency)}
-                    <span className="text-[11px] font-semibold text-slate-400">{short}</span>
+                    <span className="text-[11px] font-semibold text-slate-500">{short}</span>
                   </>
                 ) : (
                   '-'
@@ -161,7 +161,7 @@ export function PaywallCard({
       {/* Platform upsell */}
       <div className="mt-5 flex items-center gap-2">
         <span className="h-px flex-1 bg-slate-200" />
-        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">or unlock everything</span>
+        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">or unlock everything</span>
         <span className="h-px flex-1 bg-slate-200" />
       </div>
       <button
@@ -177,7 +177,7 @@ export function PaywallCard({
       </button>
       <Link
         href="/upgrade"
-        className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-orange"
+        className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-orange"
       >
         See all plans <ArrowRight className="size-3" />
       </Link>

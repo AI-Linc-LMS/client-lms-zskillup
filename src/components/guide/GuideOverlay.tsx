@@ -222,7 +222,7 @@ export function GuideOverlay({
           <button
             type="button"
             onClick={onClose}
-            className="absolute right-3 top-3 grid size-7 place-items-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            className="absolute right-3 top-3 grid size-7 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-600"
             aria-label="Exit tour"
           >
             <X className="size-4" />
@@ -259,7 +259,7 @@ export function GuideOverlay({
             <button
               type="button"
               onClick={onClose}
-              className="text-xs font-semibold text-slate-400 transition hover:text-slate-600"
+              className="text-xs font-semibold text-slate-500 transition hover:text-slate-600"
             >
               Skip tour
             </button>
@@ -291,7 +291,7 @@ export function GuideOverlay({
             </div>
           </div>
 
-          <p className="mt-2 text-center text-[10px] font-medium text-slate-300">
+          <p className="mt-2 text-center text-[10px] font-medium text-slate-400">
             {index + 1} of {total} · use ← → keys
           </p>
         </motion.div>

@@ -51,7 +51,7 @@ export function CodingPractice() {
         <h3 className="flex items-center gap-2 text-2xl font-black tracking-tight text-navy">
           <Code2 className="size-5 text-[#f5b400]" /> Coding practice
         </h3>
-        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold tabular-nums text-slate-500">
+        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold tabular-nums text-slate-600">
           {solved} / {problems.length} solved
         </span>
       </div>

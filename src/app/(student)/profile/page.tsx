@@ -204,7 +204,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="grid place-items-center py-24">
-        <Loader2 className="size-6 animate-spin text-slate-400" />
+        <Loader2 className="size-6 animate-spin text-slate-500" />
       </div>
     );
   }
@@ -308,7 +308,7 @@ export default function ProfilePage() {
           <SectionCard data-tour="profile:career" icon={Sparkles} title="Career" subtitle="Skills and target roles power your recommendations + resume.">
             <SkillsInput skills={v.skills} onAdd={addSkill} onRemove={(s) => set('skills', v.skills.filter((x) => x !== s))} />
             <div className="mt-5">
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Target roles</p>
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">Target roles</p>
               <div className="flex flex-wrap gap-2">
                 {ROLE_OPTIONS.map((name) => {
                   const active = v.roles.includes(name);
@@ -346,7 +346,7 @@ export default function ProfilePage() {
                     <span className={cn('grid size-4 shrink-0 place-items-center rounded-full', c.done ? 'bg-emerald-500 text-white' : 'border border-slate-300')}>
                       {c.done && <Check className="size-3" />}
                     </span>
-                    <span className={c.done ? 'text-slate-400 line-through' : 'font-medium text-navy'}>{c.label}</span>
+                    <span className={c.done ? 'text-slate-500 line-through' : 'font-medium text-navy'}>{c.label}</span>
                   </li>
                 ))}
               </ul>
@@ -361,7 +361,7 @@ export default function ProfilePage() {
               <Building2 className="size-4 text-orange" /> My drives
             </h2>
             {regs.length === 0 ? (
-              <p className="mt-2 text-xs leading-relaxed text-slate-500">
+              <p className="mt-2 text-xs leading-relaxed text-slate-600">
                 You haven&apos;t registered for any company drives yet.{' '}
                 <Link href="/dashboard/company" className="font-semibold text-orange hover:underline">Browse companies →</Link>
               </p>
@@ -375,7 +375,7 @@ export default function ProfilePage() {
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={r.companyLogoUrl} alt="" className="max-h-5 max-w-full object-contain" />
                         ) : (
-                          <span className="text-[10px] font-bold text-slate-500">{r.companyName.slice(0, 2).toUpperCase()}</span>
+                          <span className="text-[10px] font-bold text-slate-600">{r.companyName.slice(0, 2).toUpperCase()}</span>
                         )}
                       </span>
                       <span className="min-w-0 flex-1">
@@ -408,7 +408,7 @@ export default function ProfilePage() {
             )}
             {dirty && (
               <>
-                <button onClick={discard} disabled={saving} className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-navy disabled:opacity-50">
+                <button onClick={discard} disabled={saving} className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-navy disabled:opacity-50">
                   <RotateCcw className="size-3.5" /> Discard
                 </button>
                 <button
@@ -428,7 +428,7 @@ export default function ProfilePage() {
 }
 
 const inputCls =
-  'flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors placeholder:text-slate-400 focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30';
+  'flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors placeholder:text-slate-500 focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30';
 
 function SectionCard({
   icon: Icon,
@@ -451,7 +451,7 @@ function SectionCard({
         </span>
         <div>
           <h2 className="text-sm font-black text-navy">{title}</h2>
-          <p className="text-xs text-slate-400">{subtitle}</p>
+          <p className="text-xs text-slate-500">{subtitle}</p>
         </div>
       </div>
       {children}
@@ -462,7 +462,7 @@ function SectionCard({
 function Field({ label, done, children }: { label: string; done?: boolean; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
-      <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+      <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-500">
         {label}
         {done && <Check className="size-3 text-emerald-500" />}
       </p>
@@ -480,7 +480,7 @@ function SkillsInput({ skills, onAdd, onRemove }: { skills: string[]; onAdd: (s:
   };
   return (
     <div>
-      <p className="mb-2 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+      <p className="mb-2 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-500">
         Skills
         {skills.length > 0 && <Check className="size-3 text-emerald-500" />}
       </p>
@@ -506,7 +506,7 @@ function SkillsInput({ skills, onAdd, onRemove }: { skills: string[]; onAdd: (s:
           }}
           onBlur={commit}
           placeholder={skills.length ? 'Add a skill…' : 'e.g. Java, SQL, React, DSA'}
-          className="min-w-[8rem] flex-1 bg-transparent px-1.5 py-1 text-sm text-navy outline-none placeholder:text-slate-400"
+          className="min-w-[8rem] flex-1 bg-transparent px-1.5 py-1 text-sm text-navy outline-none placeholder:text-slate-500"
         />
         {draft.trim() && (
           <button type="button" onClick={commit} className="grid size-6 place-items-center rounded-full bg-orange text-[#171717]">
@@ -514,7 +514,7 @@ function SkillsInput({ skills, onAdd, onRemove }: { skills: string[]; onAdd: (s:
           </button>
         )}
       </div>
-      <p className="mt-1.5 text-[11px] text-slate-400">Press Enter or comma to add each skill.</p>
+      <p className="mt-1.5 text-[11px] text-slate-500">Press Enter or comma to add each skill.</p>
     </div>
   );
 }

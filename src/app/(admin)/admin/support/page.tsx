@@ -6,9 +6,9 @@ export default function AdminSupportPage() {
     <div className="space-y-6">
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Platform Admin', href: '/admin/dashboard' }, { label: 'Support' }]} />
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Support</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Support</p>
         <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Support inbox</h1>
-        <p className="mt-1 text-sm text-slate-500">Triage and respond to user tickets.</p>
+        <p className="mt-1 text-sm text-slate-600">Triage and respond to user tickets.</p>
       </header>
       <SupportInbox />
     </div>

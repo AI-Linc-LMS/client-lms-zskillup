@@ -55,7 +55,7 @@ export function SubscriptionLockGate({
             <Lock className="size-7" />
           </span>
           <h2 className="mt-4 text-xl font-black tracking-tight text-navy">{feature} is a premium feature</h2>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-slate-600">
             You&apos;ve used your free {feature.toLowerCase()}. It&apos;s bundled with any{' '}
             <span className="font-semibold text-navy">Company hub</span> or the{' '}
             <span className="font-semibold text-navy">Full Platform</span> plan - unlock unlimited access.

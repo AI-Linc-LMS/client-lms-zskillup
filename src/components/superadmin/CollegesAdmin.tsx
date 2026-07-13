@@ -74,13 +74,13 @@ export function CollegesAdmin() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="relative max-w-md flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-500" aria-hidden="true" />
           <input
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, slug, city, or state"
-            className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-navy placeholder:text-slate-400 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+            className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-navy placeholder:text-slate-500 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
             aria-label="Search colleges"
           />
         </div>
@@ -102,7 +102,7 @@ export function CollegesAdmin() {
         <div className="overflow-x-auto">
         <table className="w-full min-w-[680px] text-left text-sm">
           <thead className="bg-slate-50">
-            <tr className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            <tr className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Slug</th>
               <th className="px-4 py-3">Location</th>
@@ -115,12 +115,12 @@ export function CollegesAdmin() {
             {colleges === null ? (
               <tr>
                 <td colSpan={6} className="px-4 py-12 text-center">
-                  <Loader2 className="mx-auto size-5 animate-spin text-slate-400" aria-hidden="true" />
+                  <Loader2 className="mx-auto size-5 animate-spin text-slate-500" aria-hidden="true" />
                 </td>
               </tr>
             ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-12 text-center text-sm text-slate-500">
+                <td colSpan={6} className="px-4 py-12 text-center text-sm text-slate-600">
                   {search ? 'No colleges match that search.' : 'No colleges yet - add the first one above.'}
                 </td>
               </tr>
@@ -128,12 +128,12 @@ export function CollegesAdmin() {
               filtered.map((c) => (
                 <tr key={c.id} className="border-t border-slate-100">
                   <td className="px-4 py-3 font-semibold text-navy">{c.name}</td>
-                  <td className="px-4 py-3 font-mono text-xs text-slate-500">{c.slug}</td>
+                  <td className="px-4 py-3 font-mono text-xs text-slate-600">{c.slug}</td>
                   <td className="px-4 py-3 text-slate-600">{c.city}, {c.state}</td>
                   <td className="px-4 py-3">
                     <StatusPill status={c.status} />
                   </td>
-                  <td className="px-4 py-3 text-xs text-slate-500">
+                  <td className="px-4 py-3 text-xs text-slate-600">
                     {new Date(c.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -146,7 +146,7 @@ export function CollegesAdmin() {
                         Suspend
                       </button>
                     ) : (
-                      <span className="text-xs text-slate-400">Suspended</span>
+                      <span className="text-xs text-slate-500">Suspended</span>
                     )}
                   </td>
                 </tr>
@@ -157,7 +157,7 @@ export function CollegesAdmin() {
         </div>
       </div>
 
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-slate-500">
         {colleges?.length ?? 0} college{(colleges?.length ?? 0) === 1 ? '' : 's'} total
         {search ? ` · ${filtered.length} matching` : ''}
       </p>
@@ -195,7 +195,7 @@ function AddCollegeForm({ onCreated }: { onCreated: () => void }) {
       className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
       noValidate
     >
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
         New college
       </p>
       <h2 className="mb-4 text-base font-bold text-navy">Onboard a partner institution</h2>

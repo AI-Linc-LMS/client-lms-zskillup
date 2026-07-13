@@ -117,7 +117,7 @@ export default function UpgradeRenewPage() {
       <h1 data-tour="upgrade:title" className="mt-4 text-2xl font-black tracking-tight text-navy">
         {hasPlatform ? 'Upgrade & Renew' : 'Plans & Access'}
       </h1>
-      <p className="mt-1 text-sm text-slate-500">
+      <p className="mt-1 text-sm text-slate-600">
         {hasPlatform
           ? 'Your membership, readiness and quick actions in one place.'
           : 'See what you already have and choose the best way to continue your preparation.'}
@@ -308,7 +308,7 @@ function PremiumView({
           <StatTile icon={Target} tint="bg-emerald-50 text-emerald-600" label="Questions Attempted" value={attempted} />
           <StatTile icon={TrendingUp} tint="bg-indigo-50 text-indigo-600" label="Readiness" value={score != null ? `${score}%` : '-'} />
         </div>
-        <p className="mt-3 flex items-center gap-1.5 text-xs text-slate-400">
+        <p className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
           <Sparkles className="size-3.5 text-indigo-400" /> New companies, mock tests &amp; questions are added every week.
         </p>
       </section>
@@ -316,7 +316,7 @@ function PremiumView({
       {/* Premium perks */}
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-lg font-black tracking-tight text-navy">Everything your Premium unlocks</h2>
-        <p className="mt-1 text-sm text-slate-500">It&apos;s all included - dive into any of it.</p>
+        <p className="mt-1 text-sm text-slate-600">It&apos;s all included - dive into any of it.</p>
         <IncludedGrid items={PLAN_INCLUDED} className="mt-4" />
       </section>
 
@@ -385,7 +385,7 @@ function CustomPlanView({
           <h2 className="text-lg font-black tracking-tight text-navy">Your Current Plan</h2>
           <PlanPill tone="emerald">Active</PlanPill>
         </div>
-        <p className="mt-1 text-sm text-slate-500">Here&apos;s what you currently have access to.</p>
+        <p className="mt-1 text-sm text-slate-600">Here&apos;s what you currently have access to.</p>
 
         <div className="mt-5 grid gap-5 lg:grid-cols-[220px_1fr]">
           <div className="flex flex-col items-center justify-center rounded-2xl bg-indigo-50/60 p-5 text-center">
@@ -393,7 +393,7 @@ function CustomPlanView({
               <Puzzle className="size-7" />
             </span>
             <p className="mt-3 text-base font-black text-navy">Custom Plan</p>
-            <p className="text-xs text-slate-500">Total Value</p>
+            <p className="text-xs text-slate-600">Total Value</p>
             <p className="text-xl font-black tabular-nums text-emerald-600">{formatPrice(totalPaid, 'INR')}</p>
             <div className="mt-4 flex w-full flex-col gap-2">
               <Link
@@ -427,7 +427,7 @@ function CustomPlanView({
       {/* Choose how you want to learn */}
       <section>
         <h2 className="text-lg font-black tracking-tight text-navy">Choose how you want to learn</h2>
-        <p className="text-sm text-slate-500">Two flexible ways to continue your placement preparation.</p>
+        <p className="text-sm text-slate-600">Two flexible ways to continue your placement preparation.</p>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <LearnCard
             tone="indigo"
@@ -455,7 +455,7 @@ function CustomPlanView({
       {/* Unlock more */}
       <section>
         <h2 className="text-lg font-black tracking-tight text-navy">Unlock the full experience</h2>
-        <p className="mt-1 text-sm text-slate-500">Upgrade any time to open everything below.</p>
+        <p className="mt-1 text-sm text-slate-600">Upgrade any time to open everything below.</p>
         <IncludedGrid items={PLAN_INCLUDED} className="mt-4" />
       </section>
 
@@ -489,7 +489,7 @@ function NoPlanView({ priceMap }: { priceMap: Map<string, PriceBookEntryDto> }) 
             <Crown className="size-3.5" /> Get started
           </span>
           <h2 className="mt-4 text-3xl font-black tracking-tight text-navy sm:text-4xl">Start your placement prep</h2>
-          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base">
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base">
             You don&apos;t have a plan yet. Unlock companies, sections and topics - or go all-access
             {platform ? ` from ${formatPrice(platform.amountCents, 'INR')}/month` : ''}.
           </p>
@@ -509,7 +509,7 @@ function NoPlanView({ priceMap }: { priceMap: Map<string, PriceBookEntryDto> }) 
       {/* Two ways to learn */}
       <section>
         <h2 className="text-lg font-black tracking-tight text-navy">Choose how you want to learn</h2>
-        <p className="text-sm text-slate-500">Two flexible ways to start your placement preparation.</p>
+        <p className="text-sm text-slate-600">Two flexible ways to start your placement preparation.</p>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <LearnCard
             tone="indigo"
@@ -537,7 +537,7 @@ function NoPlanView({ priceMap }: { priceMap: Map<string, PriceBookEntryDto> }) 
       {/* Everything you unlock */}
       <section>
         <h2 className="text-lg font-black tracking-tight text-navy">Everything you unlock</h2>
-        <p className="mt-1 text-sm text-slate-500">Every plan is packed with the tools recruiters test on.</p>
+        <p className="mt-1 text-sm text-slate-600">Every plan is packed with the tools recruiters test on.</p>
         <IncludedGrid items={PLAN_INCLUDED} className="mt-4" />
       </section>
 
@@ -552,7 +552,7 @@ function NoPlanView({ priceMap }: { priceMap: Map<string, PriceBookEntryDto> }) 
 function KV({ k, v }: { k: string; v: string }) {
   return (
     <div className="flex items-center justify-between">
-      <dt className="text-slate-500">{k}</dt>
+      <dt className="text-slate-600">{k}</dt>
       <dd className="font-bold text-navy">{v}</dd>
     </div>
   );
@@ -565,7 +565,7 @@ function StatTile({ icon: Icon, tint, label, value }: { icon: typeof Building2; 
         <Icon className="size-5" />
       </span>
       <p className="mt-3 text-2xl font-black tabular-nums text-navy">{value}</p>
-      <p className="text-xs text-slate-500">{label}</p>
+      <p className="text-xs text-slate-600">{label}</p>
     </div>
   );
 }
@@ -578,7 +578,7 @@ function WhatsNew({ icon: Icon, title, sub, href }: { icon: typeof Building2; ti
       </span>
       <div className="min-w-0">
         <p className="truncate text-sm font-bold text-navy">{title}</p>
-        <p className="truncate text-xs text-slate-500">{sub}</p>
+        <p className="truncate text-xs text-slate-600">{sub}</p>
       </div>
     </Link>
   );
@@ -587,11 +587,11 @@ function WhatsNew({ icon: Icon, title, sub, href }: { icon: typeof Building2; ti
 function PlanFacet({ icon: Icon, label, primary, sub }: { icon: typeof Building2; label: string; primary: string; sub: string }) {
   return (
     <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
-      <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-400">
+      <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-500">
         <Icon className="size-3.5" /> {label}
       </p>
       <p className="mt-1.5 text-sm font-black text-navy">{primary}</p>
-      <p className="truncate text-xs text-slate-500">{sub}</p>
+      <p className="truncate text-xs text-slate-600">{sub}</p>
     </div>
   );
 }
@@ -628,7 +628,7 @@ function LearnCard({
         </div>
         <PlanPill tone={tone === 'indigo' ? 'emerald' : 'amber'}>{pill}</PlanPill>
       </div>
-      <p className="mt-2 text-sm text-slate-500">{subtitle}</p>
+      <p className="mt-2 text-sm text-slate-600">{subtitle}</p>
       <ul className="mt-4 grid flex-1 gap-2 sm:grid-cols-2">
         {features.map((f) => (
           <FeatureItem key={f} tone={tone === 'indigo' ? 'violet' : 'slate'}>
@@ -675,20 +675,20 @@ function ReadinessDonut({ score }: { score: number | null }) {
 function HistorySection({ history }: { history: PurchaseHistoryItemDto[] }) {
   if (!history.length) {
     return (
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-400 shadow-sm">
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm">
         No purchases yet.
       </section>
     );
   }
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-400">
+      <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-500">
         <Clock className="size-4" /> Purchase history
       </h2>
       <div className="mt-4 overflow-x-auto">
         <table className="w-full min-w-[520px] text-sm">
           <thead>
-            <tr className="text-left text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <tr className="text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
               <th className="pb-2">Item</th>
               <th className="pb-2">Plan</th>
               <th className="pb-2 text-right">Amount</th>
@@ -706,12 +706,12 @@ function HistorySection({ history }: { history: PurchaseHistoryItemDto[] }) {
                       ? 'Full Platform'
                       : slugToLabel(h.scopeRef) || h.scopeType}
                 </td>
-                <td className="py-2.5 capitalize text-slate-500">{historyPlanLabel(h)}</td>
+                <td className="py-2.5 capitalize text-slate-600">{historyPlanLabel(h)}</td>
                 <td className="py-2.5 text-right tabular-nums text-navy">{formatPrice(h.amountCents, h.currency)}</td>
                 <td className="py-2.5 text-right">
                   <StatusPill status={h.status} />
                 </td>
-                <td className="py-2.5 text-right tabular-nums text-slate-500">
+                <td className="py-2.5 text-right tabular-nums text-slate-600">
                   {new Date(h.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })}
                 </td>
               </tr>
@@ -729,7 +729,7 @@ function StatusPill({ status }: { status: string }) {
     CREATED: 'bg-amber-50 text-amber-700',
     FAILED: 'bg-rose-50 text-rose-700',
     REFUNDED: 'bg-slate-100 text-slate-600',
-    EXPIRED: 'bg-slate-100 text-slate-500',
+    EXPIRED: 'bg-slate-100 text-slate-600',
   };
   return (
     <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-bold', map[status] ?? 'bg-slate-100 text-slate-600')}>

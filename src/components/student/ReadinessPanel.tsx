@@ -239,7 +239,7 @@ export function ReadinessPanel({
           {/* topic mastery - heatmap chips */}
           {data.topics.length ? (
             <div data-tour={tour === 'performance' ? 'perf:topic-mastery' : undefined}>
-              <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Topic mastery</p>
+              <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Topic mastery</p>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {data.topics.slice(0, 10).map((t, i) => (
                   <motion.div
@@ -255,7 +255,7 @@ export function ReadinessPanel({
                       <motion.div className="h-full rounded-full" style={{ background: toneSolid(t.accuracy) }} initial={{ width: 0 }} animate={{ width: `${t.accuracy}%` }} transition={{ duration: 0.7 }} />
                     </div>
                     <span className="w-10 text-right text-xs font-extrabold tabular-nums" style={{ color: toneSolid(t.accuracy) }}>{t.accuracy}%</span>
-                    <span className="w-6 text-right text-[10px] font-medium text-slate-400">{t.attempts}q</span>
+                    <span className="w-6 text-right text-[10px] font-medium text-slate-500">{t.attempts}q</span>
                   </motion.div>
                 ))}
               </div>
@@ -263,7 +263,7 @@ export function ReadinessPanel({
           ) : null}
 
           {companies.length === 0 && data.topics.length === 0 ? (
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-600">
               Practice questions, take mock quizzes and assessments to build your readiness.
             </p>
           ) : null}
@@ -292,7 +292,7 @@ function CompanyRing({ name, logo, pct, level, sub }: { name: string; logo: stri
             // eslint-disable-next-line @next/next/no-img-element
             <img src={logo} alt={name} className="max-h-full max-w-full object-contain" />
           ) : (
-            <span className="text-xs font-black text-slate-500">{name.slice(0, 2).toUpperCase()}</span>
+            <span className="text-xs font-black text-slate-600">{name.slice(0, 2).toUpperCase()}</span>
           )}
         </span>
         <div className="min-w-0 flex-1">
@@ -302,7 +302,7 @@ function CompanyRing({ name, logo, pct, level, sub }: { name: string; logo: stri
       </div>
       <div className="mt-3 flex items-end justify-between">
         <span className="text-2xl font-black leading-none tabular-nums" style={{ color: c }}>{n}<span className="text-sm">%</span></span>
-        <span className="text-[10px] font-medium text-slate-400">{sub}</span>
+        <span className="text-[10px] font-medium text-slate-500">{sub}</span>
       </div>
       <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
         <motion.div className="h-full rounded-full" style={{ background: c }} initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.9, ease: EASE }} />

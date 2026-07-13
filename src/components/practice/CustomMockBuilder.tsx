@@ -155,11 +155,11 @@ export function CustomMockBuilder() {
     <div className="space-y-6">
       {/* selection */}
       {topics === null ? (
-        <div className="flex items-center gap-2 py-8 text-sm text-slate-400">
+        <div className="flex items-center gap-2 py-8 text-sm text-slate-500">
           <Loader2 className="size-4 animate-spin" /> Loading topics…
         </div>
       ) : roots.length === 0 ? (
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 text-sm text-slate-500">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 text-sm text-slate-600">
           Topic catalog is unavailable right now - try again shortly.
         </div>
       ) : (
@@ -176,8 +176,8 @@ export function CustomMockBuilder() {
                   )}
                 >
                   <span className="flex items-center gap-2">
-                    <Layers className="size-4 text-slate-400" /> {root.name}
-                    <span className="text-[11px] font-semibold text-slate-400">
+                    <Layers className="size-4 text-slate-500" /> {root.name}
+                    <span className="text-[11px] font-semibold text-slate-500">
                       whole section
                     </span>
                   </span>
@@ -216,9 +216,9 @@ export function CustomMockBuilder() {
       {/* Coding topics (optional) - pick the coding topics to mix in */}
       {codingTopicList.length ? (
         <div data-tour="mock:coding-topics" className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
-          <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+          <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">
             <Code2 className="size-3.5" /> Coding topics
-            <span className="font-medium normal-case tracking-normal text-slate-400">(optional)</span>
+            <span className="font-medium normal-case tracking-normal text-slate-500">(optional)</span>
           </p>
 
           {/* Whole coding section - parity with the MCQ "whole section" toggle. */}
@@ -230,8 +230,8 @@ export function CustomMockBuilder() {
             )}
           >
             <span className="flex items-center gap-2">
-              <Code2 className="size-4 text-slate-400" /> Full coding section
-              <span className="text-[11px] font-semibold text-slate-400">
+              <Code2 className="size-4 text-slate-500" /> Full coding section
+              <span className="text-[11px] font-semibold text-slate-500">
                 all {codingTopicList.length} topics
               </span>
             </span>
@@ -255,7 +255,7 @@ export function CustomMockBuilder() {
                       on ? 'border-orange bg-orange/10 text-navy' : 'border-slate-200 text-slate-600 hover:bg-slate-50',
                     )}
                   >
-                    {on ? <Check className="size-3" /> : <Code2 className="size-3 text-slate-400" />}
+                    {on ? <Check className="size-3" /> : <Code2 className="size-3 text-slate-500" />}
                     {c.topic}
                   </button>
                 );
@@ -284,10 +284,10 @@ export function CustomMockBuilder() {
             <Stepper label="Coding problems" icon={Code2} value={codingCount} min={1} max={20} step={1} onChange={setCodingCount} />
           ) : (
             <div>
-              <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 <Code2 className="size-3.5" /> Coding problems
               </p>
-              <p className="mt-2 text-xs text-slate-400">Pick coding topics above to add coding.</p>
+              <p className="mt-2 text-xs text-slate-500">Pick coding topics above to add coding.</p>
             </div>
           )}
         </div>
@@ -299,7 +299,7 @@ export function CustomMockBuilder() {
         ) : null}
 
         <div className="mt-5 flex items-center justify-between gap-4">
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-600">
             <ShieldCheck className="mr-1 inline size-3.5 text-emerald-500" />
             Proctored · unlimited attempts · does not count toward leaderboards.
           </p>
@@ -350,20 +350,20 @@ function Stepper({
   const clamp = (v: number) => Math.max(min, Math.min(max, v));
   return (
     <div>
-      <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+      <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">
         <Icon className="size-3.5" /> {label}
       </p>
       <div className="mt-2 inline-flex items-center gap-2">
         <button
           onClick={() => onChange(clamp(value - step))}
-          className="grid size-8 place-items-center rounded-lg border border-slate-200 text-lg font-bold text-slate-500 hover:bg-slate-50"
+          className="grid size-8 place-items-center rounded-lg border border-slate-200 text-lg font-bold text-slate-600 hover:bg-slate-50"
         >
           −
         </button>
         <span className="w-12 text-center text-xl font-black tabular-nums text-navy">{value}</span>
         <button
           onClick={() => onChange(clamp(value + step))}
-          className="grid size-8 place-items-center rounded-lg border border-slate-200 text-lg font-bold text-slate-500 hover:bg-slate-50"
+          className="grid size-8 place-items-center rounded-lg border border-slate-200 text-lg font-bold text-slate-600 hover:bg-slate-50"
         >
           +
         </button>

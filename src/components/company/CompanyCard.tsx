@@ -171,7 +171,7 @@ export function CompanyCard({
           ) : null}
           <span
             aria-hidden
-            className="absolute right-4 top-4 grid size-8 place-items-center rounded-full border border-slate-200/80 bg-white text-slate-400 transition-all duration-300 group-hover:border-transparent group-hover:bg-gradient-to-br group-hover:from-[#f7a14e] group-hover:to-[#f37021] group-hover:text-white group-hover:shadow-[0_8px_20px_-8px_rgba(243,112,33,0.8)]"
+            className="absolute right-4 top-4 grid size-8 place-items-center rounded-full border border-slate-200/80 bg-white text-slate-500 transition-all duration-300 group-hover:border-transparent group-hover:bg-gradient-to-br group-hover:from-[#f7a14e] group-hover:to-[#f37021] group-hover:text-white group-hover:shadow-[0_8px_20px_-8px_rgba(243,112,33,0.8)]"
           >
             <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:translate-x-px group-hover:-translate-y-px" />
           </span>
@@ -216,13 +216,13 @@ export function CompanyCard({
           </div>
 
           {company.tagline ? (
-            <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-slate-500">
+            <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-slate-600">
               {company.tagline}
             </p>
           ) : null}
 
           {company.rounds ? (
-            <span className="mt-3 inline-flex w-fit items-center rounded-full bg-slate-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-500 ring-1 ring-inset ring-slate-200/70">
+            <span className="mt-3 inline-flex w-fit items-center rounded-full bg-slate-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-600 ring-1 ring-inset ring-slate-200/70">
               {company.rounds} rounds
             </span>
           ) : null}
@@ -238,7 +238,7 @@ export function CompanyCard({
                   key={f.label}
                   className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-600 ring-1 ring-inset ring-slate-200/70"
                 >
-                  <f.icon className="size-3 text-slate-400" aria-hidden="true" /> {f.label}
+                  <f.icon className="size-3 text-slate-500" aria-hidden="true" /> {f.label}
                 </span>
               ))}
             </div>
@@ -274,7 +274,7 @@ export function CompanyCard({
                 <Lock className="size-4" />
               </span>
               <span className="text-xs font-bold text-navy">Locked</span>
-              <span className="text-[11px] text-slate-500">Coming soon</span>
+              <span className="text-[11px] text-slate-600">Coming soon</span>
             </div>
           </div>
         </div>

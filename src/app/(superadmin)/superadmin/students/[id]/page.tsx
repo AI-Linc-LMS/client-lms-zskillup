@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 
 function pctTone(pct: number | null): string {
-  if (pct === null) return 'text-slate-400';
+  if (pct === null) return 'text-slate-500';
   if (pct >= 70) return 'text-emerald-600';
   if (pct >= 40) return 'text-amber-600';
   return 'text-red-500';
@@ -91,7 +91,7 @@ export default function StudentReportPage() {
   if (!report) {
     return (
       <div className="flex items-center justify-center rounded-2xl border border-slate-200 bg-white p-20">
-        <Loader2 className="size-6 animate-spin text-slate-400" />
+        <Loader2 className="size-6 animate-spin text-slate-500" />
       </div>
     );
   }
@@ -114,7 +114,7 @@ export default function StudentReportPage() {
 
       <Link
         href="/superadmin/students"
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-navy"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-navy"
       >
         <ArrowLeft className="size-4" /> All students
       </Link>
@@ -200,17 +200,17 @@ export default function StudentReportPage() {
       {/* Quiz attempts table */}
       <Panel
         title="Quiz attempts"
-        action={<span className="text-xs text-slate-400">{mockAttempts.length} total</span>}
+        action={<span className="text-xs text-slate-500">{mockAttempts.length} total</span>}
       >
         {mockAttempts.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
-            <Award className="size-7 text-slate-300" />
-            <p className="text-sm text-slate-400">This student hasn&apos;t attempted any quiz yet.</p>
+            <Award className="size-7 text-slate-400" />
+            <p className="text-sm text-slate-500">This student hasn&apos;t attempted any quiz yet.</p>
           </div>
         ) : (
           <div className="-mx-5 -mb-5 overflow-x-auto">
             <table className="w-full min-w-[720px] text-sm">
-              <thead className="border-y border-slate-100 bg-slate-50/60 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              <thead className="border-y border-slate-100 bg-slate-50/60 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                 <tr>
                   <th className="px-5 py-3">Quiz</th>
                   <th className="px-5 py-3 text-center">Marks</th>
@@ -243,8 +243,8 @@ export default function StudentReportPage() {
                         {a.status.replace('_', ' ')}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-xs text-slate-400">{fmtDateTime(a.submittedAt)}</td>
-                    <td className="px-5 py-3 text-right text-xs text-slate-500">
+                    <td className="px-5 py-3 text-xs text-slate-500">{fmtDateTime(a.submittedAt)}</td>
+                    <td className="px-5 py-3 text-right text-xs text-slate-600">
                       {fmtDuration(a.timeTakenSec)}
                     </td>
                   </tr>

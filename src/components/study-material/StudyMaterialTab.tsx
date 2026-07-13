@@ -107,18 +107,18 @@ export function StudyMaterialTab({ slug }: { slug: string }) {
   if (loading) {
     return (
       <div className="grid h-64 place-items-center">
-        <Loader2 className="size-6 animate-spin text-slate-300" />
+        <Loader2 className="size-6 animate-spin text-slate-400" />
       </div>
     );
   }
   if (!data || !data.hasContent || !section) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-slate-200 bg-white p-14 text-center">
-        <span className="grid size-14 place-items-center rounded-2xl bg-slate-100 text-slate-400">
+        <span className="grid size-14 place-items-center rounded-2xl bg-slate-100 text-slate-500">
           <MonitorPlay className="size-6" />
         </span>
         <p className="text-sm font-bold text-navy">Study material is coming soon</p>
-        <p className="max-w-sm text-xs text-slate-500">
+        <p className="max-w-sm text-xs text-slate-600">
           Concept videos, guided solutions and topic quizzes for this company are being prepared.
         </p>
       </div>
@@ -137,7 +137,7 @@ export function StudyMaterialTab({ slug }: { slug: string }) {
           </span>
           <div>
             <p className="text-sm font-bold text-navy">Study Material</p>
-            <p className="text-[11px] text-slate-500">{data.doneCount} of {data.itemCount} items completed</p>
+            <p className="text-[11px] text-slate-600">{data.doneCount} of {data.itemCount} items completed</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -156,7 +156,7 @@ export function StudyMaterialTab({ slug }: { slug: string }) {
       <div className="grid gap-4 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)]">
         {/* Left rail - sections */}
         <aside className="rounded-2xl border border-slate-200 bg-white p-2.5 lg:sticky lg:top-20 lg:self-start">
-          <p className="px-2 pb-1.5 pt-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Topics</p>
+          <p className="px-2 pb-1.5 pt-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">Topics</p>
           <ul className="space-y-1">
             {data.sections.map((s, i) => {
               const active = s.id === section.id;
@@ -174,7 +174,7 @@ export function StudyMaterialTab({ slug }: { slug: string }) {
                       <span className={cn('truncate text-sm font-bold', active ? 'text-navy' : 'text-slate-600')}>
                         {i + 1}. {s.title}
                       </span>
-                      <span className="shrink-0 text-xs font-bold tabular-nums text-slate-400">{s.progressPct}%</span>
+                      <span className="shrink-0 text-xs font-bold tabular-nums text-slate-500">{s.progressPct}%</span>
                     </div>
                     <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100">
                       <div className={cn('h-full rounded-full', tone(s.progressPct))} style={{ width: `${s.progressPct}%` }} />
@@ -196,7 +196,7 @@ export function StudyMaterialTab({ slug }: { slug: string }) {
               {section.title}
             </h3>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Progress</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Progress</span>
               <div className="h-2 w-28 overflow-hidden rounded-full bg-slate-100">
                 <div className="h-full rounded-full bg-gradient-to-r from-[#7c6cf5] to-[#5b4bd6]" style={{ width: `${section.progressPct}%` }} />
               </div>
@@ -238,27 +238,27 @@ export function StudyMaterialTab({ slug }: { slug: string }) {
                     )}
                   >
                     {t.locked ? (
-                      <Lock className="size-4 shrink-0 text-slate-400" />
+                      <Lock className="size-4 shrink-0 text-slate-500" />
                     ) : (
                       <ChevronDown
-                        className={cn('size-4 shrink-0 text-slate-400 transition-transform', open && 'rotate-180')}
+                        className={cn('size-4 shrink-0 text-slate-500 transition-transform', open && 'rotate-180')}
                       />
                     )}
                     <span
                       className={cn(
                         'flex-1 truncate text-sm font-bold',
-                        t.locked ? 'text-slate-400' : 'text-navy',
+                        t.locked ? 'text-slate-500' : 'text-navy',
                       )}
                     >
                       {sectionIndex + 1}.{ti + 1} {t.title}
                     </span>
                     {t.locked ? (
-                      <span className="shrink-0 rounded-full bg-slate-200/70 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                      <span className="shrink-0 rounded-full bg-slate-200/70 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-600">
                         Locked
                       </span>
                     ) : (
                       <>
-                        <span className="shrink-0 text-xs font-bold tabular-nums text-slate-500">{t.progressPct}%</span>
+                        <span className="shrink-0 text-xs font-bold tabular-nums text-slate-600">{t.progressPct}%</span>
                         <div className="hidden h-1.5 w-20 shrink-0 overflow-hidden rounded-full bg-slate-200 sm:block">
                           <div className={cn('h-full rounded-full', tone(t.progressPct))} style={{ width: `${t.progressPct}%` }} />
                         </div>
@@ -267,7 +267,7 @@ export function StudyMaterialTab({ slug }: { slug: string }) {
                   </button>
 
                   {t.locked && (
-                    <p className="flex items-center gap-1.5 border-t border-slate-200/70 px-4 py-2.5 text-xs text-slate-500">
+                    <p className="flex items-center gap-1.5 border-t border-slate-200/70 px-4 py-2.5 text-xs text-slate-600">
                       <Lock className="size-3 shrink-0" />
                       {t.lockedReason ?? 'Complete the previous module to unlock this module.'}
                     </p>
@@ -293,7 +293,7 @@ export function StudyMaterialTab({ slug }: { slug: string }) {
                               />
                             </li>
                           ))}
-                          {t.items.length === 0 && <li className="px-4 py-3 text-xs text-slate-400">No items yet.</li>}
+                          {t.items.length === 0 && <li className="px-4 py-3 text-xs text-slate-500">No items yet.</li>}
                         </ul>
                       </motion.div>
                     )}
@@ -348,11 +348,11 @@ function ItemRow({
         className="shrink-0"
       >
         {busy ? (
-          <Loader2 className="size-5 animate-spin text-slate-300" />
+          <Loader2 className="size-5 animate-spin text-slate-400" />
         ) : item.done ? (
           <CheckCircle2 className="size-5 text-emerald-500" />
         ) : (
-          <Circle className="size-5 text-slate-300 transition hover:text-orange" />
+          <Circle className="size-5 text-slate-400 transition hover:text-orange" />
         )}
       </button>
       <span
@@ -364,10 +364,10 @@ function ItemRow({
         <Icon className="size-4" />
       </span>
       <div className="min-w-0 flex-1">
-        <p className={cn('truncate text-sm font-semibold', item.done ? 'text-slate-400' : 'text-navy')}>{item.title}</p>
-        {item.description && <p className="truncate text-xs text-slate-500">{item.description}</p>}
+        <p className={cn('truncate text-sm font-semibold', item.done ? 'text-slate-500' : 'text-navy')}>{item.title}</p>
+        {item.description && <p className="truncate text-xs text-slate-600">{item.description}</p>}
       </div>
-      <span className="hidden shrink-0 text-[11px] font-semibold text-slate-400 sm:block">{meta}</span>
+      <span className="hidden shrink-0 text-[11px] font-semibold text-slate-500 sm:block">{meta}</span>
       {item.kind === 'VIDEO' ? (
         <button
           type="button"

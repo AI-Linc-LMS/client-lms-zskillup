@@ -37,12 +37,12 @@ export function ProvenanceChip({ source, className }: { source: string; classNam
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-medium text-slate-500',
+        'inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-medium text-slate-600',
         className,
       )}
       title={`Data curated from: ${source}`}
     >
-      <Database className="size-3 text-slate-400" aria-hidden />
+      <Database className="size-3 text-slate-500" aria-hidden />
       <span className="truncate">{source}</span>
     </span>
   );
@@ -83,7 +83,7 @@ export function BentoCard({
           )}
           <div className="min-w-0">
             <h2 className="truncate text-sm font-bold text-navy">{title}</h2>
-            {subtitle && <p className="mt-0.5 text-xs text-slate-400">{subtitle}</p>}
+            {subtitle && <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>}
           </div>
         </div>
         {action}
@@ -136,9 +136,9 @@ export function KpiCard({
       <p className="mt-3 text-2xl font-black tabular-nums leading-none text-navy">
         {typeof value === 'number' ? value.toLocaleString('en-IN') : value}
       </p>
-      <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+      <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
       {source && (
-        <p className="mt-2 flex items-center gap-1 text-[10px] text-slate-400">
+        <p className="mt-2 flex items-center gap-1 text-[10px] text-slate-500">
           <Database className="size-3" aria-hidden /> {source}
         </p>
       )}
@@ -166,7 +166,7 @@ export function Quad({
   return (
     <div className={cn('rounded-xl border p-3', tint[tone])}>
       <p className="text-2xl font-black tabular-nums text-navy">{value.toLocaleString('en-IN')}</p>
-      <p className="mt-0.5 text-[11px] font-medium leading-tight text-slate-500">{label}</p>
+      <p className="mt-0.5 text-[11px] font-medium leading-tight text-slate-600">{label}</p>
     </div>
   );
 }
@@ -204,12 +204,12 @@ export function ModulePlaceholder({
                 In progress
               </span>
             </div>
-            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-500">{blurb}</p>
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-600">{blurb}</p>
           </div>
         </div>
       </div>
       <div className="p-6">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
           What you&apos;ll see here
         </p>
         <ul className="mt-3 grid gap-2 sm:grid-cols-2">

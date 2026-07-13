@@ -70,10 +70,10 @@ export function AtsPanel({ data, onClose }: { data: ResumeData; onClose: () => v
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} aria-hidden />
       <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} transition={{ type: 'tween', duration: 0.25 }} className="relative flex h-full w-full max-w-md flex-col overflow-y-auto bg-white shadow-2xl">
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-5 py-4">
-          <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-400">
+          <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-500">
             <Gauge className="size-4" /> ATS Score
           </h2>
-          <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"><X className="size-5" /></button>
+          <button onClick={onClose} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100"><X className="size-5" /></button>
         </div>
 
         <div className="space-y-6 p-5">
@@ -97,7 +97,7 @@ export function AtsPanel({ data, onClose }: { data: ResumeData; onClose: () => v
               <p className="text-sm font-bold text-navy">
                 {headline >= 75 ? 'Strong' : headline >= 50 ? 'Getting there' : 'Needs work'}
               </p>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-slate-600">
                 {ai
                   ? 'AI review of your content, relevance and impact.'
                   : `Quick local check of structure and completeness${jd.trim().length >= 15 ? ', tailored to the job below' : ''}. Run the AI analysis for a content review.`}
@@ -107,7 +107,7 @@ export function AtsPanel({ data, onClose }: { data: ResumeData; onClose: () => v
 
           {/* Breakdown */}
           <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-slate-400">Breakdown</p>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-slate-500">Breakdown</p>
             <div className="space-y-2.5">
               {dims.map((k) => {
                 const v = result.breakdown[k];
@@ -119,10 +119,10 @@ export function AtsPanel({ data, onClose }: { data: ResumeData; onClose: () => v
                     <div key={k}>
                       <div className="mb-0.5 flex justify-between text-xs">
                         <span className="text-slate-600">{DIM_LABELS[k]}</span>
-                        <span className="font-semibold text-slate-400">Not scored</span>
+                        <span className="font-semibold text-slate-500">Not scored</span>
                       </div>
                       <div className="h-1.5 rounded-full bg-slate-100" />
-                      <p className="mt-0.5 text-[10px] text-slate-400">Paste a job description below to score this.</p>
+                      <p className="mt-0.5 text-[10px] text-slate-500">Paste a job description below to score this.</p>
                     </div>
                   );
                 }
@@ -143,7 +143,7 @@ export function AtsPanel({ data, onClose }: { data: ResumeData; onClose: () => v
 
           {/* Job description */}
           <div>
-            <p className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-slate-400">Match a job (optional)</p>
+            <p className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-slate-500">Match a job (optional)</p>
             <textarea
               rows={4}
               value={jd}
@@ -177,7 +177,7 @@ export function AtsPanel({ data, onClose }: { data: ResumeData; onClose: () => v
               {aiError && <p className="mt-2 text-xs text-red-600">{aiError}</p>}
               {ai && (
                 <div className="mt-3 space-y-2 text-sm">
-                  <p><span className={cn('text-2xl font-black', scoreColor(ai.overallScore))}>{ai.overallScore}</span> <span className="text-xs text-slate-500">/ 100 (AI)</span></p>
+                  <p><span className={cn('text-2xl font-black', scoreColor(ai.overallScore))}>{ai.overallScore}</span> <span className="text-xs text-slate-600">/ 100 (AI)</span></p>
                   <p className="text-slate-700">{ai.summary}</p>
                   {ai.strengths.length > 0 && (
                     <div><p className="text-[11px] font-semibold text-green-700">Strengths</p><ul className="list-disc pl-4 text-xs text-slate-700">{ai.strengths.map((s, i) => <li key={i}>{s}</li>)}</ul></div>
@@ -195,7 +195,7 @@ export function AtsPanel({ data, onClose }: { data: ResumeData; onClose: () => v
 
           {/* Suggestions */}
           <div>
-            <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+            <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
               <Lightbulb className="size-3.5" /> Quick fixes
             </p>
             <ul className="space-y-1.5">

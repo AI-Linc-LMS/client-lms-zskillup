@@ -104,7 +104,7 @@ export function MockCodingPanel({
       <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
         <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{coding.statement}</p>
         {coding.constraints ? (
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-slate-600">
             <span className="font-semibold text-slate-600">Constraints: </span>
             {coding.constraints}
           </p>
@@ -113,10 +113,10 @@ export function MockCodingPanel({
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
             {coding.sampleCases.slice(0, 2).map((c, i) => (
               <div key={i} className="rounded-lg border border-slate-200 bg-white p-2.5 text-xs">
-                <p className="font-semibold text-slate-500">Sample {i + 1}</p>
-                <p className="mt-1 text-slate-400">Input</p>
+                <p className="font-semibold text-slate-600">Sample {i + 1}</p>
+                <p className="mt-1 text-slate-500">Input</p>
                 <pre className="overflow-x-auto whitespace-pre-wrap break-words font-mono text-[11px] text-navy">{c.input}</pre>
-                <p className="mt-1 text-slate-400">Expected</p>
+                <p className="mt-1 text-slate-500">Expected</p>
                 <pre className="overflow-x-auto whitespace-pre-wrap break-words font-mono text-[11px] text-navy">{c.expectedOutput}</pre>
               </div>
             ))}
@@ -154,7 +154,7 @@ export function MockCodingPanel({
         <button type="button" onClick={submit} disabled={submitting || running} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-4 py-2 text-sm font-extrabold text-white disabled:opacity-60">
           {submitting ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />} Submit solution
         </button>
-        <span className="text-xs text-slate-400">Submitting records your latest solution; you can resubmit before the timer ends.</span>
+        <span className="text-xs text-slate-500">Submitting records your latest solution; you can resubmit before the timer ends.</span>
       </div>
 
       {error ? <p role="alert" className="text-sm text-red-600">{error}</p> : null}
@@ -198,7 +198,7 @@ export function MockCodingPanel({
                     </span>
                     <span className="font-semibold text-slate-600">Test {c.index + 1}{c.hidden ? ' · hidden' : ''}</span>
                     {!c.hidden && c.actualOutput != null ? (
-                      <span className="ml-auto truncate font-mono text-[11px] text-slate-400">got: {c.actualOutput.slice(0, 36) || '∅'}</span>
+                      <span className="ml-auto truncate font-mono text-[11px] text-slate-500">got: {c.actualOutput.slice(0, 36) || '∅'}</span>
                     ) : null}
                   </div>
                 ))}

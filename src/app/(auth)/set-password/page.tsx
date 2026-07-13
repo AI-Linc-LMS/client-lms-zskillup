@@ -50,7 +50,7 @@ function SetPasswordForm() {
     return (
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h1 className="text-xl font-bold text-navy">Set-up link missing</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-600">
           Open the link from your account set-up email. If it&apos;s expired, ask your admin to resend it.
         </p>
         <Link href="/login" className="mt-4 inline-block text-sm font-semibold text-orange hover:underline">
@@ -67,7 +67,7 @@ function SetPasswordForm() {
           <KeyRound className="size-5 text-orange" aria-hidden="true" />
         </span>
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Welcome to ZSkillup</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Welcome to ZSkillup</p>
           <h1 className="text-xl font-bold text-navy">Set your password</h1>
         </div>
       </div>
@@ -99,7 +99,7 @@ function SetPasswordForm() {
           {isSubmitting ? 'Saving…' : 'Set password & continue'}
         </Button>
       </form>
-      <p className="mt-4 text-center text-xs text-slate-400">You&apos;ll use this password to sign in from now on.</p>
+      <p className="mt-4 text-center text-xs text-slate-500">You&apos;ll use this password to sign in from now on.</p>
     </div>
   );
 }

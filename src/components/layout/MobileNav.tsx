@@ -83,7 +83,7 @@ export function MobileNav() {
                   type="button"
                   onClick={() => setOpen(false)}
                   aria-label="Close navigation menu"
-                  className="grid size-8 shrink-0 place-items-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-navy"
+                  className="grid size-8 shrink-0 place-items-center rounded-lg text-slate-600 transition-colors hover:bg-slate-100 hover:text-navy"
                 >
                   <X className="size-5" />
                 </button>
@@ -92,7 +92,7 @@ export function MobileNav() {
               <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5" aria-label="Workspace">
                 {sections.map((section) => (
                   <div key={section.heading}>
-                    <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                    <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                       {section.heading}
                     </p>
                     <ul className="space-y-0.5">
@@ -117,7 +117,7 @@ export function MobileNav() {
                                   'flex size-7 shrink-0 items-center justify-center rounded-lg',
                                   active
                                     ? 'bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_4px_12px_-4px_rgba(243,112,33,0.7)]'
-                                    : 'text-slate-400',
+                                    : 'text-slate-500',
                                 )}
                               >
                                 <Icon className="size-4" />

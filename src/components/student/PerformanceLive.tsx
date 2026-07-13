@@ -62,7 +62,7 @@ export function PerformanceLive() {
   if (loading) {
     return (
       <div className="flex items-center justify-center rounded-3xl border border-slate-200/80 bg-white p-16">
-        <Loader2 className="size-5 animate-spin text-slate-400" aria-hidden="true" />
+        <Loader2 className="size-5 animate-spin text-slate-500" aria-hidden="true" />
       </div>
     );
   }
@@ -159,7 +159,7 @@ export function PerformanceLive() {
                         </span>
                         <span className="shrink-0 text-sm font-extrabold tabular-nums text-navy">
                           {t.accuracyPct}%{' '}
-                          <span className="text-xs font-normal text-slate-400">
+                          <span className="text-xs font-normal text-slate-500">
                             ({t.correct}/{t.total})
                           </span>
                         </span>
@@ -177,7 +177,7 @@ export function PerformanceLive() {
       {/* Weak areas */}
       {weak.length > 0 ? (
         <section>
-          <p className="mb-4 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+          <p className="mb-4 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
             <Target className="size-3.5 text-red-400" aria-hidden="true" />
             Weak Areas
           </p>
@@ -242,7 +242,7 @@ export function PerformanceLive() {
                     {['Mock', 'Date', 'Score', 'Percentile', 'Status', ''].map((h, i) => (
                       <th
                         key={h || `c${i}`}
-                        className="pb-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-400"
+                        className="pb-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-500"
                       >
                         {h}
                       </th>
@@ -260,13 +260,13 @@ export function PerformanceLive() {
                       className="group/row border-b border-slate-50 transition-colors last:border-0 hover:bg-slate-50/70"
                     >
                       <td className="py-3.5 pr-4 font-bold text-navy">{m.title}</td>
-                      <td className="py-3.5 pr-4 text-slate-400">{formatDateIN(m.submittedAt)}</td>
+                      <td className="py-3.5 pr-4 text-slate-500">{formatDateIN(m.submittedAt)}</td>
                       <td className="py-3.5 pr-4">
                         <div className="flex items-center gap-2.5">
                           <ScoreMeter pct={m.pct} passed={m.passed} expired={m.status === 'EXPIRED'} />
                           <span className="whitespace-nowrap font-extrabold tabular-nums text-navy">
                             {m.pct}%{' '}
-                            <span className="text-xs font-normal text-slate-400">
+                            <span className="text-xs font-normal text-slate-500">
                               ({m.score}/{m.total})
                             </span>
                           </span>
@@ -509,7 +509,7 @@ function SectionCard({
             <Icon className="size-[18px]" aria-hidden="true" />
           </span>
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
               {eyebrow}
             </p>
             <h2 className="text-base font-bold leading-tight text-navy">{title}</h2>
@@ -605,7 +605,7 @@ function EmptyState({
   return (
     <div className="py-4 text-center">
       <p className="text-sm font-semibold text-navy">{title}</p>
-      <p className="mt-1 text-xs text-slate-500">{detail}</p>
+      <p className="mt-1 text-xs text-slate-600">{detail}</p>
       <Button asChild size="sm" className="mt-4">
         <Link href={href}>{cta}</Link>
       </Button>

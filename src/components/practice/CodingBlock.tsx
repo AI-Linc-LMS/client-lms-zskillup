@@ -31,7 +31,7 @@ export function CodingBlock({
           </span>
           <div>
             <p className="text-base font-bold leading-snug text-navy">Coding</p>
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="mt-0.5 text-xs text-slate-600">
               {topics.length
                 ? `${topics.length} topic${topics.length === 1 ? '' : 's'} · Judge0-evaluated DSA problems`
                 : 'DSA problems - Judge0-evaluated'}
@@ -65,7 +65,7 @@ export function CodingBlock({
           ))}
         </div>
       ) : (
-        <p className="relative mt-3 text-xs text-slate-500">
+        <p className="relative mt-3 text-xs text-slate-600">
           Coding problems are on the way - check back soon.
         </p>
       )}

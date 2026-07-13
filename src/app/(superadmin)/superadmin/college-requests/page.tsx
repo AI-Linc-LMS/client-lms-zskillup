@@ -91,9 +91,9 @@ export default function SuperAdminCollegeRequestsPage() {
 
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Super Admin · Onboarding</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Super Admin · Onboarding</p>
           <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">College Registration Requests</h1>
-          <p className="mt-1 text-sm text-slate-500">Review submitted requests - approve to create the college, or send back with a reason.</p>
+          <p className="mt-1 text-sm text-slate-600">Review submitted requests - approve to create the college, or send back with a reason.</p>
         </div>
         <div className="relative w-48">
           <select
@@ -106,7 +106,7 @@ export default function SuperAdminCollegeRequestsPage() {
             <option value="REJECTED">Rejected</option>
             <option value="">All</option>
           </select>
-          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
         </div>
       </div>
 
@@ -115,10 +115,10 @@ export default function SuperAdminCollegeRequestsPage() {
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
           {rows === null ? (
             <div className="flex items-center justify-center py-16">
-              <Loader2 className="size-6 animate-spin text-slate-400" />
+              <Loader2 className="size-6 animate-spin text-slate-500" />
             </div>
           ) : rows.length === 0 ? (
-            <div className="py-16 text-center text-sm text-slate-400">Nothing here.</div>
+            <div className="py-16 text-center text-sm text-slate-500">Nothing here.</div>
           ) : (
             <ul className="divide-y divide-slate-100">
               {rows.map((r) => (
@@ -129,7 +129,7 @@ export default function SuperAdminCollegeRequestsPage() {
                   >
                     <div className="min-w-0">
                       <p className="truncate font-semibold text-navy">{r.collegeName}</p>
-                      <p className="text-xs text-slate-400">{r.city}, {r.state} · {r.studentCount} students · {r.planName}</p>
+                      <p className="text-xs text-slate-500">{r.city}, {r.state} · {r.studentCount} students · {r.planName}</p>
                     </div>
                     <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${STATUS_STYLE[r.status] ?? ''}`}>{r.status}</span>
                   </button>
@@ -143,10 +143,10 @@ export default function SuperAdminCollegeRequestsPage() {
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           {detailLoading ? (
             <div className="flex items-center justify-center py-16">
-              <Loader2 className="size-6 animate-spin text-slate-400" />
+              <Loader2 className="size-6 animate-spin text-slate-500" />
             </div>
           ) : !selected ? (
-            <div className="py-16 text-center text-sm text-slate-400">Select a request to review.</div>
+            <div className="py-16 text-center text-sm text-slate-500">Select a request to review.</div>
           ) : (
             <div className="space-y-4">
               <div className="flex items-center justify-between gap-2">
@@ -171,7 +171,7 @@ export default function SuperAdminCollegeRequestsPage() {
 
               <div className="max-h-52 overflow-auto rounded-lg border border-slate-200">
                 <table className="w-full text-xs">
-                  <thead className="sticky top-0 bg-slate-50 text-[10px] uppercase tracking-widest text-slate-400">
+                  <thead className="sticky top-0 bg-slate-50 text-[10px] uppercase tracking-widest text-slate-500">
                     <tr>
                       <th className="px-3 py-1.5 text-left">Email</th>
                       <th className="px-3 py-1.5 text-left">Name</th>
@@ -183,13 +183,13 @@ export default function SuperAdminCollegeRequestsPage() {
                       <tr key={`${s.email}-${i}`} className="border-t border-slate-100">
                         <td className="px-3 py-1.5 font-medium text-navy">{s.email}</td>
                         <td className="px-3 py-1.5 text-slate-600">{s.fullName ?? '-'}</td>
-                        <td className="px-3 py-1.5 text-slate-500">{s.rollNumber ?? '-'}</td>
+                        <td className="px-3 py-1.5 text-slate-600">{s.rollNumber ?? '-'}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
                 {selected.students.length > 100 ? (
-                  <p className="px-3 py-1.5 text-[11px] text-slate-400">…and {selected.students.length - 100} more</p>
+                  <p className="px-3 py-1.5 text-[11px] text-slate-500">…and {selected.students.length - 100} more</p>
                 ) : null}
               </div>
 
@@ -242,7 +242,7 @@ export default function SuperAdminCollegeRequestsPage() {
 function Info({ k, v }: { k: string; v: string }) {
   return (
     <div className="min-w-0">
-      <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{k}</dt>
+      <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{k}</dt>
       <dd className="mt-0.5 break-words text-sm text-navy">{v}</dd>
     </div>
   );

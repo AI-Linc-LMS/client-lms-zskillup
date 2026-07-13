@@ -151,11 +151,11 @@ export default function LeaderboardPage() {
           <div className="min-w-[180px]">
             <p className="hidden items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[#f5b400] lg:flex">
               <Globe2 className="size-3.5" /> {scopeLabel}
-              {season && <span className="text-slate-400">· Week {season.week}</span>}
+              {season && <span className="text-slate-500">· Week {season.week}</span>}
             </p>
             {myRank ? (
               <>
-                <p className="mt-1 text-sm font-semibold text-slate-500">You&apos;re Ranked</p>
+                <p className="mt-1 text-sm font-semibold text-slate-600">You&apos;re Ranked</p>
                 <p className="text-6xl font-black leading-none text-[#f5b400]">#{myRank}</p>
                 {topPct != null && (
                   <span className="mt-3 inline-block rounded-full bg-white px-3 py-1 text-xs font-bold text-navy shadow-sm ring-1 ring-orange/20">
@@ -166,7 +166,7 @@ export default function LeaderboardPage() {
             ) : (
               <>
                 <p className="mt-1 text-2xl font-black text-navy">Climb the ranks</p>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-slate-600">
                   {me ? 'Practise to earn XP and claim your spot.' : 'Sign in to see your rank.'}
                 </p>
               </>
@@ -180,17 +180,17 @@ export default function LeaderboardPage() {
                 <p className="text-sm text-slate-600">
                   You&apos;re only <span className="text-2xl font-black text-[#f5b400]">{fmt(xpAway)} XP</span>
                 </p>
-                <p className="text-sm font-semibold text-slate-500">away from Rank #{nextEntry.rank}</p>
+                <p className="text-sm font-semibold text-slate-600">away from Rank #{nextEntry.rank}</p>
                 <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-orange/10">
                   <div className="h-full rounded-full bg-gradient-to-r from-[#ffc42d] to-[#f5b400]" style={{ width: `${progress}%` }} />
                 </div>
-                <div className="mt-1 flex justify-between text-[11px] font-semibold tabular-nums text-slate-400">
+                <div className="mt-1 flex justify-between text-[11px] font-semibold tabular-nums text-slate-500">
                   <span>{fmt(myEntry?.totalXp ?? 0)} XP</span>
                   <span>{fmt(nextEntry.totalXp)} XP</span>
                 </div>
               </>
             ) : (
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-slate-600">
                 {myRank === 1 ? "You're #1 - defend your throne! 👑" : 'Every drill earns XP. Streaks multiply it.'}
               </p>
             )}
@@ -199,11 +199,11 @@ export default function LeaderboardPage() {
           {/* Reset + trophy */}
           <div className="flex items-center gap-4">
             <div className="rounded-2xl bg-white/80 px-4 py-3 text-center ring-1 ring-slate-100">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Resets in</p>
+              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Resets in</p>
               <p className="text-lg font-black text-navy">
                 {season ? `${season.days}d ${season.hours}h` : '-'}
               </p>
-              <p className="text-[10px] text-slate-400">Sunday, 11:59 PM</p>
+              <p className="text-[10px] text-slate-500">Sunday, 11:59 PM</p>
             </div>
             <Trophy className="size-16 text-amber-400 drop-shadow-[0_8px_16px_rgba(245,158,11,0.35)]" />
           </div>
@@ -248,11 +248,11 @@ export default function LeaderboardPage() {
                 ))}
               </select>
             ) : (
-              <span className="text-sm text-slate-400">No cities yet</span>
+              <span className="text-sm text-slate-500">No cities yet</span>
             ))}
         </div>
-        <span className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500">
-          <GraduationCap className="size-4 text-slate-400" /> {fmt(data?.totalStudents ?? 0)} learners
+        <span className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600">
+          <GraduationCap className="size-4 text-slate-500" /> {fmt(data?.totalStudents ?? 0)} learners
         </span>
       </div>
 
@@ -268,7 +268,7 @@ export default function LeaderboardPage() {
             <GraduationCap className="size-6" />
           </span>
           <p className="mt-3 text-sm font-black text-navy">Pick your college first</p>
-          <p className="mx-auto mt-1 max-w-sm text-sm text-slate-500">
+          <p className="mx-auto mt-1 max-w-sm text-sm text-slate-600">
             We can only rank you against your college once we know which one it is.
             Choose it in your profile and this board will fill up.
           </p>
@@ -280,7 +280,7 @@ export default function LeaderboardPage() {
           </Link>
         </div>
       ) : entries.length === 0 ? (
-        <div className="rounded-3xl border border-slate-200 bg-white p-16 text-center text-sm text-slate-400">
+        <div className="rounded-3xl border border-slate-200 bg-white p-16 text-center text-sm text-slate-500">
           No ranked learners here yet - be the first to earn XP.
         </div>
       ) : (
@@ -305,7 +305,7 @@ export default function LeaderboardPage() {
                       </span>
                     </div>
                     <p className="mt-3 max-w-[9rem] truncate text-center text-sm font-bold text-navy">{e.fullName ?? 'Learner'}</p>
-                    <p className="max-w-[9rem] truncate text-center text-xs text-slate-400">{e.collegeName ?? '-'}</p>
+                    <p className="max-w-[9rem] truncate text-center text-xs text-slate-500">{e.collegeName ?? '-'}</p>
                     <p className={`mt-1 font-black tabular-nums ${first ? 'text-lg text-[#f5b400]' : 'text-navy'}`}>{fmt(e.totalXp)} XP</p>
                     <div className={`mt-2 w-full rounded-t-xl bg-gradient-to-b ${cfg.pedestal}`} />
                   </div>
@@ -321,7 +321,7 @@ export default function LeaderboardPage() {
               <Avatar entry={myEntry} size={44} />
               <div className="min-w-0">
                 <p className="truncate font-bold text-navy">{myEntry.fullName ?? 'You'}</p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-600">
                   {myEntry.collegeName ?? 'No college set'} · <span className="font-semibold">Level {myEntry.level}</span>
                 </p>
               </div>
@@ -331,13 +331,13 @@ export default function LeaderboardPage() {
                     {fmt(myEntry.totalXp)} XP <XpInfoButton />
                   </p>
                   {xpAway != null && nextEntry && (
-                    <p className="text-xs text-slate-500">{fmt(xpAway)} XP to reach Rank #{nextEntry.rank}</p>
+                    <p className="text-xs text-slate-600">{fmt(xpAway)} XP to reach Rank #{nextEntry.rank}</p>
                   )}
                 </div>
                 <div className="flex items-center gap-1.5 text-[#ff7a1a]">
                   <Flame className="size-5 fill-[#ff7a1a]/20" />
                   <span className="font-black">{myEntry.currentStreakDays}</span>
-                  <span className="text-xs font-semibold text-slate-500">day{myEntry.currentStreakDays === 1 ? '' : 's'}</span>
+                  <span className="text-xs font-semibold text-slate-600">day{myEntry.currentStreakDays === 1 ? '' : 's'}</span>
                 </div>
               </div>
             </section>
@@ -348,7 +348,7 @@ export default function LeaderboardPage() {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[720px] text-sm">
                 <thead>
-                  <tr className="border-b border-slate-100 text-left text-[11px] font-bold uppercase tracking-widest text-slate-400">
+                  <tr className="border-b border-slate-100 text-left text-[11px] font-bold uppercase tracking-widest text-slate-500">
                     <th className="px-5 py-3">Rank</th>
                     <th className="px-2 py-3">Learner</th>
                     <th className="px-2 py-3">College</th>
@@ -361,7 +361,7 @@ export default function LeaderboardPage() {
                 <tbody className="divide-y divide-slate-100">
                   {visibleRows.map((e) => (
                     <tr key={e.userId} className={e.isYou ? 'bg-orange-50/60' : 'hover:bg-slate-50'}>
-                      <td className="px-5 py-3 font-black tabular-nums text-slate-500">{e.rank}</td>
+                      <td className="px-5 py-3 font-black tabular-nums text-slate-600">{e.rank}</td>
                       <td className="px-2 py-3">
                         <div className="flex items-center gap-2.5">
                           <Avatar entry={e} size={32} />
@@ -369,7 +369,7 @@ export default function LeaderboardPage() {
                           {e.isYou && <span className="rounded bg-orange px-1.5 py-0.5 text-[10px] font-black text-[#171717]">You</span>}
                         </div>
                       </td>
-                      <td className="px-2 py-3 text-slate-500">{e.collegeName ?? 'No college set'}</td>
+                      <td className="px-2 py-3 text-slate-600">{e.collegeName ?? 'No college set'}</td>
                       <td className="px-2 py-3">
                         <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">Lv. {e.level}</span>
                       </td>
@@ -380,13 +380,13 @@ export default function LeaderboardPage() {
                             <Flame className="size-4" /> {e.currentStreakDays} day{e.currentStreakDays === 1 ? '' : 's'}
                           </span>
                         ) : (
-                          <span className="text-sm text-slate-400">0 day</span>
+                          <span className="text-sm text-slate-500">0 day</span>
                         )}
                       </td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end">
                           {e.trend == null || e.trend === 0 ? (
-                            <Minus className="size-4 text-slate-300" />
+                            <Minus className="size-4 text-slate-400" />
                           ) : e.trend > 0 ? (
                             <span className="inline-flex items-center gap-0.5 text-sm font-bold text-emerald-600">
                               <TrendingUp className="size-4" /> {e.trend}

@@ -32,7 +32,7 @@ function ScatterTip({ active, payload }: { active?: boolean; payload?: { payload
   return (
     <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-lg">
       <p className="font-bold text-navy">{p.name}</p>
-      {p.branch && <p className="text-slate-400">{p.branch}</p>}
+      {p.branch && <p className="text-slate-500">{p.branch}</p>}
       <p className="mt-1 text-slate-600">
         Performance <span className="font-semibold tabular-nums text-navy">{p.readiness}%</span>
       </p>
