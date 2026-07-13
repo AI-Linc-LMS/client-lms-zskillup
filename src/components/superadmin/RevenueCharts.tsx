@@ -6,12 +6,12 @@ import { getFinancialsOverview } from '@/lib/api/financials';
 import type { FinancialsOverviewDto } from '@/shared/dto/financials.dto';
 import { ReadinessDonut } from '@/components/charts/ReadinessDonut';
 
-const PLAN_COLORS = ['#f37021', '#0284c7', '#7c3aed', '#059669', '#f59e0b', '#dc2626'];
+const PLAN_COLORS = ['#ffc42d', '#0284c7', '#7c3aed', '#059669', '#f59e0b', '#dc2626'];
 const inr = (cents: number) => '₹' + Math.round(cents / 100).toLocaleString('en-IN');
 
 function Kpi({ icon: Icon, label, value, tone }: { icon: typeof IndianRupee; label: string; value: string; tone: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4">
       <Icon className={`size-5 ${tone}`} />
       <p className="mt-2 text-xl font-black tabular-nums text-navy">{value}</p>
       <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
@@ -21,7 +21,7 @@ function Kpi({ icon: Icon, label, value, tone }: { icon: typeof IndianRupee; lab
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white p-5">
       <h3 className="text-sm font-bold text-navy">{title}</h3>
       <div className="mt-4">{children}</div>
     </div>
@@ -40,7 +40,7 @@ export function RevenueCharts() {
 
   if (d === null) {
     return (
-      <div className="grid h-40 place-items-center rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="grid h-40 place-items-center rounded-2xl border border-slate-200 bg-white">
         <Loader2 className="size-6 animate-spin text-slate-300" />
       </div>
     );
@@ -62,7 +62,7 @@ export function RevenueCharts() {
   return (
     <section className="space-y-5">
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Kpi icon={IndianRupee} label="MRR" value={inr(d.mrrCents)} tone="text-orange" />
+        <Kpi icon={IndianRupee} label="MRR" value={inr(d.mrrCents)} tone="text-[#f5b400]" />
         <Kpi icon={TrendingUp} label="ARR" value={inr(d.arrCents)} tone="text-emerald-600" />
         <Kpi icon={CreditCard} label="Paying subs" value={d.payingSubscriptions.toLocaleString('en-IN')} tone="text-violet-600" />
         <Kpi icon={Users} label="Active subs" value={d.activeSubscriptions.toLocaleString('en-IN')} tone="text-sky-600" />
@@ -82,7 +82,7 @@ export function RevenueCharts() {
           </Card>
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-400 shadow-sm">
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-400">
           No subscription revenue yet — charts appear once colleges or students are on paid plans.
         </div>
       )}

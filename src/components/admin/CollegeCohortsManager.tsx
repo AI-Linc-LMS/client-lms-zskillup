@@ -10,7 +10,7 @@ import {
 import type { CohortDto, TpoBulkInviteResult } from '@/shared';
 
 const inputCls =
-  'rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy shadow-sm outline-none focus:border-orange focus:ring-1 focus:ring-orange';
+  'rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy outline-none focus:border-[#f5b400] focus:ring-1 focus:ring-[#f5b400]';
 
 function parseInvites(text: string) {
   return text
@@ -101,9 +101,9 @@ export function CollegeCohortsManager({ collegeId, onChange }: { collegeId: stri
   return (
     <div className="grid gap-5 lg:grid-cols-2">
       {/* Cohorts */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5">
         <h2 className="flex items-center gap-2 text-sm font-bold text-navy">
-          <Users className="size-4 text-orange" /> Cohorts / batches
+          <Users className="size-4 text-[#f5b400]" /> Cohorts / batches
         </h2>
         {cohorts === null ? (
           <div className="grid h-24 place-items-center">
@@ -154,9 +154,9 @@ export function CollegeCohortsManager({ collegeId, onChange }: { collegeId: stri
       </section>
 
       {/* Invite students */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5">
         <h2 className="flex items-center gap-2 text-sm font-bold text-navy">
-          <Mail className="size-4 text-orange" /> Invite students
+          <Mail className="size-4 text-[#f5b400]" /> Invite students
         </h2>
         <p className="mt-1 text-xs text-slate-400">
           One per line: <code className="rounded bg-slate-100 px-1">email, name, roll, branch</code> (name/roll/branch optional).
@@ -179,7 +179,7 @@ export function CollegeCohortsManager({ collegeId, onChange }: { collegeId: stri
             type="button"
             onClick={() => void invite()}
             disabled={busyInvite}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-orange px-4 py-2 text-sm font-bold text-white transition hover:brightness-105 disabled:opacity-60"
+            className="btn-brand inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-bold transition hover:brightness-105 disabled:opacity-60"
           >
             {busyInvite ? <Loader2 className="size-4 animate-spin" /> : <Mail className="size-4" />} Send invites
           </button>

@@ -111,7 +111,7 @@ export function CodingAdmin() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search problem title / slug"
-            className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm text-navy placeholder:text-slate-400 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+            className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm text-navy placeholder:text-slate-400 focus:border-[#ffc42d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffc42d]/30"
           />
         </div>
         <select
@@ -144,7 +144,7 @@ export function CodingAdmin() {
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">{err}</div>
       ) : null}
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[860px] text-left text-sm">
             <thead className="bg-slate-50/90">
@@ -180,7 +180,7 @@ export function CodingAdmin() {
                         onClick={() => setSelected(r)}
                         className="group/title block text-left"
                       >
-                        <span className="block font-semibold text-navy group-hover/title:text-orange group-hover/title:underline">
+                        <span className="block font-semibold text-navy group-hover/title:text-[#1a1d29] group-hover/title:underline">
                           {r.title}
                         </span>
                         <span className="text-[11px] text-slate-400">{r.slug}</span>
@@ -319,7 +319,7 @@ function CodingDetailDrawer({
             <Pill tone={p.isActive ? 'bg-sky-50 text-sky-700 ring-sky-200' : 'bg-slate-100 text-slate-500 ring-slate-200'}>
               {p.isActive ? 'Active' : 'Inactive'}
             </Pill>
-            {p.xpReward ? <Pill tone="bg-orange/10 text-orange ring-orange/20">{p.xpReward} XP</Pill> : null}
+            {p.xpReward ? <Pill tone="bg-[#fff5ea] text-[#1a1d29] ring-[#ffc42d]/30">{p.xpReward} XP</Pill> : null}
           </div>
 
           {/* source citation — the whole point */}
@@ -475,7 +475,7 @@ function Pill({ tone, children }: { tone?: string; children: React.ReactNode }) 
 }
 function Metric({ label, value, accent }: { label: string; value: number; accent: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3">
       <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">{label}</p>
       <p className={`mt-2 text-2xl font-black tracking-tight ${accent}`}>{value.toLocaleString()}</p>
     </div>

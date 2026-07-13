@@ -113,7 +113,7 @@ export function CompaniesAdmin() {
         </div>
       ) : null}
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         <div className="overflow-x-auto">
         <table className="w-full min-w-[620px] text-left text-sm">
           <thead className="bg-slate-50">
@@ -155,7 +155,7 @@ export function CompaniesAdmin() {
                         type="button"
                         disabled={busyId === c.id}
                         onClick={() => togglePublish(c)}
-                        className="text-xs font-semibold text-navy transition-colors hover:text-orange disabled:opacity-50"
+                        className="text-xs font-semibold text-navy transition-colors hover:text-[#1a1d29] disabled:opacity-50"
                       >
                         {c.isPublished ? 'Unpublish' : 'Publish'}
                       </button>
@@ -211,7 +211,7 @@ function AddCompanyForm({ onCreated }: { onCreated: () => void }) {
   });
 
   return (
-    <form onSubmit={onSubmit} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm" noValidate>
+    <form onSubmit={onSubmit} className="rounded-xl border border-slate-200 bg-white p-5" noValidate>
       <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">New company</p>
       <h2 className="mb-4 text-base font-bold text-navy">Add a recruiter hub</h2>
 

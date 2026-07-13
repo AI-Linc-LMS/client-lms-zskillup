@@ -44,8 +44,8 @@ export default function SubscriptionPage() {
   }
   if (!sub) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center shadow-sm">
-        <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-orange/10 text-orange">
+      <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center">
+        <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-[#fff5ea] text-[#f5b400]">
           <CreditCard className="size-6" />
         </span>
         <h2 className="mt-4 text-lg font-extrabold text-navy">No active subscription</h2>
@@ -65,8 +65,8 @@ export default function SubscriptionPage() {
   return (
     <div className="space-y-6">
       {/* Plan hero */}
-      <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-sm sm:p-8">
-        <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#f37021]/20 blur-3xl" />
+      <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white sm:p-8">
+        <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#ffc42d]/20 blur-3xl" />
         <div className="relative flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-widest text-white/50">Current plan</p>
@@ -86,7 +86,7 @@ export default function SubscriptionPage() {
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5">
           <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
             <Users className="size-3.5" /> Seats
           </span>
@@ -100,7 +100,7 @@ export default function SubscriptionPage() {
           <p className="mt-1.5 text-[11px] text-slate-400">{seatPct}% of seats used</p>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5">
           <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
             <CalendarClock className="size-3.5" /> Validity
           </span>
@@ -108,7 +108,7 @@ export default function SubscriptionPage() {
           <p className="text-xs text-slate-400">to {sub.expiresAt ? fmtDate(sub.expiresAt) : 'no expiry'}</p>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5">
           <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
             <CreditCard className="size-3.5" /> College
           </span>

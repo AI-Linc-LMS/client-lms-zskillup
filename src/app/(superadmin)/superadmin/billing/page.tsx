@@ -154,7 +154,7 @@ function PricingSection() {
     <section className="mt-8">
       <h2 className="text-lg font-black tracking-tight text-navy">Pricing</h2>
       <p className="text-sm text-slate-500">Edit any price — it applies to new purchases immediately.</p>
-      <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
         <table className="w-full min-w-[640px] text-sm">
           <thead>
             <tr className="border-b border-slate-100 text-left text-[11px] font-bold uppercase tracking-wider text-slate-400">
@@ -280,7 +280,7 @@ function EntitlementsSection() {
       </div>
 
       {rows !== null && (
-        <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
           <table className="w-full min-w-[560px] text-sm">
             <thead>
               <tr className="border-b border-slate-100 text-left text-[11px] font-bold uppercase tracking-wider text-slate-400">
@@ -383,7 +383,7 @@ function GrantForm({ onGranted }: { onGranted: () => void }) {
         <input value={ref} onChange={(e) => setRef(e.target.value)} placeholder="slug (topic/section/company)" className="h-9 w-48 rounded-lg border border-slate-200 px-2 text-sm" />
       )}
       <input value={days} onChange={(e) => setDays(e.target.value)} placeholder="days" inputMode="numeric" className="h-9 w-20 rounded-lg border border-slate-200 px-2 text-sm" />
-      <button type="button" onClick={() => void submit()} disabled={busy || !uid.trim()} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-orange px-4 text-sm font-bold text-white disabled:opacity-60">
+      <button type="button" onClick={() => void submit()} disabled={busy || !uid.trim()} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-orange px-4 text-sm font-bold text-[#171717] disabled:opacity-60">
         {busy ? <Loader2 className="size-4 animate-spin" /> : 'Grant'}
       </button>
       <button type="button" onClick={() => setOpen(false)} className="h-9 px-2 text-sm font-semibold text-slate-500">Cancel</button>
@@ -404,9 +404,9 @@ function scopeName(scope: string): string {
 
 function Kpi({ icon: Icon, label, value, tone }: { icon: typeof CreditCard; label: string; value: string; tone: 'orange' | 'navy' }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4">
       <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-slate-400">
-        <span className={cn('grid size-6 place-items-center rounded-lg text-white', tone === 'orange' ? 'bg-gradient-to-br from-[#f7a14e] to-[#f37021]' : 'bg-navy')}>
+        <span className={cn('grid size-6 place-items-center rounded-lg', tone === 'orange' ? 'bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717]' : 'bg-navy text-white')}>
           <Icon className="size-3.5" />
         </span>
         {label}
@@ -421,7 +421,7 @@ const MINI_TONE: Record<string, string> = {
 };
 function Mini({ icon: Icon, label, value, tone }: { icon: typeof CreditCard; label: string; value: number; tone: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-3 text-center shadow-sm">
+    <div className="rounded-xl border border-slate-200 bg-white p-3 text-center">
       <Icon className={cn('mx-auto size-4', MINI_TONE[tone])} />
       <p className="mt-1 text-lg font-black tabular-nums text-navy">{value}</p>
       <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
@@ -431,7 +431,7 @@ function Mini({ icon: Icon, label, value, tone }: { icon: typeof CreditCard; lab
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white p-5">
       <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400">{title}</h3>
       <div className="mt-3">{children}</div>
     </div>

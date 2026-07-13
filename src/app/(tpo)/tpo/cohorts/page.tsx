@@ -9,7 +9,7 @@ import { GraduationCap, LayoutDashboard } from 'lucide-react';
 export default function TpoCohortsPage() {
   return (
     <div className="mx-auto max-w-lg py-16 text-center">
-      <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-orange/10 text-orange">
+      <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-[#fff5ea] text-[#f5b400]">
         <GraduationCap className="size-6" aria-hidden />
       </span>
       <h1 className="mt-4 text-lg font-extrabold text-navy">Cohorts are managed by your admin</h1>

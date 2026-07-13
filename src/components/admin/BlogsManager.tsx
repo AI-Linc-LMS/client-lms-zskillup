@@ -13,7 +13,7 @@ import { BadgeCheck, Loader2, Plus, Trash2, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const inputCls =
-  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange';
+  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#ffc42d] focus:outline-none focus:ring-1 focus:ring-[#ffc42d]';
 
 const EMPTY = {
   id: '' as string,
@@ -135,7 +135,7 @@ export function BlogsManager() {
         </div>
       )}
 
-      <form onSubmit={submit} className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2">
+      <form onSubmit={submit} className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-5 sm:grid-cols-2">
         <p className="sm:col-span-2 text-sm font-bold text-navy">
           {editing ? 'Edit post' : 'New post'}
         </p>
@@ -175,7 +175,7 @@ export function BlogsManager() {
           </select>
         </label>
         <div className="sm:col-span-2 flex gap-2">
-          <button type="submit" disabled={saving || !form.title.trim()} className="inline-flex items-center gap-2 rounded-lg bg-orange px-4 py-2 text-sm font-semibold text-white hover:bg-orange/90 disabled:opacity-50">
+          <button type="submit" disabled={saving || !form.title.trim()} className="inline-flex items-center gap-2 rounded-lg btn-brand px-4 py-2 text-sm font-semibold disabled:opacity-50">
             {saving ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
             {editing ? 'Save changes' : 'Create post'}
           </button>
@@ -187,7 +187,7 @@ export function BlogsManager() {
         </div>
       </form>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         {loading ? (
           <div className="flex items-center justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-400" /></div>
         ) : posts.length === 0 ? (

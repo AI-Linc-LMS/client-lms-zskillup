@@ -81,7 +81,7 @@ export default function SkillGapAnalyticsPage() {
           subtitle="Weakest topics by accuracy (min 10 attempts)."
           source="Topic-wise question performance"
         >
-          <div className="flex items-center gap-1.5 pb-3 text-xs font-semibold text-orange">
+          <div className="flex items-center gap-1.5 pb-3 text-xs font-semibold text-[#1a1d29]">
             <Target className="size-4" /> Aptitude
           </div>
           {aptitudeGaps.length === 0 ? (
@@ -101,7 +101,7 @@ export default function SkillGapAnalyticsPage() {
           subtitle="Weakest difficulty tiers & company patterns by solve rate."
           source="Coding submissions"
         >
-          <div className="flex items-center gap-1.5 pb-3 text-xs font-semibold text-orange">
+          <div className="flex items-center gap-1.5 pb-3 text-xs font-semibold text-[#1a1d29]">
             <Code2 className="size-4" /> Coding
           </div>
           {(coding?.totalAttempted ?? 0) === 0 ? (
@@ -160,17 +160,17 @@ export default function SkillGapAnalyticsPage() {
       <BentoCard title="Interview Skill Gaps" subtitle="Common weaknesses from mock-interview practice.">
         <Link
           href="/tpo/interview-analytics"
-          className="flex items-center justify-between gap-3 rounded-xl border border-violet-200 bg-violet-50/40 p-4 transition-colors hover:bg-violet-50"
+          className="flex items-center justify-between gap-3 rounded-xl border border-[#ffc42d] bg-[#fff5ea]/40 p-4 transition-colors hover:bg-[#fff5ea]"
         >
           <span className="flex items-center gap-3">
-            <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-500 text-white">
+            <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717]">
               <MessageSquare className="size-5" />
             </span>
             <span className="text-sm text-slate-600">
               Interview weak areas are analysed in the Interview Analytics module.
             </span>
           </span>
-          <ArrowRight className="size-4 shrink-0 text-violet-500" />
+          <ArrowRight className="size-4 shrink-0 text-[#f5b400]" />
         </Link>
       </BentoCard>
     </div>

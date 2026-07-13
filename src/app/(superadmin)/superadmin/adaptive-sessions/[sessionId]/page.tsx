@@ -43,7 +43,7 @@ export default function AdminAdaptiveSessionDetailPage({
   if (!result) {
     return (
       <div className="flex items-center gap-3 p-8 text-sm text-slate-400">
-        <Loader2 className="size-5 animate-spin text-orange" />
+        <Loader2 className="size-5 animate-spin text-[#f5b400]" />
         Loading session…
       </div>
     );
@@ -56,13 +56,13 @@ export default function AdminAdaptiveSessionDetailPage({
       <header className="flex items-start gap-4">
         <Link
           href="/superadmin/adaptive-sessions"
-          className="mt-1 inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-orange"
+          className="mt-1 inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-[#1a1d29]"
         >
           <ArrowLeft className="size-3.5" /> All sessions
         </Link>
         <div>
           <div className="flex items-center gap-2">
-            <Brain className="size-5 text-orange" />
+            <Brain className="size-5 text-[#f5b400]" />
             <h1 className="text-2xl font-extrabold text-navy">Session Report</h1>
           </div>
           <p className="text-sm text-slate-500 mt-1">

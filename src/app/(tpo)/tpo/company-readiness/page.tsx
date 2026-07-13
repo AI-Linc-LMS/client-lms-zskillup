@@ -74,7 +74,7 @@ export default function CompanyReadinessPage() {
                   <span className="shrink-0 text-sm font-bold tabular-nums text-navy">{c.readiness}%</span>
                 </div>
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200">
-                  <div className="h-full rounded-full bg-gradient-to-r from-sky-400 to-navy" style={{ width: `${c.readiness}%` }} />
+                  <div className="h-full rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400]" style={{ width: `${c.readiness}%` }} />
                 </div>
                 <p className="mt-1 text-[11px] text-slate-400">{c.attempted} attempts</p>
               </div>

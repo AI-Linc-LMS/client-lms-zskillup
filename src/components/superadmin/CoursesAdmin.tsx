@@ -492,7 +492,7 @@ export function CoursesAdmin() {
         ) : (
           <>
             {/* Course header */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
@@ -555,8 +555,8 @@ export function CoursesAdmin() {
             ) : null}
 
             {detail.modules.length === 0 && !moduleDraft ? (
-              <div className="rounded-xl border border-slate-200 bg-white p-10 text-center shadow-sm">
-                <span className="mx-auto grid size-11 place-items-center rounded-xl bg-violet-50 text-violet-600 ring-1 ring-violet-100">
+              <div className="rounded-xl border border-slate-200 bg-white p-10 text-center">
+                <span className="mx-auto grid size-11 place-items-center rounded-xl bg-[#fff5ea] text-[#f5b400] ring-1 ring-[#ffc42d]/20">
                   <Layers className="size-5" aria-hidden="true" />
                 </span>
                 <p className="mt-3 text-sm font-semibold text-navy">No modules yet.</p>
@@ -570,7 +570,7 @@ export function CoursesAdmin() {
               {detail.modules.map((m) => (
                 <div
                   key={m.id}
-                  className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+                  className="overflow-hidden rounded-xl border border-slate-200 bg-white"
                 >
                   {/* Module header */}
                   {moduleDraft && moduleDraft.id === m.id ? (
@@ -586,7 +586,7 @@ export function CoursesAdmin() {
                   ) : (
                     <div className="flex items-start justify-between gap-3 border-b border-slate-100 bg-slate-50 px-5 py-3.5">
                       <div className="flex min-w-0 items-start gap-2.5">
-                        <span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-lg bg-violet-50 text-[11px] font-bold text-violet-600 ring-1 ring-violet-100">
+                        <span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-lg bg-[#fff5ea] text-[11px] font-bold text-[#a16207] ring-1 ring-[#ffc42d]/20">
                           {m.orderIndex + 1}
                         </span>
                         <div className="min-w-0">
@@ -642,7 +642,7 @@ export function CoursesAdmin() {
                               className="size-4 shrink-0 text-slate-300"
                               aria-hidden="true"
                             />
-                            <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-orange/10 text-orange ring-1 ring-orange/20">
+                            <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-orange/10 text-[#f5b400] ring-1 ring-orange/20">
                               <Video className="size-3.5" aria-hidden="true" />
                             </span>
                             <div className="min-w-0">
@@ -721,7 +721,7 @@ export function CoursesAdmin() {
           </Button>
         </div>
 
-        <div className="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2">
+        <div className="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <FormField
               id="course-title"
@@ -877,7 +877,7 @@ export function CoursesAdmin() {
           <Loader2 className="size-5 animate-spin text-slate-400" aria-hidden="true" />
         </div>
       ) : courses.length === 0 ? (
-        <div className="rounded-xl border border-slate-200 bg-white p-10 text-center shadow-sm">
+        <div className="rounded-xl border border-slate-200 bg-white p-10 text-center">
           <span className="mx-auto grid size-11 place-items-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
             <BookOpen className="size-5" aria-hidden="true" />
           </span>
@@ -887,7 +887,7 @@ export function CoursesAdmin() {
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
           <div className="hidden grid-cols-[2.4fr_1.2fr_1fr_1fr_auto] gap-4 border-b border-slate-100 bg-slate-50 px-5 py-3 md:grid">
             {['Course', 'Category', 'Content', 'Status', 'Actions'].map((h) => (
               <span

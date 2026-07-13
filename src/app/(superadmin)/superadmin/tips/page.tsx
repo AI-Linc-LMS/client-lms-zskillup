@@ -13,7 +13,7 @@ import {
 import { Lightbulb, Loader2, Pencil, Plus, Trash2, X } from 'lucide-react';
 
 const INPUT =
-  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange';
+  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange';
 
 const EMPTY: AdminTipInput = {
   code: '',
@@ -124,7 +124,7 @@ export default function AdminTipsPage() {
         </div>
         <button
           onClick={openNew}
-          className="inline-flex items-center gap-2 rounded-full bg-orange-500 px-4 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-orange-600"
+          className="btn-brand inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-colors"
         >
           <Plus className="size-4" /> New tip
         </button>
@@ -136,7 +136,7 @@ export default function AdminTipsPage() {
 
       {/* Editor */}
       {draft ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-base font-bold text-navy">{editing ? 'Edit tip' : 'New tip'}</h2>
             <button onClick={() => setDraft(null)} className="text-slate-400 hover:text-slate-600">
@@ -229,7 +229,7 @@ export default function AdminTipsPage() {
             <button
               onClick={save}
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-sm font-bold text-white hover:bg-orange-600 disabled:opacity-60"
+              className="btn-brand inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold disabled:opacity-60"
             >
               {saving ? <Loader2 className="size-4 animate-spin" /> : null} Save
             </button>
@@ -238,7 +238,7 @@ export default function AdminTipsPage() {
       ) : null}
 
       {/* List */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="size-6 animate-spin text-slate-400" />

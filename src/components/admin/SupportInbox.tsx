@@ -27,12 +27,12 @@ const STATUS_STYLE: Record<string, string> = {
 };
 const PRIORITY_STYLE: Record<string, string> = {
   URGENT: 'text-red-600',
-  HIGH: 'text-orange-600',
+  HIGH: 'text-[#dc2626]',
   NORMAL: 'text-slate-500',
   LOW: 'text-slate-400',
 };
 const inputCls =
-  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange';
+  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange';
 
 export function SupportInbox() {
   const [tickets, setTickets] = useState<TicketDto[]>([]);
@@ -74,7 +74,7 @@ export function SupportInbox() {
 
       {error && <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         {loading ? (
           <div className="flex items-center justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-400" /></div>
         ) : tickets.length === 0 ? (
@@ -180,7 +180,7 @@ function StaffThread({ id, onBack }: { id: string; onBack: () => void }) {
       ) : !ticket ? (
         <p className="text-sm text-red-500">{error ?? 'Not found.'}</p>
       ) : (
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="rounded-xl border border-slate-200 bg-white">
           <div className="space-y-3 border-b border-slate-100 p-4">
             <div>
               <h2 className="font-bold text-navy">{ticket.subject}</h2>
@@ -225,7 +225,7 @@ function StaffThread({ id, onBack }: { id: string; onBack: () => void }) {
               placeholder="Reply to the requester…"
               className={inputCls}
             />
-            <button onClick={send} disabled={busy || !reply.trim()} className="inline-flex items-center gap-1.5 rounded-lg bg-orange px-4 py-2 text-sm font-semibold text-white hover:bg-orange/90 disabled:opacity-50">
+            <button onClick={send} disabled={busy || !reply.trim()} className="inline-flex items-center gap-1.5 rounded-lg bg-orange px-4 py-2 text-sm font-semibold text-[#171717] hover:bg-orange/90 disabled:opacity-50">
               {busy ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
             </button>
           </div>

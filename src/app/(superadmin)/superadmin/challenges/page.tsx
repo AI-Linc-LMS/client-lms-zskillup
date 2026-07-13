@@ -15,7 +15,7 @@ import { listAdminCodingProblems, type AdminCodingProblemSummary } from '@/lib/a
 import { Code2, Loader2, Pencil, Plus, Sparkles, Swords, Trash2, X } from 'lucide-react';
 
 const INPUT =
-  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange';
+  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy focus:border-[#f5b400] focus:outline-none focus:ring-1 focus:ring-[#f5b400]';
 
 const EMPTY: AdminChallengeInput = {
   code: '',
@@ -131,7 +131,7 @@ export default function AdminChallengesPage() {
             setEditing(null);
             setDraft({ ...EMPTY });
           }}
-          className="inline-flex items-center gap-2 rounded-full bg-orange-500 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-orange-600"
+          className="btn-brand inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold"
         >
           <Plus className="size-4" /> New challenge
         </button>
@@ -142,7 +142,7 @@ export default function AdminChallengesPage() {
       ) : null}
 
       {draft ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-base font-bold text-navy">{editing ? 'Edit' : 'New'} challenge</h2>
             <button onClick={() => setDraft(null)} className="text-slate-400 hover:text-slate-600">
@@ -250,7 +250,7 @@ export default function AdminChallengesPage() {
             <button
               onClick={save}
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-sm font-bold text-white hover:bg-orange-600 disabled:opacity-60"
+              className="btn-brand inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold disabled:opacity-60"
             >
               {saving ? <Loader2 className="size-4 animate-spin" /> : null} Save
             </button>
@@ -258,7 +258,7 @@ export default function AdminChallengesPage() {
         </div>
       ) : null}
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="size-6 animate-spin text-slate-400" />
@@ -291,7 +291,7 @@ export default function AdminChallengesPage() {
                         {c.difficulty}
                       </span>
                     ) : null}
-                    <span className="text-[10px] font-bold text-amber-600">+{c.xpReward} XP</span>
+                    <span className="text-[10px] font-bold text-[#a16207]">+{c.xpReward} XP</span>
                     <span
                       className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                         c.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-400'

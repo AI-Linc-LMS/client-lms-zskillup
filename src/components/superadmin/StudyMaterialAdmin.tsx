@@ -25,7 +25,7 @@ import {
 import type { StudyMaterialItemKind } from '@/shared/dto/study-material.dto';
 
 const KIND_META: Record<StudyMaterialItemKind, { icon: typeof PlayCircle; label: string; cls: string }> = {
-  VIDEO: { icon: PlayCircle, label: 'Video', cls: 'bg-orange/10 text-orange' },
+  VIDEO: { icon: PlayCircle, label: 'Video', cls: 'bg-[#fff5ea] text-[#f5b400]' },
   QUIZ: { icon: ListChecks, label: 'Quiz', cls: 'bg-amber-50 text-amber-600' },
   ARTICLE: { icon: FileText, label: 'Article', cls: 'bg-sky-50 text-sky-600' },
 };
@@ -211,7 +211,7 @@ export function StudyMaterialAdmin() {
               placeholder="New section title (e.g. Numerical Ability)"
               className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
             />
-            <button type="button" onClick={addSection} disabled={!newSection.trim()} className="inline-flex items-center gap-1.5 rounded-full bg-orange px-4 py-2 text-sm font-bold text-white disabled:opacity-50">
+            <button type="button" onClick={addSection} disabled={!newSection.trim()} className="inline-flex items-center gap-1.5 rounded-full bg-orange px-4 py-2 text-sm font-bold text-[#171717] disabled:opacity-50">
               <Plus className="size-4" /> Add section
             </button>
           </div>
@@ -298,7 +298,7 @@ function ItemForm({
                 key={k}
                 type="button"
                 onClick={() => setKind(k)}
-                className={cn('flex-1 rounded-xl border px-3 py-2 text-sm font-bold transition', kind === k ? 'border-orange bg-orange/[0.07] text-orange' : 'border-slate-200 text-slate-500 hover:border-slate-300')}
+                className={cn('flex-1 rounded-xl border px-3 py-2 text-sm font-bold transition', kind === k ? 'border-[#ffc42d] bg-[#fff5ea] text-[#1a1d29]' : 'border-slate-200 text-slate-500 hover:border-slate-300')}
               >
                 {KIND_META[k].label}
               </button>
@@ -346,7 +346,7 @@ function ItemForm({
           <button type="button" onClick={onClose} className="rounded-full px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100">
             Cancel
           </button>
-          <button type="button" onClick={submit} disabled={busy || !title.trim()} className="inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2 text-sm font-bold text-white disabled:opacity-50">
+          <button type="button" onClick={submit} disabled={busy || !title.trim()} className="inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2 text-sm font-bold text-[#171717] disabled:opacity-50">
             {busy && <Loader2 className="size-4 animate-spin" />} {item ? 'Save' : 'Add item'}
           </button>
         </div>

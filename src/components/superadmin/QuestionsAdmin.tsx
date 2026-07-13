@@ -232,15 +232,15 @@ export function QuestionsAdmin() {
         <button
           onClick={handleExport}
           disabled={exporting}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-navy shadow-sm hover:bg-slate-50 disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-navy hover:bg-slate-50 disabled:opacity-50"
         >
           {exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
           Export JSON{companyFilter ? ` (${companyFilter})` : ''}
         </button>
       </div>
       {/* Header + metrics + filters */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="bg-[radial-gradient(circle_at_top_right,_rgba(249,115,22,0.10),_transparent_28%),linear-gradient(135deg,_rgba(15,23,42,0.03),_rgba(248,250,252,1))] px-5 py-5 sm:px-6">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+        <div className="bg-[radial-gradient(circle_at_top_right,_rgba(255,196,45,0.10),_transparent_28%),linear-gradient(135deg,_rgba(15,23,42,0.03),_rgba(248,250,252,1))] px-5 py-5 sm:px-6">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <MetricCard label="Matching" value={counts.all} accent="text-navy" />
             <MetricCard label="Published" value={counts.published} accent="text-emerald-700" />
@@ -347,7 +347,7 @@ export function QuestionsAdmin() {
                 className={
                   'rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ' +
                   (statusFilter === s
-                    ? 'bg-navy text-white shadow-sm'
+                    ? 'bg-navy text-white'
                     : 'text-slate-600 hover:bg-white hover:text-navy')
                 }
               >
@@ -385,7 +385,7 @@ export function QuestionsAdmin() {
       ) : null}
 
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] text-left text-sm">
             <thead className="bg-slate-50/90">
@@ -476,7 +476,7 @@ export function QuestionsAdmin() {
                                   : QuestionStatus.PUBLISHED,
                               )
                             }
-                            className="text-xs font-semibold text-navy transition-colors hover:text-orange disabled:opacity-50"
+                            className="text-xs font-semibold text-navy transition-colors hover:text-[#1a1d29] disabled:opacity-50"
                           >
                             {q.status === 'PUBLISHED' ? 'Unpublish' : 'Publish'}
                           </button>
@@ -579,7 +579,7 @@ function FilterSelect({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       aria-label={ariaLabel}
-      className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-navy shadow-sm focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+      className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-navy focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
     >
       {children}
     </select>
@@ -620,13 +620,13 @@ function PyqSpotlight({
   const totalPyq = counts ? Object.values(counts).reduce((a, b) => a + b, 0) : null;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-violet-200/70 bg-gradient-to-br from-violet-50 via-white to-white p-5 shadow-sm">
+    <div className="relative overflow-hidden rounded-2xl border border-[#ffc42d]/30 bg-gradient-to-br from-[#fff5ea] via-white to-white p-5">
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-violet-300/20 blur-3xl"
+        className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-[#ffc42d]/20 blur-3xl"
       />
       <div className="relative mb-4 flex items-center gap-2.5">
-        <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white">
+        <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717]">
           <History className="size-5" />
         </span>
         <div>
@@ -650,8 +650,8 @@ function PyqSpotlight({
               className={
                 'group flex flex-col rounded-xl border p-3 text-left transition-all ' +
                 (isActive
-                  ? 'border-violet-400 bg-white shadow-[0_8px_20px_-12px_rgba(124,58,237,0.5)] ring-1 ring-violet-300'
-                  : 'border-slate-200 bg-white/70 hover:border-violet-300 hover:bg-white')
+                  ? 'border-[#ffc42d] bg-[#fff5ea] ring-1 ring-[#ffc42d]/40'
+                  : 'border-slate-200 bg-white/70 hover:border-[#ffc42d] hover:bg-white')
               }
             >
               <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
@@ -660,7 +660,7 @@ function PyqSpotlight({
               <span className="mt-1 text-2xl font-black tracking-tight text-navy tabular-nums">
                 {n === undefined ? '—' : n.toLocaleString()}
               </span>
-              <span className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-violet-600">
+              <span className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-[#a16207]">
                 View PYQs <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
               </span>
             </button>
@@ -673,7 +673,7 @@ function PyqSpotlight({
 
 function MetricCard({ label, value, accent }: { label: string; value: number; accent: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3">
       <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">{label}</p>
       <p className={`mt-2 text-2xl font-black tracking-tight ${accent}`}>
         {value.toLocaleString()}
@@ -994,7 +994,7 @@ function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
     'h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30';
 
   return (
-    <form onSubmit={submit} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm" noValidate>
+    <form onSubmit={submit} className="rounded-xl border border-slate-200 bg-white p-5" noValidate>
       <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">New question</p>
       <h2 className="mb-4 text-base font-bold text-navy">Author a practice question</h2>
 
@@ -1069,7 +1069,7 @@ function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
             <button
               type="button"
               onClick={() => setOptions((p) => [...p, { text: '', isCorrect: false }])}
-              className="text-xs font-semibold text-navy transition-colors hover:text-orange"
+              className="text-xs font-semibold text-navy transition-colors hover:text-[#1a1d29]"
             >
               + Add option
             </button>

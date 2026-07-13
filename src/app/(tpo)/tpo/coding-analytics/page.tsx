@@ -10,7 +10,7 @@ import { Donut } from '@/components/superadmin/dashboard-ui';
 
 const DIFF = [
   { key: 'easy', label: 'Easy', color: '#059669' },
-  { key: 'medium', label: 'Medium', color: '#f59e0b' },
+  { key: 'medium', label: 'Medium', color: '#f5b400' },
   { key: 'hard', label: 'Hard', color: '#dc2626' },
 ] as const;
 
@@ -108,7 +108,7 @@ export default function CodingAnalyticsPage() {
                     </span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-                    <div className="h-full rounded-full bg-gradient-to-r from-sky-400 to-navy" style={{ width: `${c.solveRate}%` }} />
+                    <div className="h-full rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400]" style={{ width: `${c.solveRate}%` }} />
                   </div>
                 </div>
               ))}

@@ -147,9 +147,9 @@ export function SchedulingAdmin() {
       ) : null}
 
       {/* Build assessment (auto from question bank) */}
-      <div className="flex items-center justify-between gap-4 rounded-2xl border border-orange/30 bg-gradient-to-br from-orange/[0.06] to-transparent p-5">
+      <div className="flex items-center justify-between gap-4 rounded-2xl border border-[#ffc42d]/30 bg-gradient-to-br from-[#ffc42d]/[0.06] to-transparent p-5">
         <div className="flex items-center gap-3">
-          <span className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white">
+          <span className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717]">
             <Sparkles className="size-5" />
           </span>
           <div>
@@ -162,16 +162,16 @@ export function SchedulingAdmin() {
         <button
           type="button"
           onClick={() => setWizardOpen(true)}
-          className="shrink-0 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.8)]"
+          className="shrink-0 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-5 py-2.5 text-sm font-extrabold text-[#171717]"
         >
           Build assessment
         </button>
       </div>
 
       {/* Quick schedule (bind an existing mock) */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="rounded-2xl border border-slate-200 bg-white p-5">
         <h2 className="flex items-center gap-2 text-sm font-bold text-navy">
-          <Plus className="size-4 text-orange" /> Quick schedule (existing mock)
+          <Plus className="size-4 text-[#f5b400]" /> Quick schedule (existing mock)
         </h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <label className="space-y-1">
@@ -230,7 +230,7 @@ export function SchedulingAdmin() {
               type="checkbox"
               checked={proctored}
               onChange={(e) => setProctored(e.target.checked)}
-              className="size-4 accent-orange"
+              className="size-4 accent-[#f5b400]"
             />
             <span className="text-sm font-medium text-slate-600">Proctored</span>
           </label>
@@ -242,7 +242,7 @@ export function SchedulingAdmin() {
           type="button"
           onClick={create}
           disabled={creating}
-          className="mt-4 flex items-center gap-2 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.8)] disabled:opacity-60"
+          className="mt-4 flex items-center gap-2 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-5 py-2.5 text-sm font-extrabold text-[#171717] disabled:opacity-60"
         >
           {creating ? <Loader2 className="size-4 animate-spin" /> : 'Schedule'}
         </button>
@@ -251,25 +251,25 @@ export function SchedulingAdmin() {
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Filter</span>
-        <select value={fCompany} onChange={(e) => setFCompany(e.target.value)} className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-navy focus:border-orange focus:outline-none">
+        <select value={fCompany} onChange={(e) => setFCompany(e.target.value)} className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-navy focus:border-[#ffc42d] focus:outline-none">
           <option value="">All companies</option>
           {companies.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
-        <select value={fStatus} onChange={(e) => setFStatus(e.target.value as typeof fStatus)} className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-navy focus:border-orange focus:outline-none">
+        <select value={fStatus} onChange={(e) => setFStatus(e.target.value as typeof fStatus)} className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-navy focus:border-[#ffc42d] focus:outline-none">
           <option value="all">Any status</option>
           <option value="upcoming">Upcoming</option>
           <option value="live">Live now</option>
           <option value="past">Past</option>
           <option value="inactive">Inactive</option>
         </select>
-        <select value={fDuration} onChange={(e) => setFDuration(e.target.value as typeof fDuration)} className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-navy focus:border-orange focus:outline-none">
+        <select value={fDuration} onChange={(e) => setFDuration(e.target.value as typeof fDuration)} className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-navy focus:border-[#ffc42d] focus:outline-none">
           <option value="all">Any duration</option>
           <option value="short">≤ 30 min</option>
           <option value="medium">31–90 min</option>
           <option value="long">&gt; 90 min</option>
         </select>
         {(fCompany || fStatus !== 'all' || fDuration !== 'all') ? (
-          <button type="button" onClick={() => { setFCompany(''); setFStatus('all'); setFDuration('all'); }} className="text-xs font-bold text-orange hover:underline">
+          <button type="button" onClick={() => { setFCompany(''); setFStatus('all'); setFDuration('all'); }} className="text-xs font-bold text-[#1a1d29] hover:underline">
             Clear
           </button>
         ) : null}
@@ -277,7 +277,7 @@ export function SchedulingAdmin() {
       </div>
 
       {/* List */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <div className="overflow-x-auto">
         <table className="w-full min-w-[860px] text-left text-sm">
           <thead className="bg-slate-50/90">
@@ -321,7 +321,7 @@ export function SchedulingAdmin() {
                   <td className="px-4 py-3.5 text-slate-600">{r.durationMinutes}m</td>
                   <td className="px-4 py-3.5">
                     {r.proctored ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-violet-700">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#6d5ef8]">
                         <Video className="size-3.5" /> Yes
                       </span>
                     ) : (
@@ -355,7 +355,7 @@ export function SchedulingAdmin() {
                       <button
                         type="button"
                         onClick={() => openResults(r.id)}
-                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold text-indigo-600 hover:bg-indigo-50"
+                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold text-[#6d5ef8] hover:bg-[#6d5ef8]/10"
                       >
                         <BarChart3 className="size-3.5" /> Results
                       </button>
@@ -477,4 +477,4 @@ export function SchedulingAdmin() {
 
 const labelCls = 'text-[10px] font-bold uppercase tracking-widest text-slate-400';
 const inputCls =
-  'flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30';
+  'flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors focus:border-[#ffc42d] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ffc42d]/30';

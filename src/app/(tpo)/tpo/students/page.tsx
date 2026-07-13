@@ -126,14 +126,14 @@ export default function StudentManagementPage() {
       </div>
 
       {/* Filters */}
-      <div className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="relative sm:col-span-2 lg:col-span-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Name, email or roll no…"
-            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm focus:border-[#ffc42d] focus:outline-none focus:ring-1 focus:ring-[#ffc42d]"
           />
         </div>
         <select value={branch} onChange={(e) => setBranch(e.target.value)} className={selectCls}>
@@ -155,7 +155,7 @@ export default function StudentManagementPage() {
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[820px] text-sm">
             <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-400">
@@ -216,7 +216,7 @@ export default function StudentManagementPage() {
 }
 
 const selectCls =
-  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange';
+  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#ffc42d] focus:outline-none focus:ring-1 focus:ring-[#ffc42d]';
 
 function Th({ label, onClick, active }: { label: string; onClick: () => void; active: boolean }) {
   return (
@@ -237,7 +237,7 @@ function StudentRow({ s, cohortName }: { s: TpoStudentRow; cohortName: string | 
     <tr className="transition-colors hover:bg-slate-50">
       <td className="px-4 py-2.5">
         <Link href={`/tpo/students/${s.id}`} className="group block">
-          <p className="font-semibold text-navy group-hover:text-orange">{s.name ?? '—'}</p>
+          <p className="font-semibold text-navy group-hover:text-[#1a1d29]">{s.name ?? '—'}</p>
           <p className="truncate text-xs text-slate-400">{s.email}</p>
         </Link>
       </td>

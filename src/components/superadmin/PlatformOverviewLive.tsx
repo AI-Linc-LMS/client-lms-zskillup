@@ -97,7 +97,7 @@ export function PlatformOverviewLive() {
       label: 'Mock attempts',
       value: stats.mockAttempts,
       icon: <Timer className="size-4" />,
-      accent: '#f37021',
+      accent: '#f5b400',
       sub: `${inProgress.toLocaleString()} in progress · ${stats.mockTests} live`,
     },
     {
@@ -128,11 +128,11 @@ export function PlatformOverviewLive() {
       label: 'Active colleges (14d)',
       value: stats.activeColleges ?? 0,
       icon: <Building2 className="size-4" />,
-      color: '#f37021',
+      color: '#f5b400',
     },
     { label: 'Assessments run', value: stats.assessmentsConducted ?? 0, icon: <ClipboardList className="size-4" />, color: '#7c3aed' },
     { label: 'Colleges', value: stats.colleges, icon: <Building2 className="size-4" />, color: '#2563eb' },
-    { label: 'Companies', value: stats.companies, icon: <Briefcase className="size-4" />, color: '#f37021' },
+    { label: 'Companies', value: stats.companies, icon: <Briefcase className="size-4" />, color: '#f5b400' },
     { label: 'Courses', value: stats.courses, icon: <BookOpen className="size-4" />, color: '#7c3aed' },
     { label: 'Live mocks', value: stats.mockTests, icon: <Timer className="size-4" />, color: '#059669' },
     { label: 'Practice', value: stats.practiceAttempts, icon: <Layers className="size-4" />, color: '#0ea5e9' },
@@ -169,7 +169,7 @@ export function PlatformOverviewLive() {
         <button
           onClick={() => void load()}
           disabled={refreshing}
-          className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 shadow-sm transition-colors hover:bg-slate-50 hover:text-navy disabled:opacity-60"
+          className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-navy disabled:opacity-60"
         >
           <RefreshCw className={`size-3.5 ${refreshing ? 'animate-spin' : ''}`} aria-hidden />
           Refresh
@@ -206,7 +206,7 @@ export function PlatformOverviewLive() {
             size={150}
             segments={[
               { label: 'Students', value: stats.students, color: '#2563eb' },
-              { label: 'Admins', value: admins, color: '#f37021' },
+              { label: 'Admins', value: admins, color: '#f5b400' },
             ]}
             centerTop={totalUsers.toLocaleString()}
             centerBottom="users"

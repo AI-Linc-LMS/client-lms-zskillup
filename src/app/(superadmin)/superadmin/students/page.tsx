@@ -91,12 +91,12 @@ export default function AdminStudentsReportPage() {
             setSearch(e.target.value);
             setPage(0);
           }}
-          className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-4 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+          className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-4 text-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
         />
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="size-6 animate-spin text-slate-400" />
@@ -142,7 +142,7 @@ export default function AdminStudentsReportPage() {
                     <td className="px-4 py-3 text-right">
                       <Link
                         href={`/superadmin/students/${s.id}`}
-                        className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition-colors hover:border-orange hover:text-orange"
+                        className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition-colors hover:border-orange hover:text-[#1a1d29]"
                       >
                         View <ArrowRight className="size-3" />
                       </Link>

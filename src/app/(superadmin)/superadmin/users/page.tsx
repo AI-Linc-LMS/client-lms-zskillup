@@ -135,14 +135,14 @@ export default function AdminUsersPage() {
             placeholder="Search by name or email…"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(0); }}
-            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-4 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-4 text-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
           />
         </div>
         <div className="relative">
           <select
             value={roleFilter}
             onChange={(e) => { setRoleFilter(e.target.value); setPage(0); }}
-            className="appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-4 pr-8 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+            className="appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-4 pr-8 text-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
           >
             <option value="">All roles</option>
             <option value="STUDENT">Student</option>
@@ -156,7 +156,7 @@ export default function AdminUsersPage() {
           <select
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setPage(0); }}
-            className="appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-4 pr-8 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+            className="appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-4 pr-8 text-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
           >
             <option value="">All statuses</option>
             <option value="ACTIVE">Active</option>
@@ -182,7 +182,7 @@ export default function AdminUsersPage() {
       )}
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="size-6 animate-spin text-slate-400" />

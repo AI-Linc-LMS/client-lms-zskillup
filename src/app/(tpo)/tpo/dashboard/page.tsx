@@ -132,7 +132,7 @@ export default function TpoExecutiveDashboard() {
           action={
             <Link
               href="/tpo/students"
-              className="inline-flex items-center gap-1 text-xs font-bold text-orange hover:underline"
+              className="inline-flex items-center gap-1 text-xs font-bold text-[#1a1d29] hover:underline"
             >
               View all <ArrowRight className="size-3.5" />
             </Link>
@@ -205,7 +205,7 @@ export default function TpoExecutiveDashboard() {
           action={
             <Link
               href="/tpo/company-readiness"
-              className="inline-flex items-center gap-1 text-xs font-bold text-orange hover:underline"
+              className="inline-flex items-center gap-1 text-xs font-bold text-[#1a1d29] hover:underline"
             >
               Full view <ArrowRight className="size-3.5" />
             </Link>
@@ -224,7 +224,7 @@ export default function TpoExecutiveDashboard() {
         action={
           <Link
             href="/tpo/skill-gaps"
-            className="inline-flex items-center gap-1 text-xs font-bold text-orange hover:underline"
+            className="inline-flex items-center gap-1 text-xs font-bold text-[#1a1d29] hover:underline"
           >
             All topics <ArrowRight className="size-3.5" />
           </Link>
@@ -267,8 +267,8 @@ export default function TpoExecutiveDashboard() {
 
 function EmptyState() {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-      <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-orange/10 text-orange">
+    <section className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
+      <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-[#fff5ea] text-[#f5b400]">
         <Upload className="size-6" aria-hidden="true" />
       </span>
       <h2 className="mt-4 text-lg font-extrabold text-navy">Your cohort is being onboarded</h2>

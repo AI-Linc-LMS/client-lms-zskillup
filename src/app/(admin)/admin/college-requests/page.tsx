@@ -53,7 +53,7 @@ export default function AdminCollegeRequestsPage() {
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-3 pr-8 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+          className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-3 pr-8 text-sm focus:border-[#f5b400] focus:outline-none focus:ring-1 focus:ring-[#f5b400]"
         >
           <option value="">All statuses</option>
           <option value="DRAFT">Draft</option>
@@ -64,7 +64,7 @@ export default function AdminCollegeRequestsPage() {
         <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         {rows === null ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="size-6 animate-spin text-slate-400" />
@@ -104,7 +104,7 @@ export default function AdminCollegeRequestsPage() {
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-400">{new Date(r.updatedAt).toLocaleDateString()}</td>
                     <td className="px-4 py-3 text-right">
-                      <Link href={`/admin/college-requests/${r.id}`} className="text-sm font-semibold text-orange hover:underline">
+                      <Link href={`/admin/college-requests/${r.id}`} className="text-sm font-semibold text-[#1a1d29] hover:underline">
                         View
                       </Link>
                     </td>

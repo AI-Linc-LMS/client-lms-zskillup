@@ -91,7 +91,7 @@ export function SectionTopicPicker({
           </span>
         </span>
         {selected.size > 0 && (
-          <button type="button" onClick={() => onChange(new Set())} className="text-xs font-semibold text-orange hover:underline">
+          <button type="button" onClick={() => onChange(new Set())} className="text-xs font-semibold text-[#1a1d29] hover:underline">
             Clear
           </button>
         )}
@@ -115,7 +115,7 @@ export function SectionTopicPicker({
                     type="checkbox"
                     checked={secChecked}
                     onChange={() => toggle(section.id)}
-                    className="size-3.5 accent-orange"
+                    className="size-3.5 accent-[#ffc42d]"
                     aria-label={`Select all of ${section.name}`}
                   />
                   <button
@@ -138,7 +138,7 @@ export function SectionTopicPicker({
                           checked={secChecked || selected.has(t.id)}
                           disabled={secChecked}
                           onChange={() => toggle(t.id)}
-                          className="size-3.5 accent-orange disabled:opacity-50"
+                          className="size-3.5 accent-[#ffc42d] disabled:opacity-50"
                         />
                         <span className="truncate">{t.name}</span>
                         <span className="ml-auto text-[11px] text-slate-300">{t.questionCount}</span>

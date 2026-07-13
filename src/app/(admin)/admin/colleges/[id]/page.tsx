@@ -63,7 +63,7 @@ export default function AdminCollegeDetailPage({ params }: { params: Promise<{ i
         <div className="py-24 text-center text-sm text-red-500">{error ?? 'Not found.'}</div>
       ) : (
         <>
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <section className="rounded-2xl border border-slate-200 bg-white p-6">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h1 className="text-2xl font-black tracking-tight text-navy">
@@ -96,7 +96,7 @@ export default function AdminCollegeDetailPage({ params }: { params: Promise<{ i
           {/* Cohorts + student invitations — Platform Admin manages these (TPO is read-only). */}
           <CollegeCohortsManager collegeId={id} onChange={() => void reload()} />
 
-          <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
             <div className="border-b border-slate-100 px-4 py-3">
               <h2 className="text-sm font-bold text-navy">
                 Students {students.length > 0 && `(${students.length})`}
@@ -123,7 +123,7 @@ export default function AdminCollegeDetailPage({ params }: { params: Promise<{ i
                       <tr key={s.id} className="hover:bg-slate-50">
                         <td className="px-4 py-3">
                           <Link href={`/admin/students/${s.id}`} className="group">
-                            <p className="font-semibold text-navy group-hover:text-orange">
+                            <p className="font-semibold text-navy group-hover:text-[#1a1d29]">
                               {s.fullName ?? '—'}
                             </p>
                             <p className="text-xs text-slate-400">{s.email}</p>

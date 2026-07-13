@@ -19,8 +19,8 @@ function ScoreTile({
   source: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <span className="grid size-9 place-items-center rounded-xl bg-violet-50 text-violet-600">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4">
+      <span className="grid size-9 place-items-center rounded-xl bg-[#fff5ea] text-[#f5b400]">
         <Icon className="size-5" />
       </span>
       {value != null ? (
@@ -78,8 +78,8 @@ export default function InterviewAnalyticsPage() {
         <p className="text-sm font-semibold text-slate-500">
           Interview analytics · <span className="text-navy">{cohortLabel}</span>
         </p>
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center shadow-sm">
-          <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-violet-50 text-violet-500">
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center">
+          <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-[#fff5ea] text-[#f5b400]">
             <MessageSquare className="size-6" />
           </span>
           <h2 className="mt-4 text-lg font-extrabold text-navy">No mock interviews yet</h2>
@@ -103,8 +103,8 @@ export default function InterviewAnalyticsPage() {
         <ScoreTile icon={MessageSquare} label="Interview Readiness" value={data.interviewReadiness} source="Mock-interview overall %" />
         <ScoreTile icon={Mic} label="Communication" value={data.communicationScore} source="AI transcript scoring" />
         <ScoreTile icon={Smile} label="Confidence" value={data.confidenceScore} source="AI transcript scoring" />
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <span className="grid size-9 place-items-center rounded-xl bg-sky-50 text-sky-600">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+          <span className="grid size-9 place-items-center rounded-xl bg-[#fff5ea] text-[#f5b400]">
             <Users className="size-5" />
           </span>
           <p className="mt-3 text-2xl font-black tabular-nums text-navy">{data.studentsAttempted}</p>
@@ -127,7 +127,7 @@ export default function InterviewAnalyticsPage() {
                 <div key={w.area} className="flex items-center gap-3">
                   <span className="w-56 shrink-0 truncate text-sm text-navy" title={w.area}>{w.area}</span>
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
-                    <div className="h-full rounded-full bg-gradient-to-r from-violet-400 to-indigo-500" style={{ width: `${(w.count / max) * 100}%` }} />
+                    <div className="h-full rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400]" style={{ width: `${(w.count / max) * 100}%` }} />
                   </div>
                   <span className="w-8 text-right text-xs font-semibold tabular-nums text-slate-500">{w.count}</span>
                 </div>
@@ -138,8 +138,8 @@ export default function InterviewAnalyticsPage() {
       </BentoCard>
 
       {(data.communicationScore == null || data.confidenceScore == null) && (
-        <div className="flex items-start gap-2 rounded-xl border border-violet-200 bg-violet-50/40 p-4 text-xs text-slate-600">
-          <Mic className="mt-0.5 size-4 shrink-0 text-violet-500" />
+        <div className="flex items-start gap-2 rounded-xl border border-[#ffc42d]/30 bg-[#fff5ea] p-4 text-xs text-slate-600">
+          <Mic className="mt-0.5 size-4 shrink-0 text-[#f5b400]" />
           <p>
             Communication &amp; confidence scores are graded by AI from each interview transcript. They fill
             in for interviews completed after this scoring shipped — older interviews contribute only to

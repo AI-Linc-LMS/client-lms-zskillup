@@ -137,7 +137,7 @@ export default function StudentAnalyticsPage() {
               <div key={w.label} className="flex items-center gap-3">
                 <span className="w-32 shrink-0 text-sm text-navy">{w.label}</span>
                 <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
-                  <div className="h-full rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021]" style={{ width: `${w.weight}%` }} />
+                  <div className="h-full rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400]" style={{ width: `${w.weight}%` }} />
                 </div>
                 <span className="w-10 text-right text-xs font-semibold tabular-nums text-slate-500">{w.weight}%</span>
               </div>
@@ -153,12 +153,12 @@ export default function StudentAnalyticsPage() {
           <div className="flex h-full flex-col justify-center gap-3">
             <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 text-center">
               <p className="text-sm font-semibold text-navy">
-                practice questions <span className="text-orange">+ 3×</span> mock tests{' '}
-                <span className="text-orange">+ 2×</span> coding problems
+                practice questions <span className="text-[#1a1d29]">+ 3×</span> mock tests{' '}
+                <span className="text-[#1a1d29]">+ 2×</span> coding problems
               </p>
             </div>
             <p className="flex items-center gap-1.5 text-xs text-slate-500">
-              <Activity className="size-3.5 text-orange" /> A student at <span className="font-bold text-navy">{PART_HIGH}+</span> counts
+              <Activity className="size-3.5 text-[#f5b400]" /> A student at <span className="font-bold text-navy">{PART_HIGH}+</span> counts
               as high participation.
             </p>
           </div>
@@ -215,7 +215,7 @@ export default function StudentAnalyticsPage() {
                     </span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-                    <div className="h-full rounded-full bg-gradient-to-r from-sky-400 to-navy" style={{ width: `${c.readiness}%` }} />
+                    <div className="h-full rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400]" style={{ width: `${c.readiness}%` }} />
                   </div>
                 </div>
               ))}
@@ -271,7 +271,7 @@ export default function StudentAnalyticsPage() {
             recs && !recsLoading ? (
               <span
                 className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                  recs.generatedByAi ? 'bg-violet-100 text-violet-700' : 'bg-slate-100 text-slate-500'
+                  recs.generatedByAi ? 'bg-[#fff5ea] text-[#a16207]' : 'bg-slate-100 text-slate-500'
                 }`}
               >
                 <Sparkles className="size-3" /> {recs.generatedByAi ? 'AI' : 'Rules'}

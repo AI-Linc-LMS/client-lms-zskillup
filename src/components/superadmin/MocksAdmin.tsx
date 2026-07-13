@@ -200,7 +200,7 @@ export function MocksAdmin() {
           </Button>
         </div>
 
-        <div className="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2">
+        <div className="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <FormField
               id="mock-title"
@@ -236,7 +236,7 @@ export function MocksAdmin() {
         </div>
 
         {/* Question picker */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-xl border border-slate-200 bg-white p-5">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-bold text-navy">
               Questions{' '}
@@ -285,7 +285,7 @@ export function MocksAdmin() {
                       <span
                         className={cn(
                           'mt-0.5 grid size-5 shrink-0 place-items-center rounded text-[10px] font-bold',
-                          isSelected ? 'bg-orange text-white' : 'bg-slate-100 text-slate-400',
+                          isSelected ? 'bg-orange text-[#171717]' : 'bg-slate-100 text-slate-400',
                         )}
                       >
                         {isSelected ? order : ''}
@@ -348,7 +348,7 @@ export function MocksAdmin() {
               }
             }}
             disabled={exporting || !mocks || mocks.length === 0}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-navy shadow-sm hover:bg-slate-50 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-navy hover:bg-slate-50 disabled:opacity-50"
           >
             {exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
             Export JSON
@@ -366,15 +366,15 @@ export function MocksAdmin() {
           <Loader2 className="size-5 animate-spin text-slate-400" aria-hidden="true" />
         </div>
       ) : mocks.length === 0 ? (
-        <div className="rounded-xl border border-slate-200 bg-white p-10 text-center shadow-sm">
-          <span className="mx-auto grid size-11 place-items-center rounded-xl bg-orange/10 text-orange ring-1 ring-orange/20">
+        <div className="rounded-xl border border-slate-200 bg-white p-10 text-center">
+          <span className="mx-auto grid size-11 place-items-center rounded-xl bg-orange/10 text-[#f5b400] ring-1 ring-orange/20">
             <FileText className="size-5" aria-hidden="true" />
           </span>
           <p className="mt-3 text-sm font-semibold text-navy">No mock tests yet.</p>
           <p className="mt-1 text-xs text-slate-500">Create one from your published question bank.</p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
           <div className="hidden grid-cols-[2.4fr_1fr_1fr_1fr_auto] gap-4 border-b border-slate-100 bg-slate-50 px-5 py-3 md:grid">
             {['Title', 'Questions', 'Duration', 'Status', 'Actions'].map((h) => (
               <span key={h} className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">

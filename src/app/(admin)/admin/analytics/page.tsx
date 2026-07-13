@@ -45,7 +45,7 @@ export default function AdminAnalyticsPage() {
       ) : (
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            <MiniStat label="Active today (DAU)" value={stats?.dau ?? 0} icon={<Activity className="size-4" />} color="#f37021" />
+            <MiniStat label="Active today (DAU)" value={stats?.dau ?? 0} icon={<Activity className="size-4" />} color="#f5b400" />
             <MiniStat label="Active students · 14d" value={stats?.activeStudents ?? 0} icon={<Users className="size-4" />} color="#2563eb" />
             <MiniStat label="Active colleges · 14d" value={stats?.activeColleges ?? 0} icon={<Building2 className="size-4" />} color="#7c3aed" />
             <MiniStat label="Assessments run" value={stats?.assessmentsConducted ?? 0} icon={<Sparkles className="size-4" />} color="#0891b2" />
@@ -56,7 +56,7 @@ export default function AdminAnalyticsPage() {
           <div className="grid gap-6 lg:grid-cols-3">
             <Panel title="Student signups (14 days)" className="lg:col-span-2">
               {stats?.signups && stats.signups.length > 0 ? (
-                <AreaChart id="signups-admin-analytics" color="#f37021" data={stats.signups} />
+                <AreaChart id="signups-admin-analytics" color="#f5b400" data={stats.signups} />
               ) : (
                 <p className="text-sm text-slate-400">No signup data.</p>
               )}

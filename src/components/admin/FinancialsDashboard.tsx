@@ -47,21 +47,21 @@ export function FinancialsDashboard() {
   // never masquerades as "no permission".
   if (error) {
     return (
-      <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white py-16 shadow-sm">
+      <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white py-16">
         <p className="text-sm text-red-500">{error}</p>
       </div>
     );
   }
   if (allowed === null) {
     return (
-      <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white py-16 shadow-sm">
+      <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white py-16">
         <Loader2 className="size-6 animate-spin text-slate-400" />
       </div>
     );
   }
   if (!allowed) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white py-16 text-center shadow-sm">
+      <div className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white py-16 text-center">
         <Lock className="size-8 text-slate-300" />
         <p className="max-w-sm text-sm text-slate-500">
           You don&apos;t have the <span className="font-semibold">View financials</span> capability.
@@ -72,7 +72,7 @@ export function FinancialsDashboard() {
   }
   if (!data) {
     return (
-      <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white py-16 shadow-sm">
+      <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white py-16">
         <Loader2 className="size-6 animate-spin text-slate-400" />
       </div>
     );
@@ -100,7 +100,7 @@ export function FinancialsDashboard() {
         {data.newActivations30d === 1 ? '' : 's'} in the last 30 days.
       </p>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         <div className="border-b border-slate-100 px-4 py-3">
           <h2 className="text-sm font-bold text-navy">Revenue by plan</h2>
         </div>
@@ -150,7 +150,7 @@ function Kpi({
   accent: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white p-5">
       <span className={`inline-flex size-9 items-center justify-center rounded-xl bg-gradient-to-br ${accent} text-white`}>
         {icon}
       </span>

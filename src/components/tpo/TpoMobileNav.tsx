@@ -44,7 +44,7 @@ export function TpoMobileNav() {
               transition={{ type: 'spring', stiffness: 380, damping: 40 }}
             >
               <div className="flex h-16 shrink-0 items-center gap-2.5 border-b border-slate-100 px-4">
-                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white">
+                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717]">
                   <GraduationCap className="size-5" />
                 </span>
                 <p className="flex-1 text-sm font-black tracking-tight text-navy">TPO Platform</p>
@@ -77,15 +77,15 @@ export function TpoMobileNav() {
                               className={cn(
                                 'flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition-colors',
                                 active
-                                  ? 'bg-orange/[0.08] font-semibold text-orange'
-                                  : 'font-medium text-slate-600 hover:bg-slate-50 hover:text-navy',
+                                  ? 'bg-[#1a1a1a] font-semibold text-white'
+                                  : 'font-medium text-slate-600 hover:bg-[#fff5ea] hover:text-navy',
                               )}
                             >
                               <span
                                 className={cn(
                                   'grid size-7 shrink-0 place-items-center rounded-lg',
                                   active
-                                    ? 'bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white'
+                                    ? 'text-[#ffc42d]'
                                     : 'text-slate-400',
                                 )}
                               >

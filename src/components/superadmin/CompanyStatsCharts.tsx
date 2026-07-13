@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Building2, CalendarClock, ClipboardList, Loader2, Users } from 'lucide-react';
 import { getAdminCompanyStats, type AdminCompanyStat } from '@/lib/api/admin';
 
-const BAR_GRAD = 'linear-gradient(90deg,#f7a14e,#f37021)';
+const BAR_GRAD = 'linear-gradient(90deg,#ffd24d,#f5b400)';
 
 /**
  * Super-admin dashboard charts: per-company registrations + active drives, and
@@ -22,14 +22,14 @@ export function CompanyStatsCharts() {
 
   if (stats === null) {
     return (
-      <div className="grid h-56 place-items-center rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="grid h-56 place-items-center rounded-2xl border border-slate-200 bg-white">
         <Loader2 className="size-6 animate-spin text-slate-400" />
       </div>
     );
   }
   if (stats.length === 0) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-500 shadow-sm">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
         No company data yet.
       </div>
     );
@@ -46,7 +46,7 @@ export function CompanyStatsCharts() {
       {/* KPI tiles */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Kpi icon={Building2} label="Companies" value={stats.length} tone="text-navy" />
-        <Kpi icon={Users} label="Registrations" value={totalReg} tone="text-orange" />
+        <Kpi icon={Users} label="Registrations" value={totalReg} tone="text-[#1a1d29]" />
         <Kpi icon={CalendarClock} label="Active drives" value={totalDrives} tone="text-violet-600" />
         <Kpi
           icon={ClipboardList}
@@ -58,9 +58,9 @@ export function CompanyStatsCharts() {
 
       <div className="grid gap-5 lg:grid-cols-2">
         {/* Registrations per company */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5">
           <h3 className="flex items-center gap-2 text-sm font-bold text-navy">
-            <Users className="size-4 text-orange" /> Registrations by company
+            <Users className="size-4 text-[#1a1d29]" /> Registrations by company
           </h3>
           <div className="mt-4 space-y-3">
             {byReg.map((c, i) => (
@@ -89,7 +89,7 @@ export function CompanyStatsCharts() {
         </div>
 
         {/* Question-bank coverage per company */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5">
           <h3 className="flex items-center gap-2 text-sm font-bold text-navy">
             <ClipboardList className="size-4 text-emerald-500" /> Question-bank coverage
           </h3>
@@ -145,7 +145,7 @@ function Kpi({
   tone: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3.5 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3.5">
       <Icon className={`size-4 ${tone}`} />
       <p className={`mt-2 text-2xl font-black tabular-nums ${tone}`}>{value.toLocaleString()}</p>
       <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>

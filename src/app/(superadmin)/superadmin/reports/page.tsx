@@ -146,8 +146,8 @@ function ReportCard({
   onExport: () => void;
 }) {
   return (
-    <div className="flex flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
-      <span className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white">
+    <div className="flex flex-col rounded-2xl border border-slate-200/80 bg-white p-5">
+      <span className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717]">
         <Icon className="size-5" />
       </span>
       <h2 className="mt-3 text-base font-black text-navy">{title}</h2>

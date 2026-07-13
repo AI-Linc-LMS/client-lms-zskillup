@@ -61,7 +61,7 @@ export function TpoSidebar() {
           collapsed && 'justify-center px-0',
         )}
       >
-        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_8px_20px_-8px_rgba(243,112,33,0.9)]">
+        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717]">
           <GraduationCap className="size-5" />
         </span>
         {!collapsed && (
@@ -99,7 +99,7 @@ export function TpoSidebar() {
                 aria-expanded={expanded}
                 className={cn(
                   'mb-1 flex w-full items-center gap-1.5 rounded-lg px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest transition-colors',
-                  sectionActive ? 'text-orange' : 'text-slate-400 hover:text-navy',
+                  sectionActive ? 'text-[#1a1d29]' : 'text-slate-400 hover:text-navy',
                 )}
               >
                 <span className="flex-1 text-left">{section.heading}</span>
@@ -129,7 +129,7 @@ export function TpoSidebar() {
                         'group relative flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition-all duration-200',
                         collapsed && 'justify-center px-0',
                         active
-                          ? 'font-semibold text-orange'
+                          ? 'font-semibold text-white'
                           : 'font-medium text-slate-500 hover:text-navy',
                       )}
                     >
@@ -137,7 +137,7 @@ export function TpoSidebar() {
                         <motion.span
                           layoutId="tpo-active-pill"
                           aria-hidden
-                          className="absolute inset-0 rounded-xl border border-orange/20 bg-gradient-to-r from-orange/[0.14] via-orange/[0.07] to-transparent shadow-[0_6px_18px_-10px_rgba(243,112,33,0.6)]"
+                          className="absolute inset-0 rounded-xl bg-[#1a1a1a] ring-1 ring-[#ffc42d]/30"
                           transition={
                             reduce ? { duration: 0 } : { type: 'spring', stiffness: 480, damping: 38, mass: 0.7 }
                           }
@@ -154,7 +154,7 @@ export function TpoSidebar() {
                         className={cn(
                           'relative z-10 flex size-7 shrink-0 items-center justify-center rounded-lg transition-all duration-200',
                           active
-                            ? 'bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_4px_12px_-4px_rgba(243,112,33,0.7)]'
+                            ? 'text-[#ffc42d]'
                             : 'text-slate-400 group-hover:text-navy',
                         )}
                       >
@@ -188,11 +188,11 @@ export function TpoSidebar() {
                     href={a.href}
                     title={collapsed ? a.label : undefined}
                     className={cn(
-                      'flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 shadow-sm transition-colors hover:border-orange/40 hover:bg-orange/[0.04] hover:text-navy',
+                      'flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:border-[#ffc42d]/40 hover:bg-[#fff5ea] hover:text-navy',
                       collapsed && 'justify-center px-0',
                     )}
                   >
-                    <Icon className="size-4 shrink-0 text-orange" />
+                    <Icon className="size-4 shrink-0 text-[#f5b400]" />
                     {!collapsed && <span className="truncate">{a.label}</span>}
                   </Link>
                 </li>

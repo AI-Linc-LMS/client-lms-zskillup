@@ -50,7 +50,7 @@ export default function SuperadminAnalyticsPage() {
           <div className="grid gap-6 lg:grid-cols-3">
             <Panel title="Student signups (14 days)" className="lg:col-span-2">
               {stats?.signups && stats.signups.length > 0 ? (
-                <AreaChart id="signups-analytics" color="#f37021" data={stats.signups} />
+                <AreaChart id="signups-analytics" color="#f5b400" data={stats.signups} />
               ) : (
                 <p className="text-sm text-slate-400">No signup data.</p>
               )}

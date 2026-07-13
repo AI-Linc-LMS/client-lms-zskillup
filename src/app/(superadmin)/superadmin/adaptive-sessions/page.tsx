@@ -52,7 +52,7 @@ export default function AdminAdaptiveSessionsPage() {
       <header>
         <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Admin</p>
         <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy flex items-center gap-2">
-          <Brain className="size-7 text-orange" />
+          <Brain className="size-7 text-[#f5b400]" />
           Adaptive Sessions
         </h1>
         <p className="mt-1 text-sm text-slate-500">
@@ -66,7 +66,7 @@ export default function AdminAdaptiveSessionsPage() {
 
       {!sessions && !error && (
         <div className="flex items-center gap-3 rounded-xl border bg-white p-8 text-sm text-slate-400">
-          <Loader2 className="size-5 animate-spin text-orange" />
+          <Loader2 className="size-5 animate-spin text-[#f5b400]" />
           Loading sessions…
         </div>
       )}
@@ -120,7 +120,7 @@ export default function AdminAdaptiveSessionsPage() {
                   <td className="px-4 py-3">
                     <Link
                       href={`/superadmin/adaptive-sessions/${s.sessionId}`}
-                      className="text-xs font-semibold text-orange hover:underline"
+                      className="text-xs font-semibold text-[#1a1d29] hover:underline"
                     >
                       View report
                     </Link>

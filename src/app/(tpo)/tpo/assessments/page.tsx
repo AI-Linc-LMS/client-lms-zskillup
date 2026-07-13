@@ -39,7 +39,7 @@ const STATUS_STYLE: Record<TpoAssessmentStatus, string> = {
 };
 
 const inputCls =
-  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange';
+  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange';
 
 function fmtDateTime(iso: string) {
   return new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true });
@@ -202,7 +202,7 @@ export default function AssessmentCenterPage() {
 
       {/* Create form */}
       {showForm && (
-        <form onSubmit={submit} className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2 lg:grid-cols-3">
+        <form onSubmit={submit} className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-5 sm:grid-cols-2 lg:grid-cols-3">
           <label className="text-xs font-semibold text-slate-600">
             Mode
             <select value={form.mode} onChange={(e) => setForm((f) => ({ ...f, mode: e.target.value }))} className={`mt-1 ${inputCls}`}>
@@ -299,7 +299,7 @@ export default function AssessmentCenterPage() {
       )}
 
       {/* Scheduled table */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <div className="border-b border-slate-100 px-5 py-3">
           <h2 className="text-sm font-bold text-navy">Scheduled Assessments</h2>
         </div>
@@ -324,7 +324,7 @@ export default function AssessmentCenterPage() {
                   <tr key={a.id} className="hover:bg-slate-50">
                     <td className="px-4 py-2.5">
                       <p className="flex items-center gap-1.5 font-semibold text-navy">
-                        {a.proctored && <Video className="size-3 text-violet-500" />}
+                        {a.proctored && <Video className="size-3 text-[#f5b400]" />}
                         {a.title}
                       </p>
                       <p className="text-xs text-slate-400">{a.durationMinutes} min</p>

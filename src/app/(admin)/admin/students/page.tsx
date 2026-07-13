@@ -71,11 +71,11 @@ export default function AdminStudentsPage() {
             setSearch(e.target.value);
             setPage(0);
           }}
-          className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-4 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+          className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-4 text-sm focus:border-[#f5b400] focus:outline-none focus:ring-1 focus:ring-[#f5b400]"
         />
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="size-6 animate-spin text-slate-400" />
@@ -102,7 +102,7 @@ export default function AdminStudentsPage() {
                   <tr key={r.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3">
                       <Link href={`/admin/students/${r.id}`} className="group">
-                        <p className="font-semibold text-navy group-hover:text-orange">
+                        <p className="font-semibold text-navy group-hover:text-[#1a1d29]">
                           {r.fullName ?? '—'}
                         </p>
                         <p className="text-xs text-slate-400">{r.email}</p>

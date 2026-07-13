@@ -83,7 +83,7 @@ export default function TpoBillingPage() {
         </div>
       </div>
 
-      <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-orange/10 px-3 py-1 text-xs font-bold text-orange">
+      <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#fff5ea] px-3 py-1 text-xs font-bold text-[#1a1d29]">
         <Users className="size-3.5" /> B2B rate {price ? `· ${formatPrice(price.amountCents, price.currency)} per company` : ''}
       </div>
 
@@ -96,7 +96,7 @@ export default function TpoBillingPage() {
           {companies.map((c) => {
             const key = `college:${c.slug}:${period}`;
             return (
-              <div key={c.slug} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div key={c.slug} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4">
                 <div className="flex min-w-0 items-center gap-3">
                   <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-xl border border-slate-200 bg-white">
                     {c.logoUrl ? (
@@ -115,7 +115,7 @@ export default function TpoBillingPage() {
                   type="button"
                   disabled={busyKey === key || !price}
                   onClick={() => void buyCompany(c)}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-3.5 py-2 text-xs font-extrabold text-white shadow-[0_10px_24px_-12px_rgba(243,112,33,0.8)] disabled:opacity-60"
+                  className="btn-brand inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-extrabold disabled:opacity-60"
                 >
                   {busyKey === key ? <Loader2 className="size-4 animate-spin" /> : <>Unlock <ArrowRight className="size-3.5" /></>}
                 </button>

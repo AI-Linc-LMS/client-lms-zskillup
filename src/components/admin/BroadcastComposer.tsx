@@ -127,7 +127,7 @@ export function BroadcastComposer() {
 
   if (allowed === null) {
     return (
-      <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white py-16 shadow-sm">
+      <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white py-16">
         <Loader2 className="size-6 animate-spin text-slate-400" />
       </div>
     );
@@ -135,7 +135,7 @@ export function BroadcastComposer() {
 
   if (!allowed) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white py-16 text-center shadow-sm">
+      <div className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white py-16 text-center">
         <Lock className="size-8 text-slate-300" />
         <p className="max-w-sm text-sm text-slate-500">
           You don&apos;t have the <span className="font-semibold">Broadcast</span> capability. Ask a
@@ -146,7 +146,7 @@ export function BroadcastComposer() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="max-w-2xl space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <form onSubmit={onSubmit} className="max-w-2xl space-y-5 rounded-xl border border-slate-200 bg-white p-6">
       {success && (
         <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">
           <BadgeCheck className="size-4 shrink-0" /> {success}
@@ -170,7 +170,7 @@ export function BroadcastComposer() {
               onClick={() => setScope(s.value)}
               className={`rounded-lg border p-3 text-left transition-colors ${
                 scope === s.value
-                  ? 'border-orange bg-orange/5 ring-1 ring-orange'
+                  ? 'border-[#ffc42d] bg-[#fff5ea] ring-1 ring-[#ffc42d]'
                   : 'border-slate-200 hover:bg-slate-50'
               }`}
             >
@@ -189,7 +189,7 @@ export function BroadcastComposer() {
           <select
             value={collegeId}
             onChange={(e) => setCollegeId(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#ffc42d] focus:outline-none focus:ring-1 focus:ring-[#ffc42d]"
           >
             <option value="">Select a college…</option>
             {colleges.map((c) => (
@@ -216,7 +216,7 @@ export function BroadcastComposer() {
             <select
               value={cohortId}
               onChange={(e) => setCohortId(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#ffc42d] focus:outline-none focus:ring-1 focus:ring-[#ffc42d]"
             >
               <option value="">Select a cohort…</option>
               {cohorts.map((c) => (
@@ -240,7 +240,7 @@ export function BroadcastComposer() {
           onChange={(e) => setTitle(e.target.value)}
           maxLength={200}
           placeholder="e.g. New mock test available"
-          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-[#ffc42d] focus:outline-none focus:ring-1 focus:ring-[#ffc42d]"
         />
       </div>
 
@@ -254,7 +254,7 @@ export function BroadcastComposer() {
           maxLength={2000}
           rows={4}
           placeholder="What do you want students to know?"
-          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-[#ffc42d] focus:outline-none focus:ring-1 focus:ring-[#ffc42d]"
         />
       </div>
 
@@ -267,14 +267,14 @@ export function BroadcastComposer() {
           onChange={(e) => setLink(e.target.value)}
           maxLength={300}
           placeholder="/assessments"
-          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-[#ffc42d] focus:outline-none focus:ring-1 focus:ring-[#ffc42d]"
         />
       </div>
 
       <button
         type="submit"
         disabled={!canSubmit || sending}
-        className="inline-flex items-center gap-2 rounded-lg bg-orange px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-orange/90 disabled:opacity-50"
+        className="inline-flex items-center gap-2 rounded-lg bg-orange px-4 py-2.5 text-sm font-semibold text-[#171717] hover:bg-orange/90 disabled:opacity-50"
       >
         {sending ? <Loader2 className="size-4 animate-spin" /> : <Megaphone className="size-4" />}
         Send broadcast

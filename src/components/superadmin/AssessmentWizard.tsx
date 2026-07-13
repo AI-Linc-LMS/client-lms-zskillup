@@ -265,7 +265,7 @@ export function AssessmentWizard({
         {/* header */}
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
           <div className="flex items-center gap-2.5">
-            <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white">
+            <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717]">
               <Wand2 className="size-5" />
             </span>
             <div>
@@ -285,7 +285,7 @@ export function AssessmentWizard({
           <div className="flex items-center gap-2 border-b border-slate-100 px-6 py-3">
             {STEPS.map((s, i) => (
               <div key={s} className="flex items-center gap-2">
-                <span className={cn('grid size-6 place-items-center rounded-full text-[11px] font-bold', i < step ? 'bg-emerald-500 text-white' : i === step ? 'bg-orange text-white' : 'bg-slate-100 text-slate-400')}>
+                <span className={cn('grid size-6 place-items-center rounded-full text-[11px] font-bold', i < step ? 'bg-emerald-500 text-white' : i === step ? 'bg-orange text-[#171717]' : 'bg-slate-100 text-slate-400')}>
                   {i < step ? <Check className="size-3.5" /> : i + 1}
                 </span>
                 <span className={cn('text-xs font-semibold', i === step ? 'text-navy' : 'text-slate-400')}>{s}</span>
@@ -307,7 +307,7 @@ export function AssessmentWizard({
                 {created.totalQuestions} questions ({created.mcqCount} MCQ · {created.codingCount} coding) for{' '}
                 {created.companyName}. It&apos;s now on the calendars of registered students.
               </p>
-              <button type="button" onClick={() => { onCreated(); onClose(); }} className="mt-5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-6 py-2.5 text-sm font-extrabold text-white">
+              <button type="button" onClick={() => { onCreated(); onClose(); }} className="mt-5 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-6 py-2.5 text-sm font-extrabold text-[#171717]">
                 Done
               </button>
             </div>
@@ -400,7 +400,7 @@ export function AssessmentWizard({
               <button
                 type="button"
                 onClick={() => setSections((p) => [...p, { name: `Section ${p.length + 1}`, items: [] }])}
-                className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-slate-300 px-4 py-2 text-sm font-bold text-slate-500 hover:border-orange hover:text-orange"
+                className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-slate-300 px-4 py-2 text-sm font-bold text-slate-500 hover:border-orange hover:text-[#1a1d29]"
               >
                 <Plus className="size-4" /> Add section
               </button>
@@ -452,15 +452,15 @@ export function AssessmentWizard({
               <ArrowLeft className="size-4" /> {step === 0 ? 'Cancel' : 'Back'}
             </button>
             {step === 0 ? (
-              <button type="button" disabled={!detailsValid} onClick={() => setStep(1)} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white disabled:opacity-50">
+              <button type="button" disabled={!detailsValid} onClick={() => setStep(1)} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-5 py-2.5 text-sm font-extrabold text-[#171717] disabled:opacity-50">
                 Next <ArrowRight className="size-4" />
               </button>
             ) : step === 1 ? (
-              <button type="button" disabled={!editId && totals.total === 0} onClick={() => setStep(2)} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white disabled:opacity-50">
+              <button type="button" disabled={!editId && totals.total === 0} onClick={() => setStep(2)} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-5 py-2.5 text-sm font-extrabold text-[#171717] disabled:opacity-50">
                 {editId ? 'Review changes' : `Review (${totals.total})`} <ArrowRight className="size-4" />
               </button>
             ) : (
-              <button type="button" disabled={creating || (!editId && totals.total === 0) || (!!existing && !existing.editable)} onClick={create} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white disabled:opacity-50">
+              <button type="button" disabled={creating || (!editId && totals.total === 0) || (!!existing && !existing.editable)} onClick={create} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-5 py-2.5 text-sm font-extrabold text-[#171717] disabled:opacity-50">
                 {creating ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />} {editId ? 'Save changes' : 'Publish assessment'}
               </button>
             )}
@@ -560,7 +560,7 @@ function SectionEditor({
           Marks
           <input type="number" min={1} max={20} value={marks} onChange={(e) => setMarks(Number(e.target.value))} className="h-10 w-14 rounded-lg border border-slate-200 bg-white px-2 text-sm text-navy focus:border-orange focus:outline-none" />
         </label>
-        <button type="button" onClick={submit} disabled={topic.trim().length < 2} className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-4 py-2 text-sm font-extrabold text-white disabled:opacity-50">
+        <button type="button" onClick={submit} disabled={topic.trim().length < 2} className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-4 py-2 text-sm font-extrabold text-[#171717] disabled:opacity-50">
           <Wand2 className="size-4" /> Add
         </button>
       </div>

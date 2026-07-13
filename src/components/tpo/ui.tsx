@@ -70,7 +70,7 @@ export function BentoCard({
   return (
     <section
       className={cn(
-        'flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm',
+        'flex flex-col rounded-2xl border border-slate-200 bg-white p-5',
         className,
       )}
     >
@@ -106,7 +106,7 @@ const TONE: Record<string, { chip: string; glow: string }> = {
   emerald: { chip: 'bg-emerald-50 text-emerald-600', glow: '#059669' },
   violet: { chip: 'bg-violet-50 text-violet-600', glow: '#7c3aed' },
   red: { chip: 'bg-red-50 text-red-600', glow: '#dc2626' },
-  orange: { chip: 'bg-orange/10 text-orange', glow: '#f37021' },
+  orange: { chip: 'bg-[#fff5ea] text-[#f5b400]', glow: '#f5b400' },
 };
 
 export function KpiCard({
@@ -124,7 +124,7 @@ export function KpiCard({
 }) {
   const t = TONE[tone] ?? TONE.slate;
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+    <div className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 transition-all hover:-translate-y-0.5">
       <div
         aria-hidden
         className="pointer-events-none absolute -right-6 -top-6 size-20 rounded-full opacity-[0.07] blur-xl transition-opacity group-hover:opacity-[0.13]"
@@ -187,14 +187,14 @@ export function ModulePlaceholder({
   source: string;
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
       <div className="relative border-b border-slate-100 bg-gradient-to-br from-slate-50 to-white p-6">
         <span
           aria-hidden
-          className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-orange/[0.06] blur-3xl"
+          className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-[#ffc42d]/[0.06] blur-3xl"
         />
         <div className="relative flex items-start gap-4">
-          <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.9)]">
+          <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717]">
             <Icon className="size-6" aria-hidden />
           </span>
           <div className="min-w-0">

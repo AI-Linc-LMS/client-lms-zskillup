@@ -90,7 +90,7 @@ export default function StudentReportPage() {
 
   if (!report) {
     return (
-      <div className="flex items-center justify-center rounded-2xl border border-slate-200 bg-white p-20 shadow-sm">
+      <div className="flex items-center justify-center rounded-2xl border border-slate-200 bg-white p-20">
         <Loader2 className="size-6 animate-spin text-slate-400" />
       </div>
     );
@@ -120,8 +120,8 @@ export default function StudentReportPage() {
       </Link>
 
       {/* Student header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0b1220] via-[#101d4a] to-[#1e3a8a] p-7 text-white shadow-lg">
-        <div aria-hidden className="pointer-events-none absolute -right-16 -top-20 size-56 rounded-full bg-[#f37021]/25 blur-3xl" />
+      <div className="relative overflow-hidden rounded-3xl bg-[#1a1a1a] p-7 text-white">
+        <div aria-hidden className="pointer-events-none absolute -right-16 -top-20 size-56 rounded-full bg-[#ffc42d]/25 blur-3xl" />
         <div className="relative flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-center gap-4">
             <span className="flex size-14 items-center justify-center rounded-2xl bg-white/10 text-2xl font-extrabold">
@@ -168,7 +168,7 @@ export default function StudentReportPage() {
           label="Avg score"
           value={summary.avgScorePct === null ? '—' : `${summary.avgScorePct}%`}
           icon={<Target className="size-4" />}
-          accent="#f37021"
+          accent="#f5b400"
         />
         <StatCard
           label="Best score"

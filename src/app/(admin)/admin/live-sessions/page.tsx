@@ -56,11 +56,11 @@ export default function AdminLiveSessionsPage() {
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Engagement</p>
           <h1 className="mt-1 flex items-center gap-2 text-[28px] font-extrabold tracking-tight text-navy">
-            <Video className="size-6 text-orange" /> Live Sessions
+            <Video className="size-6 text-[#f5b400]" /> Live Sessions
           </h1>
           <p className="mt-1 text-sm text-slate-500">Schedule Zoom / Meet sessions — students get notified and see them in-app.</p>
         </div>
-        <button onClick={openNew} className="inline-flex items-center gap-2 rounded-full bg-orange px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-orange/90">
+        <button onClick={openNew} className="inline-flex items-center gap-2 rounded-full btn-brand px-4 py-2.5 text-sm font-bold">
           <PlusCircle className="size-4" /> New session
         </button>
       </div>
@@ -113,7 +113,7 @@ function AdminRow({
   const link = safeHttpUrl(s.meetingUrl);
   const recording = safeHttpUrl(s.recordingUrl);
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -152,7 +152,7 @@ function EmptyState({ onNew }: { onNew: () => void }) {
     <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center">
       <Video className="mx-auto size-9 text-slate-300" />
       <p className="mt-2 text-sm text-slate-500">No upcoming sessions. Schedule one to notify students.</p>
-      <button onClick={onNew} className="mt-3 inline-flex items-center gap-2 rounded-full bg-orange px-4 py-2 text-sm font-bold text-white hover:bg-orange/90">
+      <button onClick={onNew} className="mt-3 inline-flex items-center gap-2 rounded-full btn-brand px-4 py-2 text-sm font-bold">
         <PlusCircle className="size-4" /> New session
       </button>
     </div>

@@ -56,14 +56,14 @@ export function SubscriptionsManager() {
 
   if (allowed === null) {
     return (
-      <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white py-16 shadow-sm">
+      <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white py-16">
         <Loader2 className="size-6 animate-spin text-slate-400" />
       </div>
     );
   }
   if (!allowed) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white py-16 text-center shadow-sm">
+      <div className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white py-16 text-center">
         <Lock className="size-8 text-slate-300" />
         <p className="max-w-sm text-sm text-slate-500">
           You don&apos;t have the <span className="font-semibold">Manage subscriptions</span>{' '}
@@ -82,7 +82,7 @@ export function SubscriptionsManager() {
             onClick={() => setTab(t)}
             className={cn(
               'flex-1 rounded-md px-4 py-2 capitalize transition-colors',
-              tab === t ? 'bg-white text-navy shadow-sm' : 'text-slate-500 hover:text-slate-700',
+              tab === t ? 'bg-white text-navy' : 'text-slate-500 hover:text-slate-700',
             )}
           >
             {t}
@@ -197,7 +197,7 @@ function PlansTab({
       </div>
 
       {showForm && (
-        <form onSubmit={submit} className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2">
+        <form onSubmit={submit} className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-5 sm:grid-cols-2">
           <Field label="Name">
             <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inputCls} />
           </Field>
@@ -221,14 +221,14 @@ function PlansTab({
             </Field>
           </div>
           <div className="sm:col-span-2">
-            <button type="submit" disabled={saving || !form.name.trim()} className="inline-flex items-center gap-2 rounded-lg bg-orange px-4 py-2 text-sm font-semibold text-white hover:bg-orange/90 disabled:opacity-50">
+            <button type="submit" disabled={saving || !form.name.trim()} className="inline-flex items-center gap-2 rounded-lg btn-brand px-4 py-2 text-sm font-semibold disabled:opacity-50">
               {saving && <Loader2 className="size-4 animate-spin" />} Create plan
             </button>
           </div>
         </form>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         {loading ? (
           <div className="flex items-center justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-400" /></div>
         ) : plans.length === 0 ? (
@@ -350,7 +350,7 @@ function SubscriptionsTab({
   return (
     <div className="space-y-4">
       {/* Assign / trial panel */}
-      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="rounded-xl border border-slate-200 bg-white p-5">
         <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-slate-400">Assign or trial a college</p>
         <div className="flex flex-wrap items-end gap-3">
           <div className="min-w-[200px] flex-1">
@@ -394,7 +394,7 @@ function SubscriptionsTab({
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         {loading ? (
           <div className="flex items-center justify-center py-12"><Loader2 className="size-6 animate-spin text-slate-400" /></div>
         ) : subs.length === 0 ? (
@@ -468,7 +468,7 @@ function SubscriptionsTab({
 }
 
 const inputCls =
-  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange';
+  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#ffc42d] focus:outline-none focus:ring-1 focus:ring-[#ffc42d]';
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (

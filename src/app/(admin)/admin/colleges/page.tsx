@@ -68,11 +68,11 @@ export default function AdminCollegesPage() {
           placeholder="Search by name, city or state…"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-4 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+          className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-4 text-sm focus:border-[#ffc42d] focus:outline-none focus:ring-1 focus:ring-[#ffc42d]"
         />
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="size-6 animate-spin text-slate-400" />
@@ -97,7 +97,7 @@ export default function AdminCollegesPage() {
                   <tr key={c.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3">
                       <Link href={`/admin/colleges/${c.id}`} className="group">
-                        <p className="font-semibold text-navy group-hover:text-orange">{c.name}</p>
+                        <p className="font-semibold text-navy group-hover:text-[#1a1d29]">{c.name}</p>
                         <p className="text-xs text-slate-400">{c.slug}</p>
                       </Link>
                     </td>

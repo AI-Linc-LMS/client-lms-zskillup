@@ -234,9 +234,9 @@ function StudentImportPanel({
   }
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-2xl border border-slate-200 bg-white p-6">
       <div className="flex items-start gap-3">
-        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-600 ring-1 ring-indigo-100">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#fff5ea] text-[#f5b400] ring-1 ring-[#ffc42d]/30">
           <Users className="size-5" />
         </span>
         <div className="flex-1">
@@ -268,7 +268,7 @@ function StudentImportPanel({
                   value={cohortName}
                   onChange={(e) => setCohortName(e.target.value)}
                   placeholder={`${req.collegeName} — ${new Date().getFullYear()}`}
-                  className="mt-1 block w-64 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+                  className="mt-1 block w-64 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
                 />
               </label>
               <Button disabled={busy || req.studentCount === 0} onClick={onImport}>
@@ -293,7 +293,7 @@ function ReadOnlyRequest({ req }: { req: CollegeRequestDetail }) {
   ];
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-white p-6">
         <dl className="grid gap-3 sm:grid-cols-2">
           {rows.map(([k, v]) => (
             <div key={k}>
@@ -307,7 +307,7 @@ function ReadOnlyRequest({ req }: { req: CollegeRequestDetail }) {
         ) : null}
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-white p-6">
         <h2 className="text-sm font-bold text-navy">Student list ({req.students.length})</h2>
         <div className="mt-3 max-h-72 overflow-auto rounded-lg border border-slate-200">
           <table className="w-full text-xs">
