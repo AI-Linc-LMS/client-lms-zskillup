@@ -48,7 +48,7 @@ const zoneOf = (p: ScatterPoint): ZoneKey => {
 function verdict(perf: number, part: number): { label: string; tip: string; tone: string } {
   const hiP = perf >= PERF_HIGH;
   const hiE = part >= PART_HIGH;
-  if (hiP && hiE) return { label: 'Thriving', tip: 'Strong accuracy on real volume — keep the streak alive.', tone: 'text-emerald-600' };
+  if (hiP && hiE) return { label: 'Thriving', tip: 'Strong performance on real volume — keep the streak alive.', tone: 'text-emerald-600' };
   if (hiP && !hiE) return { label: 'Coasting', tip: 'Sharp on light practice — a bit more volume locks it in.', tone: 'text-sky-600' };
   if (!hiP && hiE) return { label: 'Grinding', tip: 'Great effort — target your weak topics to convert it into results.', tone: 'text-amber-600' };
   return { label: 'Getting started', tip: 'A little daily practice moves you up fast — start with one topic.', tone: 'text-rose-500' };
@@ -62,8 +62,8 @@ function pathToTop(perf: number, part: number): string | null {
   const needAct = Math.max(0, Math.ceil(PART_HIGH - part));
   if (hiP && hiE) return null;
   if (hiP && !hiE) return `${needAct} more activity to reach Thriving`;
-  if (!hiP && hiE) return `+${needAcc}% accuracy to reach Thriving`;
-  return `+${needAcc}% accuracy and ${needAct} more activity to reach Thriving`;
+  if (!hiP && hiE) return `+${needAcc}% performance to reach Thriving`;
+  return `+${needAcc}% performance and ${needAct} more activity to reach Thriving`;
 }
 
 /**
@@ -154,7 +154,7 @@ export function PerformanceParticipation() {
             Performance vs Participation
           </h2>
           <p className="mt-1 text-xs text-slate-500">
-            Accuracy vs effort — you against {data?.scope === 'college' ? 'your college' : 'everyone'}.
+            Performance vs effort — you against {data?.scope === 'college' ? 'your college' : 'everyone'}.
           </p>
         </div>
         <Link
@@ -173,18 +173,18 @@ export function PerformanceParticipation() {
         <div className="mt-4 flex h-56 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-200 text-center">
           <Target className="size-7 text-slate-300" />
           <p className="max-w-xs text-sm text-slate-500">Answer a few practice questions to see where you land on the map.</p>
-          <Link href="/practice" className="mt-1 rounded-full bg-orange px-4 py-1.5 text-xs font-bold text-white transition hover:bg-orange/90">
+          <Link href="/practice" className="mt-1 rounded-full bg-orange px-4 py-1.5 text-xs font-bold text-[#171717] transition hover:bg-orange/90">
             Start practising
           </Link>
         </div>
       ) : (
         <>
           {/* Metric strip — your numbers + where they place you in the cohort */}
-          <div className="mt-4 grid grid-cols-3 gap-2">
+          <div className="mt-4 grid grid-cols-3 gap-2.5">
             <Metric
-              label="Your accuracy"
+              label="Your performance"
               value={`${data.you.performance}%`}
-              sub={peerCount > 0 ? `${ord(stats.perfPct)} percentile` : 'practice accuracy'}
+              sub={peerCount > 0 ? `${ord(stats.perfPct)} percentile` : 'practice performance'}
             />
             <Metric
               label="Your activity"
@@ -204,22 +204,23 @@ export function PerformanceParticipation() {
             <div className="flex w-6 shrink-0 flex-col items-end justify-between py-1">
               <span className="text-[10px] font-semibold tabular-nums text-slate-300">100</span>
               <span className="-rotate-90 whitespace-nowrap text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                Accuracy
+                Performance
               </span>
               <span className="text-[10px] font-semibold tabular-nums text-slate-300">0</span>
             </div>
 
             {/* Plot */}
             <div className="relative aspect-[2/1] w-full min-w-0 overflow-hidden rounded-2xl bg-slate-50/40 ring-1 ring-inset ring-slate-100">
-              {/* Quadrant tints */}
-              <div className="absolute bg-sky-500/[0.05]" style={{ left: 0, top: 0, width: `${vx}%`, height: `${hy}%` }} />
-              <div className="absolute bg-emerald-500/[0.07]" style={{ left: `${vx}%`, top: 0, right: 0, height: `${hy}%` }} />
-              <div className="absolute bg-rose-500/[0.05]" style={{ left: 0, top: `${hy}%`, width: `${vx}%`, bottom: 0 }} />
-              <div className="absolute bg-amber-400/[0.08]" style={{ left: `${vx}%`, top: `${hy}%`, right: 0, bottom: 0 }} />
+              {/* Quadrant tints — checkerboard intensity (diagonals match, adjacent
+                  differ) so every shared edge separates by both hue and strength. */}
+              <div className="absolute bg-sky-500/[0.15]" style={{ left: 0, top: 0, width: `${vx}%`, height: `${hy}%` }} />
+              <div className="absolute bg-emerald-500/[0.10]" style={{ left: `${vx}%`, top: 0, right: 0, height: `${hy}%` }} />
+              <div className="absolute bg-rose-500/[0.10]" style={{ left: 0, top: `${hy}%`, width: `${vx}%`, bottom: 0 }} />
+              <div className="absolute bg-amber-400/[0.16]" style={{ left: `${vx}%`, top: `${hy}%`, right: 0, bottom: 0 }} />
 
               {/* Dividers */}
-              <div className="absolute top-0 bottom-0 border-l border-dashed border-slate-300/70" style={{ left: `${vx}%` }} />
-              <div className="absolute right-0 left-0 border-t border-dashed border-slate-300/70" style={{ top: `${hy}%` }} />
+              <div className="absolute top-0 bottom-0 border-l border-dashed border-slate-400/60" style={{ left: `${vx}%` }} />
+              <div className="absolute right-0 left-0 border-t border-dashed border-slate-400/60" style={{ top: `${hy}%` }} />
 
               {/* Quadrant captions */}
               <span className="absolute left-2.5 top-2 text-[11px] font-bold text-sky-500/90">Coasting</span>
@@ -257,7 +258,7 @@ export function PerformanceParticipation() {
                 <span className="absolute left-1/2 top-1/2 size-7 -translate-x-1/2 -translate-y-1/2 animate-ping rounded-full bg-orange/25" />
                 <span className="relative block size-3.5 rounded-full bg-orange shadow-md ring-2 ring-white">
                   <span className="sr-only">
-                    You · {data.you.performance}% accuracy · {data.you.participation} participation
+                    You · {data.you.performance}% performance · {data.you.participation} participation
                   </span>
                 </span>
                 <span
@@ -271,14 +272,18 @@ export function PerformanceParticipation() {
             </div>
           </div>
 
-          {/* X axis caption */}
-          <p className="ml-8 mt-1 text-center text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-            Participation →
-          </p>
+          {/* X axis caption — mirrors the chart's y-rail gutter (w-6 + gap-2.5) so it
+              centres exactly under the plot instead of a hand-tuned margin. */}
+          <div className="mt-1.5 flex gap-2.5">
+            <div className="w-6 shrink-0" aria-hidden />
+            <p className="w-full min-w-0 text-center text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+              Participation →
+            </p>
+          </div>
 
           {/* Cohort distribution across the four zones */}
           {peerCount > 0 && (
-            <div className="mt-3.5">
+            <div className="mt-4">
               <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                 <span>Where the cohort sits</span>
                 <span className="normal-case tracking-normal text-slate-400">
@@ -313,7 +318,7 @@ export function PerformanceParticipation() {
           )}
 
           {/* Verdict + concrete next step */}
-          <div className="mt-3.5 rounded-2xl border border-slate-100 bg-slate-50/70 p-3">
+          <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-3">
             <p className="text-xs leading-relaxed">
               <span className={`font-bold ${v!.tone}`}>{v!.label}.</span>{' '}
               <span className="text-slate-600">{v!.tip}</span>
