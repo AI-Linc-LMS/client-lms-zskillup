@@ -24,7 +24,7 @@ export default async function CodingPracticePage({ searchParams }: PageProps) {
         items={[
           { label: 'Home', href: '/' },
           { label: 'Dashboard', href: '/dashboard' },
-          { label: 'Practice', href: '/practice' },
+          { label: 'Adaptive', href: '/practice' },
           { label: topic ? `Coding · ${topic}` : 'Coding' },
         ]}
       />

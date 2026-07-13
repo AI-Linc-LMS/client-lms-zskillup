@@ -114,18 +114,18 @@ export default function PracticeWishPage() {
         items={[
           { label: 'Home', href: '/' },
           { label: 'Dashboard', href: '/dashboard' },
-          { label: 'Practice as Wish' },
+          { label: 'Non-Adaptive' },
         ]}
       />
 
-      <PremiumLockGate feature="Practice as Wish" contentClassName="space-y-8">
+      <PremiumLockGate feature="Non-Adaptive practice" contentClassName="space-y-8">
       {/* hero */}
       <section data-tour="aswish:hero" className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#3b1f6d] via-[#2a1a52] to-[#140b28] p-6 text-white shadow-sm sm:p-8">
         <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#a855f7]/30 blur-3xl" />
         <span aria-hidden className="pointer-events-none absolute -bottom-20 left-1/4 size-56 rounded-full bg-[#f0abfc]/20 blur-3xl" />
         <div className="relative">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-white/70 ring-1 ring-inset ring-white/15">
-            <Sparkles className="size-3.5" /> Practice as-wish
+            <Sparkles className="size-3.5" /> Non-Adaptive
           </span>
           <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Practice anything, any amount</h1>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/60">

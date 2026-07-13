@@ -32,13 +32,13 @@ const GRAND_STEPS: GuideStep[] = [
   { id: 'chrome-account', target: 'chrome:account', placement: 'bottom', eyebrow: 'Your account', title: 'Profile & settings', body: 'Open your profile, switch settings, and sign out from your avatar menu.' },
   // \u2500\u2500 Sidebar walk (where every module lives) \u2500\u2500
   { id: 'nav-dashboard', route: '/dashboard', target: nav('/dashboard'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Dashboard \u2014 your home base', body: 'Your personalized hub: recommendations, readiness, daily challenges and quick practice, all in one place.' },
-  { id: 'nav-study-plan', target: nav('/study-plan'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Study Plan', body: 'Your fixed 90-day placement roadmap, built from your calibration result — one day unlocks at a time.' },
+  { id: 'nav-study-plan', target: nav('/study-plan'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Study Plan', body: 'Your fixed 90-day placement roadmap, built from your placement readiness result — one day unlocks at a time.' },
   { id: 'nav-performance', target: nav('/performance'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Performance', body: 'Track accuracy, strengths and \u2014 at the bottom \u2014 your focus areas to work on next.' },
   { id: 'nav-leaderboard', target: nav('/leaderboard'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Leaderboard', body: 'See how you rank against peers on XP. Friendly competition that keeps you sharp.' },
   { id: 'nav-community', target: nav('/community'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Community', body: 'Ask questions, share tips and discuss problems with other students.' },
   { id: 'nav-live-sessions', target: nav('/live-sessions'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Live Sessions', body: 'Join scheduled live classes and webinars \u2014 links appear here when they go live.' },
-  { id: 'nav-practice', target: nav('/practice'), placement: 'right', desktopOnly: true, eyebrow: 'Practice', title: 'Practice', body: 'Sharpen skills with targeted question sets by topic and company. Unlocks after your calibration.' },
-  { id: 'nav-practice-wish', target: nav('/practice-wish'), placement: 'right', desktopOnly: true, eyebrow: 'Practice', title: 'Practice as Wish', body: 'Build your own custom practice set \u2014 pick topics, difficulty and length exactly as you want.' },
+  { id: 'nav-practice', target: nav('/practice'), placement: 'right', desktopOnly: true, eyebrow: 'Practice', title: 'Adaptive', body: 'Sharpen skills with targeted question sets by topic and company. Unlocks after your placement readiness test.' },
+  { id: 'nav-practice-wish', target: nav('/practice-wish'), placement: 'right', desktopOnly: true, eyebrow: 'Practice', title: 'Non-Adaptive', body: 'Build your own custom practice set \u2014 pick topics, difficulty and length exactly as you want.' },
   { id: 'nav-mock-assessment', target: nav('/mock-assessment'), placement: 'right', desktopOnly: true, eyebrow: 'Assessment', title: 'Mock Assessment', body: 'Full-length, timed practice tests that mirror real placement exams \u2014 with detailed reports.' },
   { id: 'nav-assessments', target: nav('/assessments'), placement: 'right', desktopOnly: true, eyebrow: 'Assessment', title: 'Assessments', body: 'Official assessments scheduled by your college or the platform show up here.' },
   { id: 'nav-resume', target: nav('/resume-builder'), placement: 'right', desktopOnly: true, eyebrow: 'Career', title: 'Resume Builder', body: 'Craft an ATS-friendly resume from proven templates \u2014 and tailor it to any job with AI.' },
@@ -60,7 +60,7 @@ const GRAND_STEPS: GuideStep[] = [
     route: '/dashboard',
     placement: 'center',
     title: "You're all set \u{1F389}",
-    body: 'That\u2019s the tour! Replay it anytime from the \u201C?\u201D help button in the top bar. Next up: take your calibration to personalize everything.',
+    body: 'That\u2019s the tour! Replay it anytime from the \u201C?\u201D help button in the top bar. Next up: take your placement readiness test to personalize everything.',
   },
 ];
 
@@ -69,22 +69,22 @@ const GRAND_TOUR: GuideTour = { id: GRAND_TOUR_ID, label: 'Platform tour', steps
 /** Per-route mini-tours. Keyed by route; longest-prefix match resolves dynamics. */
 export const PAGE_TOURS: Record<string, GuideTour> = {
   "/study-plan": { id: "plan", label: "Study Plan tour", steps: [
-    { id: "plan-hero", route: "/study-plan", target: "plan:hero", placement: "auto", eyebrow: "Study Plan", title: "Your 90-day roadmap", body: "Built once from your calibration result — a fixed, day-by-day path to placement-ready that front-loads your weak areas. The ring shows how far you've come." },
+    { id: "plan-hero", route: "/study-plan", target: "plan:hero", placement: "auto", eyebrow: "Study Plan", title: "Your 90-day roadmap", body: "Built once from your placement readiness result — a fixed, day-by-day path to placement-ready that front-loads your weak areas. The ring shows how far you've come." },
     { id: "plan-today", route: "/study-plan", target: "plan:today", placement: "auto", eyebrow: "Study Plan", title: "Today's focus", body: "Just today's few tasks — practice, timed quizzes, mocks or coding. They tick off automatically when you finish the linked activity, or check them yourself." },
     { id: "plan-roadmap", route: "/study-plan", target: "plan:roadmap", placement: "auto", eyebrow: "Study Plan", title: "The road ahead", body: "All 90 days across three phases. Completed days fill in, today pulses, and future days unlock one at a time — tomorrow's unlocks tomorrow." },
   ] },
-  "/practice": { id: "practice", label: "Practice tour", steps: [
-    { id: "practice-hero", route: "/practice", target: "practice:hero", placement: "auto", eyebrow: "Practice", title: "Adaptive practice, your way", body: "Your practice home: it explains adaptive, non-proctored drilling and shows how many sections and topics are available to you." },
-    { id: "practice-search", route: "/practice", target: "practice:search", placement: "auto", eyebrow: "Practice", title: "Search everything", body: "Type here to instantly filter companies, sections, and topics so you can jump straight to what you want to practise." },
-    { id: "practice-by-company", route: "/practice", target: "practice:by-company", placement: "auto", eyebrow: "Practice", title: "By company", body: "Practise in a specific company's question style — tap a company chip to launch adaptive practice tuned to their pattern." },
-    { id: "practice-by-section", route: "/practice", target: "practice:by-section", placement: "auto", eyebrow: "Practice", title: "By section or topic", body: "Practise a whole section or a single topic: use 'Practice whole section' or tap a topic chip; Coding links out separately." },
-    { id: "practice-weak-topics", route: "/practice", target: "practice:weak-topics", placement: "auto", eyebrow: "Practice", title: "Your weak topics", body: "After you attempt questions, your weakest topics surface here with live accuracy so you know exactly where to focus." },
+  "/practice": { id: "practice", label: "Adaptive tour", steps: [
+    { id: "practice-hero", route: "/practice", target: "practice:hero", placement: "auto", eyebrow: "Adaptive", title: "Adaptive practice, your way", body: "Your practice home: it explains adaptive, non-proctored drilling and shows how many sections and topics are available to you." },
+    { id: "practice-search", route: "/practice", target: "practice:search", placement: "auto", eyebrow: "Adaptive", title: "Search everything", body: "Type here to instantly filter companies, sections, and topics so you can jump straight to what you want to practise." },
+    { id: "practice-by-company", route: "/practice", target: "practice:by-company", placement: "auto", eyebrow: "Adaptive", title: "By company", body: "Practise in a specific company's question style — tap a company chip to launch adaptive practice tuned to their pattern." },
+    { id: "practice-by-section", route: "/practice", target: "practice:by-section", placement: "auto", eyebrow: "Adaptive", title: "By section or topic", body: "Practise a whole section or a single topic: use 'Practice whole section' or tap a topic chip; Coding links out separately." },
+    { id: "practice-weak-topics", route: "/practice", target: "practice:weak-topics", placement: "auto", eyebrow: "Adaptive", title: "Your weak topics", body: "After you attempt questions, your weakest topics surface here with live accuracy so you know exactly where to focus." },
   ] },
-  "/practice-wish": { id: "aswish", label: "Practice as Wish tour", steps: [
-    { id: "aswish-hero", route: "/practice-wish", target: "aswish:hero", placement: "auto", eyebrow: "Practice as Wish", title: "Practice anything", body: "A purple banner introduces the mode: practice any topic, any amount, with adaptive questions that never run out." },
-    { id: "aswish-topic-search", route: "/practice-wish", target: "aswish:topic-search", placement: "auto", eyebrow: "Practice as Wish", title: "Search a topic", body: "Type any topic here and hit Start practicing; no exact match just means we craft fresh AI questions for you." },
-    { id: "aswish-coding", route: "/practice-wish", target: "aswish:coding", placement: "auto", eyebrow: "Practice as Wish", title: "Coding practice", body: "Jump into Judge0-evaluated DSA problems — pick any coding-topic chip to start drilling it." },
-    { id: "aswish-browse-bank", route: "/practice-wish", target: "aswish:browse-bank", placement: "auto", eyebrow: "Practice as Wish", title: "Browse the bank", body: "Expand each section to reveal every topic, then click any chip to launch an instant adaptive session on it." },
+  "/practice-wish": { id: "aswish", label: "Non-Adaptive tour", steps: [
+    { id: "aswish-hero", route: "/practice-wish", target: "aswish:hero", placement: "auto", eyebrow: "Non-Adaptive", title: "Practice anything", body: "A purple banner introduces the mode: practice any topic, any amount, with adaptive questions that never run out." },
+    { id: "aswish-topic-search", route: "/practice-wish", target: "aswish:topic-search", placement: "auto", eyebrow: "Non-Adaptive", title: "Search a topic", body: "Type any topic here and hit Start practicing; no exact match just means we craft fresh AI questions for you." },
+    { id: "aswish-coding", route: "/practice-wish", target: "aswish:coding", placement: "auto", eyebrow: "Non-Adaptive", title: "Coding practice", body: "Jump into Judge0-evaluated DSA problems — pick any coding-topic chip to start drilling it." },
+    { id: "aswish-browse-bank", route: "/practice-wish", target: "aswish:browse-bank", placement: "auto", eyebrow: "Non-Adaptive", title: "Browse the bank", body: "Expand each section to reveal every topic, then click any chip to launch an instant adaptive session on it." },
   ] },
   "/mock-assessment": { id: "mock", label: "Mock Assessment tour", steps: [
     { id: "mock-hero", route: "/mock-assessment", target: "mock:hero", placement: "auto", eyebrow: "Mock Assessment", title: "How mocks work", body: "A quick intro banner: your custom mocks are camera-proctored, server-timed, and unlimited — the same experience as a real placement drive." },

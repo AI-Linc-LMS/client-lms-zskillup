@@ -72,11 +72,11 @@ export default async function PracticePage({ searchParams }: PageProps) {
         items={[
           { label: 'Home', href: '/' },
           { label: 'Dashboard', href: '/dashboard' },
-          { label: 'Practice' },
+          { label: 'Adaptive' },
         ]}
       />
 
-      <ProfileLockGate feature="Practice" contentClassName="space-y-8">
+      <ProfileLockGate feature="Adaptive practice" contentClassName="space-y-8">
       <Reveal>
         <section data-tour="practice:hero" className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] p-6 text-white sm:p-8">
           <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#6d3bf5]/25 blur-3xl" />
@@ -88,7 +88,7 @@ export default async function PracticePage({ searchParams }: PageProps) {
               </span>
               <div>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-white/70 ring-1 ring-inset ring-white/15">
-                  <Compass className="size-3.5" /> Practice
+                  <Compass className="size-3.5" /> Adaptive
                 </span>
                 <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">
                   {activeCompany ? `Practice for ${activeCompany.name}` : 'Adaptive practice, your way'}

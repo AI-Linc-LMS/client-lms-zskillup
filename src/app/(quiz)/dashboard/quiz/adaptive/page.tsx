@@ -195,7 +195,7 @@ function AdaptiveQuizRunner({
 
   const mode = sessionMeta?.mode ?? (mockId ? 'MOCK' : 'PRACTICE');
   const unbounded = sessionMeta?.maxQuestions == null || mode === 'AS_WISH';
-  const modeLabel = mode === 'AS_WISH' ? 'Practice as-wish' : mode === 'MOCK' ? 'Mock Quiz' : 'Practice';
+  const modeLabel = mode === 'AS_WISH' ? 'Non-Adaptive' : mode === 'MOCK' ? 'Mock Quiz' : 'Adaptive';
   const exitHref = mode === 'AS_WISH' ? '/practice-wish' : '/practice';
   const maxQ = sessionMeta?.maxQuestions ?? 15;
   const minQ = sessionMeta?.minQuestions ?? 8;
@@ -854,7 +854,7 @@ function AdaptiveQuizLanding() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background px-6 text-center text-navy">
       <QuizMark size={48} />
-      <h1 className="text-2xl font-black">Practice</h1>
+      <h1 className="text-2xl font-black">Adaptive</h1>
       <p className="max-w-sm text-sm text-slate-500">
         No practice scope selected. Choose a company, topic or section to begin.
       </p>

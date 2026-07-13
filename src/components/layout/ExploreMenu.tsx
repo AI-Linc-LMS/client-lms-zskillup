@@ -48,7 +48,7 @@ const PRACTICE: Dest[] = [
   // below still offers quick per-company jump-in).
   { label: 'Topic Mastery', href: '/practice', icon: Target, desc: 'Adaptive drills, section by section' },
   { label: 'Full Mock Quiz', href: '/mock-assessment', icon: ClipboardList, desc: 'Timed, full-length simulation' },
-  { label: 'Practice as-wish', href: '/practice-wish', icon: Sparkles, desc: 'Free-form practice on any topic' },
+  { label: 'Non-Adaptive', href: '/practice-wish', icon: Sparkles, desc: 'Free-form practice on any topic' },
 ];
 
 const GROW: Dest[] = [

@@ -74,8 +74,8 @@ export const STUDENT_NAV: NavSection[] = [
   {
     heading: 'PRACTICE',
     items: [
-      { label: 'Practice', href: '/practice', icon: Target },
-      { label: 'Practice as Wish', href: '/practice-wish', icon: Sparkles },
+      { label: 'Adaptive', href: '/practice', icon: Target },
+      { label: 'Non-Adaptive', href: '/practice-wish', icon: Sparkles },
     ],
   },
   {
