@@ -90,14 +90,14 @@ export function StreakPill() {
       }
       whileHover={reduce ? undefined : { y: -1, scale: 1.03 }}
       className={cn(
-        'group relative inline-flex select-none items-center gap-1.5 overflow-hidden rounded-full px-3 py-1 text-[11px] font-bold text-white ring-1 ring-white/20',
+        'group relative inline-flex select-none items-center gap-1.5 overflow-hidden rounded-full px-3 py-1 text-[11px] font-extrabold ring-1',
         lit
-          ? 'shadow-[0_4px_14px_-4px_rgba(243,112,33,0.6)]'
-          : 'shadow-[0_4px_14px_-6px_rgba(100,116,139,0.45)]',
+          ? 'text-[#5b2a00] ring-[#ff7a1a]/35 shadow-[0_5px_16px_-5px_rgba(255,122,26,0.6)]'
+          : 'text-white ring-white/20 shadow-[0_4px_14px_-6px_rgba(100,116,139,0.45)]',
       )}
       style={{
         backgroundImage: lit
-          ? 'linear-gradient(120deg, #fb923c 0%, #f37021 45%, #ea580c 100%)'
+          ? 'linear-gradient(120deg, #ffd24d 0%, #ffa32e 50%, #ff7a1a 100%)'
           : 'linear-gradient(120deg, #94a3b8 0%, #64748b 100%)',
       }}
       aria-label={`${streak}-day streak${lit ? '' : ' - start one today'}`}
@@ -154,7 +154,7 @@ export function StreakPill() {
             className={cn(
               'size-3.5',
               lit
-                ? 'fill-amber-100/90 drop-shadow-[0_0_3px_rgba(255,237,213,0.8)]'
+                ? 'fill-white text-white drop-shadow-[0_1px_2px_rgba(120,45,10,0.5)]'
                 : 'fill-white/20',
             )}
             aria-hidden="true"
@@ -164,7 +164,7 @@ export function StreakPill() {
 
       <span className="relative inline-flex items-baseline gap-1 tabular-nums">
         <AnimatedNumber value={streak} format={(n) => `${n}`} />
-        <span className="hidden text-[10px] font-semibold tracking-widest text-white/85 sm:inline">
+        <span className={cn('hidden text-[10px] font-bold tracking-widest sm:inline', lit ? 'text-[#5b2a00]/75' : 'text-white/85')}>
           DAY STREAK
         </span>
       </span>
