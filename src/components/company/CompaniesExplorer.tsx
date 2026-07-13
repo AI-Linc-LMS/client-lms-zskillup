@@ -6,21 +6,13 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { CompanyCard, type CompanyCardData } from './CompanyCard';
 import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
-import { DEMO_COMPANIES } from '@/lib/demo-data';
-import { HOMEPAGE_COMPANY_LOGOS } from '@/lib/demo-data-extra';
+import { HOMEPAGE_FEATURED_TRACKS } from '@/lib/demo-data-extra';
 import { useMySubscription } from '@/hooks/useMySubscription';
 import { getPricing } from '@/lib/api/payments';
 import { formatPrice } from '@/lib/api/subscriptions';
 import { buildPriceMap, retailPrice } from '@/lib/payments/pricing';
 import { BillingPeriod, EntitlementScope } from '@/shared/enums';
 import type { PriceBookEntryDto } from '@/shared/dto/payments.dto';
-
-/** Real brand logos for the canonical companies — locked cards have no live
- *  logoUrl from the catalog, so they'd otherwise fall back to a text monogram. */
-const LOGO_BY_SLUG: Record<string, string> = {
-  ...Object.fromEntries(HOMEPAGE_COMPANY_LOGOS.map((c) => [c.slug, c.logoSrc])),
-  google: 'https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg',
-};
 
 const TYPE_TABS: Array<{ key: 'All' | ApiCompany['type']; label: string }> = [
   { key: 'All', label: 'All' },
@@ -96,47 +88,44 @@ export function CompaniesExplorer() {
           codingCount: c.codingCount,
           locked: false,
         });
-        const demoType = (t: (typeof DEMO_COMPANIES)[number]['type']): ApiCompany['type'] =>
-          t === 'Service' ? 'SERVICE' : t === 'Product' ? 'PRODUCT' : 'CONSULTING';
         const liveBySlug = new Map(live.map((c) => [c.slug, c]));
-        // Always show the full canonical set of companies. Live-catalog rows
-        // unlock + enrich their card; the rest render locked ("coming soon").
-        const merged: ExplorerCompany[] = DEMO_COMPANIES.map((d) => {
-          const l = liveBySlug.get(d.slug);
+        // Show exactly the FEATURED set (HOMEPAGE_FEATURED_TRACKS), in its declared order,
+        // shared with the landing page. A featured slug present in the live catalog renders
+        // unlocked + enriched; the rest render locked ("coming soon"), using the featured
+        // config's own name/logo/tagline (so "LTIMindtree"/"HCLTech" show correctly even
+        // though the catalog rows are unpublished). Publishing a row auto-unlocks it.
+        const merged: ExplorerCompany[] = HOMEPAGE_FEATURED_TRACKS.map((f) => {
+          const l = liveBySlug.get(f.slug);
           if (l) return mapLive(l);
           return {
-            slug: d.slug,
-            name: d.name,
-            tagline: d.tagline,
-            accent: d.accent,
+            slug: f.slug,
+            name: f.company,
+            tagline: f.description,
+            accent: f.accent,
             badge: null,
-            type: demoType(d.type),
-            logoUrl: LOGO_BY_SLUG[d.slug] ?? null,
-            difficulty: d.difficulty as CompanyCardData['difficulty'],
-            rounds: d.rounds,
+            type: f.type,
+            logoUrl: f.logoSrc,
+            rounds: f.rounds,
             locked: true,
           };
         });
-        // Append any live company that isn't part of the canonical set (unlocked).
-        const canon = new Set(DEMO_COMPANIES.map((d) => d.slug));
-        for (const l of live) if (!canon.has(l.slug)) merged.push(mapLive(l));
-        // Unlocked hubs lead; locked ("coming soon") ones trail. (stable sort)
-        merged.sort((a, b) => Number(!!a.locked) - Number(!!b.locked));
         setCompanies(merged);
       })
       .catch(() => {
         if (cancelled) return;
-        // API unreachable → fall back to the seeded demo grid so the page
-        // still renders something instead of an empty state.
+        // API unreachable → render the featured set all-locked so the grid still shows the
+        // right companies in the right order rather than an empty state.
         setCompanies(
-          DEMO_COMPANIES.map((d) => ({
-            ...(d as CompanyCardData),
-            type:
-              d.type === 'Service'
-                ? 'SERVICE'
-                : d.type === 'Product'
-                  ? 'PRODUCT'
-                  : 'CONSULTING',
+          HOMEPAGE_FEATURED_TRACKS.map((f) => ({
+            slug: f.slug,
+            name: f.company,
+            tagline: f.description,
+            accent: f.accent,
+            badge: null,
+            type: f.type,
+            logoUrl: f.logoSrc,
+            rounds: f.rounds,
+            locked: true,
           })),
         );
       })
@@ -177,7 +166,9 @@ export function CompaniesExplorer() {
             role="tablist"
             aria-label="Company type"
           >
-            {TYPE_TABS.map((t) => {
+            {/* Hide a type tab with no companies — the featured set has no PRODUCT company,
+                so a "Product" tab would open onto an empty grid. "All" always shows. */}
+            {TYPE_TABS.filter((t) => t.key === 'All' || typeCount(t.key) > 0).map((t) => {
               const active = type === t.key;
               return (
                 <button

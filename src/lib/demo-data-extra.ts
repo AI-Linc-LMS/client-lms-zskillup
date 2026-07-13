@@ -153,17 +153,35 @@ export interface HomepageTrack {
   enrolled: string;
   hours: number;
   accent: string;
+  /** Company card type — drives the explorer's Service/Product/Consulting filter. */
+  type: 'SERVICE' | 'PRODUCT' | 'CONSULTING';
+  /** Coming-soon: the hub isn't live yet. Renders locked (no "Prepare now", no link)
+   *  on both the landing tracks and the Explore grid. */
+  locked?: boolean;
 }
 
+/**
+ * The featured company set — the SINGLE ordered source of truth for BOTH the landing-page
+ * tracks and the Explore grid. Order is the display order on both surfaces.
+ *
+ * The first five are live hubs (published in the catalog) and render as normal tracks. The
+ * last four are `locked` — their hubs aren't built yet, so they show a "Coming soon" card
+ * and don't navigate. "LTIMindtree" and "HCLTech" are the current brand names for the DB's
+ * `mindtree` / `hcl` rows (unpublished); the slug is unchanged, only the display name.
+ *
+ * A locked entry auto-unlocks the moment its catalog row is published — both surfaces treat
+ * "present in GET /companies" as the unlock signal — so this list won't need editing then.
+ */
 export const HOMEPAGE_FEATURED_TRACKS: HomepageTrack[] = [
-  { slug: 'accenture', badge: 'Most enrolled', company: 'Accenture', logoSrc: `${wiki}/c/cd/Accenture.svg`, logoAlt: 'Accenture logo', description: 'Cognitive, Technical & English tracks with adaptive section timing.', title: 'Accenture — Complete preparation', mcqs: '2.4k+', rounds: 5, rating: 4.5, enrolled: '12k+', hours: 10, accent: 'from-violet-600 to-indigo-700' },
-  { slug: 'tcs', badge: 'Recruiter-endorsed', company: 'TCS', logoSrc: `${wiki}/0/0e/Tata_Consultancy_Services_old_logo.svg`, logoAlt: 'TCS logo', description: 'NQT-style quant, verbal & reasoning updated to 2026 paper pattern.', title: 'TCS — Complete preparation', mcqs: '3.1k+', rounds: 5, rating: 4.6, enrolled: '25k+', hours: 12, accent: 'from-teal-600 to-emerald-700' },
-  { slug: 'infosys', badge: 'New 2026 syllabus', company: 'Infosys', logoSrc: `${wiki}/9/95/Infosys_logo.svg`, logoAlt: 'Infosys logo', description: 'Puzzle-heavy specialist paths with InfyTQ Power Programmer drills.', title: 'Infosys — Complete preparation', mcqs: '2.8k+', rounds: 5, rating: 4.7, enrolled: '18k+', hours: 14, accent: 'from-orange-500 to-amber-600' },
-  { slug: 'wipro', company: 'Wipro', logoSrc: `${wiki}/a/a0/Wipro_Primary_Logo_Color_RGB.svg`, logoAlt: 'Wipro logo', description: 'Aptitude + OOP + coding fundamentals for the NTH elite track.', title: 'Wipro — Complete preparation', mcqs: '1.9k+', rounds: 4, rating: 4.8, enrolled: '10k+', hours: 16, accent: 'from-purple-600 to-fuchsia-700' },
-  { slug: 'cognizant', company: 'Cognizant', logoSrc: `${wiki}/4/43/Cognizant_logo_2022.svg`, logoAlt: 'Cognizant logo', description: 'GenC and GenC Next tracks with game-based aptitude simulation.', title: 'Cognizant — Complete preparation', mcqs: '2.2k+', rounds: 4, rating: 4.5, enrolled: '15k+', hours: 18, accent: 'from-rose-500 to-red-600' },
-  { slug: 'capgemini', company: 'Capgemini', logoSrc: `${wiki}/9/9d/Capgemini_201x_logo.svg`, logoAlt: 'Capgemini logo', description: 'Pseudocode, game-based aptitude, and communication assessment prep.', title: 'Capgemini — Complete preparation', mcqs: '2.0k+', rounds: 5, rating: 4.6, enrolled: '12k+', hours: 20, accent: 'from-sky-600 to-blue-700' },
-  { slug: 'deloitte', company: 'Deloitte', logoSrc: `${wiki}/e/ed/Logo_of_Deloitte.svg`, logoAlt: 'Deloitte logo', description: 'Aptitude, case-study reasoning and behavioural rounds for the consulting track.', title: 'Deloitte — Complete preparation', mcqs: '1.2k+', rounds: 5, rating: 4.5, enrolled: '6k+', hours: 12, accent: 'from-slate-600 to-slate-800' },
-  { slug: 'amazon', badge: 'High package', company: 'Amazon', logoSrc: `${wiki}/a/a9/Amazon_logo.svg`, logoAlt: 'Amazon logo', description: 'DSA-heavy problem sets and leadership-principle interview prep for the product track.', title: 'Amazon — Complete preparation', mcqs: '2.1k+', rounds: 5, rating: 4.8, enrolled: '14k+', hours: 20, accent: 'from-orange-500 to-amber-700' },
+  { slug: 'accenture', badge: 'Most enrolled', company: 'Accenture', type: 'CONSULTING', logoSrc: `${wiki}/c/cd/Accenture.svg`, logoAlt: 'Accenture logo', description: 'Cognitive, Technical & English tracks with adaptive section timing.', title: 'Accenture — Complete preparation', mcqs: '2.4k+', rounds: 5, rating: 4.5, enrolled: '12k+', hours: 10, accent: 'from-violet-600 to-indigo-700' },
+  { slug: 'tcs', badge: 'Recruiter-endorsed', company: 'TCS', type: 'SERVICE', logoSrc: `${wiki}/0/0e/Tata_Consultancy_Services_old_logo.svg`, logoAlt: 'TCS logo', description: 'NQT-style quant, verbal & reasoning updated to 2026 paper pattern.', title: 'TCS — Complete preparation', mcqs: '3.1k+', rounds: 5, rating: 4.6, enrolled: '25k+', hours: 12, accent: 'from-teal-600 to-emerald-700' },
+  { slug: 'infosys', badge: 'New 2026 syllabus', company: 'Infosys', type: 'SERVICE', logoSrc: `${wiki}/9/95/Infosys_logo.svg`, logoAlt: 'Infosys logo', description: 'Puzzle-heavy specialist paths with InfyTQ Power Programmer drills.', title: 'Infosys — Complete preparation', mcqs: '2.8k+', rounds: 5, rating: 4.7, enrolled: '18k+', hours: 14, accent: 'from-orange-500 to-amber-600' },
+  { slug: 'cognizant', company: 'Cognizant', type: 'SERVICE', logoSrc: `${wiki}/4/43/Cognizant_logo_2022.svg`, logoAlt: 'Cognizant logo', description: 'GenC and GenC Next tracks with game-based aptitude simulation.', title: 'Cognizant — Complete preparation', mcqs: '2.2k+', rounds: 4, rating: 4.5, enrolled: '15k+', hours: 18, accent: 'from-rose-500 to-red-600' },
+  { slug: 'capgemini', company: 'Capgemini', type: 'CONSULTING', logoSrc: `${wiki}/9/9d/Capgemini_201x_logo.svg`, logoAlt: 'Capgemini logo', description: 'Pseudocode, game-based aptitude, and communication assessment prep.', title: 'Capgemini — Complete preparation', mcqs: '2.0k+', rounds: 5, rating: 4.6, enrolled: '12k+', hours: 20, accent: 'from-sky-600 to-blue-700' },
+  { slug: 'tech-mahindra', company: 'Tech Mahindra', type: 'SERVICE', locked: true, logoSrc: `${wiki}/3/34/Tech_Mahindra_New_Logo.svg`, logoAlt: 'Tech Mahindra logo', description: 'Aptitude, coding and communication rounds for the ELCOT / campus track.', title: 'Tech Mahindra — Complete preparation', mcqs: '—', rounds: 4, rating: 4.4, enrolled: '—', hours: 0, accent: 'from-red-600 to-rose-700' },
+  { slug: 'mindtree', company: 'LTIMindtree', type: 'SERVICE', locked: true, logoSrc: `${wiki}/9/9f/LTIMindtree_Logo.svg`, logoAlt: 'LTIMindtree logo', description: 'Quant, logical reasoning and coding for the merged LTI + Mindtree hiring track.', title: 'LTIMindtree — Complete preparation', mcqs: '—', rounds: 4, rating: 4.4, enrolled: '—', hours: 0, accent: 'from-orange-500 to-pink-600' },
+  { slug: 'hcl', company: 'HCLTech', type: 'SERVICE', locked: true, logoSrc: `${wiki}/e/e5/HCLTech-new-logo.svg`, logoAlt: 'HCLTech logo', description: 'Aptitude and technical MCQs for the HCLTech TechBee / fresher drives.', title: 'HCLTech — Complete preparation', mcqs: '—', rounds: 4, rating: 4.3, enrolled: '—', hours: 0, accent: 'from-blue-600 to-indigo-700' },
+  { slug: 'ibm', company: 'IBM', type: 'CONSULTING', locked: true, logoSrc: `${wiki}/5/51/IBM_logo.svg`, logoAlt: 'IBM logo', description: 'Cognitive ability, coding and behavioural rounds for the IBM early-career track.', title: 'IBM — Complete preparation', mcqs: '—', rounds: 5, rating: 4.5, enrolled: '—', hours: 0, accent: 'from-blue-700 to-slate-800' },
 ];
 
 export const HOMEPAGE_WHY_BLOCKS = [

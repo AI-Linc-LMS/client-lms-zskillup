@@ -18,14 +18,7 @@ import {
   Trophy,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { DEMO_COMPANIES } from '@/lib/demo-data';
-import { HOMEPAGE_COMPANY_LOGOS } from '@/lib/demo-data-extra';
-
-/** Real brand logos keyed by slug, so the menu shows the company logo (not a
- *  monogram) with a graceful fallback when a logo is missing or fails to load. */
-const LOGO_BY_SLUG: Record<string, string> = Object.fromEntries(
-  HOMEPAGE_COMPANY_LOGOS.map((c) => [c.slug, c.logoSrc]),
-);
+import { HOMEPAGE_FEATURED_TRACKS } from '@/lib/demo-data-extra';
 
 /**
  * Explore mega-menu — a discovery hub that surfaces the platform's key
@@ -211,19 +204,24 @@ export function ExploreMenu() {
                 <Column className="col-span-3">
                   <SectionLabel icon={<Building2 className="size-3" />}>Top companies</SectionLabel>
                   <div className="space-y-0.5">
-                    {DEMO_COMPANIES.slice(0, 5).map((c) => (
+                    {/* The five LIVE featured companies, shared with the Explore grid and the
+                        landing tracks — not DEMO_COMPANIES.slice(0,5), which still led with
+                        Wipro after it was delisted from the featured set. */}
+                    {HOMEPAGE_FEATURED_TRACKS.filter((c) => !c.locked)
+                      .slice(0, 5)
+                      .map((c) => (
                       <Link
                         key={c.slug}
                         href={`/dashboard/company/${c.slug}`}
                         onClick={closeNow}
                         className="group flex items-center gap-3 rounded-xl border border-transparent px-2.5 py-2 transition-colors hover:border-slate-200/80 hover:bg-white hover:shadow-[0_10px_24px_-16px_rgba(11,18,32,0.5)]"
                       >
-                        <CompanyChip name={c.name} accent={c.accent} logo={LOGO_BY_SLUG[c.slug]} />
+                        <CompanyChip name={c.company} accent={c.accent} logo={c.logoSrc} />
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-sm font-semibold text-slate-700 group-hover:text-navy">
-                            {c.name}
+                            {c.company}
                           </span>
-                          <span className="block truncate text-[10px] text-slate-400">{c.tagline}</span>
+                          <span className="block truncate text-[10px] text-slate-400">{c.description}</span>
                         </span>
                         <ArrowRight className="size-3.5 shrink-0 -translate-x-1 text-orange opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
                       </Link>
