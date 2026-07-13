@@ -148,7 +148,7 @@ export function CartButton({ className }: { className?: string }) {
     >
       <ShoppingCart className="size-[18px]" />
       {cart.count > 0 && (
-        <span className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-orange px-1 text-[10px] font-bold leading-4 text-white">
+        <span className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-orange px-1 text-[10px] font-bold leading-4 text-[#171717]">
           {cart.count}
         </span>
       )}

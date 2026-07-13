@@ -123,7 +123,7 @@ export function MockInterviewHome() {
                 <p className="text-sm font-semibold text-navy">No interviews yet</p>
                 <p className="mt-0.5 text-xs text-slate-400">Start your first mock from the New tab.</p>
               </div>
-              <button onClick={() => setTab('new')} className="mt-1 inline-flex items-center gap-1.5 rounded-lg bg-orange px-4 py-2 text-xs font-bold text-white hover:bg-orange/90">
+              <button onClick={() => setTab('new')} className="mt-1 inline-flex items-center gap-1.5 rounded-lg bg-orange px-4 py-2 text-xs font-bold text-[#171717] hover:bg-orange/90">
                 <Play className="size-3.5" /> Start an interview
               </button>
             </div>
@@ -153,7 +153,7 @@ export function MockInterviewHome() {
                     {r.status === 'completed' ? (
                       <Link href={`/mock-interview/${r.id}/result`} className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50"><CheckCircle2 className="size-3.5" /> Result</Link>
                     ) : r.status === 'scheduled' || r.status === 'in_progress' ? (
-                      <Link href={`/mock-interview/${r.id}/take`} className="inline-flex items-center gap-1 rounded-lg bg-orange px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange/90"><Play className="size-3.5" /> Resume</Link>
+                      <Link href={`/mock-interview/${r.id}/take`} className="inline-flex items-center gap-1 rounded-lg bg-orange px-3 py-1.5 text-xs font-semibold text-[#171717] hover:bg-orange/90"><Play className="size-3.5" /> Resume</Link>
                     ) : null}
                     <button onClick={() => remove(r.id, r.topic)} className="rounded-lg border border-slate-200 p-1.5 text-slate-400 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-500" aria-label="Delete"><Trash2 className="size-4" /></button>
                   </div>

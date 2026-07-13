@@ -75,7 +75,7 @@ export function CourseTable() {
                   <span
                     className={cn(
                       'rounded-full px-1.5 py-px text-[10px] font-bold',
-                      tab === t.key ? 'bg-orange text-white' : 'bg-slate-100 text-slate-500',
+                      tab === t.key ? 'bg-orange text-[#171717]' : 'bg-slate-100 text-slate-500',
                     )}
                   >
                     {count}

@@ -94,7 +94,7 @@ export function StudentSupport() {
                 onClick={() => setView({ mode: 'new', category: h.category })}
                 className="group flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white p-3 text-left shadow-sm transition-all hover:border-orange/40 hover:shadow"
               >
-                <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-orange/10 text-orange transition-colors group-hover:bg-orange group-hover:text-white">
+                <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-orange/10 text-orange transition-colors group-hover:bg-orange group-hover:text-[#171717]">
                   <Icon className="size-4.5" />
                 </span>
                 <span className="text-[13px] font-semibold leading-tight text-navy">{h.label}</span>
@@ -321,7 +321,7 @@ function Thread({ id, onBack }: { id: string; onBack: () => void }) {
               placeholder="Type a reply…  (Enter to send, Shift+Enter for a new line)"
               className={cn(inputCls, 'max-h-32 resize-none')}
             />
-            <button onClick={send} disabled={sending || !reply.trim()} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-orange px-4 py-2 text-sm font-semibold text-white hover:bg-orange/90 disabled:opacity-50">
+            <button onClick={send} disabled={sending || !reply.trim()} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-orange px-4 py-2 text-sm font-semibold text-[#171717] hover:bg-orange/90 disabled:opacity-50">
               {sending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
             </button>
           </div>

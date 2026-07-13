@@ -190,7 +190,7 @@ export function StudyMaterialTab({ slug }: { slug: string }) {
         <section className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
           <div className="mb-4 flex items-center justify-between gap-3">
             <h3 className="flex items-center gap-2.5 font-display text-base font-bold text-navy">
-              <span className="grid size-7 place-items-center rounded-full bg-orange text-xs font-black text-white">
+              <span className="grid size-7 place-items-center rounded-full bg-orange text-xs font-black text-[#171717]">
                 {sectionIndex + 1}
               </span>
               {section.title}

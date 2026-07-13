@@ -94,7 +94,7 @@ export function CommandPalette() {
                           onSelect={() => go(item.href)}
                           className="group flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium text-slate-600 data-[selected=true]:bg-orange-50 data-[selected=true]:text-navy"
                         >
-                          <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-500 group-data-[selected=true]:bg-orange group-data-[selected=true]:text-white">
+                          <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-500 group-data-[selected=true]:bg-orange group-data-[selected=true]:text-[#171717]">
                             <Icon className="size-4" />
                           </span>
                           <span className="flex-1">{item.label}</span>
@@ -117,7 +117,7 @@ export function CommandPalette() {
                         onSelect={() => go(`/dashboard/company/${slug}`)}
                         className="group flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium capitalize text-slate-600 data-[selected=true]:bg-orange-50 data-[selected=true]:text-navy"
                       >
-                        <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-500 group-data-[selected=true]:bg-orange group-data-[selected=true]:text-white">
+                        <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-500 group-data-[selected=true]:bg-orange group-data-[selected=true]:text-[#171717]">
                           <Building2 className="size-4" />
                         </span>
                         <span className="flex-1">{slug === 'tcs' ? 'TCS' : slug}</span>

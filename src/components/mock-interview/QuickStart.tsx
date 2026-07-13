@@ -244,7 +244,7 @@ export function QuickStart() {
             >
               {m} min
               {m === RECOMMENDED_DURATION && (
-                <span className="absolute -right-1.5 -top-2 rounded-full bg-orange px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white shadow-sm">Best</span>
+                <span className="absolute -right-1.5 -top-2 rounded-full bg-orange px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-[#171717] shadow-sm">Best</span>
               )}
             </button>
           ))}

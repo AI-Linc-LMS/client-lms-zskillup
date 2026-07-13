@@ -509,7 +509,7 @@ function SkillsInput({ skills, onAdd, onRemove }: { skills: string[]; onAdd: (s:
           className="min-w-[8rem] flex-1 bg-transparent px-1.5 py-1 text-sm text-navy outline-none placeholder:text-slate-400"
         />
         {draft.trim() && (
-          <button type="button" onClick={commit} className="grid size-6 place-items-center rounded-full bg-orange text-white">
+          <button type="button" onClick={commit} className="grid size-6 place-items-center rounded-full bg-orange text-[#171717]">
             <Plus className="size-3.5" />
           </button>
         )}

@@ -137,7 +137,7 @@ function RoadCard({ day, phase, onSelect }: { day: DayNode; phase: StudyPhase; o
       <div className="min-w-0 flex-1">
         <p className="flex items-center gap-2">
           <span className={cn('text-[10px] font-black uppercase tracking-wide', locked ? 'text-slate-300' : meta.text)}>Day {day.dayNumber}</span>
-          {today && <span className="rounded-full bg-orange px-1.5 py-px text-[9px] font-black uppercase tracking-wide text-white shadow-sm">Today</span>}
+          {today && <span className="rounded-full bg-orange px-1.5 py-px text-[9px] font-black uppercase tracking-wide text-[#171717] shadow-sm">Today</span>}
           {isCheckpoint(day) && !locked && <span className="rounded-full bg-amber-100 px-1.5 py-px text-[9px] font-black uppercase tracking-wide text-amber-700">Checkpoint</span>}
         </p>
         <p className={cn('truncate text-sm font-bold', locked ? 'text-slate-400' : 'text-navy')}>{day.theme}</p>

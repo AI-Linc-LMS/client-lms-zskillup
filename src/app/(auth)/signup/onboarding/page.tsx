@@ -440,7 +440,7 @@ function StepBubble({ num, active, done }: { num: number; active: boolean; done:
         done
           ? 'bg-emerald-500 text-white'
           : active
-            ? 'bg-orange text-white shadow-sm'
+            ? 'bg-orange text-[#171717] shadow-sm'
             : 'bg-slate-100 text-slate-400',
       )}
     >

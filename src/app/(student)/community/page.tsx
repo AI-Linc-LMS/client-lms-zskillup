@@ -110,7 +110,7 @@ export default function CommunityPage() {
             </div>
             <button
               onClick={() => setComposerOpen(true)}
-              className="inline-flex items-center gap-2 rounded-full bg-orange px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-orange/90"
+              className="inline-flex items-center gap-2 rounded-full bg-orange px-4 py-2.5 text-sm font-bold text-[#171717] shadow-sm hover:bg-orange/90"
             >
               <PenSquare className="size-4" /> New post
             </button>
@@ -194,7 +194,7 @@ export default function CommunityPage() {
               </p>
               <button
                 onClick={() => setComposerOpen(true)}
-                className="mt-4 inline-flex items-center gap-2 rounded-full bg-orange px-4 py-2 text-sm font-bold text-white hover:bg-orange/90"
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-orange px-4 py-2 text-sm font-bold text-[#171717] hover:bg-orange/90"
               >
                 <PenSquare className="size-4" /> Create a post
               </button>

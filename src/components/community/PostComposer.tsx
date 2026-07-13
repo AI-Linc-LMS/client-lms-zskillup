@@ -161,7 +161,7 @@ export function PostComposer({
               <button
                 onClick={submit}
                 disabled={saving}
-                className="inline-flex items-center gap-2 rounded-lg bg-orange px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-orange/90 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg bg-orange px-4 py-2 text-sm font-bold text-[#171717] shadow-sm hover:bg-orange/90 disabled:opacity-50"
               >
                 {saving ? <Loader2 className="size-4 animate-spin" /> : null} Post
               </button>

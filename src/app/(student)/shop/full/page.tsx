@@ -282,7 +282,7 @@ export default function FullPlatformPage() {
               <button
                 type="button"
                 onClick={proceed}
-                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-orange px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:brightness-105"
+                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-orange px-5 py-3 text-sm font-bold text-[#171717] shadow-sm transition hover:brightness-105"
               >
                 {hasPlatform ? (
                   <>

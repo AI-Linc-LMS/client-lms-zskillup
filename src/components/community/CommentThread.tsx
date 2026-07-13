@@ -142,7 +142,7 @@ function CommentItem({
               <button
                 onClick={submitReply}
                 disabled={busy || !replyText.trim()}
-                className="rounded-full bg-orange px-3 py-1.5 text-xs font-bold text-white hover:bg-orange/90 disabled:opacity-50"
+                className="rounded-full bg-orange px-3 py-1.5 text-xs font-bold text-[#171717] hover:bg-orange/90 disabled:opacity-50"
               >
                 {busy ? <Loader2 className="size-3.5 animate-spin" /> : 'Reply'}
               </button>

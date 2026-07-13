@@ -178,7 +178,7 @@ export function SessionComposer({
 
             <div className="flex items-center justify-end gap-2 border-t border-slate-100 px-5 py-4">
               <button onClick={onClose} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100">Cancel</button>
-              <button onClick={submit} disabled={saving} className="inline-flex items-center gap-2 rounded-lg bg-orange px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-orange/90 disabled:opacity-50">
+              <button onClick={submit} disabled={saving} className="inline-flex items-center gap-2 rounded-lg bg-orange px-4 py-2 text-sm font-bold text-[#171717] shadow-sm hover:bg-orange/90 disabled:opacity-50">
                 {saving ? <Loader2 className="size-4 animate-spin" /> : null} {editing ? 'Save changes' : 'Schedule & notify'}
               </button>
             </div>

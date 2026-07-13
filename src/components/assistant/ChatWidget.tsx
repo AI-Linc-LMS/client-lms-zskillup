@@ -129,7 +129,7 @@ export function ChatWidget() {
                 <div
                   className={
                     m.role === 'user'
-                      ? 'max-w-[82%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-orange px-3.5 py-2 text-sm font-medium text-white'
+                      ? 'max-w-[82%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-orange px-3.5 py-2 text-sm font-medium text-[#171717]'
                       : 'max-w-[85%] rounded-2xl rounded-bl-md border border-slate-200 bg-white px-3.5 py-2 text-sm leading-relaxed text-slate-700 shadow-sm'
                   }
                 >
@@ -193,7 +193,7 @@ export function ChatWidget() {
               type="submit"
               disabled={busy || input.trim().length === 0}
               aria-label="Send"
-              className="grid size-10 shrink-0 place-items-center rounded-full bg-orange text-white transition hover:brightness-105 disabled:opacity-50"
+              className="grid size-10 shrink-0 place-items-center rounded-full bg-orange text-[#171717] transition hover:brightness-105 disabled:opacity-50"
             >
               {busy ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
             </button>

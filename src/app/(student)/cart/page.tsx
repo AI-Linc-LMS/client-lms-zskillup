@@ -236,7 +236,7 @@ export default function CartPage() {
                   type="button"
                   onClick={() => void checkout()}
                   disabled={busy || total === 0}
-                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-orange px-5 py-3.5 text-base font-bold text-white transition hover:brightness-105 disabled:opacity-60"
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-orange px-5 py-3.5 text-base font-bold text-[#171717] transition hover:brightness-105 disabled:opacity-60"
                 >
                   {busy ? <Loader2 className="size-5 animate-spin" /> : <Lock className="size-5" />}
                   {busy ? 'Opening checkout…' : 'Proceed to Payment'}

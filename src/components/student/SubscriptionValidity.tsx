@@ -87,7 +87,7 @@ export function SubscriptionValidity() {
           </p>
           <Link
             href="/upgrade"
-            className="mt-2 flex items-center justify-center gap-1.5 rounded-xl bg-orange px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-orange/90"
+            className="mt-2 flex items-center justify-center gap-1.5 rounded-xl bg-orange px-3 py-1.5 text-xs font-bold text-[#171717] transition-colors hover:bg-orange/90"
           >
             <RefreshCw className="size-3.5" /> Renew now
           </Link>

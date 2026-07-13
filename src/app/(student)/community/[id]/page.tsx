@@ -217,7 +217,7 @@ export default function CommunityPostPage({ params }: { params: Promise<{ id: st
         <button
           onClick={submitComment}
           disabled={posting || !comment.trim()}
-          className="inline-flex items-center gap-1.5 rounded-full bg-orange px-4 py-2 text-sm font-bold text-white hover:bg-orange/90 disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-full bg-orange px-4 py-2 text-sm font-bold text-[#171717] hover:bg-orange/90 disabled:opacity-50"
         >
           {posting ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />} Post
         </button>

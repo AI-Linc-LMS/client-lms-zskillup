@@ -80,7 +80,7 @@ export function InterviewResult({ id }: { id: string }) {
     return (
       <div className="py-16 text-center">
         <p className="text-sm text-slate-500">This interview isn&apos;t finished yet.</p>
-        <Link href={`/mock-interview/${id}/take`} className="mt-3 inline-block rounded-lg bg-orange px-4 py-2 text-sm font-semibold text-white">Resume interview</Link>
+        <Link href={`/mock-interview/${id}/take`} className="mt-3 inline-block rounded-lg bg-orange px-4 py-2 text-sm font-semibold text-[#171717]">Resume interview</Link>
       </div>
     );
   }

@@ -790,7 +790,7 @@ function MockRunningView({
                       isSelected ? 'border-orange bg-orange/5 text-navy' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
                     )}
                   >
-                    <span className={cn('grid size-7 shrink-0 place-items-center rounded-full text-xs font-bold', isSelected ? 'bg-orange text-white' : 'bg-slate-100 text-slate-500')}>
+                    <span className={cn('grid size-7 shrink-0 place-items-center rounded-full text-xs font-bold', isSelected ? 'bg-orange text-[#171717]' : 'bg-slate-100 text-slate-500')}>
                       {String.fromCharCode(65 + i)}
                     </span>
                     <span className="flex-1">{opt.text}</span>

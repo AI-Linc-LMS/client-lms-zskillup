@@ -194,7 +194,7 @@ function Player({
             disabled={busy}
             className={cn(
               'ml-auto inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition',
-              item.done ? 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30' : 'bg-orange text-white hover:bg-orange/90',
+              item.done ? 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30' : 'bg-orange text-[#171717] hover:bg-orange/90',
             )}
           >
             {busy ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
