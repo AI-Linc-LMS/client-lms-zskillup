@@ -1,4 +1,4 @@
-import { BookOpen, Brain, Calculator, Code2, Cpu, Layers } from 'lucide-react';
+import { BookOpen, Brain, Calculator, Code2, Cpu, Layers, Users } from 'lucide-react';
 
 /**
  * Shared section presentation metadata, keyed by the REAL root-topic slugs in the
@@ -26,12 +26,14 @@ export interface SectionMeta {
   order: number;
 }
 
-/** The four MCQ sections, in the canonical order the client requested. */
+/** The four MCQ sections + the Coding and Soft-Skills sections (Sectional Hubs). */
 export const SECTION_META: Record<string, SectionMeta> = {
   'section-1-numerical-ability': { icon: Calculator, accent: 'sky', order: 1 },
   'section-2-logical-reasoning': { icon: Brain, accent: 'orange', order: 2 },
   'section-3-verbal-ability': { icon: BookOpen, accent: 'violet', order: 3 },
   'section-4-technical-mcqs': { icon: Cpu, accent: 'emerald', order: 4 },
+  coding: { icon: Code2, accent: 'indigo', order: 5 },
+  'section-5-interview-preparation': { icon: Users, accent: 'amber', order: 6 },
 };
 
 /** Coding is section 5 — a separate Judge0 system, so it renders synthetically. */
@@ -79,6 +81,16 @@ export const SECTION_DESCRIPTORS: Record<string, SectionDescriptor> = {
     category: 'Technical',
     difficulty: 'Hard',
     tagline: 'Core CS fundamentals, programming and technical concepts.',
+  },
+  coding: {
+    category: 'Programming',
+    difficulty: 'Hard',
+    tagline: 'Solve Judge0-evaluated DSA problems across data structures and algorithms.',
+  },
+  'section-5-interview-preparation': {
+    category: 'Soft Skills',
+    difficulty: 'Easy',
+    tagline: 'HR, behavioural and technical interview prep — communication and confidence.',
   },
 };
 export function sectionDescriptorFor(slug: string): SectionDescriptor {

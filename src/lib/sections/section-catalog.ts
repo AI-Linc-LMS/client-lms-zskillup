@@ -36,10 +36,24 @@ export interface SectionTopic {
   subtopics: SectionSubtopic[];
 }
 
+/**
+ * What kind of section this is — drives the practice link + ownership scope:
+ * - `mcq`         standard bank-root section (adaptive MCQ practice)
+ * - `coding`      synthetic section over the Judge0 coding bank (practice at /coding)
+ * - `soft-skills` an interview-prep root (topic tree, content authored as study material)
+ */
+export type SectionKind = 'mcq' | 'coding' | 'soft-skills';
+
+/** The interview-prep root repurposed as the "Soft Skills & Interview Prep" section. */
+export const SOFT_SKILLS_ROOT = 'section-5-interview-preparation';
+/** Synthetic slug for the coding section (Judge0 bank, not a bank topic root). */
+export const CODING_SECTION_SLUG = 'coding';
+
 export interface SectionRoot {
   slug: string;
   name: string;
   order: number;
+  kind: SectionKind;
   /** Rolled-up published-question count for the whole section. */
   questionCount: number;
   /** Number of mid-level topics under the section. */
@@ -89,6 +103,7 @@ export function buildSections(topics: ApiTopic[]): SectionRoot[] {
         slug: r.slug,
         name: r.name,
         order: orderFor(r.slug, index),
+        kind: 'mcq' as SectionKind,
         questionCount: r.questionCount ?? 0,
         topicCount: topicNodes.length,
         topics: topicNodes,
@@ -101,6 +116,55 @@ export function buildSections(topics: ApiTopic[]): SectionRoot[] {
     .filter((s) => s.topicCount > 0);
 
   return roots.sort((a, b) => a.order - b.order);
+}
+
+/** Build the whole tree for ONE root slug, ignoring the question-count filter — used
+ *  for the Soft Skills / Interview-Prep root, which has topics but no MCQ questions
+ *  yet (its content lives as authored study material). Returns null if not found. */
+export function buildSoftSkillsSection(topics: ApiTopic[], name = 'Soft Skills & Interview Prep'): SectionRoot | null {
+  const root = topics.find((t) => t.parentId === null && t.slug === SOFT_SKILLS_ROOT);
+  if (!root) return null;
+  const byParent = new Map<string, ApiTopic[]>();
+  for (const t of topics) {
+    const key = t.parentId ?? '__root__';
+    (byParent.get(key) ?? byParent.set(key, []).get(key)!).push(t);
+  }
+  const childrenOf = (id: string) => byParent.get(id) ?? [];
+  const topicNodes = childrenOf(root.id).map((topic): SectionTopic => ({
+    slug: topic.slug,
+    name: topic.name,
+    questionCount: topic.questionCount ?? 0,
+    subtopics: childrenOf(topic.id).map((s) => ({ slug: s.slug, name: s.name, questionCount: s.questionCount ?? 0 })),
+  }));
+  return {
+    slug: root.slug,
+    name,
+    order: 6,
+    kind: 'soft-skills',
+    questionCount: root.questionCount ?? 0,
+    topicCount: topicNodes.length,
+    topics: topicNodes,
+  };
+}
+
+/** Build a synthetic Coding section from the Judge0 coding-topic list (each topic is
+ *  a primary tag). Practice deep-links to /coding; there is no MCQ subtree. */
+export function buildCodingSection(codingTopics: Array<{ topic: string; count: number }>): SectionRoot {
+  const topicNodes: SectionTopic[] = codingTopics.map((t) => ({
+    slug: t.topic,
+    name: t.topic,
+    questionCount: t.count,
+    subtopics: [],
+  }));
+  return {
+    slug: CODING_SECTION_SLUG,
+    name: 'Programming / Coding',
+    order: 5,
+    kind: 'coding',
+    questionCount: codingTopics.reduce((n, t) => n + t.count, 0),
+    topicCount: topicNodes.length,
+    topics: topicNodes,
+  };
 }
 
 /** Resolve one section's full tree by its root slug (null when unknown/empty). */

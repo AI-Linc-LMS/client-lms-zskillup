@@ -118,6 +118,18 @@ export function SectionHub({ section }: { section: SectionRoot }) {
   const Icon = meta.icon;
   const tone = ACCENT_CLASS[meta.accent];
 
+  // Coding is a separate Judge0 system: it practises at /coding and its TOPIC
+  // entitlement scope is `coding:<tag>` (not the bare slug).
+  const isCoding = section.kind === 'coding';
+  const scopeRefFor = useCallback((slug: string) => (isCoding ? `coding:${slug}` : slug), [isCoding]);
+  const practiceHref = useCallback(
+    (slug: string) =>
+      isCoding
+        ? `/coding?topic=${encodeURIComponent(slug)}`
+        : `/dashboard/quiz/adaptive?topic=${encodeURIComponent(slug)}`,
+    [isCoding],
+  );
+
   const leaves = useMemo(() => sectionLeaves(section), [section]);
   const acc = useSectionAccuracy(leaves);
 
@@ -138,8 +150,8 @@ export function SectionHub({ section }: { section: SectionRoot }) {
     [active],
   );
   const topicOwned = useCallback(
-    (slug: string) => ownedSection || ownedTopics.has(slug),
-    [ownedSection, ownedTopics],
+    (slug: string) => ownedSection || ownedTopics.has(scopeRefFor(slug)),
+    [ownedSection, ownedTopics, scopeRefFor],
   );
 
   const priceMap = useMemo(() => buildPriceMap(prices), [prices]);
@@ -154,10 +166,11 @@ export function SectionHub({ section }: { section: SectionRoot }) {
 
   const addTopic = useCallback(
     (leaf: SectionLeaf) => {
-      if (!cart || cart.has(EntitlementScope.TOPIC, leaf.slug)) return;
+      const ref = scopeRefFor(leaf.slug);
+      if (!cart || cart.has(EntitlementScope.TOPIC, ref)) return;
       cart.add({
         scope: EntitlementScope.TOPIC,
-        scopeRef: leaf.slug,
+        scopeRef: ref,
         period: BillingPeriod.MONTHLY,
         label: leaf.name,
       });
@@ -165,7 +178,7 @@ export function SectionHub({ section }: { section: SectionRoot }) {
         description: 'Change the plan length any time in your cart.',
       });
     },
-    [cart],
+    [cart, scopeRefFor],
   );
   const addSection = useCallback(() => {
     if (!cart || cart.has(EntitlementScope.SECTION, section.slug)) return;
@@ -195,7 +208,7 @@ export function SectionHub({ section }: { section: SectionRoot }) {
     [router, pathname, searchParams],
   );
 
-  const firstPracticeHref = leaves[0] ? `/dashboard/quiz/adaptive?topic=${encodeURIComponent(leaves[0].slug)}` : '/practice';
+  const firstPracticeHref = leaves[0] ? practiceHref(leaves[0].slug) : isCoding ? '/coding' : '/practice';
 
   return (
     <div className="w-full">
@@ -278,7 +291,9 @@ export function SectionHub({ section }: { section: SectionRoot }) {
                 firstPracticeHref={firstPracticeHref}
               />
             )}
-            {tab === 'Syllabus' && <SyllabusTab section={section} topicOwned={topicOwned} />}
+            {tab === 'Syllabus' && (
+              <SyllabusTab section={section} topicOwned={topicOwned} practiceHref={practiceHref} />
+            )}
             {tab === 'Study Material' && (
               <StudyMaterialTab slug={section.slug} scope="section" gate={upgrade.guard} />
             )}
@@ -289,7 +304,8 @@ export function SectionHub({ section }: { section: SectionRoot }) {
                 topicOwned={topicOwned}
                 topicPrice={topicPrice}
                 onAddTopic={addTopic}
-                cartHas={(slug) => !!cart?.has(EntitlementScope.TOPIC, slug)}
+                practiceHref={practiceHref}
+                cartHas={(slug) => !!cart?.has(EntitlementScope.TOPIC, scopeRefFor(slug))}
               />
             )}
           </motion.div>
@@ -808,9 +824,11 @@ function OverviewTab({
 function SyllabusTab({
   section,
   topicOwned,
+  practiceHref,
 }: {
   section: SectionRoot;
   topicOwned: (slug: string) => boolean;
+  practiceHref: (slug: string) => string;
 }) {
   return (
     <Reveal>
@@ -850,7 +868,7 @@ function SyllabusTab({
                             </span>
                           ) : (
                             <Link
-                              href={`/dashboard/quiz/adaptive?topic=${encodeURIComponent(s.slug)}`}
+                              href={practiceHref(s.slug)}
                               className="shrink-0 text-[11px] font-bold text-orange hover:text-[#d9610f]"
                             >
                               Practise →
@@ -876,6 +894,7 @@ function PracticeTab({
   topicOwned,
   topicPrice,
   onAddTopic,
+  practiceHref,
   cartHas,
 }: {
   section: SectionRoot;
@@ -883,6 +902,7 @@ function PracticeTab({
   topicOwned: (slug: string) => boolean;
   topicPrice: string | null;
   onAddTopic: (leaf: SectionLeaf) => void;
+  practiceHref: (slug: string) => string;
   cartHas: (slug: string) => boolean;
 }) {
   const leaves = useMemo(() => sectionLeaves(section), [section]);
@@ -955,7 +975,7 @@ function PracticeTab({
                     )}
 
                     <Link
-                      href={`/dashboard/quiz/adaptive?topic=${encodeURIComponent(leaf.slug)}`}
+                      href={practiceHref(leaf.slug)}
                       className="inline-flex shrink-0 items-center gap-1 rounded-full bg-navy px-3 py-1.5 text-xs font-bold text-white transition hover:bg-navy/90"
                     >
                       Practise <ArrowRight className="size-3.5" />

@@ -5,7 +5,13 @@ import { Layers, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { SectionCard } from './SectionCard';
 import { listTopicsWithCounts } from '@/lib/api/catalog';
-import { buildSections, type SectionRoot } from '@/lib/sections/section-catalog';
+import { listCodingTopics } from '@/lib/api/mocks';
+import {
+  buildCodingSection,
+  buildSections,
+  buildSoftSkillsSection,
+  type SectionRoot,
+} from '@/lib/sections/section-catalog';
 import { useMySubscription } from '@/hooks/useMySubscription';
 import { getPricing } from '@/lib/api/payments';
 import { formatPrice } from '@/lib/api/subscriptions';
@@ -53,10 +59,16 @@ export function SectionsExplorer() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    listTopicsWithCounts()
-      .then((topics) => {
+    // The 4 MCQ sections come from the bank; Coding is synthetic (Judge0 topic list),
+    // and Soft Skills is the interview-prep root. Coding topics failing shouldn't drop
+    // the whole grid, so tolerate an empty coding list.
+    Promise.all([listTopicsWithCounts(), listCodingTopics().catch(() => [])])
+      .then(([topics, codingTopics]) => {
         if (cancelled) return;
-        setSections(buildSections(topics));
+        const mcq = buildSections(topics);
+        const coding = codingTopics.length ? [buildCodingSection(codingTopics)] : [];
+        const soft = buildSoftSkillsSection(topics);
+        setSections([...mcq, ...coding, ...(soft ? [soft] : [])].sort((a, b) => a.order - b.order));
       })
       .catch(() => {
         if (!cancelled) setSections([]);
