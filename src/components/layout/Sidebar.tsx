@@ -24,6 +24,7 @@ import {
   navForPath,
   PROFILE_GATED_HREFS,
   CALIBRATION_GATED_HREFS,
+  PREMIUM_GATED_HREFS,
   PLAN_ONLY_HREFS,
   type NavItem,
 } from './nav-config';
@@ -99,7 +100,8 @@ export function Sidebar() {
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
   const isLocked = (href: string) =>
     (calibrationRequired && CALIBRATION_GATED_HREFS.has(href)) ||
-    (!profileComplete && PROFILE_GATED_HREFS.has(href));
+    (!profileComplete && PROFILE_GATED_HREFS.has(href)) ||
+    (planStatus === 'none' && PREMIUM_GATED_HREFS.has(href));
 
   // Collapsible accordion sidebar for EVERY role (student / admin / super-admin) —
   // sections expand on click, multi-open, with the active section open by default.

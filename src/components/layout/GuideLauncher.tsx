@@ -7,7 +7,8 @@ import { Compass, HelpCircle, MousePointerClick } from 'lucide-react';
 import { useOptionalGuide } from '@/components/guide/GuideProvider';
 import { useProfileCompletion } from '@/hooks/useProfileCompletion';
 import { useCalibrationStatus } from '@/hooks/useCalibrationStatus';
-import { CALIBRATION_GATED_HREFS, PROFILE_GATED_HREFS } from './nav-config';
+import { useMySubscription } from '@/hooks/useMySubscription';
+import { CALIBRATION_GATED_HREFS, PROFILE_GATED_HREFS, PREMIUM_GATED_HREFS } from './nav-config';
 
 /**
  * Top-bar "?" launcher for the platform guide. Opens a small popover: replay the
@@ -20,6 +21,7 @@ export function GuideLauncher() {
   const pathname = usePathname();
   const { complete: profileComplete } = useProfileCompletion();
   const { required: calibrationRequired } = useCalibrationStatus();
+  const { planStatus } = useMySubscription(true);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -27,7 +29,8 @@ export function GuideLauncher() {
   // is actually unlocked — otherwise it would spotlight the blurred lock overlay.
   const pageLocked =
     (calibrationRequired && CALIBRATION_GATED_HREFS.has(pathname)) ||
-    (!profileComplete && PROFILE_GATED_HREFS.has(pathname));
+    (!profileComplete && PROFILE_GATED_HREFS.has(pathname)) ||
+    (planStatus === 'none' && PREMIUM_GATED_HREFS.has(pathname));
 
   useEffect(() => {
     if (!open) return;
