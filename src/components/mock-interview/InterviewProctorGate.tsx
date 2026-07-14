@@ -109,7 +109,7 @@ function IntroGate({ onStart, starting }: { onStart: () => void; starting: boole
   return (
     <div className="mx-auto max-w-lg py-6">
       <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <div className="relative bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-7 text-white">
+        <div className="relative bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0a0a0c] p-7 text-white">
           <span aria-hidden className="pointer-events-none absolute -right-8 -top-12 size-44 rounded-full bg-orange/20 blur-3xl" />
           <span className="relative inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-orange ring-1 ring-inset ring-white/15">
             <ShieldCheck className="size-3.5" /> Proctored session

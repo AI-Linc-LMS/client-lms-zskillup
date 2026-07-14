@@ -58,7 +58,7 @@ export const CERT_THEMES: Record<number, CertTheme> = {
   },
   4: {
     ...T(4), dark: true, metalLabel: 'Bronze',
-    bg: 'radial-gradient(130% 150% at 50% -10%, #23324f 0%, #16223f 45%, #0b1220 100%)',
+    bg: 'radial-gradient(130% 150% at 50% -10%, #23324f 0%, #16223f 45%, #0a0a0c 100%)',
     ink: '#f6f8fc', sub: '#aebbd2', faint: '#4a5c7a',
     accent: '#f0a844', accentDeep: '#c77d1e',
     metal: '#c98a3c', metalDeep: '#8a5a1e', metalInk: '#fff5e2',

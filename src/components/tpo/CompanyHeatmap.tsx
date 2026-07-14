@@ -51,7 +51,7 @@ export function CompanyHeatmap({ rows }: { rows: TpoCompanyHeatmapRow[] }) {
                         style={{
                           background: count > 0 ? BAND_COLORS[i] : '#f8fafc',
                           opacity: count > 0 ? intensity : 1,
-                          color: count === 0 ? '#cbd5e1' : strong ? 'white' : '#0b1220',
+                          color: count === 0 ? '#cbd5e1' : strong ? 'white' : '#0a0a0c',
                         }}
                         title={`${count} student${count === 1 ? '' : 's'} · ${BAND_LABELS[i]} on ${r.name}`}
                       >

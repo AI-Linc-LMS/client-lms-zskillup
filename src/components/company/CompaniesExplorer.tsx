@@ -185,7 +185,7 @@ export function CompaniesExplorer() {
                     <motion.span
                       layoutId="company-type-pill"
                       aria-hidden
-                      className="absolute inset-0 rounded-full bg-gradient-to-b from-[#1f2d4d] to-[#0b1220] shadow-[0_8px_18px_-8px_rgba(11,18,32,0.7)]"
+                      className="absolute inset-0 rounded-full bg-gradient-to-b from-[#1f2d4d] to-[#0a0a0c] shadow-[0_8px_18px_-8px_rgba(11,18,32,0.7)]"
                       transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                     />
                   )}

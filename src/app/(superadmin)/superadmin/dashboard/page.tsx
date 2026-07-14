@@ -38,7 +38,7 @@ export default function SuperAdminDashboardPage() {
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Super Admin Dashboard' }]} />
 
       {/* Gradient hero */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0b1220] via-[#101d4a] to-[#1e3a8a] p-7 text-white sm:p-9">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] p-7 text-white sm:p-9">
         {/* glow + grid */}
         <div aria-hidden className="pointer-events-none absolute -left-20 -top-24 size-64 rounded-full bg-[#ffc42d]/25 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute -bottom-28 right-0 size-72 rounded-full bg-white/[0.06] blur-3xl" />

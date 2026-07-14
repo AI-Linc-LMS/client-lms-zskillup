@@ -121,7 +121,7 @@ export function GamifiedShowcase() {
         };
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-[#0b1220] via-[#101d4a] to-[#1e3a8a] py-16 text-white lg:py-24">
+    <section className="relative overflow-hidden bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] py-16 text-white lg:py-24">
       {/* ── animated backdrop ── */}
       <motion.div
         aria-hidden

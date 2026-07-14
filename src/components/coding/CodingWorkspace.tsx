@@ -257,7 +257,7 @@ export function CodingWorkspace({ slug }: { slug: string }) {
 
         {/* ── Editor + controls + results ─────────────────────────── */}
         <section className="flex flex-col gap-4">
-          <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-[#0b1220] shadow-sm">
+          <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-[#0a0a0c] shadow-sm">
             <div className="flex items-center justify-between gap-3 border-b border-white/5 px-3 py-2">
               <select
                 value={lang}
@@ -376,7 +376,7 @@ function ResultPanel({ result }: { result: CodingResult }) {
       ) : null}
 
       {result.compileOutput ? (
-        <pre className="mt-3 max-h-44 overflow-auto rounded-lg bg-[#0b1220] p-3 text-xs leading-relaxed text-rose-300">
+        <pre className="mt-3 max-h-44 overflow-auto rounded-lg bg-[#0a0a0c] p-3 text-xs leading-relaxed text-rose-300">
           {result.compileOutput}
         </pre>
       ) : null}
@@ -424,7 +424,7 @@ function ResultPanel({ result }: { result: CodingResult }) {
                   <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-rose-400">
                     Runtime error / stderr
                   </p>
-                  <pre className="max-h-28 overflow-auto rounded-md bg-[#0b1220] p-2 text-[11px] text-rose-300">
+                  <pre className="max-h-28 overflow-auto rounded-md bg-[#0a0a0c] p-2 text-[11px] text-rose-300">
                     {c.stderr}
                   </pre>
                 </div>

@@ -91,7 +91,7 @@ export function QuadrantScatter({
             r={on ? 6 : 4}
             fill={BAND_DOT[s.band]}
             opacity={on ? 1 : 0.72}
-            stroke={on ? '#0b1220' : 'white'}
+            stroke={on ? '#0a0a0c' : 'white'}
             strokeWidth={on ? 1.5 : 0.5}
             className="cursor-pointer transition-[r]"
             onMouseEnter={() => setHoverId(s.id)}
@@ -106,7 +106,7 @@ export function QuadrantScatter({
       {/* In-SVG tooltip for the hovered dot */}
       {hovered && (
         <g pointerEvents="none" transform={`translate(${Math.min(x(hovered.participation) + 10, W - 190)}, ${Math.max(y(hovered.readiness) - 34, PAD.t)})`}>
-          <rect width={180} height={30} rx={6} fill="#0b1220" opacity={0.92} />
+          <rect width={180} height={30} rx={6} fill="#0a0a0c" opacity={0.92} />
           <text x={8} y={13} fontSize="10" fontWeight="700" fill="white">{hovered.name ?? hovered.email}</text>
           <text x={8} y={24} fontSize="9" fill="#cbd5e1">{`${hovered.readiness}% readiness · ${hovered.participation} participation`}</text>
         </g>

@@ -59,7 +59,7 @@ export function PublicMobileMenu() {
             onClick={() => setOpen(false)}
             aria-hidden
           />
-          <div className="absolute left-0 right-0 top-full z-50 border-b border-white/10 bg-[#0b1220] px-5 py-4 shadow-xl">
+          <div className="absolute left-0 right-0 top-full z-50 border-b border-white/10 bg-[#0a0a0c] px-5 py-4 shadow-xl">
             <nav className="flex flex-col gap-1" aria-label="Primary">
               {LINKS.map((l) => (
                 <Link

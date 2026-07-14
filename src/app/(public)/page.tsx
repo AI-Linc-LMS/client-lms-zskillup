@@ -163,7 +163,7 @@ export default async function HomePage() {
     <main className="min-h-screen overflow-x-hidden bg-white text-[var(--color-text)]">
 
       {/* ── Public Navbar ─────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-white/10 bg-gradient-to-r from-[#0b1220] to-[#1e3a8a] px-5 md:px-8">
+      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-white/10 bg-gradient-to-r from-[#0a0a0c] to-[#141a2e] px-5 md:px-8">
         <BrandLogo variant="light" priority className="h-8" />
         <nav className="hidden items-center gap-6 lg:flex" aria-label="Primary">
           {/* Keyed by label, not href: two links legitimately CAN share a destination, and
@@ -187,7 +187,7 @@ export default async function HomePage() {
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden">
         {/* Dark navy gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0b1220] via-[#101d4a] to-[#1e3a8a]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e]" />
         {/* Glow orbs */}
         <div aria-hidden className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-white/[0.08] blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute -bottom-32 -right-24 h-96 w-96 rounded-full bg-[#f5b400]/20 blur-3xl" />
@@ -267,7 +267,7 @@ export default async function HomePage() {
           <div className="relative hidden flex-col justify-center gap-6 lg:flex">
             {/* Card 1 - course card */}
             <div className="float-card-1 w-[19rem] self-start overflow-hidden rounded-2xl border border-white/15 bg-white shadow-2xl">
-              <div className="relative flex h-24 items-center justify-center bg-gradient-to-br from-[#1d4ed8] to-[#0b1220]">
+              <div className="relative flex h-24 items-center justify-center bg-gradient-to-br from-[#1d4ed8] to-[#0a0a0c]">
                 <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-md bg-[#1d4ed8] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-white shadow">
                   Most enrolled
                 </span>
@@ -688,7 +688,7 @@ export default async function HomePage() {
       <HomeBlogSection posts={blogs.slice(0, 3)} />
 
       {/* ── Final CTA ─────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#0b1220] via-[#101d4a] to-[#1e3a8a] py-16 text-white lg:py-24">
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] py-16 text-white lg:py-24">
         <div aria-hidden className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-[#f5b400]/30 blur-3xl" />
         <div aria-hidden className="absolute -right-24 -bottom-24 h-72 w-72 rounded-full bg-white/[0.08] blur-3xl" />
         <div className="relative mx-auto max-w-3xl px-5 text-center md:px-8">
