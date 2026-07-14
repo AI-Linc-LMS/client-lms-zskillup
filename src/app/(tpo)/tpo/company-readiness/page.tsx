@@ -52,7 +52,7 @@ export default function CompanyReadinessPage() {
 
       <BentoCard
         title="Company Readiness Heatmap"
-        subtitle="How your students are distributed across accuracy bands, per recruiter."
+        subtitle="How your students are distributed across readiness bands, per recruiter."
         source="Company-tagged practice accuracy"
       >
         <CompanyHeatmap rows={heatmap?.rows ?? []} />
