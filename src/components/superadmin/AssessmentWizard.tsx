@@ -18,7 +18,12 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ApiRequestError } from '@/lib/api/types';
-import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
+import { listCompanies, listTopicsWithCounts, type ApiCompany, type ApiTopic } from '@/lib/api/catalog';
+import { listCodingTopics, type CodingTopic } from '@/lib/api/mocks';
+import { listAdminColleges, type AdminCollegeRow } from '@/lib/api/admin';
+import { getCollegeCohorts } from '@/lib/api/admin-cohorts';
+import { HIDDEN_ROOT_SLUGS } from '@/components/practice/section-meta';
+import type { CohortDto } from '@/shared';
 import {
   createAssessment,
   generateOne,
@@ -84,12 +89,20 @@ export function AssessmentWizard({
 
   // details
   const [companyId, setCompanyId] = useState('');
+  const [collegeId, setCollegeId] = useState('');
+  const [cohortId, setCohortId] = useState('');
   const [title, setTitle] = useState('');
   const [startAt, setStartAt] = useState('');
   const [endAt, setEndAt] = useState('');
   const [durationMinutes, setDurationMinutes] = useState(60);
   const [proctored, setProctored] = useState(true);
   const [passingScore, setPassingScore] = useState(60);
+
+  // pickers: MCQ taxonomy, coding tags, colleges + the selected college's cohorts
+  const [topics, setTopics] = useState<ApiTopic[]>([]);
+  const [codingTopics, setCodingTopics] = useState<CodingTopic[]>([]);
+  const [colleges, setColleges] = useState<AdminCollegeRow[]>([]);
+  const [cohorts, setCohorts] = useState<CohortDto[]>([]);
 
   // sections
   const [sections, setSections] = useState<Section[]>([{ name: 'Section 1', items: [] }]);
@@ -101,7 +114,43 @@ export function AssessmentWizard({
 
   useEffect(() => {
     listCompanies().then(setCompanies).catch(() => {});
+    listTopicsWithCounts().then(setTopics).catch(() => {});
+    listCodingTopics().then(setCodingTopics).catch(() => {});
+    listAdminColleges().then(setColleges).catch(() => {});
   }, []);
+
+  // Load the selected college's cohorts (for the cohort-wise scope selector).
+  useEffect(() => {
+    if (!collegeId) {
+      setCohorts([]);
+      setCohortId('');
+      return;
+    }
+    let alive = true;
+    getCollegeCohorts(collegeId)
+      .then((cs) => alive && setCohorts(cs))
+      .catch(() => alive && setCohorts([]));
+    return () => {
+      alive = false;
+    };
+  }, [collegeId]);
+
+  /** MCQ picker options grouped by section (root topic) — pick a whole section or a
+   *  specific topic; the backend samples the whole subtree by id. */
+  const topicGroups = useMemo(() => {
+    const roots = topics.filter((t) => t.parentId === null && !HIDDEN_ROOT_SLUGS.has(t.slug) && (t.questionCount ?? 0) > 0);
+    return roots
+      .map((r) => ({
+        label: r.name,
+        options: [
+          { id: r.id, name: `${r.name} — whole section`, count: r.questionCount ?? 0 },
+          ...topics
+            .filter((c) => c.parentId === r.id && (c.questionCount ?? 0) > 0)
+            .map((c) => ({ id: c.id, name: c.name, count: c.questionCount ?? 0 })),
+        ],
+      }))
+      .filter((g) => g.options.length > 0);
+  }, [topics]);
 
   // Edit mode: prefill from the existing assessment.
   useEffect(() => {
@@ -151,10 +200,11 @@ export function AssessmentWizard({
     count: number,
     difficulty: Difficulty,
     marks: number,
+    topicId?: string,
   ) => {
     setGen({ sectionIdx, topic, type, difficulty, marks, requested: count, phase: 'sourcing', bankCount: 0, labels: [] });
     try {
-      const sourced = await sourceTopic(topic, type, count);
+      const sourced = await sourceTopic(topic, type, count, { topicId, difficulty });
       const ids = sourced.fromBank.map((b) => b.id);
       const labels = sourced.fromBank.map((b) => b.label);
       const willGen = sourced.aiAvailable ? sourced.toGenerate : 0;
@@ -241,6 +291,8 @@ export function AssessmentWizard({
       } else {
         const result = await createAssessment({
           companyId: companyArg,
+          collegeId: collegeId || undefined,
+          cohortId: cohortId || undefined,
           title: title.trim(),
           scheduledAt: new Date(startAt).toISOString(),
           endsAt: new Date(endAt).toISOString(),
@@ -325,6 +377,33 @@ export function AssessmentWizard({
                   {companies.map((c) => <option key={c.id} value={c.id}>{c.name} drive</option>)}
                 </select>
               </label>
+
+              {/* Cohort-wise scope: optionally restrict the drive to one college / batch. */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block">
+                  <span className={labelCls}>College (optional)</span>
+                  <select value={collegeId} onChange={(e) => setCollegeId(e.target.value)} className={inputCls}>
+                    <option value="">All colleges</option>
+                    {colleges.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block">
+                  <span className={labelCls}>Cohort / batch (optional)</span>
+                  <select
+                    value={cohortId}
+                    onChange={(e) => setCohortId(e.target.value)}
+                    disabled={!collegeId}
+                    className={cn(inputCls, !collegeId && 'cursor-not-allowed opacity-50')}
+                  >
+                    <option value="">{collegeId ? 'All cohorts in this college' : 'Select a college first'}</option>
+                    {cohorts.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
               <div className="grid gap-4 sm:grid-cols-3">
                 <label className="block">
                   <span className={labelCls}>Start time *</span>
@@ -391,8 +470,10 @@ export function AssessmentWizard({
                 <SectionEditor
                   key={si}
                   section={sec}
+                  topicGroups={topicGroups}
+                  codingTopics={codingTopics}
                   onRename={(name) => setSections((p) => p.map((s, i) => (i === si ? { ...s, name } : s)))}
-                  onAddTopic={(topic, type, count, difficulty, marks) => runSource(si, topic, type, count, difficulty, marks)}
+                  onAddTopic={(topic, type, count, difficulty, marks, topicId) => runSource(si, topic, type, count, difficulty, marks, topicId)}
                   onRemoveItem={(key) => removeItem(si, key)}
                   onRemoveSection={sections.length > 1 ? () => setSections((p) => p.filter((_, i) => i !== si)) : undefined}
                 />
@@ -474,30 +555,52 @@ export function AssessmentWizard({
   );
 }
 
+type TopicGroup = { label: string; options: Array<{ id: string; name: string; count: number }> };
+
 /** Per-section editor: name + resolved items + the add-topic row. */
 function SectionEditor({
   section,
+  topicGroups,
+  codingTopics,
   onRename,
   onAddTopic,
   onRemoveItem,
   onRemoveSection,
 }: {
   section: Section;
+  topicGroups: TopicGroup[];
+  codingTopics: CodingTopic[];
   onRename: (name: string) => void;
-  onAddTopic: (topic: string, type: AssessmentItemType, count: number, difficulty: Difficulty, marks: number) => void;
+  onAddTopic: (
+    topic: string,
+    type: AssessmentItemType,
+    count: number,
+    difficulty: Difficulty,
+    marks: number,
+    topicId?: string,
+  ) => void;
   onRemoveItem: (key: string) => void;
   onRemoveSection?: () => void;
 }) {
-  const [topic, setTopic] = useState('');
+  const [mcqTopicId, setMcqTopicId] = useState('');
+  const [codingTopic, setCodingTopic] = useState('');
   const [type, setType] = useState<AssessmentItemType>('MCQ');
   const [count, setCount] = useState(5);
   const [difficulty, setDifficulty] = useState<Difficulty>('MEDIUM');
   const [marks, setMarks] = useState(1);
 
+  const mcqName = topicGroups.flatMap((g) => g.options).find((o) => o.id === mcqTopicId)?.name ?? '';
+  const canAdd = type === 'MCQ' ? !!mcqTopicId : codingTopic.trim().length >= 2;
+
   const submit = () => {
-    if (topic.trim().length < 2) return;
-    onAddTopic(topic.trim(), type, count, difficulty, Math.max(1, marks));
-    setTopic('');
+    if (!canAdd) return;
+    if (type === 'MCQ') {
+      onAddTopic(mcqName, 'MCQ', count, difficulty, Math.max(1, marks), mcqTopicId);
+      setMcqTopicId('');
+    } else {
+      onAddTopic(codingTopic.trim(), 'CODING', count, difficulty, Math.max(1, marks));
+      setCodingTopic('');
+    }
   };
 
   return (
@@ -528,13 +631,39 @@ function SectionEditor({
 
       {/* add-topic row */}
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <input
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && submit()}
-          placeholder="Type a topic, e.g. Time & Work…"
-          className="h-10 min-w-[12rem] flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
-        />
+        {type === 'MCQ' ? (
+          <select
+            value={mcqTopicId}
+            onChange={(e) => setMcqTopicId(e.target.value)}
+            title="Pick a section or topic — questions are pulled from the bank"
+            className="h-10 min-w-[12rem] flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+          >
+            <option value="">Select a section or topic…</option>
+            {topicGroups.map((g) => (
+              <optgroup key={g.label} label={g.label}>
+                {g.options.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.name} ({o.count})
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+        ) : (
+          <input
+            list="coding-topics-list"
+            value={codingTopic}
+            onChange={(e) => setCodingTopic(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && submit()}
+            placeholder="Coding topic, e.g. Arrays, Strings…"
+            className="h-10 min-w-[12rem] flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+          />
+        )}
+        <datalist id="coding-topics-list">
+          {codingTopics.map((t) => (
+            <option key={t.topic} value={t.topic} />
+          ))}
+        </datalist>
         <div className="inline-flex overflow-hidden rounded-lg border border-slate-200">
           {(['MCQ', 'CODING'] as const).map((t) => (
             <button key={t} type="button" onClick={() => setType(t)} className={cn('px-3 py-2 text-xs font-bold', type === t ? 'bg-navy text-white' : 'bg-white text-slate-600')}>
@@ -560,7 +689,7 @@ function SectionEditor({
           Marks
           <input type="number" min={1} max={20} value={marks} onChange={(e) => setMarks(Number(e.target.value))} className="h-10 w-14 rounded-lg border border-slate-200 bg-white px-2 text-sm text-navy focus:border-orange focus:outline-none" />
         </label>
-        <button type="button" onClick={submit} disabled={topic.trim().length < 2} className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-4 py-2 text-sm font-extrabold text-[#171717] disabled:opacity-50">
+        <button type="button" onClick={submit} disabled={!canAdd} className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-4 py-2 text-sm font-extrabold text-[#171717] disabled:opacity-50">
           <Wand2 className="size-4" /> Add
         </button>
       </div>

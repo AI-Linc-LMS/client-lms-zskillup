@@ -16,6 +16,10 @@ export interface BuilderSection {
 export interface CreateAssessmentPayload {
   /** Omit for a platform-wide assessment (all students). */
   companyId?: string;
+  /** Restrict to one college (all its cohorts) — cohort-wise scope. */
+  collegeId?: string;
+  /** Restrict to a single cohort/batch (implies its college). */
+  cohortId?: string;
   title: string;
   scheduledAt: string;
   endsAt?: string;
@@ -50,16 +54,20 @@ export interface GeneratedItem {
   type: string;
 }
 
-/** Resolve a free-text topic + count → bank items + shortfall to generate. */
+/** Resolve a topic + count → bank items + shortfall to generate. Prefer `topicId`
+ *  (from the section/topic picker) — it samples the whole subtree from the bank. */
 export async function sourceTopic(
   topic: string,
   type: AssessmentItemType,
   count: number,
+  opts?: { topicId?: string; difficulty?: 'EASY' | 'MEDIUM' | 'HARD' },
 ): Promise<SourcedTopic> {
   const res = await apiClient.post<SourcedTopic>('/api/v1/admin/assessment-builder/source', {
     topic,
     type,
     count,
+    topicId: opts?.topicId,
+    difficulty: opts?.difficulty,
   });
   return res.data;
 }
