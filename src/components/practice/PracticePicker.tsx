@@ -2,9 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Building2, Layers, ListTree, Search } from 'lucide-react';
+import { ArrowRight, Building2, Check, Crown, Layers, ListTree, Lock, Search, SlidersHorizontal } from 'lucide-react';
 import type { ApiTopic } from '@/lib/api/catalog';
 import { listCodingTopics, type CodingTopic } from '@/lib/api/mocks';
+import { useMySubscription } from '@/hooks/useMySubscription';
+import { UpgradeModal } from '@/components/billing/UpgradeModal';
+import { EntitlementScope } from '@/shared/enums';
+import { cn } from '@/lib/utils';
 import { ACCENT_CLASS, HIDDEN_ROOT_SLUGS, sectionMetaFor, type Accent } from './section-meta';
 import { CodingBlock } from './CodingBlock';
 
@@ -44,6 +48,31 @@ export function PracticePicker({
   const [query, setQuery] = useState('');
   const q = query.trim().toLowerCase();
 
+  // ── access control: what the student owns, from live entitlements ──────────
+  const { hasPlatform, active, paywallEnabled } = useMySubscription();
+  const [onlyMine, setOnlyMine] = useState(false);
+  const [upgrade, setUpgrade] = useState<{ feature: string; message: string } | null>(null);
+
+  const ownedSections = useMemo(
+    () => new Set(active.filter((e) => e.scopeType === EntitlementScope.SECTION && e.scopeRef).map((e) => e.scopeRef as string)),
+    [active],
+  );
+  const ownedTopics = useMemo(
+    () => new Set(active.filter((e) => e.scopeType === EntitlementScope.TOPIC && e.scopeRef).map((e) => e.scopeRef as string)),
+    [active],
+  );
+  const ownedCompanies = useMemo(
+    () => new Set(active.filter((e) => e.scopeType === EntitlementScope.COMPANY && e.scopeRef).map((e) => e.scopeRef as string)),
+    [active],
+  );
+  // Only surface locks when the paywall is actually enforced (falls open otherwise).
+  const gating = paywallEnabled && !hasPlatform;
+  const sectionOwned = (slug: string) => hasPlatform || ownedSections.has(slug);
+  const topicOwned = (rootSlug: string, slug: string) =>
+    hasPlatform || ownedSections.has(rootSlug) || ownedTopics.has(slug);
+  const companyOwned = (slug: string) => hasPlatform || ownedCompanies.has(slug);
+  const codingOwned = hasPlatform || ownedSections.has('coding');
+
   // Coding topics come from the coding bank (Judge0 problems), a separate system
   // from the MCQ taxonomy — fetched client-side (guaranteed auth token) like the
   // custom-mock builder does.
@@ -79,32 +108,64 @@ export function PracticePicker({
   }, [topics]);
 
   // Search: keep a section if its name matches OR any topic matches; keep matching
-  // topics. Empty query → everything.
+  // topics. "Show only my content" then drops what isn't in the student's plan (a
+  // whole section is kept if owned; otherwise only its individually-owned topics).
   const filteredRoots = useMemo<RootTopic[]>(() => {
-    if (!q) return roots;
-    return roots
-      .map((r) => {
-        const rootMatch = r.name.toLowerCase().includes(q);
-        const children = rootMatch ? r.children : r.children.filter((c) => c.name.toLowerCase().includes(q));
-        return { ...r, children };
-      })
-      .filter((r) => r.name.toLowerCase().includes(q) || r.children.length > 0);
-  }, [roots, q]);
+    let list = roots;
+    if (q) {
+      list = list
+        .map((r) => {
+          const rootMatch = r.name.toLowerCase().includes(q);
+          const children = rootMatch ? r.children : r.children.filter((c) => c.name.toLowerCase().includes(q));
+          return { ...r, children };
+        })
+        .filter((r) => r.name.toLowerCase().includes(q) || r.children.length > 0);
+    }
+    if (onlyMine) {
+      list = list
+        .map((r) =>
+          sectionOwned(r.slug) ? r : { ...r, children: r.children.filter((c) => topicOwned(r.slug, c.slug)) },
+        )
+        .filter((r) => sectionOwned(r.slug) || r.children.length > 0);
+    }
+    return list;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roots, q, onlyMine, hasPlatform, ownedSections, ownedTopics]);
 
-  const filteredCompanies = useMemo(
-    () => (q ? companies.filter((c) => c.name.toLowerCase().includes(q)) : companies),
-    [companies, q],
-  );
+  const filteredCompanies = useMemo(() => {
+    let list = q ? companies.filter((c) => c.name.toLowerCase().includes(q)) : companies;
+    if (onlyMine) list = list.filter((c) => companyOwned(c.slug));
+    return list;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [companies, q, onlyMine, hasPlatform, ownedCompanies]);
 
   const filteredCodingTopics = useMemo(
     () => (q ? codingTopics.filter((t) => t.topic.toLowerCase().includes(q)) : codingTopics),
     [codingTopics, q],
   );
-  const codingVisible = !q || 'coding'.includes(q) || filteredCodingTopics.length > 0;
+  const codingVisible =
+    (!q || 'coding'.includes(q) || filteredCodingTopics.length > 0) && (!onlyMine || codingOwned);
   const nothing = filteredRoots.length === 0 && filteredCompanies.length === 0 && !codingVisible;
+
+  const unlockSection = (name: string) =>
+    setUpgrade({
+      feature: `the ${name} section`,
+      message: `Unlock ${name} to practise every topic in it without limits. Your first questions in each topic are always free.`,
+    });
 
   return (
     <div className="space-y-8">
+      {/* Your Access */}
+      <AccessPanel
+        hasPlatform={hasPlatform}
+        gating={gating}
+        ownedSectionCount={ownedSections.size}
+        ownedTopicCount={ownedTopics.size}
+        ownedCompanyCount={ownedCompanies.size}
+        onlyMine={onlyMine}
+        setOnlyMine={setOnlyMine}
+      />
+
       {/* search bar */}
       <div data-tour="practice:search" className="relative max-w-xl">
         <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
@@ -132,16 +193,20 @@ export function PracticePicker({
             Practice a company&apos;s question style
           </h2>
           <div className="flex flex-wrap gap-2">
-            {filteredCompanies.map((c) => (
-              <Link
-                key={c.id}
-                href={`/dashboard/quiz/adaptive?company=${encodeURIComponent(c.slug)}`}
-                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors hover:border-violet-300 hover:bg-violet-50/70"
-              >
-                <Building2 className="size-3.5 text-violet-500" />
-                {c.name}
-              </Link>
-            ))}
+            {filteredCompanies.map((c) => {
+              const locked = gating && !companyOwned(c.slug);
+              return (
+                <Link
+                  key={c.id}
+                  href={`/dashboard/quiz/adaptive?company=${encodeURIComponent(c.slug)}`}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors hover:border-violet-300 hover:bg-violet-50/70"
+                >
+                  <Building2 className="size-3.5 text-violet-500" />
+                  {c.name}
+                  {locked ? <Lock className="size-3 text-slate-400" aria-label="Not in your plan" /> : null}
+                </Link>
+              );
+            })}
           </div>
         </div>
       ) : null}
@@ -157,23 +222,129 @@ export function PracticePicker({
           </h2>
           <div className="space-y-4">
             {filteredRoots.map((root) => (
-              <SectionBlock key={root.id} root={root} topicHref={adaptiveTopicHref} />
+              <SectionBlock
+                key={root.id}
+                root={root}
+                topicHref={adaptiveTopicHref}
+                owned={sectionOwned(root.slug)}
+                locked={gating && !sectionOwned(root.slug)}
+                topicLocked={(slug) => gating && !topicOwned(root.slug, slug)}
+                onUnlock={() => unlockSection(root.name)}
+              />
             ))}
             {codingVisible ? <CodingBlock topics={filteredCodingTopics} /> : null}
           </div>
         </div>
       ) : null}
+
+      <UpgradeModal
+        open={upgrade !== null}
+        onClose={() => setUpgrade(null)}
+        feature={upgrade?.feature}
+        message={upgrade?.message}
+      />
     </div>
   );
 }
 
-/** One MCQ section: a section-wide CTA plus a chip per topic. */
+/** "Your Access" summary + the "Show only my content" filter toggle. */
+function AccessPanel({
+  hasPlatform,
+  gating,
+  ownedSectionCount,
+  ownedTopicCount,
+  ownedCompanyCount,
+  onlyMine,
+  setOnlyMine,
+}: {
+  hasPlatform: boolean;
+  gating: boolean;
+  ownedSectionCount: number;
+  ownedTopicCount: number;
+  ownedCompanyCount: number;
+  onlyMine: boolean;
+  setOnlyMine: (v: boolean) => void;
+}) {
+  const ownsSomething = ownedSectionCount + ownedTopicCount + ownedCompanyCount > 0;
+  // Nothing to show if the paywall is off and the student owns nothing — the picker
+  // is fully open, so an access panel would just be noise.
+  if (!hasPlatform && !gating && !ownsSomething) return null;
+
+  const parts: string[] = [];
+  if (ownedSectionCount) parts.push(`${ownedSectionCount} section${ownedSectionCount === 1 ? '' : 's'}`);
+  if (ownedTopicCount) parts.push(`${ownedTopicCount} topic${ownedTopicCount === 1 ? '' : 's'}`);
+  if (ownedCompanyCount) parts.push(`${ownedCompanyCount} company hub${ownedCompanyCount === 1 ? '' : 's'}`);
+
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_8px_30px_-24px_rgba(15,23,42,0.35)]">
+      <div className="flex items-center gap-3">
+        <span
+          className={cn(
+            'grid size-10 shrink-0 place-items-center rounded-xl',
+            hasPlatform ? 'bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717]' : 'bg-slate-100 text-slate-500',
+          )}
+        >
+          {hasPlatform ? <Crown className="size-5" /> : <Lock className="size-5" />}
+        </span>
+        <div>
+          <p className="text-sm font-bold text-navy">Your access</p>
+          <p className="text-xs text-slate-600">
+            {hasPlatform
+              ? 'Full platform — every section, topic and company hub is unlocked.'
+              : ownsSomething
+                ? `Unlocked: ${parts.join(' · ')}. First questions in every topic are free.`
+                : 'Free plan — your first questions in every topic are free.'}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3">
+        {!hasPlatform ? (
+          <Link
+            href="/shop"
+            className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-3.5 py-2 text-xs font-extrabold text-[#171717] transition hover:brightness-105"
+          >
+            <Crown className="size-3.5" /> Explore plans
+          </Link>
+        ) : null}
+        {ownsSomething || gating ? (
+          <button
+            type="button"
+            onClick={() => setOnlyMine(!onlyMine)}
+            aria-pressed={onlyMine}
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-bold transition',
+              onlyMine
+                ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+                : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300',
+            )}
+          >
+            <SlidersHorizontal className="size-3.5" />
+            {onlyMine ? 'Showing my content' : 'Show only my content'}
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+/** One MCQ section: a section-wide CTA plus a chip per topic. When the paywall is
+ *  on and the section isn't owned, an "Included / Unlock" pill shows access state —
+ *  the practice links stay live (the first questions in every topic are free). */
 function SectionBlock({
   root,
   topicHref,
+  owned,
+  locked,
+  topicLocked,
+  onUnlock,
 }: {
   root: RootTopic;
   topicHref: (slug: string) => string;
+  owned: boolean;
+  locked: boolean;
+  topicLocked: (slug: string) => boolean;
+  onUnlock: () => void;
 }) {
   const Icon = root.icon;
   const a = ACCENT_CLASS[root.accent];
@@ -186,18 +357,36 @@ function SectionBlock({
             <Icon className="size-6" aria-hidden="true" />
           </span>
           <div>
-            <p className="text-base font-bold leading-snug text-navy">{root.name}</p>
+            <p className="flex items-center gap-1.5 text-base font-bold leading-snug text-navy">
+              {root.name}
+              {owned ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 ring-1 ring-inset ring-emerald-200/70">
+                  <Check className="size-2.5" /> Included
+                </span>
+              ) : null}
+            </p>
             <p className="mt-0.5 text-xs text-slate-600">
               {root.children.length} topic{root.children.length === 1 ? '' : 's'}
             </p>
           </div>
         </div>
-        <Link
-          href={topicHref(root.slug)}
-          className="inline-flex items-center gap-1.5 rounded-full bg-navy px-4 py-2 text-xs font-extrabold text-white transition-transform hover:-translate-y-0.5"
-        >
-          Practice whole section <ArrowRight className="size-3.5" />
-        </Link>
+        <div className="flex items-center gap-2">
+          {locked ? (
+            <button
+              type="button"
+              onClick={onUnlock}
+              className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-[#a16207] transition hover:bg-amber-100"
+            >
+              <Lock className="size-3.5" /> Unlock
+            </button>
+          ) : null}
+          <Link
+            href={topicHref(root.slug)}
+            className="inline-flex items-center gap-1.5 rounded-full bg-navy px-4 py-2 text-xs font-extrabold text-white transition-transform hover:-translate-y-0.5"
+          >
+            Practice whole section <ArrowRight className="size-3.5" />
+          </Link>
+        </div>
       </div>
 
       <div className="relative mt-4 flex flex-wrap gap-2">
@@ -208,6 +397,9 @@ function SectionBlock({
             className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors ${a.chip}`}
           >
             {child.name}
+            {topicLocked(child.slug) ? (
+              <Lock className="size-3 text-slate-400" aria-label="Not in your plan" />
+            ) : null}
           </Link>
         ))}
       </div>
