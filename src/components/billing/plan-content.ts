@@ -32,8 +32,8 @@ export const CUSTOM_FEATURES = [
 ];
 
 export const PLAN_STATS = [
-  { icon: Building2, value: '100+', label: 'Companies & hubs', tint: 'bg-violet-50 text-violet-600' },
-  { icon: ListChecks, value: '55,000+', label: 'Practice questions', tint: 'bg-indigo-50 text-indigo-600' },
+  { icon: Building2, value: '100+', label: 'Companies & hubs', tint: 'bg-[#fff5ea] text-[#a16207]' },
+  { icon: ListChecks, value: '55,000+', label: 'Practice questions', tint: 'bg-[#fff5ea] text-[#a16207]' },
   { icon: ClipboardList, value: 'Unlimited', label: 'Mock tests', tint: 'bg-amber-50 text-amber-600' },
   { icon: Sparkles, value: 'AI', label: 'Career tools', tint: 'bg-emerald-50 text-emerald-600' },
 ];
@@ -49,7 +49,7 @@ export const PLAN_INCLUDED = [
 
 export const PLAN_VALUES = [
   { icon: BadgePercent, title: 'Save more', desc: 'Up to 37% off with longer access plans.', tint: 'bg-emerald-50 text-emerald-600' },
-  { icon: Code2, title: 'Coding + interviews', desc: 'Judge0 coding arena and AI mock interviews included.', tint: 'bg-indigo-50 text-indigo-600' },
+  { icon: Code2, title: 'Coding + interviews', desc: 'Judge0 coding arena and AI mock interviews included.', tint: 'bg-[#fff5ea] text-[#a16207]' },
   { icon: MessageSquare, title: 'Prep that adapts', desc: 'Everything personalizes to your target roles and gaps.', tint: 'bg-amber-50 text-amber-600' },
 ];
 

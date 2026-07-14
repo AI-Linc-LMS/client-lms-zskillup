@@ -28,7 +28,7 @@ export function FeatureItem({
   className?: string;
 }) {
   const tick =
-    tone === 'emerald' ? 'text-emerald-500' : tone === 'slate' ? 'text-slate-500' : 'text-indigo-500';
+    tone === 'emerald' ? 'text-emerald-500' : tone === 'slate' ? 'text-slate-500' : 'text-[#f5b400]';
   return (
     <li className={cn('flex items-start gap-2.5 text-sm text-slate-600', className)}>
       <CheckCircle2 className={cn('mt-0.5 size-4 shrink-0', tick)} />
@@ -47,7 +47,7 @@ export function PlanPill({
 }) {
   const cls =
     tone === 'violet'
-      ? 'bg-indigo-600 text-white'
+      ? 'bg-navy text-white'
       : tone === 'amber'
         ? 'bg-amber-100 text-amber-700'
         : 'bg-emerald-100 text-emerald-700';
@@ -63,7 +63,7 @@ export function TrustBadges({ className }: { className?: string }) {
   const items = [
     { icon: ShieldCheck, title: 'Secure Payments', sub: '100% safe & secure transactions', tint: 'text-emerald-600 bg-emerald-50' },
     { icon: BadgeCheck, title: 'Best Value', sub: 'Save more with full platform access', tint: 'text-amber-600 bg-amber-50' },
-    { icon: Zap, title: 'Instant Access', sub: 'Get started immediately after purchase', tint: 'text-indigo-600 bg-indigo-50' },
+    { icon: Zap, title: 'Instant Access', sub: 'Get started immediately after purchase', tint: 'text-[#a16207] bg-[#fff5ea]' },
   ];
   return (
     <div
@@ -141,9 +141,9 @@ export function IncludedGrid({
       {items.map((it) => (
         <div
           key={it.title}
-          className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-indigo-200 hover:shadow-md"
+          className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-[#ffc42d]/40 hover:shadow-md"
         >
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-600">
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#fff5ea] text-[#a16207]">
             <it.icon className="size-5" />
           </span>
           <div className="min-w-0">
@@ -218,7 +218,7 @@ export function PlanSectionTitle({
   return (
     <div className="mb-4">
       {eyebrow ? (
-        <p className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-indigo-500">
+        <p className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-[#f5b400]">
           <Icon className="size-3.5" /> {eyebrow}
         </p>
       ) : null}

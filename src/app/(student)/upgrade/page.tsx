@@ -106,7 +106,7 @@ export default function UpgradeRenewPage() {
   if (loading) {
     return (
       <div className="grid place-items-center py-24">
-        <Loader2 className="size-6 animate-spin text-indigo-500" />
+        <Loader2 className="size-6 animate-spin text-[#f5b400]" />
       </div>
     );
   }
@@ -248,7 +248,7 @@ function PremiumView({
           <button
             type="button"
             onClick={openHistory}
-            className="mt-3 inline-flex items-center gap-1.5 rounded-lg text-xs font-bold text-indigo-600 underline-offset-2 transition hover:text-indigo-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+            className="mt-3 inline-flex items-center gap-1.5 rounded-lg text-xs font-bold text-[#a16207] underline-offset-2 transition hover:text-[#a16207] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffc42d]/40"
           >
             Manage Subscription <ArrowRight className="size-3.5" />
           </button>
@@ -263,7 +263,7 @@ function PremiumView({
               <p className="text-xs font-bold text-emerald-600">{readiness?.overall.level ?? 'Keep going'}</p>
               <Link
                 href="/study-plan"
-                className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-700"
+                className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-[#a16207] hover:text-[#a16207]"
               >
                 Go to Study Plan <ArrowRight className="size-3.5" />
               </Link>
@@ -282,7 +282,7 @@ function PremiumView({
                   href={a.href}
                   className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-navy"
                 >
-                  <a.icon className="size-4 text-indigo-500" /> {a.label}
+                  <a.icon className="size-4 text-[#f5b400]" /> {a.label}
                 </Link>
               ) : (
                 <button
@@ -291,7 +291,7 @@ function PremiumView({
                   onClick={a.onClick}
                   className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-navy"
                 >
-                  <a.icon className="size-4 text-indigo-500" /> {a.label}
+                  <a.icon className="size-4 text-[#f5b400]" /> {a.label}
                 </button>
               ),
             )}
@@ -303,13 +303,13 @@ function PremiumView({
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-lg font-black tracking-tight text-navy">Your Preparation at a Glance</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-4">
-          <StatTile icon={Building2} tint="bg-violet-50 text-violet-600" label="Companies Practised" value={companies ?? '-'} />
+          <StatTile icon={Building2} tint="bg-[#fff5ea] text-[#a16207]" label="Companies Practised" value={companies ?? '-'} />
           <StatTile icon={Layers} tint="bg-amber-50 text-amber-600" label="Topics Practised" value={topics} />
           <StatTile icon={Target} tint="bg-emerald-50 text-emerald-600" label="Questions Attempted" value={attempted} />
-          <StatTile icon={TrendingUp} tint="bg-indigo-50 text-indigo-600" label="Readiness" value={score != null ? `${score}%` : '-'} />
+          <StatTile icon={TrendingUp} tint="bg-[#fff5ea] text-[#a16207]" label="Readiness" value={score != null ? `${score}%` : '-'} />
         </div>
         <p className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
-          <Sparkles className="size-3.5 text-indigo-400" /> New companies, mock tests &amp; questions are added every week.
+          <Sparkles className="size-3.5 text-[#f5b400]" /> New companies, mock tests &amp; questions are added every week.
         </p>
       </section>
 
@@ -324,7 +324,7 @@ function PremiumView({
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-black tracking-tight text-navy">What&apos;s New for You</h2>
-          <Link href="/dashboard/company" className="inline-flex items-center gap-1 text-sm font-bold text-indigo-600">
+          <Link href="/dashboard/company" className="inline-flex items-center gap-1 text-sm font-bold text-[#a16207]">
             View All <ArrowRight className="size-3.5" />
           </Link>
         </div>
@@ -388,8 +388,8 @@ function CustomPlanView({
         <p className="mt-1 text-sm text-slate-600">Here&apos;s what you currently have access to.</p>
 
         <div className="mt-5 grid gap-5 lg:grid-cols-[220px_1fr]">
-          <div className="flex flex-col items-center justify-center rounded-2xl bg-indigo-50/60 p-5 text-center">
-            <span className="grid size-14 place-items-center rounded-2xl bg-white text-indigo-600 shadow-sm">
+          <div className="flex flex-col items-center justify-center rounded-2xl bg-[#fff5ea]/60 p-5 text-center">
+            <span className="grid size-14 place-items-center rounded-2xl bg-white text-[#a16207] shadow-sm">
               <Puzzle className="size-7" />
             </span>
             <p className="mt-3 text-base font-black text-navy">Custom Plan</p>
@@ -398,7 +398,7 @@ function CustomPlanView({
             <div className="mt-4 flex w-full flex-col gap-2">
               <Link
                 href="/shop/build"
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2 text-xs font-bold text-white"
               >
                 Manage My Selections
               </Link>
@@ -481,11 +481,11 @@ function NoPlanView({ priceMap }: { priceMap: Map<string, PriceBookEntryDto> }) 
   return (
     <div className="mt-6 space-y-8">
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-sky-50 px-6 py-10 text-center shadow-sm sm:px-10 sm:py-14">
-        <div aria-hidden className="pointer-events-none absolute -left-16 -top-16 size-64 rounded-full bg-indigo-300/20 blur-3xl" />
-        <div aria-hidden className="pointer-events-none absolute -right-16 -bottom-16 size-64 rounded-full bg-sky-300/20 blur-3xl" />
+      <section className="relative overflow-hidden rounded-3xl border border-[#ffc42d]/30 bg-gradient-to-br from-[#fff5ea] via-white to-white px-6 py-10 text-center shadow-sm sm:px-10 sm:py-14">
+        <div aria-hidden className="pointer-events-none absolute -left-16 -top-16 size-64 rounded-full bg-[#ffc42d]/20 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -right-16 -bottom-16 size-64 rounded-full bg-[#ffc42d]/20 blur-3xl" />
         <div className="relative mx-auto max-w-2xl">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-white px-3 py-1 text-xs font-bold uppercase tracking-widest text-indigo-600">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#ffc42d]/40 bg-white px-3 py-1 text-xs font-bold uppercase tracking-widest text-[#a16207]">
             <Crown className="size-3.5" /> Get started
           </span>
           <h2 className="mt-4 text-3xl font-black tracking-tight text-navy sm:text-4xl">Start your placement prep</h2>
@@ -494,11 +494,11 @@ function NoPlanView({ priceMap }: { priceMap: Map<string, PriceBookEntryDto> }) 
             {platform ? ` from ${formatPrice(platform.amountCents, 'INR')}/month` : ''}.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <Link href="/shop/full" className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700">
+            <Link href="/shop/full" className="inline-flex items-center gap-2 rounded-xl bg-navy px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-navy/90">
               <Crown className="size-4" /> Get Full Access
             </Link>
             <Link href="/shop/build" className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-navy transition hover:bg-slate-50">
-              <Puzzle className="size-4 text-sky-600" /> Build Your Own
+              <Puzzle className="size-4 text-[#a16207]" /> Build Your Own
             </Link>
           </div>
         </div>
@@ -572,8 +572,8 @@ function StatTile({ icon: Icon, tint, label, value }: { icon: typeof Building2; 
 
 function WhatsNew({ icon: Icon, title, sub, href }: { icon: typeof Building2; title: string; sub: string; href: string }) {
   return (
-    <Link href={href} className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/50 p-3 transition hover:border-indigo-200 hover:bg-indigo-50/40">
-      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-indigo-600 shadow-sm">
+    <Link href={href} className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/50 p-3 transition hover:border-[#ffc42d]/40 hover:bg-[#fff5ea]/40">
+      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-[#a16207] shadow-sm">
         <Icon className="size-5" />
       </span>
       <div className="min-w-0">
@@ -615,8 +615,8 @@ function LearnCard({
   cta: string;
   href: string;
 }) {
-  const accent = tone === 'indigo' ? 'text-indigo-600 bg-indigo-50' : 'text-sky-600 bg-sky-50';
-  const btn = tone === 'indigo' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-emerald-600 hover:bg-emerald-700';
+  const accent = tone === 'indigo' ? 'text-[#a16207] bg-[#fff5ea]' : 'text-[#a16207] bg-[#fff5ea]';
+  const btn = tone === 'indigo' ? 'bg-navy hover:bg-navy/90' : 'bg-emerald-600 hover:bg-emerald-700';
   return (
     <div className="flex flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="flex items-center gap-3">

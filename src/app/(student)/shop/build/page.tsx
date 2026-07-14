@@ -46,7 +46,7 @@ const UNLOCKS = [
 
 const WHY_LONGER = [
   { icon: BadgePercent, tint: 'bg-emerald-50 text-emerald-600', title: 'Save More', sub: 'Get up to 37% discount with annual plans.' },
-  { icon: CalendarDays, tint: 'bg-indigo-50 text-indigo-600', title: 'Uninterrupted Preparation', sub: 'More time to practice, learn and improve.' },
+  { icon: CalendarDays, tint: 'bg-[#fff5ea] text-[#a16207]', title: 'Uninterrupted Preparation', sub: 'More time to practice, learn and improve.' },
   { icon: Trophy, tint: 'bg-amber-50 text-amber-600', title: 'Better Results', sub: 'Consistent practice leads to success.' },
 ];
 
@@ -215,7 +215,7 @@ export default function BuildYourOwnPage() {
               onClick={() => onPick(p.period)}
               className={`flex items-center justify-between rounded-xl border px-3.5 py-2.5 text-left transition ${
                 active
-                  ? 'border-indigo-500 bg-indigo-50/60 ring-1 ring-indigo-500/30'
+                  ? 'border-[#ffc42d] bg-[#fff5ea]/60 ring-1 ring-[#ffc42d]/40'
                   : 'border-slate-200 bg-white hover:border-slate-300'
               }`}
             >
@@ -230,7 +230,7 @@ export default function BuildYourOwnPage() {
               </span>
               <span
                 className={`grid size-4 place-items-center rounded-full border ${
-                  active ? 'border-indigo-500 bg-indigo-500' : 'border-slate-300'
+                  active ? 'border-[#ffc42d] bg-[#fff5ea]0' : 'border-slate-300'
                 }`}
               >
                 {active && <span className="size-1.5 rounded-full bg-white" />}
@@ -261,7 +261,7 @@ export default function BuildYourOwnPage() {
           </p>
         </div>
         <div className="hidden max-w-xs items-start gap-2 rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-600 shadow-sm sm:flex">
-          <HelpCircle className="mt-0.5 size-4 shrink-0 text-indigo-500" />
+          <HelpCircle className="mt-0.5 size-4 shrink-0 text-[#f5b400]" />
           <span>
             <b className="text-navy">How it works?</b> Pick a company, section or sub-section, then choose an
             access plan (Monthly / Quarterly / Annual).
@@ -271,7 +271,7 @@ export default function BuildYourOwnPage() {
 
       {loading ? (
         <div className="mt-16 flex justify-center">
-          <Loader2 className="size-6 animate-spin text-indigo-500" />
+          <Loader2 className="size-6 animate-spin text-[#f5b400]" />
         </div>
       ) : (
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
@@ -296,7 +296,7 @@ export default function BuildYourOwnPage() {
                   <button
                     type="button"
                     onClick={() => setShowAllCompanies((v) => !v)}
-                    className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-dashed border-slate-300 p-3 text-xs font-bold text-indigo-600 transition hover:bg-indigo-50/40"
+                    className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-dashed border-slate-300 p-3 text-xs font-bold text-[#a16207] transition hover:bg-[#fff5ea]/40"
                   >
                     <ArrowRight className={`size-4 transition-transform ${showAllCompanies ? 'rotate-180' : ''}`} />
                     {showAllCompanies ? 'Show less' : 'View All Companies'}
@@ -326,7 +326,7 @@ export default function BuildYourOwnPage() {
                   <button
                     type="button"
                     onClick={() => setShowAllSections((v) => !v)}
-                    className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-dashed border-slate-300 p-3 text-xs font-bold text-indigo-600 transition hover:bg-indigo-50/40"
+                    className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-dashed border-slate-300 p-3 text-xs font-bold text-[#a16207] transition hover:bg-[#fff5ea]/40"
                   >
                     <ArrowRight className={`size-4 transition-transform ${showAllSections ? 'rotate-180' : ''}`} />
                     {showAllSections ? 'Show less' : 'View All Sections'}
@@ -344,7 +344,7 @@ export default function BuildYourOwnPage() {
               title="Select a Sub-section"
               trailing={
                 activeSub ? (
-                  <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-600">
+                  <span className="rounded-full bg-[#fff5ea] px-2.5 py-1 text-xs font-bold text-[#a16207]">
                     {activeSub.section.name}
                   </span>
                 ) : null
@@ -385,7 +385,7 @@ export default function BuildYourOwnPage() {
                 <button
                   type="button"
                   onClick={() => setSubsOpen((v) => !v)}
-                  className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-indigo-600 hover:text-indigo-700"
+                  className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-[#a16207] hover:text-[#a16207]"
                 >
                   {subsOpen ? 'Show fewer' : `View ${activeSub.topics.length - 5} more sub-sections`}
                   <ChevronDown className={`size-4 transition-transform ${subsOpen ? 'rotate-180' : ''}`} />
@@ -442,7 +442,7 @@ export default function BuildYourOwnPage() {
 
               <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4">
                 <span className="text-sm font-bold text-navy">Total</span>
-                <span className="text-2xl font-black tabular-nums text-indigo-600">{formatPrice(total, 'INR')}</span>
+                <span className="text-2xl font-black tabular-nums text-[#a16207]">{formatPrice(total, 'INR')}</span>
               </div>
 
               {items.length > 0 && (
@@ -462,7 +462,7 @@ export default function BuildYourOwnPage() {
                 type="button"
                 disabled={!items.length}
                 onClick={() => commit(true)}
-                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700 disabled:opacity-40"
+                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-navy px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-navy/90 disabled:opacity-40"
               >
                 <ShoppingCart className="size-4" /> Add to Cart
               </button>
@@ -479,12 +479,12 @@ export default function BuildYourOwnPage() {
             {/* Changed your mind? */}
             <Link
               href="/shop/full"
-              className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-indigo-200 bg-indigo-50/50 px-4 py-3 text-sm transition hover:bg-indigo-50"
+              className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-[#ffc42d]/40 bg-[#fff5ea]/50 px-4 py-3 text-sm transition hover:bg-[#fff5ea]"
             >
-              <span className="inline-flex items-center gap-2 font-semibold text-indigo-700">
+              <span className="inline-flex items-center gap-2 font-semibold text-[#a16207]">
                 <Crown className="size-4" /> Want it all?
               </span>
-              <span className="inline-flex items-center gap-1 font-bold text-indigo-700">
+              <span className="inline-flex items-center gap-1 font-bold text-[#a16207]">
                 Get Full Access <ArrowRight className="size-3.5" />
               </span>
             </Link>
@@ -503,7 +503,7 @@ export default function BuildYourOwnPage() {
             <button
               type="button"
               onClick={() => commit(true)}
-              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white"
+              className="inline-flex items-center gap-2 rounded-xl bg-navy px-5 py-2.5 text-sm font-bold text-white"
             >
               <ShoppingCart className="size-4" /> Add to Cart
             </button>
@@ -530,7 +530,7 @@ function Step({
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="mb-3 flex items-center gap-2.5">
-        <span className="grid size-6 shrink-0 place-items-center rounded-md bg-indigo-600 text-xs font-black text-white">
+        <span className="grid size-6 shrink-0 place-items-center rounded-md bg-navy text-xs font-black text-white">
           {n}
         </span>
         <h2 className="flex-1 text-base font-black text-navy">{title}</h2>
@@ -595,14 +595,14 @@ function PickCard({
           owned
             ? 'cursor-default border-emerald-200 bg-emerald-50/60'
             : selected
-              ? 'border-indigo-500 bg-indigo-50/60 ring-1 ring-indigo-500/30'
+              ? 'border-[#ffc42d] bg-[#fff5ea]/60 ring-1 ring-[#ffc42d]/40'
               : 'border-slate-200 bg-white hover:border-slate-300'
         }`}
       >
         {(selected || owned) && (
           <span
             className={`absolute right-2 top-2 grid size-4 place-items-center rounded-full text-white ${
-              owned ? 'bg-emerald-500' : 'bg-indigo-500'
+              owned ? 'bg-emerald-500' : 'bg-[#fff5ea]0'
             }`}
           >
             <Check className="size-3" />
@@ -613,7 +613,7 @@ function PickCard({
             plainTile
               ? 'bg-white ring-1 ring-slate-200/80'
               : selected
-                ? 'bg-indigo-100 text-indigo-600'
+                ? 'bg-[#ffc42d]/15 text-[#a16207]'
                 : 'bg-slate-100 text-slate-600'
           }`}
         >
@@ -690,7 +690,7 @@ function SubTable({
                       >
                         <span
                           className={`grid size-4 place-items-center rounded-full border transition ${
-                            active ? 'border-indigo-500 bg-indigo-500' : 'border-slate-300 group-hover:border-indigo-400'
+                            active ? 'border-[#ffc42d] bg-[#fff5ea]0' : 'border-slate-300 group-hover:border-[#ffc42d]'
                           }`}
                         >
                           {active && <span className="size-1.5 rounded-full bg-white" />}

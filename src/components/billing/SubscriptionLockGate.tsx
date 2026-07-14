@@ -28,7 +28,7 @@ export function SubscriptionLockGate({
   if (loading) {
     return (
       <div className="grid min-h-[45vh] place-items-center">
-        <Loader2 className="size-6 animate-spin text-indigo-500" />
+        <Loader2 className="size-6 animate-spin text-[#f5b400]" />
       </div>
     );
   }
@@ -50,8 +50,8 @@ export function SubscriptionLockGate({
       {/* the card sits in a normal centered block that DEFINES the gate height -
           no sticky / no 100dvh, so it doesn't follow the scroll or leave a gap. */}
       <div className="relative z-10 flex min-h-[60vh] items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-3xl border border-indigo-200 bg-white p-7 text-center shadow-xl">
-          <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white">
+        <div className="w-full max-w-md rounded-3xl border border-[#ffc42d]/40 bg-white p-7 text-center shadow-xl">
+          <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-navy to-navy text-white">
             <Lock className="size-7" />
           </span>
           <h2 className="mt-4 text-xl font-black tracking-tight text-navy">{feature} is a premium feature</h2>
@@ -64,7 +64,7 @@ export function SubscriptionLockGate({
           <div className="mt-5 space-y-2.5">
             <Link
               href="/shop/full"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-700"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-navy px-5 py-3 text-sm font-bold text-white transition hover:bg-navy/90"
             >
               <Crown className="size-4" /> Get Full Platform Access
             </Link>
@@ -72,13 +72,13 @@ export function SubscriptionLockGate({
               href="/shop/build"
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-navy transition hover:bg-slate-50"
             >
-              <Puzzle className="size-4 text-sky-600" /> Buy a Company hub
+              <Puzzle className="size-4 text-[#a16207]" /> Buy a Company hub
             </Link>
           </div>
 
           <Link
             href="/shop"
-            className="mt-4 inline-flex items-center justify-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-700"
+            className="mt-4 inline-flex items-center justify-center gap-1 text-xs font-bold text-[#a16207] hover:text-[#a16207]"
           >
             See all plans <ArrowRight className="size-3.5" />
           </Link>

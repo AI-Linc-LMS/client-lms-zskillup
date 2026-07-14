@@ -53,11 +53,11 @@ export default function ExplorePlansPage() {
       <Breadcrumb items={[{ label: 'Explore Plans' }]} />
 
       {/* Hero */}
-      <section className="relative mt-4 overflow-hidden rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-sky-50 px-6 py-10 text-center shadow-sm sm:px-10 sm:py-14">
-        <div aria-hidden className="pointer-events-none absolute -left-16 -top-16 size-64 rounded-full bg-indigo-300/20 blur-3xl" />
-        <div aria-hidden className="pointer-events-none absolute -right-16 -bottom-16 size-64 rounded-full bg-sky-300/20 blur-3xl" />
+      <section className="relative mt-4 overflow-hidden rounded-3xl border border-[#ffc42d]/30 bg-gradient-to-br from-[#fff5ea] via-white to-white px-6 py-10 text-center shadow-sm sm:px-10 sm:py-14">
+        <div aria-hidden className="pointer-events-none absolute -left-16 -top-16 size-64 rounded-full bg-[#ffc42d]/20 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -right-16 -bottom-16 size-64 rounded-full bg-[#ffc42d]/20 blur-3xl" />
         <div className="relative mx-auto max-w-2xl">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-white px-3 py-1 text-xs font-bold uppercase tracking-widest text-indigo-600">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#ffc42d]/40 bg-white px-3 py-1 text-xs font-bold uppercase tracking-widest text-[#a16207]">
             <Sparkles className="size-3.5" /> Plans &amp; Access
           </span>
           <h1 className="mt-4 text-3xl font-black tracking-tight text-navy sm:text-4xl">
@@ -70,7 +70,7 @@ export default function ExplorePlansPage() {
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/shop/full"
-              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700"
+              className="inline-flex items-center gap-2 rounded-xl bg-navy px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-navy/90"
             >
               <Crown className="size-4" /> Get Full Access
             </Link>
@@ -78,7 +78,7 @@ export default function ExplorePlansPage() {
               href="/shop/build"
               className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-navy transition hover:bg-slate-50"
             >
-              <Puzzle className="size-4 text-sky-600" /> Build Your Own
+              <Puzzle className="size-4 text-[#a16207]" /> Build Your Own
             </Link>
           </div>
         </div>
@@ -87,7 +87,7 @@ export default function ExplorePlansPage() {
       {hasPlatform && (
         <Link
           href="/upgrade"
-          className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-indigo-200 bg-indigo-50/70 px-4 py-3 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50"
+          className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-[#ffc42d]/40 bg-[#fff5ea]/70 px-4 py-3 text-sm font-semibold text-[#a16207] transition hover:bg-[#fff5ea]"
         >
           <span className="inline-flex items-center gap-2">
             <Crown className="size-4" /> You already have Full Platform access - manage it in Upgrade &amp; Renew.
@@ -102,7 +102,7 @@ export default function ExplorePlansPage() {
       <section className="mt-10">
         <div className="text-center">
           <h2 className="inline-block text-2xl font-black tracking-tight text-navy">How would you like to prepare?</h2>
-          <div className="mx-auto mt-2 h-1 w-16 rounded-full bg-indigo-500" />
+          <div className="mx-auto mt-2 h-1 w-16 rounded-full bg-[#fff5ea]0" />
           <p className="mx-auto mt-3 max-w-lg text-sm text-slate-600">Pick the path that fits you - you can always add more later.</p>
         </div>
 
@@ -110,13 +110,13 @@ export default function ExplorePlansPage() {
           {/* Full Platform Access */}
           <div
             data-tour="plans:full"
-            className="relative flex flex-col overflow-hidden rounded-3xl border-2 border-indigo-500 bg-white p-6 shadow-md sm:p-8"
+            className="relative flex flex-col overflow-hidden rounded-3xl border-2 border-[#ffc42d] bg-white p-6 shadow-md sm:p-8"
           >
             <span className="absolute right-6 top-6">
               <PlanPill tone="emerald">Best Value</PlanPill>
             </span>
             <div className="flex items-center gap-3">
-              <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-sm">
+              <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-navy to-navy text-white shadow-sm">
                 <Crown className="size-7" />
               </span>
               <div>
@@ -142,7 +142,7 @@ export default function ExplorePlansPage() {
             </ul>
             <Link
               href="/shop/full"
-              className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700"
+              className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-navy px-5 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-navy/90"
             >
               <Crown className="size-4" /> Get Full Access
             </Link>
@@ -154,7 +154,7 @@ export default function ExplorePlansPage() {
             className="flex flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
           >
             <div className="flex items-center gap-3">
-              <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-sky-50 text-sky-600 ring-1 ring-sky-100">
+              <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-[#fff5ea] text-[#a16207] ring-1 ring-[#ffc42d]/25">
                 <Puzzle className="size-7" />
               </span>
               <div>
@@ -183,7 +183,7 @@ export default function ExplorePlansPage() {
             </div>
             <Link
               href="/shop/build"
-              className="mt-auto inline-flex items-center justify-center gap-2 rounded-xl border border-sky-300 bg-white px-5 py-3.5 text-sm font-bold text-sky-700 transition hover:bg-sky-50"
+              className="mt-auto inline-flex items-center justify-center gap-2 rounded-xl border border-[#ffc42d]/40 bg-white px-5 py-3.5 text-sm font-bold text-[#a16207] transition hover:bg-[#fff5ea]"
             >
               Start Customizing <ArrowRight className="size-4" />
             </Link>
@@ -211,7 +211,7 @@ export default function ExplorePlansPage() {
           <h2 className="text-xl font-black tracking-tight text-navy">Frequently asked</h2>
           <p className="mt-2 text-sm leading-relaxed text-slate-600">
             Everything you need to know before you pick a plan. Still unsure?{' '}
-            <Link href="/support" className="font-semibold text-indigo-600 hover:underline">
+            <Link href="/support" className="font-semibold text-[#a16207] hover:underline">
               Talk to us
             </Link>
             .

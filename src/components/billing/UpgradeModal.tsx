@@ -77,7 +77,7 @@ export function UpgradeModal({
         onClick={stop}
         className="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-black/5"
       >
-        <div className="relative bg-gradient-to-br from-indigo-600 to-indigo-700 px-6 py-6 text-white">
+        <div className="relative bg-gradient-to-br from-navy to-navy px-6 py-6 text-white">
           <button
             ref={closeRef}
             type="button"
@@ -120,7 +120,7 @@ export function UpgradeModal({
             <Link
               href="/shop/full"
               onClick={onClose}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-navy/90"
             >
               Get Full Access <ArrowRight className="size-3.5" />
             </Link>
