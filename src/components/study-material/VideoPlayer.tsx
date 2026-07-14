@@ -6,7 +6,6 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Clock,
   ExternalLink,
   Loader2,
   Maximize2,
@@ -17,8 +16,6 @@ import {
 import { cn } from '@/lib/utils';
 import type { StudyMaterialItemDto } from '@/lib/api/study-material';
 
-const PROVIDER_LABEL: Record<string, string> = { VIMEO: 'Vimeo', GDRIVE: 'Google Drive', YOUTUBE: 'YouTube' };
-const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
 /** A native-feel video theatre — branded chrome around the provider embed, with
  *  fullscreen + theater modes, a watch-session timer, prev/next playlist navigation
@@ -42,7 +39,6 @@ function Player({
   const stageRef = useRef<HTMLDivElement>(null);
   const [full, setFull] = useState(false);
   const [theater, setTheater] = useState(false);
-  const [elapsed, setElapsed] = useState(0);
 
   const hasPrev = index > 0;
   const hasNext = index < playlist.length - 1;
@@ -51,13 +47,6 @@ function Player({
     if (document.fullscreenElement) void document.exitFullscreen();
     else void stageRef.current?.requestFullscreen?.();
   }, []);
-
-  // watch-session timer — resets when the video changes.
-  useEffect(() => {
-    setElapsed(0);
-    const t = setInterval(() => setElapsed((e) => e + 1), 1000);
-    return () => clearInterval(t);
-  }, [index]);
 
   useEffect(() => {
     const onFs = () => setFull(Boolean(document.fullscreenElement));
@@ -110,10 +99,11 @@ function Player({
           </span>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-bold">{item.title}</p>
-            <p className="text-[11px] text-white/50">
-              {item.provider ? PROVIDER_LABEL[item.provider] ?? 'Video' : 'Video'}
-              {playlist.length > 1 ? ` · ${index + 1} of ${playlist.length}` : ''}
-            </p>
+            {/* Playlist position only — the storage provider (Google Drive/Vimeo)
+                is an implementation detail and is deliberately not surfaced. */}
+            {playlist.length > 1 ? (
+              <p className="text-[11px] text-white/50">Lesson {index + 1} of {playlist.length}</p>
+            ) : null}
           </div>
           <button type="button" onClick={onClose} aria-label="Close" className="rounded-full bg-white/10 p-1.5 text-white transition hover:bg-white/20">
             <X className="size-4" />
@@ -160,7 +150,7 @@ function Player({
           {/* top-right stage controls */}
           <div className="absolute right-2 top-2 z-10 flex items-center gap-1.5 opacity-0 transition group-hover:opacity-100">
             {item.embedUrl && (
-              <a href={item.embedUrl.replace('/preview', '/view')} target="_blank" rel="noopener noreferrer" aria-label="Open in Google Drive" className="rounded-lg bg-black/50 p-1.5 text-white/90 transition hover:bg-black/70">
+              <a href={item.embedUrl.replace('/preview', '/view')} target="_blank" rel="noopener noreferrer" aria-label="Open in new tab" className="rounded-lg bg-black/50 p-1.5 text-white/90 transition hover:bg-black/70">
                 <ExternalLink className="size-4" />
               </a>
             )}
@@ -175,9 +165,6 @@ function Player({
 
         {/* controls footer */}
         <div className="flex flex-wrap items-center gap-3 px-5 py-3">
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-white/50">
-            <Clock className="size-3.5" /> Watching · {fmt(elapsed)}
-          </span>
           {playlist.length > 1 && (
             <div className="flex items-center gap-1">
               <button type="button" disabled={!hasPrev} onClick={() => onIndex(index - 1)} className="rounded-full bg-white/10 px-2.5 py-1.5 text-[11px] font-bold text-white transition hover:bg-white/20 disabled:opacity-40">
