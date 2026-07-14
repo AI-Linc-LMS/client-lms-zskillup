@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight, Calendar, Check, Loader2, Trophy, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { QuestionStem } from '@/components/practice/QuestionStem';
 import { PyqTag } from '@/components/practice/PyqTag';
 import { submitPracticeAttempt, type ApiAttemptResult, type ApiQuestion } from '@/lib/api/practice';
 import {
@@ -153,7 +154,7 @@ export function DailyChallenge() {
       ) : q ? (
         <div className="relative">
           <PyqTag companyIds={q.companyTags.map((t) => t.companyId)} years={q.yearTags ?? []} className="mb-2" />
-          <p className="text-lg font-bold leading-relaxed text-navy">{q.stem}</p>
+          <QuestionStem text={q.stem} className="text-lg font-bold leading-relaxed text-navy" />
           {multi ? <p className="mt-1 text-xs text-slate-500">Select all that apply.</p> : null}
           <div className="mt-3 space-y-2">
             {q.options.map((opt, i) => {

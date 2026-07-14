@@ -32,6 +32,7 @@ import { PointsBurst } from '@/components/adaptive/PointsBurst';
 import type { AdaptiveOption } from '@/lib/api/adaptive';
 import { getQuestionSolution, type QuestionSolutionDto } from '@/lib/api/question-solutions';
 import { MarkdownLite } from '@/components/ui/MarkdownLite';
+import { QuestionStem } from '@/components/practice/QuestionStem';
 
 /* Brand quiz palette — light surface with an orange accent. */
 const BRAND_GRAD = 'linear-gradient(135deg,#ffd24d 0%,#f5b400 100%)';
@@ -426,7 +427,7 @@ function AdaptiveQuizRunner({
             </div>
 
             <PyqTag companyIds={q.companyIds ?? []} years={q.yearTags ?? []} className="mt-5" />
-            <h2 className="mt-2 text-lg font-semibold leading-relaxed text-navy">{q.stem}</h2>
+            <QuestionStem text={q.stem} className="mt-2 text-lg font-semibold leading-relaxed text-navy" />
 
             <div className="mt-5 space-y-2.5">
               {q.options.map((opt: AdaptiveOption, i: number) => {
