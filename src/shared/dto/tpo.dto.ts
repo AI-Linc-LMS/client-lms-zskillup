@@ -181,6 +181,15 @@ export class CreateTpoAssessmentDto {
   @ArrayMaxSize(100)
   @IsUUID('all', { each: true })
   topicIds?: string[];
+
+  /** Restrict CODING sampling to these coding topics (primary tags). Empty = the
+   *  whole coding bank for the scope (company-tagged, or all in sectional mode). */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(50)
+  @IsString({ each: true })
+  @MaxLength(80, { each: true })
+  codingTopics?: string[];
 }
 
 /** Input for the live "questions available" preview (a subset of create). */
@@ -199,6 +208,13 @@ export class PreviewTpoAssessmentDto {
   @ArrayMaxSize(100)
   @IsUUID('all', { each: true })
   topicIds?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(50)
+  @IsString({ each: true })
+  @MaxLength(80, { each: true })
+  codingTopics?: string[];
 }
 
 /** How many questions the current selection actually has. */
