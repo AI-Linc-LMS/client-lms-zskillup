@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Logo } from './Logo';
@@ -58,17 +57,8 @@ export function TopBar() {
         <>
           {/* Primary nav */}
           <nav className="relative z-10 hidden items-center gap-1 lg:flex" aria-label="Primary">
+            {/* "Companies" removed — the Explore menu already surfaces company hubs. */}
             <ExploreMenu />
-            <Link
-              href="/dashboard/company"
-              className="group relative rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:text-navy"
-            >
-              Companies
-              <span
-                aria-hidden
-                className="absolute inset-x-3 -bottom-px h-px scale-x-0 bg-gradient-to-r from-orange to-amber-500 transition-transform duration-300 group-hover:scale-x-100"
-              />
-            </Link>
             <RecommendedMenu />
           </nav>
 
