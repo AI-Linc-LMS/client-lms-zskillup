@@ -18,6 +18,7 @@ import {
   X,
 } from 'lucide-react';
 import { getMe, updateMe, type ApiMe } from '@/lib/api/me';
+import { notifyProfileUpdated } from '@/lib/profile-events';
 import { useMySubscription } from '@/hooks/useMySubscription';
 import { CollegeCombobox } from '@/components/student/CollegeCombobox';
 import { getMyRegistrations, type ApiRegistration } from '@/lib/api/registrations';
@@ -153,9 +154,13 @@ export default function ProfilePage() {
         course: v.course.trim() || null,
         yearOfStudy: v.yearOfStudy ? Number(v.yearOfStudy) : null,
         // The canonical id is the source of truth — the server sets auth.users
-        // .college_id from it and denormalises the display name, so we no longer
-        // send free text (which left college_id NULL and broke the college board).
+        // .college_id from it and denormalises the display name. We ALSO send the
+        // name: for the "Add it / Other" free-text flow there is no collegeId, and
+        // without the name the chosen college was never persisted, so the College
+        // field stayed incomplete forever. (When collegeId IS set the server
+        // ignores this and uses the canonical name.)
         collegeId: v.collegeId || null,
+        collegeName: v.collegeName.trim() || null,
         passoutYear: v.passoutYear ? Number(v.passoutYear) : null,
         skills: v.skills,
         rolesInterested: v.roles,
@@ -163,6 +168,9 @@ export default function ProfilePage() {
       setMe(updated);
       setBaseline(snap(v));
       setSaved(true);
+      // Flip the dashboard banner + feature lock gates (server-driven completion)
+      // immediately, rather than leaving them stale until the next window focus.
+      notifyProfileUpdated();
       setTimeout(() => setSaved(false), 2500);
     } catch (e) {
       setErr(e instanceof ApiRequestError ? e.message : 'Could not save. Please try again.');

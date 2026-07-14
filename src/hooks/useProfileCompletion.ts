@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { getMe } from '@/lib/api/me';
 import { profileCompletion, type ProfileCompletion } from '@/lib/profile/completion';
+import { onProfileUpdated } from '@/lib/profile-events';
 
 export interface ProfileCompletionState extends ProfileCompletion {
   loading: boolean;
@@ -40,10 +41,14 @@ export function useProfileCompletion(): ProfileCompletionState {
     const onVis = () => document.visibilityState === 'visible' && check();
     window.addEventListener('focus', onFocus);
     document.addEventListener('visibilitychange', onVis);
+    // Re-fetch the moment the student saves their profile so the banner + feature
+    // lock gates flip immediately, instead of staying stale until a focus change.
+    const offProfile = onProfileUpdated(check);
     return () => {
       cancelled = true;
       window.removeEventListener('focus', onFocus);
       document.removeEventListener('visibilitychange', onVis);
+      offProfile();
     };
   }, []);
 
