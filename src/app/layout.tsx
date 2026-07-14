@@ -26,12 +26,16 @@ const instrument = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: 'ZSkillup - Placement preparation, simplified',
+  title: 'Prephasz | ZSkillup',
   description:
     'Real previous-year questions for TCS, Infosys, Wipro, Cognizant, Capgemini and Accenture. Live mock drives, expert instructors, and verified certificates accepted by 1,200+ campus placement cells.',
   icons: {
-    icon: '/images/prephasz-icon.png',
-    shortcut: '/images/prephasz-icon.png',
+    // Crisp SVG mark first (legible at 16px), PNG as a fallback for older browsers.
+    icon: [
+      { url: '/prephasz-favicon.svg', type: 'image/svg+xml' },
+      { url: '/images/prephasz-icon.png', type: 'image/png' },
+    ],
+    shortcut: '/prephasz-favicon.svg',
     apple: '/images/prephasz-icon.png',
   },
 };
