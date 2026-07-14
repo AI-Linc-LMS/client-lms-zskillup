@@ -99,11 +99,11 @@ function useMyReadiness(slug: string, name: string): { loading: boolean; pct: nu
 
 const READINESS_TIP = {
   title: 'Your readiness',
-  body: 'How prepared you are for this company right now - measured from your own practice, not an average.',
+  body: 'How prepared you are for this company right now - measured from your own practice, not a community average. This is the same score shown on your dashboard.',
   bullets: [
-    'Built from the skill mastery in your latest adaptive session',
-    'Weighted across the skills this company actually tests',
-    'Moves every time you finish an adaptive quiz',
+    'Built from your accuracy and skill mastery across the topics this company tests',
+    'Blends MCQ practice and coding, weighted by how much each section matters here',
+    'Updates automatically every time you practise or take a mock',
   ],
 };
 
