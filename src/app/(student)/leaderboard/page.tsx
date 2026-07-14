@@ -142,31 +142,35 @@ export default function LeaderboardPage() {
   return (
     <div className="space-y-6">
       {/* ── Hero rank card ─────────────────────────────────────────────────── */}
-      <section data-tour="lb:rank-hero" className="overflow-hidden rounded-3xl border border-orange/20 bg-gradient-to-br from-orange-50 via-amber-50/60 to-white p-6 sm:p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[#f5b400] lg:hidden">
+      <section data-tour="lb:rank-hero" className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] p-6 text-white sm:p-8">
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <div className="absolute -left-1/4 -top-1/2 size-[40vw] rounded-full bg-[#ffc42d]/15 blur-[120px]" />
+          <div className="absolute -bottom-1/2 -right-1/4 size-[34vw] rounded-full bg-[#f5b400]/12 blur-[120px]" />
+        </div>
+        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[#ffc42d] lg:hidden">
             <Globe2 className="size-3.5" /> {scopeLabel}
           </div>
           {/* Rank */}
           <div className="min-w-[180px]">
-            <p className="hidden items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[#f5b400] lg:flex">
+            <p className="hidden items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[#ffc42d] lg:flex">
               <Globe2 className="size-3.5" /> {scopeLabel}
-              {season && <span className="text-slate-500">· Week {season.week}</span>}
+              {season && <span className="text-white/50">· Week {season.week}</span>}
             </p>
             {myRank ? (
               <>
-                <p className="mt-1 text-sm font-semibold text-slate-600">You&apos;re Ranked</p>
-                <p className="text-6xl font-black leading-none text-[#f5b400]">#{myRank}</p>
+                <p className="mt-1 text-sm font-semibold text-white/70">You&apos;re Ranked</p>
+                <p className="text-6xl font-black leading-none text-[#ffc42d]">#{myRank}</p>
                 {topPct != null && (
-                  <span className="mt-3 inline-block rounded-full bg-white px-3 py-1 text-xs font-bold text-navy shadow-sm ring-1 ring-orange/20">
+                  <span className="mt-3 inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white ring-1 ring-inset ring-white/15 backdrop-blur">
                     Top {topPct}% of {fmt(data?.totalStudents ?? 0)} learners
                   </span>
                 )}
               </>
             ) : (
               <>
-                <p className="mt-1 text-2xl font-black text-navy">Climb the ranks</p>
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-1 text-2xl font-black text-white">Climb the ranks</p>
+                <p className="mt-1 text-sm text-white/70">
                   {me ? 'Practise to earn XP and claim your spot.' : 'Sign in to see your rank.'}
                 </p>
               </>
@@ -177,20 +181,20 @@ export default function LeaderboardPage() {
           <div className="flex-1 lg:px-8">
             {xpAway != null && nextEntry ? (
               <>
-                <p className="text-sm text-slate-600">
-                  You&apos;re only <span className="text-2xl font-black text-[#f5b400]">{fmt(xpAway)} XP</span>
+                <p className="text-sm text-white/70">
+                  You&apos;re only <span className="text-2xl font-black text-[#ffc42d]">{fmt(xpAway)} XP</span>
                 </p>
-                <p className="text-sm font-semibold text-slate-600">away from Rank #{nextEntry.rank}</p>
-                <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-orange/10">
+                <p className="text-sm font-semibold text-white/70">away from Rank #{nextEntry.rank}</p>
+                <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-white/10 ring-1 ring-inset ring-white/10">
                   <div className="h-full rounded-full bg-gradient-to-r from-[#ffc42d] to-[#f5b400]" style={{ width: `${progress}%` }} />
                 </div>
-                <div className="mt-1 flex justify-between text-[11px] font-semibold tabular-nums text-slate-500">
+                <div className="mt-1 flex justify-between text-[11px] font-semibold tabular-nums text-white/50">
                   <span>{fmt(myEntry?.totalXp ?? 0)} XP</span>
                   <span>{fmt(nextEntry.totalXp)} XP</span>
                 </div>
               </>
             ) : (
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-white/70">
                 {myRank === 1 ? "You're #1 - defend your throne! 👑" : 'Every drill earns XP. Streaks multiply it.'}
               </p>
             )}
@@ -198,14 +202,14 @@ export default function LeaderboardPage() {
 
           {/* Reset + trophy */}
           <div className="flex items-center gap-4">
-            <div className="rounded-2xl bg-white/80 px-4 py-3 text-center ring-1 ring-slate-100">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Resets in</p>
-              <p className="text-lg font-black text-navy">
+            <div className="rounded-2xl bg-white/[0.06] px-4 py-3 text-center ring-1 ring-inset ring-white/10 backdrop-blur">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-white/50">Resets in</p>
+              <p className="text-lg font-black text-white">
                 {season ? `${season.days}d ${season.hours}h` : '-'}
               </p>
-              <p className="text-[10px] text-slate-500">Sunday, 11:59 PM</p>
+              <p className="text-[10px] text-white/50">Sunday, 11:59 PM</p>
             </div>
-            <Trophy className="size-16 text-amber-400 drop-shadow-[0_8px_16px_rgba(245,158,11,0.35)]" />
+            <Trophy className="size-16 text-[#ffc42d] drop-shadow-[0_8px_16px_rgba(245,180,0,0.4)]" />
           </div>
         </div>
       </section>
