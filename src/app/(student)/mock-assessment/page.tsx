@@ -25,9 +25,9 @@ export default function MockAssessmentPage() {
 
       <ProfileLockGate feature="Mock Assessment" contentClassName="space-y-8">
       <Reveal>
-        <section data-tour="mock:hero" className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#12324a] via-[#0f2740] to-[#0a1a2c] p-6 text-white shadow-sm sm:p-8">
-          <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#38bdf8]/25 blur-3xl" />
-          <span aria-hidden className="pointer-events-none absolute -bottom-20 left-1/4 size-56 rounded-full bg-[#22d3ee]/20 blur-3xl" />
+        <section data-tour="mock:hero" className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] p-6 text-white shadow-sm sm:p-8">
+          <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#ffc42d]/25 blur-3xl" />
+          <span aria-hidden className="pointer-events-none absolute -bottom-20 left-1/4 size-56 rounded-full bg-[#f5b400]/20 blur-3xl" />
           <div className="relative">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-white/70 ring-1 ring-inset ring-white/15">
               <Brain className="size-3.5" /> Mock assessment
