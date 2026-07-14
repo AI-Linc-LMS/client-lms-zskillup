@@ -71,13 +71,21 @@ export function CalibrationResults({
   }
 
   return (
-    <ResultsView data={data} onReview={() => setShowReview(true)} />
+    <ResultsView data={data} report={report} onReview={() => setShowReview(true)} />
   );
 }
 
 // ── Presentation ──────────────────────────────────────────────────────────────
 
-function ResultsView({ data, onReview }: { data: CalibrationResultsDto; onReview: () => void }) {
+function ResultsView({
+  data,
+  report,
+  onReview,
+}: {
+  data: CalibrationResultsDto;
+  report: ApiMockReport;
+  onReview: () => void;
+}) {
   const tone = data.band === 'High' ? 'emerald' : data.band === 'Medium' ? 'amber' : 'orange';
   const best = data.best;
   const rest = useMemo(
