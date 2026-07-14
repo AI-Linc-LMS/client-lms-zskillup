@@ -30,13 +30,10 @@ export const metadata: Metadata = {
   description:
     'Real previous-year questions for TCS, Infosys, Wipro, Cognizant, Capgemini and Accenture. Live mock drives, expert instructors, and verified certificates accepted by 1,200+ campus placement cells.',
   icons: {
-    // Crisp SVG mark first (legible at 16px), PNG as a fallback for older browsers.
-    icon: [
-      { url: '/prephasz-favicon.svg', type: 'image/svg+xml' },
-      { url: '/images/prephasz-icon.png', type: 'image/png' },
-    ],
-    shortcut: '/prephasz-favicon.svg',
-    apple: '/images/prephasz-icon.png',
+    // The ZSkillup "Z" mark, matching the main zskillup site.
+    icon: '/z-favicon.png',
+    shortcut: '/z-favicon.png',
+    apple: '/z-favicon.png',
   },
 };
 
