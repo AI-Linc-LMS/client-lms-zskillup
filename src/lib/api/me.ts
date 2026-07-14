@@ -61,6 +61,8 @@ export interface UpdateMePayload {
    *  never did, which is why the "My College" leaderboard had nothing to filter on. */
   collegeId?: string | null;
   passoutYear?: number | null;
+  /** Profile photo — hosted URL or a small client-resized data URL. "" clears it. */
+  avatarUrl?: string | null;
 }
 
 export interface ApiMe {
