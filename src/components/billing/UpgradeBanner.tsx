@@ -27,10 +27,10 @@ export function UpgradeBanner() {
   return (
     <Link
       href="/upgrade"
-      className="group relative mb-5 flex items-center gap-3 overflow-hidden rounded-2xl border border-[#f37021]/25 bg-gradient-to-r from-[#fff4ec] to-white p-4 transition-shadow hover:shadow-[0_12px_30px_-18px_rgba(243,112,33,0.6)]"
+      className="group relative mb-5 flex items-center gap-3 overflow-hidden rounded-2xl border border-[#f5b400]/25 bg-gradient-to-r from-[#fff4ec] to-white p-4 transition-shadow hover:shadow-[0_12px_30px_-18px_rgba(245,180,0,0.6)]"
     >
       <span aria-hidden className="pointer-events-none absolute -right-6 -top-8 size-24 rounded-full bg-orange/10 blur-2xl" />
-      <span className="relative grid size-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_10px_24px_-12px_rgba(243,112,33,0.9)]">
+      <span className="relative grid size-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717] shadow-[0_10px_24px_-12px_rgba(245,180,0,0.9)]">
         <Sparkles className="size-5" />
       </span>
       <span className="relative min-w-0 flex-1">

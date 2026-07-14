@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
  * `variant`:
  *  - `default` — solid navy/blue (course completion, general progress)
  *  - `xp`      — colorful gradient matching the reference dashboard XP bar
- *                (yellow → orange → red)
+ *                (gold)
  */
 export function ProgressBar({
   value,
@@ -27,7 +27,7 @@ export function ProgressBar({
 
   const barColor =
     variant === 'xp'
-      ? 'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500'
+      ? 'bg-gradient-to-r from-yellow-400 via-orange-500 to-[#f5b400]'
       : 'bg-navy';
 
   return (

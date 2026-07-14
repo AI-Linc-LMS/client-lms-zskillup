@@ -81,7 +81,7 @@ export function PublicCertificateView({ id }: { id: string }) {
               <button
                 onClick={download}
                 disabled={busy}
-                className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105 disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-5 py-2.5 text-sm font-extrabold text-[#171717] shadow-sm transition hover:brightness-105 disabled:opacity-60"
               >
                 {busy ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />} Download PDF
               </button>
@@ -117,10 +117,10 @@ export function PublicHeader() {
   return (
     <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6">
       <Link href="/" className="flex items-center gap-2">
-        <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-[#f7a14e] to-[#f37021] font-display text-lg font-black text-white">Z</span>
+        <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-[#ffd24d] to-[#f5b400] font-display text-lg font-black text-[#171717]">Z</span>
         <span className="font-display text-base font-bold tracking-tight text-navy">ZSkillup</span>
       </Link>
-      <Link href="/dashboard" className="text-sm font-semibold text-orange hover:underline">
+      <Link href="/dashboard" className="text-sm font-semibold text-[#f5b400] hover:underline">
         Go to platform
       </Link>
     </header>

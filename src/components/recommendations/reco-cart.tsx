@@ -96,7 +96,7 @@ export function RecoAction({ r, block = false }: { r: RecommendationDto; block?:
       onClick={() =>
         cart?.add({ scope, scopeRef: r.scopeRef, period: BillingPeriod.ANNUAL, label: recoLabel(r) })
       }
-      className={base('bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-3 py-1.5 text-white shadow-sm hover:brightness-105')}
+      className={base('bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-3 py-1.5 text-[#171717] shadow-sm hover:brightness-105')}
     >
       <Plus className="size-3.5" /> Add to cart
     </button>

@@ -353,7 +353,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
       />
 
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-1/4 -top-1/3 size-[55vw] rounded-full bg-[#f37021]/15 blur-[130px]" />
+        <div className="absolute -left-1/4 -top-1/3 size-[55vw] rounded-full bg-[#f5b400]/15 blur-[130px]" />
         <div className="absolute -right-1/4 top-1/4 size-[45vw] rounded-full bg-[#2563eb]/15 blur-[130px]" />
       </div>
 
@@ -372,7 +372,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
               : 'bg-white/[0.06] text-white/70 ring-white/15',
           )}
         >
-          {proctored ? <Video className="size-3" /> : <Sparkles className="size-3 text-[#ffb877]" />}
+          {proctored ? <Video className="size-3" /> : <Sparkles className="size-3 text-[#ffc42d]" />}
           {proctored ? 'Proctored Assessment' : 'Mock Test'}
         </span>
       </div>
@@ -380,7 +380,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
       <main className="relative z-10 mx-auto max-w-5xl px-5 pb-16 pt-2 sm:px-10">
         <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#ffb877]">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#ffc42d]">
               {proctored ? 'ZSkillup placement assessment' : 'ZSkillup mock drive'}
             </p>
             <h1 className="mt-3 text-3xl font-black leading-[1.08] tracking-tight sm:text-4xl sm:leading-[1.05] md:text-[52px]">
@@ -400,7 +400,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
                   key={label}
                   className="rounded-2xl border border-white/10 bg-white/[0.05] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur"
                 >
-                  <Icon className="size-4 text-[#ffb877]" aria-hidden="true" />
+                  <Icon className="size-4 text-[#ffc42d]" aria-hidden="true" />
                   <p className="mt-3 text-[10px] font-bold uppercase tracking-widest text-white/45">{label}</p>
                   <p className="mt-1 text-xl font-black text-white">{value}</p>
                 </div>
@@ -412,7 +412,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
                 type="button"
                 onClick={beginAttempt}
                 disabled={starting}
-                className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-b from-[#f7a14e] to-[#f37021] px-7 py-3.5 text-[15px] font-extrabold text-white shadow-[0_18px_40px_-14px_rgba(243,112,33,0.9)] transition-transform hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-60"
+                className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-b from-[#ffd24d] to-[#f5b400] px-7 py-3.5 text-[15px] font-extrabold text-[#171717] shadow-[0_18px_40px_-14px_rgba(245,180,0,0.9)] transition-transform hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-60"
               >
                 <span aria-hidden className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
                 {starting ? <Loader2 className="size-4 animate-spin" /> : proctored ? <ShieldCheck className="size-4" /> : <Timer className="size-4" />}
@@ -449,9 +449,9 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
             <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-5 backdrop-blur">
               <p className="text-[10px] font-bold uppercase tracking-widest text-white/45">What to expect</p>
               <ul className="mt-3 space-y-3 text-[13px] leading-snug text-white/75">
-                <li className="flex gap-3"><Clock className="mt-0.5 size-4 shrink-0 text-[#ffb877]" /> A single countdown for the whole {kind} - pace yourself.</li>
-                <li className="flex gap-3"><Target className="mt-0.5 size-4 shrink-0 text-[#ffb877]" /> Jump between questions freely; change answers until you submit.</li>
-                <li className="flex gap-3"><BarChart3 className="mt-0.5 size-4 shrink-0 text-[#ffb877]" /> Get a percentile, topic breakdown, and full answer review.</li>
+                <li className="flex gap-3"><Clock className="mt-0.5 size-4 shrink-0 text-[#ffc42d]" /> A single countdown for the whole {kind} - pace yourself.</li>
+                <li className="flex gap-3"><Target className="mt-0.5 size-4 shrink-0 text-[#ffc42d]" /> Jump between questions freely; change answers until you submit.</li>
+                <li className="flex gap-3"><BarChart3 className="mt-0.5 size-4 shrink-0 text-[#ffc42d]" /> Get a percentile, topic breakdown, and full answer review.</li>
               </ul>
             </div>
           </aside>
@@ -695,7 +695,7 @@ function MockRunningView({
                 className={cn(
                   'relative flex shrink-0 items-center gap-2 overflow-hidden rounded-xl px-4 py-2 text-sm font-bold transition-all',
                   active
-                    ? 'bg-gradient-to-r from-[#f7a14e] to-[#f37021] text-white shadow-[0_8px_20px_-8px_rgba(243,112,33,0.7)]'
+                    ? 'bg-gradient-to-r from-[#ffd24d] to-[#f5b400] text-[#171717] shadow-[0_8px_20px_-8px_rgba(245,180,0,0.7)]'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
                 )}
               >
@@ -703,7 +703,7 @@ function MockRunningView({
                 <span
                   className={cn(
                     'rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums',
-                    active ? 'bg-white/25 text-white' : complete ? 'bg-emerald-100 text-emerald-700' : 'bg-white text-slate-600',
+                    active ? 'bg-white/25 text-[#171717]' : complete ? 'bg-emerald-100 text-emerald-700' : 'bg-white text-slate-600',
                   )}
                 >
                   {done}/{s.items.length}

@@ -103,12 +103,12 @@ export function RewardOverlay({
           {/* glow */}
           <div
             aria-hidden
-            className="pointer-events-none absolute -top-24 left-1/2 size-56 -translate-x-1/2 rounded-full bg-[#f37021]/30 blur-3xl"
+            className="pointer-events-none absolute -top-24 left-1/2 size-56 -translate-x-1/2 rounded-full bg-[#f5b400]/30 blur-3xl"
           />
 
           {/* Emblem */}
           <motion.div
-            className="relative mx-auto grid size-20 place-items-center rounded-3xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] shadow-[0_10px_40px_-8px_rgba(243,112,33,0.7)]"
+            className="relative mx-auto grid size-20 place-items-center rounded-3xl bg-gradient-to-br from-[#ffd24d] to-[#f5b400] shadow-[0_10px_40px_-8px_rgba(245,180,0,0.7)]"
             initial={{ scale: 0, rotate: -25 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: 'spring', stiffness: 220, damping: 12, delay: 0.1 }}
@@ -145,7 +145,7 @@ export function RewardOverlay({
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4 }}
           >
-            <span className="text-[40px] font-black leading-none tabular-nums text-[#ffb877]">
+            <span className="text-[40px] font-black leading-none tabular-nums text-[#ffc42d]">
               +{xp}
             </span>
             <span className="text-sm font-bold uppercase tracking-wider text-white/60">XP</span>
@@ -163,7 +163,7 @@ export function RewardOverlay({
             </div>
             <div className="h-3 overflow-hidden rounded-full bg-white/10">
               <motion.div
-                className="h-full rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021]"
+                className="h-full rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400]"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -219,7 +219,7 @@ export function RewardOverlay({
 
           <motion.button
             onClick={onClose}
-            className="mt-7 w-full rounded-2xl bg-gradient-to-b from-[#f7a14e] to-[#f37021] py-3.5 text-sm font-extrabold uppercase tracking-wide text-white shadow-lg transition-transform active:scale-[0.98]"
+            className="mt-7 w-full rounded-2xl bg-gradient-to-b from-[#ffd24d] to-[#f5b400] py-3.5 text-sm font-extrabold uppercase tracking-wide text-[#171717] shadow-lg transition-transform active:scale-[0.98]"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.0 }}

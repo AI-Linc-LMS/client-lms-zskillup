@@ -82,7 +82,7 @@ export function InterviewProctorGate({ id }: { id: string }) {
             <button
               type="button"
               onClick={guard.enterFullscreen}
-              className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105"
+              className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-5 py-2.5 text-sm font-extrabold text-[#171717] shadow-sm transition hover:brightness-105"
             >
               <Maximize2 className="size-4" /> Return to fullscreen
             </button>
@@ -127,7 +127,7 @@ function IntroGate({ onStart, starting }: { onStart: () => void; starting: boole
             type="button"
             onClick={onStart}
             disabled={starting}
-            className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105 disabled:opacity-70"
+            className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-5 py-3 text-sm font-extrabold text-[#171717] shadow-sm transition hover:brightness-105 disabled:opacity-70"
           >
             {starting ? <Loader2 className="size-4 animate-spin" /> : <Maximize2 className="size-4" />}
             Enter fullscreen &amp; start interview

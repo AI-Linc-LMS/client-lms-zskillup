@@ -31,9 +31,9 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 const TYPE_STYLE: Record<string, { icon: LucideIcon; from: string; to: string }> = {
   REGISTRATION: { icon: BadgeCheck, from: '#34d399', to: '#059669' },
   ASSESSMENT_SCHEDULED: { icon: CalendarClock, from: '#7c6cf5', to: '#5b3bf5' },
-  ASSESSMENT_REMINDER: { icon: BellRing, from: '#f7a14e', to: '#f37021' },
+  ASSESSMENT_REMINDER: { icon: BellRing, from: '#ffd24d', to: '#f5b400' },
   RESULT: { icon: Trophy, from: '#f5c451', to: '#e0a91b' },
-  BROADCAST: { icon: Megaphone, from: '#f7a14e', to: '#f37021' },
+  BROADCAST: { icon: Megaphone, from: '#ffd24d', to: '#f5b400' },
   GENERIC: { icon: Sparkles, from: '#94a3b8', to: '#64748b' },
 };
 
@@ -124,17 +124,17 @@ export function NotificationsBell() {
         whileTap={reduce ? undefined : { scale: 0.92 }}
         className={cn(
           'group relative grid size-9 place-items-center rounded-full border transition-all duration-200',
-          'text-slate-600 hover:text-[#f37021]',
+          'text-slate-600 hover:text-[#f5b400]',
           open
-            ? 'border-[#f37021]/30 bg-[#f37021]/10 text-[#f37021] ring-2 ring-[#f37021]/15'
-            : 'border-slate-200/80 bg-white hover:-translate-y-px hover:border-[#f37021]/30 hover:bg-[#f37021]/5 hover:shadow-sm',
+            ? 'border-[#f5b400]/30 bg-[#f5b400]/10 text-[#f5b400] ring-2 ring-[#f5b400]/15'
+            : 'border-slate-200/80 bg-white hover:-translate-y-px hover:border-[#f5b400]/30 hover:bg-[#f5b400]/5 hover:shadow-sm',
         )}
       >
         {/* faint colored glow that intensifies on hover/open */}
         <span
           aria-hidden
           className={cn(
-            'pointer-events-none absolute inset-0 rounded-full bg-[#f37021]/20 opacity-0 blur-md transition-opacity duration-300',
+            'pointer-events-none absolute inset-0 rounded-full bg-[#f5b400]/20 opacity-0 blur-md transition-opacity duration-300',
             open ? 'opacity-60' : 'group-hover:opacity-50',
           )}
         />
@@ -159,7 +159,7 @@ export function NotificationsBell() {
               aria-hidden="true"
             >
               {!reduce ? (
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#f37021] opacity-60" />
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#f5b400] opacity-60" />
               ) : null}
               <span className="relative inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-gradient-to-br from-[#ff8a4c] to-[#f5491e] px-1 text-[10px] font-bold leading-none text-white shadow-[0_2px_8px_-2px_rgba(243,73,30,0.7)] ring-2 ring-white">
                 {unreadCount > 9 ? '9+' : unreadCount}
@@ -185,7 +185,7 @@ export function NotificationsBell() {
             <div className="relative overflow-hidden border-b border-slate-100 px-4 py-3.5">
               <div
                 aria-hidden
-                className="pointer-events-none absolute -right-8 -top-10 size-28 rounded-full bg-[#f37021]/10 blur-2xl"
+                className="pointer-events-none absolute -right-8 -top-10 size-28 rounded-full bg-[#f5b400]/10 blur-2xl"
               />
               <div
                 aria-hidden
@@ -193,7 +193,7 @@ export function NotificationsBell() {
               />
               <div className="relative flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
-                  <span className="flex size-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-sm">
+                  <span className="flex size-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717] shadow-sm">
                     <Bell className="size-4" aria-hidden="true" />
                   </span>
                   <div>
@@ -209,7 +209,7 @@ export function NotificationsBell() {
                   <button
                     type="button"
                     onClick={onMarkAll}
-                    className="inline-flex items-center gap-1 rounded-full bg-[#f37021]/10 px-2.5 py-1 text-[11px] font-semibold text-[#f37021] transition-colors hover:bg-[#f37021]/20"
+                    className="inline-flex items-center gap-1 rounded-full bg-[#f5b400]/10 px-2.5 py-1 text-[11px] font-semibold text-[#f5b400] transition-colors hover:bg-[#f5b400]/20"
                   >
                     <CheckCheck className="size-3.5" /> Mark all read
                   </button>
@@ -235,7 +235,7 @@ export function NotificationsBell() {
                         onClick={() => onRowClick(n)}
                         className={cn(
                           'group/row relative flex w-full gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50',
-                          unread && 'bg-[#f37021]/[0.03]',
+                          unread && 'bg-[#f5b400]/[0.03]',
                         )}
                       >
                         {unread ? (
@@ -256,7 +256,7 @@ export function NotificationsBell() {
                             {unread ? (
                               <span
                                 aria-hidden
-                                className="mt-1 size-2 shrink-0 rounded-full bg-[#f37021] ring-2 ring-[#f37021]/20"
+                                className="mt-1 size-2 shrink-0 rounded-full bg-[#f5b400] ring-2 ring-[#f5b400]/20"
                               />
                             ) : null}
                           </div>
@@ -288,7 +288,7 @@ function EmptyState({ reduce }: { reduce: boolean }) {
       {/* layered glow blobs for depth */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-6 size-32 -translate-x-1/2 rounded-full bg-[#f37021]/[0.07] blur-2xl"
+        className="pointer-events-none absolute left-1/2 top-6 size-32 -translate-x-1/2 rounded-full bg-[#f5b400]/[0.07] blur-2xl"
       />
       <motion.div
         initial={reduce ? false : { scale: 0.85, opacity: 0 }}
@@ -299,7 +299,7 @@ function EmptyState({ reduce }: { reduce: boolean }) {
         {/* soft rings */}
         <span className="absolute inset-0 rounded-full bg-gradient-to-br from-slate-100 to-slate-50 ring-1 ring-inset ring-slate-200/80" />
         <span className="absolute inset-2 rounded-full bg-white ring-1 ring-slate-100" />
-        <span className="relative flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_8px_20px_-8px_rgba(243,112,33,0.7)]">
+        <span className="relative flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717] shadow-[0_8px_20px_-8px_rgba(245,180,0,0.7)]">
           <Sparkles className="size-[18px]" aria-hidden="true" />
         </span>
       </motion.div>

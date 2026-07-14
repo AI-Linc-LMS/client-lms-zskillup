@@ -46,12 +46,12 @@ export function CertificateVerifyForm({ initialId = '' }: { initialId?: string }
             value={value}
             onChange={(e) => setValue(e.target.value.toUpperCase())}
             placeholder="ZS-XX-XXXXXXXX"
-            className="h-12 flex-1 rounded-full border border-slate-200 bg-white px-5 font-mono text-sm uppercase tracking-wider text-navy shadow-sm outline-none transition focus:border-orange"
+            className="h-12 flex-1 rounded-full border border-slate-200 bg-white px-5 font-mono text-sm uppercase tracking-wider text-navy shadow-sm outline-none transition focus:border-[#f5b400]"
           />
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex h-12 shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-6 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105 disabled:opacity-60"
+            className="inline-flex h-12 shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-6 text-sm font-extrabold text-[#171717] shadow-sm transition hover:brightness-105 disabled:opacity-60"
           >
             {loading ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />} Verify
           </button>

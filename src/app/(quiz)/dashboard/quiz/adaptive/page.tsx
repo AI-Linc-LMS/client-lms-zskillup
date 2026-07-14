@@ -34,7 +34,7 @@ import { getQuestionSolution, type QuestionSolutionDto } from '@/lib/api/questio
 import { MarkdownLite } from '@/components/ui/MarkdownLite';
 
 /* Brand quiz palette — light surface with an orange accent. */
-const BRAND_GRAD = 'linear-gradient(135deg,#f7a14e 0%,#f37021 100%)';
+const BRAND_GRAD = 'linear-gradient(135deg,#ffd24d 0%,#f5b400 100%)';
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 const masteryPct = (theta: number) => Math.round((1 / (1 + Math.exp(-1.3 * theta))) * 100);
@@ -238,7 +238,7 @@ function AdaptiveQuizRunner({
     <div className="relative min-h-screen overflow-hidden bg-background text-navy">
       {/* radial glow backdrop */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-1/4 -top-1/4 size-[60vw] rounded-full bg-[#f37021]/[0.05] blur-[120px]" />
+        <div className="absolute -left-1/4 -top-1/4 size-[60vw] rounded-full bg-[#f5b400]/[0.05] blur-[120px]" />
         <div className="absolute -right-1/4 -top-1/3 size-[55vw] rounded-full bg-[#2563eb]/[0.05] blur-[120px]" />
       </div>
 
@@ -333,7 +333,7 @@ function AdaptiveQuizRunner({
             </p>
             <div className="relative mt-2 h-2 rounded-full" style={{ background: 'linear-gradient(90deg,#34d399,#818cf8 50%,#f87171)' }}>
               <motion.span
-                className="absolute top-1/2 size-3.5 -translate-y-1/2 rounded-full bg-white shadow ring-2 ring-[#f37021]"
+                className="absolute top-1/2 size-3.5 -translate-y-1/2 rounded-full bg-white shadow ring-2 ring-[#f5b400]"
                 initial={false}
                 animate={{ left: markerLeft }}
                 transition={{ type: 'spring', stiffness: 220, damping: 26 }}
@@ -532,7 +532,7 @@ function AdaptiveQuizRunner({
               {revealed ? (
                 <button
                   onClick={handleAdvance}
-                  className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-extrabold text-white transition-[filter] hover:brightness-105"
+                  className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-extrabold text-[#171717] transition-[filter] hover:brightness-105"
                   style={{ background: BRAND_GRAD }}
                 >
                   {nextCta} <ArrowRight className="size-4" />
@@ -541,7 +541,7 @@ function AdaptiveQuizRunner({
                 <button
                   onClick={handleSubmit}
                   disabled={!canSubmit}
-                  className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-extrabold text-white transition-[filter] enabled:hover:brightness-105 disabled:opacity-40"
+                  className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-extrabold text-[#171717] transition-[filter] enabled:hover:brightness-105 disabled:opacity-40"
                   style={{ background: BRAND_GRAD }}
                 >
                   {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
@@ -841,7 +841,7 @@ function Chip({ children }: { children: React.ReactNode }) {
 function Pill({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <span
-      className={cn('inline-block rounded-full px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-white', className)}
+      className={cn('inline-block rounded-full px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-[#171717]', className)}
       style={{ background: BRAND_GRAD }}
     >
       {children}

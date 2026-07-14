@@ -632,7 +632,7 @@ export function InterviewRunner({ id }: { id: string }) {
             <button
               onClick={doNext}
               disabled={busy || submitting || transcribing}
-              className={cn('inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:shadow disabled:opacity-50', isFinal ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700' : 'bg-gradient-to-r from-orange to-[#f5872f] hover:brightness-105')}
+              className={cn('inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold shadow-sm transition-all hover:shadow disabled:opacity-50', isFinal ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white hover:from-emerald-700' : 'bg-gradient-to-r from-orange to-[#f5b400] text-[#171717] hover:brightness-105')}
             >
               {busy || submitting || transcribing ? <Loader2 className="size-4 animate-spin" /> : isFinal ? <Sparkles className="size-4" /> : <Send className="size-4" />}
               {isFinal ? 'Finish & get feedback' : 'Next question'}
@@ -708,7 +708,7 @@ function TurnDots({ current, total }: { current: number; total: number }) {
 }
 
 function TimerRing({ frac, label, low }: { frac: number; label: string; low: boolean }) {
-  const stroke = low ? '#ef4444' : '#f37021';
+  const stroke = low ? '#ef4444' : '#f5b400';
   return (
     <span className={cn('inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-bold tabular-nums', low ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-700')}>
       <svg viewBox="0 0 36 36" className="size-4 -rotate-90">

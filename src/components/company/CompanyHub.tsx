@@ -210,7 +210,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
                   />
                 )}
                 <Icon
-                  className={cn('size-4 transition-colors', active ? 'text-[#ffb877]' : 'text-slate-500')}
+                  className={cn('size-4 transition-colors', active ? 'text-[#ffc42d]' : 'text-slate-500')}
                   aria-hidden="true"
                 />
                 {t}
@@ -325,12 +325,12 @@ function CompanyHero({ content, reduce }: { content: HubContent; reduce: boolean
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Sparkles className="size-3.5 text-[#ffb877]" />
+            <Sparkles className="size-3.5 text-[#ffc42d]" />
             Company hub
             {c.badge ? (
               <>
                 <span aria-hidden className="size-1 rounded-full bg-white/30" />
-                <span className="text-[#ffb877]">{c.badge}</span>
+                <span className="text-[#ffc42d]">{c.badge}</span>
               </>
             ) : null}
           </motion.div>
@@ -391,7 +391,7 @@ function CompanyHero({ content, reduce }: { content: HubContent; reduce: boolean
                 transition={{ duration: 0.5, delay: 0.22 + i * 0.07 }}
               >
                 <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/45">
-                  <f.icon className="size-3 text-[#ffb877]" aria-hidden="true" />
+                  <f.icon className="size-3 text-[#ffc42d]" aria-hidden="true" />
                   {f.label}
                 </span>
                 <p className="mt-1 truncate text-sm font-extrabold text-white">{f.value}</p>
@@ -408,7 +408,7 @@ function CompanyHero({ content, reduce }: { content: HubContent; reduce: boolean
           >
             <Link
               href={`/practice?company=${c.slug}`}
-              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-b from-[#f7a14e] to-[#f37021] px-5 py-2.5 text-sm font-extrabold text-white shadow-[0_14px_34px_-10px_rgba(243,112,33,0.85)] transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
+              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-b from-[#ffd24d] to-[#f5b400] px-5 py-2.5 text-sm font-extrabold text-[#171717] shadow-[0_14px_34px_-10px_rgba(245,180,0,0.85)] transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
             >
               <span
                 aria-hidden
@@ -472,8 +472,8 @@ function ReadinessRing({ pct, reduce }: { pct: number | null; reduce: boolean })
       <svg viewBox="0 0 120 120" className="size-full -rotate-90">
         <defs>
           <linearGradient id="readyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#f7a14e" />
-            <stop offset="55%" stopColor="#f37021" />
+            <stop offset="0%" stopColor="#ffd24d" />
+            <stop offset="55%" stopColor="#f5b400" />
             <stop offset="100%" stopColor="#6d3bf5" />
           </linearGradient>
         </defs>
@@ -501,7 +501,7 @@ function ReadinessRing({ pct, reduce }: { pct: number | null; reduce: boolean })
             <span className="text-2xl text-white/70">%</span>
           </span>
         )}
-        <span className="mt-0.5 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-widest text-[#ffb877]">
+        <span className="mt-0.5 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-widest text-[#ffc42d]">
           <Gauge className="size-3" aria-hidden="true" /> ready
         </span>
       </div>

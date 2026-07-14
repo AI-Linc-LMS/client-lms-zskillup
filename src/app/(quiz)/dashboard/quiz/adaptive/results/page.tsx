@@ -33,7 +33,7 @@ import {
   type NarrationRemediationPath,
 } from '@/lib/api/adaptive';
 
-const BRAND_GRAD = 'linear-gradient(135deg,#f7a14e 0%,#f37021 100%)';
+const BRAND_GRAD = 'linear-gradient(135deg,#ffd24d 0%,#f5b400 100%)';
 
 /** Humanise an engine skill key for a button label. */
 const prettySkill = (s: string) =>
@@ -133,7 +133,7 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
       {/* ── Results hero (dark navy so the accuracy donut + headline read) ── */}
       <div className="relative overflow-hidden border-b border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] text-white">
         <div aria-hidden className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-1/4 -top-1/3 size-[55vw] rounded-full bg-[#f37021]/15 blur-[120px]" />
+          <div className="absolute -left-1/4 -top-1/3 size-[55vw] rounded-full bg-[#f5b400]/15 blur-[120px]" />
           <div className="absolute -right-1/4 -top-1/4 size-[50vw] rounded-full bg-[#2563eb]/15 blur-[120px]" />
         </div>
         <div className="relative z-10 mx-auto max-w-5xl px-5 pb-8 pt-6 sm:px-6">
@@ -141,7 +141,7 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
             <Link href={back.href} className="inline-flex items-center gap-1.5 text-xs text-white/60 transition-colors hover:text-white">
               <ArrowLeft className="size-3.5" /> {back.label}
             </Link>
-            <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#ffb877]">
+            <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#ffc42d]">
               Session results
             </span>
           </div>
@@ -151,7 +151,7 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
               <AccuracyDonut accuracy={results.accuracy} />
             </div>
             <div className="min-w-0 flex-1 text-center sm:text-left">
-              <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-white" style={{ background: BRAND_GRAD }}>
+              <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-[#171717]" style={{ background: BRAND_GRAD }}>
                 <Sparkles className="size-3" /> Your results read
               </div>
               {headline.loading ? (

@@ -99,7 +99,7 @@ export function CertificatesGallery() {
                   <span className="font-normal text-white/45"> · {next.tagline}</span>
                 </p>
                 <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/12">
-                  <div className="h-full rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f5cf5a] transition-[width] duration-700" style={{ width: `${nextSegPct}%` }} />
+                  <div className="h-full rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5cf5a] transition-[width] duration-700" style={{ width: `${nextSegPct}%` }} />
                 </div>
               </div>
               <span className="shrink-0 text-right">
@@ -161,7 +161,7 @@ function JourneyRail({ certs, totalXp }: { certs: MyCertificateDto[]; totalXp: n
       <div className="relative h-16 min-w-[560px]">
         <div className="absolute inset-x-0 top-5 h-1 rounded-full bg-white/12" />
         <div
-          className="absolute left-0 top-5 h-1 rounded-full bg-gradient-to-r from-[#f7a14e] via-[#f0a844] to-[#f5cf5a] transition-[width] duration-700"
+          className="absolute left-0 top-5 h-1 rounded-full bg-gradient-to-r from-[#ffd24d] via-[#f0a844] to-[#f5cf5a] transition-[width] duration-700"
           style={{ width: `${fillPct}%` }}
         />
         {certs.map((c, i) => {
@@ -242,7 +242,7 @@ function CertificateCard({
               </span>
               <span className="text-xs font-bold text-navy">{(cert.xp - totalXp).toLocaleString()} XP to unlock</span>
               <div className="h-1.5 w-32 overflow-hidden rounded-full bg-slate-200">
-                <div className="h-full rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021]" style={{ width: `${pct}%` }} />
+                <div className="h-full rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400]" style={{ width: `${pct}%` }} />
               </div>
             </div>
           </div>
@@ -398,7 +398,7 @@ function CertificateModal({
             <button
               onClick={download}
               disabled={busy || !issued}
-              className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-5 py-2 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105 disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-5 py-2 text-sm font-extrabold text-[#171717] shadow-sm transition hover:brightness-105 disabled:opacity-60"
             >
               {busy ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />} Download PDF
             </button>

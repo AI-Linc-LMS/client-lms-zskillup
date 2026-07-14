@@ -113,7 +113,7 @@ export function CodingWorkspace({ slug }: { slug: string }) {
       <div className="rounded-2xl border border-slate-200/80 bg-white p-10 text-center shadow-sm">
         <CircleSlash className="mx-auto mb-3 size-8 text-slate-400" />
         <p className="text-sm font-semibold text-navy">Problem not found</p>
-        <button type="button" onClick={goBack} className="mt-3 inline-block text-sm font-bold text-orange">
+        <button type="button" onClick={goBack} className="mt-3 inline-block text-sm font-bold text-[#f5b400]">
           ← Back
         </button>
       </div>
@@ -193,7 +193,7 @@ export function CodingWorkspace({ slug }: { slug: string }) {
         >
           {problem.difficulty}
         </span>
-        <span className="rounded-full bg-orange/10 px-2.5 py-0.5 text-[11px] font-bold text-orange">
+        <span className="rounded-full bg-[#f5b400]/10 px-2.5 py-0.5 text-[11px] font-bold text-[#f5b400]">
           +{problem.xpReward} XP
         </span>
         {solved ? (
@@ -262,7 +262,7 @@ export function CodingWorkspace({ slug }: { slug: string }) {
               <select
                 value={lang}
                 onChange={(e) => setLang(e.target.value)}
-                className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-sm font-semibold text-slate-100 outline-none focus:border-orange/60"
+                className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-sm font-semibold text-slate-100 outline-none focus:border-[#f5b400]/60"
               >
                 {languages.map((l) => (
                   <option key={l.name} value={l.name} className="text-slate-900">
@@ -300,7 +300,7 @@ export function CodingWorkspace({ slug }: { slug: string }) {
               <button
                 onClick={() => run('submit')}
                 disabled={running !== null || code.trim().length === 0}
-                className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-[#f37021] to-[#e85c0a] px-5 py-1.5 text-sm font-bold text-white shadow-sm hover:brightness-105 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-[#ffd24d] to-[#f5b400] px-5 py-1.5 text-sm font-bold text-[#171717] shadow-sm hover:brightness-105 disabled:opacity-50"
               >
                 {running === 'submit' ? (
                   <Loader2 className="size-4 animate-spin" />

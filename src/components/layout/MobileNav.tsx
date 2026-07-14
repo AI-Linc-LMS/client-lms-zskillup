@@ -107,7 +107,7 @@ export function MobileNav() {
                               className={cn(
                                 'flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm transition-colors',
                                 active
-                                  ? 'bg-[#f37021]/10 font-semibold text-[var(--color-primary)]'
+                                  ? 'bg-[#f5b400]/10 font-semibold text-[var(--color-primary)]'
                                   : 'font-medium text-slate-600 hover:bg-slate-100 hover:text-navy',
                               )}
                             >
@@ -116,7 +116,7 @@ export function MobileNav() {
                                 className={cn(
                                   'flex size-7 shrink-0 items-center justify-center rounded-lg',
                                   active
-                                    ? 'bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_4px_12px_-4px_rgba(243,112,33,0.7)]'
+                                    ? 'bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717] shadow-[0_4px_12px_-4px_rgba(245,180,0,0.7)]'
                                     : 'text-slate-500',
                                 )}
                               >

@@ -38,7 +38,7 @@ export function PrepareHero() {
     <section className="relative overflow-hidden rounded-2xl bg-navy p-8 text-white shadow-sm sm:p-10">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_100%_0%,rgba(243,112,33,0.18),transparent),radial-gradient(50%_50%_at_0%_100%,rgba(56,189,248,0.12),transparent)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_100%_0%,rgba(245,180,0,0.18),transparent),radial-gradient(50%_50%_at_0%_100%,rgba(56,189,248,0.12),transparent)]"
       />
       <div className="relative">
         <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/60">
@@ -122,7 +122,7 @@ const CATEGORY_ACCENT: Record<ApiCourseSummary['category'], string> = {
   APTITUDE: 'from-teal-600 to-emerald-700',
   PROGRAMMING_DSA: 'from-blue-700 to-indigo-900',
   COMMUNICATION_HR: 'from-rose-500 to-red-600',
-  MOCK_DRIVE: 'from-orange-500 to-amber-600',
+  MOCK_DRIVE: 'from-[#ffd24d] to-[#f5b400]',
 };
 
 export function PrepareCatalog() {

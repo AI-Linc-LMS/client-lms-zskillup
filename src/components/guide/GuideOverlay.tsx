@@ -276,7 +276,7 @@ export function GuideOverlay({
               <button
                 type="button"
                 onClick={onNext}
-                className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-4 py-1.5 text-xs font-extrabold text-white shadow-sm transition hover:brightness-105"
+                className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-4 py-1.5 text-xs font-extrabold text-[#171717] shadow-sm transition hover:brightness-105"
               >
                 {isLast ? (
                   <>
