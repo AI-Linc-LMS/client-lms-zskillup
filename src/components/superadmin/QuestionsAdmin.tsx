@@ -31,6 +31,7 @@ import {
 } from '@/lib/api/admin';
 import { QuestionDifficulty, QuestionStatus, QuestionType } from '@/shared/enums';
 import type { AdminCreateQuestionDto } from '@/shared/dto/admin-questions.dto';
+import { resizeImageToDataUrl } from '@/lib/image';
 
 const TYPE_LABEL: Record<string, string> = {
   MCQ: 'Single choice',
@@ -697,13 +698,19 @@ function QuestionDetailDrawer({
 }) {
   const [detail, setDetail] = useState<AdminQuestionDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Diagram editor (existing questions): local draft + explicit save.
+  const [image, setImage] = useState('');
+  const [imageBusy, setImageBusy] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     setDetail(null);
     getAdminQuestion(id)
       .then((d) => {
-        if (!cancelled) setDetail(d);
+        if (!cancelled) {
+          setDetail(d);
+          setImage(d.question.imageUrl ?? '');
+        }
       })
       .catch((e) => {
         if (!cancelled) setError(e instanceof ApiRequestError ? e.message : 'Could not load question.');
@@ -714,6 +721,19 @@ function QuestionDetailDrawer({
   }, [id]);
 
   const q = detail?.question;
+  const imageDirty = !!detail && image !== (detail.question.imageUrl ?? '');
+
+  const saveImage = async () => {
+    setImageBusy(true);
+    try {
+      await updateAdminQuestion(id, { imageUrl: image });
+      setDetail((d) => (d ? { ...d, question: { ...d.question, imageUrl: image || null } } : d));
+    } catch (e) {
+      setError(e instanceof ApiRequestError ? e.message : 'Could not save the diagram.');
+    } finally {
+      setImageBusy(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[120] flex justify-end">
@@ -769,6 +789,17 @@ function QuestionDetailDrawer({
               <p className="mt-1 whitespace-pre-wrap text-[15px] font-semibold leading-relaxed text-navy">
                 {q.stem}
               </p>
+              <QuestionImageField value={image} onChange={setImage} />
+              {imageDirty ? (
+                <button
+                  type="button"
+                  onClick={() => void saveImage()}
+                  disabled={imageBusy}
+                  className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-orange px-3.5 py-2 text-xs font-bold text-[#171717] disabled:opacity-50"
+                >
+                  {imageBusy ? 'Saving…' : 'Save diagram'}
+                </button>
+              ) : null}
             </div>
 
             {detail.options.length ? (
@@ -910,10 +941,79 @@ interface OptionDraft {
   isCorrect: boolean;
 }
 
+/**
+ * Diagram picker for a question — upload an image (downscaled + compressed to a
+ * data-URL, aspect preserved) or paste an image URL. Used by the create form and
+ * the detail drawer so the 300-odd Data-Interpretation/Venn questions can finally
+ * carry their figure. `value` is the URL/data-URL; '' means no image.
+ */
+function QuestionImageField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const onPick = async (file: File | undefined) => {
+    if (!file) return;
+    setErr(null);
+    if (!/^image\/(png|jpe?g|webp|gif)$/i.test(file.type)) {
+      setErr('Use a PNG, JPG, WebP or GIF image.');
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      setErr('Image is over 8 MB — use a smaller file.');
+      return;
+    }
+    setBusy(true);
+    try {
+      onChange(await resizeImageToDataUrl(file));
+    } catch {
+      setErr("Couldn't process that image.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="mt-4 space-y-1.5">
+      <label className="block text-sm font-medium text-navy">
+        Diagram / figure <span className="font-normal text-slate-500">(optional — for DI charts &amp; Venn diagrams)</span>
+      </label>
+      <div className="flex flex-wrap items-center gap-2">
+        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-navy hover:border-orange">
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/gif"
+            className="hidden"
+            onChange={(e) => void onPick(e.target.files?.[0])}
+          />
+          {busy ? 'Processing…' : value ? 'Replace image' : 'Upload image'}
+        </label>
+        <input
+          type="url"
+          value={value.startsWith('data:') ? '' : value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="…or paste an image URL"
+          className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-navy placeholder:text-slate-500 focus:border-orange focus-visible:outline-none"
+        />
+        {value ? (
+          <button type="button" onClick={() => onChange('')} className="text-xs font-semibold text-red-500 hover:underline">
+            Remove
+          </button>
+        ) : null}
+      </div>
+      {err ? <p className="text-xs font-medium text-red-500">{err}</p> : null}
+      {value ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={value} alt="Diagram preview" className="mt-1 max-h-40 w-auto max-w-full rounded-lg border border-slate-200 bg-white object-contain" />
+      ) : null}
+    </div>
+  );
+}
+
 function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
   const [type, setType] = useState<QuestionType>(QuestionType.MCQ);
   const [difficulty, setDifficulty] = useState<QuestionDifficulty>(QuestionDifficulty.MEDIUM);
   const [stem, setStem] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [topicSlug, setTopicSlug] = useState('');
   const [companySlug, setCompanySlug] = useState('');
   const [hint, setHint] = useState('');
@@ -969,6 +1069,7 @@ function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
       type,
       difficulty,
       stem: stem.trim(),
+      imageUrl: imageUrl || undefined,
       hint: hint.trim() || undefined,
       explanation: explanation.trim() || undefined,
       topicSlug,
@@ -1035,6 +1136,8 @@ function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
           className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy placeholder:text-slate-500 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
         />
       </div>
+
+      <QuestionImageField value={imageUrl} onChange={setImageUrl} />
 
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-1.5">

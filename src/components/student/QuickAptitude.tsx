@@ -130,7 +130,7 @@ export function QuickAptitude() {
       ) : q ? (
         <div className="relative">
           <PyqTag companyIds={q.companyTags.map((t) => t.companyId)} years={q.yearTags ?? []} className="mb-2" />
-          <QuestionStem text={q.stem} className="text-lg font-bold leading-relaxed text-navy" />
+          <QuestionStem text={q.stem} imageUrl={q.imageUrl} className="text-lg font-bold leading-relaxed text-navy" />
           {multi ? <p className="mt-1 text-xs text-slate-500">Select all that apply.</p> : null}
 
           <div className="mt-4 space-y-2.5">

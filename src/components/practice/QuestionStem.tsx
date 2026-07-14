@@ -1,5 +1,3 @@
-import { cn } from '@/lib/utils';
-
 /**
  * Renders a question stem, formatting any embedded code (Pseudocode / C / Java /
  * Python / SQL snippets) as a monospace block with preserved line breaks — so
@@ -34,14 +32,39 @@ function formatCode(code: string): string {
     .trim();
 }
 
-export function QuestionStem({ text, className }: { text: string; className?: string }) {
+export function QuestionStem({
+  text,
+  imageUrl,
+  className,
+}: {
+  text: string;
+  /** Optional diagram/figure (URL or data-URL) for DI charts / Venn diagrams. */
+  imageUrl?: string | null;
+  className?: string;
+}) {
   const { prose, code } = splitStem(text);
+  const diagram = imageUrl ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={imageUrl}
+      alt="Question diagram"
+      className="mb-3 max-h-80 w-auto max-w-full rounded-lg border border-slate-200 bg-white object-contain"
+      loading="lazy"
+    />
+  ) : null;
+
   if (!code) {
     // Preserve any intentional line breaks/indentation even for non-code stems.
-    return <div className={cn('whitespace-pre-wrap', className)}>{text}</div>;
+    return (
+      <div className={className}>
+        {diagram}
+        <div className="whitespace-pre-wrap">{text}</div>
+      </div>
+    );
   }
   return (
     <div className={className}>
+      {diagram}
       {prose ? <p className="whitespace-pre-wrap">{prose}</p> : null}
       <pre className="mt-2 overflow-x-auto whitespace-pre-wrap break-words rounded-lg border border-slate-200 bg-slate-50 p-3 font-mono text-[13px] font-normal leading-relaxed text-navy">
         {formatCode(code)}

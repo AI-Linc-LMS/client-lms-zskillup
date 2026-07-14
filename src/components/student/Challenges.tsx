@@ -263,7 +263,7 @@ function ChallengeSolveModal({
           </p>
         ) : (
           <>
-            <QuestionStem text={q.stem} className="text-[15px] font-semibold leading-relaxed text-navy" />
+            <QuestionStem text={q.stem} imageUrl={q.imageUrl} className="text-[15px] font-semibold leading-relaxed text-navy" />
             {multi ? <p className="mt-1 text-xs text-slate-500">Select all that apply.</p> : null}
             <div className="mt-3 space-y-2">
               {q.options.map((opt, i) => {

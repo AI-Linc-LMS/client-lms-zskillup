@@ -125,6 +125,16 @@ function PyqCard({ q, index }: { q: ApiCompanyPyq; index: number }) {
         </div>
       </div>
 
+      {q.imageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={q.imageUrl}
+          alt="Question diagram"
+          loading="lazy"
+          className="mt-3 max-h-72 w-auto max-w-full rounded-lg border border-slate-200 bg-white object-contain"
+        />
+      ) : null}
+
       <div className="mt-3 space-y-1.5">
         {q.options.map((o, i) => (
           <div

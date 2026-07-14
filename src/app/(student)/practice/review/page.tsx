@@ -120,7 +120,7 @@ export default function ReviewPage() {
               <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold tabular-nums text-slate-600">{idx + 1} / {questions.length}</span>
             </div>
             <PyqTag companyIds={q.companyTags.map((t) => t.companyId)} years={q.yearTags ?? []} className="mt-3" />
-            <QuestionStem text={q.stem} className="mt-2 text-lg font-bold leading-relaxed text-navy" />
+            <QuestionStem text={q.stem} imageUrl={q.imageUrl} className="mt-2 text-lg font-bold leading-relaxed text-navy" />
             {multi ? <p className="mt-1 text-xs text-slate-500">Select all that apply.</p> : null}
 
             <div className="mt-4 space-y-2.5">

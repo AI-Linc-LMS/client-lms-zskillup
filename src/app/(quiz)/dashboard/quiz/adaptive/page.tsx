@@ -427,7 +427,7 @@ function AdaptiveQuizRunner({
             </div>
 
             <PyqTag companyIds={q.companyIds ?? []} years={q.yearTags ?? []} className="mt-5" />
-            <QuestionStem text={q.stem} className="mt-2 text-lg font-semibold leading-relaxed text-navy" />
+            <QuestionStem text={q.stem} imageUrl={q.imageUrl} className="mt-2 text-lg font-semibold leading-relaxed text-navy" />
 
             <div className="mt-5 space-y-2.5">
               {q.options.map((opt: AdaptiveOption, i: number) => {

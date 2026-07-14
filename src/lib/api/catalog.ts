@@ -126,6 +126,7 @@ export interface ApiCompanyPrep {
 export interface ApiCompanyPyq {
   id: string;
   stem: string;
+  imageUrl?: string | null;
   difficulty: string;
   solution: string | null;
   hint: string | null;

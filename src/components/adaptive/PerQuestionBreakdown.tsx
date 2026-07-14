@@ -97,7 +97,7 @@ export function PerQuestionBreakdown({ questions, perQuestionNarration }: PerQue
           </span>
         </div>
 
-        <QuestionStem text={q.stem} className="mt-3 text-sm font-semibold leading-relaxed text-navy break-words" />
+        <QuestionStem text={q.stem} imageUrl={q.imageUrl} className="mt-3 text-sm font-semibold leading-relaxed text-navy break-words" />
 
         <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
           <div className={cn('min-w-0 rounded-lg p-2.5 text-xs', q.isCorrect ? 'bg-emerald-100/70' : 'bg-rose-100/70')}>
