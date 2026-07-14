@@ -32,6 +32,7 @@ import { HomeBlogSection } from '@/components/marketing/HomeBlogSection';
 import { VideoPlaceholder } from '@/components/media/VideoPlaceholder';
 import RotatingText from '@/components/reactbits/RotatingText';
 import SpotlightCard from '@/components/reactbits/SpotlightCard';
+import CountUp from '@/components/reactbits/CountUp';
 import { getPublicBlogs, getPublicTestimonials } from '@/lib/server/public-content';
 import {
   LANDING_FOOTER,
@@ -45,6 +46,18 @@ const HERO_STATS = LANDING_HERO_STATS;
 /** Rotating phrases for the final-CTA headline (rendered in a fixed-width slot
  *  sized to the widest phrase, so the centered line never shifts as it cycles). */
 const CTA_ROTATING = ['dream job', 'first offer', 'tech career', 'big break'];
+
+/** Split a display stat ("240,000+", "4.7★", "82%") into an animated CountUp
+ *  target + trailing suffix so the hero figures count up on load. */
+function parseHeroStat(value: string): { to: number; separator: string; suffix: string } | null {
+  const m = value.match(/^(\d[\d,]*(?:\.\d+)?)(.*)$/);
+  if (!m) return null;
+  return {
+    to: parseFloat(m[1].replace(/,/g, '')),
+    separator: m[1].includes(',') ? ',' : '',
+    suffix: m[2],
+  };
+}
 
 /** The eight modules that make up the platform (was four). */
 const MODULES = [
@@ -257,16 +270,32 @@ export default async function HomePage() {
             </div>
 
             <div className="mt-10 grid max-w-2xl grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4 sm:gap-x-8">
-              {HERO_STATS.map((s) => (
-                <div key={s.label}>
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-white/55">
-                    {s.label}
-                  </p>
-                  <p className="mt-1 text-2xl font-extrabold tracking-tight num-tab sm:text-[1.7rem]">
-                    {s.value}
-                  </p>
-                </div>
-              ))}
+              {HERO_STATS.map((s, i) => {
+                const stat = parseHeroStat(s.value);
+                return (
+                  <div key={s.label}>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-white/55">
+                      {s.label}
+                    </p>
+                    <p className="mt-1 text-2xl font-extrabold tracking-tight num-tab sm:text-[1.7rem]">
+                      {stat ? (
+                        <>
+                          <CountUp
+                            to={stat.to}
+                            separator={stat.separator}
+                            duration={2}
+                            delay={i * 0.12}
+                            className="num-tab"
+                          />
+                          {stat.suffix}
+                        </>
+                      ) : (
+                        s.value
+                      )}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
             {/* Disclaimer - these figures come from the ZSkillup platform. */}
             <p className="mt-4 max-w-2xl text-[11px] leading-relaxed text-white/45">
