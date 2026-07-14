@@ -15,7 +15,6 @@ import {
   LineChart,
   LogIn,
   MessageSquare,
-  Quote,
   Sparkles,
   Star,
   Trophy,
@@ -373,8 +372,8 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="grid items-start gap-6 lg:grid-cols-2 lg:gap-8">
-            {/* LEFT - platform tour video, what's inside, founder note */}
+          <div className="grid items-stretch gap-6 lg:grid-cols-2 lg:gap-8">
+            {/* LEFT - platform tour video + what's inside prephasz */}
             <div className="flex flex-col gap-6">
               <VideoPlaceholder
                 eyebrow="Platform tour"
@@ -383,7 +382,7 @@ export default async function HomePage() {
               />
 
               {/* What's inside prephasz */}
-              <div className="relative overflow-hidden rounded-[var(--radius-card-lg)] border border-[var(--color-line)] bg-white p-7 lg:p-8">
+              <div className="relative flex flex-1 flex-col justify-center overflow-hidden rounded-[var(--radius-card-lg)] border border-[var(--color-line)] bg-white p-7 lg:p-8">
                 <div
                   aria-hidden
                   className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[#ffc42d]/15 blur-3xl"
@@ -418,32 +417,16 @@ export default async function HomePage() {
                   ))}
                 </ul>
               </div>
-
-              {/* Founder note */}
-              <figure className="relative overflow-hidden rounded-[var(--radius-card-lg)] bg-gradient-to-br from-[#0b1220] via-[#101d4a] to-[#1e3a8a] p-7 text-white lg:p-8">
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-[#ffc42d]/20 blur-3xl"
-                />
-                <Quote className="relative h-8 w-8 text-[var(--color-brand)]" aria-hidden />
-                <blockquote className="relative mt-4 text-base font-semibold leading-relaxed text-white sm:text-lg">
-                  &ldquo;We built prephasz so that where you come from never decides where you can
-                  reach - the same shot at a great first job, for every student.&rdquo;
-                </blockquote>
-                <figcaption className="relative mt-5 flex items-center gap-2 text-sm font-semibold text-white/70">
-                  <span className="h-px w-6 bg-[var(--color-brand)]" aria-hidden /> Lokesh Mathur, Founder
-                </figcaption>
-              </figure>
             </div>
 
             {/* RIGHT - founder: photo first, then description */}
             <article className="overflow-hidden rounded-[var(--radius-card-lg)] border border-[var(--color-line)] bg-white">
               {/* Photo (white studio bg blends into the card; a missing file degrades to plain white). */}
-              <div className="relative aspect-square w-full overflow-hidden border-b border-[var(--color-line)] bg-white">
+              <div className="relative aspect-[4/3] w-full overflow-hidden border-b border-[var(--color-line)] bg-white">
                 <div
                   role="img"
                   aria-label="Lokesh Mathur, Founder of prephasz"
-                  className="absolute inset-0 bg-cover bg-top"
+                  className="absolute inset-0 bg-cover bg-[center_top]"
                   style={{ backgroundImage: "url('/images/founder-lokesh.png')" }}
                 />
                 <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-[var(--color-brand)] px-3 py-1 text-[11px] font-black uppercase tracking-wider text-[var(--color-brand-ink)] shadow-sm">
@@ -456,16 +439,10 @@ export default async function HomePage() {
                 <h3 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)]">Lokesh Mathur</h3>
                 <p className="mt-1 text-sm font-semibold text-[var(--color-brand-strong)]">Founder · prephasz</p>
                 <p className="mt-4 text-sm leading-relaxed text-[var(--color-text-muted)] sm:text-[15px]">
-                  A dynamic leader with 19+ years across IT, education, and edtech, and an IIM Calcutta
-                  Executive MBA certified in PMP®, CSM®, and SCJP 5.0. From leading his own venture to
-                  senior roles at upGrad, he has consistently driven real career outcomes and strategic
-                  growth.
-                </p>
-                <p className="mt-3 text-sm leading-relaxed text-[var(--color-text-muted)] sm:text-[15px]">
-                  Lokesh has shaped 50,000+ futures and transformed lives, pioneering tech-driven
-                  education and mentoring at scale. He pairs a strategic mindset with a genuine
-                  commitment to empowering others - a true force for change in the world of learning
-                  and career.
+                  A dynamic leader with 19+ years across IT, education, and edtech - an IIM Calcutta
+                  Executive MBA, certified in PMP®, CSM®, and SCJP 5.0. From his own venture to senior
+                  roles at upGrad, Lokesh has shaped 50,000+ futures with tech-driven education and
+                  mentoring at scale, and a genuine commitment to empowering others.
                 </p>
 
                 <div className="mt-7">
@@ -598,17 +575,24 @@ export default async function HomePage() {
             {MODULES.map((f) => (
               <div
                 key={f.title}
-                className="hover-lift relative h-full rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6"
+                className="hover-lift group relative h-full overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6"
               >
                 <span
                   aria-hidden
-                  className="absolute inset-x-0 top-0 h-[3px] rounded-t-[var(--radius-card)] bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-primary)]"
+                  className="absolute inset-x-0 top-0 z-10 h-[3px] rounded-t-[var(--radius-card)] bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-primary)]"
                 />
-                <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--color-primary-highlight)] to-white text-[var(--color-primary)]">
-                  <f.icon className="h-5 w-5" />
-                </div>
-                <h3 className="text-lg font-bold tracking-tight">{f.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">{f.body}</p>
+                {/* backdrop icon: soft glow + oversized faint watermark bleeding off the corner */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -right-10 -top-10 size-36 rounded-full bg-[#f5b400]/10 blur-2xl transition-opacity duration-500 group-hover:bg-[#f5b400]/20"
+                />
+                <f.icon
+                  aria-hidden
+                  strokeWidth={1.25}
+                  className="pointer-events-none absolute -right-5 -top-3 size-28 text-[#f5b400]/15 transition-all duration-500 group-hover:scale-110 group-hover:text-[#f5b400]/25"
+                />
+                <h3 className="relative mt-2 text-lg font-bold tracking-tight">{f.title}</h3>
+                <p className="relative mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">{f.body}</p>
               </div>
             ))}
           </div>
