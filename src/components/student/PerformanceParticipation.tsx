@@ -220,14 +220,15 @@ export function PerformanceParticipation() {
                 className="pointer-events-none absolute inset-0 opacity-[0.5]"
                 style={{ backgroundImage: 'radial-gradient(rgb(148 163 184 / 0.18) 0.8px, transparent 0.8px)', backgroundSize: '16px 16px' }}
               />
-              {/* Quadrant tints - checkerboard intensity (diagonals match, adjacent
-                  differ) so every shared edge separates by both hue and strength. Fade in. */}
+              {/* Quadrant tints - stronger, clearly-readable fills. Checkerboard
+                  intensity (diagonals match, adjacent differ) so every shared edge
+                  separates by both hue and strength; dots still read on top. Fade in. */}
               {(
                 [
-                  { c: 'bg-sky-500/[0.15]', s: { left: 0, top: 0, width: `${vx}%`, height: `${hy}%` } },
-                  { c: 'bg-emerald-500/[0.10]', s: { left: `${vx}%`, top: 0, right: 0, height: `${hy}%` } },
-                  { c: 'bg-rose-500/[0.10]', s: { left: 0, top: `${hy}%`, width: `${vx}%`, bottom: 0 } },
-                  { c: 'bg-amber-400/[0.16]', s: { left: `${vx}%`, top: `${hy}%`, right: 0, bottom: 0 } },
+                  { c: 'bg-sky-500/[0.24]', s: { left: 0, top: 0, width: `${vx}%`, height: `${hy}%` } },
+                  { c: 'bg-emerald-500/[0.17]', s: { left: `${vx}%`, top: 0, right: 0, height: `${hy}%` } },
+                  { c: 'bg-rose-500/[0.17]', s: { left: 0, top: `${hy}%`, width: `${vx}%`, bottom: 0 } },
+                  { c: 'bg-amber-400/[0.28]', s: { left: `${vx}%`, top: `${hy}%`, right: 0, bottom: 0 } },
                 ] as const
               ).map((q, i) => (
                 <motion.div
@@ -266,7 +267,7 @@ export function PerformanceParticipation() {
               {data.peers.map((p, i) => (
                 <motion.span
                   key={i}
-                  className="absolute size-2 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full bg-slate-400/50 transition-colors hover:z-10 hover:bg-slate-500"
+                  className="absolute size-2 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full bg-slate-500/60 transition-colors hover:z-10 hover:bg-slate-600"
                   style={{ left: `${xPct(p.participation)}%`, top: `${yPct(p.performance)}%` }}
                   initial={reduce ? false : { scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
