@@ -120,9 +120,9 @@ export default function PracticeWishPage() {
 
       <PremiumLockGate feature="Non-Adaptive practice" contentClassName="space-y-8">
       {/* hero */}
-      <section data-tour="aswish:hero" className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#3b1f6d] via-[#2a1a52] to-[#140b28] p-6 text-white shadow-sm sm:p-8">
-        <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#a855f7]/30 blur-3xl" />
-        <span aria-hidden className="pointer-events-none absolute -bottom-20 left-1/4 size-56 rounded-full bg-[#f0abfc]/20 blur-3xl" />
+      <section data-tour="aswish:hero" className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] p-6 text-white shadow-sm sm:p-8">
+        <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#ffc42d]/25 blur-3xl" />
+        <span aria-hidden className="pointer-events-none absolute -bottom-20 left-1/4 size-56 rounded-full bg-[#f5b400]/20 blur-3xl" />
         <div className="relative">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-white/70 ring-1 ring-inset ring-white/15">
             <Sparkles className="size-3.5" /> Non-Adaptive
@@ -148,7 +148,7 @@ export default function PracticeWishPage() {
             <button
               onClick={() => launch(query)}
               disabled={!query.trim() || !!launching}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-extrabold text-[#2a1a52] transition-transform enabled:hover:-translate-y-0.5 disabled:opacity-40"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-5 py-3 text-sm font-extrabold text-[#171717] transition-transform enabled:hover:-translate-y-0.5 disabled:opacity-40"
             >
               {launching === query.trim() ? <Loader2 className="size-4 animate-spin" /> : <Wand2 className="size-4" />}
               Start practicing
@@ -156,7 +156,7 @@ export default function PracticeWishPage() {
           </div>
           {query.trim() && !exactMatch ? (
             <p className="mt-2 flex items-center gap-1.5 text-[12px] text-white/60">
-              <Sparkles className="size-3.5 text-fuchsia-300" />
+              <Sparkles className="size-3.5 text-[#ffc42d]" />
               No exact match - we&apos;ll craft fresh questions for &ldquo;{query.trim()}&rdquo;.
             </p>
           ) : null}
@@ -172,7 +172,7 @@ export default function PracticeWishPage() {
       <div data-tour="aswish:browse-bank">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
           <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-violet-600 ring-1 ring-inset ring-violet-100">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#fff5ea] px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-[#a16207] ring-1 ring-inset ring-[#ffc42d]/25">
               <Layers className="size-3.5" /> {q ? 'Matching topics' : 'Browse the bank'}
             </span>
             <h2 className="mt-2 text-lg font-extrabold tracking-tight text-navy sm:text-xl">
@@ -202,7 +202,7 @@ export default function PracticeWishPage() {
                     className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-slate-50/60"
                     aria-expanded={open}
                   >
-                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-violet-100 text-violet-600">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#ffc42d]/15 text-[#a16207]">
                       <Layers className="size-4" />
                     </span>
                     <span className="min-w-0 flex-1">
@@ -222,11 +222,11 @@ export default function PracticeWishPage() {
                             key={t.id}
                             onClick={() => launch(t.name)}
                             disabled={!!launching}
-                            className="group inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy shadow-sm transition-colors hover:border-violet-300 hover:bg-violet-50/70 disabled:opacity-60"
+                            className="group inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy shadow-sm transition-colors hover:border-[#ffc42d]/60 hover:bg-[#fff5ea] disabled:opacity-60"
                           >
-                            {busy ? <Loader2 className="size-3 animate-spin text-violet-500" /> : null}
+                            {busy ? <Loader2 className="size-3 animate-spin text-[#f5b400]" /> : null}
                             {t.name}
-                            <ArrowRight className="size-3 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-violet-500" />
+                            <ArrowRight className="size-3 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-[#f5b400]" />
                           </button>
                         );
                       })}
@@ -237,15 +237,15 @@ export default function PracticeWishPage() {
             })}
           </div>
         ) : (
-          <div className="rounded-2xl border border-dashed border-violet-200 bg-violet-50/40 p-6 text-center">
-            <Sparkles className="mx-auto size-6 text-violet-400" />
+          <div className="rounded-2xl border border-dashed border-[#ffc42d]/40 bg-[#fff5ea] p-6 text-center">
+            <Sparkles className="mx-auto size-6 text-[#f5b400]" />
             <p className="mt-2 text-sm text-slate-600">
               No topic matches &ldquo;{query.trim()}&rdquo; in the bank yet.
             </p>
             <button
               onClick={() => launch(query)}
               disabled={!query.trim() || !!launching}
-              className="mt-3 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-50"
+              className="mt-3 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-5 py-2.5 text-sm font-bold text-[#171717] disabled:opacity-50"
             >
               <Wand2 className="size-4" /> Generate a fresh set
             </button>
