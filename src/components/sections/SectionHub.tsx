@@ -33,7 +33,7 @@ import { UpgradeModal } from '@/components/billing/UpgradeModal';
 import { useUpgradeGate } from '@/hooks/useUpgradeGate';
 import { useMySubscription } from '@/hooks/useMySubscription';
 import { useCartOptional } from '@/components/billing/CartProvider';
-import { ACCENT_CLASS, sectionMetaFor } from '@/components/practice/section-meta';
+import { ACCENT_CLASS, sectionDescriptorFor, sectionMetaFor } from '@/components/practice/section-meta';
 import { sectionLeaves, type SectionLeaf, type SectionRoot } from '@/lib/sections/section-catalog';
 import { buildPriceMap, retailPrice } from '@/lib/payments/pricing';
 import { formatPrice } from '@/lib/api/subscriptions';
@@ -274,6 +274,8 @@ export function SectionHub({ section }: { section: SectionRoot }) {
                 sectionPrice={sectionPrice}
                 onUnlock={addSection}
                 inCart={!!cart?.has(EntitlementScope.SECTION, section.slug)}
+                onOpenTab={selectTab}
+                firstPracticeHref={firstPracticeHref}
               />
             )}
             {tab === 'Syllabus' && <SyllabusTab section={section} topicOwned={topicOwned} />}
@@ -661,35 +663,106 @@ function OverviewTab({
   sectionPrice,
   onUnlock,
   inCart,
+  onOpenTab,
+  firstPracticeHref,
 }: {
   section: SectionRoot;
   owned: boolean;
   sectionPrice: string | null;
   onUnlock: () => void;
   inCart: boolean;
+  onOpenTab: (tab: SectionTab) => void;
+  firstPracticeHref: string;
 }) {
+  const desc = sectionDescriptorFor(section.slug);
+  const inside: Array<{ icon: typeof MonitorPlay; title: string; body: string; cta: string; action: () => void }> = [
+    {
+      icon: BookOpen,
+      title: 'Guided syllabus',
+      body: 'Every topic and sub-topic in this section, in the order to learn them.',
+      cta: 'View syllabus',
+      action: () => onOpenTab('Syllabus'),
+    },
+    {
+      icon: MonitorPlay,
+      title: 'Study material',
+      body: 'Concept videos, notes and topic quizzes to learn before you drill.',
+      cta: 'Open material',
+      action: () => onOpenTab('Study Material'),
+    },
+    {
+      icon: ListChecks,
+      title: 'Topic-wise practice',
+      body: 'Adaptive practice from the real question bank, topic by topic.',
+      cta: 'Practise now',
+      action: () => onOpenTab('Practice'),
+    },
+  ];
+
   return (
     <div className="space-y-6">
       <Reveal>
         <AuroraCard glow="#7c3aed">
-          <SectionLabel icon={Sparkles}>What you'll master</SectionLabel>
+          <div className="flex flex-wrap items-center gap-2">
+            <SectionLabel icon={Sparkles}>What you'll master</SectionLabel>
+            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-600">
+              {section.topicCount} topics
+            </span>
+          </div>
           <h2 className="mt-3 text-lg font-extrabold tracking-tight text-navy sm:text-xl">{section.name}</h2>
-          <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">
-            Work through {section.name} topic by topic — start with the syllabus, learn from the study
-            material, then drill each topic with adaptive practice from the real question bank.
-          </p>
-          {section.topics.length > 0 ? (
-            <div className="mt-5 flex flex-wrap gap-1.5">
-              {section.topics.map((t) => (
-                <span
-                  key={t.slug}
-                  className="inline-flex items-center rounded-full bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600 ring-1 ring-inset ring-slate-200/70"
-                >
-                  {t.name}
+          <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">{desc.tagline}</p>
+
+          {/* What's inside — the content this section gives you */}
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            {inside.map((it) => (
+              <button
+                key={it.title}
+                type="button"
+                onClick={it.action}
+                className="group/inside flex flex-col rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4 text-left transition hover:border-violet-300 hover:bg-violet-50/40"
+              >
+                <span className="grid size-9 place-items-center rounded-xl bg-white text-violet-600 ring-1 ring-inset ring-violet-100">
+                  <it.icon className="size-4" aria-hidden="true" />
                 </span>
-              ))}
+                <p className="mt-3 text-sm font-bold text-navy">{it.title}</p>
+                <p className="mt-1 flex-1 text-xs leading-relaxed text-slate-600">{it.body}</p>
+                <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-violet-600">
+                  {it.cta} <ArrowRight className="size-3 transition-transform group-hover/inside:translate-x-0.5" />
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {section.topics.length > 0 ? (
+            <div className="mt-5">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">Topics covered</p>
+              <div className="flex flex-wrap gap-1.5">
+                {section.topics.map((t) => (
+                  <span
+                    key={t.slug}
+                    className="inline-flex items-center rounded-full bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600 ring-1 ring-inset ring-slate-200/70"
+                  >
+                    {t.name}
+                  </span>
+                ))}
+              </div>
             </div>
           ) : null}
+
+          <div className="mt-6 flex flex-wrap gap-2.5">
+            <Link
+              href={firstPracticeHref}
+              className="inline-flex items-center gap-1.5 rounded-full bg-navy px-4 py-2 text-sm font-bold text-white transition hover:bg-navy/90"
+            >
+              <ListChecks className="size-4" /> Start practising
+            </Link>
+            <Link
+              href="/mock-assessment"
+              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-navy transition hover:border-violet-300"
+            >
+              <Trophy className="size-4 text-violet-500" /> Timed assessment
+            </Link>
+          </div>
         </AuroraCard>
       </Reveal>
 
