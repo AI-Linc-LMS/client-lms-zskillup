@@ -24,12 +24,14 @@ import {
   releaseTpoAssessment,
 } from '@/lib/api/tpo';
 import { listCompanies } from '@/lib/api/catalog';
+import { listCodingTopics, type CodingTopic } from '@/lib/api/mocks';
 import type { AssessmentResults } from '@/lib/api/scheduling';
 import type { TpoAssessment, TpoAssessmentAvailability, TpoAssessmentList, TpoAssessmentStatus } from '@/shared';
 import { useTpoConsole } from '@/components/tpo/TpoConsole';
 import { KpiCard } from '@/components/tpo/ui';
 import { SectionTopicPicker } from '@/components/tpo/SectionTopicPicker';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const STATUS_STYLE: Record<TpoAssessmentStatus, string> = {
   DRAFT: 'bg-slate-100 text-slate-600',
@@ -67,7 +69,19 @@ export default function AssessmentCenterPage() {
     cohortId: '',
   });
   const [topicSel, setTopicSel] = useState<Set<string>>(new Set());
+  const [codingTopics, setCodingTopics] = useState<CodingTopic[]>([]);
+  const [codingSel, setCodingSel] = useState<Set<string>>(new Set());
   const [avail, setAvail] = useState<TpoAssessmentAvailability | null>(null);
+  const wantsCoding = (Number(form.codingCount) || 0) > 0;
+
+  // Coding topics (primary tags) for the picker — scoped to the chosen company in
+  // company mode, else the whole coding bank (sectional mode). Refetch on scope change.
+  useEffect(() => {
+    const company = form.mode === 'COMPANY' && form.companySlug ? form.companySlug : undefined;
+    listCodingTopics(company)
+      .then(setCodingTopics)
+      .catch(() => setCodingTopics([]));
+  }, [form.mode, form.companySlug]);
 
   // Live "questions available" for the current selection (debounced), so a drive is
   // never built blind or short of the requested count.
@@ -81,12 +95,13 @@ export default function AssessmentCenterPage() {
         mode: form.mode,
         companySlug: form.mode === 'COMPANY' ? form.companySlug || undefined : undefined,
         topicIds: topicSel.size > 0 ? [...topicSel] : undefined,
+        codingTopics: codingSel.size > 0 ? [...codingSel] : undefined,
       })
         .then(setAvail)
         .catch(() => setAvail(null));
     }, 400);
     return () => clearTimeout(t);
-  }, [showForm, form.mode, form.companySlug, topicSel]);
+  }, [showForm, form.mode, form.companySlug, topicSel, codingSel]);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -137,6 +152,7 @@ export default function AssessmentCenterPage() {
         proctored: form.proctored,
         cohortId: form.cohortId || undefined,
         topicIds: topicSel.size > 0 ? [...topicSel] : undefined,
+        codingTopics: codingSel.size > 0 ? [...codingSel] : undefined,
       });
       toast.success('Assessment created');
       setShowForm(false);
@@ -238,6 +254,60 @@ export default function AssessmentCenterPage() {
             )}
             <SectionTopicPicker selected={topicSel} onChange={setTopicSel} />
           </div>
+
+          {/* Coding topics — only when the drive includes coding questions. Scopes
+              which coding topics (tags) the coding problems are sampled from. */}
+          {wantsCoding && (
+            <div className="sm:col-span-2 lg:col-span-3">
+              <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-slate-600">
+                    Coding topics{' '}
+                    <span className="font-normal text-slate-500">
+                      · {codingSel.size ? `${codingSel.size} selected` : 'all coding topics (leave empty to mix)'}
+                    </span>
+                  </span>
+                  {codingSel.size > 0 && (
+                    <button type="button" onClick={() => setCodingSel(new Set())} className="text-xs font-semibold text-[#1a1d29] hover:underline">
+                      Clear
+                    </button>
+                  )}
+                </div>
+                {codingTopics.length === 0 ? (
+                  <p className="py-3 text-center text-xs text-slate-500">No coding topics available for this scope.</p>
+                ) : (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {codingTopics.map((t) => {
+                      const on = codingSel.has(t.topic);
+                      return (
+                        <button
+                          key={t.topic}
+                          type="button"
+                          onClick={() =>
+                            setCodingSel((prev) => {
+                              const next = new Set(prev);
+                              if (next.has(t.topic)) next.delete(t.topic);
+                              else next.add(t.topic);
+                              return next;
+                            })
+                          }
+                          className={cn(
+                            'inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold transition',
+                            on
+                              ? 'border-[#ffc42d] bg-[#fff5ea] text-[#1a1d29]'
+                              : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300',
+                          )}
+                        >
+                          {t.topic}
+                          <span className="text-[10px] text-slate-400">{t.count}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           <label className="text-xs font-semibold text-slate-600 sm:col-span-2 lg:col-span-1">
             Title
             <input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} className={`mt-1 ${inputCls}`} placeholder="e.g. TCS Mock - Round 1" required />
