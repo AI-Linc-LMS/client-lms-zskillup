@@ -3,19 +3,35 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { ArrowRight, ArrowUpRight, Check, Layers, ListChecks, ShoppingCart } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Check, ListChecks, ShoppingCart } from 'lucide-react';
 import { useCartOptional } from '@/components/billing/CartProvider';
-import { ACCENT_CLASS, sectionMetaFor } from '@/components/practice/section-meta';
+import {
+  ACCENT_CLASS,
+  DIFFICULTY_TONE,
+  sectionDescriptorFor,
+  sectionMetaFor,
+  type Accent,
+} from '@/components/practice/section-meta';
 import type { SectionRoot } from '@/lib/sections/section-catalog';
 import { BillingPeriod, EntitlementScope } from '@/shared/enums';
 import { cn } from '@/lib/utils';
 
+/** Accent → text colour, for the category eyebrow + "Explore now" link. */
+const ACCENT_TEXT: Record<Accent, string> = {
+  sky: 'text-sky-600',
+  violet: 'text-violet-600',
+  orange: 'text-orange-600',
+  emerald: 'text-emerald-600',
+  indigo: 'text-indigo-600',
+  amber: 'text-amber-600',
+};
+
 /**
- * One Sectional Hub card — the section analog of `CompanyCard`. Instead of a logo
- * banner it shows the section's icon tile + accent (from `section-meta.ts`), the
- * topic count (a structural number, NOT a raw question tally), and an "Add · ₹N"
- * SECTION-scope cart action. Owned sections (Full Platform or a section grant)
- * show "Owned" instead.
+ * One Sectional Hub card — the section analog of `CompanyCard`, styled to match
+ * the Sectional Hubs mockup: a category eyebrow + difficulty pill, an accent icon
+ * tile, a two-stat strip (structural counts only — no raw question inventory, per
+ * the student-facing counts rule) and an accent "Explore now" CTA. Owned sections
+ * show "Owned"; otherwise a SECTION-scope "Add · ₹N" cart action.
  */
 function SectionCartAction({
   section,
@@ -81,6 +97,15 @@ function SectionCartAction({
   );
 }
 
+function Stat({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="min-w-0">
+      <p className="text-base font-extrabold leading-none tracking-tight text-navy tabular-nums">{value}</p>
+      <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
+    </div>
+  );
+}
+
 export function SectionCard({
   section,
   index,
@@ -93,8 +118,12 @@ export function SectionCard({
   priceLabel?: string | null;
 }) {
   const meta = sectionMetaFor(section.slug, index);
+  const desc = sectionDescriptorFor(section.slug);
   const Icon = meta.icon;
   const tone = ACCENT_CLASS[meta.accent];
+  const accentText = ACCENT_TEXT[meta.accent];
+  // Structural counts only (no raw question inventory shown to students).
+  const subCount = section.topics.reduce((n, t) => n + (t.subtopics.length || 1), 0);
 
   const cardClass =
     'relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white shadow-[0_10px_34px_-20px_rgba(15,23,42,0.4)]';
@@ -112,53 +141,68 @@ export function SectionCard({
           'transition-shadow duration-300 hover:shadow-[0_36px_70px_-30px_rgba(15,23,42,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/40 focus-visible:ring-offset-2',
         )}
       >
-        {/* Icon banner — mirrors the company logo banner, keyed to the section accent. */}
-        <div className="relative flex h-36 items-center justify-center border-b border-slate-100 bg-gradient-to-br from-slate-50/90 via-white to-slate-50/50 px-8">
-          <span aria-hidden className={cn('absolute inset-x-0 top-0 h-[3px]', tone.solid)} />
-          <span
-            aria-hidden
-            className="absolute right-4 top-4 grid size-8 place-items-center rounded-full border border-slate-200/80 bg-white text-slate-500 transition-all duration-300 group-hover:border-transparent group-hover:bg-gradient-to-br group-hover:from-[#ffd24d] group-hover:to-[#f5b400] group-hover:text-[#171717] group-hover:shadow-[0_8px_20px_-8px_rgba(245,180,0,0.8)]"
-          >
-            <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:translate-x-px group-hover:-translate-y-px" />
-          </span>
-          <span
-            className={cn(
-              'grid size-20 place-items-center rounded-2xl text-2xl font-extrabold shadow-[0_14px_30px_-12px_rgba(15,23,42,0.35)] ring-1 ring-inset transition-transform duration-300 group-hover:scale-[1.05]',
-              tone.tile,
-            )}
-          >
-            <Icon className="size-9" aria-hidden="true" />
-          </span>
-        </div>
+        {/* accent top rail */}
+        <span aria-hidden className={cn('absolute inset-x-0 top-0 h-[3px]', tone.solid)} />
 
-        {/* Body */}
         <div className="flex flex-1 flex-col p-5">
-          <h3 className="truncate text-lg font-extrabold leading-tight tracking-tight text-navy">
-            {section.name}
-          </h3>
-          <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-slate-600">
-            Master this section end to end — guided syllabus, study material and topic-wise practice
-            from the real question bank.
-          </p>
-
-          {section.topicCount > 0 ? (
-            <span className="mt-3 inline-flex w-fit items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-600 ring-1 ring-inset ring-slate-200/70">
-              <Layers className="size-3 text-slate-500" aria-hidden="true" />
-              {section.topicCount} {section.topicCount === 1 ? 'topic' : 'topics'}
+          {/* Header: icon tile + open affordance */}
+          <div className="flex items-start justify-between">
+            <span
+              className={cn(
+                'grid size-14 place-items-center rounded-2xl ring-1 ring-inset transition-transform duration-300 group-hover:scale-[1.04]',
+                tone.tile,
+              )}
+            >
+              <Icon className="size-7" aria-hidden="true" />
             </span>
-          ) : null}
-
-          <div className="flex-1" />
-
-          <div className="mt-5 flex flex-wrap gap-1.5 border-t border-slate-100 pt-4">
-            <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-600 ring-1 ring-inset ring-slate-200/70">
-              <ListChecks className="size-3 text-slate-500" aria-hidden="true" /> Practice Qs
+            <span
+              aria-hidden
+              className="grid size-8 place-items-center rounded-full border border-slate-200/80 bg-white text-slate-500 transition-all duration-300 group-hover:border-transparent group-hover:bg-gradient-to-br group-hover:from-[#ffd24d] group-hover:to-[#f5b400] group-hover:text-[#171717] group-hover:shadow-[0_8px_20px_-8px_rgba(245,180,0,0.8)]"
+            >
+              <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:translate-x-px group-hover:-translate-y-px" />
             </span>
           </div>
 
+          {/* Badges: category eyebrow + difficulty */}
+          <div className="mt-4 flex flex-wrap items-center gap-1.5">
+            <span className={cn('text-[11px] font-extrabold uppercase tracking-wider', accentText)}>
+              {desc.category}
+            </span>
+            <span aria-hidden className="size-1 rounded-full bg-slate-300" />
+            <span
+              className={cn(
+                'rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ring-1 ring-inset',
+                DIFFICULTY_TONE[desc.difficulty],
+              )}
+            >
+              {desc.difficulty}
+            </span>
+          </div>
+
+          <h3 className="mt-1.5 truncate text-lg font-extrabold leading-tight tracking-tight text-navy">
+            {section.name}
+          </h3>
+          <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-slate-600">{desc.tagline}</p>
+
+          <div className="flex-1" />
+
+          {/* Structural stat strip */}
+          <div className="mt-5 grid grid-cols-2 gap-3 border-t border-slate-100 pt-4">
+            <Stat value={String(section.topicCount)} label="Topics" />
+            <Stat value={String(subCount)} label="Sub-topics" />
+          </div>
+
+          {/* content indicator */}
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-600 ring-1 ring-inset ring-slate-200/70">
+              <ListChecks className="size-3 text-slate-500" aria-hidden="true" /> Practice · Study material
+            </span>
+          </div>
+
+          {/* Footer CTA */}
           <div className="mt-4 flex items-center justify-between gap-2">
-            <span className="flex items-center gap-1 text-[13px] font-bold text-orange transition-colors group-hover:text-[#d9610f]">
-              Open section
+            <span className={cn('flex items-center gap-1 text-[13px] font-bold transition-colors group-hover:brightness-90', accentText)}>
+              Explore now
               <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
             </span>
             <SectionCartAction section={section} owned={owned} priceLabel={priceLabel} />

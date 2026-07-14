@@ -50,3 +50,50 @@ export const HIDDEN_ROOT_SLUGS = new Set(['ai-practice-topics']);
 export function sectionMetaFor(slug: string, index: number): SectionMeta {
   return SECTION_META[slug] ?? { icon: Layers, accent: ACCENT_CYCLE[index % ACCENT_CYCLE.length], order: 90 + index };
 }
+
+/** Editorial card copy for a section — category eyebrow, difficulty descriptor and
+ *  a punchier tagline than the generic default, used by the Sectional Hubs cards. */
+export type SectionDifficulty = 'Easy' | 'Medium' | 'Hard';
+export interface SectionDescriptor {
+  category: string;
+  difficulty: SectionDifficulty;
+  tagline: string;
+}
+export const SECTION_DESCRIPTORS: Record<string, SectionDescriptor> = {
+  'section-1-numerical-ability': {
+    category: 'Quantitative',
+    difficulty: 'Medium',
+    tagline: 'Master numbers, arithmetic, algebra and advanced calculations.',
+  },
+  'section-2-logical-reasoning': {
+    category: 'Reasoning',
+    difficulty: 'Medium',
+    tagline: 'Sharpen your reasoning with puzzles, patterns and logic sets.',
+  },
+  'section-3-verbal-ability': {
+    category: 'Verbal',
+    difficulty: 'Easy',
+    tagline: 'Improve grammar, vocabulary and reading comprehension.',
+  },
+  'section-4-technical-mcqs': {
+    category: 'Technical',
+    difficulty: 'Hard',
+    tagline: 'Core CS fundamentals, programming and technical concepts.',
+  },
+};
+export function sectionDescriptorFor(slug: string): SectionDescriptor {
+  return (
+    SECTION_DESCRIPTORS[slug] ?? {
+      category: 'Section',
+      difficulty: 'Medium',
+      tagline: 'Master this section end to end — guided syllabus, study material and topic-wise practice.',
+    }
+  );
+}
+
+/** Difficulty pill tone (matches the company card scale). */
+export const DIFFICULTY_TONE: Record<SectionDifficulty, string> = {
+  Easy: 'bg-emerald-50 text-emerald-700 ring-emerald-200/70',
+  Medium: 'bg-amber-50 text-amber-700 ring-amber-200/70',
+  Hard: 'bg-red-50 text-red-700 ring-red-200/70',
+};
