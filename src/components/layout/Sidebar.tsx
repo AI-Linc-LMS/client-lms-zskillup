@@ -16,6 +16,7 @@ import {
   Target,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { InfoTip } from '@/components/ui/InfoTip';
 import { useProfileCompletion } from '@/hooks/useProfileCompletion';
 import { useCalibrationStatus } from '@/hooks/useCalibrationStatus';
 import { useMySubscription } from '@/hooks/useMySubscription';
@@ -267,15 +268,30 @@ function NavAccordion({
 
 /** A top-level, standalone nav link — same prominence as a section header, but a
  *  real destination (used for the un-grouped Plans & Support items). */
+/** Inline (ⓘ) info tooltip for a nav item — a SIBLING of the nav <Link> (never a
+ *  child, since a <button> inside an <a> is invalid HTML). */
+function NavTip({ label, tip }: { label: string; tip: string }) {
+  return (
+    <InfoTip
+      content={{ title: label, body: tip }}
+      label={label}
+      className="relative flex shrink-0 items-center pr-1 text-slate-400"
+      dotClassName="relative"
+    >
+      <span className="sr-only">{label} info</span>
+    </InfoTip>
+  );
+}
+
 function StandaloneNavLink({ item, active, locked }: { item: NavItem; active: boolean; locked: boolean }) {
   const Icon = item.icon;
-  return (
+  const link = (
     <Link
       href={item.href}
       data-tour={`nav:${item.href}`}
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'group flex items-center gap-2.5 rounded-xl px-2.5 py-2.5 transition-colors',
+        'group flex flex-1 items-center gap-2.5 rounded-xl px-2.5 py-2.5 transition-colors',
         active ? 'bg-[#1a1a1a] ring-1 ring-[#ffc42d]/30' : 'hover:bg-[#fff5ea]',
       )}
     >
@@ -301,18 +317,25 @@ function StandaloneNavLink({ item, active, locked }: { item: NavItem; active: bo
       {locked && <Lock className="size-3.5 shrink-0 text-slate-400" aria-label="Locked" />}
     </Link>
   );
+  if (!item.tip) return link;
+  return (
+    <div className="flex items-center">
+      {link}
+      <NavTip label={item.label} tip={item.tip} />
+    </div>
+  );
 }
 
 /** Accordion sub-item — compact row under a section header. */
 function SubNavLink({ item, active, locked }: { item: NavItem; active: boolean; locked: boolean }) {
   const Icon = item.icon;
-  return (
+  const link = (
     <Link
       href={item.href}
       data-tour={`nav:${item.href}`}
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'group flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm transition-colors',
+        'group flex flex-1 items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm transition-colors',
         active
           ? // Active = black pill, WHITE label, GOLD icon + a gold ring accent - matches the
             // benchmark (black bg, white text, yellow icon) with the requested yellow border.
@@ -334,5 +357,12 @@ function SubNavLink({ item, active, locked }: { item: NavItem; active: boolean; 
       <span className="flex-1 truncate">{item.label}</span>
       {locked && <Lock className="size-3.5 shrink-0 text-slate-400" aria-label="Locked" />}
     </Link>
+  );
+  if (!item.tip) return link;
+  return (
+    <div className="flex items-center">
+      {link}
+      <NavTip label={item.label} tip={item.tip} />
+    </div>
   );
 }
