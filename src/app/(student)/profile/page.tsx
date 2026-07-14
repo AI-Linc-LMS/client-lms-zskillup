@@ -59,6 +59,24 @@ const EMPTY: Values = {
   fullName: '', phone: '', course: '', yearOfStudy: '', collegeId: '', collegeName: '', passoutYear: '', skills: [], roles: [],
 };
 
+/** Common degrees for the Course/Degree autocomplete (free text still allowed). */
+const COURSES = [
+  'B.Tech', 'B.E.', 'B.Sc', 'BCA', 'B.Com', 'B.A', 'B.Arch', 'B.Pharm', 'BBA',
+  'B.Tech CSE', 'B.Tech IT', 'B.Tech ECE', 'B.Tech EEE', 'B.Tech Mechanical', 'B.Tech Civil',
+  'M.Tech', 'M.E.', 'M.Sc', 'MCA', 'M.Com', 'M.A', 'MBA', 'PhD', 'Diploma',
+];
+
+/** Keep only digits, preserving an optional leading "+", capped at 15 digits. */
+const sanitizePhone = (s: string) => {
+  const hasPlus = s.trimStart().startsWith('+');
+  return (hasPlus ? '+' : '') + s.replace(/\D/g, '').slice(0, 15);
+};
+/** A valid phone is 10–15 digits (covers a bare 10-digit number up to +country code). */
+const isValidPhone = (s: string) => {
+  const d = s.replace(/\D/g, '');
+  return d.length >= 10 && d.length <= 15;
+};
+
 const snap = (v: Values) =>
   JSON.stringify({
     ...v,
@@ -119,7 +137,7 @@ export default function ProfilePage() {
   const checklist = useMemo(
     () => [
       { label: 'Full name', done: !!v.fullName.trim() },
-      { label: 'Phone', done: !!v.phone.trim() },
+      { label: 'Phone', done: !!v.phone.trim() && isValidPhone(v.phone) },
       { label: 'Course / degree', done: !!v.course.trim() },
       { label: 'Year of study', done: !!v.yearOfStudy },
       { label: 'College', done: !!v.collegeName.trim() },
@@ -131,6 +149,8 @@ export default function ProfilePage() {
   );
   const completion = Math.round((checklist.filter((c) => c.done).length / checklist.length) * 100);
   const dirty = snap(v) !== baseline;
+  // Only flag an INVALID (non-empty) phone — empty is fine until they complete the profile.
+  const phoneInvalid = !!v.phone.trim() && !isValidPhone(v.phone);
 
   const addSkill = (raw: string) => {
     const s = raw.trim();
@@ -141,6 +161,11 @@ export default function ProfilePage() {
     setV((p) => ({ ...p, roles: p.roles.includes(name) ? p.roles.filter((r) => r !== name) : [...p.roles, name] }));
 
   const save = async () => {
+    // Never persist a malformed phone number.
+    if (phoneInvalid) {
+      setErr('Please enter a valid phone number (10–15 digits).');
+      return;
+    }
     setSaving(true);
     setErr(null);
     setSaved(false);
@@ -249,8 +274,19 @@ export default function ProfilePage() {
               <Field label="Full name" done={!!v.fullName.trim()}>
                 <input value={v.fullName} onChange={(e) => set('fullName', e.target.value)} className={inputCls} placeholder="Your name" />
               </Field>
-              <Field label="Phone" done={!!v.phone.trim()}>
-                <input value={v.phone} onChange={(e) => set('phone', e.target.value)} inputMode="tel" className={inputCls} placeholder="+91 …" />
+              <Field label="Phone" done={!!v.phone.trim() && isValidPhone(v.phone)}>
+                <input
+                  value={v.phone}
+                  onChange={(e) => set('phone', sanitizePhone(e.target.value))}
+                  inputMode="numeric"
+                  maxLength={16}
+                  className={cn(inputCls, phoneInvalid && 'border-rose-300 focus:border-rose-400 focus:ring-rose-200')}
+                  placeholder="10-digit mobile number"
+                  aria-invalid={phoneInvalid}
+                />
+                {phoneInvalid ? (
+                  <p className="mt-1 text-xs font-medium text-rose-500">Enter a valid phone number (10–15 digits).</p>
+                ) : null}
               </Field>
             </div>
           </SectionCard>
@@ -258,7 +294,19 @@ export default function ProfilePage() {
           <SectionCard data-tour="profile:academic" icon={GraduationCap} title="Academic" subtitle="Your college and where you are in your degree.">
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Course / degree" done={!!v.course.trim()}>
-                <input value={v.course} onChange={(e) => set('course', e.target.value)} placeholder="B.Tech CSE" className={inputCls} />
+                <input
+                  value={v.course}
+                  onChange={(e) => set('course', e.target.value)}
+                  placeholder="e.g. B.Tech CSE"
+                  list="course-options"
+                  className={inputCls}
+                  autoComplete="off"
+                />
+                <datalist id="course-options">
+                  {COURSES.map((c) => (
+                    <option key={c} value={c} />
+                  ))}
+                </datalist>
               </Field>
               <Field label="Year of study" done={!!v.yearOfStudy}>
                 <select value={v.yearOfStudy} onChange={(e) => set('yearOfStudy', e.target.value ? Number(e.target.value) : '')} className={inputCls}>
@@ -407,7 +455,7 @@ export default function ProfilePage() {
                 </button>
                 <button
                   onClick={save}
-                  disabled={saving}
+                  disabled={saving || phoneInvalid}
                   className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-5 py-2 text-sm font-extrabold text-[#171717] shadow-[0_10px_24px_-10px_rgba(245,180,0,0.5)] disabled:opacity-60"
                 >
                   {saving ? <Loader2 className="size-4 animate-spin" /> : 'Save changes'}
