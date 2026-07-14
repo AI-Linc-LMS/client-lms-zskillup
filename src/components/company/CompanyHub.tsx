@@ -24,7 +24,8 @@ import { CompanyRegisterCard } from '@/components/company/CompanyRegisterCard';
 import { VideoPlaceholder } from '@/components/media/VideoPlaceholder';
 import { cn } from '@/lib/utils';
 import { HUB_TABS, type HubContent, type HubTab } from '@/lib/hub-data';
-import { getCompanyReadiness } from '@/lib/api/adaptive';
+import { getReadiness } from '@/lib/api/readiness';
+import { onXpUpdated } from '@/lib/xp-events';
 import { InfoTip } from '@/components/ui/InfoTip';
 import { Disclaimer } from '@/components/legal/Disclaimer';
 import { AnimatedNumber, AuroraBackground, Reveal, Stagger, StaggerItem } from '@/components/motion/primitives';
@@ -52,14 +53,16 @@ const TAB_ICONS: Record<HubTab, typeof BookOpen> = {
  * tooltip to explain "how it is calculated" — would have been inventing a number and
  * attributing it to real users.
  *
- * There is also no community to average: 19 students have ever run an adaptive session,
- * and ten of the fifteen companies have zero. So this shows the ONE readiness figure that
- * is genuinely computed and genuinely meaningful to the person reading it: their own.
- * `/adaptive-mocks/company-readiness` derives it from the skill mastery in their latest
- * completed adaptive session, weighted across the skills this company actually tests.
+ * Sourced from `/api/v1/me/readiness` — the SAME endpoint the dashboard's readiness
+ * panel uses, so the hub ring and the dashboard always show the identical figure.
+ * (It previously read `/adaptive-mocks/company-readiness`, which only has a row once
+ * the student completes an ADAPTIVE session for the company — so a company practised
+ * the normal way had no row and the ring blanked to "-" even though the dashboard
+ * showed a real score.) Matched by slug, falling back to name.
  *
- * Fails soft: any error, or no session yet, leaves `pct` null and the hero shows a "start
- * practising" state instead of a fake number.
+ * Refreshes on every XP award (i.e. after the student practises) so the ring tracks
+ * new practice live. Fails soft: any error, or a company with no readiness computed
+ * yet, leaves `pct` null and the hero shows a "start practising" state, not a fake number.
  */
 function useMyReadiness(slug: string, name: string): { loading: boolean; pct: number | null } {
   const [state, setState] = useState<{ loading: boolean; pct: number | null }>({
@@ -68,23 +71,27 @@ function useMyReadiness(slug: string, name: string): { loading: boolean; pct: nu
   });
   useEffect(() => {
     let cancelled = false;
-    getCompanyReadiness()
-      .then((rows) => {
-        if (cancelled) return;
-        // Match on slug OR name (case-insensitive) so a slug-format difference
-        // between the hub catalog and the readiness API doesn't blank the ring —
-        // this is the same figure the dashboard shows, keyed reliably.
-        const target = name.trim().toLowerCase();
-        const mine = rows.find(
-          (r) => r.companySlug === slug || (r.companyName ?? '').trim().toLowerCase() === target,
-        );
-        setState({ loading: false, pct: mine ? Math.round(mine.readinessPct) : null });
-      })
-      .catch(() => {
-        if (!cancelled) setState({ loading: false, pct: null });
-      });
+    const target = name.trim().toLowerCase();
+    const sync = () =>
+      getReadiness()
+        .then((r) => {
+          if (cancelled) return;
+          // Match on slug OR name (case-insensitive) so a slug-format difference
+          // between the hub catalog and the readiness API doesn't blank the ring.
+          const mine = r.companies.find(
+            (c) => c.slug === slug || c.name.trim().toLowerCase() === target,
+          );
+          setState({ loading: false, pct: mine ? Math.round(mine.readiness) : null });
+        })
+        .catch(() => {
+          if (!cancelled) setState({ loading: false, pct: null });
+        });
+    void sync();
+    // Recompute after any XP award — practising a company moves its readiness.
+    const off = onXpUpdated(() => void sync());
     return () => {
       cancelled = true;
+      off();
     };
   }, [slug, name]);
   return state;
@@ -452,8 +459,8 @@ function CompanyHero({ content, reduce }: { content: HubContent; reduce: boolean
   );
 }
 
-/** `pct === null` = no adaptive session for this company yet. Show an em-dash, not a 0% —
- *  "0%" reads as "you scored zero", which is a very different (and wrong) message. */
+/** `pct === null` = no readiness computed for this company yet (never practised). Show an
+ *  em-dash, not a 0% — "0%" reads as "you scored zero", a very different (and wrong) message. */
 function ReadinessRing({ pct, reduce }: { pct: number | null; reduce: boolean }) {
   const R = 52;
   const C = 2 * Math.PI * R;
