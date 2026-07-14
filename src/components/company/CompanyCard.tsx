@@ -100,7 +100,7 @@ function CardCartAction({
         'inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[11px] font-bold transition',
         inCart
           ? 'cursor-default bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200/70'
-          : 'bg-indigo-600 text-white shadow-sm hover:bg-indigo-700',
+          : 'bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] text-[#171717] shadow-sm hover:brightness-105',
       )}
     >
       {inCart ? (
