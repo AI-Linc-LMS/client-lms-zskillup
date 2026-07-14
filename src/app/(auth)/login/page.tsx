@@ -20,6 +20,9 @@ import { ApiRequestError } from '@/lib/api/types';
 import { FormField } from '@/components/ui/form-field';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import type { LoginResult } from '@/lib/api/auth';
+import BlurText from '@/components/reactbits/BlurText';
+import CountUp from '@/components/reactbits/CountUp';
+import ShinyText from '@/components/reactbits/ShinyText';
 
 const BRAND_FEATURES = [
   { icon: BookOpen, label: 'Company-wise tracks', desc: 'TCS, Infosys, Wipro & more' },
@@ -266,11 +269,21 @@ export default function LoginPage() {
         <div className="relative space-y-8">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white/80">
-              India&apos;s #1 campus prep platform
+              <ShinyText
+                text="India's #1 campus prep platform"
+                speed={4}
+                color="rgba(255,255,255,0.75)"
+                shineColor="#ffffff"
+              />
             </span>
-            <h2 className="mt-4 text-2xl font-extrabold leading-tight tracking-tight xl:text-3xl">
-              Land your first tech job with confidence.
-            </h2>
+            <BlurText
+              text="Land your first tech job with confidence."
+              animateBy="words"
+              direction="top"
+              delay={110}
+              stepDuration={0.38}
+              className="mt-4 text-2xl font-extrabold leading-tight tracking-tight xl:text-3xl"
+            />
             <p className="mt-3 text-sm leading-relaxed text-white/70">
               Real previous-year questions for TCS, Infosys, Wipro, Cognizant, Capgemini and
               Accenture. 240,000+ students already inside.
@@ -295,12 +308,15 @@ export default function LoginPage() {
           {/* Stats */}
           <div className="grid grid-cols-3 gap-3 border-t border-white/10 pt-6">
             {[
-              { value: '240k+', label: 'Students' },
-              { value: '1,200+', label: 'Colleges' },
-              { value: '82%', label: 'Placement rate' },
+              { to: 240, separator: '', suffix: 'k+', label: 'Students' },
+              { to: 1200, separator: ',', suffix: '+', label: 'Colleges' },
+              { to: 82, separator: '', suffix: '%', label: 'Placement rate' },
             ].map((s) => (
               <div key={s.label}>
-                <p className="text-xl font-extrabold num-tab">{s.value}</p>
+                <p className="text-xl font-extrabold num-tab">
+                  <CountUp to={s.to} separator={s.separator} duration={2.2} className="num-tab" />
+                  {s.suffix}
+                </p>
                 <p className="text-[11px] text-white/55">{s.label}</p>
               </div>
             ))}
