@@ -331,7 +331,7 @@ function PerformanceHero({
   }>;
 }) {
   return (
-    <section className="relative isolate overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] p-6 text-white sm:p-7">
+    <section className="relative isolate overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] p-6 text-white sm:p-7">
       {/* aurora orbs */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -left-24 -top-28 size-72 rounded-full bg-[#ffc42d]/25 blur-[110px]" />

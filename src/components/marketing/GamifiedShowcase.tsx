@@ -130,7 +130,7 @@ export function GamifiedShowcase() {
       />
       <motion.div
         aria-hidden
-        className="pointer-events-none absolute top-1/4 -right-28 h-96 w-96 rounded-full bg-[#2563eb]/25 blur-3xl"
+        className="pointer-events-none absolute top-1/4 -right-28 h-96 w-96 rounded-full bg-[#f5b400]/25 blur-3xl"
         {...drift(-40, 44, 21)}
       />
       <motion.div

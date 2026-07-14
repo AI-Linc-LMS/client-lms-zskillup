@@ -37,7 +37,7 @@ export default function HowXpWorksPage() {
       </Link>
 
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] p-7 text-white sm:p-9">
+      <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] p-7 text-white sm:p-9">
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div className="absolute -left-1/4 -top-1/2 size-[38vw] rounded-full bg-[#ffc42d]/20 blur-[110px]" />
           <div className="absolute -right-1/4 -bottom-1/2 size-[34vw] rounded-full bg-[#7c3aed]/20 blur-[110px]" />

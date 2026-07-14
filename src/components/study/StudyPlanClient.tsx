@@ -114,7 +114,7 @@ export function StudyPlanClient() {
 
         {/* The roadmap */}
         <section data-tour="plan:roadmap" className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-          <div className="relative overflow-hidden bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] px-5 py-4 text-white">
+          <div className="relative overflow-hidden bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] px-5 py-4 text-white">
             <span aria-hidden className="pointer-events-none absolute -right-8 -top-8 size-32 rounded-full bg-[radial-gradient(closest-side,rgba(245,180,0,0.20),transparent)] blur-2xl" />
             <span
               aria-hidden
@@ -150,7 +150,7 @@ export function StudyPlanClient() {
             exit={{ opacity: 0, y: 24, scale: 0.9 }}
             transition={{ type: 'spring', stiffness: 320, damping: 24 }}
           >
-            <div className="flex items-center gap-3 rounded-2xl bg-gradient-to-br from-[#0f1117] to-[#202b63] px-5 py-3 text-white shadow-2xl">
+            <div className="flex items-center gap-3 rounded-2xl bg-gradient-to-br from-[#0a0a0c] to-[#141a2e] px-5 py-3 text-white shadow-2xl">
               <span className="grid size-9 place-items-center rounded-full bg-orange text-[#171717]">
                 <Sparkles className="size-4" />
               </span>
@@ -318,7 +318,7 @@ function TodayPanel({
   const allDone = today.doneCount >= today.taskCount && today.taskCount > 0;
   return (
     <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] p-5 text-white">
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] p-5 text-white">
         <span aria-hidden className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-[radial-gradient(closest-side,rgba(245,180,0,0.22),transparent)] blur-2xl" />
         <span
           aria-hidden

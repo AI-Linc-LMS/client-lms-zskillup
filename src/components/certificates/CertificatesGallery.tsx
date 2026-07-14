@@ -53,7 +53,7 @@ export function CertificatesGallery() {
       <div data-tour="certs:hero" className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
         <div className="relative bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0a0a0c] p-6 text-white sm:p-8">
           <span aria-hidden className="pointer-events-none absolute -right-10 -top-16 size-56 rounded-full bg-[#f5cf5a]/20 blur-3xl" />
-          <span aria-hidden className="pointer-events-none absolute -left-16 bottom-0 size-56 rounded-full bg-[#3b82f6]/10 blur-3xl" />
+          <span aria-hidden className="pointer-events-none absolute -left-16 bottom-0 size-56 rounded-full bg-[#f5b400]/10 blur-3xl" />
 
           <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>

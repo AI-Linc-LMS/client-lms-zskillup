@@ -239,7 +239,7 @@ function AdaptiveQuizRunner({
       {/* radial glow backdrop */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div className="absolute -left-1/4 -top-1/4 size-[60vw] rounded-full bg-[#f5b400]/[0.05] blur-[120px]" />
-        <div className="absolute -right-1/4 -top-1/3 size-[55vw] rounded-full bg-[#2563eb]/[0.05] blur-[120px]" />
+        <div className="absolute -right-1/4 -top-1/3 size-[55vw] rounded-full bg-[#f5b400]/[0.05] blur-[120px]" />
       </div>
 
       {/* points earned burst - stays mounted across questions so it fires on submit */}

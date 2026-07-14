@@ -354,7 +354,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
 
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div className="absolute -left-1/4 -top-1/3 size-[55vw] rounded-full bg-[#f5b400]/15 blur-[130px]" />
-        <div className="absolute -right-1/4 top-1/4 size-[45vw] rounded-full bg-[#2563eb]/15 blur-[130px]" />
+        <div className="absolute -right-1/4 top-1/4 size-[45vw] rounded-full bg-[#f5b400]/15 blur-[130px]" />
       </div>
 
       <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 px-5 py-6 sm:px-10">

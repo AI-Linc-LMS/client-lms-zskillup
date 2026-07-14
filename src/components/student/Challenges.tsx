@@ -229,7 +229,7 @@ function ChallengeSolveModal({
 
   return (
     <motion.div
-      className="fixed inset-0 z-[150] grid place-items-center bg-[#0f1117]/70 px-5 backdrop-blur-sm"
+      className="fixed inset-0 z-[150] grid place-items-center bg-[#0a0a0c]/70 px-5 backdrop-blur-sm"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}

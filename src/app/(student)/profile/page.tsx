@@ -218,7 +218,7 @@ export default function ProfilePage() {
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Profile' }]} />
 
       {/* ── Hero header ──────────────────────────────────────────────────── */}
-      <section data-tour="profile:hero" className="relative mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] p-6 text-white sm:p-7">
+      <section data-tour="profile:hero" className="relative mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] p-6 text-white sm:p-7">
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div className="absolute -left-1/4 -top-1/2 size-[40vw] rounded-full bg-[#ffc42d]/20 blur-[110px]" />
           <div className="absolute -right-1/4 -bottom-1/2 size-[36vw] rounded-full bg-[#f5b400]/15 blur-[110px]" />
