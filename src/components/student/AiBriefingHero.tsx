@@ -180,7 +180,7 @@ export function AiBriefingHero() {
         <div className="relative z-10 max-w-3xl animate-pulse" aria-busy="true" aria-label="Loading your briefing">
           <div className="h-7 w-36 rounded-full bg-white/10" />
           <div className="mt-6 h-4 w-40 rounded bg-white/10" />
-          <div className="mt-3 h-9 w-3/4 rounded-lg bg-white/15 sm:h-11" />
+          <div className="mt-4 h-10 w-3/4 rounded-lg bg-white/15 sm:h-12" />
           <div className="mt-3 h-4 w-2/3 rounded bg-white/10" />
           <div className="mt-7 flex flex-wrap gap-2.5">
             <div className="h-[3.25rem] w-52 rounded-2xl bg-white/10" />
@@ -224,7 +224,7 @@ export function AiBriefingHero() {
 
         {/* headline */}
         <motion.h1
-          className="mt-1.5 bg-gradient-to-b from-white to-white/70 bg-clip-text text-[28px] font-extrabold leading-[1.06] tracking-tight text-transparent sm:text-[34px]"
+          className="mt-4 bg-gradient-to-b from-white to-white/70 bg-clip-text text-[30px] font-extrabold leading-[1.08] tracking-tight text-transparent sm:text-[38px]"
           initial={reduce ? false : { opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, delay: 0.08 }}
