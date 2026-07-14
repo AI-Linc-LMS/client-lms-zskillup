@@ -361,8 +361,9 @@ export default async function HomePage() {
           </div>
         </div>
 
-        {/* Recruiter logo ticker - centred, larger logos, colour on hover */}
-        <div className="relative border-t border-white/10 bg-white/[0.03]">
+        {/* Recruiter logo ticker - centred, larger logos, colour on hover. Solid black
+            so the bottom of the hero stays fully dark (no lighter band showing through). */}
+        <div className="relative border-t border-white/10 bg-[#0a0a0c]">
           <div className="mx-auto max-w-[1400px] px-5 py-8 md:px-8">
             <p className="text-center text-[11px] font-bold uppercase tracking-[0.18em] text-white/55">
               Aligned with the hiring patterns of
@@ -453,8 +454,9 @@ export default async function HomePage() {
 
             {/* RIGHT - founder: photo first, then description */}
             <article className="overflow-hidden rounded-[var(--radius-card-lg)] border border-[var(--color-line)] bg-white">
-              {/* Photo (white studio bg blends into the card; a missing file degrades to plain white). */}
-              <div className="relative aspect-[4/3] w-full overflow-hidden border-b border-[var(--color-line)] bg-white">
+              {/* Photo (white studio bg blends into the card; a missing file degrades to plain white).
+                  Taller crop (4:5) so the founder's chest — incl. the prephasz-logo pocket — is visible. */}
+              <div className="relative aspect-[4/5] w-full overflow-hidden border-b border-[var(--color-line)] bg-white">
                 <div
                   role="img"
                   aria-label="Lokesh Mathur, Founder of prephasz"
