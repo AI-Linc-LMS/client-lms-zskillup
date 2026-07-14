@@ -239,12 +239,15 @@ export function CompanyHub({ content }: { content: HubContent }) {
           >
             {tab === 'Overview' && <OverviewTab content={content} />}
             {tab === 'Syllabus' && <SyllabusTab content={content} />}
+            {/* Study Material videos are NOT covered by the freemium question meter,
+                so they stay Premium (Watch -> upgrade modal). Practice Quiz, Coding and
+                Mock keep their own freemium allowance instead — "#9 wins": free users
+                still get their first 5 questions per company + 1 free mock. */}
             {tab === 'Study Material' && <StudyMaterialTab slug={content.company.slug} gate={upgrade.guard} />}
             {tab === 'Practice Quiz' && (
               <CompanyPrepPanel
                 companySlug={content.company.slug}
                 companyName={content.company.name}
-                gate={upgrade.guard}
               />
             )}
             {tab === 'Coding' && (
@@ -259,10 +262,10 @@ export function CompanyHub({ content }: { content: HubContent }) {
                     submit to grade against the full test set and earn XP.
                   </p>
                 </div>
-                <CodingProblemsList company={content.company.slug} gate={upgrade.guard} />
+                <CodingProblemsList company={content.company.slug} />
               </div>
             )}
-            {tab === 'Full Mock Assessment' && <MockTab content={content} gate={upgrade.guard} />}
+            {tab === 'Full Mock Assessment' && <MockTab content={content} />}
           </motion.div>
         </div>
 
