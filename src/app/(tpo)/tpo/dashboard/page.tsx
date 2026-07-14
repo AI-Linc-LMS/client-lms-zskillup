@@ -199,7 +199,7 @@ export default function TpoExecutiveDashboard() {
         <BentoCard
           n={4}
           title="Company Readiness Heatmap"
-          subtitle="Students in each accuracy band, per company."
+          subtitle="Students in each readiness band, per company."
           source="Company-tagged practice"
           className="lg:col-span-2"
           action={
