@@ -169,12 +169,12 @@ export default function AssessmentLeaderboardPage({ params }: { params: Promise<
                 <Avatar src={e.avatarUrl} name={e.name} size={38} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-bold text-navy">
-                    {e.name} {e.isYou ? <span className="ml-1 rounded-full bg-sky-100 px-1.5 py-0.5 text-[10px] font-bold text-sky-700">You</span> : null}
+                    {e.name} {e.isYou ? <span className="ml-1 rounded-full bg-[#ffc42d]/15 px-1.5 py-0.5 text-[10px] font-bold text-[#a16207]">You</span> : null}
                   </p>
                   <p className="truncate text-[11px] text-slate-500">{e.collegeName ?? '-'}</p>
                 </div>
                 <span className="hidden items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-600 sm:inline-flex" title="Streak"><Flame className="size-3" /> {e.currentStreakDays}d</span>
-                <span className="hidden items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-bold text-violet-600 sm:inline-flex" title="Badges"><Award className="size-3" /> {e.badgesEarned}</span>
+                <span className="hidden items-center gap-1 rounded-full bg-[#fff5ea] px-2 py-0.5 text-[11px] font-bold text-[#a16207] sm:inline-flex" title="Badges"><Award className="size-3" /> {e.badgesEarned}</span>
                 <span className="hidden items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-600 sm:inline-flex" title="Level"><Star className="size-3 text-amber-400" /> Lv {e.level}</span>
                 <span className="hidden w-14 shrink-0 text-right text-[11px] font-semibold text-slate-500 sm:inline-block" title="Percentile">{e.percentile}th pct</span>
                 <span className="w-12 shrink-0 text-right text-base font-black tabular-nums" style={{ color: toneFor(e.scorePct) }}>{e.scorePct}%</span>
