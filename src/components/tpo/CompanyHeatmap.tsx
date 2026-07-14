@@ -1,12 +1,12 @@
 import type { TpoCompanyHeatmapRow } from '@/shared';
 
 /**
- * Company Readiness heatmap — rows = companies, columns = accuracy bands. Each
+ * Company Readiness heatmap — rows = companies, columns = readiness bands. Each
  * cell is coloured by its band hue with opacity scaled to the company's largest
  * band, so the dominant readiness bucket per company reads at a glance. Pure CSS.
  */
 
-const BAND_LABELS = ['<40%', '40–59%', '60–79%', '≥80%'];
+const BAND_LABELS = ['<40', '40–54', '55–69', '70+']; // readiness bands, aligned to the Overall Placement Readiness donut
 const BAND_COLORS = ['#dc2626', '#f59e0b', '#0284c7', '#059669'];
 
 export function CompanyHeatmap({ rows }: { rows: TpoCompanyHeatmapRow[] }) {

@@ -5,12 +5,12 @@ import { Loader2 } from 'lucide-react';
 import { getTpoCompanyHeatmap } from '@/lib/api/tpo';
 import type { TpoCompanyHeatmapRow } from '@/shared/dto/tpo-analytics.dto';
 
-const BAND_LABELS = ['<40%', '40–59%', '60–79%', '≥80%'];
+const BAND_LABELS = ['<40', '40–54', '55–69', '70+']; // readiness bands, aligned to the Overall Placement Readiness donut
 // Base RGB per band (red → amber → sky → emerald); opacity encodes the count.
 const BAND_RGB = ['220,38,38', '245,158,11', '2,132,199', '5,150,105'];
 
 /**
- * Company Readiness heatmap — rows are companies, columns are accuracy bands,
+ * Company Readiness heatmap — rows are companies, columns are readiness bands,
  * each cell a colour-scaled count of students. Reads /tpo/company-heatmap.
  */
 export function CompanyHeatmap({ cohortId }: { cohortId?: string }) {
