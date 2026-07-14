@@ -814,9 +814,12 @@
 @keyframes marquee-y { from { transform: translateY(0); } to { transform: translateY(-50%); } }
 .marquee-x { animation: marquee-x var(--marquee-dur, 36s) linear infinite; will-change: transform; }
 .marquee-y { animation: marquee-y var(--marquee-dur, 28s) linear infinite; will-change: transform; }
+/* Same belt, reversed — the second outcomes column scrolls downward. */
+.marquee-y-reverse { animation: marquee-y var(--marquee-dur, 28s) linear infinite reverse; will-change: transform; }
 /* Pause the belt on hover so a logo can be inspected (and its true colours shown). */
 .marquee-hover-pause:hover .marquee-x,
-.marquee-hover-pause:hover .marquee-y { animation-play-state: paused; }
+.marquee-hover-pause:hover .marquee-y,
+.marquee-hover-pause:hover .marquee-y-reverse { animation-play-state: paused; }
 /* Soft fade at the belt edges so items slide in/out instead of hard-clipping. */
 .edge-fade-x { -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent); mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent); }
 .edge-fade-y { -webkit-mask-image: linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent); }

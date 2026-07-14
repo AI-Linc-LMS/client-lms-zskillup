@@ -109,6 +109,36 @@ function initialsOf(name: string): string {
     .join('');
 }
 
+type Testimonial = { quote: string; name: string; meta: string; initials: string };
+
+/** One outcome/testimonial card used inside the vertical marquee columns. */
+function OutcomeCard({ t, muted = false }: { t: Testimonial; muted?: boolean }) {
+  return (
+    <figure
+      aria-hidden={muted}
+      className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6 shadow-[var(--shadow-card)]"
+    >
+      <div className="mb-3 flex items-center gap-1">
+        {Array.from({ length: 5 }).map((_, k) => (
+          <Star key={k} className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden />
+        ))}
+      </div>
+      <blockquote className="text-sm leading-relaxed text-[var(--color-text)]">
+        &ldquo;{t.quote}&rdquo;
+      </blockquote>
+      <figcaption className="mt-5 flex items-center gap-3 border-t border-[var(--color-line)] pt-4">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] text-xs font-extrabold text-white">
+          {t.initials}
+        </span>
+        <span>
+          <p className="text-sm font-bold text-[var(--color-text)]">{t.name}</p>
+          <p className="text-xs text-[var(--color-text-muted)]">{t.meta}</p>
+        </span>
+      </figcaption>
+    </figure>
+  );
+}
+
 export default async function HomePage() {
   // Prefer admin-curated testimonials (Phase 5 CMS); fall back to built-in copy.
   const cms = await getPublicTestimonials();
@@ -122,8 +152,12 @@ export default async function HomePage() {
           initials: initialsOf(t.authorName),
         }))
       : TESTIMONIALS;
-  // Duplicated once so the vertical outcomes ticker loops seamlessly.
-  const outcomesLoop = [...testimonials, ...testimonials];
+  // Two vertical marquee columns (one scrolls up, one down), each duplicated so
+  // it loops seamlessly. Column B is rotated so the columns never mirror.
+  const half = Math.ceil(testimonials.length / 2);
+  const rotated = [...testimonials.slice(half), ...testimonials.slice(0, half)];
+  const outcomesUp = [...testimonials, ...testimonials];
+  const outcomesDown = [...rotated, ...rotated];
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-white text-[var(--color-text)]">
@@ -624,34 +658,24 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* Vertical ticker viewport */}
+          {/* Two vertical ticker columns - left scrolls up, right scrolls down */}
           <div className="marquee-hover-pause edge-fade-y relative h-[26rem] overflow-hidden lg:h-[30rem]">
-            <div className="marquee-y flex flex-col gap-4">
-              {outcomesLoop.map((t, i) => (
-                <figure
-                  key={`${t.name}-${i}`}
-                  aria-hidden={i >= testimonials.length}
-                  className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6 shadow-[var(--shadow-card)]"
-                >
-                  <div className="mb-3 flex items-center gap-1">
-                    {Array.from({ length: 5 }).map((_, k) => (
-                      <Star key={k} className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden />
-                    ))}
-                  </div>
-                  <blockquote className="text-sm leading-relaxed text-[var(--color-text)]">
-                    &ldquo;{t.quote}&rdquo;
-                  </blockquote>
-                  <figcaption className="mt-5 flex items-center gap-3 border-t border-[var(--color-line)] pt-4">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] text-xs font-extrabold text-white">
-                      {t.initials}
-                    </span>
-                    <span>
-                      <p className="text-sm font-bold text-[var(--color-text)]">{t.name}</p>
-                      <p className="text-xs text-[var(--color-text-muted)]">{t.meta}</p>
-                    </span>
-                  </figcaption>
-                </figure>
-              ))}
+            <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
+              {/* Column 1 - scrolls up */}
+              <div className="marquee-y flex flex-col gap-4 [--marquee-dur:32s]">
+                {outcomesUp.map((t, i) => (
+                  <OutcomeCard key={`up-${t.name}-${i}`} t={t} muted={i >= testimonials.length} />
+                ))}
+              </div>
+              {/* Column 2 - scrolls down (single column collapses on the narrowest screens) */}
+              <div
+                aria-hidden
+                className="marquee-y-reverse hidden flex-col gap-4 [--marquee-dur:38s] sm:flex"
+              >
+                {outcomesDown.map((t, i) => (
+                  <OutcomeCard key={`down-${t.name}-${i}`} t={t} />
+                ))}
+              </div>
             </div>
           </div>
         </div>
