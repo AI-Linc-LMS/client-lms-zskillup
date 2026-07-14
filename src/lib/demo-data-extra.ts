@@ -202,13 +202,16 @@ export const HOMEPAGE_TESTIMONIALS = [
   { quote: 'The cohort heat-map is invaluable. We caught at-risk students 3 weeks before the placement window and had time to intervene.', name: 'Dr. Priya Menon', detail: 'TPO, VVIT' },
 ];
 
+// Priority recruiter set shown in the landing "Aligned with the hiring patterns
+// of" ticker (decorative only — not clickable). Logos verified live on Wikimedia.
 export const HOMEPAGE_COMPANY_LOGOS = [
-  { name: 'Accenture', slug: 'accenture', logoSrc: `${wiki}/c/cd/Accenture.svg`, logoAlt: 'Accenture logo' },
-  { name: 'TCS',       slug: 'tcs',       logoSrc: `${wiki}/0/0e/Tata_Consultancy_Services_old_logo.svg`, logoAlt: 'TCS logo' },
-  { name: 'Infosys',   slug: 'infosys',   logoSrc: `${wiki}/9/95/Infosys_logo.svg`, logoAlt: 'Infosys logo' },
-  { name: 'Wipro',     slug: 'wipro',     logoSrc: `${wiki}/a/a0/Wipro_Primary_Logo_Color_RGB.svg`, logoAlt: 'Wipro logo' },
-  { name: 'Cognizant', slug: 'cognizant', logoSrc: `${wiki}/4/43/Cognizant_logo_2022.svg`, logoAlt: 'Cognizant logo' },
-  { name: 'Capgemini', slug: 'capgemini', logoSrc: `${wiki}/9/9d/Capgemini_201x_logo.svg`, logoAlt: 'Capgemini logo' },
-  { name: 'Deloitte',  slug: 'deloitte',  logoSrc: `${wiki}/e/ed/Logo_of_Deloitte.svg`, logoAlt: 'Deloitte logo' },
-  { name: 'Amazon',    slug: 'amazon',    logoSrc: `${wiki}/a/a9/Amazon_logo.svg`, logoAlt: 'Amazon logo' },
+  { name: 'Accenture',     slug: 'accenture',     logoSrc: `${wiki}/c/cd/Accenture.svg`, logoAlt: 'Accenture logo' },
+  { name: 'TCS',           slug: 'tcs',           logoSrc: `${wiki}/0/0e/Tata_Consultancy_Services_old_logo.svg`, logoAlt: 'TCS logo' },
+  { name: 'Infosys',       slug: 'infosys',       logoSrc: `${wiki}/9/95/Infosys_logo.svg`, logoAlt: 'Infosys logo' },
+  { name: 'Cognizant',     slug: 'cognizant',     logoSrc: `${wiki}/4/43/Cognizant_logo_2022.svg`, logoAlt: 'Cognizant logo' },
+  { name: 'Capgemini',     slug: 'capgemini',     logoSrc: `${wiki}/9/9d/Capgemini_201x_logo.svg`, logoAlt: 'Capgemini logo' },
+  { name: 'Tech Mahindra', slug: 'tech-mahindra', logoSrc: `${wiki}/3/34/Tech_Mahindra_New_Logo.svg`, logoAlt: 'Tech Mahindra logo' },
+  { name: 'LTIMindtree',   slug: 'ltimindtree',   logoSrc: `${wiki}/9/9f/LTIMindtree_Logo.svg`, logoAlt: 'LTIMindtree logo' },
+  { name: 'HCLTech',       slug: 'hcltech',       logoSrc: `${wiki}/8/8a/HCL_Technologies_logo.svg`, logoAlt: 'HCLTech logo' },
+  { name: 'IBM',           slug: 'ibm',           logoSrc: `${wiki}/5/51/IBM_logo.svg`, logoAlt: 'IBM logo' },
 ];
