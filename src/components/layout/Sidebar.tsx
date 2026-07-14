@@ -43,7 +43,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 
 /** Sections rendered FLAT — always-open, no collapse toggle (their items stand
  *  as individual nav links under a static header). */
-const FLAT_HEADINGS = new Set(['COMPANY HUBS']);
+const FLAT_HEADINGS = new Set<string>([]);
 
 /** Section-level icons for the accordion headers, keyed by the nav heading. */
 const SECTION_ICON: Record<string, typeof Compass> = {

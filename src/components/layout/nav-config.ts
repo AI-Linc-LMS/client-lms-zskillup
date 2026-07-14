@@ -98,7 +98,10 @@ export const STUDENT_NAV: NavSection[] = [
     ],
   },
   {
+    // Single destination — render it as one standalone top-level item rather than a
+    // "COMPANY HUBS" header ABOVE a "Company Hubs" link (which read as a duplicate).
     heading: 'COMPANY HUBS',
+    standalone: true,
     items: [{ label: 'Company Hubs', href: '/dashboard/company', icon: Building2 }],
   },
   {
