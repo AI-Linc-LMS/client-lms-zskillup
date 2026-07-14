@@ -63,11 +63,15 @@ export function TaskRow({
   onToggle,
   disabled = false,
   busy = false,
+  onCtaClick,
 }: {
   task: StudyTaskDto;
   onToggle: (done: boolean) => void;
   disabled?: boolean;
   busy?: boolean;
+  /** Intercept the task CTA (e.g. to raise the free-tier upgrade modal). Return
+   *  true to swallow the click so the Link doesn't navigate. */
+  onCtaClick?: (e: React.MouseEvent) => boolean;
 }) {
   const meta = TASK_META[task.kind];
   const Icon = meta.icon;
@@ -108,6 +112,7 @@ export function TaskRow({
       </span>
       <Link
         href={task.href}
+        onClick={onCtaClick}
         className={cn(
           'shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition',
           task.done ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' : 'bg-navy text-white hover:bg-navy/90',

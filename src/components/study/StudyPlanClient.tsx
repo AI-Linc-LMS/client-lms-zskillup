@@ -24,6 +24,8 @@ import {
 } from '@/lib/api/roadmap';
 import { PHASE_META, unlockCopy } from './study-ui';
 import { ProgressRing, TaskRow } from './StudyBits';
+import { useUpgradeGate } from '@/hooks/useUpgradeGate';
+import { UpgradeModal } from '@/components/billing/UpgradeModal';
 import { RoadmapRail } from './RoadmapRail';
 import { DayDrawerPortal } from './DayDrawer';
 import { Confetti } from './Confetti';
@@ -316,6 +318,9 @@ function TodayPanel({
 }) {
   const meta = PHASE_META[today.phase];
   const allDone = today.doneCount >= today.taskCount && today.taskCount > 0;
+  // Free users may READ their plan but acting on a task (warm-up / timed quiz)
+  // opens paid practice — raise the upgrade modal instead of navigating.
+  const upgrade = useUpgradeGate();
   return (
     <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
       <div className="relative overflow-hidden bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] p-5 text-white">
@@ -351,7 +356,12 @@ function TodayPanel({
         <ul className="space-y-2.5">
           {today.tasks.map((t) => (
             <li key={t.index}>
-              <TaskRow task={t} onToggle={(d) => onToggle(t.index, d)} busy={busyTask === t.index} />
+              <TaskRow
+                task={t}
+                onToggle={(d) => onToggle(t.index, d)}
+                busy={busyTask === t.index}
+                onCtaClick={(e) => upgrade.guard(e, t.title)}
+              />
             </li>
           ))}
         </ul>
@@ -359,6 +369,16 @@ function TodayPanel({
           Finishing the linked practice or mock ticks a task automatically - or check it off yourself.
         </p>
       </div>
+      <UpgradeModal
+        open={upgrade.feature !== null}
+        onClose={upgrade.close}
+        feature={upgrade.feature ?? undefined}
+        message={
+          upgrade.feature
+            ? `Your study plan is yours to read. Starting "${upgrade.feature}" needs a plan.`
+            : undefined
+        }
+      />
     </section>
   );
 }
