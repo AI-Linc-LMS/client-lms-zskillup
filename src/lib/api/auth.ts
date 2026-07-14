@@ -146,12 +146,24 @@ export async function resetPassword(dto: AuthResetPasswordDto): Promise<{ messag
   return res.data;
 }
 
-export async function listColleges(params: { state?: string; city?: string }): Promise<College[]> {
+export async function listColleges(params: {
+  state?: string;
+  city?: string;
+  search?: string;
+  limit?: number;
+}): Promise<College[]> {
   const qs = new URLSearchParams();
   if (params.state) qs.set('state', params.state);
   if (params.city) qs.set('city', params.city);
+  if (params.search) qs.set('search', params.search);
+  if (params.limit) qs.set('limit', String(params.limit));
   const suffix = qs.toString() ? `?${qs.toString()}` : '';
-  // Public endpoint — used by the signup wizard before login.
+  // Public endpoint — used by the signup wizard + profile picker.
   const res = await apiClient.get<College[]>(`/api/v1/colleges${suffix}`, { auth: 'public' });
   return res.data;
+}
+
+/** "Other" option — request a college be added to the directory. Best-effort. */
+export async function suggestCollege(body: { name: string; city?: string; state?: string }): Promise<void> {
+  await apiClient.post('/api/v1/colleges/suggestions', body, { auth: 'public' });
 }

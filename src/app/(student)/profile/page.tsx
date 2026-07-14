@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { getMe, updateMe, type ApiMe } from '@/lib/api/me';
 import { useMySubscription } from '@/hooks/useMySubscription';
-import { listColleges, type College } from '@/lib/api/auth';
+import { CollegeCombobox } from '@/components/student/CollegeCombobox';
 import { getMyRegistrations, type ApiRegistration } from '@/lib/api/registrations';
 import { ApiRequestError } from '@/lib/api/types';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
@@ -76,8 +76,6 @@ export default function ProfilePage() {
   const isPremium = planStatus !== 'none';
   const [me, setMe] = useState<ApiMe | null>(null);
   const [regs, setRegs] = useState<ApiRegistration[]>([]);
-  /** Pre-loaded colleges for the picker (public endpoint, same list as signup). */
-  const [colleges, setColleges] = useState<College[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -86,22 +84,6 @@ export default function ProfilePage() {
   const [v, setV] = useState<Values>(EMPTY);
   const [baseline, setBaseline] = useState<string>(snap(EMPTY));
   const set = <K extends keyof Values>(k: K, val: Values[K]) => setV((p) => ({ ...p, [k]: val }));
-
-  // Pre-load the colleges list for the picker (public endpoint — same source the
-  // signup wizard uses, so the ids line up with tenancy.colleges).
-  useEffect(() => {
-    let cancelled = false;
-    listColleges({})
-      .then((cs) => {
-        if (!cancelled) setColleges([...cs].sort((a, b) => a.name.localeCompare(b.name)));
-      })
-      .catch(() => {
-        /* picker just shows the empty state */
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -283,19 +265,14 @@ export default function ProfilePage() {
                   leaderboard (and cohort scoping) filter on. Typing it never did -
                   which is why that board silently showed national rankings. */}
               <Field label="College" done={!!v.collegeId}>
-                <select
-                  value={v.collegeId}
-                  onChange={(e) => set('collegeId', e.target.value)}
-                  className={inputCls}
-                >
-                  <option value="">{colleges.length ? 'Select your college' : 'Loading colleges…'}</option>
-                  {colleges.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                      {c.city ? ` · ${c.city}` : ''}
-                    </option>
-                  ))}
-                </select>
+                <CollegeCombobox
+                  collegeId={v.collegeId}
+                  collegeName={v.collegeName}
+                  onSelect={({ id, name }) => {
+                    set('collegeId', id);
+                    set('collegeName', name);
+                  }}
+                />
                 {!v.collegeId && v.collegeName ? (
                   <p className="mt-1 text-[11px] text-amber-600">
                     Currently saved as “{v.collegeName}”. Pick it from the list so your
