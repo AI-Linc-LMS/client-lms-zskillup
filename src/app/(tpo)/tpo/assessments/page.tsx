@@ -10,6 +10,7 @@ import {
   Loader2,
   Plus,
   Radio,
+  Sparkles,
   Trash2,
   Users,
   Video,
@@ -30,6 +31,7 @@ import type { TpoAssessment, TpoAssessmentAvailability, TpoAssessmentList, TpoAs
 import { useTpoConsole } from '@/components/tpo/TpoConsole';
 import { KpiCard } from '@/components/tpo/ui';
 import { SectionTopicPicker } from '@/components/tpo/SectionTopicPicker';
+import { AssessmentWizard } from '@/components/superadmin/AssessmentWizard';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -54,6 +56,7 @@ export default function AssessmentCenterPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [aiWizard, setAiWizard] = useState(false);
   const [saving, setSaving] = useState(false);
   const [resultsFor, setResultsFor] = useState<TpoAssessment | null>(null);
 
@@ -196,9 +199,14 @@ export default function AssessmentCenterPage() {
         <p className="text-sm font-semibold text-slate-600">
           Assessment Center · <span className="text-navy">{data?.activeCount ?? 0}/{data?.activeCap ?? 10} active</span>
         </p>
-        <Button size="sm" onClick={() => setShowForm((v) => !v)} disabled={capReached}>
-          <Plus className="size-4" /> Create Assessment
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={() => setAiWizard(true)} disabled={capReached}>
+            <Sparkles className="size-4" /> Build with AI
+          </Button>
+          <Button size="sm" onClick={() => setShowForm((v) => !v)} disabled={capReached}>
+            <Plus className="size-4" /> Create Assessment
+          </Button>
+        </div>
       </div>
 
       {capReached && (
@@ -431,6 +439,17 @@ export default function AssessmentCenterPage() {
       </p>
 
       {resultsFor && <ResultsModal assessment={resultsFor} onClose={() => setResultsFor(null)} onReleased={load} />}
+
+      {aiWizard && (
+        <AssessmentWizard
+          tpoCohorts={cohorts.map((c) => ({ id: c.id, name: c.name }))}
+          onClose={() => setAiWizard(false)}
+          onCreated={() => {
+            setAiWizard(false);
+            load();
+          }}
+        />
+      )}
     </div>
   );
 }

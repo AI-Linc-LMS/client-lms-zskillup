@@ -73,16 +73,22 @@ const inputCls =
 
 const PLATFORM = '__platform__';
 
-/** AI-assisted assessment builder wizard. Pass `editId` to edit an existing one. */
+/** AI-assisted assessment builder wizard. Pass `editId` to edit an existing one.
+ *  Pass `tpoCohorts` to run in TPO mode: the drive is confined to the caller's own
+ *  college (enforced server-side too), so the college picker + platform-wide option
+ *  are hidden and cohorts come from the TPO's own list. */
 export function AssessmentWizard({
   onClose,
   onCreated,
   editId,
+  tpoCohorts,
 }: {
   onClose: () => void;
   onCreated: () => void;
   editId?: string;
+  tpoCohorts?: Array<{ id: string; name: string }>;
 }) {
+  const isTpo = !!tpoCohorts;
   const [step, setStep] = useState(0);
   const [companies, setCompanies] = useState<ApiCompany[]>([]);
   const [existing, setExisting] = useState<EditableAssessment | null>(null);
@@ -116,11 +122,12 @@ export function AssessmentWizard({
     listCompanies().then(setCompanies).catch(() => {});
     listTopicsWithCounts().then(setTopics).catch(() => {});
     listCodingTopics().then(setCodingTopics).catch(() => {});
-    listAdminColleges().then(setColleges).catch(() => {});
-  }, []);
+    if (!isTpo) listAdminColleges().then(setColleges).catch(() => {});
+  }, [isTpo]);
 
-  // Load the selected college's cohorts (for the cohort-wise scope selector).
+  // Load the selected college's cohorts (admin scope). TPO mode uses its own list.
   useEffect(() => {
+    if (isTpo) return;
     if (!collegeId) {
       setCohorts([]);
       setCohortId('');
@@ -133,7 +140,10 @@ export function AssessmentWizard({
     return () => {
       alive = false;
     };
-  }, [collegeId]);
+  }, [collegeId, isTpo]);
+
+  /** Cohorts shown in the picker: the TPO's own list, or the selected college's. */
+  const cohortOptions: Array<{ id: string; name: string }> = isTpo ? tpoCohorts ?? [] : cohorts;
 
   /** MCQ picker options grouped by section (root topic) — pick a whole section or a
    *  specific topic; the backend samples the whole subtree by id. */
@@ -291,7 +301,7 @@ export function AssessmentWizard({
       } else {
         const result = await createAssessment({
           companyId: companyArg,
-          collegeId: collegeId || undefined,
+          collegeId: isTpo ? undefined : collegeId || undefined,
           cohortId: cohortId || undefined,
           title: title.trim(),
           scheduledAt: new Date(startAt).toISOString(),
@@ -373,37 +383,53 @@ export function AssessmentWizard({
                 <span className={labelCls}>Audience</span>
                 <select value={companyId} onChange={(e) => setCompanyId(e.target.value)} className={inputCls}>
                   <option value="">Select audience</option>
-                  <option value={PLATFORM}>🌐 Platform-wide (all students)</option>
+                  {!isTpo && <option value={PLATFORM}>🌐 Platform-wide (all students)</option>}
                   {companies.map((c) => <option key={c.id} value={c.id}>{c.name} drive</option>)}
                 </select>
               </label>
 
-              {/* Cohort-wise scope: optionally restrict the drive to one college / batch. */}
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="block">
-                  <span className={labelCls}>College (optional)</span>
-                  <select value={collegeId} onChange={(e) => setCollegeId(e.target.value)} className={inputCls}>
-                    <option value="">All colleges</option>
-                    {colleges.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
-                </label>
+              {/* Cohort-wise scope. TPO mode: confined to your own college (server-enforced),
+                  so we only offer the cohort picker. Admin: college + cohort. */}
+              {isTpo ? (
                 <label className="block">
                   <span className={labelCls}>Cohort / batch (optional)</span>
-                  <select
-                    value={cohortId}
-                    onChange={(e) => setCohortId(e.target.value)}
-                    disabled={!collegeId}
-                    className={cn(inputCls, !collegeId && 'cursor-not-allowed opacity-50')}
-                  >
-                    <option value="">{collegeId ? 'All cohorts in this college' : 'Select a college first'}</option>
-                    {cohorts.map((c) => (
+                  <select value={cohortId} onChange={(e) => setCohortId(e.target.value)} className={inputCls}>
+                    <option value="">All cohorts in your college</option>
+                    {cohortOptions.map((c) => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                   </select>
+                  <span className="mt-1 block text-[11px] font-normal text-slate-500">
+                    This assessment is limited to your college&apos;s students.
+                  </span>
                 </label>
-              </div>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="block">
+                    <span className={labelCls}>College (optional)</span>
+                    <select value={collegeId} onChange={(e) => setCollegeId(e.target.value)} className={inputCls}>
+                      <option value="">All colleges</option>
+                      {colleges.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="block">
+                    <span className={labelCls}>Cohort / batch (optional)</span>
+                    <select
+                      value={cohortId}
+                      onChange={(e) => setCohortId(e.target.value)}
+                      disabled={!collegeId}
+                      className={cn(inputCls, !collegeId && 'cursor-not-allowed opacity-50')}
+                    >
+                      <option value="">{collegeId ? 'All cohorts in this college' : 'Select a college first'}</option>
+                      {cohortOptions.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+              )}
               <div className="grid gap-4 sm:grid-cols-3">
                 <label className="block">
                   <span className={labelCls}>Start time *</span>
