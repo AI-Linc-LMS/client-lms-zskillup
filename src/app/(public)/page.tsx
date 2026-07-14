@@ -359,82 +359,107 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── What is prephasz (platform tour) ──────────────────────────────── */}
-      <section className="relative bg-[var(--color-bg)] pt-16 lg:pt-20">
+      {/* ── Platform tour + founder (video left, founder right) ────────────── */}
+      <section className="relative bg-[var(--color-bg)] py-16 lg:py-20">
         <div className="mx-auto max-w-[1400px] px-5 md:px-8">
-          <div className="mb-8 text-center">
-            <p className="section-tag">Platform overview</p>
+          <div className="mb-10 max-w-2xl">
+            <p className="section-tag">Why prephasz</p>
             <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
-              What is prephasz?
+              See how it works - and who&apos;s behind it
             </h2>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-[var(--color-text-muted)] sm:text-base">
-              How adaptive practice, company drives, mock assessments and placement readiness fit together.
+            <p className="mt-2 text-sm text-[var(--color-text-muted)] sm:text-base">
+              A quick tour of the platform, and the founder betting 19+ years of IT and edtech on
+              making placement prep fairer for every student.
             </p>
           </div>
-          <div className="mx-auto max-w-4xl">
-            <VideoPlaceholder
-              eyebrow="Platform tour"
-              title="See how prephasz works"
-              subtitle="From your first practice question to placement-ready - the full journey. Video coming soon."
-            />
-          </div>
-        </div>
-      </section>
 
-      {/* ── Founder note - card left, Lokesh right ────────────────────────── */}
-      <section className="bg-[var(--color-bg)] py-16 lg:py-20">
-        <div className="mx-auto max-w-[1400px] px-5 md:px-8">
           <div className="grid items-stretch gap-6 lg:grid-cols-2 lg:gap-8">
-            {/* LEFT - mission card */}
-            <div className="relative overflow-hidden rounded-[var(--radius-card-lg)] bg-gradient-to-br from-[#0b1220] via-[#101d4a] to-[#1e3a8a] p-8 text-white lg:p-10">
-              <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[#f37021]/20 blur-3xl" />
-              <p className="relative text-[11px] font-bold uppercase tracking-[0.18em] text-white/55">
-                Why we exist
-              </p>
-              <h2 className="relative mt-3 text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl">
-                Placement prep that meets students where they are
-              </h2>
-              <p className="relative mt-4 max-w-md text-sm leading-relaxed text-white/75">
-                Not everyone has a mentor, a senior&apos;s notes, or a coaching budget. prephasz turns
-                honest, pattern-accurate practice into something every student can reach - and every
-                placement cell can trust.
-              </p>
-              <div className="relative mt-7 grid grid-cols-3 gap-4 border-t border-white/10 pt-6">
-                {[
-                  { k: '240k+', v: 'Students' },
-                  { k: '1,200+', v: 'Colleges' },
-                  { k: '82%', v: 'Place rate' },
-                ].map((s) => (
-                  <div key={s.v}>
-                    <p className="text-xl font-extrabold tracking-tight num-tab">{s.k}</p>
-                    <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wider text-white/50">
-                      {s.v}
-                    </p>
-                  </div>
-                ))}
-              </div>
-              <p className="relative mt-3 text-[10px] text-white/40">Figures from the ZSkillup platform.</p>
+            {/* LEFT - platform tour video + founder pull-quote */}
+            <div className="flex flex-col gap-6">
+              <VideoPlaceholder
+                eyebrow="Platform tour"
+                title="See how prephasz works"
+                subtitle="From your first practice question to placement-ready - the full journey. Video coming soon."
+                accent="#f5b400"
+              />
+              <figure className="relative flex flex-1 flex-col justify-center overflow-hidden rounded-[var(--radius-card-lg)] border border-[var(--color-line)] bg-white p-7 lg:p-8">
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full bg-[var(--color-brand)]/20 blur-3xl"
+                />
+                <Quote className="relative h-8 w-8 text-[var(--color-brand-strong)]" aria-hidden />
+                <blockquote className="relative mt-4 text-lg font-semibold leading-relaxed tracking-tight text-[var(--color-text)] sm:text-xl">
+                  &ldquo;We built prephasz so that where you come from never decides where you can
+                  reach. Every student deserves the same shot at a great first job - structured,
+                  honest practice that mirrors the real drive.&rdquo;
+                </blockquote>
+                <figcaption className="relative mt-6 text-sm font-semibold text-[var(--color-text-muted)]">
+                  Lokesh Mathur, Founder
+                </figcaption>
+              </figure>
             </div>
 
-            {/* RIGHT - Lokesh (photo placeholder + quote + designation) */}
-            <figure className="flex flex-col justify-center rounded-[var(--radius-card-lg)] border border-[var(--color-line)] bg-white p-8 shadow-[var(--shadow-card)] lg:p-10">
-              <Quote className="h-8 w-8 text-[var(--color-brand)]" aria-hidden />
-              <blockquote className="mt-4 text-lg font-semibold leading-relaxed tracking-tight text-[var(--color-text)] sm:text-xl">
-                &ldquo;We built prephasz so that where you come from never decides where you can reach.
-                Every student deserves the same shot at a great first job - structured, honest practice
-                that mirrors the real drive.&rdquo;
-              </blockquote>
-              <figcaption className="mt-7 flex items-center gap-4 border-t border-[var(--color-line)] pt-6">
-                {/* Photo placeholder - swap for a real headshot when available. */}
-                <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-brand)] text-lg font-extrabold text-white shadow-md">
-                  L
+            {/* RIGHT - founder: photo first, then description */}
+            <article className="overflow-hidden rounded-[var(--radius-card-lg)] border border-[var(--color-line)] bg-white">
+              {/* Photo as a CSS background so a missing file degrades to the navy card (no broken icon). */}
+              <div className="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-b from-[#101d4a] to-[#0b1220]">
+                <div
+                  role="img"
+                  aria-label="Lokesh Mathur, Founder of prephasz"
+                  className="absolute inset-0 bg-cover bg-top"
+                  style={{ backgroundImage: "url('/images/founder-lokesh.png')" }}
+                />
+                <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-[var(--color-brand)] px-3 py-1 text-[11px] font-black uppercase tracking-wider text-[var(--color-brand-ink)] shadow-md">
+                  <Sparkles className="h-3 w-3" aria-hidden /> Founder
                 </span>
-                <span>
-                  <p className="text-base font-bold text-[var(--color-text)]">Lokesh</p>
-                  <p className="text-sm text-[var(--color-text-muted)]">Founder · prephasz</p>
-                </span>
-              </figcaption>
-            </figure>
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent px-6 pb-5 pt-16">
+                  <p className="text-2xl font-extrabold tracking-tight text-white">Lokesh Mathur</p>
+                  <p className="mt-0.5 text-sm font-medium text-white/70">Founder · prephasz</p>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="p-7 lg:p-8">
+                <p className="text-sm leading-relaxed text-[var(--color-text-muted)] sm:text-[15px]">
+                  A dynamic leader with 19+ years across IT, education, and edtech, and an IIM Calcutta
+                  Executive MBA certified in PMP®, CSM®, and SCJP 5.0. From leading his own venture to
+                  senior roles at upGrad, he has consistently driven real career outcomes and strategic
+                  growth.
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-[var(--color-text-muted)] sm:text-[15px]">
+                  Lokesh has shaped 50,000+ futures and transformed lives, pioneering tech-driven
+                  education and mentoring at scale. He pairs a strategic mindset with a genuine
+                  commitment to empowering others - a true force for change in the world of learning
+                  and career.
+                </p>
+
+                <div className="mt-7">
+                  <p className="flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--color-text-subtle)]">
+                    <span className="h-px w-6 bg-[var(--color-brand-strong)]" aria-hidden /> Key experience
+                  </p>
+                  <ul className="mt-4 grid gap-x-6 gap-y-3 sm:grid-cols-2">
+                    {[
+                      '19+ years in IT, Education & EdTech',
+                      'IIM Calcutta Executive MBA',
+                      'PMP®, CSM®, SCJP 5.0 Certified',
+                      'Former Senior Leader at upGrad',
+                      'Mentored 50,000+ students',
+                    ].map((item) => (
+                      <li
+                        key={item}
+                        className="flex items-start gap-2.5 text-sm text-[var(--color-text)]"
+                      >
+                        <CheckCircle2
+                          className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-brand-strong)]"
+                          aria-hidden
+                        />
+                        <span className="font-medium">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </article>
           </div>
         </div>
       </section>
