@@ -53,15 +53,15 @@ const MODULES = [
 ];
 
 /** Practice-by-section cards — the five sections students segregate prep by. */
-const SECTION_TINT = {
-  sky: 'bg-sky-50 text-sky-600 ring-sky-100',
-  orange: 'bg-orange-50 text-orange-600 ring-orange-100',
-  violet: 'bg-violet-50 text-violet-600 ring-violet-100',
-  emerald: 'bg-emerald-50 text-emerald-600 ring-emerald-100',
-  indigo: 'bg-indigo-50 text-indigo-600 ring-indigo-100',
+const SECTION_STYLE = {
+  sky: { icon: 'text-sky-500/15 group-hover:text-sky-500/25', glow: 'bg-sky-400/10' },
+  orange: { icon: 'text-orange-500/15 group-hover:text-orange-500/25', glow: 'bg-orange-400/10' },
+  violet: { icon: 'text-violet-500/15 group-hover:text-violet-500/25', glow: 'bg-violet-400/10' },
+  emerald: { icon: 'text-emerald-500/15 group-hover:text-emerald-500/25', glow: 'bg-emerald-400/10' },
+  indigo: { icon: 'text-indigo-500/15 group-hover:text-indigo-500/25', glow: 'bg-indigo-400/10' },
 } as const;
 
-const SECTIONS: { icon: typeof Calculator; name: string; blurb: string; tint: keyof typeof SECTION_TINT }[] = [
+const SECTIONS: { icon: typeof Calculator; name: string; blurb: string; tint: keyof typeof SECTION_STYLE }[] = [
   { icon: Calculator, name: 'Numerical Ability', blurb: 'Percentages, ratios, time-speed-distance & data interpretation.', tint: 'sky' },
   { icon: Brain, name: 'Logical Reasoning', blurb: 'Series, blood relations, syllogisms, coding-decoding & puzzles.', tint: 'orange' },
   { icon: BookOpen, name: 'Verbal Ability', blurb: 'Reading comprehension, grammar, vocabulary & error spotting.', tint: 'violet' },
@@ -559,20 +559,23 @@ export default async function HomePage() {
               <Link
                 key={s.name}
                 href="/signup"
-                className="hover-lift group relative flex items-start gap-4 overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6"
+                className="hover-lift group relative block h-full overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6"
               >
-                <span
-                  className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl ring-1 ring-inset ${SECTION_TINT[s.tint]}`}
-                >
-                  <s.icon className="h-6 w-6" />
-                </span>
-                <div className="min-w-0">
-                  <h3 className="flex items-center gap-1 text-lg font-bold tracking-tight text-[var(--color-text)]">
-                    {s.name}
-                    <ArrowRight className="h-4 w-4 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
-                  </h3>
-                  <p className="mt-1 text-sm leading-relaxed text-[var(--color-text-muted)]">{s.blurb}</p>
-                </div>
+                {/* backdrop watermark: soft section-tinted glow + oversized faint icon */}
+                <div
+                  aria-hidden
+                  className={`pointer-events-none absolute -right-10 -top-10 size-36 rounded-full blur-2xl ${SECTION_STYLE[s.tint].glow}`}
+                />
+                <s.icon
+                  aria-hidden
+                  strokeWidth={1.25}
+                  className={`pointer-events-none absolute -right-5 -top-3 size-28 transition-all duration-500 group-hover:scale-110 ${SECTION_STYLE[s.tint].icon}`}
+                />
+                <h3 className="relative flex items-center gap-1 text-lg font-bold tracking-tight text-[var(--color-text)]">
+                  {s.name}
+                  <ArrowRight className="h-4 w-4 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
+                </h3>
+                <p className="relative mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">{s.blurb}</p>
               </Link>
             ))}
             {/* Trailing CTA tile keeps the 3-col grid balanced at five sections. */}
