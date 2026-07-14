@@ -42,14 +42,14 @@ const HERO_STATS = LANDING_HERO_STATS;
 
 /** The eight modules that make up the platform (was four). */
 const MODULES = [
-  { icon: Compass, title: 'Company-wise tracks', body: 'Pattern-matched papers for TCS, Infosys, Wipro, Cognizant, Accenture & Capgemini - real PYQ coverage, refreshed each season.' },
-  { icon: Zap, title: 'Adaptive practice', body: 'Difficulty and pace re-tune to your accuracy and speed on every question - you never grind blindly.' },
-  { icon: ClipboardList, title: 'Timed mock assessments', body: 'Full-length simulations with the section weights, timing and cut-offs of the real drive.' },
-  { icon: MessageSquare, title: 'AI mock interviews', body: 'Spoken, role-aware interviews with instant rubric feedback on your strengths and gaps.' },
-  { icon: FileText, title: 'Resume builder', body: 'ATS-ready templates, AI tailoring to a target role, and one-click PDF export.' },
-  { icon: Code2, title: 'Coding practice', body: 'Write, run and judge real problems in-browser across languages - DSA to company sets.' },
+  { icon: Compass, title: 'Company-specific drives', body: 'Practice company-specific questions based on the latest placement patterns and previous-year questions.' },
+  { icon: Zap, title: 'Adaptive practice', body: 'Questions automatically adjust to your skill level so you keep improving with every practice session.' },
+  { icon: ClipboardList, title: 'Timed mock assessments', body: 'Take mock tests that feel just like real placement exams with actual timing and question patterns.' },
+  { icon: MessageSquare, title: 'AI mock interviews', body: 'Practice interviews with AI and receive instant feedback on your communication, confidence, and interview skills.' },
+  { icon: FileText, title: 'Resume builder', body: 'Create professional, ATS-friendly resumes that match your target job role in just a few minutes.' },
+  { icon: Code2, title: 'Coding practice', body: 'Solve coding problems, practice DSA, and improve your programming skills with an online compiler.' },
   { icon: Trophy, title: 'Gamified progress', body: 'XP, streaks, daily quests, level badges and a national leaderboard make prep a habit.' },
-  { icon: LineChart, title: 'Institutional analytics', body: 'TPOs get cohort heat-maps, at-risk flags and placement-readiness - export-ready.' },
+  { icon: LineChart, title: 'Institutional analytics', body: 'TPOs can easily track student progress, identify placement readiness, and monitor overall performance.' },
 ];
 
 /** Practice-by-section cards — the five sections students segregate prep by. */
@@ -217,9 +217,8 @@ export default async function HomePage() {
             </h1>
 
             <p className="mt-5 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg">
-              Structured prep for TCS, Infosys, Wipro, Cognizant, Capgemini and Accenture - real
-              previous-year questions, live mock drives, expert instructors, and verified
-              certificates accepted by 1,200+ campus placement cells.
+              Prepare smarter for top companies with real placement questions, mock tests,
+              coding practice, AI interviews, and resume building—all on one platform.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -466,7 +465,7 @@ export default async function HomePage() {
               <div className="relative aspect-[4/5] w-full overflow-hidden border-b border-[var(--color-line)] bg-white">
                 <div
                   role="img"
-                  aria-label="Lokesh Mathur, Founder of prephasz"
+                  aria-label="Lokesh Mathur, Founder, ZSkillup Education"
                   className="absolute inset-0 bg-cover bg-[center_top]"
                   style={{ backgroundImage: "url('/images/founder-lokesh.png')" }}
                 />
@@ -478,7 +477,7 @@ export default async function HomePage() {
               {/* Description */}
               <div className="p-7 lg:p-8">
                 <h3 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)]">Lokesh Mathur</h3>
-                <p className="mt-1 text-sm font-semibold text-[var(--color-brand-strong)]">Founder · prephasz</p>
+                <p className="mt-1 text-sm font-semibold text-[var(--color-brand-strong)]">Founder, ZSkillup Education</p>
                 <p className="mt-4 text-sm leading-relaxed text-[var(--color-text-muted)] sm:text-[15px]">
                   A dynamic leader with 19+ years across IT, education, and edtech - an IIM Calcutta
                   Executive MBA, certified in PMP®, CSM®, and SCJP 5.0. From his own venture to senior
@@ -527,8 +526,8 @@ export default async function HomePage() {
                 Pattern-matched paths for top recruiters
               </h2>
               <p className="mt-2 max-w-2xl text-sm text-[var(--color-text-muted)] sm:text-base">
-                Each track follows the actual drive - paper section weights, time pressure, and
-                section cut-offs.
+                Practice exactly the way companies conduct their placement tests, with the latest
+                exam pattern, timing, and question types.
               </p>
             </div>
             <Link
@@ -553,7 +552,7 @@ export default async function HomePage() {
                 Every section the recruiters test
               </h2>
               <p className="mt-2 max-w-2xl text-sm text-[var(--color-text-muted)] sm:text-base">
-                Drill one area at a time, or run a full mock - the bank spans all five.
+                Strengthen individual topics or test yourself with full-length mock exams anytime.
               </p>
             </div>
             <Link href={LANDING_HREFS.catalog} className="text-sm font-bold text-[var(--color-primary)] hover:underline">
@@ -703,11 +702,11 @@ export default async function HomePage() {
             Ready when you are
           </p>
           <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
-            Your next placement starts today.
+            Your dream job starts with today&apos;s preparation.
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-base text-white/75">
-            Free to start. No credit card. Pick a target company, take an assessment, and
-            we&apos;ll personalize your path.
+            Get started for free. Choose your dream company, check where you stand, and
+            we&apos;ll create a preparation plan just for you.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link href="/signup" className="btn-brand inline-flex h-12 rounded-full px-8 text-sm">
