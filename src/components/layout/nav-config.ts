@@ -113,20 +113,20 @@ export const STUDENT_NAV: NavSection[] = [
  *  out via the live subscription status (falls open while the paywall is off). */
 export const PLAN_ONLY_HREFS = new Set<string>(['/upgrade']);
 
-/** Student features gated behind a 100%-complete profile (blur-locked in-page +
- *  shown with a lock in the sidebar until the profile is finished). */
-export const PROFILE_GATED_HREFS = new Set<string>(['/practice-wish', '/mock-interview']);
+/** Student features gated behind a 100%-complete profile — "Complete your
+ *  profile" card in-page + a lock in the sidebar until the profile is finished.
+ *  Kept to core practice/assessment surfaces so a new user isn't walled off. */
+export const PROFILE_GATED_HREFS = new Set<string>(['/practice', '/mock-assessment', '/assessments']);
 
-/** Student features gated behind the one-time calibration assessment — all
- *  practice + assessment surfaces are locked until the student takes it. */
-export const CALIBRATION_GATED_HREFS = new Set<string>([
-  '/practice',
-  '/practice-wish',
-  '/mock-assessment',
-  '/assessments',
-  '/mock-interview',
-  '/coding',
-]);
+/** Student features gated behind a paid plan — a premium-upgrade card in-page +
+ *  a lock in the sidebar until the student has an active plan. */
+export const PREMIUM_GATED_HREFS = new Set<string>(['/practice-wish', '/mock-interview']);
+
+/** Student features GENERATED from the one-time Placement Readiness Test — locked
+ *  until it's completed because they're derived from its result. Deliberately
+ *  narrow (only these two) so calibration never makes the whole platform feel
+ *  locked to a brand-new user. */
+export const CALIBRATION_GATED_HREFS = new Set<string>(['/study-plan', '/recommendations']);
 
 export const SUPERADMIN_NAV: NavSection[] = [
   {
