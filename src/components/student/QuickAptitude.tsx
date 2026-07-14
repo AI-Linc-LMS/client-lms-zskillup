@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, Check, Loader2, RefreshCw, Sparkles, X, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { QuestionStem } from '@/components/practice/QuestionStem';
 import { PyqTag } from '@/components/practice/PyqTag';
 import {
   getQuickAptitude,
@@ -129,7 +130,7 @@ export function QuickAptitude() {
       ) : q ? (
         <div className="relative">
           <PyqTag companyIds={q.companyTags.map((t) => t.companyId)} years={q.yearTags ?? []} className="mb-2" />
-          <p className="text-lg font-bold leading-relaxed text-navy">{q.stem}</p>
+          <QuestionStem text={q.stem} className="text-lg font-bold leading-relaxed text-navy" />
           {multi ? <p className="mt-1 text-xs text-slate-500">Select all that apply.</p> : null}
 
           <div className="mt-4 space-y-2.5">

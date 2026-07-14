@@ -24,6 +24,7 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { QuestionStem } from '@/components/practice/QuestionStem';
 import { formatClock, formatDuration } from '@/lib/format';
 import { DIFFICULTY_RING } from '@/lib/ui-maps';
 import { Button } from '@/components/ui/button';
@@ -758,7 +759,7 @@ function MockRunningView({
             <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-bold text-indigo-600">Coding problem</p>
           ) : null}
           <PyqTag companyIds={question.companyIds ?? []} years={question.yearTags ?? []} className="mt-2" />
-          <p className="mt-2 text-base font-semibold leading-relaxed text-navy">{question.stem}</p>
+          <QuestionStem text={question.stem} className="mt-2 text-base font-semibold leading-relaxed text-navy" />
           {question.type === 'MULTI_SELECT' ? <p className="mt-1 text-xs text-slate-500">Select all that apply.</p> : null}
 
           {question.type === 'CODING' && question.coding ? (

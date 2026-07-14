@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Clock, Sparkles, Target, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { QuestionStem } from '@/components/practice/QuestionStem';
 import { Typewriter } from './ResultsVisuals';
 import type { AdaptiveQuestionRecord, NarrationPerQuestion } from '@/lib/api/adaptive';
 
@@ -96,7 +97,7 @@ export function PerQuestionBreakdown({ questions, perQuestionNarration }: PerQue
           </span>
         </div>
 
-        <p className="mt-3 text-sm font-semibold leading-relaxed text-navy break-words">{q.stem}</p>
+        <QuestionStem text={q.stem} className="mt-3 text-sm font-semibold leading-relaxed text-navy break-words" />
 
         <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
           <div className={cn('min-w-0 rounded-lg p-2.5 text-xs', q.isCorrect ? 'bg-emerald-100/70' : 'bg-rose-100/70')}>
