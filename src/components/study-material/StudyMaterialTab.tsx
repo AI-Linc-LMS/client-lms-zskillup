@@ -17,7 +17,9 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
+  completeSectionStudyMaterialItem,
   completeStudyMaterialItem,
+  getSectionStudyMaterial,
   getStudyMaterial,
   type StudyMaterialDto,
   type StudyMaterialItemDto,
@@ -31,12 +33,18 @@ const tone = (p: number) => (p >= 75 ? 'bg-emerald-500' : p >= 40 ? 'bg-amber-50
 
 export function StudyMaterialTab({
   slug,
+  scope = 'company',
   gate,
 }: {
   slug: string;
+  /** Which tree to load: a company hub (default) or a Sectional Hub root slug. */
+  scope?: 'company' | 'section';
   /** Company-hub free-tier gate: swallow Watch/quiz clicks into the upgrade modal. */
   gate?: (e: React.MouseEvent, what: string) => boolean;
 }) {
+  // Bind the API pair once per scope so the rest of the component is scope-agnostic.
+  const fetchTree = scope === 'section' ? getSectionStudyMaterial : getStudyMaterial;
+  const completeItem = scope === 'section' ? completeSectionStudyMaterialItem : completeStudyMaterialItem;
   const [data, setData] = useState<StudyMaterialDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState<string | null>(null);
@@ -46,7 +54,7 @@ export function StudyMaterialTab({
 
   useEffect(() => {
     let alive = true;
-    getStudyMaterial(slug)
+    fetchTree(slug)
       .then((d) => {
         if (!alive) return;
         setData(d);
@@ -59,7 +67,7 @@ export function StudyMaterialTab({
     return () => {
       alive = false;
     };
-  }, [slug]);
+  }, [slug, fetchTree]);
 
   const section = useMemo(
     () => data?.sections.find((s) => s.id === activeSection) ?? data?.sections[0] ?? null,
@@ -87,12 +95,12 @@ export function StudyMaterialTab({
       // Optimistic tick so the checkbox feels instant.
       setData((prev) => (prev ? recompute(mapItem(prev, item.id, (i) => ({ ...i, done: next }))) : prev));
       try {
-        await completeStudyMaterialItem(slug, item.id, next);
+        await completeItem(slug, item.id, next);
         // Locks are computed SERVER-side, and `recompute` only fixes local progress numbers.
         // Finishing a module's last item unlocks the next one (and un-ticking re-locks it),
         // which the client cannot know — so resync the tree instead of duplicating the rule
         // here and letting the two drift. Cheap, and it happens behind the optimistic tick.
-        const fresh = await getStudyMaterial(slug);
+        const fresh = await fetchTree(slug);
         setData(fresh);
       } catch (e) {
         // Roll back, and SAY WHY. The server refuses to complete an item inside a locked
@@ -108,7 +116,7 @@ export function StudyMaterialTab({
         setBusy(null);
       }
     },
-    [slug],
+    [slug, fetchTree, completeItem],
   );
 
   if (loading) {
@@ -126,7 +134,7 @@ export function StudyMaterialTab({
         </span>
         <p className="text-sm font-bold text-navy">Study material is coming soon</p>
         <p className="max-w-sm text-xs text-slate-600">
-          Concept videos, guided solutions and topic quizzes for this company are being prepared.
+          Concept videos, guided solutions and topic quizzes are being prepared.
         </p>
       </div>
     );

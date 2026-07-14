@@ -16,6 +16,7 @@ import {
   MonitorPlay,
   LayoutDashboard,
   IndianRupee,
+  Layers,
   LifeBuoy,
   ListChecks,
   type LucideIcon,
@@ -105,6 +106,13 @@ export const STUDENT_NAV: NavSection[] = [
     heading: 'COMPANY HUBS',
     standalone: true,
     items: [{ label: 'Company Hubs', href: '/dashboard/company', icon: Building2, tip: 'Company-specific prep: hiring process, study material, practice, previous-year questions, mocks and interview prep.' }],
+  },
+  {
+    // Section-organized prep (Numerical / Logical / Verbal / Technical …) — the
+    // sibling of Company Hubs, one standalone top-level destination.
+    heading: 'SECTIONAL HUBS',
+    standalone: true,
+    items: [{ label: 'Sectional Hubs', href: '/dashboard/section', icon: Layers, tip: 'Section-by-section prep: syllabus, study material and topic-wise practice. Unlock a single topic or the whole section.' }],
   },
   {
     // Individual top-level items — deliberately NOT grouped under a "Plans &

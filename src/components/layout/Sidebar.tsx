@@ -11,6 +11,7 @@ import {
   ClipboardCheck,
   Compass,
   CreditCard,
+  Layers,
   LayoutGrid,
   Lock,
   Target,
@@ -55,6 +56,7 @@ const SECTION_ICON: Record<string, typeof Compass> = {
   CAREER: Briefcase,
   EXPLORE: Compass,
   'COMPANY HUBS': Building2,
+  'SECTIONAL HUBS': Layers,
   'PLANS & SUPPORT': CreditCard,
   // Admin / Super-admin / TPO
   'PLATFORM ADMIN': LayoutGrid,
@@ -269,13 +271,17 @@ function NavAccordion({
 /** A top-level, standalone nav link — same prominence as a section header, but a
  *  real destination (used for the un-grouped Plans & Support items). */
 /** Inline (ⓘ) info tooltip for a nav item — a SIBLING of the nav <Link> (never a
- *  child, since a <button> inside an <a> is invalid HTML). */
-function NavTip({ label, tip }: { label: string; tip: string }) {
+ *  child, since a <button> inside an <a> is invalid HTML). When the item is active
+ *  it lives INSIDE the black pill, so the dot lightens to stay legible on black. */
+function NavTip({ label, tip, active }: { label: string; tip: string; active?: boolean }) {
   return (
     <InfoTip
       content={{ title: label, body: tip }}
       label={label}
-      className="relative flex shrink-0 items-center pr-1 text-slate-400"
+      className={cn(
+        'relative flex shrink-0 items-center pr-1.5',
+        active ? 'text-white/45 hover:text-white' : 'text-slate-400',
+      )}
       dotClassName="relative"
     >
       <span className="sr-only">{label} info</span>
@@ -285,6 +291,10 @@ function NavTip({ label, tip }: { label: string; tip: string }) {
 
 function StandaloneNavLink({ item, active, locked }: { item: NavItem; active: boolean; locked: boolean }) {
   const Icon = item.icon;
+  const hasTip = !!item.tip;
+  // The pill (black bg + gold ring on active) lives on the LINK when there's no
+  // tip, but moves to the WRAPPER when there is one — so the (ⓘ) sits inside it.
+  const pill = active ? 'bg-[#1a1a1a] ring-1 ring-[#ffc42d]/30' : 'hover:bg-[#fff5ea]';
   const link = (
     <Link
       href={item.href}
@@ -292,7 +302,7 @@ function StandaloneNavLink({ item, active, locked }: { item: NavItem; active: bo
       aria-current={active ? 'page' : undefined}
       className={cn(
         'group flex flex-1 items-center gap-2.5 rounded-xl px-2.5 py-2.5 transition-colors',
-        active ? 'bg-[#1a1a1a] ring-1 ring-[#ffc42d]/30' : 'hover:bg-[#fff5ea]',
+        hasTip ? null : pill,
       )}
     >
       <span
@@ -317,11 +327,11 @@ function StandaloneNavLink({ item, active, locked }: { item: NavItem; active: bo
       {locked && <Lock className="size-3.5 shrink-0 text-slate-400" aria-label="Locked" />}
     </Link>
   );
-  if (!item.tip) return link;
+  if (!hasTip) return link;
   return (
-    <div className="flex items-center">
+    <div className={cn('flex items-center rounded-xl transition-colors', pill)}>
       {link}
-      <NavTip label={item.label} tip={item.tip} />
+      <NavTip label={item.label} tip={item.tip!} active={active} />
     </div>
   );
 }
@@ -329,6 +339,13 @@ function StandaloneNavLink({ item, active, locked }: { item: NavItem; active: bo
 /** Accordion sub-item — compact row under a section header. */
 function SubNavLink({ item, active, locked }: { item: NavItem; active: boolean; locked: boolean }) {
   const Icon = item.icon;
+  const hasTip = !!item.tip;
+  // Black pill + gold ring on the LINK (no tip) or the WRAPPER (with tip), so the
+  // (ⓘ) sits inside the pill. Text/font styling always stays on the link.
+  const pill = active ? 'bg-[#1a1a1a] ring-1 ring-[#ffc42d]/30' : 'hover:bg-[#fff5ea]';
+  const textStyle = active
+    ? 'font-semibold text-white'
+    : 'font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)]';
   const link = (
     <Link
       href={item.href}
@@ -336,11 +353,8 @@ function SubNavLink({ item, active, locked }: { item: NavItem; active: boolean; 
       aria-current={active ? 'page' : undefined}
       className={cn(
         'group flex flex-1 items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm transition-colors',
-        active
-          ? // Active = black pill, WHITE label, GOLD icon + a gold ring accent - matches the
-            // benchmark (black bg, white text, yellow icon) with the requested yellow border.
-            'bg-[#1a1a1a] font-semibold text-white ring-1 ring-[#ffc42d]/30'
-          : 'font-medium text-[var(--color-text-muted)] hover:bg-[#fff5ea] hover:text-[var(--color-text)]',
+        textStyle,
+        hasTip ? null : pill,
       )}
     >
       <span
@@ -358,11 +372,11 @@ function SubNavLink({ item, active, locked }: { item: NavItem; active: boolean; 
       {locked && <Lock className="size-3.5 shrink-0 text-slate-400" aria-label="Locked" />}
     </Link>
   );
-  if (!item.tip) return link;
+  if (!hasTip) return link;
   return (
-    <div className="flex items-center">
+    <div className={cn('flex items-center rounded-xl transition-colors', pill)}>
       {link}
-      <NavTip label={item.label} tip={item.tip} />
+      <NavTip label={item.label} tip={item.tip!} active={active} />
     </div>
   );
 }

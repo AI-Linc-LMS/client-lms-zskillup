@@ -13,7 +13,9 @@ import {
   deleteItem,
   deleteSection,
   deleteTopic,
+  generateSectionStudyMaterialQuizzes,
   generateStudyMaterialQuizzes,
+  getAdminSectionStudyMaterial,
   getAdminStudyMaterial,
   updateItem,
   updateSection,
@@ -22,7 +24,10 @@ import {
   type AdminStudyMaterialItemDto,
   type ItemInput,
 } from '@/lib/api/study-material-admin';
+import { buildSections } from '@/lib/sections/section-catalog';
 import type { StudyMaterialItemKind } from '@/shared/dto/study-material.dto';
+
+type Scope = 'company' | 'section';
 
 const KIND_META: Record<StudyMaterialItemKind, { icon: typeof PlayCircle; label: string; cls: string }> = {
   VIDEO: { icon: PlayCircle, label: 'Video', cls: 'bg-[#fff5ea] text-[#f5b400]' },
@@ -31,8 +36,10 @@ const KIND_META: Record<StudyMaterialItemKind, { icon: typeof PlayCircle; label:
 };
 
 export function StudyMaterialAdmin() {
+  const [scope, setScope] = useState<Scope>('company');
   const [companies, setCompanies] = useState<AdminCompanyRow[]>([]);
   const [companyId, setCompanyId] = useState('');
+  const [sectionSlug, setSectionSlug] = useState('');
   const [tree, setTree] = useState<AdminStudyMaterialDto | null>(null);
   const [loading, setLoading] = useState(false);
   const [topics, setTopics] = useState<ApiTopic[]>([]);
@@ -48,17 +55,32 @@ export function StudyMaterialAdmin() {
         if (cs[0]) setCompanyId(cs[0].id);
       })
       .catch(() => {});
-    listTopicsWithCounts().then(setTopics).catch(() => {});
+    listTopicsWithCounts()
+      .then((ts) => {
+        setTopics(ts);
+        const roots = buildSections(ts);
+        if (roots[0]) setSectionSlug((prev) => prev || roots[0].slug);
+      })
+      .catch(() => {});
   }, []);
 
+  /** Sectional-Hub roots to author against (+ synthetic Coding). */
+  const sectionOptions = useMemo(() => {
+    const roots = buildSections(topics).map((s) => ({ slug: s.slug, name: s.name }));
+    return [...roots, { slug: 'coding', name: 'Coding' }];
+  }, [topics]);
+
+  const scopeReady = scope === 'company' ? !!companyId : !!sectionSlug;
+
   const load = useCallback(() => {
-    if (!companyId) return;
+    if (scope === 'company' ? !companyId : !sectionSlug) return;
     setLoading(true);
-    getAdminStudyMaterial(companyId)
-      .then(setTree)
+    const p =
+      scope === 'company' ? getAdminStudyMaterial(companyId) : getAdminSectionStudyMaterial(sectionSlug);
+    p.then(setTree)
       .catch(() => setTree(null))
       .finally(() => setLoading(false));
-  }, [companyId]);
+  }, [scope, companyId, sectionSlug]);
   useEffect(() => {
     load();
   }, [load]);
@@ -75,51 +97,89 @@ export function StudyMaterialAdmin() {
 
   const addSection = () => {
     const title = newSection.trim();
-    if (!title || !companyId) return;
+    if (!title || !scopeReady) return;
     setNewSection('');
-    void run(() => createSection({ companyId, title }));
+    void run(() =>
+      createSection(scope === 'company' ? { companyId, title } : { sectionSlug, title }),
+    );
+  };
+
+  const runGenerate = async () => {
+    if (!scopeReady) return;
+    const label = scope === 'company' ? "this company's" : "this section's";
+    if (
+      !confirm(
+        `Regenerate ${label} quiz sections from the ${scope === 'company' ? "company's" : 'platform'} question bank? Auto-generated quizzes are replaced with fresh ones (your videos and hand-added sections are kept).`,
+      )
+    )
+      return;
+    setGenerating(true);
+    try {
+      const r =
+        scope === 'company'
+          ? await generateStudyMaterialQuizzes(companyId)
+          : await generateSectionStudyMaterialQuizzes(sectionSlug);
+      load();
+      alert(`Generated ${r.sections} sections · ${r.topics} topics · ${r.quizzes} quizzes from the question bank.`);
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const quizSlugs = useMemo(() => topics.filter((t) => t.parentId).map((t) => ({ slug: t.slug, name: t.name })), [topics]);
 
   return (
     <div className="space-y-4">
-      {/* Company picker */}
+      {/* Scope + target picker */}
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4">
-        <label className="text-xs font-bold uppercase tracking-wide text-slate-600">Company</label>
-        <select
-          value={companyId}
-          onChange={(e) => setCompanyId(e.target.value)}
-          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-navy"
-        >
-          {companies.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
+        {/* Company vs Section scope */}
+        <div className="inline-flex rounded-full bg-slate-100 p-0.5">
+          {(['company', 'section'] as const).map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setScope(s)}
+              className={cn(
+                'rounded-full px-3 py-1.5 text-xs font-bold capitalize transition',
+                scope === s ? 'bg-white text-navy shadow-sm' : 'text-slate-500 hover:text-navy',
+              )}
+            >
+              {s === 'company' ? 'Company hub' : 'Sectional hub'}
+            </button>
           ))}
-        </select>
+        </div>
+
+        {scope === 'company' ? (
+          <select
+            value={companyId}
+            onChange={(e) => setCompanyId(e.target.value)}
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-navy"
+          >
+            {companies.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <select
+            value={sectionSlug}
+            onChange={(e) => setSectionSlug(e.target.value)}
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-navy"
+          >
+            {sectionOptions.map((s) => (
+              <option key={s.slug} value={s.slug}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+        )}
         {tree && <span className="text-xs text-slate-500">{tree.sections.length} sections · edits show instantly on the student side</span>}
         {(loading || busy) && <Loader2 className="size-4 animate-spin text-slate-400" />}
         <button
           type="button"
-          onClick={async () => {
-            if (
-              !companyId ||
-              !confirm(
-                "Regenerate this company's quiz sections from its real question bank? Auto-generated quizzes are replaced with fresh ones (your videos and hand-added sections are kept).",
-              )
-            )
-              return;
-            setGenerating(true);
-            try {
-              const r = await generateStudyMaterialQuizzes(companyId);
-              load();
-              alert(`Generated ${r.sections} sections · ${r.topics} topics · ${r.quizzes} quizzes from the question bank.`);
-            } finally {
-              setGenerating(false);
-            }
-          }}
-          disabled={!companyId || generating}
+          onClick={runGenerate}
+          disabled={!scopeReady || generating}
           className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[#1f2d4d] to-[#0a0a0c] px-3.5 py-2 text-xs font-bold text-white transition hover:opacity-90 disabled:opacity-50"
         >
           {generating ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5" />}
