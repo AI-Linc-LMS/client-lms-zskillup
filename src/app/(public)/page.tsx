@@ -42,6 +42,10 @@ import {
 
 const HERO_STATS = LANDING_HERO_STATS;
 
+/** Rotating phrases for the final-CTA headline (rendered in a fixed-width slot
+ *  sized to the widest phrase, so the centered line never shifts as it cycles). */
+const CTA_ROTATING = ['dream job', 'first offer', 'tech career', 'big break'];
+
 /** The eight modules that make up the platform (was four). */
 const MODULES = [
   { icon: Compass, title: 'Company-specific drives', body: 'Practice company-specific questions based on the latest placement patterns and previous-year questions.' },
@@ -414,7 +418,7 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="grid items-start gap-6 lg:grid-cols-2 lg:gap-8">
+          <div className="grid items-center gap-6 lg:grid-cols-2 lg:gap-8">
             {/* LEFT - platform tour video + what's inside prephasz */}
             <div className="flex flex-col gap-6">
               <VideoPlaceholder
@@ -478,11 +482,11 @@ export default async function HomePage() {
             >
               {/* Photo (white studio bg blends into the card; a missing file degrades to plain white).
                   Taller crop (4:5) so the founder's chest — incl. the prephasz-logo pocket — is visible. */}
-              <div className="relative aspect-[4/5] w-full overflow-hidden border-b border-[var(--color-line)] bg-white">
+              <div className="relative h-[26rem] w-full overflow-hidden border-b border-[var(--color-line)] bg-white">
                 <div
                   role="img"
                   aria-label="Lokesh Mathur, Founder, ZSkillup Education"
-                  className="absolute inset-0 bg-cover bg-[center_top]"
+                  className="absolute inset-0 bg-contain bg-bottom bg-no-repeat"
                   style={{ backgroundImage: "url('/images/founder-lokesh.png')" }}
                 />
                 <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-[var(--color-brand)] px-3 py-1 text-[11px] font-black uppercase tracking-wider text-[var(--color-brand-ink)] shadow-sm">
@@ -719,18 +723,31 @@ export default async function HomePage() {
           </p>
           <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
             Today&apos;s preparation, tomorrow&apos;s{' '}
-            <RotatingText
-              texts={['dream job', 'first offer', 'tech career', 'big break']}
-              mainClassName="inline-flex overflow-hidden py-1 -my-1 text-[#ffc42d]"
-              staggerFrom="last"
-              staggerDuration={0.02}
-              rotationInterval={2200}
-              splitBy="characters"
-              transition={{ type: 'spring', damping: 26, stiffness: 340 }}
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '-120%' }}
-            />
+            {/* Fixed-width slot: invisible sizers reserve the widest phrase's
+                width so the centered headline never shifts as the word cycles. */}
+            <span className="relative inline-grid align-bottom">
+              {CTA_ROTATING.map((w) => (
+                <span
+                  key={w}
+                  aria-hidden
+                  className="invisible col-start-1 row-start-1 whitespace-nowrap"
+                >
+                  {w}
+                </span>
+              ))}
+              <RotatingText
+                texts={CTA_ROTATING}
+                mainClassName="col-start-1 row-start-1 inline-flex justify-start overflow-hidden py-1 -my-1 text-[#ffc42d]"
+                staggerFrom="last"
+                staggerDuration={0.02}
+                rotationInterval={2200}
+                splitBy="characters"
+                transition={{ type: 'spring', damping: 26, stiffness: 340 }}
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '-120%' }}
+              />
+            </span>
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-base text-white/75">
             Get started for free. Choose your dream company, check where you stand, and
