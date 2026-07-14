@@ -65,7 +65,7 @@ export function DashboardCompanies() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-3.5 transition-all hover:-translate-y-0.5 hover:border-orange/40"
+              className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-3.5 transition-all hover:-translate-y-0.5 hover:border-orange/40"
             >
               <span aria-hidden className="pointer-events-none absolute -right-10 -top-10 size-28 rounded-full bg-orange/[0.06] blur-2xl transition-opacity group-hover:bg-orange/[0.12]" />
               <div className="relative flex items-start gap-3">
@@ -120,8 +120,9 @@ export function DashboardCompanies() {
                 ) : null;
               })()}
 
-              {/* CTA */}
-              <div className="relative mt-3">
+              {/* CTA — pinned to the bottom (mt-auto) so every card's Register button
+                  aligns across the row regardless of how the badge/feature rows wrap. */}
+              <div className="relative mt-auto pt-3">
                 {isReg ? (
                   <span className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-emerald-50 py-2 text-sm font-extrabold text-emerald-700 ring-1 ring-inset ring-emerald-200">
                     <BadgeCheck className="size-4" /> Registered
