@@ -387,40 +387,38 @@ export default async function HomePage() {
                   aria-hidden
                   className="pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full bg-[var(--color-brand)]/20 blur-3xl"
                 />
-                <Quote className="relative h-8 w-8 text-[var(--color-brand-strong)]" aria-hidden />
-                <blockquote className="relative mt-4 text-lg font-semibold leading-relaxed tracking-tight text-[var(--color-text)] sm:text-xl">
+                <Quote className="relative h-9 w-9 text-[var(--color-brand-strong)]" aria-hidden />
+                <blockquote className="relative mt-5 text-xl font-semibold leading-relaxed tracking-tight text-[var(--color-text)] sm:text-2xl">
                   &ldquo;We built prephasz so that where you come from never decides where you can
                   reach. Every student deserves the same shot at a great first job - structured,
                   honest practice that mirrors the real drive.&rdquo;
                 </blockquote>
-                <figcaption className="relative mt-6 text-sm font-semibold text-[var(--color-text-muted)]">
-                  Lokesh Mathur, Founder
+                <figcaption className="relative mt-6 flex items-center gap-2 text-sm font-semibold text-[var(--color-text-muted)]">
+                  <span className="h-px w-6 bg-[var(--color-brand-strong)]" aria-hidden /> Lokesh Mathur, Founder
                 </figcaption>
               </figure>
             </div>
 
             {/* RIGHT - founder: photo first, then description */}
             <article className="overflow-hidden rounded-[var(--radius-card-lg)] border border-[var(--color-line)] bg-white">
-              {/* Photo as a CSS background so a missing file degrades to the navy card (no broken icon). */}
-              <div className="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-b from-[#101d4a] to-[#0b1220]">
+              {/* Photo (white studio bg blends into the card; a missing file degrades to plain white). */}
+              <div className="relative aspect-square w-full overflow-hidden border-b border-[var(--color-line)] bg-white">
                 <div
                   role="img"
                   aria-label="Lokesh Mathur, Founder of prephasz"
                   className="absolute inset-0 bg-cover bg-top"
                   style={{ backgroundImage: "url('/images/founder-lokesh.png')" }}
                 />
-                <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-[var(--color-brand)] px-3 py-1 text-[11px] font-black uppercase tracking-wider text-[var(--color-brand-ink)] shadow-md">
+                <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-[var(--color-brand)] px-3 py-1 text-[11px] font-black uppercase tracking-wider text-[var(--color-brand-ink)] shadow-sm">
                   <Sparkles className="h-3 w-3" aria-hidden /> Founder
                 </span>
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent px-6 pb-5 pt-16">
-                  <p className="text-2xl font-extrabold tracking-tight text-white">Lokesh Mathur</p>
-                  <p className="mt-0.5 text-sm font-medium text-white/70">Founder · prephasz</p>
-                </div>
               </div>
 
               {/* Description */}
               <div className="p-7 lg:p-8">
-                <p className="text-sm leading-relaxed text-[var(--color-text-muted)] sm:text-[15px]">
+                <h3 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)]">Lokesh Mathur</h3>
+                <p className="mt-1 text-sm font-semibold text-[var(--color-brand-strong)]">Founder · prephasz</p>
+                <p className="mt-4 text-sm leading-relaxed text-[var(--color-text-muted)] sm:text-[15px]">
                   A dynamic leader with 19+ years across IT, education, and edtech, and an IIM Calcutta
                   Executive MBA certified in PMP®, CSM®, and SCJP 5.0. From leading his own venture to
                   senior roles at upGrad, he has consistently driven real career outcomes and strategic
