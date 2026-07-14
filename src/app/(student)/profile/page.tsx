@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
   BadgeCheck,
   Briefcase,
   Building2,
+  CalendarClock,
+  Camera,
   Check,
   Crown,
   GraduationCap,
@@ -14,6 +16,7 @@ import {
   Plus,
   RotateCcw,
   Sparkles,
+  Trash2,
   User,
   X,
 } from 'lucide-react';
@@ -53,10 +56,12 @@ type Values = {
   passoutYear: number | '';
   skills: string[];
   roles: string[];
+  /** Profile photo — hosted URL or a small client-resized JPEG data URL; '' = none. */
+  avatarUrl: string;
 };
 
 const EMPTY: Values = {
-  fullName: '', phone: '', course: '', yearOfStudy: '', collegeId: '', collegeName: '', passoutYear: '', skills: [], roles: [],
+  fullName: '', phone: '', course: '', yearOfStudy: '', collegeId: '', collegeName: '', passoutYear: '', skills: [], roles: [], avatarUrl: '',
 };
 
 /** Common degrees for the Course/Degree autocomplete (free text still allowed). */
@@ -76,6 +81,32 @@ const isValidPhone = (s: string) => {
   const d = s.replace(/\D/g, '');
   return d.length >= 10 && d.length <= 15;
 };
+
+/** Load an image File, center-crop to a square, downscale to `size`px, and return a
+ *  compressed JPEG data URL. Keeps the stored avatar tiny (~15-30KB) so it fits the
+ *  text column + leaderboard payload without any object-storage infra. */
+function resizeToDataUrl(file: File, size = 256): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return reject(new Error('no-2d-context'));
+      const s = Math.min(img.width, img.height); // square center-crop
+      ctx.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
+      resolve(canvas.toDataURL('image/jpeg', 0.8));
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('decode-failed'));
+    };
+    img.src = url;
+  });
+}
 
 const snap = (v: Values) =>
   JSON.stringify({
@@ -104,6 +135,28 @@ export default function ProfilePage() {
   const [baseline, setBaseline] = useState<string>(snap(EMPTY));
   const set = <K extends keyof Values>(k: K, val: Values[K]) => setV((p) => ({ ...p, [k]: val }));
 
+  // Profile-photo upload: resize client-side to a small JPEG data URL (no object
+  // storage needed) then stage it in `v.avatarUrl`; it persists on Save.
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [avatarErr, setAvatarErr] = useState<string | null>(null);
+  const onPickPhoto = async (file: File | null) => {
+    if (!file) return;
+    setAvatarErr(null);
+    if (!/^image\/(jpe?g|png)$/.test(file.type)) {
+      setAvatarErr('Please choose a JPG or PNG image.');
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      setAvatarErr('That image is too large (max 8MB).');
+      return;
+    }
+    try {
+      set('avatarUrl', await resizeToDataUrl(file, 256));
+    } catch {
+      setAvatarErr("Couldn't process that image — try another.");
+    }
+  };
+
   useEffect(() => {
     let cancelled = false;
     Promise.all([getMe(), getMyRegistrations().catch(() => [] as ApiRegistration[])])
@@ -122,6 +175,7 @@ export default function ProfilePage() {
           passoutYear: p?.passoutYear ?? '',
           skills: p?.skills ?? [],
           roles: p?.rolesInterested ?? [],
+          avatarUrl: m.avatarUrl ?? '',
         };
         setV(loaded);
         setBaseline(snap(loaded));
@@ -189,6 +243,9 @@ export default function ProfilePage() {
         passoutYear: v.passoutYear ? Number(v.passoutYear) : null,
         skills: v.skills,
         rolesInterested: v.roles,
+        // Send the photo only when it actually changed — avoids re-uploading a
+        // ~45KB data URL on every unrelated save. '' clears it back to no photo.
+        ...(v.avatarUrl !== (me?.avatarUrl ?? '') ? { avatarUrl: v.avatarUrl } : {}),
       });
       setMe(updated);
       setBaseline(snap(v));
@@ -217,6 +274,7 @@ export default function ProfilePage() {
       passoutYear: p?.passoutYear ?? '',
       skills: p?.skills ?? [],
       roles: p?.rolesInterested ?? [],
+      avatarUrl: me.avatarUrl ?? '',
     });
   };
 
@@ -239,8 +297,46 @@ export default function ProfilePage() {
           <div className="absolute -right-1/4 -bottom-1/2 size-[36vw] rounded-full bg-[#f5b400]/15 blur-[110px]" />
         </div>
         <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center">
-          <Avatar src={me?.avatarUrl ?? null} name={me?.fullName ?? me?.email ?? '?'} />
+          <div className="relative shrink-0 self-start sm:self-center">
+            <Avatar src={v.avatarUrl || null} name={v.fullName || me?.email || '?'} />
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              aria-label="Change profile photo"
+              className="absolute -bottom-1.5 -right-1.5 grid size-9 place-items-center rounded-full bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717] shadow-lg ring-2 ring-[#0d0e13] transition hover:brightness-110 active:scale-95"
+            >
+              <Camera className="size-4" strokeWidth={2.5} />
+            </button>
+            {v.avatarUrl ? (
+              <button
+                type="button"
+                onClick={() => {
+                  set('avatarUrl', '');
+                  setAvatarErr(null);
+                }}
+                aria-label="Remove photo"
+                className="absolute -right-1.5 -top-1.5 grid size-7 place-items-center rounded-full bg-white/15 text-white ring-1 ring-white/25 backdrop-blur transition hover:bg-white/25"
+              >
+                <Trash2 className="size-3.5" />
+              </button>
+            ) : null}
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png"
+              className="hidden"
+              onChange={(e) => {
+                void onPickPhoto(e.target.files?.[0] ?? null);
+                e.target.value = '';
+              }}
+            />
+          </div>
           <div className="min-w-0 flex-1">
+            {avatarErr ? (
+              <p className="mb-1.5 inline-flex items-center gap-1 rounded-full bg-rose-500/15 px-2.5 py-1 text-[11px] font-semibold text-rose-200 ring-1 ring-inset ring-rose-400/30">
+                {avatarErr}
+              </p>
+            ) : null}
             {isPremium ? (
               <span className="mb-1.5 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-[#171717] shadow-[0_2px_10px_-2px_rgba(245,180,0,0.7)]">
                 <Crown className="size-3" strokeWidth={2.75} /> Premium Member
@@ -255,6 +351,8 @@ export default function ProfilePage() {
             <div className="mt-2.5 flex flex-wrap items-center gap-2">
               {v.collegeName ? <Chip icon={GraduationCap}>{v.collegeName}</Chip> : null}
               {v.course ? <Chip icon={Briefcase}>{v.course}</Chip> : null}
+              {v.yearOfStudy ? <Chip icon={CalendarClock}>Year {v.yearOfStudy}</Chip> : null}
+              {v.passoutYear ? <Chip icon={GraduationCap}>Class of {v.passoutYear}</Chip> : null}
               {regs.length ? (
                 <Chip icon={Building2}>{regs.length} drive{regs.length === 1 ? '' : 's'}</Chip>
               ) : null}
@@ -561,13 +659,14 @@ function SkillsInput({ skills, onAdd, onRemove }: { skills: string[]; onAdd: (s:
   );
 }
 
-/** Profile avatar — Google photo (via avatarUrl) with an initials fallback. */
+/** Profile avatar — uploaded/Google photo (via avatarUrl) with an initials fallback. */
 function Avatar({ src, name }: { src: string | null; name: string }) {
   const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [src]); // a freshly-picked photo must re-attempt
   const initials = name.slice(0, 2).toUpperCase();
   const showImg = src && !failed;
   return (
-    <span className="grid size-20 shrink-0 place-items-center overflow-hidden rounded-3xl bg-white/10 text-2xl font-extrabold text-white ring-1 ring-inset ring-white/20 backdrop-blur">
+    <span className="grid size-24 shrink-0 place-items-center overflow-hidden rounded-3xl bg-white/10 text-3xl font-extrabold text-white ring-1 ring-inset ring-white/20 backdrop-blur sm:size-28">
       {showImg ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={src} alt={name} referrerPolicy="no-referrer" onError={() => setFailed(true)} className="size-full object-cover" />
