@@ -33,6 +33,8 @@ import { CompanyPrepPanel } from './CompanyPrepPanel';
 import { CompanyMockTab as MockTab } from './CompanyMockTab';
 import { StudyMaterialTab } from '@/components/study-material/StudyMaterialTab';
 import { CodingProblemsList } from '@/components/coding/CodingProblemsList';
+import { useUpgradeGate } from '@/hooks/useUpgradeGate';
+import { UpgradeModal } from '@/components/billing/UpgradeModal';
 
 const TAB_ICONS: Record<HubTab, typeof BookOpen> = {
   Overview: LayoutGrid,
@@ -152,6 +154,11 @@ export function CompanyHub({ content }: { content: HubContent }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  // Company-hub content is a paid product: free users may BROWSE every tab's list
+  // but acting (Watch a video, open a PYQ/section, Solve a problem, Start an
+  // assessment) raises the upgrade modal. Inert for entitled users / while the
+  // paywall is off.
+  const upgrade = useUpgradeGate();
   const urlTab = searchParams.get('tab');
   const [tab, setTab] = useState<HubTab>(
     urlTab && (HUB_TABS as readonly string[]).includes(urlTab) ? (urlTab as HubTab) : 'Overview',
@@ -232,11 +239,12 @@ export function CompanyHub({ content }: { content: HubContent }) {
           >
             {tab === 'Overview' && <OverviewTab content={content} />}
             {tab === 'Syllabus' && <SyllabusTab content={content} />}
-            {tab === 'Study Material' && <StudyMaterialTab slug={content.company.slug} />}
+            {tab === 'Study Material' && <StudyMaterialTab slug={content.company.slug} gate={upgrade.guard} />}
             {tab === 'Practice Quiz' && (
               <CompanyPrepPanel
                 companySlug={content.company.slug}
                 companyName={content.company.name}
+                gate={upgrade.guard}
               />
             )}
             {tab === 'Coding' && (
@@ -251,10 +259,10 @@ export function CompanyHub({ content }: { content: HubContent }) {
                     submit to grade against the full test set and earn XP.
                   </p>
                 </div>
-                <CodingProblemsList company={content.company.slug} />
+                <CodingProblemsList company={content.company.slug} gate={upgrade.guard} />
               </div>
             )}
-            {tab === 'Full Mock Assessment' && <MockTab content={content} />}
+            {tab === 'Full Mock Assessment' && <MockTab content={content} gate={upgrade.guard} />}
           </motion.div>
         </div>
 
@@ -281,6 +289,17 @@ export function CompanyHub({ content }: { content: HubContent }) {
           company, once, where the company's name and logo are actually being used - rather
           than as a 60-word legal paragraph crammed into each tile of a card grid. */}
       <Disclaimer className="mt-8" />
+
+      <UpgradeModal
+        open={upgrade.feature !== null}
+        onClose={upgrade.close}
+        feature={upgrade.feature ?? undefined}
+        message={
+          upgrade.feature
+            ? `${content.company.name}'s hub is yours to explore. Opening ${upgrade.feature} needs a plan.`
+            : undefined
+        }
+      />
     </div>
   );
 }

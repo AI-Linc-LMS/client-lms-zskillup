@@ -29,7 +29,14 @@ const pct = (done: number, total: number) => (total > 0 ? Math.round((done / tot
 const ITEM_ICON = { VIDEO: PlayCircle, QUIZ: ListChecks, ARTICLE: FileText } as const;
 const tone = (p: number) => (p >= 75 ? 'bg-emerald-500' : p >= 40 ? 'bg-amber-500' : p > 0 ? 'bg-orange' : 'bg-slate-300');
 
-export function StudyMaterialTab({ slug }: { slug: string }) {
+export function StudyMaterialTab({
+  slug,
+  gate,
+}: {
+  slug: string;
+  /** Company-hub free-tier gate: swallow Watch/quiz clicks into the upgrade modal. */
+  gate?: (e: React.MouseEvent, what: string) => boolean;
+}) {
   const [data, setData] = useState<StudyMaterialDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState<string | null>(null);
@@ -290,6 +297,7 @@ export function StudyMaterialTab({ slug }: { slug: string }) {
                                 busy={busy === item.id}
                                 onToggle={() => toggleItem(item)}
                                 onPlay={() => openVideo(t.id, t.items.filter((i) => i.kind === 'VIDEO'), item)}
+                                gate={gate}
                               />
                             </li>
                           ))}
@@ -322,11 +330,13 @@ function ItemRow({
   busy,
   onToggle,
   onPlay,
+  gate,
 }: {
   item: StudyMaterialItemDto;
   busy: boolean;
   onToggle: () => void;
   onPlay: () => void;
+  gate?: (e: React.MouseEvent, what: string) => boolean;
 }) {
   const Icon = ITEM_ICON[item.kind];
   const meta =
@@ -371,7 +381,10 @@ function ItemRow({
       {item.kind === 'VIDEO' ? (
         <button
           type="button"
-          onClick={onPlay}
+          onClick={(e) => {
+            // Gate first; only open the player when the free-tier gate lets it through.
+            if (!gate?.(e, item.title)) onPlay();
+          }}
           className="shrink-0 rounded-full bg-navy px-3 py-1.5 text-xs font-bold text-white transition hover:bg-navy/90"
         >
           Watch
@@ -379,6 +392,7 @@ function ItemRow({
       ) : item.kind === 'QUIZ' && item.quizHref ? (
         <Link
           href={item.quizHref}
+          onClick={(e) => gate?.(e, item.title)}
           className="shrink-0 rounded-full bg-navy px-3 py-1.5 text-xs font-bold text-white transition hover:bg-navy/90"
         >
           Take quiz
@@ -386,6 +400,7 @@ function ItemRow({
       ) : item.embedUrl ? (
         <a
           href={item.embedUrl}
+          onClick={(e) => gate?.(e, item.title)}
           target="_blank"
           rel="noopener noreferrer"
           className="shrink-0 rounded-full bg-navy px-3 py-1.5 text-xs font-bold text-white transition hover:bg-navy/90"

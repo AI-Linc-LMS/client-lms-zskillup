@@ -35,9 +35,12 @@ function accTone(pct: number): { bar: string; text: string } {
 export function CompanyPrepPanel({
   companySlug,
   companyName,
+  gate,
 }: {
   companySlug: string;
   companyName: string;
+  /** Company-hub free-tier gate: swallow PYQ/topic clicks into the upgrade modal. */
+  gate?: (e: React.MouseEvent, what: string) => boolean;
 }) {
   const [prep, setPrep] = useState<ApiCompanyPrep | null>(null);
   const [errored, setErrored] = useState(false);
@@ -154,6 +157,7 @@ export function CompanyPrepPanel({
               <Link
                 key={y.year}
                 href={`/dashboard/quiz/adaptive?company=${companySlug}&year=${y.year}`}
+                onClick={(e) => gate?.(e, `${y.year} previous-year paper`)}
                 className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_-30px_rgba(124,58,237,0.22)] transition-all hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-[0_22px_50px_-26px_rgba(124,58,237,0.45)]"
               >
                 <div
@@ -226,6 +230,7 @@ export function CompanyPrepPanel({
                   pyqCount={t.pyqCount}
                   acc={accBySlug[t.slug]}
                   href={`/dashboard/quiz/adaptive?topic=${encodeURIComponent(t.slug)}&company=${encodeURIComponent(companySlug)}`}
+                  gate={gate}
                 />
               ))}
             </div>
@@ -319,12 +324,14 @@ function TopicCard({
   pyqCount,
   acc,
   href,
+  gate,
 }: {
   name: string;
   count: number;
   pyqCount: number;
   acc: ApiTopicAccuracy | undefined;
   href: string;
+  gate?: (e: React.MouseEvent, what: string) => boolean;
 }) {
   const attempts = acc?.total ?? 0;
   const pct = acc?.accuracyPct ?? 0;
@@ -332,6 +339,7 @@ function TopicCard({
   return (
     <Link
       href={href}
+      onClick={(e) => gate?.(e, `${name} practice`)}
       className="group flex flex-col rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_18px_50px_-32px_rgba(124,58,237,0.2)] transition-all hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-[0_22px_50px_-28px_rgba(124,58,237,0.4)]"
     >
       <div className="flex items-start justify-between gap-3">
