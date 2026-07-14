@@ -15,8 +15,18 @@ export async function getAdminStudyMaterial(companyId: string): Promise<AdminStu
   return (await apiClient.get<AdminStudyMaterialDto>(`/api/v1/admin/companies/${companyId}/study-material`)).data;
 }
 
+/** Admin tree for a Sectional Hub root slug. */
+export async function getAdminSectionStudyMaterial(sectionSlug: string): Promise<AdminStudyMaterialDto> {
+  return (await apiClient.get<AdminStudyMaterialDto>(`/api/v1/admin/sections/${sectionSlug}/study-material`)).data;
+}
+
 // ── sections ──────────────────────────────────────────────────────────────
-export async function createSection(body: { companyId: string; title: string; subtitle?: string }) {
+export async function createSection(body: {
+  companyId?: string;
+  sectionSlug?: string;
+  title: string;
+  subtitle?: string;
+}) {
   await apiClient.post('/api/v1/admin/study-material/sections', body);
 }
 export async function updateSection(
@@ -72,6 +82,18 @@ export async function generateStudyMaterialQuizzes(
   return (
     await apiClient.post<{ sections: number; topics: number; quizzes: number }>(
       `/api/v1/admin/companies/${companyId}/study-material/generate-quizzes`,
+      {},
+    )
+  ).data;
+}
+
+/** (Re)generate a Sectional Hub's quiz module from the platform question bank. */
+export async function generateSectionStudyMaterialQuizzes(
+  sectionSlug: string,
+): Promise<{ sections: number; topics: number; quizzes: number }> {
+  return (
+    await apiClient.post<{ sections: number; topics: number; quizzes: number }>(
+      `/api/v1/admin/sections/${sectionSlug}/study-material/generate-quizzes`,
       {},
     )
   ).data;

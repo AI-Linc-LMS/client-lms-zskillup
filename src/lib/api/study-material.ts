@@ -32,3 +32,23 @@ export async function completeStudyMaterialItem(
     )
   ).data;
 }
+
+/** A section's published Study Material tree + the caller's progress. Mirrors the
+ *  company endpoint but keyed by the taxonomy root slug (Sectional Hubs). */
+export async function getSectionStudyMaterial(slug: string): Promise<StudyMaterialDto> {
+  return (await apiClient.get<StudyMaterialDto>(`/api/v1/sections/${slug}/study-material`)).data;
+}
+
+/** Mark a section study-material item done / undone. */
+export async function completeSectionStudyMaterialItem(
+  slug: string,
+  itemId: string,
+  done: boolean,
+): Promise<StudyMaterialProgressResultDto> {
+  return (
+    await apiClient.post<StudyMaterialProgressResultDto>(
+      `/api/v1/sections/${slug}/study-material/items/${itemId}/complete`,
+      { done },
+    )
+  ).data;
+}

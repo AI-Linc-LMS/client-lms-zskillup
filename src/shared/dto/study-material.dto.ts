@@ -104,8 +104,15 @@ export interface AdminStudyMaterialSectionDto {
   topics: AdminStudyMaterialTopicDto[];
 }
 export interface AdminStudyMaterialDto {
+  /** Company scope only — '' for a section-scoped tree. */
   companyId: string;
+  /** The scope ref used for display/deep-links: company slug OR section root slug. */
   companySlug: string;
+  /** Human label: company name OR section name. */
   companyName: string;
+  /** Which hub this tree belongs to (defaults to 'company' when absent). */
+  scopeType?: 'company' | 'section';
+  /** Section-scope root slug (null for company scope). */
+  sectionSlug?: string | null;
   sections: AdminStudyMaterialSectionDto[];
 }

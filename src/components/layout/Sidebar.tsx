@@ -11,6 +11,7 @@ import {
   ClipboardCheck,
   Compass,
   CreditCard,
+  Layers,
   LayoutGrid,
   Lock,
   Target,
@@ -55,6 +56,7 @@ const SECTION_ICON: Record<string, typeof Compass> = {
   CAREER: Briefcase,
   EXPLORE: Compass,
   'COMPANY HUBS': Building2,
+  'SECTIONAL HUBS': Layers,
   'PLANS & SUPPORT': CreditCard,
   // Admin / Super-admin / TPO
   'PLATFORM ADMIN': LayoutGrid,
