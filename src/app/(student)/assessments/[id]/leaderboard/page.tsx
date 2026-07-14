@@ -62,10 +62,10 @@ export default function AssessmentLeaderboardPage({ params }: { params: Promise<
       />
 
       {/* Hero */}
-      <section className="relative mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] p-6 text-white sm:p-8">
+      <section className="relative mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] p-6 text-white sm:p-8">
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div className="absolute -left-1/4 -top-1/2 size-[44vw] rounded-full bg-[#ffc42d]/20 blur-[120px]" />
-          <div className="absolute -right-1/4 -bottom-1/2 size-[40vw] rounded-full bg-[#2563eb]/20 blur-[120px]" />
+          <div className="absolute -right-1/4 -bottom-1/2 size-[40vw] rounded-full bg-[#f5b400]/20 blur-[120px]" />
         </div>
         <div className="relative z-10">
           <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#ffc42d]">

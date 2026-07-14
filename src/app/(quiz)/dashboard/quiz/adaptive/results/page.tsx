@@ -134,7 +134,7 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
       <div className="relative overflow-hidden border-b border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0a0a0c] text-white">
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div className="absolute -left-1/4 -top-1/3 size-[55vw] rounded-full bg-[#f5b400]/15 blur-[120px]" />
-          <div className="absolute -right-1/4 -top-1/4 size-[50vw] rounded-full bg-[#2563eb]/15 blur-[120px]" />
+          <div className="absolute -right-1/4 -top-1/4 size-[50vw] rounded-full bg-[#f5b400]/15 blur-[120px]" />
         </div>
         <div className="relative z-10 mx-auto max-w-5xl px-5 pb-8 pt-6 sm:px-6">
           <div className="flex items-center justify-between">

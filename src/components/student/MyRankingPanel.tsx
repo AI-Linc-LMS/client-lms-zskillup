@@ -37,7 +37,7 @@ export function MyRankingPanel() {
   return (
     <div className="space-y-4">
       {/* Your rank hero */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] p-5 text-white sm:p-6">
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] p-5 text-white sm:p-6">
         <span aria-hidden className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-[#ffc42d]/20 blur-3xl" />
         <div className="relative flex items-center justify-between gap-4">
           <div>

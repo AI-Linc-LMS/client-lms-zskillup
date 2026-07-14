@@ -145,10 +145,10 @@ export function ReadinessPanel({
       {/* ── Navy premium hero band ──────────────────────────────────────── */}
       <div
         data-tour={tour === 'performance' ? 'perf:readiness-hero' : undefined}
-        className="relative overflow-hidden bg-gradient-to-br from-[#0f1117] via-[#171b2e] to-[#202b63] px-6 py-5 sm:px-7 sm:py-6"
+        className="relative overflow-hidden bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] px-6 py-5 sm:px-7 sm:py-6"
       >
         <span aria-hidden className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full opacity-25 blur-3xl" style={{ background: c }} />
-        <span aria-hidden className="pointer-events-none absolute -bottom-20 left-1/4 size-56 rounded-full bg-[#2563eb]/20 blur-3xl" />
+        <span aria-hidden className="pointer-events-none absolute -bottom-20 left-1/4 size-56 rounded-full bg-[#f5b400]/20 blur-3xl" />
         <div className="relative flex items-center justify-between gap-2">
           <h2 className="flex items-center gap-2 text-xl font-black tracking-tight text-white">
             <Target className="size-5 text-[#ffc42d]" /> Placement readiness

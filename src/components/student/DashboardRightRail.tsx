@@ -28,8 +28,8 @@ const UP_NEXT = [
     title: 'Take a timed mock',
     meta: 'Score, percentile, and a full answer review',
     href: '/mock-assessment',
-    from: '#171b2e',
-    to: '#0f1117',
+    from: '#0d0e13',
+    to: '#0a0a0c',
   },
   {
     id: 'weak',
@@ -215,7 +215,7 @@ export function DashboardRightRail() {
                   className={cn(
                     'relative grid size-8 place-items-center rounded-xl text-[13px] font-bold tabular-nums transition-colors sm:size-9',
                     day.today
-                      ? 'bg-gradient-to-b from-[#171b2e] to-[#0f1117] text-white shadow-[0_8px_18px_-8px_rgba(15,17,23,0.7)]'
+                      ? 'bg-gradient-to-b from-[#0d0e13] to-[#0a0a0c] text-white shadow-[0_8px_18px_-8px_rgba(15,17,23,0.7)]'
                       : 'text-slate-600 hover:bg-slate-100',
                   )}
                 >
