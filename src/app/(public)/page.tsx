@@ -373,28 +373,65 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="grid items-stretch gap-6 lg:grid-cols-2 lg:gap-8">
-            {/* LEFT - platform tour video + founder pull-quote */}
+          <div className="grid items-start gap-6 lg:grid-cols-2 lg:gap-8">
+            {/* LEFT - platform tour video, what's inside, founder note */}
             <div className="flex flex-col gap-6">
               <VideoPlaceholder
                 eyebrow="Platform tour"
                 title="See how prephasz works"
                 subtitle="From your first practice question to placement-ready - the full journey. Video coming soon."
-                accent="#f5b400"
               />
-              <figure className="relative flex flex-1 flex-col justify-center overflow-hidden rounded-[var(--radius-card-lg)] border border-[var(--color-line)] bg-white p-7 lg:p-8">
+
+              {/* What's inside prephasz */}
+              <div className="relative overflow-hidden rounded-[var(--radius-card-lg)] border border-[var(--color-line)] bg-white p-7 lg:p-8">
                 <div
                   aria-hidden
-                  className="pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full bg-[var(--color-brand)]/20 blur-3xl"
+                  className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[#ffc42d]/15 blur-3xl"
                 />
-                <Quote className="relative h-9 w-9 text-[var(--color-brand-strong)]" aria-hidden />
-                <blockquote className="relative mt-5 text-xl font-semibold leading-relaxed tracking-tight text-[var(--color-text)] sm:text-2xl">
+                <div className="relative flex items-center justify-between gap-3">
+                  <p className="flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--color-text-subtle)]">
+                    <span className="h-px w-6 bg-[var(--color-brand-strong)]" aria-hidden /> Inside prephasz
+                  </p>
+                  <Link
+                    href={LANDING_HREFS.prepare}
+                    className="inline-flex items-center gap-1 text-sm font-bold text-[var(--color-text)] transition hover:text-[var(--color-brand-strong)]"
+                  >
+                    Explore <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+                <ul className="relative mt-6 space-y-5">
+                  {[
+                    { icon: Brain, t: 'Adaptive practice', d: 'Questions that adjust to your level, section by section.' },
+                    { icon: Compass, t: 'Company-specific drives', d: 'Pattern-matched paths for TCS, Infosys, Accenture and more.' },
+                    { icon: ClipboardList, t: 'Timed mock assessments', d: 'Full-length mocks that mirror the real paper and the clock.' },
+                    { icon: LineChart, t: 'Placement readiness', d: 'Track accuracy, speed and readiness as your scores climb.' },
+                  ].map(({ icon: Icon, t, d }) => (
+                    <li key={t} className="flex items-start gap-4">
+                      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[var(--color-brand-soft)] text-[var(--color-brand-strong)]">
+                        <Icon className="size-5" aria-hidden />
+                      </span>
+                      <div>
+                        <p className="font-bold text-[var(--color-text)]">{t}</p>
+                        <p className="mt-0.5 text-sm leading-relaxed text-[var(--color-text-muted)]">{d}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Founder note */}
+              <figure className="relative overflow-hidden rounded-[var(--radius-card-lg)] bg-gradient-to-br from-[#0b1220] via-[#101d4a] to-[#1e3a8a] p-7 text-white lg:p-8">
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-[#ffc42d]/20 blur-3xl"
+                />
+                <Quote className="relative h-8 w-8 text-[var(--color-brand)]" aria-hidden />
+                <blockquote className="relative mt-4 text-base font-semibold leading-relaxed text-white sm:text-lg">
                   &ldquo;We built prephasz so that where you come from never decides where you can
-                  reach. Every student deserves the same shot at a great first job - structured,
-                  honest practice that mirrors the real drive.&rdquo;
+                  reach - the same shot at a great first job, for every student.&rdquo;
                 </blockquote>
-                <figcaption className="relative mt-6 flex items-center gap-2 text-sm font-semibold text-[var(--color-text-muted)]">
-                  <span className="h-px w-6 bg-[var(--color-brand-strong)]" aria-hidden /> Lokesh Mathur, Founder
+                <figcaption className="relative mt-5 flex items-center gap-2 text-sm font-semibold text-white/70">
+                  <span className="h-px w-6 bg-[var(--color-brand)]" aria-hidden /> Lokesh Mathur, Founder
                 </figcaption>
               </figure>
             </div>
