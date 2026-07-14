@@ -54,7 +54,7 @@ export function PremiumLockGate({
 
       <div className="relative grid min-h-[60vh] place-items-center p-6">
         <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white/95 p-7 text-center shadow-[0_30px_80px_-30px_rgba(11,18,32,0.55)]">
-          <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-[0_10px_24px_-10px_rgba(79,70,229,0.8)]">
+          <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-navy to-navy text-white shadow-[0_10px_24px_-10px_rgba(79,70,229,0.8)]">
             <Crown className="size-6" />
           </span>
           {/* Leads with what they GET, not with the word "locked". */}
@@ -81,7 +81,7 @@ export function PremiumLockGate({
             </Link>
             <Link
               href="/shop/full"
-              className="inline-flex items-center justify-center gap-1.5 rounded-full bg-indigo-600 px-4 py-2.5 text-sm font-extrabold text-white shadow-sm transition hover:bg-indigo-700"
+              className="inline-flex items-center justify-center gap-1.5 rounded-full bg-navy px-4 py-2.5 text-sm font-extrabold text-white shadow-sm transition hover:bg-navy/90"
             >
               Upgrade <ArrowRight className="size-4" />
             </Link>

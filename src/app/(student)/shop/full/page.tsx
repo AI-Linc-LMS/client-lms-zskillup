@@ -108,8 +108,8 @@ export default function FullPlatformPage() {
       </Link>
 
       <header className="mt-4 flex items-center gap-3">
-        <span className="grid size-14 place-items-center rounded-2xl bg-indigo-50 ring-1 ring-indigo-100">
-          <Crown className="size-7 text-indigo-600" />
+        <span className="grid size-14 place-items-center rounded-2xl bg-[#fff5ea] ring-1 ring-[#ffc42d]/25">
+          <Crown className="size-7 text-[#a16207]" />
         </span>
         <div>
           <h1 className="text-2xl font-black tracking-tight text-navy">Full Platform Access</h1>
@@ -119,21 +119,21 @@ export default function FullPlatformPage() {
 
       {loading ? (
         <div className="mt-16 flex justify-center">
-          <Loader2 className="size-6 animate-spin text-indigo-500" />
+          <Loader2 className="size-6 animate-spin text-[#f5b400]" />
         </div>
       ) : (
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_340px]">
           {/* Main column */}
           <div className="space-y-6">
             {/* Everything. Unlimited. */}
-            <section className="overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-indigo-50/70 to-white p-6 shadow-sm">
+            <section className="overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-[#fff5ea]/70 to-white p-6 shadow-sm">
               <div className="grid items-center gap-6 sm:grid-cols-[200px_1fr]">
-                <div className="relative grid h-40 place-items-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600">
+                <div className="relative grid h-40 place-items-center rounded-2xl bg-gradient-to-br from-navy to-navy">
                   <InfinityIcon className="size-20 text-white/95" strokeWidth={2.5} />
                   {FLOATERS.map((Icon, i) => (
                     <span
                       key={i}
-                      className="absolute grid size-9 place-items-center rounded-xl bg-white/95 text-indigo-600 shadow-md"
+                      className="absolute grid size-9 place-items-center rounded-xl bg-white/95 text-[#a16207] shadow-md"
                       style={{
                         top: i < 2 ? '10%' : '72%',
                         left: i % 2 === 0 ? '8%' : '78%',
@@ -174,7 +174,7 @@ export default function FullPlatformPage() {
                       onClick={() => setPeriod(p.period)}
                       className={`relative flex flex-col rounded-2xl border p-5 text-left transition ${
                         active
-                          ? 'border-indigo-500 bg-indigo-50/50 ring-2 ring-indigo-500/30'
+                          ? 'border-[#ffc42d] bg-[#fff5ea]/50 ring-2 ring-[#ffc42d]/40'
                           : 'border-slate-200 bg-white hover:border-slate-300'
                       }`}
                     >
@@ -203,7 +203,7 @@ export default function FullPlatformPage() {
                       <span aria-hidden className="grow" />
                       <span
                         className={`mt-5 inline-flex items-center justify-center rounded-lg px-3 py-2.5 text-xs font-bold transition ${
-                          active ? 'bg-indigo-600 text-white' : 'border border-slate-200 text-navy'
+                          active ? 'bg-navy text-white' : 'border border-slate-200 text-navy'
                         }`}
                       >
                         {active ? 'Selected' : 'Select Plan'}
@@ -244,7 +244,7 @@ export default function FullPlatformPage() {
           <aside className="lg:sticky lg:top-6 lg:self-start">
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="flex items-center gap-2.5">
-                <span className="grid size-10 place-items-center rounded-xl bg-indigo-50 text-indigo-600">
+                <span className="grid size-10 place-items-center rounded-xl bg-[#fff5ea] text-[#a16207]">
                   <Crown className="size-5" />
                 </span>
                 <div>
@@ -269,7 +269,7 @@ export default function FullPlatformPage() {
               </div>
               <div className="mt-2 flex items-end justify-between">
                 <span className="text-sm font-semibold text-slate-600">Total Amount</span>
-                <span className="text-2xl font-black tabular-nums text-indigo-600">
+                <span className="text-2xl font-black tabular-nums text-[#a16207]">
                   {selected ? formatPrice(selected.amountCents, 'INR') : '-'}
                 </span>
               </div>
@@ -299,19 +299,19 @@ export default function FullPlatformPage() {
                 )}
               </button>
               <p className="mt-2 flex items-center justify-center gap-1.5 text-center text-xs text-slate-500">
-                <Zap className="size-3.5 text-indigo-400" /> Instant access after payment
+                <Zap className="size-3.5 text-[#f5b400]" /> Instant access after payment
               </p>
             </div>
 
             {/* Changed your mind? */}
             <Link
               href="/shop/build"
-              className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm transition hover:border-sky-300 hover:bg-sky-50/40"
+              className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm transition hover:border-[#ffc42d]/40 hover:bg-[#fff5ea]/40"
             >
               <span className="inline-flex items-center gap-2 font-semibold text-slate-600">
-                <Puzzle className="size-4 text-sky-600" /> Prefer a custom plan?
+                <Puzzle className="size-4 text-[#a16207]" /> Prefer a custom plan?
               </span>
-              <span className="inline-flex items-center gap-1 font-bold text-sky-700">
+              <span className="inline-flex items-center gap-1 font-bold text-[#a16207]">
                 Build your own <Sparkles className="size-3.5" />
               </span>
             </Link>
