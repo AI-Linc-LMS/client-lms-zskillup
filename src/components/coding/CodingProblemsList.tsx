@@ -19,7 +19,16 @@ const DIFF_TONE: Record<string, string> = {
  * lists the full active bank. With a `topic` it narrows to a single coding topic
  * (used by the Practice → Coding section's topic chips).
  */
-export function CodingProblemsList({ company, topic }: { company?: string; topic?: string } = {}) {
+export function CodingProblemsList({
+  company,
+  topic,
+  gate,
+}: {
+  company?: string;
+  topic?: string;
+  /** Company-hub free-tier gate: swallow "Solve" clicks into the upgrade modal. */
+  gate?: (e: React.MouseEvent, what: string) => boolean;
+} = {}) {
   const [problems, setProblems] = useState<CodingProblemListItem[] | null>(null);
   const [errored, setErrored] = useState(false);
   const [q, setQ] = useState('');
@@ -169,7 +178,7 @@ export function CodingProblemsList({ company, topic }: { company?: string; topic
             <Stagger className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {items.map((p) => (
                 <StaggerItem key={p.id} className="h-full">
-                  <ProblemCard p={p} />
+                  <ProblemCard p={p} gate={gate} />
                 </StaggerItem>
               ))}
             </Stagger>
@@ -180,10 +189,11 @@ export function CodingProblemsList({ company, topic }: { company?: string; topic
   );
 }
 
-function ProblemCard({ p }: { p: CodingProblemListItem }) {
+function ProblemCard({ p, gate }: { p: CodingProblemListItem; gate?: (e: React.MouseEvent, what: string) => boolean }) {
   return (
     <Link
       href={`/coding/${p.slug}`}
+      onClick={(e) => gate?.(e, 'this coding problem')}
       className={cn(
         'group relative flex h-full flex-col overflow-hidden rounded-2xl border p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-[0_18px_40px_-22px_rgba(15,23,42,0.4)]',
         p.solved

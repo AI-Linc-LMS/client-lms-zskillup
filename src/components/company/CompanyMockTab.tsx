@@ -8,7 +8,14 @@ import { getCompanyScheduledAssessments, type ApiScheduledAssessment } from '@/l
 
 /** Full Mock Assessment tab — real: this company's scheduled proctored drives +
  *  a path into the adaptive (non-proctored) Mock Quiz. */
-export function CompanyMockTab({ content }: { content: HubContent }) {
+export function CompanyMockTab({
+  content,
+  gate,
+}: {
+  content: HubContent;
+  /** Company-hub free-tier gate: swallow "Start"/practice clicks into the upgrade modal. */
+  gate?: (e: React.MouseEvent, what: string) => boolean;
+}) {
   const { slug, name } = content.company;
   const [scheduled, setScheduled] = useState<ApiScheduledAssessment[] | null>(null);
 
@@ -42,6 +49,7 @@ export function CompanyMockTab({ content }: { content: HubContent }) {
       {/* Adaptive mock quiz - standout violet card */}
       <Link
         href="/mock-assessment"
+        onClick={(e) => gate?.(e, 'the Adaptive Mock Quiz')}
         className="group relative flex items-center justify-between gap-3 overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_-30px_rgba(124,58,237,0.22)] transition-shadow hover:shadow-[0_24px_60px_-28px_rgba(124,58,237,0.35)] sm:gap-4 sm:p-6"
       >
         <div
