@@ -242,7 +242,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen">
       {/* ── Left brand panel (hidden on mobile) ────────────────────────────── */}
-      <aside className="relative hidden w-[42%] shrink-0 overflow-hidden bg-gradient-to-br from-[#0b1220] via-[#101d4a] to-[#1e3a8a] text-white lg:flex lg:flex-col lg:justify-between lg:p-10 xl:p-14">
+      <aside className="relative hidden w-[42%] shrink-0 overflow-hidden bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] text-white lg:flex lg:flex-col lg:justify-between lg:p-10 xl:p-14">
         {/* Glow orbs */}
         <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-[#f5b400]/25 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute -bottom-24 -right-16 h-64 w-64 rounded-full bg-white/[0.06] blur-3xl" />
@@ -318,7 +318,7 @@ export default function LoginPage() {
             &ldquo;{TESTIMONIAL.quote}&rdquo;
           </p>
           <div className="mt-4 flex items-center gap-3 border-t border-white/10 pt-3">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#1d4ed8] to-[#0b1220] text-[11px] font-extrabold">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#1d4ed8] to-[#0a0a0c] text-[11px] font-extrabold">
               {TESTIMONIAL.initials}
             </span>
             <span>

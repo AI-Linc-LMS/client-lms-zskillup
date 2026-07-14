@@ -95,7 +95,7 @@ function Player({
       />
       <motion.div
         className={cn(
-          'relative w-full overflow-hidden rounded-3xl bg-[#0b1220] shadow-2xl ring-1 ring-white/10 transition-[max-width] duration-300',
+          'relative w-full overflow-hidden rounded-3xl bg-[#0a0a0c] shadow-2xl ring-1 ring-white/10 transition-[max-width] duration-300',
           theater ? 'max-w-6xl' : 'max-w-3xl',
         )}
         initial={{ opacity: 0, scale: 0.96, y: 12 }}

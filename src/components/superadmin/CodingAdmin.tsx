@@ -416,7 +416,7 @@ function CodingDetailDrawer({
           {/* reference solution */}
           {p.referenceSolution?.source ? (
             <Field label={`Reference solution (${p.referenceSolution.language})`}>
-              <pre className="max-h-80 overflow-auto rounded-xl bg-[#0b1220] p-3 text-[12px] leading-relaxed text-slate-100">
+              <pre className="max-h-80 overflow-auto rounded-xl bg-[#0a0a0c] p-3 text-[12px] leading-relaxed text-slate-100">
                 <code>{p.referenceSolution.source}</code>
               </pre>
             </Field>

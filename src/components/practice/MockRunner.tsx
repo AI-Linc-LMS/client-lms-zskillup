@@ -342,7 +342,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
   ];
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] text-white">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0a0a0c] text-white">
       {/* Free-mock allowance spent - the server refused the start. Portalled, so the dark
           full-bleed runner backdrop can't clip or tint it. */}
       <UpgradeModal

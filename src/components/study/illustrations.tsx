@@ -51,7 +51,7 @@ export function RoadmapJourney({ className }: { className?: string }) {
       ].map(([x, y, c], i) => (
         <g key={i}>
           <circle cx={x as number} cy={y as number} r="7.5" fill={c as string} opacity="0.25" />
-          <circle cx={x as number} cy={y as number} r="4.5" fill={c as string} stroke="#0b1220" strokeWidth="1.5" />
+          <circle cx={x as number} cy={y as number} r="4.5" fill={c as string} stroke="#0a0a0c" strokeWidth="1.5" />
         </g>
       ))}
       {/* summit flag */}
@@ -59,7 +59,7 @@ export function RoadmapJourney({ className }: { className?: string }) {
       <path d="M215.4,29 L231,33.5 L215.4,38.5 Z" fill="url(#rj-flag)" />
       {/* start marker */}
       <circle cx="18" cy="168" r="7" fill="#f5b400" opacity="0.25" />
-      <circle cx="18" cy="168" r="4" fill="#f5b400" stroke="#0b1220" strokeWidth="1.5" />
+      <circle cx="18" cy="168" r="4" fill="#f5b400" stroke="#0a0a0c" strokeWidth="1.5" />
     </svg>
   );
 }

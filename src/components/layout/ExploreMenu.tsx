@@ -239,7 +239,7 @@ export function ExploreMenu() {
 
                 {/* Plus promo card */}
                 <Column className="col-span-3">
-                  <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-[#1a2440] via-[#0b1220] to-[#0b1220] p-4 text-white shadow-[0_20px_50px_-24px_rgba(11,18,32,0.8)]">
+                  <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-[#1a2440] via-[#0a0a0c] to-[#0a0a0c] p-4 text-white shadow-[0_20px_50px_-24px_rgba(11,18,32,0.8)]">
                     <div
                       aria-hidden
                       className="pointer-events-none absolute -right-10 -top-10 size-28 rounded-full bg-orange/40 blur-2xl transition-opacity duration-500 group-hover:opacity-80"

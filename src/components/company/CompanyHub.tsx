@@ -205,7 +205,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
                 {active && (
                   <motion.span
                     layoutId="hub-tab-pill"
-                    className="absolute inset-0 -z-10 rounded-xl bg-gradient-to-b from-[#1f2d4d] to-[#0b1220] shadow-[0_10px_24px_-10px_rgba(11,18,32,0.7)]"
+                    className="absolute inset-0 -z-10 rounded-xl bg-gradient-to-b from-[#1f2d4d] to-[#0a0a0c] shadow-[0_10px_24px_-10px_rgba(11,18,32,0.7)]"
                     transition={{ type: 'spring', stiffness: 480, damping: 38 }}
                   />
                 )}

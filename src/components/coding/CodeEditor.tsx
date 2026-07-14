@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 
 /**
  * Thin Monaco wrapper with an Aurora-navy theme so the editor sits natively in
- * the coding workspace (deep navy #0b1220 surface, orange caret/keywords). The
+ * the coding workspace (deep navy #0a0a0c surface, orange caret/keywords). The
  * heavy editor loads client-side only; @monaco-editor/react streams it in.
  */
 
@@ -24,7 +24,7 @@ function defineTheme(monaco: Monaco) {
       { token: 'function', foreground: '93c5fd' },
     ],
     colors: {
-      'editor.background': '#0b1220',
+      'editor.background': '#0a0a0c',
       'editor.foreground': '#e2e8f0',
       'editorLineNumber.foreground': '#334155',
       'editorLineNumber.activeForeground': '#94a3b8',
@@ -33,7 +33,7 @@ function defineTheme(monaco: Monaco) {
       'editorCursor.foreground': '#f5b400',
       'editorIndentGuide.background': '#1e293b',
       'editorWidget.background': '#0f172a',
-      'editorGutter.background': '#0b1220',
+      'editorGutter.background': '#0a0a0c',
       'scrollbarSlider.background': '#1e293b88',
     },
   });

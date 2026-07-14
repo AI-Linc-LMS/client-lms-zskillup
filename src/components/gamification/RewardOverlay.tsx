@@ -84,7 +84,7 @@ export function RewardOverlay({
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-[200] grid place-items-center bg-[#0b1220]/80 px-6 backdrop-blur-md"
+        className="fixed inset-0 z-[200] grid place-items-center bg-[#0a0a0c]/80 px-6 backdrop-blur-md"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -94,7 +94,7 @@ export function RewardOverlay({
           role="dialog"
           aria-label="Assessment reward"
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-sm overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-b from-[#141d3a] to-[#0b1220] p-7 text-center text-white shadow-2xl"
+          className="relative w-full max-w-sm overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-b from-[#141d3a] to-[#0a0a0c] p-7 text-center text-white shadow-2xl"
           initial={{ scale: 0.8, y: 30, opacity: 0 }}
           animate={{ scale: 1, y: 0, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}

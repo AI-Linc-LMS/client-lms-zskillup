@@ -120,7 +120,7 @@ export function StudyMaterialAdmin() {
             }
           }}
           disabled={!companyId || generating}
-          className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[#1f2d4d] to-[#0b1220] px-3.5 py-2 text-xs font-bold text-white transition hover:opacity-90 disabled:opacity-50"
+          className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[#1f2d4d] to-[#0a0a0c] px-3.5 py-2 text-xs font-bold text-white transition hover:opacity-90 disabled:opacity-50"
         >
           {generating ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5" />}
           Auto-generate quizzes

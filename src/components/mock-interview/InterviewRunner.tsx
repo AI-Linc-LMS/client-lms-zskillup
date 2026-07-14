@@ -505,7 +505,7 @@ export function InterviewRunner({ id }: { id: string }) {
       {/* Calibration stage: interviewer + candidate camera */}
       <div className="grid gap-4 sm:grid-cols-2">
         {/* Interviewer */}
-        <div className="relative flex min-h-[240px] flex-col items-center justify-center gap-4 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0b1220] p-6 text-white shadow-sm">
+        <div className="relative flex min-h-[240px] flex-col items-center justify-center gap-4 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0a0a0c] p-6 text-white shadow-sm">
           <span aria-hidden className="pointer-events-none absolute -left-10 -top-10 size-40 rounded-full bg-[#8b5cf6]/25 blur-3xl" />
           <InterviewerBlob speaking={interviewerSpeaking || busy} big />
           <div className="text-center">
