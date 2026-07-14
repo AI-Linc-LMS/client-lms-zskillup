@@ -405,7 +405,7 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="grid items-stretch gap-6 lg:grid-cols-2 lg:gap-8">
+          <div className="grid items-start gap-6 lg:grid-cols-2 lg:gap-8">
             {/* LEFT - platform tour video + what's inside prephasz */}
             <div className="flex flex-col gap-6">
               <VideoPlaceholder
@@ -415,7 +415,7 @@ export default async function HomePage() {
               />
 
               {/* What's inside prephasz */}
-              <div className="relative flex flex-1 flex-col justify-center overflow-hidden rounded-[var(--radius-card-lg)] border border-[var(--color-line)] bg-white p-7 lg:p-8">
+              <div className="relative flex flex-col overflow-hidden rounded-[var(--radius-card-lg)] border border-[var(--color-line)] bg-white p-7 lg:p-8">
                 <div
                   aria-hidden
                   className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[#ffc42d]/15 blur-3xl"
@@ -449,6 +449,13 @@ export default async function HomePage() {
                     </li>
                   ))}
                 </ul>
+                {/* Brand CTA anchors the card so it reads as intentional, not empty. */}
+                <Link
+                  href={LANDING_HREFS.prepare}
+                  className="relative mt-7 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-5 py-3 text-sm font-extrabold text-[#171717] shadow-[0_10px_24px_-12px_rgba(245,180,0,0.6)] transition hover:brightness-105"
+                >
+                  Start practising free <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
             </div>
 
