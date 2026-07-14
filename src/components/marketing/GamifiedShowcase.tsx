@@ -59,7 +59,7 @@ const ACHIEVEMENTS = [
 ];
 
 const FEATURES = [
-  { icon: Flame, label: 'Streaks that reward showing up' },
+  { icon: Flame, label: 'Stay consistent. Get rewarded every day.' },
   { icon: Zap, label: 'Daily quests with XP rewards' },
   { icon: Trophy, label: 'College & national leaderboard' },
   { icon: BadgeCheck, label: 'Earnable concept badges' },
