@@ -30,6 +30,8 @@ import { HomeFeaturedTracks } from '@/components/marketing/HomeFeaturedTracks';
 import { GamifiedShowcase } from '@/components/marketing/GamifiedShowcase';
 import { HomeBlogSection } from '@/components/marketing/HomeBlogSection';
 import { VideoPlaceholder } from '@/components/media/VideoPlaceholder';
+import RotatingText from '@/components/reactbits/RotatingText';
+import SpotlightCard from '@/components/reactbits/SpotlightCard';
 import { getPublicBlogs, getPublicTestimonials } from '@/lib/server/public-content';
 import {
   LANDING_FOOTER,
@@ -209,11 +211,19 @@ export default async function HomePage() {
             </span>
 
             <h1 className="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-              Land your first tech job with{' '}
-              <span className="bg-gradient-to-r from-[#ffe08a] via-[#f5b400] to-[#f5b400] bg-clip-text text-transparent">
-                India&apos;s top recruiters
-              </span>
-              .
+              Land your first tech job at{' '}
+              <RotatingText
+                texts={['TCS', 'Infosys', 'Wipro', 'Accenture', 'Cognizant', 'Capgemini']}
+                mainClassName="inline-flex overflow-hidden py-1 -my-1 text-[#ffc42d]"
+                staggerFrom="last"
+                staggerDuration={0.02}
+                rotationInterval={2000}
+                splitBy="characters"
+                transition={{ type: 'spring', damping: 26, stiffness: 340 }}
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '-120%' }}
+              />
             </h1>
 
             <p className="mt-5 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg">
@@ -414,7 +424,10 @@ export default async function HomePage() {
               />
 
               {/* What's inside prephasz */}
-              <div className="relative flex flex-col overflow-hidden rounded-[var(--radius-card-lg)] border border-[var(--color-line)] bg-white p-7 lg:p-8">
+              <SpotlightCard
+                className="flex flex-col rounded-[var(--radius-card-lg)] border border-[var(--color-line)] bg-white p-7 lg:p-8"
+                spotlightColor="rgba(245, 180, 0, 0.20)"
+              >
                 <div
                   aria-hidden
                   className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[#ffc42d]/15 blur-3xl"
@@ -455,11 +468,14 @@ export default async function HomePage() {
                 >
                   Start practising free <ArrowRight className="h-4 w-4" />
                 </Link>
-              </div>
+              </SpotlightCard>
             </div>
 
             {/* RIGHT - founder: photo first, then description */}
-            <article className="overflow-hidden rounded-[var(--radius-card-lg)] border border-[var(--color-line)] bg-white">
+            <SpotlightCard
+              className="rounded-[var(--radius-card-lg)] border border-[var(--color-line)] bg-white"
+              spotlightColor="rgba(245, 180, 0, 0.20)"
+            >
               {/* Photo (white studio bg blends into the card; a missing file degrades to plain white).
                   Taller crop (4:5) so the founder's chest — incl. the prephasz-logo pocket — is visible. */}
               <div className="relative aspect-[4/5] w-full overflow-hidden border-b border-[var(--color-line)] bg-white">
@@ -511,7 +527,7 @@ export default async function HomePage() {
                   </ul>
                 </div>
               </div>
-            </article>
+            </SpotlightCard>
           </div>
         </div>
       </section>
@@ -702,7 +718,19 @@ export default async function HomePage() {
             Ready when you are
           </p>
           <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
-            Your dream job starts with today&apos;s preparation.
+            Today&apos;s preparation, tomorrow&apos;s{' '}
+            <RotatingText
+              texts={['dream job', 'first offer', 'tech career', 'big break']}
+              mainClassName="inline-flex overflow-hidden py-1 -my-1 text-[#ffc42d]"
+              staggerFrom="last"
+              staggerDuration={0.02}
+              rotationInterval={2200}
+              splitBy="characters"
+              transition={{ type: 'spring', damping: 26, stiffness: 340 }}
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '-120%' }}
+            />
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-base text-white/75">
             Get started for free. Choose your dream company, check where you stand, and
