@@ -43,7 +43,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 
 /** Sections rendered FLAT — always-open, no collapse toggle (their items stand
  *  as individual nav links under a static header). */
-const FLAT_HEADINGS = new Set(['COMPANY HUBS', 'PLANS & SUPPORT']);
+const FLAT_HEADINGS = new Set(['COMPANY HUBS']);
 
 /** Section-level icons for the accordion headers, keyed by the nav heading. */
 const SECTION_ICON: Record<string, typeof Compass> = {
@@ -147,6 +147,22 @@ function NavAccordion({
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#ffc42d]/[0.06] to-transparent" />
       <nav className="scroll-soft relative flex-1 space-y-1.5 overflow-y-auto px-3 py-4" aria-label="Workspace">
         {sections.map((section) => {
+          // Standalone: each item is its own top-level nav link (no group header,
+          // no accordion) — e.g. Explore Plans / Upgrade & Renew / Help & Support.
+          if (section.standalone) {
+            return (
+              <div key={section.heading} className="space-y-1.5">
+                {section.items.map((item) => (
+                  <StandaloneNavLink
+                    key={item.href}
+                    item={item}
+                    active={isActive(item.href)}
+                    locked={isLocked(item.href)}
+                  />
+                ))}
+              </div>
+            );
+          }
           const SecIcon = SECTION_ICON[section.heading] ?? Compass;
           const active = section.items.some((i) => isActive(i.href));
           const flat = FLAT_HEADINGS.has(section.heading);
@@ -246,6 +262,44 @@ function NavAccordion({
         })}
       </nav>
     </aside>
+  );
+}
+
+/** A top-level, standalone nav link — same prominence as a section header, but a
+ *  real destination (used for the un-grouped Plans & Support items). */
+function StandaloneNavLink({ item, active, locked }: { item: NavItem; active: boolean; locked: boolean }) {
+  const Icon = item.icon;
+  return (
+    <Link
+      href={item.href}
+      data-tour={`nav:${item.href}`}
+      aria-current={active ? 'page' : undefined}
+      className={cn(
+        'group flex items-center gap-2.5 rounded-xl px-2.5 py-2.5 transition-colors',
+        active ? 'bg-[#1a1a1a] ring-1 ring-[#ffc42d]/30' : 'hover:bg-[#fff5ea]',
+      )}
+    >
+      <span
+        aria-hidden
+        className={cn(
+          'grid size-8 shrink-0 place-items-center rounded-lg transition-all duration-200',
+          active
+            ? 'text-[#ffc42d]'
+            : 'bg-[#ffc42d]/15 text-[var(--color-primary)] group-hover:bg-[#ffc42d]/25',
+        )}
+      >
+        <Icon className="size-[18px]" />
+      </span>
+      <span
+        className={cn(
+          'flex-1 text-left text-[13px] font-bold tracking-wide',
+          active ? 'text-white' : 'text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)]',
+        )}
+      >
+        {item.label}
+      </span>
+      {locked && <Lock className="size-3.5 shrink-0 text-slate-400" aria-label="Locked" />}
+    </Link>
   );
 }
 

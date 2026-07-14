@@ -57,6 +57,10 @@ export interface NavItem {
 export interface NavSection {
   heading: string;
   items: NavItem[];
+  /** Render each item as an INDIVIDUAL top-level nav link — no group header, no
+   *  accordion. Used for Plans & Support so Explore Plans / Upgrade & Renew /
+   *  Help & Support each stand on their own rather than nesting under a heading. */
+  standalone?: boolean;
 }
 
 export const STUDENT_NAV: NavSection[] = [
@@ -98,7 +102,10 @@ export const STUDENT_NAV: NavSection[] = [
     items: [{ label: 'Company Hubs', href: '/dashboard/company', icon: Building2 }],
   },
   {
+    // Individual top-level items — deliberately NOT grouped under a "Plans &
+    // Support" header (the heading is kept only as a stable React key / icon lookup).
     heading: 'PLANS & SUPPORT',
+    standalone: true,
     items: [
       { label: 'Explore Plans', href: '/shop', icon: Compass },
       { label: 'Upgrade & Renew', href: '/upgrade', icon: Crown },

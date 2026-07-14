@@ -92,9 +92,13 @@ export function MobileNav() {
               <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5" aria-label="Workspace">
                 {sections.map((section) => (
                   <div key={section.heading}>
-                    <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-                      {section.heading}
-                    </p>
+                    {/* Standalone sections (Plans & Support) drop the group heading —
+                        each item stands on its own as an individual nav link. */}
+                    {section.standalone ? null : (
+                      <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+                        {section.heading}
+                      </p>
+                    )}
                     <ul className="space-y-0.5">
                       {section.items.map((item) => {
                         const active = pathname === item.href || pathname.startsWith(item.href + '/');
