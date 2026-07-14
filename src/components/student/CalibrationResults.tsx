@@ -118,6 +118,22 @@ function ResultsView({ data, onReview }: { data: CalibrationResultsDto; onReview
               <h1 className="mt-2 text-2xl font-black leading-tight tracking-tight text-navy">
                 Here's where you stand
               </h1>
+              {/* Actual test score (raw performance on this assessment), distinct from readiness */}
+              <div className="mt-2.5 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm">
+                <span className="font-semibold text-slate-500">
+                  Your score
+                  <span className="ml-1.5 font-black tabular-nums text-navy">
+                    {report.score}/{report.total}
+                  </span>
+                  <span className="ml-1 font-bold tabular-nums text-slate-400">({report.pct}%)</span>
+                </span>
+                {report.percentile > 0 ? (
+                  <span className="font-semibold text-slate-500">
+                    Percentile
+                    <span className="ml-1.5 font-black tabular-nums text-navy">{report.percentile}th</span>
+                  </span>
+                ) : null}
+              </div>
             </div>
           </div>
           {data.aiSummary && (
