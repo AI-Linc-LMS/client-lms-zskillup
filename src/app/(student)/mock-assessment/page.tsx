@@ -1,14 +1,16 @@
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { Brain, ShieldCheck, Timer } from 'lucide-react';
 import { CustomMockBuilder } from '@/components/practice/CustomMockBuilder';
+import { MockAllowanceChip } from '@/components/practice/MockAllowanceChip';
 import { MockHistory } from '@/components/practice/MockHistory';
 import { ProfileLockGate } from '@/components/student/ProfileLockGate';
 import { Reveal } from '@/components/motion/primitives';
 
 /**
- * Mock Assessment (Mode 3) — student-assembled, unlimited, non-adaptive,
- * PROCTORED practice assessments. Pick sections/topics, set size + duration, and
- * run under the same proctored assessment UI as the real drives.
+ * Mock Assessment (Mode 3) — student-assembled, non-adaptive, PROCTORED practice
+ * assessments. Pick sections/topics, set size + duration, and run under the same
+ * proctored assessment UI as the real drives. Free users get one complimentary
+ * mock (enforced server-side); premium unlocks unlimited attempts.
  */
 export default function MockAssessmentPage() {
   return (
@@ -33,12 +35,12 @@ export default function MockAssessmentPage() {
             <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Build your own mock, exam-style</h1>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/60">
               Choose the sections and topics you want, set the length, and sit a full proctored mock -
-              the same experience as a real drive, but unlimited and just for practice.
+              the same experience as a real drive, just for practice.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Feature icon={ShieldCheck} text="Camera-proctored, full-screen" />
               <Feature icon={Timer} text="Server-timed" />
-              <Feature icon={Brain} text="Unlimited attempts" />
+              <MockAllowanceChip />
             </div>
           </div>
         </section>
