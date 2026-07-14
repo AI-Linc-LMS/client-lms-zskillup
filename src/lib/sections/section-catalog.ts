@@ -93,7 +93,12 @@ export function buildSections(topics: ApiTopic[]): SectionRoot[] {
         topicCount: topicNodes.length,
         topics: topicNodes,
       };
-    });
+    })
+    // A real section is a curated root WITH child topics — not a flat AI-experiment
+    // bucket (arrays-ai, lr-ai, strings-ai …) that happens to hold a handful of
+    // questions but no topic tree. Mirrors the practice picker's children filter, so
+    // the two never disagree on what counts as a section.
+    .filter((s) => s.topicCount > 0);
 
   return roots.sort((a, b) => a.order - b.order);
 }
