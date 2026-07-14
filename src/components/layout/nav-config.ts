@@ -69,12 +69,12 @@ export const STUDENT_NAV: NavSection[] = [
   {
     heading: 'WORKSPACE',
     items: [
-      { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { label: 'Study Plan', href: '/study-plan', icon: ListChecks },
-      { label: 'Performance', href: '/performance', icon: TrendingUp },
-      { label: 'Leaderboard', href: '/leaderboard', icon: Trophy },
-      { label: 'Community', href: '/community', icon: MessagesSquare },
-      { label: 'Live Sessions', href: '/live-sessions', icon: Video },
+      { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, tip: 'Your personalized home — progress, streak, readiness and your next best step at a glance.' },
+      { label: 'Study Plan', href: '/study-plan', icon: ListChecks, tip: 'Your day-by-day placement roadmap, generated from the Placement Readiness Test.' },
+      { label: 'Performance', href: '/performance', icon: TrendingUp, tip: 'Detailed analytics — accuracy, speed and readiness across sections and topics.' },
+      { label: 'Leaderboard', href: '/leaderboard', icon: Trophy, tip: 'See how you rank against peers — nationally, by college, company or city.' },
+      { label: 'Community', href: '/community', icon: MessagesSquare, tip: 'Ask doubts, share tips and connect with other students in discussion threads.' },
+      { label: 'Live Sessions', href: '/live-sessions', icon: Video, tip: 'Scheduled live classes and webinars (Zoom/Meet) you can join.' },
     ],
   },
   {
@@ -94,9 +94,9 @@ export const STUDENT_NAV: NavSection[] = [
   {
     heading: 'CAREER',
     items: [
-      { label: 'Resume Builder', href: '/resume-builder', icon: FileText },
-      { label: 'Mock Interview', href: '/mock-interview', icon: MessageSquare },
-      { label: 'Certificates', href: '/certificates', icon: Award },
+      { label: 'Resume Builder', href: '/resume-builder', icon: FileText, tip: 'Build an ATS-ready resume with templates, AI tailoring to a target role, and PDF export.' },
+      { label: 'Mock Interview', href: '/mock-interview', icon: MessageSquare, tip: 'Practice AI-driven, role-aware mock interviews with instant rubric feedback.' },
+      { label: 'Certificates', href: '/certificates', icon: Award, tip: 'Earn and download shareable, verifiable certificates as you hit XP milestones.' },
     ],
   },
   {
