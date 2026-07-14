@@ -21,6 +21,7 @@ export interface DecayParams {
 export interface AdaptivePendingQuestion {
   questionId: string;
   stem: string;
+  imageUrl?: string | null;
   options: AdaptiveOption[];
   targetSkill: string;
   difficultyLabel: 'EASY' | 'MEDIUM' | 'HARD';
@@ -111,6 +112,7 @@ export interface AdaptiveQuestionRecord {
   index: number;
   questionId: string;
   stem: string;
+  imageUrl?: string | null;
   difficulty: string;
   targetSkill: string;
   isCorrect: boolean;

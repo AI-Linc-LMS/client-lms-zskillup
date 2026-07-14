@@ -22,6 +22,8 @@ export interface ApiQuestion {
   type: 'MCQ' | 'MULTI_SELECT' | 'NUMERIC' | 'CODING';
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   stem: string;
+  /** Optional diagram/figure (URL or data-URL) shown with the stem. */
+  imageUrl?: string | null;
   /** Backend `QuestionPublicDto` field names — was previously mistyped as
    *  topicId/companyId, which never matched the wire shape. */
   subtopicId: string;

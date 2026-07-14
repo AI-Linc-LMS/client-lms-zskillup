@@ -249,6 +249,8 @@ export interface AdminQuestionRow {
   type: 'MCQ' | 'MULTI_SELECT' | 'NUMERIC' | 'CODING';
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   stem: string;
+  /** Optional diagram/figure (URL or data-URL) shown with the stem. */
+  imageUrl?: string | null;
   /** The (leaf) topic this question is tagged to — backend field is `subtopicId`. */
   subtopicId: string | null;
   companyId: string | null;

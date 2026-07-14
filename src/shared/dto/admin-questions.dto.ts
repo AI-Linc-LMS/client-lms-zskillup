@@ -55,6 +55,13 @@ export class AdminCreateQuestionDto {
   @MaxLength(5000)
   stem!: string;
 
+  /** Optional diagram/figure shown with the stem — a URL or a compressed data-URL
+   *  (for Data-Interpretation charts / Venn diagrams). */
+  @IsOptional()
+  @IsString()
+  @MaxLength(3_000_000)
+  imageUrl?: string;
+
   @IsOptional()
   @IsString()
   @MaxLength(2000)
@@ -101,6 +108,12 @@ export class AdminUpdateQuestionDto {
   @MinLength(5)
   @MaxLength(5000)
   stem?: string;
+
+  /** Set/replace the diagram; send '' to clear it. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(3_000_000)
+  imageUrl?: string;
 
   @IsOptional()
   @IsString()

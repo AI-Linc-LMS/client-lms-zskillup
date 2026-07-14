@@ -43,6 +43,7 @@ export interface ApiMockQuestion {
   type: 'MCQ' | 'MULTI_SELECT' | 'NUMERIC' | 'CODING';
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   stem: string;
+  imageUrl?: string | null;
   /** Root section name (e.g. "Numerical Ability"); "Coding" for coding items.
    *  Drives the per-section tabs in the runner. */
   section?: string | null;
@@ -135,6 +136,7 @@ export interface ApiMockReviewQuestion {
   id: string;
   type: 'MCQ' | 'MULTI_SELECT' | 'NUMERIC' | 'CODING';
   stem: string;
+  imageUrl?: string | null;
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   explanation: string | null;
   options: Array<{ id: string; text: string; orderIndex: number; isCorrect: boolean }>;

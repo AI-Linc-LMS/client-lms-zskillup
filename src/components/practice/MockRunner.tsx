@@ -759,7 +759,7 @@ function MockRunningView({
             <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-bold text-indigo-600">Coding problem</p>
           ) : null}
           <PyqTag companyIds={question.companyIds ?? []} years={question.yearTags ?? []} className="mt-2" />
-          <QuestionStem text={question.stem} className="mt-2 text-base font-semibold leading-relaxed text-navy" />
+          <QuestionStem text={question.stem} imageUrl={question.imageUrl} className="mt-2 text-base font-semibold leading-relaxed text-navy" />
           {question.type === 'MULTI_SELECT' ? <p className="mt-1 text-xs text-slate-500">Select all that apply.</p> : null}
 
           {question.type === 'CODING' && question.coding ? (
@@ -1146,6 +1146,16 @@ export function MockReportView({
                     )}
                   </span>
                 </div>
+
+                {q.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={q.imageUrl}
+                    alt="Question diagram"
+                    loading="lazy"
+                    className="mt-3 max-h-72 w-auto max-w-full rounded-lg border border-slate-200 bg-white object-contain"
+                  />
+                ) : null}
 
                 {q.type === 'CODING' && q.coding ? (
                   <div className="mt-3 space-y-2">
