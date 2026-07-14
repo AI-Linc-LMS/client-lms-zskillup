@@ -51,6 +51,9 @@ export interface NavItem {
   label: string;
   href: string;
   icon: LucideIcon;
+  /** Optional one-line explainer shown via an (ⓘ) tooltip next to the item — for
+   *  platform-specific concepts a first-time user may not recognise. */
+  tip?: string;
 }
 
 export interface NavSection {
@@ -77,15 +80,15 @@ export const STUDENT_NAV: NavSection[] = [
   {
     heading: 'PRACTICE',
     items: [
-      { label: 'Adaptive', href: '/practice', icon: Target },
-      { label: 'Non-Adaptive', href: '/practice-wish', icon: Sparkles },
+      { label: 'Adaptive', href: '/practice', icon: Target, tip: 'Questions adapt to your performance — difficulty rises or falls as you answer.' },
+      { label: 'Non-Adaptive', href: '/practice-wish', icon: Sparkles, tip: 'Questions stay at a fixed difficulty throughout the session.' },
     ],
   },
   {
     heading: 'ASSESSMENT',
     items: [
-      { label: 'Mock Assessment', href: '/mock-assessment', icon: Brain },
-      { label: 'Assessments', href: '/assessments', icon: FileCheck2 },
+      { label: 'Mock Assessment', href: '/mock-assessment', icon: Brain, tip: 'Build customizable mock tests from your chosen sections, topics, question count and duration.' },
+      { label: 'Assessments', href: '/assessments', icon: FileCheck2, tip: 'View and attempt scheduled or assigned assessments.' },
     ],
   },
   {
@@ -101,7 +104,7 @@ export const STUDENT_NAV: NavSection[] = [
     // "COMPANY HUBS" header ABOVE a "Company Hubs" link (which read as a duplicate).
     heading: 'COMPANY HUBS',
     standalone: true,
-    items: [{ label: 'Company Hubs', href: '/dashboard/company', icon: Building2 }],
+    items: [{ label: 'Company Hubs', href: '/dashboard/company', icon: Building2, tip: 'Company-specific prep: hiring process, study material, practice, previous-year questions, mocks and interview prep.' }],
   },
   {
     // Individual top-level items — deliberately NOT grouped under a "Plans &
@@ -109,9 +112,9 @@ export const STUDENT_NAV: NavSection[] = [
     heading: 'PLANS & SUPPORT',
     standalone: true,
     items: [
-      { label: 'Explore Plans', href: '/shop', icon: Compass },
-      { label: 'Upgrade & Renew', href: '/upgrade', icon: Crown },
-      { label: 'Help & Support', href: '/support', icon: LifeBuoy },
+      { label: 'Explore Plans', href: '/shop', icon: Compass, tip: 'View and compare the available subscription plans.' },
+      { label: 'Upgrade & Renew', href: '/upgrade', icon: Crown, tip: 'Upgrade your subscription or renew an existing plan.' },
+      { label: 'Help & Support', href: '/support', icon: LifeBuoy, tip: 'Get assistance, report issues, or contact the support team.' },
     ],
   },
 ];
