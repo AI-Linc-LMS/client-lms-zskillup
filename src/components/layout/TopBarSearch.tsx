@@ -44,7 +44,7 @@ export function TopBarSearch() {
       <div
         aria-hidden
         className={cn(
-          'pointer-events-none absolute -inset-px rounded-full bg-gradient-to-r from-[#f37021]/40 via-[#6d3bf5]/30 to-[#2563eb]/40 opacity-0 blur-[6px] transition-opacity duration-300',
+          'pointer-events-none absolute -inset-px rounded-full bg-gradient-to-r from-[#f5b400]/40 via-[#6d3bf5]/30 to-[#2563eb]/40 opacity-0 blur-[6px] transition-opacity duration-300',
           focused && 'opacity-100',
         )}
       />

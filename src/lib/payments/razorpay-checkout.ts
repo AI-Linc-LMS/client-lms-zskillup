@@ -133,7 +133,7 @@ export async function startPurchase(params: StartPurchaseParams): Promise<Purcha
         name: params.prefill?.name ?? undefined,
         email: params.prefill?.email ?? undefined,
       },
-      theme: { color: '#f37021' },
+      theme: { color: '#f5b400' },
       handler: (response: RazorpayHandlerResponse) => {
         void (async () => {
           try {
@@ -210,7 +210,7 @@ export async function startCartPurchase(
       name: 'ZSkillup',
       description: `${order.lines.length} item${order.lines.length === 1 ? '' : 's'}`,
       prefill: { name: prefill?.name ?? undefined, email: prefill?.email ?? undefined },
-      theme: { color: '#f37021' },
+      theme: { color: '#f5b400' },
       handler: (response: RazorpayHandlerResponse) => {
         void (async () => {
           try {

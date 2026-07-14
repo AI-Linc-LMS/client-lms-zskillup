@@ -151,7 +151,7 @@ export function MockCodingPanel({
         <button type="button" onClick={run} disabled={running || submitting} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-navy hover:bg-slate-50 disabled:opacity-60">
           {running ? <Loader2 className="size-4 animate-spin" /> : <Play className="size-4" />} Run sample
         </button>
-        <button type="button" onClick={submit} disabled={submitting || running} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-4 py-2 text-sm font-extrabold text-white disabled:opacity-60">
+        <button type="button" onClick={submit} disabled={submitting || running} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-4 py-2 text-sm font-extrabold text-[#171717] disabled:opacity-60">
           {submitting ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />} Submit solution
         </button>
         <span className="text-xs text-slate-500">Submitting records your latest solution; you can resubmit before the timer ends.</span>

@@ -107,7 +107,7 @@ export function DeviceCheck({
             type="button"
             onClick={onReady}
             disabled={state === 'requesting'}
-            className="flex-[1.6] rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.8)] disabled:opacity-60"
+            className="flex-[1.6] rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-4 py-2.5 text-sm font-extrabold text-[#171717] shadow-[0_10px_24px_-10px_rgba(245,180,0,0.8)] disabled:opacity-60"
           >
             {state === 'ready' ? 'Start proctored assessment' : 'Continue'}
           </button>

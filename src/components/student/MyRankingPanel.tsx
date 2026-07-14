@@ -76,7 +76,7 @@ export function MyRankingPanel() {
       <div className="rounded-3xl border border-slate-200/80 bg-white p-4">
         <div className="mb-2 flex items-center justify-between">
           <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Top students</p>
-          <Link href="/leaderboard" className="inline-flex items-center gap-1 text-[11px] font-bold text-orange-600 hover:underline">
+          <Link href="/leaderboard" className="inline-flex items-center gap-1 text-[11px] font-bold text-[#f5b400] hover:underline">
             Full leaderboard <ArrowUpRight className="size-3" />
           </Link>
         </div>
@@ -124,7 +124,7 @@ function RankRow({ e }: { e: ApiLeaderboardEntry }) {
       </span>
       <span className={cn('min-w-0 flex-1 truncate text-sm font-semibold', e.isYou ? 'text-navy' : 'text-slate-700')}>
         {e.fullName ?? 'Student'}
-        {e.isYou ? <span className="ml-1 text-[10px] font-bold text-orange-600">You</span> : null}
+        {e.isYou ? <span className="ml-1 text-[10px] font-bold text-[#f5b400]">You</span> : null}
       </span>
       <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 tabular-nums">
         <Zap className="size-3.5 fill-amber-400 text-amber-500" /> {e.totalXp.toLocaleString()}

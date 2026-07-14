@@ -127,7 +127,7 @@ export function RecommendedMenu() {
               ) : !calibrated ? (
                 /* Unlock teaser — before the first calibration assessment. */
                 <div className="px-4 py-5 text-center">
-                  <span className="mx-auto grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-sm">
+                  <span className="mx-auto grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717] shadow-sm">
                     <Lock className="size-5" />
                   </span>
                   <p className="mt-3 text-sm font-black text-navy">Unlock your recommendations</p>

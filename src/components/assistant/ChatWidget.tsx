@@ -89,7 +89,7 @@ export function ChatWidget() {
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? 'Close help chat' : 'Open help chat'}
         aria-expanded={open}
-        className="fixed bottom-5 right-5 z-[60] grid size-14 place-items-center rounded-full bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_16px_40px_-12px_rgba(243,112,33,0.7)] transition-transform hover:scale-105 focus:outline-none focus-visible:ring-4 focus-visible:ring-orange/30 print:hidden"
+        className="fixed bottom-5 right-5 z-[60] grid size-14 place-items-center rounded-full bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717] shadow-[0_16px_40px_-12px_rgba(245,180,0,0.7)] transition-transform hover:scale-105 focus:outline-none focus-visible:ring-4 focus-visible:ring-orange/30 print:hidden"
       >
         {open ? <X className="size-6" /> : <MessageCircle className="size-6" />}
         {!open && (

@@ -9,7 +9,7 @@ export function VideoPlaceholder({
   title,
   subtitle,
   eyebrow = 'Intro video',
-  accent = '#f37021',
+  accent = '#f5b400',
   className = '',
 }: {
   title: string;

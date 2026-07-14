@@ -75,9 +75,9 @@ export function MockHistory({ scope = 'all' }: { scope?: 'all' | 'custom' | 'ass
       label: 'Tests Taken',
       value: testsTaken,
       icon: <FileText className="size-5" />,
-      from: '#f7a14e',
-      to: '#f37021',
-      glow: '#f37021',
+      from: '#ffd24d',
+      to: '#f5b400',
+      glow: '#f5b400',
     },
     {
       label: 'Avg Score',

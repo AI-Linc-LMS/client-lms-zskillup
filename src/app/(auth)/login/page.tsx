@@ -244,7 +244,7 @@ export default function LoginPage() {
       {/* ── Left brand panel (hidden on mobile) ────────────────────────────── */}
       <aside className="relative hidden w-[42%] shrink-0 overflow-hidden bg-gradient-to-br from-[#0b1220] via-[#101d4a] to-[#1e3a8a] text-white lg:flex lg:flex-col lg:justify-between lg:p-10 xl:p-14">
         {/* Glow orbs */}
-        <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-[#f37021]/25 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-[#f5b400]/25 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute -bottom-24 -right-16 h-64 w-64 rounded-full bg-white/[0.06] blur-3xl" />
         {/* Dotted grid */}
         <div

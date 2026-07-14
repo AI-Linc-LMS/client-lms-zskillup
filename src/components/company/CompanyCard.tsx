@@ -171,7 +171,7 @@ export function CompanyCard({
           ) : null}
           <span
             aria-hidden
-            className="absolute right-4 top-4 grid size-8 place-items-center rounded-full border border-slate-200/80 bg-white text-slate-500 transition-all duration-300 group-hover:border-transparent group-hover:bg-gradient-to-br group-hover:from-[#f7a14e] group-hover:to-[#f37021] group-hover:text-white group-hover:shadow-[0_8px_20px_-8px_rgba(243,112,33,0.8)]"
+            className="absolute right-4 top-4 grid size-8 place-items-center rounded-full border border-slate-200/80 bg-white text-slate-500 transition-all duration-300 group-hover:border-transparent group-hover:bg-gradient-to-br group-hover:from-[#ffd24d] group-hover:to-[#f5b400] group-hover:text-[#171717] group-hover:shadow-[0_8px_20px_-8px_rgba(245,180,0,0.8)]"
           >
             <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:translate-x-px group-hover:-translate-y-px" />
           </span>

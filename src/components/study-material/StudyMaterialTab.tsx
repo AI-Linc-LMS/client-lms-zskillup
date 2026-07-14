@@ -143,7 +143,7 @@ export function StudyMaterialTab({ slug }: { slug: string }) {
         <div className="flex items-center gap-2">
           <div className="h-2 w-40 overflow-hidden rounded-full bg-slate-100">
             <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021]"
+              className="h-full rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400]"
               initial={{ width: 0 }}
               animate={{ width: `${data.progressPct}%` }}
               transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}

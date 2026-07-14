@@ -250,7 +250,7 @@ export function ExploreMenu() {
                     />
                     <div className="relative flex flex-1 flex-col">
                       <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.08] px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-white/80 backdrop-blur">
-                        <Sparkles className="size-3 text-[#ffb877]" />
+                        <Sparkles className="size-3 text-[#ffc42d]" />
                         prephasz Plus
                       </span>
                       <p className="mt-3 text-sm font-semibold leading-snug text-white">
@@ -259,7 +259,7 @@ export function ExploreMenu() {
                       <ul className="mt-3 space-y-1.5">
                         {PLUS_PERKS.map((perk) => (
                           <li key={perk} className="flex items-center gap-2 text-[12px] text-white/75">
-                            <span className="grid size-4 shrink-0 place-items-center rounded-full bg-[#f37021]/20 text-[#ffb877]">
+                            <span className="grid size-4 shrink-0 place-items-center rounded-full bg-[#f5b400]/20 text-[#ffc42d]">
                               <svg viewBox="0 0 12 12" className="size-2.5 fill-none stroke-current stroke-[1.8]">
                                 <path d="M2.5 6.2 5 8.5 9.5 3.5" strokeLinecap="round" strokeLinejoin="round" />
                               </svg>
@@ -271,7 +271,7 @@ export function ExploreMenu() {
                       <Link
                         href="/upgrade"
                         onClick={closeNow}
-                        className="group/cta mt-auto inline-flex w-fit items-center gap-1.5 rounded-xl bg-gradient-to-b from-[#f7a14e] to-[#f37021] px-4 py-2 text-sm font-bold text-white shadow-[0_12px_28px_-12px_rgba(243,112,33,0.9)] transition-transform active:scale-[0.98]"
+                        className="group/cta mt-auto inline-flex w-fit items-center gap-1.5 rounded-xl bg-gradient-to-b from-[#ffd24d] to-[#f5b400] px-4 py-2 text-sm font-bold text-[#171717] shadow-[0_12px_28px_-12px_rgba(245,180,0,0.9)] transition-transform active:scale-[0.98]"
                       >
                         Get started
                         <ArrowRight className="size-4 transition-transform group-hover/cta:translate-x-0.5" />

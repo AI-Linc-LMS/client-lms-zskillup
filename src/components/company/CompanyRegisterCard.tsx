@@ -114,7 +114,7 @@ export function CompanyRegisterCard({
         />
         <div className="relative z-10">
           <span className="flex size-10 items-center justify-center rounded-xl border border-white/15 bg-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur">
-            <CalendarCheck className="size-5 text-[#ffb877]" />
+            <CalendarCheck className="size-5 text-[#ffc42d]" />
           </span>
 
           {phase === 'registered' ? (
@@ -160,7 +160,7 @@ export function CompanyRegisterCard({
                 type="button"
                 onClick={() => setDialog(true)}
                 disabled={phase === 'loading'}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-3 py-2 text-sm font-extrabold text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.8)] transition-transform hover:scale-[1.02] disabled:opacity-60"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-3 py-2 text-sm font-extrabold text-[#171717] shadow-[0_10px_24px_-10px_rgba(245,180,0,0.8)] transition-transform hover:scale-[1.02] disabled:opacity-60"
               >
                 {phase === 'loading' ? (
                   <Loader2 className="size-4 animate-spin" />
@@ -174,7 +174,7 @@ export function CompanyRegisterCard({
 
           {nextAssessment ? (
             <div className="mt-4 rounded-xl border border-white/15 bg-white/[0.06] p-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-[#ffb877]">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#ffc42d]">
                 Next assessment
               </p>
               <p className="mt-1 text-xs font-semibold text-white">{nextAssessment.title}</p>
@@ -251,7 +251,7 @@ export function CompanyRegisterCard({
                         type="button"
                         onClick={confirm}
                         disabled={submitting}
-                        className="flex flex-[1.4] items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#f7a14e] to-[#f37021] px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_10px_24px_-10px_rgba(243,112,33,0.8)] disabled:opacity-60"
+                        className="flex flex-[1.4] items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-4 py-2.5 text-sm font-extrabold text-[#171717] shadow-[0_10px_24px_-10px_rgba(245,180,0,0.8)] disabled:opacity-60"
                       >
                         {submitting ? <Loader2 className="size-4 animate-spin" /> : 'Confirm & register'}
                       </button>

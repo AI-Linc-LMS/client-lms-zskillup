@@ -88,7 +88,7 @@ export function PaywallCard({
 
   return (
     <div className="mx-auto max-w-lg rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-[0_24px_60px_-30px_rgba(11,18,32,0.4)] sm:p-8">
-      <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-[#f7a14e] to-[#f37021] text-white shadow-[0_12px_28px_-12px_rgba(243,112,33,0.9)]">
+      <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717] shadow-[0_12px_28px_-12px_rgba(245,180,0,0.9)]">
         <Lock className="size-6" />
       </span>
       <h2 className="mt-4 text-xl font-black tracking-tight text-navy sm:text-2xl">

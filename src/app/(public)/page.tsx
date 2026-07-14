@@ -190,7 +190,7 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-br from-[#0b1220] via-[#101d4a] to-[#1e3a8a]" />
         {/* Glow orbs */}
         <div aria-hidden className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-white/[0.08] blur-3xl" />
-        <div aria-hidden className="pointer-events-none absolute -bottom-32 -right-24 h-96 w-96 rounded-full bg-[#f37021]/20 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-32 -right-24 h-96 w-96 rounded-full bg-[#f5b400]/20 blur-3xl" />
         {/* Dotted grid overlay */}
         <div
           aria-hidden
@@ -210,7 +210,7 @@ export default async function HomePage() {
 
             <h1 className="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
               Land your first tech job with{' '}
-              <span className="bg-gradient-to-r from-[#fbbf24] via-[#f97316] to-[#ef4444] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#ffe08a] via-[#f5b400] to-[#f5b400] bg-clip-text text-transparent">
                 India&apos;s top recruiters
               </span>
               .
@@ -689,7 +689,7 @@ export default async function HomePage() {
 
       {/* ── Final CTA ─────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-gradient-to-br from-[#0b1220] via-[#101d4a] to-[#1e3a8a] py-16 text-white lg:py-24">
-        <div aria-hidden className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-[#f37021]/30 blur-3xl" />
+        <div aria-hidden className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-[#f5b400]/30 blur-3xl" />
         <div aria-hidden className="absolute -right-24 -bottom-24 h-72 w-72 rounded-full bg-white/[0.08] blur-3xl" />
         <div className="relative mx-auto max-w-3xl px-5 text-center md:px-8">
           <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/55">

@@ -17,7 +17,7 @@ function defineTheme(monaco: Monaco) {
     inherit: true,
     rules: [
       { token: 'comment', foreground: '64748b', fontStyle: 'italic' },
-      { token: 'keyword', foreground: 'f7a14e' },
+      { token: 'keyword', foreground: 'ffd24d' },
       { token: 'number', foreground: '7dd3fc' },
       { token: 'string', foreground: 'a7f3d0' },
       { token: 'type', foreground: 'c4b5fd' },
@@ -30,7 +30,7 @@ function defineTheme(monaco: Monaco) {
       'editorLineNumber.activeForeground': '#94a3b8',
       'editor.selectionBackground': '#1e3a8a66',
       'editor.lineHighlightBackground': '#11192b',
-      'editorCursor.foreground': '#f37021',
+      'editorCursor.foreground': '#f5b400',
       'editorIndentGuide.background': '#1e293b',
       'editorWidget.background': '#0f172a',
       'editorGutter.background': '#0b1220',

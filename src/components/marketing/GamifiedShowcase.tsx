@@ -125,7 +125,7 @@ export function GamifiedShowcase() {
       {/* ── animated backdrop ── */}
       <motion.div
         aria-hidden
-        className="pointer-events-none absolute -left-28 -top-24 h-96 w-96 rounded-full bg-[#f37021]/25 blur-3xl"
+        className="pointer-events-none absolute -left-28 -top-24 h-96 w-96 rounded-full bg-[#f5b400]/25 blur-3xl"
         {...drift(46, 34, 17)}
       />
       <motion.div
@@ -260,7 +260,7 @@ export function GamifiedShowcase() {
               {LANDING_STREAK_DEMO.week.map((h, i) => (
                 <div key={i} className="flex flex-1 flex-col items-center gap-1">
                   <motion.div
-                    className="w-full rounded-md bg-gradient-to-t from-[#f37021] to-[#fbbf24]"
+                    className="w-full rounded-md bg-gradient-to-t from-[#f5b400] to-[#fbbf24]"
                     style={{ height: `${(h / 100) * 36}px`, transformOrigin: 'bottom' }}
                     variants={{ hidden: { scaleY: 0 }, show: { scaleY: 1, transition: { duration: 0.45, ease: EASE } } }}
                   />

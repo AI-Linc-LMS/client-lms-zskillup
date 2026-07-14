@@ -16,7 +16,7 @@ export function TopBarShell({ children }: { children: ReactNode }) {
     <div className="relative min-h-screen bg-background">
       {/* ambient aurora wash behind the top of the page */}
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-0 h-72 overflow-hidden">
-        <div className="absolute -left-24 -top-28 size-72 rounded-full bg-[#f37021]/10 blur-[110px]" />
+        <div className="absolute -left-24 -top-28 size-72 rounded-full bg-[#f5b400]/10 blur-[110px]" />
         <div className="absolute right-0 -top-32 size-72 rounded-full bg-[#6d3bf5]/10 blur-[120px]" />
       </div>
 
