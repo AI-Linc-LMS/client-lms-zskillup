@@ -370,12 +370,10 @@ export default async function HomePage() {
             <div className="marquee-hover-pause edge-fade-x relative mt-5 overflow-hidden">
               <div className="marquee-x flex w-max items-center gap-4 pr-4">
                 {[...HOMEPAGE_COMPANY_LOGOS, ...HOMEPAGE_COMPANY_LOGOS].map((c, i) => (
-                  <Link
+                  <div
                     key={`${c.slug}-${i}`}
-                    href={`/dashboard/company/${c.slug}`}
                     title={c.name}
                     aria-hidden={i >= HOMEPAGE_COMPANY_LOGOS.length}
-                    tabIndex={i >= HOMEPAGE_COMPANY_LOGOS.length ? -1 : undefined}
                     className="group flex h-16 w-40 shrink-0 items-center justify-center rounded-xl bg-white/[0.06] px-6 ring-1 ring-white/10 transition hover:bg-white hover:ring-white/50"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -384,7 +382,7 @@ export default async function HomePage() {
                       alt={c.logoAlt}
                       className="max-h-8 max-w-full object-contain opacity-70 [filter:brightness(0)_invert(1)] transition group-hover:opacity-100 group-hover:[filter:none]"
                     />
-                  </Link>
+                  </div>
                 ))}
               </div>
             </div>
