@@ -59,7 +59,7 @@ export function MockHistory({ scope = 'all' }: { scope?: 'all' | 'custom' | 'ass
     );
   }
 
-  const { taken: testsTaken, avgPct, bestPercentile } = getMockStats(rows);
+  const { taken: testsTaken, avgPct, bestPct } = getMockStats(rows);
 
   const kpis: Array<{
     label: string;
@@ -90,10 +90,10 @@ export function MockHistory({ scope = 'all' }: { scope?: 'all' | 'custom' | 'ass
       glow: '#6d3bf5',
     },
     {
-      label: 'Best Percentile',
-      value: bestPercentile ?? 0,
-      suffix: bestPercentile !== null ? 'th' : undefined,
-      display: bestPercentile === null ? '-' : undefined,
+      label: 'Best Score',
+      value: bestPct ?? 0,
+      suffix: bestPct !== null ? '%' : undefined,
+      display: bestPct === null ? '-' : undefined,
       icon: <Trophy className="size-5" />,
       from: '#34d399',
       to: '#059669',

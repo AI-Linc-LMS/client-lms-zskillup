@@ -580,7 +580,7 @@ export default async function HomePage() {
             ))}
             {/* Trailing CTA tile keeps the 3-col grid balanced at five sections. */}
             <Link
-              href="/signup"
+              href="/mock-assessment"
               className="hover-lift flex flex-col justify-center gap-1 rounded-[var(--radius-card)] border border-dashed border-[var(--color-accent)]/40 bg-[var(--color-primary-highlight)]/40 p-6 text-[var(--color-primary)]"
             >
               <span className="text-sm font-bold">Build a custom mock</span>

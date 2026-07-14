@@ -26,7 +26,6 @@ import {
   Quote,
   School,
   ScrollText,
-  Settings,
   Sparkles,
   Target,
   TrendingUp,
@@ -208,7 +207,6 @@ export const TPO_NAV: NavSection[] = [
       { label: 'Reports & Exports', href: '/tpo/reports', icon: FileText },
       { label: 'Subscription', href: '/tpo/subscription', icon: CreditCard },
       { label: 'Cohort Access', href: '/tpo/billing', icon: Wallet },
-      { label: 'Settings', href: '/tpo/settings', icon: Settings },
     ],
   },
 ];

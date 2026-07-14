@@ -38,7 +38,6 @@ function Player({
   const item = playlist[index];
   const stageRef = useRef<HTMLDivElement>(null);
   const [full, setFull] = useState(false);
-  const [theater, setTheater] = useState(false);
 
   const hasPrev = index > 0;
   const hasNext = index < playlist.length - 1;
@@ -84,8 +83,7 @@ function Player({
       />
       <motion.div
         className={cn(
-          'relative w-full overflow-hidden rounded-3xl bg-[#0a0a0c] shadow-2xl ring-1 ring-white/10 transition-[max-width] duration-300',
-          theater ? 'max-w-6xl' : 'max-w-3xl',
+          'relative w-full max-w-3xl overflow-hidden rounded-3xl bg-[#0a0a0c] shadow-2xl ring-1 ring-white/10',
         )}
         initial={{ opacity: 0, scale: 0.96, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -154,9 +152,6 @@ function Player({
                 <ExternalLink className="size-4" />
               </a>
             )}
-            <button type="button" onClick={() => setTheater((t) => !t)} aria-label="Theater mode" className="hidden rounded-lg bg-black/50 p-1.5 text-white/90 transition hover:bg-black/70 sm:block">
-              {theater ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
-            </button>
             <button type="button" onClick={toggleFull} aria-label="Fullscreen" className="rounded-lg bg-black/50 p-1.5 text-white/90 transition hover:bg-black/70">
               {full ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
             </button>
