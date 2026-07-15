@@ -23,7 +23,11 @@ export function ReadinessDonut({
   const data = segments.filter((s) => s.value > 0);
 
   return (
-    <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-between">
+    // Container query, not a viewport breakpoint: go side-by-side ONLY when the
+    // CARD itself is wide enough. In a narrow (1/3-width) card it stays stacked so
+    // the legend's % column can't drift to the card edge and look like it belongs
+    // to the neighbouring card. Degrades safely to stacked if @container is unset.
+    <div className="@container flex flex-col items-center gap-4 @[26rem]:flex-row @[26rem]:items-center @[26rem]:justify-between">
       <div className="relative h-40 w-40 shrink-0">
         <ResponsiveContainer>
           <PieChart>
@@ -53,7 +57,7 @@ export function ReadinessDonut({
         </div>
       </div>
 
-      <ul className="grid w-full min-w-0 gap-2 sm:max-w-[220px]">
+      <ul className="grid w-full min-w-0 gap-2 @[26rem]:max-w-[220px]">
         {segments.map((s) => (
           <li key={s.label} className="flex items-center gap-2 text-sm">
             <span className="size-2.5 shrink-0 rounded-full" style={{ background: s.color }} />
