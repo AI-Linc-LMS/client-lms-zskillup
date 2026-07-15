@@ -28,6 +28,8 @@ export function UpgradeModal({
   feature = 'this',
   title = 'Upgrade to start preparing',
   message,
+  secondaryHref,
+  secondaryLabel = 'Practise a few free questions first',
 }: {
   open: boolean;
   onClose: () => void;
@@ -37,6 +39,11 @@ export function UpgradeModal({
   /** The server's own paywall message (403 PAYWALL). Preferred over the generic line —
    *  it already says exactly which allowance ran out. */
   message?: string;
+  /** Optional escape hatch to the free-taste funnel. When a locked topic/company opens
+   *  this modal we still honour "first questions in every topic are free" — this links
+   *  straight into the runner, where the server meters the free allowance. */
+  secondaryHref?: string;
+  secondaryLabel?: string;
 }) {
   const id = useId();
   const [mounted, setMounted] = useState(false);
@@ -125,6 +132,16 @@ export function UpgradeModal({
               Get Full Access <ArrowRight className="size-3.5" />
             </Link>
           </div>
+
+          {secondaryHref ? (
+            <Link
+              href={secondaryHref}
+              onClick={onClose}
+              className="mt-3 flex items-center justify-center gap-1.5 text-xs font-semibold text-navy underline decoration-slate-300 underline-offset-4 transition hover:decoration-navy"
+            >
+              {secondaryLabel} <ArrowRight className="size-3.5" />
+            </Link>
+          ) : null}
 
           <p className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-slate-500">
             <Lock className="size-3" /> You keep your placement readiness results and progress either way.

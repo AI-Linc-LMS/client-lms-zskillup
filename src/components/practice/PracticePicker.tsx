@@ -51,7 +51,7 @@ export function PracticePicker({
   // ── access control: what the student owns, from live entitlements ──────────
   const { hasPlatform, active, paywallEnabled } = useMySubscription();
   const [onlyMine, setOnlyMine] = useState(false);
-  const [upgrade, setUpgrade] = useState<{ feature: string; message: string } | null>(null);
+  const [upgrade, setUpgrade] = useState<{ feature: string; message: string; secondaryHref?: string } | null>(null);
 
   const ownedSections = useMemo(
     () => new Set(active.filter((e) => e.scopeType === EntitlementScope.SECTION && e.scopeRef).map((e) => e.scopeRef as string)),
@@ -147,10 +147,26 @@ export function PracticePicker({
     (!q || 'coding'.includes(q) || filteredCodingTopics.length > 0) && (!onlyMine || codingOwned);
   const nothing = filteredRoots.length === 0 && filteredCompanies.length === 0 && !codingVisible;
 
-  const unlockSection = (name: string) =>
+  const unlockSection = (name: string, sectionHref: string) =>
     setUpgrade({
       feature: `the ${name} section`,
       message: `Unlock ${name} to practise every topic in it without limits. Your first questions in each topic are always free.`,
+      secondaryHref: sectionHref,
+    });
+
+  // A locked topic/company chip opens the upgrade prompt instead of navigating — but the
+  // modal still offers the free-taste path, so "first questions are free" holds.
+  const lockTopic = (name: string, href: string) =>
+    setUpgrade({
+      feature: `the ${name} topic`,
+      message: `${name} is not in your plan yet. Unlock it for unlimited practice, or try your first few questions free.`,
+      secondaryHref: href,
+    });
+  const lockCompany = (name: string, href: string) =>
+    setUpgrade({
+      feature: `${name} previous-year questions`,
+      message: `${name}'s question bank is not in your plan yet. Unlock it for unlimited practice, or try your first few questions free.`,
+      secondaryHref: href,
     });
 
   return (
@@ -194,16 +210,20 @@ export function PracticePicker({
           </h2>
           <div className="flex flex-wrap gap-2">
             {filteredCompanies.map((c) => {
+              const href = `/dashboard/quiz/adaptive?company=${encodeURIComponent(c.slug)}`;
               const locked = gating && !companyOwned(c.slug);
-              return (
-                <Link
-                  key={c.id}
-                  href={`/dashboard/quiz/adaptive?company=${encodeURIComponent(c.slug)}`}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors hover:border-violet-300 hover:bg-violet-50/70"
-                >
+              const chipClass =
+                'inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors hover:border-violet-300 hover:bg-violet-50/70';
+              return locked ? (
+                <button key={c.id} type="button" onClick={() => lockCompany(c.name, href)} className={chipClass}>
                   <Building2 className="size-3.5 text-violet-500" />
                   {c.name}
-                  {locked ? <Lock className="size-3 text-slate-400" aria-label="Not in your plan" /> : null}
+                  <Lock className="size-3 text-slate-400" aria-label="Not in your plan" />
+                </button>
+              ) : (
+                <Link key={c.id} href={href} className={chipClass}>
+                  <Building2 className="size-3.5 text-violet-500" />
+                  {c.name}
                 </Link>
               );
             })}
@@ -229,7 +249,8 @@ export function PracticePicker({
                 owned={sectionOwned(root.slug)}
                 locked={gating && !sectionOwned(root.slug)}
                 topicLocked={(slug) => gating && !topicOwned(root.slug, slug)}
-                onUnlock={() => unlockSection(root.name)}
+                onUnlock={() => unlockSection(root.name, adaptiveTopicHref(root.slug))}
+                onLockedTopic={(name, slug) => lockTopic(name, adaptiveTopicHref(slug))}
               />
             ))}
             {codingVisible ? <CodingBlock topics={filteredCodingTopics} /> : null}
@@ -242,6 +263,7 @@ export function PracticePicker({
         onClose={() => setUpgrade(null)}
         feature={upgrade?.feature}
         message={upgrade?.message}
+        secondaryHref={upgrade?.secondaryHref}
       />
     </div>
   );
@@ -338,6 +360,7 @@ function SectionBlock({
   locked,
   topicLocked,
   onUnlock,
+  onLockedTopic,
 }: {
   root: RootTopic;
   topicHref: (slug: string) => string;
@@ -345,6 +368,7 @@ function SectionBlock({
   locked: boolean;
   topicLocked: (slug: string) => boolean;
   onUnlock: () => void;
+  onLockedTopic: (name: string, slug: string) => void;
 }) {
   const Icon = root.icon;
   const a = ACCENT_CLASS[root.accent];
@@ -390,18 +414,24 @@ function SectionBlock({
       </div>
 
       <div className="relative mt-4 flex flex-wrap gap-2">
-        {root.children.map((child) => (
-          <Link
-            key={child.id}
-            href={topicHref(child.slug)}
-            className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors ${a.chip}`}
-          >
-            {child.name}
-            {topicLocked(child.slug) ? (
+        {root.children.map((child) => {
+          const chipClass = `inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors ${a.chip}`;
+          return topicLocked(child.slug) ? (
+            <button
+              key={child.id}
+              type="button"
+              onClick={() => onLockedTopic(child.name, child.slug)}
+              className={chipClass}
+            >
+              {child.name}
               <Lock className="size-3 text-slate-400" aria-label="Not in your plan" />
-            ) : null}
-          </Link>
-        ))}
+            </button>
+          ) : (
+            <Link key={child.id} href={topicHref(child.slug)} className={chipClass}>
+              {child.name}
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
