@@ -84,7 +84,7 @@ export default function SuperadminAnalyticsPage() {
                       label={c.name}
                       value={c.registrations}
                       total={regMax}
-                      color="#2563eb"
+                      color="#f5b400"
                       hint={`${c.assessments} drives`}
                     />
                   ))}

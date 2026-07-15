@@ -477,7 +477,7 @@ export function QuestionsAdmin() {
                                   : QuestionStatus.PUBLISHED,
                               )
                             }
-                            className="text-xs font-semibold text-navy transition-colors hover:text-[#1a1d29] disabled:opacity-50"
+                            className="text-xs font-semibold text-navy transition-colors hover:text-[#1a1a1a] disabled:opacity-50"
                           >
                             {q.status === 'PUBLISHED' ? 'Unpublish' : 'Publish'}
                           </button>
@@ -1172,7 +1172,7 @@ function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
             <button
               type="button"
               onClick={() => setOptions((p) => [...p, { text: '', isCorrect: false }])}
-              className="text-xs font-semibold text-navy transition-colors hover:text-[#1a1d29]"
+              className="text-xs font-semibold text-navy transition-colors hover:text-[#1a1a1a]"
             >
               + Add option
             </button>

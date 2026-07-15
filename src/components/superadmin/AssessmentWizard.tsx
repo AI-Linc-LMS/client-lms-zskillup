@@ -507,7 +507,7 @@ export function AssessmentWizard({
               <button
                 type="button"
                 onClick={() => setSections((p) => [...p, { name: `Section ${p.length + 1}`, items: [] }])}
-                className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-slate-300 px-4 py-2 text-sm font-bold text-slate-600 hover:border-orange hover:text-[#1a1d29]"
+                className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-slate-300 px-4 py-2 text-sm font-bold text-slate-600 hover:border-orange hover:text-[#1a1a1a]"
               >
                 <Plus className="size-4" /> Add section
               </button>

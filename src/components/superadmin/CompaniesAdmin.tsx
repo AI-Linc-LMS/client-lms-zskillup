@@ -155,7 +155,7 @@ export function CompaniesAdmin() {
                         type="button"
                         disabled={busyId === c.id}
                         onClick={() => togglePublish(c)}
-                        className="text-xs font-semibold text-navy transition-colors hover:text-[#1a1d29] disabled:opacity-50"
+                        className="text-xs font-semibold text-navy transition-colors hover:text-[#1a1a1a] disabled:opacity-50"
                       >
                         {c.isPublished ? 'Unpublish' : 'Publish'}
                       </button>

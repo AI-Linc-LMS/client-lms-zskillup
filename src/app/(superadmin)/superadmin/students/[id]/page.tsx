@@ -162,7 +162,7 @@ export default function StudentReportPage() {
           label="Quizzes taken"
           value={summary.totalAttempts}
           icon={<Timer className="size-4" />}
-          accent="#2563eb"
+          accent="#f5b400"
         />
         <StatCard
           label="Avg score"

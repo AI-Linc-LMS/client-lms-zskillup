@@ -46,7 +46,7 @@ export default function AdminAnalyticsPage() {
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             <MiniStat label="Active today (DAU)" value={stats?.dau ?? 0} icon={<Activity className="size-4" />} color="#f5b400" />
-            <MiniStat label="Active students · 14d" value={stats?.activeStudents ?? 0} icon={<Users className="size-4" />} color="#2563eb" />
+            <MiniStat label="Active students · 14d" value={stats?.activeStudents ?? 0} icon={<Users className="size-4" />} color="#f5b400" />
             <MiniStat label="Active colleges · 14d" value={stats?.activeColleges ?? 0} icon={<Building2 className="size-4" />} color="#7c3aed" />
             <MiniStat label="Assessments run" value={stats?.assessmentsConducted ?? 0} icon={<Sparkles className="size-4" />} color="#0891b2" />
             <MiniStat label="Coding solved" value={stats?.codingSolved ?? 0} icon={<Code2 className="size-4" />} color="#059669" />
@@ -85,7 +85,7 @@ export default function AdminAnalyticsPage() {
               ) : (
                 <div className="space-y-3">
                   {topCompanies.map((c) => (
-                    <ProgressRow key={c.id} label={c.name} value={c.registrations} total={regMax} color="#2563eb" hint={`${c.assessments} drives`} />
+                    <ProgressRow key={c.id} label={c.name} value={c.registrations} total={regMax} color="#f5b400" hint={`${c.assessments} drives`} />
                   ))}
                 </div>
               )}

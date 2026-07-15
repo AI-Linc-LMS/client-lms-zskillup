@@ -99,7 +99,7 @@ export function TpoSidebar() {
                 aria-expanded={expanded}
                 className={cn(
                   'mb-1 flex w-full items-center gap-1.5 rounded-lg px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest transition-colors',
-                  sectionActive ? 'text-[#1a1d29]' : 'text-slate-500 hover:text-navy',
+                  sectionActive ? 'text-[#1a1a1a]' : 'text-slate-500 hover:text-navy',
                 )}
               >
                 <span className="flex-1 text-left">{section.heading}</span>

@@ -79,7 +79,7 @@ export function PlatformOverviewLive() {
       label: 'Total users',
       value: totalUsers,
       icon: <Users className="size-4" />,
-      accent: '#2563eb',
+      accent: '#f5b400',
       sub: `${admins.toLocaleString()} admins · ${stats.students.toLocaleString()} students`,
       trend: new7d ? { value: new7d, label: '7d' } : undefined,
     },
@@ -122,7 +122,7 @@ export function PlatformOverviewLive() {
       label: `Active students (14d)`,
       value: stats.activeStudents ?? 0,
       icon: <Layers className="size-4" />,
-      color: '#2563eb',
+      color: '#f5b400',
     },
     {
       label: 'Active colleges (14d)',
@@ -131,7 +131,7 @@ export function PlatformOverviewLive() {
       color: '#f5b400',
     },
     { label: 'Assessments run', value: stats.assessmentsConducted ?? 0, icon: <ClipboardList className="size-4" />, color: '#7c3aed' },
-    { label: 'Colleges', value: stats.colleges, icon: <Building2 className="size-4" />, color: '#2563eb' },
+    { label: 'Colleges', value: stats.colleges, icon: <Building2 className="size-4" />, color: '#f5b400' },
     { label: 'Companies', value: stats.companies, icon: <Briefcase className="size-4" />, color: '#f5b400' },
     { label: 'Courses', value: stats.courses, icon: <BookOpen className="size-4" />, color: '#7c3aed' },
     { label: 'Live mocks', value: stats.mockTests, icon: <Timer className="size-4" />, color: '#059669' },
@@ -195,7 +195,7 @@ export function PlatformOverviewLive() {
           }
         >
           {signups.length > 0 ? (
-            <AreaChart id="signups" data={signups} color="#2563eb" height={210} />
+            <AreaChart id="signups" data={signups} color="#f5b400" height={210} />
           ) : (
             <EmptyChart label="Signup trend will appear once the enriched stats API is deployed." />
           )}
@@ -205,7 +205,7 @@ export function PlatformOverviewLive() {
           <Donut
             size={150}
             segments={[
-              { label: 'Students', value: stats.students, color: '#2563eb' },
+              { label: 'Students', value: stats.students, color: '#1a1a1a' },
               { label: 'Admins', value: admins, color: '#f5b400' },
             ]}
             centerTop={totalUsers.toLocaleString()}

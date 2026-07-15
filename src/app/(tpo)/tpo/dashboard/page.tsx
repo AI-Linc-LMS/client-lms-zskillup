@@ -132,7 +132,7 @@ export default function TpoExecutiveDashboard() {
           action={
             <Link
               href="/tpo/students"
-              className="inline-flex items-center gap-1 text-xs font-bold text-[#1a1d29] hover:underline"
+              className="inline-flex items-center gap-1 text-xs font-bold text-[#1a1a1a] hover:underline"
             >
               View all <ArrowRight className="size-3.5" />
             </Link>
@@ -205,7 +205,7 @@ export default function TpoExecutiveDashboard() {
           action={
             <Link
               href="/tpo/company-readiness"
-              className="inline-flex items-center gap-1 text-xs font-bold text-[#1a1d29] hover:underline"
+              className="inline-flex items-center gap-1 text-xs font-bold text-[#1a1a1a] hover:underline"
             >
               Full view <ArrowRight className="size-3.5" />
             </Link>
@@ -224,7 +224,7 @@ export default function TpoExecutiveDashboard() {
         action={
           <Link
             href="/tpo/skill-gaps"
-            className="inline-flex items-center gap-1 text-xs font-bold text-[#1a1d29] hover:underline"
+            className="inline-flex items-center gap-1 text-xs font-bold text-[#1a1a1a] hover:underline"
           >
             All topics <ArrowRight className="size-3.5" />
           </Link>

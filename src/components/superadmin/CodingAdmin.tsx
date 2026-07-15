@@ -180,7 +180,7 @@ export function CodingAdmin() {
                         onClick={() => setSelected(r)}
                         className="group/title block text-left"
                       >
-                        <span className="block font-semibold text-navy group-hover/title:text-[#1a1d29] group-hover/title:underline">
+                        <span className="block font-semibold text-navy group-hover/title:text-[#1a1a1a] group-hover/title:underline">
                           {r.title}
                         </span>
                         <span className="text-[11px] text-slate-500">{r.slug}</span>
@@ -319,7 +319,7 @@ function CodingDetailDrawer({
             <Pill tone={p.isActive ? 'bg-sky-50 text-sky-700 ring-sky-200' : 'bg-slate-100 text-slate-600 ring-slate-200'}>
               {p.isActive ? 'Active' : 'Inactive'}
             </Pill>
-            {p.xpReward ? <Pill tone="bg-[#fff5ea] text-[#1a1d29] ring-[#ffc42d]/30">{p.xpReward} XP</Pill> : null}
+            {p.xpReward ? <Pill tone="bg-[#fff5ea] text-[#1a1a1a] ring-[#ffc42d]/30">{p.xpReward} XP</Pill> : null}
           </div>
 
           {/* source citation - the whole point */}

@@ -120,7 +120,7 @@ export default function AdminAdaptiveSessionsPage() {
                   <td className="px-4 py-3">
                     <Link
                       href={`/superadmin/adaptive-sessions/${s.sessionId}`}
-                      className="text-xs font-semibold text-[#1a1d29] hover:underline"
+                      className="text-xs font-semibold text-[#1a1a1a] hover:underline"
                     >
                       View report
                     </Link>
