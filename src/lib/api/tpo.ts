@@ -3,7 +3,9 @@ import type {
   CollegeSubscriptionDto,
   CreateTpoAssessmentDto,
   CreateTpoPlacementDto,
+  EntitlementDto,
   PreviewTpoAssessmentDto,
+  PurchaseHistoryItemDto,
   TpoAssessment,
   TpoAssessmentAvailability,
   TpoAssessmentList,
@@ -71,6 +73,19 @@ export async function getTpoInterviewAnalytics(cohortId?: string): Promise<TpoIn
 /** The college's current subscription (plan, seats, validity) — null if none. */
 export async function getTpoSubscription(): Promise<CollegeSubscriptionDto | null> {
   const res = await apiClient.get<CollegeSubscriptionDto | null>('/api/v1/tpo/subscription');
+  return res.data;
+}
+
+/** Full college billing view: platform plan (if any) + active cohort-access
+ *  entitlements (every student inherits these) + payment/order history. */
+export interface TpoBillingDto {
+  subscription: CollegeSubscriptionDto | null;
+  entitlements: EntitlementDto[];
+  history: PurchaseHistoryItemDto[];
+}
+
+export async function getTpoBilling(): Promise<TpoBillingDto> {
+  const res = await apiClient.get<TpoBillingDto>('/api/v1/tpo/billing');
   return res.data;
 }
 
