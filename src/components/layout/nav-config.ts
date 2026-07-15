@@ -178,6 +178,27 @@ export const SUPERADMIN_NAV: NavSection[] = [
       { label: 'Audit Log', href: '/superadmin/audit-logs', icon: ScrollText },
     ],
   },
+  {
+    heading: 'CATALOG',
+    items: [
+      { label: 'Companies', href: '/superadmin/companies', icon: Building2 },
+      { label: 'Question Bank', href: '/superadmin/questions', icon: ClipboardList },
+      { label: 'Coding Bank', href: '/superadmin/coding', icon: Code2 },
+      { label: 'Mock Tests', href: '/superadmin/mocks', icon: FileCheck2 },
+      { label: 'Assessments', href: '/superadmin/scheduled-assessments', icon: CalendarClock },
+      { label: 'Challenges', href: '/superadmin/challenges', icon: Trophy },
+      { label: 'Courses', href: '/superadmin/courses', icon: GraduationCap },
+      { label: 'Study Material', href: '/superadmin/study-material', icon: MonitorPlay },
+    ],
+  },
+  {
+    heading: 'MARKETING',
+    items: [
+      { label: 'Blog', href: '/superadmin/blogs', icon: Newspaper },
+      { label: 'Testimonials', href: '/superadmin/testimonials', icon: Quote },
+      { label: "Today's Tips", href: '/superadmin/tips', icon: Sparkles },
+    ],
+  },
 ];
 
 /**
