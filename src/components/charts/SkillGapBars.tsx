@@ -9,6 +9,26 @@ function accColor(acc: number): string {
   return '#dc2626';
 }
 
+/** Long merged topic names (e.g. "Vocabulary (Contextual • Synonyms • Antonyms)" or
+ *  "Time, Speed & Distance / Boats & Streams / Trains") overflow the axis and wrap
+ *  into 3-4 lines that collide. Shorten to the first segment (before " / " or " (")
+ *  and hard-cap the length; the full name stays in the tooltip. */
+function shortLabel(name: string): string {
+  let s = name.split(' / ')[0].split(' (')[0].trim();
+  if (s.length > 24) s = `${s.slice(0, 23).trimEnd()}…`;
+  return s;
+}
+
+/** Single-line, right-aligned tick — plain SVG <text> never wraps (unlike recharts'
+ *  default <Text>, which wrapped the long names and overlapped adjacent rows). */
+function YTick({ x, y, payload }: { x?: number; y?: number; payload?: { value?: string } }) {
+  return (
+    <text x={x} y={y} dy={4} textAnchor="end" fontSize={11} fill="#475569">
+      {shortLabel(payload?.value ?? '')}
+    </text>
+  );
+}
+
 /** Horizontal bars of weakest topics by accuracy (lowest first). Recharts BarChart. */
 export function SkillGapBars({ gaps }: { gaps: TpoSkillGap[] }) {
   const data = [...gaps]
@@ -21,15 +41,15 @@ export function SkillGapBars({ gaps }: { gaps: TpoSkillGap[] }) {
   }
 
   return (
-    <div style={{ height: Math.max(160, data.length * 34) }} className="w-full">
+    <div style={{ height: Math.max(160, data.length * 40) }} className="w-full">
       <ResponsiveContainer>
         <BarChart data={data} layout="vertical" margin={{ top: 4, right: 34, bottom: 4, left: 4 }} barSize={16}>
           <XAxis type="number" domain={[0, 100]} hide />
           <YAxis
             type="category"
             dataKey="name"
-            width={128}
-            tick={{ fontSize: 11, fill: '#475569' }}
+            width={150}
+            tick={<YTick />}
             tickLine={false}
             axisLine={false}
           />
