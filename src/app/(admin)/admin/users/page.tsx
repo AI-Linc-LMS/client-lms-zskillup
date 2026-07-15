@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { listAdminUsers, type AdminUserRow } from '@/lib/api/admin';
 import { UserDetailDrawer } from '@/components/superadmin/UserDetailDrawer';
 import { BadgeCheck, ChevronDown, Loader2, Search, Users, XCircle } from 'lucide-react';
@@ -88,21 +89,22 @@ export default function AdminUsersPage() {
         ]}
       />
 
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-            Platform Admin · ZSkillup
-          </p>
-          <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">User Management</h1>
-          <p className="mt-1 text-sm text-slate-600">
+      <ConsoleHero
+        icon={Users}
+        eyebrow="Platform Admin"
+        title="User Management"
+        description={
+          <>
             {total.toLocaleString()} student &amp; college accounts · lock, verify, and reset access
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Users className="size-5 text-slate-500" />
-          <span className="text-sm font-semibold text-slate-600">{total} users</span>
-        </div>
-      </div>
+          </>
+        }
+        actions={
+          <div className="flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 ring-1 ring-inset ring-white/15">
+            <Users className="size-5 text-white/70" />
+            <span className="text-sm font-semibold text-white/80">{total} users</span>
+          </div>
+        }
+      />
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3">

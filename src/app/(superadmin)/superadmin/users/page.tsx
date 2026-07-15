@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { listAdminUsers, updateAdminUserRole, type AdminUserRow } from '@/lib/api/admin';
 import { UserDetailDrawer } from '@/components/superadmin/UserDetailDrawer';
 import {
@@ -108,23 +109,18 @@ export default function AdminUsersPage() {
         ]}
       />
 
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-            Super Admin · ZSkillup
-          </p>
-          <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">
-            User Management
-          </h1>
-          <p className="mt-1 text-sm text-slate-600">
-            {total.toLocaleString()} total accounts · view, search, and change roles
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Users className="size-5 text-slate-500" />
-          <span className="text-sm font-semibold text-slate-600">{total} users</span>
-        </div>
-      </div>
+      <ConsoleHero
+        icon={Users}
+        eyebrow="Super Admin"
+        title="User Management"
+        description={`${total.toLocaleString()} total accounts · view, search, and change roles`}
+        actions={
+          <div className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 ring-1 ring-inset ring-white/15">
+            <Users className="size-5 text-white/70" />
+            <span className="text-sm font-semibold text-white/90">{total} users</span>
+          </div>
+        }
+      />
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3">

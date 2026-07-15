@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Brain, CheckCircle2, Clock, Loader2, XCircle } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { cn } from '@/lib/utils';
 import { adminListAdaptiveSessions, type AdminAdaptiveSession } from '@/lib/api/adaptive';
 
@@ -49,16 +50,12 @@ export default function AdminAdaptiveSessionsPage() {
     <div className="space-y-6">
       <Breadcrumb items={CRUMBS} />
 
-      <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Admin</p>
-        <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy flex items-center gap-2">
-          <Brain className="size-7 text-[#f5b400]" />
-          Adaptive Sessions
-        </h1>
-        <p className="mt-1 text-sm text-slate-600">
-          All student adaptive mock quiz sessions with IRT-derived skill profiles.
-        </p>
-      </header>
+      <ConsoleHero
+        icon={Brain}
+        eyebrow="Super Admin"
+        title="Adaptive Sessions"
+        description="All student adaptive mock quiz sessions with IRT-derived skill profiles."
+      />
 
       {error && (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>

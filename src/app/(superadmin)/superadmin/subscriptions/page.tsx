@@ -1,4 +1,6 @@
+import { CalendarClock } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { SubscriptionsManager } from '@/components/admin/SubscriptionsManager';
 
 /** Super-admin — subscription plans + college lifecycle. */
@@ -12,13 +14,12 @@ export default function SuperadminSubscriptionsPage() {
           { label: 'Subscriptions' },
         ]}
       />
-      <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Commercial</p>
-        <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Subscriptions</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Manage the plan catalog and each college&apos;s subscription lifecycle.
-        </p>
-      </header>
+      <ConsoleHero
+        icon={CalendarClock}
+        eyebrow="Super Admin"
+        title="Subscriptions"
+        description="Manage the plan catalog and each college's subscription lifecycle."
+      />
       <SubscriptionsManager />
     </div>
   );

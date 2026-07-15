@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Loader2, Plus } from 'lucide-react';
+import { Building2, ChevronDown, Loader2, Plus } from 'lucide-react';
 import { listCollegeRequests, type CollegeRequestSummary } from '@/lib/api/college-requests';
 import { STATUS_STYLE } from '@/lib/college-request-status';
 
@@ -36,18 +37,19 @@ export default function AdminCollegeRequestsPage() {
         items={[{ label: 'Home', href: '/' }, { label: 'Platform Admin', href: '/admin/dashboard' }, { label: 'College Requests' }]}
       />
 
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Platform Admin</p>
-          <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">College Registration Requests</h1>
-          <p className="mt-1 text-sm text-slate-600">Draft a college onboarding request and submit it for Super Admin review.</p>
-        </div>
-        <Link href="/admin/college-requests/new">
-          <Button>
-            <Plus className="mr-1.5 size-4" /> New request
-          </Button>
-        </Link>
-      </div>
+      <ConsoleHero
+        icon={Building2}
+        eyebrow="Platform Admin"
+        title="College Registration Requests"
+        description="Draft a college onboarding request and submit it for Super Admin review."
+        actions={
+          <Link href="/admin/college-requests/new">
+            <Button>
+              <Plus className="mr-1.5 size-4" /> New request
+            </Button>
+          </Link>
+        }
+      />
 
       <div className="relative w-48">
         <select

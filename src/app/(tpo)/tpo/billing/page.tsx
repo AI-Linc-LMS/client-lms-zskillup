@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowRight, Building2, Loader2, Users } from 'lucide-react';
+import { ArrowRight, Building2, Loader2, Users, Wallet } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { getMe, type ApiMe } from '@/lib/api/me';
 import { getPricing } from '@/lib/api/payments';
 import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
@@ -59,29 +60,30 @@ export default function TpoBillingPage() {
   return (
     <div className="w-full">
       <Breadcrumb items={[{ label: 'Dashboard', href: '/tpo/dashboard' }, { label: 'Billing' }]} />
-      <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-black tracking-tight text-navy">Cohort access</h1>
-          <p className="max-w-xl text-sm text-slate-600">
-            Buy a company&apos;s question bank at the B2B rate - every student in your college gets it, no per-seat setup.
-          </p>
-        </div>
-        <div className="inline-flex rounded-full border border-slate-200 bg-white p-1">
-          {PERIODS.map(({ period: p, label }) => (
-            <button
-              key={p}
-              type="button"
-              onClick={() => setPeriod(p)}
-              className={cn(
-                'rounded-full px-3 py-1.5 text-xs font-bold transition-colors',
-                period === p ? 'bg-navy text-white' : 'text-slate-600 hover:text-navy',
-              )}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <ConsoleHero
+        className="mt-4"
+        icon={Wallet}
+        eyebrow="Placement Office"
+        title="Cohort access"
+        description="Buy a company's question bank at the B2B rate - every student in your college gets it, no per-seat setup."
+        actions={
+          <div className="inline-flex rounded-full border border-slate-200 bg-white p-1">
+            {PERIODS.map(({ period: p, label }) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setPeriod(p)}
+                className={cn(
+                  'rounded-full px-3 py-1.5 text-xs font-bold transition-colors',
+                  period === p ? 'bg-navy text-white' : 'text-slate-600 hover:text-navy',
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#fff5ea] px-3 py-1 text-xs font-bold text-[#1a1a1a]">
         <Users className="size-3.5" /> B2B rate {price ? `· ${formatPrice(price.amountCents, price.currency)} per company` : ''}

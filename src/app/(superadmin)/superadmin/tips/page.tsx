@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import {
   createAdminTip,
   deleteAdminTip,
@@ -112,23 +113,20 @@ export default function AdminTipsPage() {
         ]}
       />
 
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-            Super Admin · ZSkillup
-          </p>
-          <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Today&apos;s Tips</h1>
-          <p className="mt-1 text-sm text-slate-600">
-            {tips.length} tips · rotated per student per day on the dashboard
-          </p>
-        </div>
-        <button
-          onClick={openNew}
-          className="btn-brand inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-colors"
-        >
-          <Plus className="size-4" /> New tip
-        </button>
-      </div>
+      <ConsoleHero
+        icon={Lightbulb}
+        eyebrow="Super Admin"
+        title="Today's Tips"
+        description={`${tips.length} tips · rotated per student per day on the dashboard`}
+        actions={
+          <button
+            onClick={openNew}
+            className="btn-brand inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-colors"
+          >
+            <Plus className="size-4" /> New tip
+          </button>
+        }
+      />
 
       {error ? (
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>

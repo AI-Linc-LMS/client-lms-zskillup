@@ -7,6 +7,7 @@ import { getTpoAnalytics, getTpoCodingAnalytics } from '@/lib/api/tpo';
 import type { TpoCodingAnalytics, TpoDashboard } from '@/shared';
 import { useTpoConsole } from '@/components/tpo/TpoConsole';
 import { BentoCard } from '@/components/tpo/ui';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 
 const DIFF = [
   { key: 'easy', label: 'Easy' },
@@ -70,9 +71,17 @@ export default function SkillGapAnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm font-semibold text-slate-600">
-        Skill gap analytics · <span className="text-navy">{cohortLabel}</span>
-      </p>
+      <ConsoleHero
+        icon={Target}
+        eyebrow="Placement Office"
+        title="Skill Gap Analytics"
+        description="The weakest aptitude, coding, and interview areas across your cohort — where clinics move the needle."
+        actions={
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white/80 ring-1 ring-inset ring-white/15">
+            {cohortLabel}
+          </span>
+        }
+      />
 
       <div className="grid gap-5 lg:grid-cols-2">
         {/* Aptitude */}

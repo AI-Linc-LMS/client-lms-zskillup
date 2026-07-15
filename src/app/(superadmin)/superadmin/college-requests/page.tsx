@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, CheckCircle2, ChevronDown, Loader2, XCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle2, ChevronDown, FileCheck2, Loader2, XCircle } from 'lucide-react';
 import {
   approveCollegeRequest,
   getCollegeRequest,
@@ -89,26 +90,27 @@ export default function SuperAdminCollegeRequestsPage() {
     <div className="space-y-6">
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Super Admin', href: '/superadmin/dashboard' }, { label: 'College Requests' }]} />
 
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Super Admin · Onboarding</p>
-          <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">College Registration Requests</h1>
-          <p className="mt-1 text-sm text-slate-600">Review submitted requests - approve to create the college, or send back with a reason.</p>
-        </div>
-        <div className="relative w-48">
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-3 pr-8 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
-          >
-            <option value="SUBMITTED">Submitted</option>
-            <option value="APPROVED">Approved</option>
-            <option value="REJECTED">Rejected</option>
-            <option value="">All</option>
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
-        </div>
-      </div>
+      <ConsoleHero
+        icon={FileCheck2}
+        eyebrow="Super Admin"
+        title="College Registration Requests"
+        description="Review submitted requests - approve to create the college, or send back with a reason."
+        actions={
+          <div className="relative w-48">
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-3 pr-8 text-sm text-navy shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+            >
+              <option value="SUBMITTED">Submitted</option>
+              <option value="APPROVED">Approved</option>
+              <option value="REJECTED">Rejected</option>
+              <option value="">All</option>
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
+          </div>
+        }
+      />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_1.1fr]">
         {/* Queue */}

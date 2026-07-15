@@ -9,6 +9,7 @@ import { useTpoConsole } from '@/components/tpo/TpoConsole';
 import { BentoCard } from '@/components/tpo/ui';
 import { PlacementOutcomes } from '@/components/tpo/PlacementOutcomes';
 import { AreaChart, Donut } from '@/components/superadmin/dashboard-ui';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 
 const BANDS = [
   { label: 'Ready (70+)', color: '#059669', test: (r: number) => r >= 70 },
@@ -74,9 +75,17 @@ export default function PlacementReadinessPage() {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm font-semibold text-slate-600">
-        Placement readiness · <span className="text-navy">{cohortLabel}</span>
-      </p>
+      <ConsoleHero
+        icon={Trophy}
+        eyebrow="Placement Office"
+        title="Placement Readiness"
+        description="Readiness distribution across bands, the weekly trend, and your top performers in this scope."
+        actions={
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white/80 ring-1 ring-inset ring-white/15">
+            {cohortLabel}
+          </span>
+        }
+      />
 
       <div className="grid gap-5 lg:grid-cols-2">
         <BentoCard title="Overall Readiness" subtitle="Distribution across readiness bands." source="Aptitude + Coding + Mock + coverage">

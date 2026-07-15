@@ -1,4 +1,6 @@
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
+import { Megaphone } from 'lucide-react';
 import { BroadcastComposer } from '@/components/admin/BroadcastComposer';
 
 /** Admin console — broadcast composer (Phase 3, requires canBroadcast). */
@@ -12,13 +14,12 @@ export default function AdminBroadcastsPage() {
           { label: 'Broadcasts' },
         ]}
       />
-      <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Engagement</p>
-        <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Broadcasts</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Send an in-app notification to all students or a specific college.
-        </p>
-      </header>
+      <ConsoleHero
+        icon={Megaphone}
+        eyebrow="Platform Admin"
+        title="Broadcasts"
+        description="Send an in-app notification to all students or a specific college."
+      />
       <BroadcastComposer />
     </div>
   );

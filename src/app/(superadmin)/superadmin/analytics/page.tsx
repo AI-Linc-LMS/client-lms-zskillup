@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
-import { Loader2 } from 'lucide-react';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
+import { BarChart3, Loader2 } from 'lucide-react';
 import { getAdminStats, getAdminCompanyStats, type AdminPlatformStats, type AdminCompanyStat } from '@/lib/api/admin';
 import { getFinancialsPayments } from '@/lib/api/financials';
 import { formatPrice } from '@/lib/api/subscriptions';
@@ -35,11 +36,12 @@ export default function SuperadminAnalyticsPage() {
   return (
     <div className="space-y-6">
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Super Admin', href: '/superadmin/dashboard' }, { label: 'Platform Analytics' }]} />
-      <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Insights</p>
-        <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Platform Analytics</h1>
-        <p className="mt-1 text-sm text-slate-600">Distributions and trends across the platform - headline KPIs live on the dashboard.</p>
-      </header>
+      <ConsoleHero
+        icon={BarChart3}
+        eyebrow="Super Admin"
+        title="Platform Analytics"
+        description="Distributions and trends across the platform - headline KPIs live on the dashboard."
+      />
 
       {loading ? (
         <div className="flex items-center justify-center py-24"><Loader2 className="size-7 animate-spin text-slate-500" /></div>

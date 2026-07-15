@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { Activity, Building2, Code2, Loader2, MessageSquare, Sparkles, Users } from 'lucide-react';
 import { getAdminStats, getAdminCompanyStats, type AdminPlatformStats, type AdminCompanyStat } from '@/lib/api/admin';
 import { AreaChart, Donut, MiniStat, Panel, ProgressRow } from '@/components/superadmin/dashboard-ui';
@@ -32,11 +33,12 @@ export default function AdminAnalyticsPage() {
   return (
     <div className="space-y-6">
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Platform Admin', href: '/admin/dashboard' }, { label: 'Platform Analytics' }]} />
-      <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Insights</p>
-        <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Platform Analytics</h1>
-        <p className="mt-1 text-sm text-slate-600">Distributions and trends across the platform - headline KPIs live on the dashboard.</p>
-      </header>
+      <ConsoleHero
+        icon={Activity}
+        eyebrow="Platform Admin"
+        title="Platform Analytics"
+        description="Distributions and trends across the platform - headline KPIs live on the dashboard."
+      />
 
       {loading ? (
         <div className="flex items-center justify-center py-24"><Loader2 className="size-7 animate-spin text-slate-500" /></div>

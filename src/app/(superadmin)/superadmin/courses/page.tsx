@@ -1,4 +1,6 @@
+import { GraduationCap } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { CoursesAdmin } from '@/components/superadmin/CoursesAdmin';
 
 /**
@@ -29,14 +31,12 @@ export default function AdminCoursesPage() {
         ]}
       />
 
-      <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Catalog</p>
-        <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Courses</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Author courses and their curriculum of modules and lessons. Published courses appear in
-          the student catalog and dashboard instantly.
-        </p>
-      </header>
+      <ConsoleHero
+        icon={GraduationCap}
+        eyebrow="Super Admin"
+        title="Courses"
+        description="Author courses and their curriculum of modules and lessons. Published courses appear in the student catalog and dashboard instantly."
+      />
 
       <CoursesAdmin />
     </div>

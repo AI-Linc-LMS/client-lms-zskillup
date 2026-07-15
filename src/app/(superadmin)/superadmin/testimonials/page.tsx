@@ -1,15 +1,18 @@
+import { Quote } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { TestimonialsManager } from '@/components/admin/TestimonialsManager';
 
 export default function SuperadminTestimonialsPage() {
   return (
     <div className="space-y-6">
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Super Admin', href: '/superadmin/dashboard' }, { label: 'Testimonials' }]} />
-      <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Marketing</p>
-        <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Testimonials</h1>
-        <p className="mt-1 text-sm text-slate-600">Curate the testimonials shown on the public site.</p>
-      </header>
+      <ConsoleHero
+        icon={Quote}
+        eyebrow="Super Admin"
+        title="Testimonials"
+        description="Curate the testimonials shown on the public site."
+      />
       <TestimonialsManager />
     </div>
   );

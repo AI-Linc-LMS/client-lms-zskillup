@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowUpDown, ChevronLeft, ChevronRight, Loader2, Mail, Search } from 'lucide-react';
+import { ArrowUpDown, ChevronLeft, ChevronRight, Loader2, Mail, Search, Users } from 'lucide-react';
 import { getTpoAnalytics } from '@/lib/api/tpo';
 import type { ReadinessBand, TpoDashboard, TpoStudentRow } from '@/shared';
 import { useTpoConsole } from '@/components/tpo/TpoConsole';
 import { ReadinessBadge } from '@/components/tpo/ui';
 import { Button } from '@/components/ui/button';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { cn } from '@/lib/utils';
 
 const PAGE_SIZE = 25;
@@ -114,16 +115,25 @@ export default function StudentManagementPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-slate-600">
-          Student Directory · <span className="text-navy">{filtered.length}</span> students
-        </p>
-        <Button asChild size="sm" variant="outline">
-          <Link href="/tpo/invitations">
-            <Mail className="size-4" /> Invite more
-          </Link>
-        </Button>
-      </div>
+      <ConsoleHero
+        icon={Users}
+        eyebrow="Placement Office"
+        title="Student Management"
+        description="Search, filter and sort every student by placement readiness, participation and activity across your batches."
+        actions={
+          <div className="flex items-center gap-3">
+            <div className="text-right">
+              <p className="text-2xl font-black tabular-nums text-white">{filtered.length}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-white/50">Students</p>
+            </div>
+            <Button asChild size="sm" variant="outline">
+              <Link href="/tpo/invitations">
+                <Mail className="size-4" /> Invite more
+              </Link>
+            </Button>
+          </div>
+        }
+      />
 
       {/* Filters */}
       <div className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-4">

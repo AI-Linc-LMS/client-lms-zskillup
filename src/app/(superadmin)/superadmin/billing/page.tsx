@@ -15,6 +15,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { formatPrice } from '@/lib/api/subscriptions';
 import { getFinancialsPayments } from '@/lib/api/financials';
 import {
@@ -33,10 +34,13 @@ export default function SuperAdminBillingPage() {
   return (
     <div className="w-full">
       <Breadcrumb items={[{ label: 'Dashboard', href: '/superadmin/dashboard' }, { label: 'Billing' }]} />
-      <div className="mt-4">
-        <h1 className="text-2xl font-black tracking-tight text-navy">Billing &amp; revenue</h1>
-        <p className="text-sm text-slate-600">Real payments, configurable pricing, and student access - Super Admin.</p>
-      </div>
+      <ConsoleHero
+        className="mt-4"
+        icon={CreditCard}
+        eyebrow="Super Admin"
+        title="Billing & revenue"
+        description="Real payments, configurable pricing, and student access."
+      />
       <PaymentsSection />
       <PricingSection />
       <EntitlementsSection />
