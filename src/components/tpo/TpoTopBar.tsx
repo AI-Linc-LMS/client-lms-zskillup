@@ -36,7 +36,12 @@ export function TpoTopBar() {
   const asOf = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-slate-200 bg-white/85 px-4 backdrop-blur-md sm:px-6">
+    <header className="glass sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-slate-200/70 px-4 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6),0_8px_24px_-18px_rgba(11,18,32,0.45)] sm:px-6">
+      {/* aurora hairline — matches the student TopBar */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#ffc42d]/40 to-transparent"
+      />
       <TpoMobileNav />
       <div className="min-w-0 flex-1">
         <h1 className="truncate text-lg font-black tracking-tight text-navy">{title}</h1>
