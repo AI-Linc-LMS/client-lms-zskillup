@@ -10,6 +10,7 @@ import {
   buildCodingSection,
   buildSections,
   buildSoftSkillsSection,
+  SOFT_SKILLS_ROOT,
   type SectionRoot,
 } from '@/lib/sections/section-catalog';
 import { useMySubscription } from '@/hooks/useMySubscription';
@@ -65,7 +66,10 @@ export function SectionsExplorer() {
     Promise.all([listTopicsWithCounts(), listCodingTopics().catch(() => [])])
       .then(([topics, codingTopics]) => {
         if (cancelled) return;
-        const mcq = buildSections(topics);
+        // The interview-prep root is rendered ONCE, by buildSoftSkillsSection (with its
+        // "Soft Skills & Interview Prep" name). buildSections would surface it a second
+        // time now that it has MCQ questions, so exclude it here to avoid a duplicate card.
+        const mcq = buildSections(topics).filter((s) => s.slug !== SOFT_SKILLS_ROOT);
         const coding = codingTopics.length ? [buildCodingSection(codingTopics)] : [];
         const soft = buildSoftSkillsSection(topics);
         setSections([...mcq, ...coding, ...(soft ? [soft] : [])].sort((a, b) => a.order - b.order));
