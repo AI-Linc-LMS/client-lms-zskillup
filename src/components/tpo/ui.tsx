@@ -1,7 +1,18 @@
+'use client';
+
 import type { ComponentType, ReactNode } from 'react';
+import { motion } from 'framer-motion';
 import { Database } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { ReadinessBand } from '@/shared';
+
+// Student "motion as default" — subtle fade+rise on mount; motion owns the
+// transform so `whileHover` can lift without fighting a Tailwind hover class.
+const CARD_MOTION = {
+  initial: { opacity: 0, y: 12 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
+};
 
 /**
  * Presentational building blocks for the TPO Placement Office console — Blueprint
@@ -124,7 +135,11 @@ export function KpiCard({
 }) {
   const t = TONE[tone] ?? TONE.slate;
   return (
-    <div className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 transition-all hover:-translate-y-1">
+    <motion.div
+      {...CARD_MOTION}
+      whileHover={{ y: -4 }}
+      className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-4"
+    >
       {/* aurora top-hairline — the student KPI signature */}
       <div
         aria-hidden
@@ -148,7 +163,7 @@ export function KpiCard({
           <Database className="size-3" aria-hidden /> {source}
         </p>
       )}
-    </div>
+    </motion.div>
   );
 }
 
