@@ -7,6 +7,8 @@ import {
   CalendarClock,
   CheckCircle2,
   ClipboardCheck,
+  Code2,
+  ListChecks,
   Loader2,
   Plus,
   Radio,
@@ -76,6 +78,7 @@ export default function AssessmentCenterPage() {
   const [codingSel, setCodingSel] = useState<Set<string>>(new Set());
   const [avail, setAvail] = useState<TpoAssessmentAvailability | null>(null);
   const wantsCoding = (Number(form.codingCount) || 0) > 0;
+  const wantsMcq = (Number(form.mcqCount) || 0) > 0;
 
   // Coding topics (primary tags) for the picker — scoped to the chosen company in
   // company mode, else the whole coding bank (sectional mode). Refetch on scope change.
@@ -133,9 +136,10 @@ export default function AssessmentCenterPage() {
       toast.error('Add a title (2+ characters) and a schedule time');
       return;
     }
-    const mcq = Number(form.mcqCount);
-    if (!Number.isFinite(mcq) || mcq < 1) {
-      toast.error('MCQ count must be at least 1');
+    const mcq = Number(form.mcqCount) || 0;
+    const coding = Number(form.codingCount) || 0;
+    if (mcq + coding < 1) {
+      toast.error('Add at least one round — turn on the MCQ round, the coding round, or both');
       return;
     }
     if (form.mode === 'COMPANY' && !form.companySlug.trim()) {
@@ -254,14 +258,57 @@ export default function AssessmentCenterPage() {
               </span>
             </label>
           )}
+          {/* Assessment rounds — MCQ and/or a technical coding round. Coding used to be
+              hidden behind the count field defaulting to 0; make it a first-class,
+              discoverable choice for BOTH sectional and company-wise drives. */}
           <div className="sm:col-span-2 lg:col-span-3">
-            {form.mode === 'COMPANY' && (
-              <p className="mb-1.5 text-[11px] font-medium text-slate-500">
-                Optional - narrow the company&apos;s bank to specific sections/topics (leave empty to use the whole bank).
-              </p>
-            )}
-            <SectionTopicPicker selected={topicSel} onChange={setTopicSel} />
+            <span className="text-xs font-semibold text-slate-600">Assessment rounds</span>
+            <div className="mt-1.5 flex flex-wrap gap-2">
+              <button
+                type="button"
+                aria-pressed={wantsMcq}
+                onClick={() => setForm((f) => ({ ...f, mcqCount: wantsMcq ? '0' : '20' }))}
+                className={cn(
+                  'inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-semibold transition',
+                  wantsMcq
+                    ? 'border-[#ffc42d] bg-[#fff5ea] text-[#1a1d29]'
+                    : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300',
+                )}
+              >
+                <ListChecks className="size-4" /> MCQ round
+                {wantsMcq && <CheckCircle2 className="size-3.5 text-emerald-600" />}
+              </button>
+              <button
+                type="button"
+                aria-pressed={wantsCoding}
+                onClick={() => setForm((f) => ({ ...f, codingCount: wantsCoding ? '0' : '2' }))}
+                className={cn(
+                  'inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-semibold transition',
+                  wantsCoding
+                    ? 'border-[#ffc42d] bg-[#fff5ea] text-[#1a1d29]'
+                    : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300',
+                )}
+              >
+                <Code2 className="size-4" /> Coding round
+                {wantsCoding && <CheckCircle2 className="size-3.5 text-emerald-600" />}
+              </button>
+            </div>
+            <p className="mt-1.5 text-[11px] text-slate-500">
+              Run MCQs, a technical coding round, or both — a coding round samples problems from the
+              {form.mode === 'COMPANY' ? " company's" : ''} coding bank (Judge0-graded), for both sectional and company-wise drives.
+            </p>
           </div>
+
+          {wantsMcq && (
+            <div className="sm:col-span-2 lg:col-span-3">
+              {form.mode === 'COMPANY' && (
+                <p className="mb-1.5 text-[11px] font-medium text-slate-500">
+                  Optional - narrow the company&apos;s bank to specific sections/topics (leave empty to use the whole bank).
+                </p>
+              )}
+              <SectionTopicPicker selected={topicSel} onChange={setTopicSel} />
+            </div>
+          )}
 
           {/* Coding topics — only when the drive includes coding questions. Scopes
               which coding topics (tags) the coding problems are sampled from. */}
@@ -337,14 +384,18 @@ export default function AssessmentCenterPage() {
               ))}
             </select>
           </label>
-          <label className="text-xs font-semibold text-slate-600">
-            MCQ count
-            <input type="number" min="1" max="100" value={form.mcqCount} onChange={(e) => setForm((f) => ({ ...f, mcqCount: e.target.value }))} className={`mt-1 ${inputCls}`} />
-          </label>
-          <label className="text-xs font-semibold text-slate-600">
-            Coding count
-            <input type="number" min="0" max="20" value={form.codingCount} onChange={(e) => setForm((f) => ({ ...f, codingCount: e.target.value }))} className={`mt-1 ${inputCls}`} />
-          </label>
+          {wantsMcq && (
+            <label className="text-xs font-semibold text-slate-600">
+              MCQ count
+              <input type="number" min="1" max="100" value={form.mcqCount} onChange={(e) => setForm((f) => ({ ...f, mcqCount: e.target.value }))} className={`mt-1 ${inputCls}`} />
+            </label>
+          )}
+          {wantsCoding && (
+            <label className="text-xs font-semibold text-slate-600">
+              Coding count
+              <input type="number" min="1" max="20" value={form.codingCount} onChange={(e) => setForm((f) => ({ ...f, codingCount: e.target.value }))} className={`mt-1 ${inputCls}`} />
+            </label>
+          )}
           <label className="flex items-center gap-2 pt-5 text-xs font-semibold text-slate-600">
             <input type="checkbox" checked={form.proctored} onChange={(e) => setForm((f) => ({ ...f, proctored: e.target.checked }))} />
             Proctored
