@@ -76,14 +76,14 @@ export default async function CompaniesPage() {
                 ))}
               </dl>
             ) : null}
+
+            {/* On the hero card itself (dark tone) - not stranded at the bottom of the page. */}
+            <Disclaimer tone="dark" className="mt-8" />
           </div>
         </section>
       </Reveal>
 
       <CompaniesExplorer />
-
-      {/* Once, under the grid - not repeated inside each card. */}
-      <Disclaimer className="mt-2" />
     </div>
   );
 }

@@ -407,6 +407,11 @@ export default async function HomePage() {
             so the bottom of the hero stays fully dark (no lighter band showing through). */}
         <div className="relative border-t border-white/10 bg-[#0a0a0c]">
           <div className="mx-auto max-w-[1400px] px-5 py-8 md:px-8">
+            {/* Affiliation disclaimer sits right above the recruiter logos it applies to,
+                lightly highlighted (amber-tinted) so it reads as an advisory, not footer fine print. */}
+            <div className="mx-auto mb-7 max-w-4xl">
+              <Disclaimer tone="dark" className="border-amber-300/25 bg-amber-300/[0.05]" />
+            </div>
             <p className="text-center text-[11px] font-bold uppercase tracking-[0.18em] text-white/55">
               Aligned with the hiring patterns of
             </p>
@@ -842,12 +847,9 @@ export default async function HomePage() {
             </ul>
           </div>
         </div>
-        {/* The landing page names TCS, Infosys, Wipro, Cognizant, Capgemini and Accenture and
-            shows their logos, so the affiliation disclaimer belongs here, above the © line. */}
-        <div className="mx-auto mt-10 max-w-[1400px]">
-          <Disclaimer />
-        </div>
-        <div className="mx-auto mt-6 max-w-[1400px] border-t border-[var(--color-line)] pt-6 text-center text-xs text-[var(--color-text-subtle)]">
+        {/* Affiliation disclaimer moved up next to the recruiter logos (above the "Aligned
+            with the hiring patterns of" strip), so it no longer lives in the footer. */}
+        <div className="mx-auto mt-10 max-w-[1400px] border-t border-[var(--color-line)] pt-6 text-center text-xs text-[var(--color-text-subtle)]">
           © 2026 prephasz · Powered by ZSkillup · Future-ready graduates, future-strong institutions
         </div>
       </footer>
