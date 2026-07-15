@@ -288,11 +288,6 @@ export function CompanyHub({ content }: { content: HubContent }) {
         </aside>
       </div>
 
-      {/* Mounted on the hub itself, not on the grid cards: this way it appears on EVERY
-          company, once, where the company's name and logo are actually being used - rather
-          than as a 60-word legal paragraph crammed into each tile of a card grid. */}
-      <Disclaimer className="mt-8" />
-
       <UpgradeModal
         open={upgrade.feature !== null}
         onClose={upgrade.close}
@@ -446,6 +441,10 @@ function CompanyHero({ content, reduce }: { content: HubContent; reduce: boolean
               <Trophy className="size-4" aria-hidden="true" /> Timed assessment
             </Link>
           </motion.div>
+
+          {/* Disclaimer lives on the hero card itself, just below the CTAs - it applies to
+              this company's branded content, so it belongs here, not at the page bottom. */}
+          <Disclaimer tone="dark" className="mt-7" />
         </div>
 
         {/* Readiness ring */}
