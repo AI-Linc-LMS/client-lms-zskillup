@@ -406,7 +406,7 @@ function AdaptiveQuizRunner({
             transition={{ duration: 0.4, ease: EASE }}
             className="order-1 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:order-none"
           >
-            <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="flex flex-wrap items-center gap-1.5">
                 <Chip>{unbounded ? `Q${questionNumber}` : `Q${questionNumber} / ~${maxQ}`}</Chip>
                 <span className={cn('rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ring-1 ring-inset', diff.text, diff.ring, diff.bg)}>
@@ -414,20 +414,23 @@ function AdaptiveQuizRunner({
                 </span>
                 <Chip>{prettySkill(q.targetSkill)}</Chip>
               </div>
-              {!revealed && q.hintTokensRemaining > 0 && !hintState ? (
-                <button
-                  onClick={askHint}
-                  disabled={hintLoading || submitting}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-orange/50 px-3 py-1.5 text-[11px] font-bold text-orange transition-colors hover:bg-orange/10 disabled:opacity-50"
-                >
-                  {hintLoading ? <Loader2 className="size-3.5 animate-spin" /> : <Lightbulb className="size-3.5" />}
-                  Ask for a hint · {q.hintTokensRemaining} left
-                </button>
-              ) : null}
+              {/* Right column: hint button with the PYQ "Asked in…" tag directly beneath it. */}
+              <div className="flex shrink-0 flex-col items-end gap-2">
+                {!revealed && q.hintTokensRemaining > 0 && !hintState ? (
+                  <button
+                    onClick={askHint}
+                    disabled={hintLoading || submitting}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-orange/50 px-3 py-1.5 text-[11px] font-bold text-orange transition-colors hover:bg-orange/10 disabled:opacity-50"
+                  >
+                    {hintLoading ? <Loader2 className="size-3.5 animate-spin" /> : <Lightbulb className="size-3.5" />}
+                    Ask for a hint · {q.hintTokensRemaining} left
+                  </button>
+                ) : null}
+                <PyqTag companyIds={q.companyIds ?? []} years={q.yearTags ?? []} />
+              </div>
             </div>
 
-            <PyqTag companyIds={q.companyIds ?? []} years={q.yearTags ?? []} className="mt-5" />
-            <QuestionStem text={q.stem} imageUrl={q.imageUrl} className="mt-2 text-lg font-semibold leading-relaxed text-navy" />
+            <QuestionStem text={q.stem} imageUrl={q.imageUrl} className="mt-4 text-lg font-semibold leading-relaxed text-navy" />
 
             <div className="mt-5 space-y-2.5">
               {q.options.map((opt: AdaptiveOption, i: number) => {

@@ -730,36 +730,39 @@ function MockRunningView({
       >
         {/* Question card (left/main) */}
         <article className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-start justify-between gap-3">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
               {sections.length > 1 ? `${activeLabel} · ` : ''}
               Question {posInSec + 1} of {activeItems.length}
             </p>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={toggleMark}
-                aria-pressed={marked.has(question.id)}
-                className={cn(
-                  'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1 ring-inset transition-colors',
-                  marked.has(question.id)
-                    ? 'bg-violet-100 text-violet-700 ring-violet-300'
-                    : 'bg-white text-slate-600 ring-slate-200 hover:bg-slate-50',
-                )}
-              >
-                <Flag className={cn('size-3', marked.has(question.id) && 'fill-violet-500 text-violet-600')} aria-hidden="true" />
-                {marked.has(question.id) ? 'Marked' : 'Mark for review'}
-              </button>
-              <span className={cn('rounded-full px-2.5 py-0.5 text-[11px] font-semibold capitalize ring-1', DIFFICULTY_RING[question.difficulty] ?? 'bg-slate-100 text-slate-600 ring-slate-200')}>
-                {question.difficulty.toLowerCase()}
-              </span>
+            {/* Right column: mark/difficulty controls with the PYQ "Asked in…" tag beneath. */}
+            <div className="flex shrink-0 flex-col items-end gap-2">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={toggleMark}
+                  aria-pressed={marked.has(question.id)}
+                  className={cn(
+                    'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1 ring-inset transition-colors',
+                    marked.has(question.id)
+                      ? 'bg-violet-100 text-violet-700 ring-violet-300'
+                      : 'bg-white text-slate-600 ring-slate-200 hover:bg-slate-50',
+                  )}
+                >
+                  <Flag className={cn('size-3', marked.has(question.id) && 'fill-violet-500 text-violet-600')} aria-hidden="true" />
+                  {marked.has(question.id) ? 'Marked' : 'Mark for review'}
+                </button>
+                <span className={cn('rounded-full px-2.5 py-0.5 text-[11px] font-semibold capitalize ring-1', DIFFICULTY_RING[question.difficulty] ?? 'bg-slate-100 text-slate-600 ring-slate-200')}>
+                  {question.difficulty.toLowerCase()}
+                </span>
+              </div>
+              <PyqTag companyIds={question.companyIds ?? []} years={question.yearTags ?? []} />
             </div>
           </div>
           {question.type === 'CODING' ? (
             <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-bold text-indigo-600">Coding problem</p>
           ) : null}
-          <PyqTag companyIds={question.companyIds ?? []} years={question.yearTags ?? []} className="mt-2" />
-          <QuestionStem text={question.stem} imageUrl={question.imageUrl} className="mt-2 text-base font-semibold leading-relaxed text-navy" />
+          <QuestionStem text={question.stem} imageUrl={question.imageUrl} className="mt-4 text-base font-semibold leading-relaxed text-navy" />
           {question.type === 'MULTI_SELECT' ? <p className="mt-1 text-xs text-slate-500">Select all that apply.</p> : null}
 
           {question.type === 'CODING' && question.coding ? (
