@@ -104,7 +104,7 @@ export default function AdminCollegeRequestsPage() {
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-500">{new Date(r.updatedAt).toLocaleDateString()}</td>
                     <td className="px-4 py-3 text-right">
-                      <Link href={`/admin/college-requests/${r.id}`} className="text-sm font-semibold text-[#1a1d29] hover:underline">
+                      <Link href={`/admin/college-requests/${r.id}`} className="text-sm font-semibold text-[#1a1a1a] hover:underline">
                         View
                       </Link>
                     </td>

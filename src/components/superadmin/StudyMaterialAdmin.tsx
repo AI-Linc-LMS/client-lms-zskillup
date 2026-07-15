@@ -358,7 +358,7 @@ function ItemForm({
                 key={k}
                 type="button"
                 onClick={() => setKind(k)}
-                className={cn('flex-1 rounded-xl border px-3 py-2 text-sm font-bold transition', kind === k ? 'border-[#ffc42d] bg-[#fff5ea] text-[#1a1d29]' : 'border-slate-200 text-slate-600 hover:border-slate-300')}
+                className={cn('flex-1 rounded-xl border px-3 py-2 text-sm font-bold transition', kind === k ? 'border-[#ffc42d] bg-[#fff5ea] text-[#1a1a1a]' : 'border-slate-200 text-slate-600 hover:border-slate-300')}
               >
                 {KIND_META[k].label}
               </button>

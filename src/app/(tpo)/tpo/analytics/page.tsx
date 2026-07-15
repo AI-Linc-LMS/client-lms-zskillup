@@ -153,8 +153,8 @@ export default function StudentAnalyticsPage() {
           <div className="flex h-full flex-col justify-center gap-3">
             <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 text-center">
               <p className="text-sm font-semibold text-navy">
-                practice questions <span className="text-[#1a1d29]">+ 3×</span> mock tests{' '}
-                <span className="text-[#1a1d29]">+ 2×</span> coding problems
+                practice questions <span className="text-[#1a1a1a]">+ 3×</span> mock tests{' '}
+                <span className="text-[#1a1a1a]">+ 2×</span> coding problems
               </p>
             </div>
             <p className="flex items-center gap-1.5 text-xs text-slate-600">

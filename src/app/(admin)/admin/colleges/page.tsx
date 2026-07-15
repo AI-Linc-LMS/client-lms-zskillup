@@ -97,7 +97,7 @@ export default function AdminCollegesPage() {
                   <tr key={c.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3">
                       <Link href={`/admin/colleges/${c.id}`} className="group">
-                        <p className="font-semibold text-navy group-hover:text-[#1a1d29]">{c.name}</p>
+                        <p className="font-semibold text-navy group-hover:text-[#1a1a1a]">{c.name}</p>
                         <p className="text-xs text-slate-500">{c.slug}</p>
                       </Link>
                     </td>

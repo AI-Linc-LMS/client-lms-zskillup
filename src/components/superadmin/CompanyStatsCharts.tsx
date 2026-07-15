@@ -46,7 +46,7 @@ export function CompanyStatsCharts() {
       {/* KPI tiles */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Kpi icon={Building2} label="Companies" value={stats.length} tone="text-navy" />
-        <Kpi icon={Users} label="Registrations" value={totalReg} tone="text-[#1a1d29]" />
+        <Kpi icon={Users} label="Registrations" value={totalReg} tone="text-[#1a1a1a]" />
         <Kpi icon={CalendarClock} label="Active drives" value={totalDrives} tone="text-violet-600" />
         <Kpi
           icon={ClipboardList}
@@ -60,7 +60,7 @@ export function CompanyStatsCharts() {
         {/* Registrations per company */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5">
           <h3 className="flex items-center gap-2 text-sm font-bold text-navy">
-            <Users className="size-4 text-[#1a1d29]" /> Registrations by company
+            <Users className="size-4 text-[#1a1a1a]" /> Registrations by company
           </h3>
           <div className="mt-4 space-y-3">
             {byReg.map((c, i) => (

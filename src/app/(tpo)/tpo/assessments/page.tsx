@@ -274,7 +274,7 @@ export default function AssessmentCenterPage() {
                 className={cn(
                   'inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-semibold transition',
                   wantsMcq
-                    ? 'border-[#ffc42d] bg-[#fff5ea] text-[#1a1d29]'
+                    ? 'border-[#ffc42d] bg-[#fff5ea] text-[#1a1a1a]'
                     : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300',
                 )}
               >
@@ -288,7 +288,7 @@ export default function AssessmentCenterPage() {
                 className={cn(
                   'inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-semibold transition',
                   wantsCoding
-                    ? 'border-[#ffc42d] bg-[#fff5ea] text-[#1a1d29]'
+                    ? 'border-[#ffc42d] bg-[#fff5ea] text-[#1a1a1a]'
                     : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300',
                 )}
               >
@@ -326,7 +326,7 @@ export default function AssessmentCenterPage() {
                     </span>
                   </span>
                   {codingSel.size > 0 && (
-                    <button type="button" onClick={() => setCodingSel(new Set())} className="text-xs font-semibold text-[#1a1d29] hover:underline">
+                    <button type="button" onClick={() => setCodingSel(new Set())} className="text-xs font-semibold text-[#1a1a1a] hover:underline">
                       Clear
                     </button>
                   )}
@@ -352,7 +352,7 @@ export default function AssessmentCenterPage() {
                           className={cn(
                             'inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold transition',
                             on
-                              ? 'border-[#ffc42d] bg-[#fff5ea] text-[#1a1d29]'
+                              ? 'border-[#ffc42d] bg-[#fff5ea] text-[#1a1a1a]'
                               : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300',
                           )}
                         >

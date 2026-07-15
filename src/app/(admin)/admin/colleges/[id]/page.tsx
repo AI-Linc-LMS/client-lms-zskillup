@@ -123,7 +123,7 @@ export default function AdminCollegeDetailPage({ params }: { params: Promise<{ i
                       <tr key={s.id} className="hover:bg-slate-50">
                         <td className="px-4 py-3">
                           <Link href={`/admin/students/${s.id}`} className="group">
-                            <p className="font-semibold text-navy group-hover:text-[#1a1d29]">
+                            <p className="font-semibold text-navy group-hover:text-[#1a1a1a]">
                               {s.fullName ?? '-'}
                             </p>
                             <p className="text-xs text-slate-500">{s.email}</p>

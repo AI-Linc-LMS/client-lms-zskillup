@@ -142,7 +142,7 @@ export default function AdminStudentsReportPage() {
                     <td className="px-4 py-3 text-right">
                       <Link
                         href={`/superadmin/students/${s.id}`}
-                        className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition-colors hover:border-orange hover:text-[#1a1d29]"
+                        className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition-colors hover:border-orange hover:text-[#1a1a1a]"
                       >
                         View <ArrowRight className="size-3" />
                       </Link>

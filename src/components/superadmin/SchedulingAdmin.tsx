@@ -269,7 +269,7 @@ export function SchedulingAdmin() {
           <option value="long">&gt; 90 min</option>
         </select>
         {(fCompany || fStatus !== 'all' || fDuration !== 'all') ? (
-          <button type="button" onClick={() => { setFCompany(''); setFStatus('all'); setFDuration('all'); }} className="text-xs font-bold text-[#1a1d29] hover:underline">
+          <button type="button" onClick={() => { setFCompany(''); setFStatus('all'); setFDuration('all'); }} className="text-xs font-bold text-[#1a1a1a] hover:underline">
             Clear
           </button>
         ) : null}

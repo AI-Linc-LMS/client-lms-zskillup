@@ -125,7 +125,7 @@ export function FinancialsPaymentsBoard() {
           {/* Range KPIs */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard label="Revenue (period)" value={formatPrice(data.rangeRevenueCents, data.currency)} icon={<IndianRupee className="size-4" />} accent="#059669" />
-            <StatCard label="Successful (period)" value={data.rangeSuccessfulPayments} icon={<CheckCircle2 className="size-4" />} accent="#2563eb" />
+            <StatCard label="Successful (period)" value={data.rangeSuccessfulPayments} icon={<CheckCircle2 className="size-4" />} accent="#f5b400" />
             <StatCard label="Failed (period)" value={data.rangeFailedPayments} icon={<XCircle className="size-4" />} accent="#dc2626" />
             <StatCard label="Pending (period)" value={data.rangePendingPayments} icon={<AlertTriangle className="size-4" />} accent="#f59e0b" />
           </div>
@@ -135,7 +135,7 @@ export function FinancialsPaymentsBoard() {
             <StatCard label="This month" value={formatPrice(data.monthlyRevenueCents, data.currency)} icon={<IndianRupee className="size-4" />} accent="#f5b400" />
             <StatCard label="This year" value={formatPrice(data.annualRevenueCents, data.currency)} icon={<TrendingUp className="size-4" />} accent="#f5b400" />
             <StatCard label="Lifetime" value={formatPrice(data.lifetimeRevenueCents, data.currency)} icon={<IndianRupee className="size-4" />} accent="#1e3a8a" />
-            <StatCard label="Active subscriptions" value={data.activeEntitlements} sub={`${data.activeSubscribers} subscribers`} icon={<Users className="size-4" />} accent="#2563eb" />
+            <StatCard label="Active subscriptions" value={data.activeEntitlements} sub={`${data.activeSubscribers} subscribers`} icon={<Users className="size-4" />} accent="#f5b400" />
             <StatCard label="Expiring ≤ 7 days" value={data.expiringSoon} icon={<CalendarClock className="size-4" />} accent="#dc2626" />
           </div>
 

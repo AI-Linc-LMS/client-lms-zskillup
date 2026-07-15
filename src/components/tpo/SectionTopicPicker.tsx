@@ -91,7 +91,7 @@ export function SectionTopicPicker({
           </span>
         </span>
         {selected.size > 0 && (
-          <button type="button" onClick={() => onChange(new Set())} className="text-xs font-semibold text-[#1a1d29] hover:underline">
+          <button type="button" onClick={() => onChange(new Set())} className="text-xs font-semibold text-[#1a1a1a] hover:underline">
             Clear
           </button>
         )}

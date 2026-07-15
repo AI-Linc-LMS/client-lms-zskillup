@@ -83,7 +83,7 @@ export default function TpoBillingPage() {
         </div>
       </div>
 
-      <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#fff5ea] px-3 py-1 text-xs font-bold text-[#1a1d29]">
+      <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#fff5ea] px-3 py-1 text-xs font-bold text-[#1a1a1a]">
         <Users className="size-3.5" /> B2B rate {price ? `· ${formatPrice(price.amountCents, price.currency)} per company` : ''}
       </div>
 

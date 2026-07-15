@@ -81,7 +81,7 @@ export default function SkillGapAnalyticsPage() {
           subtitle="Weakest topics by accuracy (min 10 attempts)."
           source="Topic-wise question performance"
         >
-          <div className="flex items-center gap-1.5 pb-3 text-xs font-semibold text-[#1a1d29]">
+          <div className="flex items-center gap-1.5 pb-3 text-xs font-semibold text-[#1a1a1a]">
             <Target className="size-4" /> Aptitude
           </div>
           {aptitudeGaps.length === 0 ? (
@@ -101,7 +101,7 @@ export default function SkillGapAnalyticsPage() {
           subtitle="Weakest difficulty tiers & company patterns by solve rate."
           source="Coding submissions"
         >
-          <div className="flex items-center gap-1.5 pb-3 text-xs font-semibold text-[#1a1d29]">
+          <div className="flex items-center gap-1.5 pb-3 text-xs font-semibold text-[#1a1a1a]">
             <Code2 className="size-4" /> Coding
           </div>
           {(coding?.totalAttempted ?? 0) === 0 ? (

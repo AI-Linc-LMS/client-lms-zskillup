@@ -237,7 +237,7 @@ function StudentRow({ s, cohortName }: { s: TpoStudentRow; cohortName: string | 
     <tr className="transition-colors hover:bg-slate-50">
       <td className="px-4 py-2.5">
         <Link href={`/tpo/students/${s.id}`} className="group block">
-          <p className="font-semibold text-navy group-hover:text-[#1a1d29]">{s.name ?? '-'}</p>
+          <p className="font-semibold text-navy group-hover:text-[#1a1a1a]">{s.name ?? '-'}</p>
           <p className="truncate text-xs text-slate-500">{s.email}</p>
         </Link>
       </td>

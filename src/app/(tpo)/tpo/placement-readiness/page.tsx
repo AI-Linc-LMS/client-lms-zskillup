@@ -17,7 +17,7 @@ const BANDS = [
   { label: 'At risk (<40)', color: '#dc2626', test: (r: number) => r < 40 },
 ] as const;
 
-const MEDAL = ['bg-amber-100 text-amber-700', 'bg-slate-200 text-slate-600', 'bg-orange/15 text-[#1a1d29]'];
+const MEDAL = ['bg-amber-100 text-amber-700', 'bg-slate-200 text-slate-600', 'bg-orange/15 text-[#1a1a1a]'];
 
 export default function PlacementReadinessPage() {
   const { cohortId, cohorts } = useTpoConsole();

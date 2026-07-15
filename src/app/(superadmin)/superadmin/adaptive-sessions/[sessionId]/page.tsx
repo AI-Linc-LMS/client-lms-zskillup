@@ -56,7 +56,7 @@ export default function AdminAdaptiveSessionDetailPage({
       <header className="flex items-start gap-4">
         <Link
           href="/superadmin/adaptive-sessions"
-          className="mt-1 inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-[#1a1d29]"
+          className="mt-1 inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-[#1a1a1a]"
         >
           <ArrowLeft className="size-3.5" /> All sessions
         </Link>

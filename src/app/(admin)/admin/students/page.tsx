@@ -102,7 +102,7 @@ export default function AdminStudentsPage() {
                   <tr key={r.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3">
                       <Link href={`/admin/students/${r.id}`} className="group">
-                        <p className="font-semibold text-navy group-hover:text-[#1a1d29]">
+                        <p className="font-semibold text-navy group-hover:text-[#1a1a1a]">
                           {r.fullName ?? '-'}
                         </p>
                         <p className="text-xs text-slate-500">{r.email}</p>
