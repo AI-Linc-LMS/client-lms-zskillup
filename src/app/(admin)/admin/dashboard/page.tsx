@@ -17,8 +17,9 @@ export default function AdminDashboardPage() {
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Platform Admin' }, { label: 'Dashboard' }]} />
 
       <Reveal>
-        <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#1f2d4d] via-[#16223f] to-[#0a0a0c] p-6 text-white shadow-sm sm:p-8">
+        <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] p-6 text-white sm:p-8">
           <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#6d3bf5]/25 blur-3xl" />
+          <span aria-hidden className="pointer-events-none absolute -bottom-20 -left-10 size-56 rounded-full bg-[#ffc42d]/20 blur-3xl" />
           <div className="relative">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-white/70 ring-1 ring-inset ring-white/15">
               <ShieldCheck className="size-3.5" /> Platform Admin
