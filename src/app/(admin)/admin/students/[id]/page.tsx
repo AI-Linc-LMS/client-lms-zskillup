@@ -65,7 +65,7 @@ export default function AdminStudentDetailPage({ params }: { params: Promise<{ i
         <div className="py-24 text-center text-sm text-red-500">{error ?? 'Not found.'}</div>
       ) : (
         <>
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <section className="rounded-2xl border border-slate-200 bg-white p-6">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h1 className="text-2xl font-black tracking-tight text-navy">

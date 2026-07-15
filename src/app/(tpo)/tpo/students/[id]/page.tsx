@@ -43,7 +43,7 @@ export default function StudentProfilePage() {
       ) : detail ? (
         <>
           {/* Hero */}
-          <section className="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-6 shadow-sm">
+          <section className="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-6">
             <span aria-hidden className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-orange/[0.06] blur-3xl" />
             <div className="relative flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0">
@@ -76,7 +76,7 @@ export default function StudentProfilePage() {
 
           <div className="grid gap-5 lg:grid-cols-2">
             {/* Composite */}
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section className="rounded-2xl border border-slate-200 bg-white p-6">
               <h2 className="text-sm font-bold text-navy">Readiness composite</h2>
               <div className="mt-4 space-y-3">
                 {detail.components.map((c) => (
@@ -95,7 +95,7 @@ export default function StudentProfilePage() {
             </section>
 
             {/* Weak topics */}
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section className="rounded-2xl border border-slate-200 bg-white p-6">
               <h2 className="text-sm font-bold text-navy">Weakest topics</h2>
               {detail.topics.length === 0 ? (
                 <p className="mt-4 text-sm text-slate-500">Not enough practice data yet.</p>
@@ -116,7 +116,7 @@ export default function StudentProfilePage() {
           </div>
 
           {/* Company readiness */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <section className="rounded-2xl border border-slate-200 bg-white p-6">
             <h2 className="flex items-center gap-1.5 text-sm font-bold text-navy">
               <Building2 className="size-4 text-slate-500" /> Company readiness
             </h2>
