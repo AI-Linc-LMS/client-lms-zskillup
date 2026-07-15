@@ -426,7 +426,7 @@ function AdaptiveQuizRunner({
                     Ask for a hint · {q.hintTokensRemaining} left
                   </button>
                 ) : null}
-                <PyqTag companyIds={q.companyIds ?? []} years={q.yearTags ?? []} />
+                <PyqTag companyIds={q.companyIds ?? []} years={q.yearTags ?? []} source={q.source} />
               </div>
             </div>
 

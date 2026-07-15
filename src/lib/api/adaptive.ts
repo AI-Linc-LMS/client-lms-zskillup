@@ -31,6 +31,8 @@ export interface AdaptivePendingQuestion {
   /** PYQ tag — company tag ids + years this question was asked in. */
   companyIds?: string[];
   yearTags?: number[];
+  /** Question source; PATTERN_BASED (no company/year) → "SIMILAR PATTERN" tag. */
+  source?: string | null;
   /** Server ISO timestamp the question was pinned; the per-question clock runs off this. */
   servedAt: string;
   /** Time-decay knobs for the live points meter. */
