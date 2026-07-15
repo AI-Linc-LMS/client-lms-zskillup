@@ -155,7 +155,7 @@ export function CollegeRequestForm({
   return (
     <div className="space-y-6">
       {/* College details */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-white p-6">
         <h2 className="text-sm font-bold text-navy">College details</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <Field label="College name">
@@ -185,7 +185,7 @@ export function CollegeRequestForm({
       </section>
 
       {/* TPO contact */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-white p-6">
         <h2 className="text-sm font-bold text-navy">TPO contact</h2>
         <p className="mt-1 text-xs text-slate-600">Receives the college login credentials once the subscription is activated.</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -199,7 +199,7 @@ export function CollegeRequestForm({
       </section>
 
       {/* Subscription plan */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-white p-6">
         <h2 className="text-sm font-bold text-navy">Subscription plan</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           <Field label="Plan name">
@@ -221,7 +221,7 @@ export function CollegeRequestForm({
       </section>
 
       {/* Student list */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-white p-6">
         <div className="flex items-center justify-between gap-2">
           <div>
             <h2 className="text-sm font-bold text-navy">Student list</h2>

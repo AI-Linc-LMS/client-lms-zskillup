@@ -18,7 +18,7 @@ export default function AdminCodingPage() {
         ]}
       />
 
-      <header className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white px-5 py-6 shadow-sm sm:px-6">
+      <header className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white px-5 py-6 sm:px-6">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(249,115,22,0.12),_transparent_30%),linear-gradient(135deg,_rgba(15,23,42,0.03),_rgba(248,250,252,1))]" />
         <div className="relative max-w-3xl">
           <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500">
