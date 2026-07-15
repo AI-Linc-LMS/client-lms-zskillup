@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import {
   createAdminChallenge,
   deleteAdminChallenge,
@@ -116,26 +117,23 @@ export default function AdminChallengesPage() {
           { label: 'Challenges' },
         ]}
       />
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-            Super Admin · ZSkillup
-          </p>
-          <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Challenges</h1>
-          <p className="mt-1 text-sm text-slate-600">
-            {rows.length} challenges · MCQ, Coding (Judge0) & free-form
-          </p>
-        </div>
-        <button
-          onClick={() => {
-            setEditing(null);
-            setDraft({ ...EMPTY });
-          }}
-          className="btn-brand inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold"
-        >
-          <Plus className="size-4" /> New challenge
-        </button>
-      </div>
+      <ConsoleHero
+        icon={Swords}
+        eyebrow="Super Admin"
+        title="Challenges"
+        description={`${rows.length} challenges · MCQ, Coding (Judge0) & free-form`}
+        actions={
+          <button
+            onClick={() => {
+              setEditing(null);
+              setDraft({ ...EMPTY });
+            }}
+            className="btn-brand inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold"
+          >
+            <Plus className="size-4" /> New challenge
+          </button>
+        }
+      />
 
       {error ? (
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>

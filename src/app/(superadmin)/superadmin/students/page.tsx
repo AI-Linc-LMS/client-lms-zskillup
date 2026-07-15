@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { listStudentReports, type AdminStudentReportRow } from '@/lib/api/admin';
 import { ArrowRight, GraduationCap, Loader2, Search } from 'lucide-react';
 
@@ -62,23 +63,18 @@ export default function AdminStudentsReportPage() {
         ]}
       />
 
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-            Super Admin · ZSkillup
-          </p>
-          <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">
-            Student Reports
-          </h1>
-          <p className="mt-1 text-sm text-slate-600">
-            {total.toLocaleString()} students · marks &amp; attempts across every quiz
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <GraduationCap className="size-5 text-slate-500" />
-          <span className="text-sm font-semibold text-slate-600">{total} students</span>
-        </div>
-      </div>
+      <ConsoleHero
+        icon={GraduationCap}
+        eyebrow="Super Admin"
+        title="Student Reports"
+        description={<>{total.toLocaleString()} students &middot; marks &amp; attempts across every quiz</>}
+        actions={
+          <div className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 ring-1 ring-inset ring-white/15">
+            <GraduationCap className="size-5 text-white/70" />
+            <span className="text-sm font-semibold text-white/90">{total} students</span>
+          </div>
+        }
+      />
 
       {/* Search */}
       <div className="relative max-w-md">

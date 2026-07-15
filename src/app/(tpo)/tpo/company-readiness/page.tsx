@@ -1,12 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Building2, Loader2 } from 'lucide-react';
 import { getTpoAnalytics, getTpoCompanyHeatmap } from '@/lib/api/tpo';
 import type { TpoCompanyHeatmap, TpoDashboard } from '@/shared';
 import { useTpoConsole } from '@/components/tpo/TpoConsole';
 import { BentoCard } from '@/components/tpo/ui';
 import { CompanyHeatmap } from '@/components/tpo/CompanyHeatmap';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 
 export default function CompanyReadinessPage() {
   const { cohortId, cohorts } = useTpoConsole();
@@ -46,9 +47,17 @@ export default function CompanyReadinessPage() {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm font-semibold text-slate-600">
-        Company readiness · <span className="text-navy">{cohortLabel}</span>
-      </p>
+      <ConsoleHero
+        icon={Building2}
+        eyebrow="Placement Office"
+        title="Company Readiness"
+        description="How your students stack up against each recruiter's bar — company by company."
+        actions={
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white/80 ring-1 ring-inset ring-white/15">
+            {cohortLabel}
+          </span>
+        }
+      />
 
       <BentoCard
         title="Company Readiness Heatmap"

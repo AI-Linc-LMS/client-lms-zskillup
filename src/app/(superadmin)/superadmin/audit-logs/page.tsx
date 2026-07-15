@@ -2,6 +2,7 @@
 
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { AUDIT_ACTIONS, listAuditLogs, type AuditLogRow } from '@/lib/api/audit';
 import { ChevronDown, Loader2, ScrollText } from 'lucide-react';
 
@@ -54,16 +55,12 @@ export default function AuditLogsPage() {
           { label: 'Audit Log' },
         ]}
       />
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Security</p>
-          <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Audit log</h1>
-          <p className="mt-1 text-sm text-slate-600">
-            {total.toLocaleString()} recorded events · every privileged write, append-only
-          </p>
-        </div>
-        <ScrollText className="size-6 text-slate-400" />
-      </header>
+      <ConsoleHero
+        icon={ScrollText}
+        eyebrow="Super Admin"
+        title="Audit log"
+        description={<>{total.toLocaleString()} recorded events &middot; every privileged write, append-only</>}
+      />
 
       <div className="relative w-56">
         <select

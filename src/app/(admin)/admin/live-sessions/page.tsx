@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { Clock, ExternalLink, Loader2, Pencil, PlayCircle, PlusCircle, Trash2, Users, Video } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -52,18 +53,17 @@ export default function AdminLiveSessionsPage() {
     <div className="space-y-6">
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Platform Admin', href: '/admin/dashboard' }, { label: 'Live Sessions' }]} />
 
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Engagement</p>
-          <h1 className="mt-1 flex items-center gap-2 text-[28px] font-extrabold tracking-tight text-navy">
-            <Video className="size-6 text-[#f5b400]" /> Live Sessions
-          </h1>
-          <p className="mt-1 text-sm text-slate-600">Schedule Zoom / Meet sessions - students get notified and see them in-app.</p>
-        </div>
-        <button onClick={openNew} className="inline-flex items-center gap-2 rounded-full btn-brand px-4 py-2.5 text-sm font-bold">
-          <PlusCircle className="size-4" /> New session
-        </button>
-      </div>
+      <ConsoleHero
+        icon={Video}
+        eyebrow="Platform Admin"
+        title="Live Sessions"
+        description="Schedule Zoom / Meet sessions - students get notified and see them in-app."
+        actions={
+          <button onClick={openNew} className="inline-flex items-center gap-2 rounded-full btn-brand px-4 py-2.5 text-sm font-bold">
+            <PlusCircle className="size-4" /> New session
+          </button>
+        }
+      />
 
       {loading ? (
         <div className="flex items-center justify-center py-24"><Loader2 className="size-7 animate-spin text-slate-500" /></div>

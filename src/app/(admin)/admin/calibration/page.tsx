@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { CalendarClock, CheckCircle2, Loader2, ShieldCheck, Target } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -70,15 +71,12 @@ export default function AdminCalibrationPage() {
     <div className="space-y-6">
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Platform Admin', href: '/admin/dashboard' }, { label: 'Calibration' }]} />
 
-      <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Assessment library</p>
-        <h1 className="mt-1 flex items-center gap-2 text-[28px] font-extrabold tracking-tight text-navy">
-          <Target className="size-6 text-[#f5b400]" /> Calibration
-        </h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Turn the Placement Readiness Test gate on or off platform-wide, and choose which scheduled assessment students take as their calibration.
-        </p>
-      </header>
+      <ConsoleHero
+        icon={Target}
+        eyebrow="Platform Admin"
+        title="Calibration"
+        description="Turn the Placement Readiness Test gate on or off platform-wide, and choose which scheduled assessment students take as their calibration."
+      />
 
       {loading ? (
         <div className="flex items-center justify-center py-24">

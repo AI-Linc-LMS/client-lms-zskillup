@@ -7,6 +7,7 @@ import type { TpoCodingAnalytics } from '@/shared';
 import { useTpoConsole } from '@/components/tpo/TpoConsole';
 import { BentoCard, KpiCard } from '@/components/tpo/ui';
 import { Donut } from '@/components/superadmin/dashboard-ui';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 
 const DIFF = [
   { key: 'easy', label: 'Easy', color: '#059669' },
@@ -55,9 +56,17 @@ export default function CodingAnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm font-semibold text-slate-600">
-        Coding analytics · <span className="text-navy">{cohortLabel}</span>
-      </p>
+      <ConsoleHero
+        icon={Code2}
+        eyebrow="Placement Office"
+        title="Coding Analytics"
+        description="Coding participation, solve rates, and difficulty breakdown across your cohort."
+        actions={
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white/80 ring-1 ring-inset ring-white/15">
+            {cohortLabel}
+          </span>
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard icon={Users} label="Active Coders" value={data.activeCoders} tone="sky" source="≥1 submission" />

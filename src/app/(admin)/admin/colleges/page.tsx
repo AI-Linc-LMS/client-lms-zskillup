@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { listAdminColleges, type AdminCollegeRow } from '@/lib/api/admin';
 import { Loader2, School, Search } from 'lucide-react';
 
@@ -50,16 +51,16 @@ export default function AdminCollegesPage() {
           { label: 'Colleges' },
         ]}
       />
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Insights</p>
-          <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Colleges</h1>
-          <p className="mt-1 text-sm text-slate-600">
+      <ConsoleHero
+        icon={School}
+        eyebrow="Platform Admin"
+        title="Colleges"
+        description={
+          <>
             {rows.length.toLocaleString()} colleges · click a row for enrolment + performance
-          </p>
-        </div>
-        <School className="size-6 text-slate-400" />
-      </header>
+          </>
+        }
+      />
 
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-500" />

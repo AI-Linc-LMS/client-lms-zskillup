@@ -1,15 +1,18 @@
+import { Newspaper } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { BlogsManager } from '@/components/admin/BlogsManager';
 
 export default function SuperadminBlogsPage() {
   return (
     <div className="space-y-6">
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Super Admin', href: '/superadmin/dashboard' }, { label: 'Blog' }]} />
-      <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Marketing</p>
-        <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Blog</h1>
-        <p className="mt-1 text-sm text-slate-600">Author and publish posts shown on the public site.</p>
-      </header>
+      <ConsoleHero
+        icon={Newspaper}
+        eyebrow="Super Admin"
+        title="Blog"
+        description="Author and publish posts shown on the public site."
+      />
       <BlogsManager />
     </div>
   );

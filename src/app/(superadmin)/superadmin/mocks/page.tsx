@@ -1,4 +1,6 @@
+import { FileCheck2 } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { MocksAdmin } from '@/components/superadmin/MocksAdmin';
 
 /**
@@ -24,14 +26,12 @@ export default function AdminMocksPage() {
         ]}
       />
 
-      <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Catalog</p>
-        <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Mock Tests</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Build timed mock assessments from your published question bank. Active mocks appear in the
-          student catalog instantly.
-        </p>
-      </header>
+      <ConsoleHero
+        icon={FileCheck2}
+        eyebrow="Super Admin"
+        title="Mock Tests"
+        description="Build timed mock assessments from your published question bank. Active mocks appear in the student catalog instantly."
+      />
 
       <MocksAdmin />
     </div>

@@ -36,6 +36,7 @@ import { KpiCard } from '@/components/tpo/ui';
 import { SectionTopicPicker } from '@/components/tpo/SectionTopicPicker';
 import { AssessmentWizard } from '@/components/superadmin/AssessmentWizard';
 import { Button } from '@/components/ui/button';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { cn } from '@/lib/utils';
 
 const STATUS_STYLE: Record<TpoAssessmentStatus, string> = {
@@ -202,19 +203,25 @@ export default function AssessmentCenterPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-slate-600">
-          Assessment Center · <span className="text-navy">{data?.activeCount ?? 0}/{data?.activeCap ?? 10} active</span>
-        </p>
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={() => setAiWizard(true)} disabled={capReached}>
-            <Sparkles className="size-4" /> Build with AI
-          </Button>
-          <Button size="sm" onClick={() => setShowForm((v) => !v)} disabled={capReached}>
-            <Plus className="size-4" /> Create Assessment
-          </Button>
-        </div>
-      </div>
+      <ConsoleHero
+        icon={ClipboardCheck}
+        eyebrow="Placement Office"
+        title="Assessment Center"
+        description="Schedule proctored MCQ and coding drives for your batches, then release results to students."
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-bold text-white/70 ring-1 ring-inset ring-white/15">
+              {data?.activeCount ?? 0}/{data?.activeCap ?? 10} active
+            </span>
+            <Button size="sm" variant="outline" onClick={() => setAiWizard(true)} disabled={capReached}>
+              <Sparkles className="size-4" /> Build with AI
+            </Button>
+            <Button size="sm" onClick={() => setShowForm((v) => !v)} disabled={capReached}>
+              <Plus className="size-4" /> Create Assessment
+            </Button>
+          </div>
+        }
+      />
 
       {capReached && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-medium text-amber-700">

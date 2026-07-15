@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { listStudentReports, type AdminStudentReportRow } from '@/lib/api/admin';
 import { BarChart3, Loader2, Search } from 'lucide-react';
 
@@ -50,16 +51,16 @@ export default function AdminStudentsPage() {
           { label: 'Student Reports' },
         ]}
       />
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Insights</p>
-          <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Student reports</h1>
-          <p className="mt-1 text-sm text-slate-600">
+      <ConsoleHero
+        icon={BarChart3}
+        eyebrow="Platform Admin"
+        title="Student reports"
+        description={
+          <>
             {total.toLocaleString()} students · mock performance at a glance
-          </p>
-        </div>
-        <BarChart3 className="size-6 text-slate-400" />
-      </header>
+          </>
+        }
+      />
 
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-500" />

@@ -6,6 +6,7 @@ import { getTpoInterviewAnalytics } from '@/lib/api/tpo';
 import type { TpoInterviewAnalytics } from '@/shared';
 import { useTpoConsole } from '@/components/tpo/TpoConsole';
 import { BentoCard, ProvenanceChip } from '@/components/tpo/ui';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 
 function ScoreTile({
   icon: Icon,
@@ -75,9 +76,17 @@ export default function InterviewAnalyticsPage() {
   if (!data || data.totalInterviews === 0) {
     return (
       <div className="space-y-4">
-        <p className="text-sm font-semibold text-slate-600">
-          Interview analytics · <span className="text-navy">{cohortLabel}</span>
-        </p>
+        <ConsoleHero
+          icon={MessageSquare}
+          eyebrow="Placement Office"
+          title="Interview Analytics"
+          description="Campus interview readiness, communication, and confidence from AI mock interviews."
+          actions={
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white/80 ring-1 ring-inset ring-white/15">
+              {cohortLabel}
+            </span>
+          }
+        />
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center">
           <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-[#fff5ea] text-[#f5b400]">
             <MessageSquare className="size-6" />
@@ -94,10 +103,17 @@ export default function InterviewAnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm font-semibold text-slate-600">
-        Interview analytics · <span className="text-navy">{cohortLabel}</span> ·{' '}
-        <span className="text-slate-500">{data.studentsAttempted} students · {data.totalInterviews} interviews</span>
-      </p>
+      <ConsoleHero
+        icon={MessageSquare}
+        eyebrow="Placement Office"
+        title="Interview Analytics"
+        description="Campus interview readiness, communication, and confidence from AI mock interviews."
+        actions={
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white/80 ring-1 ring-inset ring-white/15">
+            {cohortLabel} · {data.studentsAttempted} students · {data.totalInterviews} interviews
+          </span>
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <ScoreTile icon={MessageSquare} label="Interview Readiness" value={data.interviewReadiness} source="Mock-interview overall %" />

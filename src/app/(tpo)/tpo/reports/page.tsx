@@ -11,6 +11,7 @@ import type { TpoCodingAnalytics, TpoDashboard, TpoPlacementSummary } from '@/sh
 import { useTpoConsole } from '@/components/tpo/TpoConsole';
 import { BentoCard } from '@/components/tpo/ui';
 import { Button } from '@/components/ui/button';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 
 const BAND_LABEL: Record<string, string> = { READY: 'Ready', IN_TRAINING: 'In training', AT_RISK: 'At risk' };
 
@@ -124,14 +125,22 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-slate-600">
-          Reports &amp; exports · <span className="text-navy">{cohortId ? cohorts.find((c) => c.id === cohortId)?.name : 'All batches'}</span>
-        </p>
-        <Button size="sm" variant="outline" onClick={() => window.print()}>
-          <Printer className="size-4" /> Print / Save as PDF
-        </Button>
-      </div>
+      <ConsoleHero
+        icon={FileText}
+        eyebrow="Placement Office"
+        title="Reports & Exports"
+        description="Download student, company and campus CSVs, or print a placement snapshot for your college."
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-bold text-white/70 ring-1 ring-inset ring-white/15">
+              {cohortId ? cohorts.find((c) => c.id === cohortId)?.name : 'All batches'}
+            </span>
+            <Button size="sm" variant="outline" onClick={() => window.print()}>
+              <Printer className="size-4" /> Print / Save as PDF
+            </Button>
+          </div>
+        }
+      />
 
       <div className="grid gap-5 md:grid-cols-3">
         <ReportCard

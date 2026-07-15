@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
-import { Building2, Download, Loader2, School } from 'lucide-react';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
+import { Building2, Download, FileText, Loader2, School } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getAdminStats, getAdminCompanyStats, type AdminPlatformStats, type AdminCompanyStat } from '@/lib/api/admin';
 
@@ -77,11 +78,12 @@ export default function AdminReportsPage() {
   return (
     <div className="space-y-6">
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Platform Admin', href: '/admin/dashboard' }, { label: 'Reports' }]} />
-      <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Insights</p>
-        <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Reports &amp; Exports</h1>
-        <p className="mt-1 text-sm text-slate-600">Platform and company reports - download as CSV.</p>
-      </header>
+      <ConsoleHero
+        icon={FileText}
+        eyebrow="Platform Admin"
+        title="Reports & Exports"
+        description="Platform and company reports - download as CSV."
+      />
 
       {loading ? (
         <div className="flex items-center justify-center py-24"><Loader2 className="size-7 animate-spin text-slate-500" /></div>

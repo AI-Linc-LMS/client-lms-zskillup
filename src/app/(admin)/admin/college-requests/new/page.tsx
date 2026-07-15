@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
+import { Building2 } from 'lucide-react';
 import {
   CollegeRequestForm,
   toCreateBody,
@@ -38,12 +40,12 @@ export default function NewCollegeRequestPage() {
           { label: 'New' },
         ]}
       />
-      <div>
-        <h1 className="text-[28px] font-extrabold tracking-tight text-navy">New college registration request</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Save as a draft to finish later, or submit for Super Admin review.
-        </p>
-      </div>
+      <ConsoleHero
+        icon={Building2}
+        eyebrow="Platform Admin"
+        title="New college registration request"
+        description="Save as a draft to finish later, or submit for Super Admin review."
+      />
       <CollegeRequestForm busy={busy} error={error} onSave={onSave} primaryLabel="Save & submit for review" />
     </div>
   );

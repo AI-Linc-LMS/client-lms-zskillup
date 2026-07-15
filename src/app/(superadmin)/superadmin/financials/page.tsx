@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { IndianRupee } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { FinancialsPaymentsBoard } from '@/components/admin/FinancialsPaymentsBoard';
 import { FinancialsDashboard } from '@/components/admin/FinancialsDashboard';
 
@@ -16,13 +18,12 @@ export default function SuperadminFinancialsPage() {
           { label: 'Financials' },
         ]}
       />
-      <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Commercial</p>
-        <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">Financials</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Collected revenue from real payments, with a date filter - plus a projected (MRR/ARR) view.
-        </p>
-      </header>
+      <ConsoleHero
+        icon={IndianRupee}
+        eyebrow="Super Admin"
+        title="Financials"
+        description="Collected revenue from real payments, with a date filter - plus a projected (MRR/ARR) view."
+      />
 
       <div className="flex gap-1 border-b border-slate-200">
         {(
