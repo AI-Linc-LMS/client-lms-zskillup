@@ -6,11 +6,14 @@ import { cn } from '@/lib/utils';
 import type { DecayParams } from '@/lib/api/adaptive';
 
 /**
- * Live time-decay points meter (ai-linc parity). Replicates the server scorer
- * BYTE-FOR-BYTE off the question's `servedAt` anchor, so the "worth now" value it
- * shows is exactly what will be awarded on a correct submit. Counts down from
- * `base` (green, during grace) → amber (decaying) → `floor` (red). Anchoring on
- * the server timestamp means a resumed question shows the already-decayed value.
+ * Live time-decay points meter (ai-linc parity). Replicates the server scorer off
+ * `anchorMs` — the epoch ms when the question was actually SHOWN — so the "worth
+ * now" value it shows is exactly what will be awarded on a correct submit. Counts
+ * down from `base` (green, during grace) → amber (decaying) → `floor` (red).
+ * Anchoring on the show-moment (NOT the earlier server `servedAt` pin time, which
+ * is stamped during the previous submit) means the meter starts at full points the
+ * instant the question appears — matching the per-question timer and the server,
+ * which trusts the client's show-time `timeMs`.
  */
 
 function pointsAfterDecay(tSeconds: number, d: DecayParams): number {
@@ -21,12 +24,12 @@ function pointsAfterDecay(tSeconds: number, d: DecayParams): number {
 
 export function LivePointsMeter({
   points,
-  servedAt,
+  anchorMs,
   hinted = false,
   className,
 }: {
   points: DecayParams;
-  servedAt: string;
+  anchorMs: number;
   hinted?: boolean;
   className?: string;
 }) {
@@ -36,8 +39,7 @@ export function LivePointsMeter({
     return () => clearInterval(id);
   }, []);
 
-  const anchor = Date.parse(servedAt);
-  const elapsed = Math.max(0, (now - (Number.isFinite(anchor) ? anchor : now)) / 1000);
+  const elapsed = Math.max(0, (now - anchorMs) / 1000);
   const raw = pointsAfterDecay(elapsed, points);
   const penalty = hinted ? 1 - points.hintPenalty : 1;
   const worth = Math.round(raw * penalty);

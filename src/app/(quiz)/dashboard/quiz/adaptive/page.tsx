@@ -118,6 +118,7 @@ function AdaptiveQuizRunner({
     resumed,
     paywall,
     continueAfterUnlock,
+    questionStartMs,
   } = useAdaptiveSession({ mockTestId: mockId, topicSlug, companySlug, asWishTopic, requizSourceId, year });
 
   const [selected, setSelected] = useState<string | null>(null);
@@ -134,17 +135,20 @@ function AdaptiveQuizRunner({
     }
   }, [currentQuestion]);
 
-  // Per-question elapsed timer — anchored to the server `servedAt` so a resumed
-  // question shows the real elapsed time (matches the live points meter), not 0.
+  // Per-question elapsed timer — anchored to `questionStartMs`, the moment the
+  // question was actually SHOWN (the hook resets it to now on start/advance/resume).
+  // It must NOT anchor to the server `servedAt`: the next question is pinned during
+  // the PREVIOUS submit, so `servedAt` predates the student ever seeing it — using
+  // it made the new question's timer start at the seconds spent reading the previous
+  // solution instead of 0:00. `questionStartMs` is exactly what the server scorer
+  // trusts (client show-time `timeMs`), so the timer, points meter and award agree.
   useEffect(() => {
     if (!currentQuestion || revealed) return; // freeze the clock once answered
-    const anchor = Date.parse(currentQuestion.servedAt);
-    const base = Number.isFinite(anchor) ? anchor : Date.now();
-    const tick = () => setElapsed(Math.max(0, Math.floor((Date.now() - base) / 1000)));
+    const tick = () => setElapsed(Math.max(0, Math.floor((Date.now() - questionStartMs) / 1000)));
     tick();
     const t = setInterval(tick, 1000);
     return () => clearInterval(t);
-  }, [currentQuestion, revealed]);
+  }, [currentQuestion, revealed, questionStartMs]);
 
   useEffect(() => {
     if (phase === 'complete' && sessionId) {
@@ -354,7 +358,7 @@ function AdaptiveQuizRunner({
             {revealed && lastAnswer ? (
               <EarnedCard earned={lastAnswer.pointsEarned} base={lastAnswer.pointsBase} correct={lastAnswer.isCorrect} />
             ) : (
-              <LivePointsMeter points={q.points} servedAt={q.servedAt} hinted={!!hintState} />
+              <LivePointsMeter points={q.points} anchorMs={questionStartMs} hinted={!!hintState} />
             )}
             <Panel>
               <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
