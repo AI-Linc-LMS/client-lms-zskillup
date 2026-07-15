@@ -45,10 +45,13 @@ function formatCode(code: string): string {
   // Drop markdown code fences (```csharp … ```) — some stems wrap code in them.
   code = code.replace(/```[a-zA-Z]*/g, '').trim();
   if (code.includes('\n')) return code;
+  // Single-line snippet → re-break at statement boundaries WITHOUT splitting array
+  // or object literals. Break after '{' only when a block body (a letter) follows —
+  // never inside "int[] a = {1, 2, 3}" — and break at ';' (statement ends). The old
+  // rule split on every '{'/'}', which mangled literals across lines.
   return code
-    .replace(/\s*\{\s*/g, ' {\n')
+    .replace(/\{\s*(?=[A-Za-z_])/g, '{\n')
     .replace(/;\s*/g, ';\n')
-    .replace(/\s*\}\s*/g, '\n}\n')
     .replace(/\n{2,}/g, '\n')
     .trim();
 }
