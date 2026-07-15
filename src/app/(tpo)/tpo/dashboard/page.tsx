@@ -9,6 +9,7 @@ import {
   BarChart3,
   ClipboardCheck,
   GraduationCap,
+  LayoutDashboard,
   Loader2,
   Plus,
   TrendingUp,
@@ -16,6 +17,7 @@ import {
   Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { getTpoAnalytics } from '@/lib/api/tpo';
 import type { TpoDashboard } from '@/shared';
 import { useTpoConsole } from '@/components/tpo/TpoConsole';
@@ -91,17 +93,26 @@ export default function TpoExecutiveDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Contextual header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-slate-600">
-          Campus overview · <span className="text-navy">{cohortLabel}</span>
-        </p>
-        <Button asChild size="sm" variant="outline">
-          <Link href="/tpo/students">
+      {/* Page hero */}
+      <ConsoleHero
+        icon={LayoutDashboard}
+        eyebrow="Placement Office"
+        title="Executive Dashboard"
+        description={
+          <>
+            Campus readiness, participation and skill gaps across{' '}
+            <span className="font-semibold text-white/90">{cohortLabel}</span>.
+          </>
+        }
+        actions={
+          <Link
+            href="/tpo/students"
+            className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-inset ring-white/15 transition hover:bg-white/15"
+          >
             <Users className="size-4" /> View students
           </Link>
-        </Button>
-      </div>
+        }
+      />
 
       {/* KPI row */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
