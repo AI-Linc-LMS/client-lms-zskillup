@@ -24,7 +24,7 @@ export function ReadinessDonut({
 
   return (
     <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="relative h-44 w-44 shrink-0">
+      <div className="relative h-40 w-40 shrink-0">
         <ResponsiveContainer>
           <PieChart>
             <Pie
@@ -53,11 +53,11 @@ export function ReadinessDonut({
         </div>
       </div>
 
-      <ul className="grid w-full gap-2 sm:max-w-[220px]">
+      <ul className="grid w-full min-w-0 gap-2 sm:max-w-[220px]">
         {segments.map((s) => (
           <li key={s.label} className="flex items-center gap-2 text-sm">
             <span className="size-2.5 shrink-0 rounded-full" style={{ background: s.color }} />
-            <span className="flex-1 truncate text-slate-600">{s.label}</span>
+            <span className="min-w-0 flex-1 truncate text-slate-600">{s.label}</span>
             <span className="font-bold tabular-nums text-navy">{formatValue(s.value)}</span>
             <span className="w-9 text-right text-xs tabular-nums text-slate-500">
               {total ? Math.round((s.value / total) * 100) : 0}%
