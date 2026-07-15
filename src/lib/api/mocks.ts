@@ -50,6 +50,8 @@ export interface ApiMockQuestion {
   /** PYQ tag — company tag ids + years this question was asked in. */
   companyIds?: string[];
   yearTags?: number[];
+  /** Question source; PATTERN_BASED (no company/year) → "SIMILAR PATTERN" tag. */
+  source?: string | null;
   options: ApiMockOption[];
   coding?: ApiMockCodingPayload;
 }

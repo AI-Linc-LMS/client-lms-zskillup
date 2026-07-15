@@ -822,7 +822,7 @@ function MockRunningView({
                   {question.difficulty.toLowerCase()}
                 </span>
               </div>
-              <PyqTag companyIds={question.companyIds ?? []} years={question.yearTags ?? []} />
+              <PyqTag companyIds={question.companyIds ?? []} years={question.yearTags ?? []} source={question.source} />
             </div>
           </div>
           {question.type === 'CODING' ? (
