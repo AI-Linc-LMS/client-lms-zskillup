@@ -6,7 +6,6 @@ import { ArrowRight, Building2, Check, Crown, Layers, ListTree, Lock, Search, Sl
 import type { ApiTopic } from '@/lib/api/catalog';
 import { listCodingTopics, type CodingTopic } from '@/lib/api/mocks';
 import { useMySubscription } from '@/hooks/useMySubscription';
-import { UpgradeModal } from '@/components/billing/UpgradeModal';
 import { EntitlementScope } from '@/shared/enums';
 import { cn } from '@/lib/utils';
 import { ACCENT_CLASS, HIDDEN_ROOT_SLUGS, sectionMetaFor, type Accent } from './section-meta';
@@ -20,6 +19,13 @@ import { CodingBlock } from './CodingBlock';
  * section-meta map (icons can't cross the RSC boundary). Coding is a separate
  * Judge0 system, so it links out to the Company Hub browse rather than the
  * adaptive MCQ runner.
+ *
+ * No lock affordances on chips/sections: every topic, section and company links
+ * straight into the runner (like the Company Hub → Practice Quiz tab). The
+ * free-tier meter (first N questions per scope free) is enforced INSIDE the
+ * runner, which raises the PaywallCard only once the allowance is spent — so a
+ * padlock up-front (which reads as "completely inaccessible") is wrong. Ownership
+ * is still surfaced positively via the "Included" pill + "Your access" panel.
  */
 
 interface RootTopic extends ApiTopic {
@@ -51,7 +57,6 @@ export function PracticePicker({
   // ── access control: what the student owns, from live entitlements ──────────
   const { hasPlatform, active, paywallEnabled } = useMySubscription();
   const [onlyMine, setOnlyMine] = useState(false);
-  const [upgrade, setUpgrade] = useState<{ feature: string; message: string; secondaryHref?: string } | null>(null);
 
   const ownedSections = useMemo(
     () => new Set(active.filter((e) => e.scopeType === EntitlementScope.SECTION && e.scopeRef).map((e) => e.scopeRef as string)),
@@ -147,28 +152,6 @@ export function PracticePicker({
     (!q || 'coding'.includes(q) || filteredCodingTopics.length > 0) && (!onlyMine || codingOwned);
   const nothing = filteredRoots.length === 0 && filteredCompanies.length === 0 && !codingVisible;
 
-  const unlockSection = (name: string, sectionHref: string) =>
-    setUpgrade({
-      feature: `the ${name} section`,
-      message: `Unlock ${name} to practise every topic in it without limits. Your first questions in each topic are always free.`,
-      secondaryHref: sectionHref,
-    });
-
-  // A locked topic/company chip opens the upgrade prompt instead of navigating — but the
-  // modal still offers the free-taste path, so "first questions are free" holds.
-  const lockTopic = (name: string, href: string) =>
-    setUpgrade({
-      feature: `the ${name} topic`,
-      message: `${name} is not in your plan yet. Unlock it for unlimited practice, or try your first few questions free.`,
-      secondaryHref: href,
-    });
-  const lockCompany = (name: string, href: string) =>
-    setUpgrade({
-      feature: `${name} previous-year questions`,
-      message: `${name}'s question bank is not in your plan yet. Unlock it for unlimited practice, or try your first few questions free.`,
-      secondaryHref: href,
-    });
-
   return (
     <div className="space-y-8">
       {/* Your Access */}
@@ -209,24 +192,16 @@ export function PracticePicker({
             Practice a company&apos;s question style
           </h2>
           <div className="flex flex-wrap gap-2">
-            {filteredCompanies.map((c) => {
-              const href = `/dashboard/quiz/adaptive?company=${encodeURIComponent(c.slug)}`;
-              const locked = gating && !companyOwned(c.slug);
-              const chipClass =
-                'inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors hover:border-violet-300 hover:bg-violet-50/70';
-              return locked ? (
-                <button key={c.id} type="button" onClick={() => lockCompany(c.name, href)} className={chipClass}>
-                  <Building2 className="size-3.5 text-violet-500" />
-                  {c.name}
-                  <Lock className="size-3 text-slate-400" aria-label="Not in your plan" />
-                </button>
-              ) : (
-                <Link key={c.id} href={href} className={chipClass}>
-                  <Building2 className="size-3.5 text-violet-500" />
-                  {c.name}
-                </Link>
-              );
-            })}
+            {filteredCompanies.map((c) => (
+              <Link
+                key={c.id}
+                href={`/dashboard/quiz/adaptive?company=${encodeURIComponent(c.slug)}`}
+                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors hover:border-violet-300 hover:bg-violet-50/70"
+              >
+                <Building2 className="size-3.5 text-violet-500" />
+                {c.name}
+              </Link>
+            ))}
           </div>
         </div>
       ) : null}
@@ -247,10 +222,6 @@ export function PracticePicker({
                 root={root}
                 topicHref={adaptiveTopicHref}
                 owned={sectionOwned(root.slug)}
-                locked={gating && !sectionOwned(root.slug)}
-                topicLocked={(slug) => gating && !topicOwned(root.slug, slug)}
-                onUnlock={() => unlockSection(root.name, adaptiveTopicHref(root.slug))}
-                onLockedTopic={(name, slug) => lockTopic(name, adaptiveTopicHref(slug))}
               />
             ))}
             {codingVisible ? <CodingBlock topics={filteredCodingTopics} /> : null}
@@ -258,13 +229,6 @@ export function PracticePicker({
         </div>
       ) : null}
 
-      <UpgradeModal
-        open={upgrade !== null}
-        onClose={() => setUpgrade(null)}
-        feature={upgrade?.feature}
-        message={upgrade?.message}
-        secondaryHref={upgrade?.secondaryHref}
-      />
     </div>
   );
 }
@@ -350,25 +314,17 @@ function AccessPanel({
   );
 }
 
-/** One MCQ section: a section-wide CTA plus a chip per topic. When the paywall is
- *  on and the section isn't owned, an "Included / Unlock" pill shows access state —
- *  the practice links stay live (the first questions in every topic are free). */
+/** One MCQ section: a section-wide CTA plus a chip per topic. Chips + the CTA link
+ *  straight into the runner — no locks — and an "Included" pill positively marks a
+ *  section the student owns. The free-tier allowance is metered in the runner. */
 function SectionBlock({
   root,
   topicHref,
   owned,
-  locked,
-  topicLocked,
-  onUnlock,
-  onLockedTopic,
 }: {
   root: RootTopic;
   topicHref: (slug: string) => string;
   owned: boolean;
-  locked: boolean;
-  topicLocked: (slug: string) => boolean;
-  onUnlock: () => void;
-  onLockedTopic: (name: string, slug: string) => void;
 }) {
   const Icon = root.icon;
   const a = ACCENT_CLASS[root.accent];
@@ -394,44 +350,24 @@ function SectionBlock({
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {locked ? (
-            <button
-              type="button"
-              onClick={onUnlock}
-              className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-[#a16207] transition hover:bg-amber-100"
-            >
-              <Lock className="size-3.5" /> Unlock
-            </button>
-          ) : null}
-          <Link
-            href={topicHref(root.slug)}
-            className="inline-flex items-center gap-1.5 rounded-full bg-navy px-4 py-2 text-xs font-extrabold text-white transition-transform hover:-translate-y-0.5"
-          >
-            Practice whole section <ArrowRight className="size-3.5" />
-          </Link>
-        </div>
+        <Link
+          href={topicHref(root.slug)}
+          className="inline-flex items-center gap-1.5 rounded-full bg-navy px-4 py-2 text-xs font-extrabold text-white transition-transform hover:-translate-y-0.5"
+        >
+          Practice whole section <ArrowRight className="size-3.5" />
+        </Link>
       </div>
 
       <div className="relative mt-4 flex flex-wrap gap-2">
-        {root.children.map((child) => {
-          const chipClass = `inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors ${a.chip}`;
-          return topicLocked(child.slug) ? (
-            <button
-              key={child.id}
-              type="button"
-              onClick={() => onLockedTopic(child.name, child.slug)}
-              className={chipClass}
-            >
-              {child.name}
-              <Lock className="size-3 text-slate-400" aria-label="Not in your plan" />
-            </button>
-          ) : (
-            <Link key={child.id} href={topicHref(child.slug)} className={chipClass}>
-              {child.name}
-            </Link>
-          );
-        })}
+        {root.children.map((child) => (
+          <Link
+            key={child.id}
+            href={topicHref(child.slug)}
+            className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors ${a.chip}`}
+          >
+            {child.name}
+          </Link>
+        ))}
       </div>
     </div>
   );

@@ -67,6 +67,8 @@ export function CodingWorkspace({ slug }: { slug: string }) {
   const [paywall, setPaywall] = useState<AdaptivePaywall | null>(null);
   const [reward, setReward] = useState<GamificationSummary | null>(null);
   const [solved, setSolved] = useState(false);
+  // Bumped after a successful unlock to re-run the loader past the open-time paywall.
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -74,6 +76,7 @@ export function CodingWorkspace({ slug }: { slug: string }) {
       .then(([p, l]) => {
         if (cancelled) return;
         setProblem(p);
+        setPaywall(null);
         setSolved(p.solved);
         setCodeByLang(p.starterCode ?? {});
         // The problem tells us which languages it offers (SQL-only for SQL
@@ -94,13 +97,27 @@ export function CodingWorkspace({ slug }: { slug: string }) {
           'python';
         setLang(initial);
       })
-      .catch(() => {
-        if (!cancelled) setMissing(true);
+      .catch((err) => {
+        if (cancelled) return;
+        // Open-time freemium gate (parity with the adaptive MCQ runner): once the
+        // free coding allowance for this topic is spent, opening a NEW problem is
+        // paywalled server-side. Surface the Buy card instead of "not found".
+        if (err instanceof ApiRequestError && err.code === 'PAYWALL') {
+          const d = (err.details ?? {}) as { scope?: string; scopeRef?: string | null; freeLimit?: number };
+          setPaywall({
+            scope: (d.scope as AdaptivePaywall['scope']) ?? 'TOPIC',
+            scopeRef: d.scopeRef ?? null,
+            freeUsed: d.freeLimit ?? 5,
+            freeLimit: d.freeLimit ?? 5,
+          });
+        } else {
+          setMissing(true);
+        }
       });
     return () => {
       cancelled = true;
     };
-  }, [slug]);
+  }, [slug, reloadKey]);
 
   const monacoLang = useMemo(
     () => languages.find((l) => l.name === lang)?.monaco ?? lang,
@@ -116,6 +133,29 @@ export function CodingWorkspace({ slug }: { slug: string }) {
         <button type="button" onClick={goBack} className="mt-3 inline-block text-sm font-bold text-[#f5b400]">
           ← Back
         </button>
+      </div>
+    );
+  }
+  // Open-time paywall: the problem itself is gated (free coding allowance spent), so
+  // there's no statement/editor to show — render the Buy card full-width. A successful
+  // unlock re-runs the loader (reloadKey) and the problem then opens normally.
+  if (paywall && !problem) {
+    return (
+      <div className="relative mx-auto max-w-2xl">
+        <button
+          type="button"
+          onClick={goBack}
+          className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-slate-600 hover:text-navy"
+        >
+          <ChevronLeft className="size-4" /> Back
+        </button>
+        <PaywallCard
+          paywall={paywall}
+          onUnlocked={() => {
+            setPaywall(null);
+            setReloadKey((k) => k + 1);
+          }}
+        />
       </div>
     );
   }
