@@ -268,6 +268,7 @@ export const ADMIN_NAV: NavSection[] = [
       { label: 'Coding Bank', href: '/admin/coding', icon: Code2 },
       { label: 'Mock Tests', href: '/admin/mocks', icon: FileCheck2 },
       { label: 'Assessments', href: '/admin/scheduled-assessments', icon: CalendarClock },
+      { label: 'Calibration', href: '/admin/calibration', icon: Target, tip: 'Toggle the Placement Readiness Test gate and pick which scheduled assessment is the calibration.' },
       { label: 'Courses', href: '/admin/courses', icon: GraduationCap },
       { label: 'Study Material', href: '/admin/study-material', icon: MonitorPlay },
     ],
