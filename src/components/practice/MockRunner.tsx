@@ -7,12 +7,17 @@ import {
   ArrowLeft,
   BarChart3,
   BookOpen,
+  Brain,
+  Calculator,
   Check,
   ChevronLeft,
   ChevronRight,
   Clock,
+  Compass,
+  Cpu,
   Eraser,
   Flag,
+  Layers,
   Loader2,
   ShieldCheck,
   Sparkles,
@@ -331,15 +336,35 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
   // ── intro ──────────────────────────────────────────────────────────────────
   const m = mock!;
   const kind = proctored ? 'assessment' : 'test';
+  // The Placement Readiness Test (calibration) is the one-time baseline. It gets a
+  // richer, purpose-specific intro. Detected by its title (the only mock named so);
+  // the server still gates it by the is_calibration flag, not the name.
+  const isCalibration = /placement readiness/i.test(m.title);
   const stats = [
     { icon: BookOpen, label: 'Questions', value: String(m.totalQuestions) },
     { icon: Timer, label: 'Duration', value: `${m.durationMinutes} min` },
-    { icon: Star, label: 'Pass mark', value: `${m.passingScore}%` },
+    // A baseline has no pass/fail — show what it spans instead.
+    isCalibration
+      ? { icon: Layers, label: 'Sections', value: '4' }
+      : { icon: Star, label: 'Pass mark', value: `${m.passingScore}%` },
     {
       icon: proctored ? ShieldCheck : Sparkles,
       label: 'Format',
-      value: proctored ? 'Proctored' : 'Timed',
+      value: proctored ? 'Proctored' : isCalibration ? 'Baseline' : 'Timed',
     },
+  ];
+
+  // What the Placement Readiness Test measures + what completing it unlocks.
+  const CALIBRATION_SECTIONS = [
+    { icon: Calculator, name: 'Numerical Ability', desc: 'Arithmetic, data interpretation, speed math' },
+    { icon: Brain, name: 'Logical Reasoning', desc: 'Patterns, puzzles, Venn, seating' },
+    { icon: BookOpen, name: 'Verbal Ability', desc: 'Grammar, comprehension, vocabulary' },
+    { icon: Cpu, name: 'Technical MCQs', desc: 'CS fundamentals, output & coding logic' },
+  ];
+  const CALIBRATION_UNLOCKS = [
+    { icon: Compass, text: 'A personalized study plan matched to your weakest areas' },
+    { icon: Target, text: 'Question recommendations tuned to your real level' },
+    { icon: BarChart3, text: 'A section-wise percentile and full answer review' },
   ];
 
   return (
@@ -382,13 +407,15 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
         <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#ffc42d]">
-              {proctored ? 'ZSkillup placement assessment' : 'ZSkillup mock drive'}
+              {proctored ? 'ZSkillup placement assessment' : isCalibration ? 'ZSkillup placement readiness' : 'ZSkillup mock drive'}
             </p>
             <h1 className="mt-3 text-3xl font-black leading-[1.08] tracking-tight sm:text-4xl sm:leading-[1.05] md:text-[52px]">
               {m.title}
             </h1>
             <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-white/65">
-              {m.totalQuestions} questions · {m.durationMinutes} minutes.{' '}
+              {isCalibration
+                ? 'A one-time baseline across all four placement sections. There is no pass or fail - your results map exactly where you stand today and personalise everything that follows. '
+                : `${m.totalQuestions} questions · ${m.durationMinutes} minutes. `}
               {proctored
                 ? 'This is a strict, server-timed assessment with camera + microphone proctoring. '
                 : 'The clock is enforced by the server. '}
@@ -432,6 +459,28 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
               Once started, the timer can&apos;t be paused. Final submit is one-way.
             </p>
             {error ? <p role="alert" className="mt-2 text-sm text-rose-300">{error}</p> : null}
+
+            {isCalibration ? (
+              <div className="mt-9">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-white/45">What this measures</p>
+                <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
+                  {CALIBRATION_SECTIONS.map(({ icon: Icon, name, desc }) => (
+                    <div
+                      key={name}
+                      className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3.5 backdrop-blur"
+                    >
+                      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#f5b400]/15 text-[#ffc42d]">
+                        <Icon className="size-4" aria-hidden="true" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-sm font-bold text-white">{name}</span>
+                        <span className="mt-0.5 block text-xs leading-snug text-white/55">{desc}</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <aside className="space-y-4">
@@ -445,6 +494,23 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
                   <li className="flex gap-2.5"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-violet-300" /> Stay on this tab in fullscreen - switches are logged.</li>
                 </ul>
                 <p className="mt-3 text-[11px] text-white/45">You&apos;ll grant camera/mic access right after you start.</p>
+              </div>
+            ) : null}
+            {isCalibration ? (
+              <div className="rounded-2xl border border-[#f5b400]/25 bg-[#f5b400]/[0.06] p-5 backdrop-blur">
+                <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-[#ffc42d]">
+                  <Sparkles className="size-3.5" /> What you unlock
+                </p>
+                <ul className="mt-3 space-y-3 text-[13px] leading-snug text-white/80">
+                  {CALIBRATION_UNLOCKS.map(({ icon: Icon, text }) => (
+                    <li key={text} className="flex gap-3">
+                      <Icon className="mt-0.5 size-4 shrink-0 text-[#ffc42d]" aria-hidden="true" /> {text}
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-3 text-[11px] text-white/45">
+                  Take it once - you can always practise the sections afterwards.
+                </p>
               </div>
             ) : null}
             <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-5 backdrop-blur">
