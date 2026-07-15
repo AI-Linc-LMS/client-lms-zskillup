@@ -3,10 +3,15 @@
 import type { ReactNode } from 'react';
 
 /**
- * Presentational building blocks for the super-admin dashboard — pure SVG/CSS,
- * no charting dependency. Each piece is responsive (viewBox + width:100%) and
- * themed off the app tokens (navy / brand orange / accent blue / emerald).
+ * Presentational building blocks for the admin / super-admin consoles — pure
+ * SVG/CSS, no charting dependency. Each piece is responsive (viewBox + width:100%)
+ * and themed off the STUDENT design system: navy(=ink) + brand gold `#f5b400`,
+ * rounded cards, borders-not-shadows, and the signature aurora top-hairline on KPI
+ * tiles. The default accent is brand gold (not blue) so consoles read on-brand;
+ * callers still pass semantic colors (emerald/red/amber) for status.
  */
+
+const BRAND = '#f5b400';
 
 // ── KPI card ──────────────────────────────────────────────────────────────────
 
@@ -15,7 +20,7 @@ export function StatCard({
   value,
   sub,
   icon,
-  accent = '#2563eb',
+  accent = BRAND,
   trend,
 }: {
   label: string;
@@ -27,11 +32,17 @@ export function StatCard({
 }) {
   const up = trend ? trend.value >= 0 : false;
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-      {/* accent wash */}
+    <div className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 transition-all hover:-translate-y-1">
+      {/* aurora top-hairline — the student KPI signature */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-8 -top-8 size-24 rounded-full opacity-[0.07] blur-xl transition-opacity group-hover:opacity-[0.13]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-1"
+        style={{ background: `linear-gradient(90deg, ${accent}, color-mix(in srgb, ${accent} 30%, white))` }}
+      />
+      {/* corner glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-8 -top-8 size-24 rounded-full opacity-[0.10] blur-2xl transition-opacity group-hover:opacity-20"
         style={{ background: accent }}
       />
       <div className="mb-3 flex items-center justify-between">
@@ -79,7 +90,7 @@ export function Panel({
   className?: string;
 }) {
   return (
-    <section className={`rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm ${className}`}>
+    <section className={`rounded-2xl border border-slate-200/80 bg-white p-5 ${className}`}>
       <div className="mb-4 flex items-center justify-between">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">{title}</p>
         {action}
@@ -94,7 +105,7 @@ export function Panel({
 export function AreaChart({
   data,
   height = 200,
-  color = '#2563eb',
+  color = BRAND,
   id,
 }: {
   data: Array<{ date: string; count: number }>;
@@ -236,7 +247,7 @@ export function ProgressRow({
   label,
   value,
   total,
-  color = '#2563eb',
+  color = BRAND,
   hint,
 }: {
   label: string;
@@ -268,7 +279,7 @@ export function MiniStat({
   label,
   value,
   icon,
-  color = '#2563eb',
+  color = BRAND,
 }: {
   label: string;
   value: number;

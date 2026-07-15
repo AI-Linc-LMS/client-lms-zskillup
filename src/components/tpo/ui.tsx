@@ -124,10 +124,16 @@ export function KpiCard({
 }) {
   const t = TONE[tone] ?? TONE.slate;
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 transition-all hover:-translate-y-0.5">
+    <div className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 transition-all hover:-translate-y-1">
+      {/* aurora top-hairline — the student KPI signature */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-6 -top-6 size-20 rounded-full opacity-[0.07] blur-xl transition-opacity group-hover:opacity-[0.13]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-1"
+        style={{ background: `linear-gradient(90deg, ${t.glow}, color-mix(in srgb, ${t.glow} 30%, white))` }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-6 -top-6 size-20 rounded-full opacity-[0.08] blur-2xl transition-opacity group-hover:opacity-[0.15]"
         style={{ background: t.glow }}
       />
       <span className={cn('grid size-9 place-items-center rounded-xl', t.chip)}>
