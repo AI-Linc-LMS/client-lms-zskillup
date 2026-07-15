@@ -23,11 +23,12 @@ import {
   deleteTpoAssessment,
   getTpoAssessmentResults,
   getTpoAssessments,
+  getTpoCodingTopics,
   previewTpoAssessment,
   releaseTpoAssessment,
 } from '@/lib/api/tpo';
 import { listCompanies } from '@/lib/api/catalog';
-import { listCodingTopics, type CodingTopic } from '@/lib/api/mocks';
+import type { CodingTopic } from '@/lib/api/mocks';
 import type { AssessmentResults } from '@/lib/api/scheduling';
 import type { TpoAssessment, TpoAssessmentAvailability, TpoAssessmentList, TpoAssessmentStatus } from '@/shared';
 import { useTpoConsole } from '@/components/tpo/TpoConsole';
@@ -82,9 +83,11 @@ export default function AssessmentCenterPage() {
 
   // Coding topics (primary tags) for the picker — scoped to the chosen company in
   // company mode, else the whole coding bank (sectional mode). Refetch on scope change.
+  // Uses the TPO-scoped endpoint (the student /mocks/coding-topics is STUDENT-only,
+  // so a COLLEGE_ADMIN got a 403 and the list silently came back empty).
   useEffect(() => {
     const company = form.mode === 'COMPANY' && form.companySlug ? form.companySlug : undefined;
-    listCodingTopics(company)
+    getTpoCodingTopics(company)
       .then(setCodingTopics)
       .catch(() => setCodingTopics([]));
   }, [form.mode, form.companySlug]);

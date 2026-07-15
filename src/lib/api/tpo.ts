@@ -123,6 +123,19 @@ export async function previewTpoAssessment(dto: PreviewTpoAssessmentDto): Promis
   return res.data;
 }
 
+/**
+ * Coding topics for the coding round — TPO-scoped (the student /mocks/coding-topics
+ * endpoint is STUDENT-only). Pass a company slug for a company-wise drive, omit for
+ * the whole coding bank (sectional). Returns [{ topic, count }] like the mock builder.
+ */
+export async function getTpoCodingTopics(company?: string): Promise<Array<{ topic: string; count: number }>> {
+  const qs = company ? `?company=${encodeURIComponent(company)}` : '';
+  const res = await apiClient.get<Array<{ topic: string; count: number }>>(
+    `/api/v1/tpo/assessments/coding-topics${qs}`,
+  );
+  return res.data;
+}
+
 export async function getTpoAssessmentResults(id: string): Promise<AssessmentResults> {
   const res = await apiClient.get<AssessmentResults>(`/api/v1/tpo/assessments/${id}/results`);
   return res.data;
