@@ -52,9 +52,11 @@ interface AdaptiveSessionState {
   /** Track answered question count for progress bar. */
   answeredCount: number;
   /**
-   * Per-question timer anchor (epoch ms). Derived from the pinned question's
-   * server `servedAt` so the clock (and points decay) keep running across a
-   * leave/return — this is what makes resume feel continuous.
+   * Per-question timer anchor (epoch ms) = the moment the question is actually
+   * SHOWN. Reset to `Date.now()` on start / advance / resume — deliberately NOT the
+   * server `servedAt` (pin time, stamped during the previous submit), which would
+   * start the clock mid-question. Drives the per-question timer AND the live points
+   * meter, and is what the server scorer trusts via the client `timeMs`.
    */
   questionStartMs: number;
   /** Running banked points this session (ai-linc parity). */
