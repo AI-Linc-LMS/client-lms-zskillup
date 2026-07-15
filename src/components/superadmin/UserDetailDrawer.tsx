@@ -20,6 +20,7 @@ import {
   ADMIN_CAPABILITY_KEYS,
   ADMIN_CAPABILITY_LABELS,
   ADMIN_CAPABILITY_DESCRIPTIONS,
+  isBaselineCapability,
   type AdminCapabilityKey,
 } from '@/shared/admin-capabilities';
 import { describeError } from '@/lib/api/errors';
@@ -417,40 +418,64 @@ export function UserDetailDrawer({
                   <ShieldCheck className="size-3.5" /> Capabilities
                 </p>
                 <div className="space-y-1.5">
-                  {ADMIN_CAPABILITY_KEYS.map((key) => (
-                    <button
-                      key={key}
-                      onClick={() => toggleCapability(key)}
-                      disabled={busy === `cap:${key}`}
-                      className="flex w-full items-start justify-between gap-3 rounded-lg border border-slate-200 p-2.5 text-left transition-colors hover:bg-slate-50 disabled:opacity-60"
-                    >
-                      <span className="min-w-0">
-                        <span className="block text-sm font-semibold text-navy">
-                          {ADMIN_CAPABILITY_LABELS[key]}
-                        </span>
-                        <span className="block text-[11px] text-slate-500">
-                          {ADMIN_CAPABILITY_DESCRIPTIONS[key]}
-                        </span>
-                      </span>
-                      <span
-                        className={cn(
-                          'mt-0.5 flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition-colors',
-                          user.capabilities[key] ? 'bg-green-500' : 'bg-slate-300',
-                        )}
+                  {ADMIN_CAPABILITY_KEYS.map((key) => {
+                    // Baseline capabilities are held by every admin — show them as
+                    // an always-on "Included" row, not a grantable toggle.
+                    if (isBaselineCapability(key)) {
+                      return (
+                        <div
+                          key={key}
+                          className="flex w-full items-start justify-between gap-3 rounded-lg border border-emerald-200 bg-emerald-50/50 p-2.5 text-left"
+                        >
+                          <span className="min-w-0">
+                            <span className="block text-sm font-semibold text-navy">
+                              {ADMIN_CAPABILITY_LABELS[key]}
+                            </span>
+                            <span className="block text-[11px] text-slate-500">
+                              {ADMIN_CAPABILITY_DESCRIPTIONS[key]}
+                            </span>
+                          </span>
+                          <span className="mt-0.5 inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                            <BadgeCheck className="size-3" /> Included
+                          </span>
+                        </div>
+                      );
+                    }
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => toggleCapability(key)}
+                        disabled={busy === `cap:${key}`}
+                        className="flex w-full items-start justify-between gap-3 rounded-lg border border-slate-200 p-2.5 text-left transition-colors hover:bg-slate-50 disabled:opacity-60"
                       >
-                        {busy === `cap:${key}` ? (
-                          <Loader2 className="size-4 animate-spin text-white" />
-                        ) : (
-                          <span
-                            className={cn(
-                              'size-4 rounded-full bg-white transition-transform',
-                              user.capabilities[key] && 'translate-x-4',
-                            )}
-                          />
-                        )}
-                      </span>
-                    </button>
-                  ))}
+                        <span className="min-w-0">
+                          <span className="block text-sm font-semibold text-navy">
+                            {ADMIN_CAPABILITY_LABELS[key]}
+                          </span>
+                          <span className="block text-[11px] text-slate-500">
+                            {ADMIN_CAPABILITY_DESCRIPTIONS[key]}
+                          </span>
+                        </span>
+                        <span
+                          className={cn(
+                            'mt-0.5 flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition-colors',
+                            user.capabilities[key] ? 'bg-green-500' : 'bg-slate-300',
+                          )}
+                        >
+                          {busy === `cap:${key}` ? (
+                            <Loader2 className="size-4 animate-spin text-white" />
+                          ) : (
+                            <span
+                              className={cn(
+                                'size-4 rounded-full bg-white transition-transform',
+                                user.capabilities[key] && 'translate-x-4',
+                              )}
+                            />
+                          )}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
