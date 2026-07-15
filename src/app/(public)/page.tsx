@@ -403,15 +403,17 @@ export default async function HomePage() {
           </div>
         </div>
 
+        {/* Affiliation disclaimer - full-width, part of the hero (Campus-placement) block,
+            lightly amber-highlighted so it reads as an advisory rather than footer fine print.
+            Deliberately NOT inside the recruiter-logo strip below. */}
+        <div className="relative mx-auto max-w-[1400px] px-5 pb-10 md:px-8">
+          <Disclaimer tone="dark" className="border-amber-300/25 bg-amber-300/[0.05]" />
+        </div>
+
         {/* Recruiter logo ticker - centred, larger logos, colour on hover. Solid black
             so the bottom of the hero stays fully dark (no lighter band showing through). */}
         <div className="relative border-t border-white/10 bg-[#0a0a0c]">
           <div className="mx-auto max-w-[1400px] px-5 py-8 md:px-8">
-            {/* Affiliation disclaimer sits right above the recruiter logos it applies to,
-                lightly highlighted (amber-tinted) so it reads as an advisory, not footer fine print. */}
-            <div className="mx-auto mb-7 max-w-4xl">
-              <Disclaimer tone="dark" className="border-amber-300/25 bg-amber-300/[0.05]" />
-            </div>
             <p className="text-center text-[11px] font-bold uppercase tracking-[0.18em] text-white/55">
               Aligned with the hiring patterns of
             </p>
