@@ -5,6 +5,7 @@ import type {
   AuthLoginDto,
   AuthRegisterDto,
   AuthResetPasswordDto,
+  AuthResetPasswordOtpDto,
   AuthVerifyEmailDto,
   OnboardingCollegeDto,
   OnboardingProfileDto,
@@ -141,6 +142,16 @@ export async function forgotPassword(dto: AuthForgotPasswordDto): Promise<{ mess
 
 export async function resetPassword(dto: AuthResetPasswordDto): Promise<{ message: string }> {
   const res = await apiClient.post<{ message: string }>('/api/v1/auth/reset-password', dto, {
+    auth: 'login',
+  });
+  return res.data;
+}
+
+/** OTP-based reset (forgot-password flow) — {email, code, password}. */
+export async function resetPasswordOtp(
+  dto: AuthResetPasswordOtpDto,
+): Promise<{ message: string }> {
+  const res = await apiClient.post<{ message: string }>('/api/v1/auth/reset-password-otp', dto, {
     auth: 'login',
   });
   return res.data;

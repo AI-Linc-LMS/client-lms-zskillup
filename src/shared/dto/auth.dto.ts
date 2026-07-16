@@ -102,3 +102,28 @@ export class AuthResetPasswordDto {
   @Matches(/[0-9]/, { message: 'Password must contain a number' })
   password!: string;
 }
+
+/**
+ * OTP-based password reset (forgot-password flow). A 6-digit code is delivered
+ * by email and entered alongside the new password. Distinct from the token
+ * reset above (which stays in use for college set-password + admin-initiated
+ * reset links). Scoped by email + code — anti-enumeration is preserved by a
+ * uniform "invalid or expired" error for any failure.
+ */
+export class AuthResetPasswordOtpDto {
+  @Transform(normaliseEmail)
+  @IsEmail()
+  email!: string;
+
+  @Transform(trimString)
+  @IsString()
+  @Matches(/^\d{6}$/, { message: 'Enter the 6-digit code' })
+  code!: string;
+
+  @IsString()
+  @MinLength(8, { message: 'Password must be at least 8 characters' })
+  @MaxLength(128)
+  @Matches(/[a-zA-Z]/, { message: 'Password must contain a letter' })
+  @Matches(/[0-9]/, { message: 'Password must contain a number' })
+  password!: string;
+}

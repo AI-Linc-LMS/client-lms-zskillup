@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { Mail } from 'lucide-react';
 import type { AuthForgotPasswordDto } from '@/shared';
@@ -12,15 +13,15 @@ import { FormField } from '@/components/ui/form-field';
 import { Logo } from '@/components/layout/Logo';
 
 /**
- * Forgot password — Sprint 1 deliverable. Submitting calls
- * `POST /auth/forgot-password`, which always returns the same response shape
- * regardless of whether the email exists (anti-enumeration).
- *
- * The user is told to check their email; the dev transport surfaces the reset
- * link via the backend server log so a developer can complete the flow.
+ * Forgot password. Submitting calls `POST /auth/forgot-password`, which always
+ * returns the same response regardless of whether the email exists
+ * (anti-enumeration). We then route to /reset-password with the email so the
+ * user can enter the 6-digit code we emailed and set a new password — mirroring
+ * the signup email-verification flow. The code screen is shown regardless of
+ * whether the account exists (it simply never arrives otherwise).
  */
 export default function ForgotPasswordPage() {
-  const [sent, setSent] = useState(false);
+  const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
@@ -33,7 +34,7 @@ export default function ForgotPasswordPage() {
     setServerError(null);
     try {
       await forgotPassword(values);
-      setSent(true);
+      router.push(`/reset-password?email=${encodeURIComponent(values.email)}`);
     } catch (err) {
       setServerError(
         err instanceof ApiRequestError ? err.message : 'Something went wrong. Please try again.',
@@ -61,60 +62,44 @@ export default function ForgotPasswordPage() {
             </div>
           </div>
 
-          {sent ? (
-            <div className="space-y-4">
-              <p className="rounded-md bg-emerald-50 p-3 text-sm font-medium text-emerald-700 ring-1 ring-emerald-200">
-                If an account exists for that email, a reset link has been sent. It expires in 1 hour.
-              </p>
-              <p className="text-xs text-slate-600">
-                Didn&apos;t get the email? Check spam, or try again in a few minutes.
-              </p>
-              <Link
-                href="/login"
-                className="block text-center text-sm font-semibold text-orange hover:underline"
+          <form onSubmit={onSubmit} className="space-y-4" noValidate>
+            <p className="text-sm text-slate-600">
+              Enter the email you registered with and we&apos;ll send you a 6-digit code to set a
+              new password.
+            </p>
+            <FormField
+              id="email"
+              label="Email address"
+              type="email"
+              autoComplete="email"
+              placeholder="you@college.edu"
+              error={errors.email?.message}
+              {...register('email', {
+                required: 'Email is required',
+                pattern: {
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: 'Enter a valid email address',
+                },
+              })}
+            />
+            {serverError ? (
+              <p
+                role="alert"
+                className="rounded-md bg-red-50 p-3 text-sm font-medium text-red-700 ring-1 ring-red-200"
               >
-                ← Back to sign in
+                {serverError}
+              </p>
+            ) : null}
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? 'Sending…' : 'Send reset code'}
+            </Button>
+            <p className="text-center text-sm text-slate-600">
+              Remembered it?{' '}
+              <Link href="/login" className="font-semibold text-orange hover:underline">
+                Sign in
               </Link>
-            </div>
-          ) : (
-            <form onSubmit={onSubmit} className="space-y-4" noValidate>
-              <p className="text-sm text-slate-600">
-                Enter the email you registered with and we&apos;ll send you a link to set a new password.
-              </p>
-              <FormField
-                id="email"
-                label="Email address"
-                type="email"
-                autoComplete="email"
-                placeholder="you@college.edu"
-                error={errors.email?.message}
-                {...register('email', {
-                  required: 'Email is required',
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: 'Enter a valid email address',
-                  },
-                })}
-              />
-              {serverError ? (
-                <p
-                  role="alert"
-                  className="rounded-md bg-red-50 p-3 text-sm font-medium text-red-700 ring-1 ring-red-200"
-                >
-                  {serverError}
-                </p>
-              ) : null}
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? 'Sending…' : 'Send reset link'}
-              </Button>
-              <p className="text-center text-sm text-slate-600">
-                Remembered it?{' '}
-                <Link href="/login" className="font-semibold text-orange hover:underline">
-                  Sign in
-                </Link>
-              </p>
-            </form>
-          )}
+            </p>
+          </form>
         </div>
       </div>
     </main>
