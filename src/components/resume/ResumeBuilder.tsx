@@ -28,8 +28,13 @@ import { describeError } from '@/lib/api/errors';
 import { Copy, Download, FileText, FolderOpen, Gauge, LayoutTemplate, Loader2, RotateCcw, Save, Sparkles, Trash2, UserRound, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const DRAFT_KEY = 'zskillup_resume_draft';
-const TEMPLATE_KEY = 'zskillup_resume_template';
+// Drafts are keyed PER USER so a saved draft can never leak into a different
+// account on the same browser (mirrors CartProvider's per-user cart key). The
+// legacy GLOBAL keys are purged on mount so no account inherits a stale draft.
+const LEGACY_DRAFT_KEY = 'zskillup_resume_draft';
+const LEGACY_TEMPLATE_KEY = 'zskillup_resume_template';
+const draftKey = (userId: string) => `zskillup_resume_draft:${userId}`;
+const templateKey = (userId: string) => `zskillup_resume_template:${userId}`;
 
 function atsColor(n: number): string {
   if (n >= 75) return 'text-green-600';
@@ -109,6 +114,7 @@ export function ResumeBuilder() {
   const [downloading, setDownloading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const [showResumes, setShowResumes] = useState(false);
   const [showAts, setShowAts] = useState(false);
   const [resumes, setResumes] = useState<ResumeSummaryDto[]>([]);
@@ -118,43 +124,58 @@ export function ResumeBuilder() {
   const ats = useMemo(() => computeAtsScore(data, '').overall, [data]);
 
   useEffect(() => {
-    let hasDraft = false;
+    // Purge the legacy GLOBAL draft first so no account ever inherits it (this is
+    // the cross-account leak). Then identify the user and read only THAT user's
+    // draft — never a global one.
     try {
-      const raw = localStorage.getItem(DRAFT_KEY);
-      if (raw) {
-        setData(normalizeResume(JSON.parse(raw)));
-        hasDraft = true;
-      }
-      const t = localStorage.getItem(TEMPLATE_KEY);
-      if (isTemplateKey(t)) setTemplate(t);
+      localStorage.removeItem(LEGACY_DRAFT_KEY);
+      localStorage.removeItem(LEGACY_TEMPLATE_KEY);
     } catch {
-      /* ignore corrupt draft */
+      /* private mode / SSR */
     }
-    setHydrated(true);
-    // First open (no saved draft) → seed the editor from the student's profile
-    // so contact + education + skills are prefilled instead of a blank page.
-    if (!hasDraft) {
-      getMe()
-        .then((me) => setData((prev) => (isResumeEmpty(prev) ? resumeFromProfile(me) : prev)))
-        .catch(() => {
-          /* not a student / offline — leave the empty resume */
-        });
-    }
+    getMe()
+      .then((me) => {
+        setUserId(me.id);
+        let hasDraft = false;
+        try {
+          const raw = localStorage.getItem(draftKey(me.id));
+          if (raw) {
+            setData(normalizeResume(JSON.parse(raw)));
+            hasDraft = true;
+          }
+          const t = localStorage.getItem(templateKey(me.id));
+          if (isTemplateKey(t)) setTemplate(t);
+        } catch {
+          /* ignore corrupt draft */
+        }
+        // No per-user draft → seed the editor from the student's profile so
+        // contact + education + skills are prefilled instead of a blank page.
+        if (!hasDraft) {
+          setData((prev) => (isResumeEmpty(prev) ? resumeFromProfile(me) : prev));
+        }
+        setHydrated(true);
+      })
+      .catch(() => {
+        // Not a student / offline: no user id, so no draft is read or written
+        // (avoids ever adopting another account's data). Editor stays usable.
+        setHydrated(true);
+      });
   }, []);
 
   useEffect(() => {
-    if (hydrated) {
+    // Persist only once the owning user is known → drafts stay per-account.
+    if (hydrated && userId) {
       try {
-        localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+        localStorage.setItem(draftKey(userId), JSON.stringify(data));
       } catch {
         /* non-fatal */
       }
     }
-  }, [data, hydrated]);
+  }, [data, hydrated, userId]);
 
   useEffect(() => {
-    if (hydrated) localStorage.setItem(TEMPLATE_KEY, template);
-  }, [template, hydrated]);
+    if (hydrated && userId) localStorage.setItem(templateKey(userId), template);
+  }, [template, hydrated, userId]);
 
   const router = useRouter();
 
