@@ -24,6 +24,7 @@ export function companyTip(c: ApiCompany): TipContent {
     body: blurb || `Everything ${c.name} tests, in one place.`,
     bullets: [
       `Previous-year questions from real ${c.name} papers`,
+      'Study Material (video lectures)',
       'Every section and sub-section this company asks',
       `${c.name}-pattern mock assessments`,
       'Mock Interview + Resume Builder included',
@@ -41,6 +42,7 @@ export function sectionTip(name: string, subs: ApiTopic[]): TipContent {
       subs.length
         ? `All ${subs.length} sub-sections - ${shown.join(', ')}${subs.length > shown.length ? ' and more' : ''}`
         : 'Every sub-section in this section',
+      'Study Material (video lectures)',
       'Adaptive practice that adjusts to your level',
       'Timed section drills with step-by-step solutions',
       'Progress tracking and performance analytics',
@@ -53,6 +55,7 @@ export function subsectionTip(name: string, sectionName: string): TipContent {
     title: name,
     body: `Focused practice on ${name}, from the ${sectionName} section.`,
     bullets: [
+      'Study Material (video lectures)',
       'Adaptive practice that adjusts to your accuracy',
       'Step-by-step solutions for every question',
       'Progress tracking on this topic',

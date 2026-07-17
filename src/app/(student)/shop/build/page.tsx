@@ -136,7 +136,13 @@ export default function BuildYourOwnPage() {
       return [...best.values()].sort((a, b) => a.name.localeCompare(b.name));
     };
     const mcqSections = roots
-      .map((r) => ({ section: r, topics: dedupe(leavesByRoot.get(r.id) ?? []) }))
+      // Strip a leading "Section N" prefix from the DB-authored root name (e.g.
+      // "Section 5: Interview Preparation" → "Interview Preparation"); the tabs,
+      // tooltip and cart label all read this single normalized name.
+      .map((r) => ({
+        section: { ...r, name: r.name.replace(/^Section\s*\d+\s*[:.\-–·]?\s*/i, '') },
+        topics: dedupe(leavesByRoot.get(r.id) ?? []),
+      }))
       .filter((s) => s.topics.length > 0);
     // Coding is a separate Judge0 system (not in assessments.topics), so inject it
     // synthetically like SectionsExplorer does. Buyable as a SECTION (scopeRef 'coding')
