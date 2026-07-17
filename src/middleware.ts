@@ -71,8 +71,26 @@ function roleHome(role: string | undefined): string {
  * errors. A SUPER_ADMIN with the preview cookie is deliberately allowed into
  * the student area ("view as student").
  */
+/** The only domain the app may run on. Razorpay live checkout is registered to
+ *  it, and session cookies are host-scoped — so the raw Netlify subdomain must
+ *  never serve the app (a payment there fails "Website Mismatch", and a login
+ *  there doesn't carry to prephasz.com). */
+const CANONICAL_HOST = 'prephasz.com';
+const NETLIFY_HOST = 'zskilluplms.netlify.app';
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Canonical-domain guard — runs BEFORE the auth gate so it catches protected
+  // routes too (the netlify.toml edge redirect is shadowed by this middleware
+  // for those paths, so the redirect has to live here as well). Preserves path
+  // + query; deploy previews (deploy-preview-*--…) don't match the exact host.
+  if (request.headers.get('host') === NETLIFY_HOST) {
+    return NextResponse.redirect(
+      `https://${CANONICAL_HOST}${pathname}${request.nextUrl.search}`,
+      301,
+    );
+  }
 
   // Company hubs are PUBLICLY browsable — they're linked from the marketing/
   // landing pages and their backend endpoints are @Public. Allow everyone
