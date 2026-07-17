@@ -1,5 +1,6 @@
 import { _rearmApiClient, apiClient } from './client';
 import { authToken } from '@/store/auth';
+import { clearSessionHints, writeOnboardedHint, writeRoleHint } from '@/lib/session-hints';
 import type {
   AuthForgotPasswordDto,
   AuthLoginDto,
@@ -43,10 +44,35 @@ export async function register(dto: AuthRegisterDto): Promise<{ message: string 
   return res.data;
 }
 
-export async function verifyEmail(dto: AuthVerifyEmailDto): Promise<{ message: string }> {
-  const res = await apiClient.post<{ message: string }>('/api/v1/auth/verify-email', dto, {
+/**
+ * Establish a client session from a credential-endpoint result: store the
+ * in-memory access token, re-arm the API-client circuit breaker, and write the
+ * durable middleware hint cookies. Shared by login / Google / email-verify so a
+ * session is created the SAME way on every path.
+ */
+function establishSession(result: LoginResult): void {
+  authToken.set(result.accessToken);
+  _rearmApiClient();
+  writeRoleHint(result.user.role);
+  writeOnboardedHint(result.user.isOnboarded);
+}
+
+/**
+ * Verify the email OTP. The backend now issues a full login session on success
+ * (symmetric with login/Google), so a freshly-verified account enters the
+ * workspace authenticated — this is the root-cause fix for new users being
+ * bounced to /login on /practice and /mock-assessment.
+ */
+export async function verifyEmail(dto: AuthVerifyEmailDto): Promise<LoginResult> {
+  const res = await apiClient.post<LoginResult>('/api/v1/auth/verify-email', dto, {
     auth: 'login',
   });
+  // The backend issues a session on success. Guard the establish step so a
+  // staggered polyrepo deploy is safe: an older backend that still returns only
+  // `{ message }` (no accessToken) leaves signup exactly as it was — no crash.
+  if (res.data?.accessToken && res.data.user) {
+    establishSession(res.data);
+  }
   return res.data;
 }
 
@@ -61,21 +87,13 @@ export async function resendOtp(email: string): Promise<{ message: string }> {
 
 export async function login(dto: AuthLoginDto): Promise<LoginResult> {
   const res = await apiClient.post<LoginResult>('/api/v1/auth/login', dto, { auth: 'login' });
-  authToken.set(res.data.accessToken);
-  // Re-arm the API client circuit-breaker after a fresh successful login.
-  _rearmApiClient();
-  // Non-sensitive hints for middleware redirects (UX only — server is authority).
-  document.cookie = `role=${res.data.user.role}; path=/; samesite=lax`;
-  document.cookie = `onboarded=${res.data.user.isOnboarded ? '1' : '0'}; path=/; samesite=lax`;
+  establishSession(res.data);
   return res.data;
 }
 
 export async function loginWithGoogle(idToken: string): Promise<LoginResult> {
   const res = await apiClient.post<LoginResult>('/api/v1/auth/google', { idToken }, { auth: 'login' });
-  authToken.set(res.data.accessToken);
-  _rearmApiClient();
-  document.cookie = `role=${res.data.user.role}; path=/; samesite=lax`;
-  document.cookie = `onboarded=${res.data.user.isOnboarded ? '1' : '0'}; path=/; samesite=lax`;
+  establishSession(res.data);
   return res.data;
 }
 
@@ -90,9 +108,7 @@ export async function logout(): Promise<void> {
     // Even if the network call fails, clear local state below.
   } finally {
     authToken.clear(); // also drops any active "view as student" preview token
-    document.cookie = 'role=; path=/; max-age=0; samesite=lax';
-    document.cookie = 'onboarded=; path=/; max-age=0; samesite=lax';
-    document.cookie = 'preview=; path=/; max-age=0; samesite=lax';
+    clearSessionHints();
   }
 }
 
@@ -121,7 +137,7 @@ export async function saveOnboardingTargets(
   const res = await apiClient.post<{ isComplete: boolean }>('/api/v1/onboarding/step/targets', dto);
   if (res.data.isComplete) {
     // Update the middleware onboarding hint (UX only — server is authority).
-    document.cookie = 'onboarded=1; path=/; samesite=lax';
+    writeOnboardedHint(true);
   }
   return res.data;
 }
