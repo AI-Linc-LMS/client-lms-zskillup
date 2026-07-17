@@ -27,3 +27,19 @@
   to = "http://zskillup-load-balancer-122235018.ap-south-1.elb.amazonaws.com/health"
   status = 200
   force = true
+
+# Canonical-domain redirect. The site must only ever be used on prephasz.com:
+#  - Razorpay blocks live payments whose checkout runs on an UNREGISTERED domain
+#    ("Business – Website Mismatch"). Only prephasz.com is registered, so a
+#    payment attempted from the raw Netlify subdomain fails.
+#  - Session cookies (the `role` middleware hint + the HttpOnly refresh cookie)
+#    are host-scoped, so mixing the two domains logs the user out (/practice →
+#    /login bounce).
+# Force every request to the default Netlify subdomain over to prephasz.com,
+# preserving the path + query. Listed AFTER the /api proxies so API calls are
+# still served same-origin; deploy previews (deploy-preview-*--…) don't match.
+[[redirects]]
+  from = "https://zskilluplms.netlify.app/*"
+  to = "https://prephasz.com/:splat"
+  status = 301
+  force = true
