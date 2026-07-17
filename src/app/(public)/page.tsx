@@ -29,7 +29,7 @@ import { BrandLogo } from '@/components/layout/BrandLogo';
 import { HomeFeaturedTracks } from '@/components/marketing/HomeFeaturedTracks';
 import { GamifiedShowcase } from '@/components/marketing/GamifiedShowcase';
 import { HomeBlogSection } from '@/components/marketing/HomeBlogSection';
-import { VideoPlaceholder } from '@/components/media/VideoPlaceholder';
+import { DriveVideoEmbed } from '@/components/media/DriveVideoEmbed';
 import RotatingText from '@/components/reactbits/RotatingText';
 import SpotlightCard from '@/components/reactbits/SpotlightCard';
 import CountUp from '@/components/reactbits/CountUp';
@@ -457,10 +457,10 @@ export default async function HomePage() {
           <div className="grid items-center gap-6 lg:grid-cols-2 lg:gap-8">
             {/* LEFT - platform tour video + what's inside prephasz */}
             <div className="flex flex-col gap-6">
-              <VideoPlaceholder
+              <DriveVideoEmbed
+                fileId="1LRxk6aPvabhmB4txFWFgK4tlxYNu5mDA"
                 eyebrow="Platform tour"
                 title="See how prephasz works"
-                subtitle="From your first practice question to placement-ready - the full journey. Video coming soon."
               />
 
               {/* What's inside prephasz */}
