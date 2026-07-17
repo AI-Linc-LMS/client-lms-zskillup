@@ -322,3 +322,20 @@ export function _rearmApiClient(): void {
   sessionTerminated = false;
   refreshInFlight = null;
 }
+
+/**
+ * Attempt to restore a session straight from the HttpOnly refresh cookie, with
+ * NO role hint required (unlike getMe, which short-circuits when the hint is
+ * absent). Used by the login page after a middleware bounce: if the session is
+ * actually alive, this re-primes the access token AND re-stamps the `role` hint
+ * cookie (see refreshAccessToken's resync), so the visitor can be sent straight
+ * back to their destination instead of being stranded on a login form. Returns
+ * 'ok' only when the hint is confirmed restored, so the caller can't create a
+ * /login ↔ protected-route loop.
+ */
+export async function restoreSessionFromRefreshCookie(): Promise<'ok' | 'unauthorized' | 'network'> {
+  _rearmApiClient(); // this is a fresh page load after a hard bounce; clear any latch
+  const outcome = await refreshAccessToken();
+  if (outcome === 'ok' && roleHint() !== null) return 'ok';
+  return outcome === 'ok' ? 'unauthorized' : outcome;
+}

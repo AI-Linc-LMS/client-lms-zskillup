@@ -1,12 +1,13 @@
 'use client';
 
-import { Suspense, useCallback, useState } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import type { AuthLoginDto } from '@/shared';
 import { login } from '@/lib/api/auth';
+import { restoreSessionFromRefreshCookie } from '@/lib/api/client';
 import { ApiRequestError } from '@/lib/api/types';
 import { FormField } from '@/components/ui/form-field';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
@@ -67,6 +68,33 @@ function LoginForm() {
     // token is preserved (soft nav) so the destination loads its data fast.
     router.replace(target);
   }, [router, searchParams]);
+
+  // Bounced here from a protected route (?redirect=...)? The middleware only sees
+  // the `role` hint cookie, so a live session whose hint went missing (e.g. an
+  // older session cookie that expired, or a hint cleared out-of-band) lands here
+  // even though the HttpOnly refresh session is still valid. Instead of stranding
+  // an authenticated user on a login form (and looping every time they click the
+  // gated nav item), silently restore the session from the refresh cookie — which
+  // re-stamps the durable `role` hint — and send them straight back.
+  useEffect(() => {
+    const redirect = searchParams.get('redirect');
+    if (!redirect || !redirect.startsWith('/')) return;
+    let cancelled = false;
+    setRedirecting(true);
+    restoreSessionFromRefreshCookie()
+      .then((outcome) => {
+        if (cancelled) return;
+        if (outcome === 'ok') router.replace(redirect);
+        else setRedirecting(false); // genuinely logged out → show the form
+      })
+      .catch(() => {
+        if (!cancelled) setRedirecting(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (redirecting) {
     return (
