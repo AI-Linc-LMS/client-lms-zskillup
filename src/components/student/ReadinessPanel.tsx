@@ -239,7 +239,13 @@ export function ReadinessPanel({
           {/* topic mastery - heatmap chips */}
           {data.topics.length ? (
             <div data-tour={tour === 'performance' ? 'perf:topic-mastery' : undefined}>
-              <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Topic mastery</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Topic mastery · accuracy</p>
+              {/* Explicit: these %s are ACCURACY (correct ÷ attempted), not completion —
+                  a topic can read 100% off a single correct answer. Prevents the
+                  "why is Number System 100% completed?" confusion. */}
+              <p className="mb-3 mt-1 text-[11px] leading-snug text-slate-400">
+                % = accuracy on questions you&apos;ve attempted (correct ÷ attempted), not completion.
+              </p>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {data.topics.slice(0, 10).map((t, i) => (
                   <motion.div
