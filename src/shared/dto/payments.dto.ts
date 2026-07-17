@@ -20,6 +20,7 @@ import {
   Max,
   MaxLength,
   Min,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -129,6 +130,14 @@ export class UpdatePriceBookDto {
   @Max(1_000_000_00)
   amountCents?: number;
 
+  /** Strike-through/MRP price (minor units). null clears it (no strikethrough). */
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @IsInt()
+  @Min(0)
+  @Max(1_000_000_00)
+  mrpCents?: number | null;
+
   @IsOptional()
   @IsInt()
   @Min(1)
@@ -148,6 +157,9 @@ export interface PriceBookEntryDto {
   tier: PriceTier;
   period: BillingPeriod;
   amountCents: number;
+  /** Original/MRP price for a strike-through (same minor units). NULL = no MRP.
+   *  Display-only — amountCents is the charged price; MRP never hits Razorpay. */
+  mrpCents: number | null;
   currency: string;
   durationDays: number;
   isActive: boolean;
