@@ -28,6 +28,8 @@ import { InfoTip, type TipContent } from '@/components/ui/InfoTip';
 import { getMySubscription, getPricing } from '@/lib/api/payments';
 import { formatPrice } from '@/lib/api/subscriptions';
 import { listCompanies, listTopicsWithCounts, type ApiCompany, type ApiTopic } from '@/lib/api/catalog';
+import { listCodingTopics } from '@/lib/api/mocks';
+import { CODING_SECTION_SLUG } from '@/lib/sections/section-catalog';
 import { HIDDEN_ROOT_SLUGS } from '@/components/practice/section-meta';
 import { buildPriceMap, PERIODS, periodSavingsPct, retailPrice } from '@/lib/payments/pricing';
 import { BillingPeriod, EntitlementScope } from '@/shared/enums';
@@ -62,6 +64,7 @@ export default function BuildYourOwnPage() {
   const [prices, setPrices] = useState<PriceBookEntryDto[]>([]);
   const [topics, setTopics] = useState<ApiTopic[]>([]);
   const [companies, setCompanies] = useState<ApiCompany[]>([]);
+  const [codingTopics, setCodingTopics] = useState<Awaited<ReturnType<typeof listCodingTopics>>>([]);
   const [owned, setOwned] = useState<Owned>({ platform: false, scopes: new Set() });
   const [loading, setLoading] = useState(true);
 
@@ -80,10 +83,12 @@ export default function BuildYourOwnPage() {
       listTopicsWithCounts().catch(() => []),
       listCompanies().catch(() => []),
       getMySubscription().catch(() => null),
-    ]).then(([pr, tp, co, sub]) => {
+      listCodingTopics().catch(() => []),
+    ]).then(([pr, tp, co, sub, coding]) => {
       setPrices(pr);
       setTopics(tp);
       setCompanies(co);
+      setCodingTopics(coding);
       if (sub) {
         const ents = sub.entitlements.filter((e) => e.status === 'ACTIVE');
         setOwned({
@@ -130,10 +135,32 @@ export default function BuildYourOwnPage() {
       }
       return [...best.values()].sort((a, b) => a.name.localeCompare(b.name));
     };
-    return roots
+    const mcqSections = roots
       .map((r) => ({ section: r, topics: dedupe(leavesByRoot.get(r.id) ?? []) }))
       .filter((s) => s.topics.length > 0);
-  }, [topics]);
+    // Coding is a separate Judge0 system (not in assessments.topics), so inject it
+    // synthetically like SectionsExplorer does. Buyable as a SECTION (scopeRef 'coding')
+    // or per coding-topic (scopeRef 'coding:<tag>') — both validated server-side by
+    // ScopeCatalogService. Appended AFTER the empty-topics filter so it always shows.
+    if (codingTopics.length) {
+      const codingSection: ApiTopic = {
+        id: CODING_SECTION_SLUG,
+        slug: CODING_SECTION_SLUG,
+        name: 'Programming / Coding',
+        parentId: null,
+        questionCount: codingTopics.reduce((n, t) => n + t.count, 0),
+      };
+      const codingLeaves: ApiTopic[] = codingTopics.map((t) => ({
+        id: `${CODING_SECTION_SLUG}:${t.topic}`,
+        slug: `${CODING_SECTION_SLUG}:${t.topic}`,
+        name: t.topic,
+        parentId: CODING_SECTION_SLUG,
+        questionCount: t.count,
+      }));
+      mcqSections.push({ section: codingSection, topics: codingLeaves });
+    }
+    return mcqSections;
+  }, [topics, codingTopics]);
 
   useEffect(() => {
     if (!activeSection && sections.length) setActiveSection(sections[0].section.id);
