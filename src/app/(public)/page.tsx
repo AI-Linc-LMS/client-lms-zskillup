@@ -521,19 +521,19 @@ export default async function HomePage() {
               <div className="relative h-[26rem] w-full overflow-hidden border-b border-[var(--color-line)] bg-white">
                 <div
                   role="img"
-                  aria-label="Lokesh Mathur, Founder, ZSkillup Education"
+                  aria-label="Lokesh Mathur, Founder & Director, ZSkillup Education"
                   className="absolute inset-0 bg-contain bg-bottom bg-no-repeat"
                   style={{ backgroundImage: "url('/images/founder-lokesh.png')" }}
                 />
                 <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-[var(--color-brand)] px-3 py-1 text-[11px] font-black uppercase tracking-wider text-[var(--color-brand-ink)] shadow-sm">
-                  <Sparkles className="h-3 w-3" aria-hidden /> Founder
+                  <Sparkles className="h-3 w-3" aria-hidden /> Founder &amp; Director
                 </span>
               </div>
 
               {/* Description */}
               <div className="p-7 lg:p-8">
                 <h3 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)]">Lokesh Mathur</h3>
-                <p className="mt-1 text-sm font-semibold text-[var(--color-brand-strong)]">Founder, ZSkillup Education</p>
+                <p className="mt-1 text-sm font-semibold text-[var(--color-brand-strong)]">Founder &amp; Director, ZSkillup Education</p>
                 <p className="mt-4 text-sm leading-relaxed text-[var(--color-text-muted)] sm:text-[15px]">
                   A dynamic leader with 19+ years across IT, education, and edtech - an IIM Calcutta
                   Executive MBA, certified in PMP®, CSM®, and SCJP 5.0. From his own venture to senior
