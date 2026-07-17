@@ -47,14 +47,18 @@ export function CodingProblemsList({
     };
   }, [company]);
 
-  // When a topic is selected, keep only problems carrying that tag (case-insensitive,
-  // any position — a problem tagged [Arrays, Hashing] shows for both). Then apply the
-  // free-text search (matches the title or any tag).
+  // A coding sub-topic == a problem's PRIMARY tag (tags[0]) — the same key the
+  // catalogue groups by (below), the coding-topics picker lists by, AND the
+  // backend free-access meter counts by (codingTopicAccess keys on tags[0]).
+  // Filtering by any tag position broke that alignment: a "Hashing" view would
+  // include problems whose primary tag is Strings/Arrays, each metered under a
+  // DIFFERENT key, so no single sub-topic ever reached the 5-free limit and the
+  // upgrade lock never triggered. Match the meter: primary tag only.
   const filtered = useMemo(() => {
     let all = problems ?? [];
     if (topic) {
       const t = topic.trim().toLowerCase();
-      all = all.filter((p) => p.tags?.some((tag) => tag.trim().toLowerCase() === t));
+      all = all.filter((p) => (p.tags?.[0] ?? '').trim().toLowerCase() === t);
     }
     const needle = q.trim().toLowerCase();
     if (needle) {
