@@ -1,8 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
+import { ApiRequestError } from '@/lib/api/types';
 import type { ResumeData, TemplateKey } from './types';
 import { emptyResume, fullName, isTemplateKey, newId, normalizeResume } from './types';
 import { SAMPLE_RESUME } from './sample-data';
@@ -154,6 +156,8 @@ export function ResumeBuilder() {
     if (hydrated) localStorage.setItem(TEMPLATE_KEY, template);
   }, [template, hydrated]);
 
+  const router = useRouter();
+
   const flash = (msg: string, kind: 'info' | 'error' = 'info') => {
     if (kind === 'error') toast.error(msg);
     else toast.success(msg);
@@ -178,6 +182,30 @@ export function ResumeBuilder() {
   const download = async () => {
     if (!pageRef.current) return;
     setDownloading(true);
+    // Export IS the resume's value path, so it must count against the free-run
+    // meter (parity with Mock Interview, whose "start" always persists a row).
+    // Persisting an unsaved resume here routes the export through the metered
+    // POST /me/resumes, which the backend blocks with CAREER_PAYWALL after the
+    // free run — without this, build-and-download never counted and never locked.
+    if (!currentId) {
+      try {
+        const created = await createResume({ title, template, data });
+        setCurrentId(created.id);
+        setSavedTitle(title);
+        refreshList();
+      } catch (err) {
+        if (err instanceof ApiRequestError && err.code === 'CAREER_PAYWALL') {
+          setDownloading(false);
+          toast.error("You've used your free resume", {
+            description: 'Upgrade to save and export more resumes.',
+            action: { label: 'Upgrade', onClick: () => router.push('/upgrade') },
+          });
+          return;
+        }
+        // A transient (non-paywall) save failure shouldn't block the export the
+        // user explicitly asked for — fall through and still generate the PDF.
+      }
+    }
     flash('Generating PDF…');
     try {
       const blob = await resumeToPdfBlob(pageRef.current);
