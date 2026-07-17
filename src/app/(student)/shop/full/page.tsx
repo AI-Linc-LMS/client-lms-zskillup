@@ -187,6 +187,11 @@ export default function FullPlatformPage() {
                       <span className="mt-2 text-2xl font-black tabular-nums text-navy">
                         {entry ? formatPrice(entry.amountCents, 'INR') : '-'}
                       </span>
+                      {entry?.mrpCents != null && entry.mrpCents > entry.amountCents && (
+                        <span className="text-sm font-medium tabular-nums text-slate-400 line-through">
+                          {formatPrice(entry.mrpCents, 'INR')}
+                        </span>
+                      )}
                       {pct ? (
                         <span className="mt-1.5">
                           <PlanPill tone="emerald">Save {pct}%</PlanPill>

@@ -27,6 +27,7 @@ import { companyTip, sectionTip, subsectionTip } from '@/components/billing/plan
 import { InfoTip, type TipContent } from '@/components/ui/InfoTip';
 import { getMySubscription, getPricing } from '@/lib/api/payments';
 import { formatPrice } from '@/lib/api/subscriptions';
+import { PriceTag } from '@/components/billing/PriceTag';
 import { listCompanies, listTopicsWithCounts, type ApiCompany, type ApiTopic } from '@/lib/api/catalog';
 import { listCodingTopics } from '@/lib/api/mocks';
 import { CODING_SECTION_SLUG } from '@/lib/sections/section-catalog';
@@ -238,7 +239,7 @@ export default function BuildYourOwnPage() {
       <p className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-500">Access Plan (Validity)</p>
       <div className="grid gap-2.5 sm:grid-cols-3">
         {PERIODS.map((p) => {
-          const amt = priceOf(scope, p.period);
+          const entry = retailPrice(priceMap, scope, p.period);
           const pct = periodSavingsPct(priceMap, scope, p.period);
           const active = current === p.period;
           return (
@@ -258,7 +259,7 @@ export default function BuildYourOwnPage() {
                   {pct ? <PlanPill tone="emerald">Save {pct}%</PlanPill> : null}
                 </span>
                 <span className="text-sm font-semibold tabular-nums text-slate-600">
-                  {amt != null ? formatPrice(amt, 'INR') : '-'}
+                  {entry ? <PriceTag sellingCents={entry.amountCents} mrpCents={entry.mrpCents} size="sm" /> : '-'}
                 </span>
               </span>
               <span
@@ -711,7 +712,7 @@ function SubTable({
                   {owned && <span className="ml-2 text-[10px] font-bold text-emerald-600">Owned</span>}
                 </td>
                 {PERIODS.map((p) => {
-                  const amt = retailPrice(priceMap, EntitlementScope.TOPIC, p.period)?.amountCents ?? null;
+                  const entry = retailPrice(priceMap, EntitlementScope.TOPIC, p.period);
                   const active = sel === p.period;
                   return (
                     <td key={p.period} className="px-2 py-2.5 text-center">
@@ -729,7 +730,7 @@ function SubTable({
                           {active && <span className="size-1.5 rounded-full bg-white" />}
                         </span>
                         <span className="text-xs font-semibold tabular-nums text-slate-600">
-                          {amt != null ? formatPrice(amt, 'INR') : '-'}
+                          {entry ? <PriceTag sellingCents={entry.amountCents} mrpCents={entry.mrpCents} size="sm" /> : '-'}
                         </span>
                       </button>
                     </td>

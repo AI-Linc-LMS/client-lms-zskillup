@@ -130,6 +130,11 @@ export default function ExplorePlansPage() {
                 <span className="text-2xl font-black tabular-nums text-navy">
                   {formatPrice(platformFrom.amountCents, 'INR')}
                 </span>
+                {platformFrom.mrpCents != null && platformFrom.mrpCents > platformFrom.amountCents && (
+                  <span className="ml-1.5 text-base font-medium tabular-nums text-slate-400 line-through">
+                    {formatPrice(platformFrom.mrpCents, 'INR')}
+                  </span>
+                )}
                 <span className="text-slate-500">/month</span>
               </p>
             )}
@@ -168,6 +173,11 @@ export default function ExplorePlansPage() {
                 <span className="text-2xl font-black tabular-nums text-navy">
                   {formatPrice(topicFrom.amountCents, 'INR')}
                 </span>
+                {topicFrom.mrpCents != null && topicFrom.mrpCents > topicFrom.amountCents && (
+                  <span className="ml-1.5 text-base font-medium tabular-nums text-slate-400 line-through">
+                    {formatPrice(topicFrom.mrpCents, 'INR')}
+                  </span>
+                )}
                 <span className="text-slate-500">/month</span>
               </p>
             )}
