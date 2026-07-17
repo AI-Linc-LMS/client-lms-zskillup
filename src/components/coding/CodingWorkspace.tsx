@@ -31,6 +31,8 @@ import type { AdaptivePaywall } from '@/lib/api/adaptive';
 import { RewardOverlay } from '@/components/gamification/RewardOverlay';
 import { notifyXpUpdated } from '@/lib/xp-events';
 import { CodeEditor } from './CodeEditor';
+import { SqlSchemaView, SqlResultGrid } from './SqlSchemaView';
+import { parseSqlSchema } from './sql-schema';
 
 const DIFF_TONE: Record<string, string> = {
   EASY: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
@@ -124,6 +126,12 @@ export function CodingWorkspace({ slug }: { slug: string }) {
     [languages, lang],
   );
   const code = codeByLang[lang] ?? '';
+  // SQL problems: parse the CREATE TABLE / INSERT seed so we can show the schema +
+  // sample data as tables. null → not a SQL-schema problem → plain-text samples.
+  const sqlTables = useMemo(
+    () => (problem ? parseSqlSchema(problem.sampleCases[0]?.input, problem.statement) : null),
+    [problem],
+  );
 
   if (missing) {
     return (
@@ -280,7 +288,22 @@ export function CodingWorkspace({ slug }: { slug: string }) {
             <Block label="Constraints">{problem.constraints}</Block>
           ) : null}
 
-          {problem.sampleCases.length ? (
+          {sqlTables ? (
+            /* SQL problem — render the seed as a schema + sample-data table instead
+               of raw CREATE TABLE / INSERT text, and the expected query result. */
+            <div className="relative mt-5 space-y-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Database</p>
+              <SqlSchemaView sampleInput={problem.sampleCases[0]?.input} statement={problem.statement} />
+              {problem.sampleCases[0]?.expectedOutput ? (
+                <div>
+                  <p className="mb-1 mt-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                    Expected result
+                  </p>
+                  <SqlResultGrid text={problem.sampleCases[0].expectedOutput} />
+                </div>
+              ) : null}
+            </div>
+          ) : problem.sampleCases.length ? (
             <div className="relative mt-5 space-y-3">
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
                 Examples
