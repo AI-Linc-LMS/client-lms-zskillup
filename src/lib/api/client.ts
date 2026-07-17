@@ -1,5 +1,5 @@
 import { authToken } from '@/store/auth';
-import { hasPreviewHint, roleHint } from '@/lib/session-hints';
+import { clearSessionHints, hasPreviewHint, roleHint, writeRoleHint } from '@/lib/session-hints';
 import { ApiRequestError, type ApiResponse } from './types';
 
 /**
@@ -53,6 +53,23 @@ let refreshInFlight: Promise<RefreshOutcome> | null = null;
 let sessionTerminated = false;
 
 /**
+ * Read the `role` claim from a JWT access token WITHOUT verifying it — used only
+ * to keep the non-sensitive `role` hint cookie in sync after a refresh. The
+ * backend guards verify the signature; this is a display/routing hint only.
+ */
+function roleFromAccessToken(token: string): string | null {
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) return null;
+    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+    const claims = JSON.parse(json) as { role?: string };
+    return typeof claims.role === 'string' ? claims.role : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Calls the Next refresh route handler (same-origin) which forwards the
  * HttpOnly refresh cookie to Nest. De-duplicates concurrent refreshes so a
  * burst of 401s triggers EXACTLY ONE refresh.
@@ -77,6 +94,12 @@ async function refreshAccessToken(): Promise<RefreshOutcome> {
         const accessToken = body.data?.accessToken ?? body.accessToken;
         if (!accessToken) return 'unauthorized';
         authToken.set(accessToken);
+        // Re-stamp the durable `role` hint so a session resurrected from (or slid
+        // forward by) the refresh cookie stays visible to the middleware. The
+        // refresh endpoint returns only the token, so read the role claim from it
+        // — a UX hint only; the Nest guards remain the authority.
+        const role = roleFromAccessToken(accessToken);
+        if (role) writeRoleHint(role);
         return 'ok';
       } catch {
         // fetch() rejects only on network failure — the server never answered,
@@ -101,8 +124,7 @@ function endSessionAndRedirect(): void {
   if (sessionTerminated) return; // single-shot
   sessionTerminated = true;
   authToken.clear();
-  document.cookie = 'role=; path=/; max-age=0; samesite=lax';
-  document.cookie = 'onboarded=; path=/; max-age=0; samesite=lax';
+  clearSessionHints();
   // The refresh cookie is HttpOnly — only the logout route handler can clear
   // it. A dead-but-present cookie makes the middleware treat the visitor as
   // authenticated and bounce /login → /dashboard → 401 → /login in an endless
