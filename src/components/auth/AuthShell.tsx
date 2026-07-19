@@ -32,7 +32,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen">
       {/* ── Left brand panel (hidden on mobile) ────────────────────────────── */}
-      <aside className="relative hidden w-[42%] shrink-0 overflow-hidden bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] text-white lg:flex lg:flex-col lg:justify-between lg:p-10 xl:p-14">
+      <aside className="relative hidden w-[42%] shrink-0 overflow-x-hidden bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] text-white lg:flex lg:flex-col lg:gap-8 lg:overflow-y-auto lg:p-10 xl:p-14">
         {/* Glow orbs */}
         <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-[#f5b400]/25 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute -bottom-24 -right-16 h-64 w-64 rounded-full bg-white/[0.06] blur-3xl" />
@@ -111,7 +111,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
         </div>
 
         {/* Testimonial */}
-        <div className="relative rounded-2xl border border-white/10 bg-white/[0.06] p-5">
+        <div className="relative lg:mt-auto rounded-2xl border border-white/10 bg-white/[0.06] p-5">
           <div className="mb-2 flex items-center gap-0.5">
             {Array.from({ length: 5 }).map((_, k) => (
               <Star key={k} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden />
