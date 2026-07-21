@@ -27,7 +27,8 @@ export type FaceViolationType =
   | 'POOR_LIGHTING'
   | 'PHONE_DETECTED'
   | 'BOOK_DETECTED'
-  | 'SECOND_PERSON';
+  | 'SECOND_PERSON'
+  | 'IDENTITY_MISMATCH';
 
 export type FaceStatus = 'NORMAL' | 'WARNING' | 'VIOLATION';
 
@@ -79,6 +80,10 @@ export interface FaceProctorConfig {
   objectIntervalTicks: number;
   /** Min COCO-SSD score to count a detected object. */
   objectMinScore: number;
+  /** Signature distance from the enrolled baseline that suggests a different person. */
+  identityThreshold: number;
+  /** Consecutive pose checks that must mismatch before flagging (kills noise). */
+  identityStreak: number;
 }
 
 export const DEFAULT_FACE_CONFIG: FaceProctorConfig = {
@@ -99,6 +104,8 @@ export const DEFAULT_FACE_CONFIG: FaceProctorConfig = {
   enableObjectDetection: true,
   objectIntervalTicks: 6,
   objectMinScore: 0.5,
+  identityThreshold: 0.34,
+  identityStreak: 2,
 };
 
 export interface FaceProctorCallbacks {
@@ -169,6 +176,9 @@ export class FaceProctor {
   private poseTick = 0;
   private basePitch: number | null = null;
   private pitchCalib: number[] = [];
+  private baseSignature: number[] | null = null;
+  private sigCalib: number[][] = [];
+  private identityMiss = 0;
   private objectProctor: ObjectProctor | null = null;
   private objectTick = 0;
 
@@ -218,6 +228,9 @@ export class FaceProctor {
     this.poseTick = 0;
     this.basePitch = null;
     this.pitchCalib = [];
+    this.baseSignature = null;
+    this.sigCalib = [];
+    this.identityMiss = 0;
     this.objectProctor?.dispose();
     this.objectProctor = null;
     this.objectTick = 0;
@@ -294,17 +307,42 @@ export class FaceProctor {
 
     if (this.basePitch === null) {
       this.pitchCalib.push(pose.pitchRatio);
+      this.sigCalib.push(pose.signature);
       if (this.pitchCalib.length >= this.config.poseCalibrationSamples) {
         const sorted = [...this.pitchCalib].sort((a, b) => a - b);
         this.basePitch = sorted[Math.floor(sorted.length / 2)];
+        this.baseSignature = medianVector(this.sigCalib);
       }
       return;
     }
+
+    // Looking away/down (chiefly the vertical axis BlazeFace can't see).
     if (Math.abs(pose.pitchRatio - this.basePitch) > this.config.pitchDeltaThreshold) {
       const merged = result.violations.filter((x) => x.type !== 'LOOKING_AWAY');
       merged.push(v('LOOKING_AWAY', 'You appear to be looking away from the screen', 'medium'));
       result.violations = merged;
       result.status = statusOf(merged);
+    }
+
+    // Identity continuity: a sustained large deviation from the enrolled facial
+    // signature suggests a different person took the seat. Lightweight (reuses the
+    // FaceMesh call) — not biometric-grade; the streak requirement kills noise.
+    if (this.baseSignature && pose.signature.length === this.baseSignature.length) {
+      let sq = 0;
+      for (let i = 0; i < pose.signature.length; i++) {
+        const d = pose.signature[i] - this.baseSignature[i];
+        sq += d * d;
+      }
+      if (Math.sqrt(sq) > this.config.identityThreshold) {
+        if (++this.identityMiss >= this.config.identityStreak) {
+          result.violations.push(
+            v('IDENTITY_MISMATCH', 'The person in frame may have changed', 'high'),
+          );
+          result.status = statusOf(result.violations);
+        }
+      } else {
+        this.identityMiss = 0;
+      }
     }
   }
 
@@ -427,4 +465,16 @@ function statusOf(violations: FaceViolation[]): FaceStatus {
   if (significant.some((x) => x.severity === 'high')) return 'VIOLATION';
   if (significant.some((x) => x.severity === 'medium')) return 'WARNING';
   return 'NORMAL';
+}
+
+/** Per-component median of equal-length vectors (robust baseline from samples). */
+function medianVector(vectors: number[][]): number[] {
+  if (vectors.length === 0) return [];
+  const dims = vectors[0].length;
+  const out: number[] = [];
+  for (let i = 0; i < dims; i++) {
+    const col = vectors.map((vec) => vec[i]).sort((a, b) => a - b);
+    out.push(col[Math.floor(col.length / 2)]);
+  }
+  return out;
 }

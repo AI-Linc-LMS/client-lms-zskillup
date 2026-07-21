@@ -17,6 +17,10 @@ export interface HeadPose {
   yawRatio: number;
   /** In-plane head tilt, degrees. */
   roll: number;
+  /** Person-specific facial proportions, all normalised by inter-ocular distance
+   *  (scale/distance-invariant). A different person yields a different vector —
+   *  used for lightweight identity-continuity, not biometric-grade matching. */
+  signature: number[];
 }
 
 // FaceMesh canonical landmark indices.
@@ -24,8 +28,20 @@ const NOSE = 1;
 const LEFT_EYE = 33;
 const RIGHT_EYE = 263;
 const CHIN = 152;
+const FOREHEAD = 10;
 const LEFT_FACE = 234;
 const RIGHT_FACE = 454;
+const NOSE_L = 129;
+const NOSE_R = 358;
+const MOUTH_L = 61;
+const MOUTH_R = 291;
+
+function dist(
+  a: { x: number; y: number },
+  b: { x: number; y: number },
+): number {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
 
 let detectorPromise: Promise<faceLandmarks.FaceLandmarksDetector> | null = null;
 
@@ -70,10 +86,26 @@ export class HeadPoseEstimator {
     const faceWidth = rightFace.x - leftFace.x;
     if (span === 0 || faceWidth === 0) return null;
 
+    // Identity signature — proportions normalised by inter-ocular distance so
+    // they're stable across distance/scale. Absent landmarks fall back to 0.
+    const io = dist(leftEye, rightEye) || 1;
+    const noseL = kp[NOSE_L];
+    const noseR = kp[NOSE_R];
+    const mouthL = kp[MOUTH_L];
+    const mouthR = kp[MOUTH_R];
+    const forehead = kp[FOREHEAD];
+    const signature = [
+      noseL && noseR ? dist(noseL, noseR) / io : 0,
+      mouthL && mouthR ? dist(mouthL, mouthR) / io : 0,
+      forehead ? dist(forehead, chin) / io : 0,
+      (chin.y - eyeLineY) / io,
+    ];
+
     return {
       pitchRatio: (nose.y - eyeLineY) / span,
       yawRatio: (nose.x - leftFace.x) / faceWidth,
       roll: (Math.atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x) * 180) / Math.PI,
+      signature,
     };
   }
 
