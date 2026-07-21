@@ -67,7 +67,7 @@ function SetPasswordForm() {
           <KeyRound className="size-5 text-orange" aria-hidden="true" />
         </span>
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Welcome to ZSkillup</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Welcome to prephasz</p>
           <h1 className="text-xl font-bold text-navy">Set your password</h1>
         </div>
       </div>

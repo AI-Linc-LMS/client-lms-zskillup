@@ -22,7 +22,7 @@ const GRAND_STEPS: GuideStep[] = [
   {
     id: 'welcome',
     placement: 'center',
-    title: 'Welcome to ZSkillup \u{1F44B}',
+    title: 'Welcome to prephasz \u{1F44B}',
     body: "Let's take a quick tour of the platform \u2014 where everything lives and what each part does. You can skip or replay anytime.",
   },
   // \u2500\u2500 Chrome \u2500\u2500
