@@ -3,6 +3,7 @@ import '@tensorflow/tfjs-backend-cpu';
 import '@tensorflow/tfjs-backend-webgl';
 import * as tf from '@tensorflow/tfjs-core';
 import { HeadPoseEstimator, type HeadPose } from '@/lib/proctoring/head-pose';
+import { ObjectProctor, type DetectedObjects } from '@/lib/proctoring/object-detection';
 
 /**
  * Camera-intelligence layer for proctoring (Phase 1). A focused BlazeFace face
@@ -23,7 +24,10 @@ export type FaceViolationType =
   | 'LOOKING_AWAY'
   | 'FACE_TOO_CLOSE'
   | 'FACE_TOO_FAR'
-  | 'POOR_LIGHTING';
+  | 'POOR_LIGHTING'
+  | 'PHONE_DETECTED'
+  | 'BOOK_DETECTED'
+  | 'SECOND_PERSON';
 
 export type FaceStatus = 'NORMAL' | 'WARNING' | 'VIOLATION';
 
@@ -69,6 +73,12 @@ export interface FaceProctorConfig {
   pitchDeltaThreshold: number;
   /** Good single-face samples to median into the neutral baseline before flagging. */
   poseCalibrationSamples: number;
+  /** Run COCO-SSD to detect a phone / book / second person in frame. */
+  enableObjectDetection: boolean;
+  /** Run object detection every Nth tick (it's the heaviest model). */
+  objectIntervalTicks: number;
+  /** Min COCO-SSD score to count a detected object. */
+  objectMinScore: number;
 }
 
 export const DEFAULT_FACE_CONFIG: FaceProctorConfig = {
@@ -86,6 +96,9 @@ export const DEFAULT_FACE_CONFIG: FaceProctorConfig = {
   poseIntervalTicks: 3,
   pitchDeltaThreshold: 0.16,
   poseCalibrationSamples: 6,
+  enableObjectDetection: true,
+  objectIntervalTicks: 6,
+  objectMinScore: 0.5,
 };
 
 export interface FaceProctorCallbacks {
@@ -156,6 +169,8 @@ export class FaceProctor {
   private poseTick = 0;
   private basePitch: number | null = null;
   private pitchCalib: number[] = [];
+  private objectProctor: ObjectProctor | null = null;
+  private objectTick = 0;
 
   constructor(config: Partial<FaceProctorConfig> = {}) {
     this.config = { ...DEFAULT_FACE_CONFIG, ...config };
@@ -179,6 +194,12 @@ export class FaceProctor {
         this.headPose = null;
       });
     }
+    if (this.config.enableObjectDetection && !this.objectProctor) {
+      this.objectProctor = new ObjectProctor();
+      void this.objectProctor.preload().catch(() => {
+        this.objectProctor = null;
+      });
+    }
     if (this.running) return;
     this.running = true;
     this.warmupUntil = Date.now() + this.config.startupWarmupMs;
@@ -197,6 +218,9 @@ export class FaceProctor {
     this.poseTick = 0;
     this.basePitch = null;
     this.pitchCalib = [];
+    this.objectProctor?.dispose();
+    this.objectProctor = null;
+    this.objectTick = 0;
   }
 
   /** JPEG data URL of the current frame, for a violation snapshot. */
@@ -221,9 +245,32 @@ export class FaceProctor {
     try {
       const result = this.suppressWarmupNoFace(await this.analyze(v));
       await this.applyHeadPose(v, result);
+      await this.applyObjectDetection(v, result);
       this.callbacks.onFrame?.(result);
     } catch {
       // WebGL/model warm-up glitches are common on first frames — never map to NO_FACE.
+    }
+  }
+
+  /** Every Nth tick, scan the frame for a phone / book / second person — cheating
+   *  aids the face models can't see. Heaviest model, so the slowest cadence. */
+  private async applyObjectDetection(video: HTMLVideoElement, result: FaceFrameResult): Promise<void> {
+    if (!this.objectProctor) return;
+    if (++this.objectTick % this.config.objectIntervalTicks !== 0) return;
+    let objects: DetectedObjects | null = null;
+    try {
+      objects = await this.objectProctor.detect(video, this.config.objectMinScore);
+    } catch {
+      return;
+    }
+    if (!objects) return;
+    if (objects.phone) result.violations.push(v('PHONE_DETECTED', 'A phone is visible in frame', 'high'));
+    if (objects.book) result.violations.push(v('BOOK_DETECTED', 'A book or notes are visible in frame', 'high'));
+    if (objects.extraPerson) {
+      result.violations.push(v('SECOND_PERSON', 'A second person is visible in frame', 'high'));
+    }
+    if (objects.phone || objects.book || objects.extraPerson) {
+      result.status = statusOf(result.violations);
     }
   }
 
