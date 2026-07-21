@@ -39,6 +39,7 @@ import {
   answerMock,
   getMock,
   getMockReport,
+  reportProctorBatch,
   startMock,
   submitMock,
   type ApiMockReport,
@@ -52,7 +53,7 @@ import { ApiRequestError } from '@/lib/api/types';
 import { UpgradeModal } from '@/components/billing/UpgradeModal';
 import { MockCodingPanel } from '@/components/practice/MockCodingPanel';
 import { PyqTag } from '@/components/practice/PyqTag';
-import { useProctoring } from '@/lib/proctoring/useProctoring';
+import { useProctoring, type ReportedViolation } from '@/lib/proctoring/useProctoring';
 import { ProctorOverlay } from '@/components/proctoring/ProctorOverlay';
 import { CalibrationResults } from '@/components/student/CalibrationResults';
 
@@ -74,7 +75,16 @@ import { CalibrationResults } from '@/components/student/CalibrationResults';
 type Phase = 'intro' | 'running' | 'report';
 
 export function MockRunner({ mockId, proctored = false }: { mockId: string; proctored?: boolean }) {
-  const proctor = useProctoring(proctored);
+  // Ship the live proctoring batch to the server-stamped log. The attempt id
+  // isn't known until beginAttempt resolves, so read it from a ref the callback
+  // closes over (keeps the callback stable). Failures are swallowed — proctoring
+  // is advisory and must never break the exam.
+  const attemptIdRef = useRef<string | null>(null);
+  const onProctorReport = useCallback((batch: { violations: ReportedViolation[] }) => {
+    const id = attemptIdRef.current;
+    if (id) void reportProctorBatch(id, batch).catch(() => {});
+  }, []);
+  const proctor = useProctoring(proctored, { onReport: onProctorReport });
   const [phase, setPhase] = useState<Phase>('intro');
   const [mock, setMock] = useState<ApiMockSummary | null>(null);
   const [start, setStart] = useState<ApiMockStart | null>(null);
@@ -131,6 +141,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
     setError(null);
     try {
       const s = await startMock(mockId);
+      attemptIdRef.current = s.attemptId;
       const hydrated: Record<string, string[]> = {};
       ackedRef.current = new Map();
       for (const a of s.savedAnswers) {

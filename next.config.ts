@@ -23,6 +23,14 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Required for Amplify Hosting SSR (compute) deployments
   output: 'standalone',
+  turbopack: {
+    resolveAlias: {
+      // face-landmarks-detection statically imports @mediapipe/face_mesh (a UMD
+      // module with no ESM exports) for its WASM runtime; we only use the tfjs
+      // runtime, so alias it to a stub to keep the bundle building.
+      '@mediapipe/face_mesh': './src/lib/proctoring/mediapipe-face-mesh-stub.ts',
+    },
+  },
   // Legacy test-surface routes fold into the 4 consolidated modes. Permanent so
   // old bookmarks/deep-links (and any stale in-app links) land on the new home.
   async redirects() {
