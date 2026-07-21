@@ -1,8 +1,24 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { AlertTriangle, Maximize2, Mic, MicOff, Repeat, Video, VideoOff } from 'lucide-react';
+import {
+  AlertTriangle,
+  Maximize2,
+  Mic,
+  MicOff,
+  Repeat,
+  ScanFace,
+  Video,
+  VideoOff,
+} from 'lucide-react';
 import type { ProctoringController } from '@/lib/proctoring/useProctoring';
+
+const FACE_TONE: Record<string, string> = {
+  NORMAL: 'text-emerald-500',
+  WARNING: 'text-amber-500',
+  VIOLATION: 'text-rose-500',
+  OFF: 'text-slate-300',
+};
 
 /**
  * In-assessment proctoring overlay (Phase 4): a live mirrored self-view tile, a
@@ -10,8 +26,17 @@ import type { ProctoringController } from '@/lib/proctoring/useProctoring';
  * violation toasts. Fixed-position so it floats over the runner.
  */
 export function ProctorOverlay({ controller }: { controller: ProctoringController }) {
-  const { videoRef, cameraGranted, micGranted, tabSwitches, fullscreenExits, lastWarning } =
-    controller;
+  const {
+    videoRef,
+    cameraGranted,
+    micGranted,
+    tabSwitches,
+    fullscreenExits,
+    faceStatus,
+    faceCount,
+    faceViolations,
+    lastWarning,
+  } = controller;
 
   return (
     <>
@@ -49,6 +74,12 @@ export function ProctorOverlay({ controller }: { controller: ProctoringControlle
             </span>
           </span>
           <span className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
+            <span
+              className="inline-flex items-center gap-0.5"
+              title={`Camera check: ${faceStatus.toLowerCase()} · ${faceCount} face(s) · ${faceViolations} flag(s)`}
+            >
+              <ScanFace className={`size-3.5 ${FACE_TONE[faceStatus] ?? FACE_TONE.OFF}`} /> {faceViolations}
+            </span>
             <span className="inline-flex items-center gap-0.5" title="Tab switches"><Repeat className="size-3" /> {tabSwitches}</span>
             <span className="inline-flex items-center gap-0.5" title="Fullscreen exits"><Maximize2 className="size-3" /> {fullscreenExits}</span>
           </span>
