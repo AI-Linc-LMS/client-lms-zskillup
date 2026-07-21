@@ -127,7 +127,7 @@ export async function startPurchase(params: StartPurchaseParams): Promise<Purcha
       order_id: order.razorpayOrderId,
       amount: order.amountCents,
       currency: order.currency,
-      name: 'ZSkillup',
+      name: 'prephasz',
       description: params.description ?? 'Unlock practice',
       prefill: {
         name: params.prefill?.name ?? undefined,
@@ -207,7 +207,7 @@ export async function startCartPurchase(
       order_id: order.razorpayOrderId,
       amount: order.amountCents,
       currency: order.currency,
-      name: 'ZSkillup',
+      name: 'prephasz',
       description: `${order.lines.length} item${order.lines.length === 1 ? '' : 's'}`,
       prefill: { name: prefill?.name ?? undefined, email: prefill?.email ?? undefined },
       theme: { color: '#f5b400' },
