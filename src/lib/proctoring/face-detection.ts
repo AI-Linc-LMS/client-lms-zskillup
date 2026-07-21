@@ -2,6 +2,7 @@ import * as blazeface from '@tensorflow-models/blazeface';
 import '@tensorflow/tfjs-backend-cpu';
 import '@tensorflow/tfjs-backend-webgl';
 import * as tf from '@tensorflow/tfjs-core';
+import { HeadPoseEstimator, type HeadPose } from '@/lib/proctoring/head-pose';
 
 /**
  * Camera-intelligence layer for proctoring (Phase 1). A focused BlazeFace face
@@ -60,6 +61,14 @@ export interface FaceProctorConfig {
   minEyeSpreadRatio: number;
   /** Suppress spurious NO_FACE for this long after start (camera/model warm-up). */
   startupWarmupMs: number;
+  /** Run FaceMesh head-pose to catch looking-away/down the box heuristic misses. */
+  enableHeadPose: boolean;
+  /** Run head-pose every Nth detection tick (it's heavier than BlazeFace). */
+  poseIntervalTicks: number;
+  /** Deviation from the calibrated neutral pitch ratio that counts as looking away. */
+  pitchDeltaThreshold: number;
+  /** Good single-face samples to median into the neutral baseline before flagging. */
+  poseCalibrationSamples: number;
 }
 
 export const DEFAULT_FACE_CONFIG: FaceProctorConfig = {
@@ -73,6 +82,10 @@ export const DEFAULT_FACE_CONFIG: FaceProctorConfig = {
   minConfidenceForValidFace: 0.78,
   minEyeSpreadRatio: 0.22,
   startupWarmupMs: 5500,
+  enableHeadPose: true,
+  poseIntervalTicks: 3,
+  pitchDeltaThreshold: 0.16,
+  poseCalibrationSamples: 6,
 };
 
 export interface FaceProctorCallbacks {
@@ -139,6 +152,10 @@ export class FaceProctor {
   private callbacks: FaceProctorCallbacks = {};
   private faceCountBuffer: number[] = [];
   private warmupUntil = 0;
+  private headPose: HeadPoseEstimator | null = null;
+  private poseTick = 0;
+  private basePitch: number | null = null;
+  private pitchCalib: number[] = [];
 
   constructor(config: Partial<FaceProctorConfig> = {}) {
     this.config = { ...DEFAULT_FACE_CONFIG, ...config };
@@ -154,6 +171,14 @@ export class FaceProctor {
     this.callbacks = callbacks;
     this.video = video;
     this.model = await loadModel();
+    if (this.config.enableHeadPose && !this.headPose) {
+      this.headPose = new HeadPoseEstimator();
+      // Non-blocking: the exam runs on BlazeFace alone until FaceMesh is ready,
+      // and falls back to the box heuristic permanently if it won't load.
+      void this.headPose.preload().catch(() => {
+        this.headPose = null;
+      });
+    }
     if (this.running) return;
     this.running = true;
     this.warmupUntil = Date.now() + this.config.startupWarmupMs;
@@ -167,6 +192,11 @@ export class FaceProctor {
     this.video = null;
     this.faceCountBuffer = [];
     this.warmupUntil = 0;
+    this.headPose?.dispose();
+    this.headPose = null;
+    this.poseTick = 0;
+    this.basePitch = null;
+    this.pitchCalib = [];
   }
 
   /** JPEG data URL of the current frame, for a violation snapshot. */
@@ -190,9 +220,44 @@ export class FaceProctor {
     }
     try {
       const result = this.suppressWarmupNoFace(await this.analyze(v));
+      await this.applyHeadPose(v, result);
       this.callbacks.onFrame?.(result);
     } catch {
       // WebGL/model warm-up glitches are common on first frames — never map to NO_FACE.
+    }
+  }
+
+  /**
+   * Every Nth tick, use FaceMesh head-pose to catch looking-away/down that the
+   * face-box heuristic misses. First it medians a neutral baseline (the student is
+   * looking at the screen reading instructions), then flags sustained deviation —
+   * chiefly the VERTICAL axis (reading notes/a phone below the camera), the case
+   * BlazeFace is blind to. Runs single-face only; failures fall back silently.
+   */
+  private async applyHeadPose(video: HTMLVideoElement, result: FaceFrameResult): Promise<void> {
+    if (!this.headPose || result.faceCount !== 1) return;
+    if (++this.poseTick % this.config.poseIntervalTicks !== 0) return;
+    let pose: HeadPose | null = null;
+    try {
+      pose = await this.headPose.estimate(video);
+    } catch {
+      return;
+    }
+    if (!pose || !Number.isFinite(pose.pitchRatio)) return;
+
+    if (this.basePitch === null) {
+      this.pitchCalib.push(pose.pitchRatio);
+      if (this.pitchCalib.length >= this.config.poseCalibrationSamples) {
+        const sorted = [...this.pitchCalib].sort((a, b) => a - b);
+        this.basePitch = sorted[Math.floor(sorted.length / 2)];
+      }
+      return;
+    }
+    if (Math.abs(pose.pitchRatio - this.basePitch) > this.config.pitchDeltaThreshold) {
+      const merged = result.violations.filter((x) => x.type !== 'LOOKING_AWAY');
+      merged.push(v('LOOKING_AWAY', 'You appear to be looking away from the screen', 'medium'));
+      result.violations = merged;
+      result.status = statusOf(merged);
     }
   }
 
