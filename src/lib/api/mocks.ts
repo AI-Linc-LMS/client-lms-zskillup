@@ -251,6 +251,29 @@ export async function answerMock(attemptId: string, dto: MockAnswerDto): Promise
   return res.data;
 }
 
+/** One live proctoring violation reported to the server-stamped log. */
+export interface ProctorViolationReport {
+  type: string;
+  severity?: string;
+  message?: string;
+  confidence?: number;
+  occurredAt?: string;
+  /** Base64 JPEG data URL — high-severity events only. */
+  snapshot?: string;
+}
+
+/** Live proctoring heartbeat + violation batch (fired ~10s while an attempt is open). */
+export async function reportProctorBatch(
+  attemptId: string,
+  batch: { violations: ProctorViolationReport[] },
+): Promise<{ ok: boolean }> {
+  const res = await apiClient.post<{ ok: boolean }>(
+    `/api/v1/mocks/attempts/${attemptId}/proctor`,
+    batch,
+  );
+  return res.data;
+}
+
 /** Submit a coding solution for a coding problem inside a mock attempt (Judge0-graded). */
 export async function submitMockCode(
   attemptId: string,

@@ -30,6 +30,22 @@ export interface PendingSnapshot {
   at: string;
 }
 
+/** One violation shipped to the server-stamped log (mirrors ProctorViolationReport). */
+export interface ReportedViolation {
+  type: string;
+  severity?: string;
+  message?: string;
+  confidence?: number;
+  occurredAt?: string;
+  snapshot?: string;
+}
+
+export interface UseProctoringOptions {
+  /** Called every REPORT_EVERY_MS with violations since the last flush (heartbeat
+   *  even when empty). The consumer POSTs these to the server-stamped log. */
+  onReport?: (batch: { violations: ReportedViolation[] }) => void;
+}
+
 export interface ProctoringController {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   active: boolean;
@@ -53,6 +69,10 @@ const MAX_EVENTS = 120;
 const MAX_PENDING_SNAPSHOTS = 20;
 /** Don't re-log/re-warn the same face-violation type more often than this. */
 const FACE_VIOLATION_COOLDOWN_MS = 4_000;
+/** Cadence of the server-stamped heartbeat + violation flush. */
+const REPORT_EVERY_MS = 10_000;
+/** Cap violations carried in a single batch so the POST stays well under the body limit. */
+const MAX_BATCH = 30;
 
 declare global {
   interface Window {
@@ -67,15 +87,27 @@ declare global {
  * light. Warn-only (never auto-submits). Camera / model failures are non-fatal —
  * the assessment continues; the server-stamped log is the authoritative record.
  */
-export function useProctoring(enabled: boolean): ProctoringController {
+export function useProctoring(
+  enabled: boolean,
+  options?: UseProctoringOptions,
+): ProctoringController {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const snapTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const reportTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const eventsRef = useRef<Array<{ type: string; at: string }>>([]);
   const faceProctorRef = useRef<FaceProctor | null>(null);
   const faceCooldownRef = useRef<Map<FaceViolationType, number>>(new Map());
   const faceCountsRef = useRef<Partial<Record<FaceViolationType, number>>>({});
   const pendingSnapshotsRef = useRef<PendingSnapshot[]>([]);
+  const pendingReportRef = useRef<ReportedViolation[]>([]);
+  const onReportRef = useRef<UseProctoringOptions['onReport']>(options?.onReport);
+  onReportRef.current = options?.onReport;
+
+  const queueReport = useCallback((v: ReportedViolation) => {
+    pendingReportRef.current.push(v);
+    if (pendingReportRef.current.length > MAX_BATCH) pendingReportRef.current.shift();
+  }, []);
 
   const [active, setActive] = useState(false);
   const [cameraGranted, setCameraGranted] = useState(false);
@@ -103,17 +135,29 @@ export function useProctoring(enabled: boolean): ProctoringController {
     if (document.visibilityState === 'hidden') {
       setTabSwitches((n) => n + 1);
       logEvent('tab_switch');
+      queueReport({
+        type: 'tab_switch',
+        severity: 'medium',
+        message: 'Switched away from the assessment',
+        occurredAt: new Date().toISOString(),
+      });
       warn('You switched away from the assessment - this is logged.');
     }
-  }, [logEvent, warn]);
+  }, [logEvent, queueReport, warn]);
 
   const onFullscreenChange = useCallback(() => {
     if (!document.fullscreenElement) {
       setFullscreenExits((n) => n + 1);
       logEvent('fullscreen_exit');
+      queueReport({
+        type: 'fullscreen_exit',
+        severity: 'medium',
+        message: 'Exited fullscreen',
+        occurredAt: new Date().toISOString(),
+      });
       warn('You exited fullscreen - please return to fullscreen.');
     }
-  }, [logEvent, warn]);
+  }, [logEvent, queueReport, warn]);
 
   /** Process one detection frame: update live status, and log/warn/snapshot new
    *  violations (cooldown-gated so a sustained state logs once, not every frame). */
@@ -134,24 +178,27 @@ export function useProctoring(enabled: boolean): ProctoringController {
         logEvent(`face:${violation.type}`);
         if (violation.severity !== 'low') warn(violation.message);
 
-        // Capture evidence on serious events for the server-side log (Phase 3).
-        if (violation.severity === 'high') {
-          const dataUrl = faceProctorRef.current?.snapshot();
-          if (dataUrl) {
-            pendingSnapshotsRef.current.push({
-              type: violation.type,
-              dataUrl,
-              at: new Date().toISOString(),
-            });
-            if (pendingSnapshotsRef.current.length > MAX_PENDING_SNAPSHOTS) {
-              pendingSnapshotsRef.current.shift();
-            }
-            setSnapshotCount((n) => n + 1);
+        // Capture evidence on serious events for the server-stamped log.
+        const dataUrl =
+          violation.severity === 'high' ? (faceProctorRef.current?.snapshot() ?? undefined) : undefined;
+        if (dataUrl) {
+          pendingSnapshotsRef.current.push({ type: violation.type, dataUrl, at: new Date().toISOString() });
+          if (pendingSnapshotsRef.current.length > MAX_PENDING_SNAPSHOTS) {
+            pendingSnapshotsRef.current.shift();
           }
+          setSnapshotCount((n) => n + 1);
         }
+        queueReport({
+          type: `face:${violation.type}`,
+          severity: violation.severity,
+          message: violation.message,
+          confidence: violation.confidence,
+          occurredAt: new Date().toISOString(),
+          snapshot: dataUrl,
+        });
       }
     },
-    [logEvent, warn],
+    [logEvent, queueReport, warn],
   );
 
   const start = useCallback(async () => {
@@ -211,6 +258,12 @@ export function useProctoring(enabled: boolean): ProctoringController {
       setSnapshotCount((n) => n + 1);
       logEvent('snapshot');
     }, SNAPSHOT_EVERY_MS);
+    // Server-stamped heartbeat + violation flush. Fires on the cadence even with an
+    // empty batch, so the server can detect "monitoring lost" from missing pings.
+    reportTimer.current = setInterval(() => {
+      const drained = pendingReportRef.current.splice(0, MAX_BATCH);
+      onReportRef.current?.({ violations: drained });
+    }, REPORT_EVERY_MS);
   }, [enabled, onVisibility, onFullscreenChange, onFrame, logEvent]);
 
   const stop = useCallback(() => {
@@ -220,6 +273,11 @@ export function useProctoring(enabled: boolean): ProctoringController {
     faceProctorRef.current = null;
     if (snapTimer.current) clearInterval(snapTimer.current);
     snapTimer.current = null;
+    if (reportTimer.current) clearInterval(reportTimer.current);
+    reportTimer.current = null;
+    // Final flush so the last few seconds of violations reach the server log.
+    const finalBatch = pendingReportRef.current.splice(0, MAX_BATCH);
+    if (finalBatch.length) onReportRef.current?.({ violations: finalBatch });
     document.removeEventListener('visibilitychange', onVisibility);
     document.removeEventListener('fullscreenchange', onFullscreenChange);
     // Stop EVERY acquired track — the hook's stream AND any globally-stashed one
