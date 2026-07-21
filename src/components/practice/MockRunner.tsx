@@ -799,10 +799,9 @@ function MockRunningView({
 
       <main
         className={cn(
-          'mx-auto grid w-full max-w-6xl flex-1 gap-5 px-4 pb-6 sm:px-6 lg:grid-cols-[1fr_17rem]',
-          // When proctored, the fixed top-center camera bar needs clearance. The
-          // section-tabs row already provides it; without tabs, reserve top space.
-          proctored && sections.length <= 1 ? 'pt-28' : 'pt-6',
+          'mx-auto grid w-full max-w-6xl flex-1 gap-5 px-4 pb-6 pt-6 sm:px-6 lg:grid-cols-[1fr_17rem]',
+          // The camera bar now floats in the bottom-left corner, so no top clearance
+          // is needed — it never overlaps the section tabs or the question palette.
         )}
       >
         {/* Question card (left/main) */}
