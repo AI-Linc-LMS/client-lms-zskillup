@@ -7,6 +7,7 @@ import {
   aiInterviewStatus,
   getInterview,
   nextInterviewQuestion,
+  reportInterviewProctorBatch,
   startInterview,
   submitInterview,
   transcribeAnswer,
@@ -106,8 +107,13 @@ export function InterviewRunner({ id }: { id: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   // Proctoring: analyze the candidate's self-view (no-face / multiple-faces /
-  // looking-away / obstruction). Advisory + client-side; never blocks the interview.
-  const faceProctor = useFaceProctor(videoRef, camOn);
+  // looking-away / obstruction / phone / identity) and report to the server-stamped
+  // log. Advisory + client-side; failures are swallowed so it never blocks the interview.
+  const faceProctor = useFaceProctor(videoRef, camOn, {
+    onReport: (batch) => {
+      void reportInterviewProctorBatch(id, batch).catch(() => {});
+    },
+  });
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const whisperBusyRef = useRef(false);
