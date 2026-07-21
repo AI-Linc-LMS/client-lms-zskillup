@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import type { ProctorViolationReport } from './mocks';
 import type {
   CreateMockInterviewDto,
   InterviewTurnDto,
@@ -7,6 +8,18 @@ import type {
 } from '@/shared/dto/mock-interview.dto';
 
 /** Mock Interview API client. Owner-scoped (@CurrentUser). */
+
+/** Live proctoring heartbeat + violation batch for an interview (server-stamped log). */
+export async function reportInterviewProctorBatch(
+  interviewId: string,
+  batch: { violations: ProctorViolationReport[] },
+): Promise<{ ok: boolean }> {
+  const res = await apiClient.post<{ ok: boolean }>(
+    `/api/v1/me/mock-interviews/${interviewId}/proctor`,
+    batch,
+  );
+  return res.data;
+}
 
 export async function aiInterviewStatus(): Promise<boolean> {
   try {
