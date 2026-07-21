@@ -7,6 +7,7 @@ import {
   type FaceViolation,
   type FaceViolationType,
 } from '@/lib/proctoring/face-detection';
+import { AudioProctor } from '@/lib/proctoring/audio-detection';
 
 /** Proctoring summary sent to the backend at submit (Phase 4 + v2 camera signals). */
 export interface ProctoringSummary {
@@ -101,6 +102,9 @@ export function useProctoring(
   const faceCountsRef = useRef<Partial<Record<FaceViolationType, number>>>({});
   const pendingSnapshotsRef = useRef<PendingSnapshot[]>([]);
   const pendingReportRef = useRef<ReportedViolation[]>([]);
+  const audioProctorRef = useRef<AudioProctor | null>(null);
+  const audioTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const audioCooldownRef = useRef(0);
   const onReportRef = useRef<UseProctoringOptions['onReport']>(options?.onReport);
   onReportRef.current = options?.onReport;
 
@@ -237,6 +241,27 @@ export function useProctoring(
           setFaceStatus('OFF');
         });
       }
+      // Audio-presence watch (dictation / background voices). Advisory, medium.
+      if (stream.getAudioTracks().length > 0) {
+        const audio = new AudioProctor();
+        if (audio.start(stream)) {
+          audioProctorRef.current = audio;
+          audioTimer.current = setInterval(() => {
+            if (!audio.sampleVoiceActive()) return;
+            const now = Date.now();
+            if (now - audioCooldownRef.current < 8_000) return;
+            audioCooldownRef.current = now;
+            logEvent('voice_detected');
+            queueReport({
+              type: 'voice_detected',
+              severity: 'medium',
+              message: 'Talking or voices detected',
+              occurredAt: new Date().toISOString(),
+            });
+            warn('Voices detected - please stay quiet during the assessment.');
+          }, 1_000);
+        }
+      }
     }
     // Fullscreen (non-fatal).
     try {
@@ -264,7 +289,7 @@ export function useProctoring(
       const drained = pendingReportRef.current.splice(0, MAX_BATCH);
       onReportRef.current?.({ violations: drained });
     }, REPORT_EVERY_MS);
-  }, [enabled, onVisibility, onFullscreenChange, onFrame, logEvent]);
+  }, [enabled, onVisibility, onFullscreenChange, onFrame, logEvent, queueReport, warn]);
 
   const stop = useCallback(() => {
     setActive(false);
@@ -275,6 +300,10 @@ export function useProctoring(
     snapTimer.current = null;
     if (reportTimer.current) clearInterval(reportTimer.current);
     reportTimer.current = null;
+    audioProctorRef.current?.stop();
+    audioProctorRef.current = null;
+    if (audioTimer.current) clearInterval(audioTimer.current);
+    audioTimer.current = null;
     // Final flush so the last few seconds of violations reach the server log.
     const finalBatch = pendingReportRef.current.splice(0, MAX_BATCH);
     if (finalBatch.length) onReportRef.current?.({ violations: finalBatch });
