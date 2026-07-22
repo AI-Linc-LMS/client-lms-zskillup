@@ -36,7 +36,7 @@ export function useCareerAccess(tool: CareerTool): CareerAccessState {
     loading: true,
     entitled: true,
     used: 0,
-    limit: FREE_LIMIT,
+    limit: FREE_LIMIT[tool],
     locked: false,
   });
 
@@ -49,7 +49,8 @@ export function useCareerAccess(tool: CareerTool): CareerAccessState {
           if (cancelled) return;
           const entitled = sub?.careerToolsEntitled ?? true; // fail open
           const used = Array.isArray(list) ? list.length : 0;
-          setState({ loading: false, entitled, used, limit: FREE_LIMIT, locked: !entitled && used >= FREE_LIMIT });
+          const limit = FREE_LIMIT[tool];
+          setState({ loading: false, entitled, used, limit, locked: !entitled && used >= limit });
         },
       );
     };
