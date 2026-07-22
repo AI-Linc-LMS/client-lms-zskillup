@@ -92,3 +92,14 @@ export const LANDING_FOOTER = {
     { label: 'Company Tracks', href: LANDING_HREFS.companies },
   ],
 };
+
+/**
+ * Official social profiles for the footer "Follow us" row. LinkedIn is confirmed;
+ * the Instagram + YouTube handles are best-guesses (prephasz / @ByLokeshMathur) -
+ * update the hrefs here in one place if the exact handles differ.
+ */
+export const LANDING_SOCIALS = [
+  { label: 'Instagram', href: 'https://www.instagram.com/prephasz' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/company/prephasz' },
+  { label: 'YouTube', href: 'https://www.youtube.com/@ByLokeshMathur' },
+] as const;

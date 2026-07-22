@@ -12,13 +12,15 @@ import {
   Cpu,
   FileText,
   Flame,
+  Instagram,
   LineChart,
-  LogIn,
+  Linkedin,
   MessageSquare,
   Sparkles,
   Star,
   Trophy,
   Users,
+  Youtube,
   Zap,
 } from 'lucide-react';
 import { HOMEPAGE_COMPANY_LOGOS } from '@/lib/demo-data-extra';
@@ -39,7 +41,11 @@ import {
   LANDING_HERO_STATS,
   LANDING_HREFS,
   LANDING_NAV,
+  LANDING_SOCIALS,
 } from '@/lib/landing-config';
+
+/** Footer "Follow us" icon per social label. */
+const SOCIAL_ICON = { Instagram, LinkedIn: Linkedin, YouTube: Youtube } as const;
 
 const HERO_STATS = LANDING_HERO_STATS;
 
@@ -251,12 +257,6 @@ export default async function HomePage() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Link href="/signup" className="btn-brand rounded-full px-7 py-3 text-sm">
                 Get started free <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/login"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/[0.08] px-7 py-3 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/[0.14]"
-              >
-                <LogIn className="h-4 w-4" /> Login
               </Link>
             </div>
 
@@ -794,12 +794,6 @@ export default async function HomePage() {
             <Link href="/signup" className="btn-brand inline-flex h-12 rounded-full px-8 text-sm">
               Get started free <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link
-              href="/login"
-              className="inline-flex h-12 items-center justify-center rounded-full border border-white/25 bg-white/[0.08] px-8 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/[0.14]"
-            >
-              Login
-            </Link>
           </div>
         </div>
       </section>
@@ -812,6 +806,24 @@ export default async function HomePage() {
             <p className="mt-2 text-sm text-[var(--color-text-muted)]">
               Company-wise prep, timed mocks, and cohort analytics - all in one platform.
             </p>
+            <p className="group-label mb-3 mt-6">Follow us</p>
+            <div className="flex items-center gap-2.5">
+              {LANDING_SOCIALS.map((s) => {
+                const Icon = SOCIAL_ICON[s.label];
+                return (
+                  <a
+                    key={s.label}
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label}
+                    className="grid size-9 place-items-center rounded-full border border-[var(--color-line)] text-[var(--color-text-muted)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-primary)]"
+                  >
+                    <Icon className="size-4" />
+                  </a>
+                );
+              })}
+            </div>
           </div>
           <div>
             <p className="group-label mb-3">Product</p>
