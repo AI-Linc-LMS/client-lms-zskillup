@@ -9,7 +9,7 @@ import {
 } from '@/lib/api/content';
 import type { BlogPostDto } from '@/shared/dto/content.dto';
 import { describeError } from '@/lib/api/errors';
-import { BadgeCheck, Loader2, Plus, Trash2, XCircle } from 'lucide-react';
+import { BadgeCheck, Loader2, Plus, Trash2, Upload, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const inputCls =
@@ -110,6 +110,21 @@ export function BlogsManager() {
     }
   };
 
+  // Upload a Markdown/text file to populate the body instead of pasting it in.
+  const uploadBody = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // let the same file be re-selected later
+    if (!file) return;
+    if (file.size > 1_000_000) {
+      setError('That file is too large (max 1MB of text).');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setForm((f) => ({ ...f, body: String(reader.result ?? '') }));
+    reader.onerror = () => setError('Could not read that file.');
+    reader.readAsText(file);
+  };
+
   const remove = async (p: BlogPostDto) => {
     if (!window.confirm(`Delete "${p.title}"? This cannot be undone.`)) return;
     try {
@@ -152,7 +167,19 @@ export function BlogsManager() {
           <input value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} className={inputCls} />
         </label>
         <label className="block sm:col-span-2">
-          <span className="mb-1 block text-xs font-medium text-slate-600">Body (markdown)</span>
+          <span className="mb-1 flex items-center justify-between text-xs font-medium text-slate-600">
+            Body (markdown)
+            <span className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-[11px] font-semibold text-navy transition hover:bg-slate-50">
+              <Upload className="size-3" />
+              Upload .md / .txt
+              <input
+                type="file"
+                accept=".md,.markdown,.txt,text/markdown,text/plain"
+                onChange={uploadBody}
+                className="hidden"
+              />
+            </span>
+          </span>
           <textarea rows={6} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} className={inputCls} />
         </label>
         <label className="block">
