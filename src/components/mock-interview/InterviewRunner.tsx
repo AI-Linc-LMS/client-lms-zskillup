@@ -7,23 +7,14 @@ import {
   aiInterviewStatus,
   getInterview,
   nextInterviewQuestion,
-  reportInterviewProctorBatch,
   startInterview,
   submitInterview,
   transcribeAnswer,
 } from '@/lib/api/mock-interviews';
 import type { InterviewQuestionDto } from '@/shared/dto/mock-interview.dto';
 import { describeError } from '@/lib/api/errors';
-import { Bot, Keyboard, Loader2, Mic, ScanFace, Send, Sparkles, Video, VideoOff, Volume2, VolumeX, X } from 'lucide-react';
+import { Bot, Keyboard, Loader2, Mic, Send, Sparkles, Video, VideoOff, Volume2, VolumeX, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useFaceProctor } from '@/lib/proctoring/useFaceProctor';
-
-const FACE_TONE: Record<string, string> = {
-  NORMAL: 'text-emerald-400',
-  WARNING: 'text-amber-400',
-  VIOLATION: 'text-rose-400',
-  OFF: 'text-white/40',
-};
 
 /**
  * Whisper hallucinates a short phrase repeated over and over when it's fed silence or
@@ -106,14 +97,12 @@ export function InterviewRunner({ id }: { id: string }) {
   const totalSecondsRef = useRef(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  // Proctoring: analyze the candidate's self-view (no-face / multiple-faces /
-  // looking-away / obstruction / phone / identity) and report to the server-stamped
-  // log. Advisory + client-side; failures are swallowed so it never blocks the interview.
-  const faceProctor = useFaceProctor(videoRef, camOn, {
-    onReport: (batch) => {
-      void reportInterviewProctorBatch(id, batch).catch(() => {});
-    },
-  });
+  // NOTE: face proctoring (BlazeFace/FaceMesh) was removed here. Its continuous
+  // main-thread ML inference starved the browser SpeechRecognition, so the live
+  // "Whisper" transcript never updated and answers recorded as empty. The mock
+  // interview is a self-practice tool ("nothing is uploaded, no strict proctoring"),
+  // so the camera stays a plain self-view; tab/fullscreen proctoring lives in the
+  // gate (useFocusGuard). Strict face proctoring belongs to the graded assessments.
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const whisperBusyRef = useRef(false);
@@ -544,13 +533,7 @@ export function InterviewRunner({ id }: { id: string }) {
             </div>
           )}
           {/* overlays */}
-          <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between gap-2 bg-gradient-to-b from-black/50 to-transparent p-2.5">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/40 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white/80 backdrop-blur">
-              <ScanFace className={`size-3 ${FACE_TONE[faceProctor.faceStatus] ?? FACE_TONE.OFF}`} /> Proctored
-              {faceProctor.faceViolations > 0 ? (
-                <span className="text-amber-300">· {faceProctor.faceViolations}</span>
-              ) : null}
-            </span>
+          <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-end gap-2 bg-gradient-to-b from-black/50 to-transparent p-2.5">
             {recording && (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/90 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
                 <motion.span className="size-1.5 rounded-full bg-white" animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.2, repeat: Infinity }} /> Rec
@@ -560,11 +543,6 @@ export function InterviewRunner({ id }: { id: string }) {
           <div className="pointer-events-none absolute bottom-2 left-2.5 inline-flex items-center gap-1.5 rounded-full bg-black/40 px-2 py-1 text-[10px] font-semibold text-white/80 backdrop-blur">
             {camOn ? <Video className="size-3" /> : <VideoOff className="size-3" />} You
           </div>
-          {camOn && faceProctor.latestFaceViolation && faceProctor.latestFaceViolation.severity !== 'low' ? (
-            <div className="pointer-events-none absolute inset-x-2 bottom-9 rounded-lg bg-amber-500/90 px-2 py-1 text-center text-[10px] font-semibold text-white">
-              {faceProctor.latestFaceViolation.message}
-            </div>
-          ) : null}
         </div>
       </div>
 
