@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import {
   BadgeIndianRupee,
+  Gift,
   CalendarClock,
   CheckCircle2,
   CreditCard,
@@ -27,7 +28,8 @@ import {
 } from '@/lib/api/admin-payments';
 import type { FinancialsPaymentsDto } from '@/shared/dto/financials.dto';
 import type { EntitlementDto, PriceBookEntryDto } from '@/shared/dto/payments.dto';
-import { BillingPeriod, EntitlementScope, EntitlementSubject } from '@/shared/enums';
+import { listAdminUsers, type AdminUserRow } from '@/lib/api/admin';
+import { BillingPeriod, EntitlementScope, EntitlementSource, EntitlementSubject } from '@/shared/enums';
 import { cn } from '@/lib/utils';
 
 export default function SuperAdminBillingPage() {
@@ -260,17 +262,118 @@ function PricingSection() {
   );
 }
 
+/** Human label + tone for an entitlement source. ADMIN_GRANT = a complimentary,
+ *  staff-granted plan (there's no separate COMPLIMENTARY enum value). */
+function sourceLabel(source: string): { label: string; tone: string } {
+  switch (source) {
+    case EntitlementSource.ADMIN_GRANT:
+      return { label: 'Complimentary', tone: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200' };
+    case EntitlementSource.PURCHASE:
+      return { label: 'Purchased', tone: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' };
+    case EntitlementSource.TRIAL:
+      return { label: 'Trial', tone: 'bg-sky-50 text-sky-700 ring-1 ring-sky-200' };
+    case EntitlementSource.COLLEGE_INHERITED:
+      return { label: 'College', tone: 'bg-violet-50 text-violet-700 ring-1 ring-violet-200' };
+    default:
+      return { label: source, tone: 'bg-slate-100 text-slate-600 ring-1 ring-slate-200' };
+  }
+}
+
+/** Debounced search-a-student-by-email/name picker. Reuses GET /admin/users. On
+ *  pick, reports the user's UUID + a display label so operators never paste a raw id. */
+function UserSearchSelect({
+  onSelect,
+  selectedLabel,
+}: {
+  onSelect: (userId: string, label: string) => void;
+  selectedLabel: string | null;
+}) {
+  const [q, setQ] = useState('');
+  const [results, setResults] = useState<AdminUserRow[]>([]);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const term = q.trim();
+    if (term.length < 2) {
+      setResults([]);
+      return;
+    }
+    let cancelled = false;
+    setLoading(true);
+    const t = setTimeout(() => {
+      listAdminUsers({ search: term, role: 'STUDENT', limit: 8 })
+        .then((r) => !cancelled && setResults(r.rows))
+        .catch(() => !cancelled && setResults([]))
+        .finally(() => !cancelled && setLoading(false));
+    }, 250);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [q]);
+
+  return (
+    <div className="relative">
+      <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-500">
+        Find student (name or email)
+      </label>
+      <input
+        value={q}
+        onChange={(e) => {
+          setQ(e.target.value);
+          setOpen(true);
+        }}
+        onFocus={() => setOpen(true)}
+        placeholder="Search by name or email…"
+        className="mt-1 h-10 w-80 rounded-lg border border-slate-200 px-3 text-sm focus:border-orange focus:outline-none"
+      />
+      {selectedLabel ? (
+        <p className="mt-1 text-[11px] font-semibold text-emerald-700">Selected: {selectedLabel}</p>
+      ) : null}
+      {open && q.trim().length >= 2 ? (
+        <div className="absolute z-20 mt-1 w-80 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-md">
+          {loading ? (
+            <div className="flex items-center gap-2 p-3 text-xs text-slate-500">
+              <Loader2 className="size-3.5 animate-spin" /> Searching…
+            </div>
+          ) : results.length === 0 ? (
+            <div className="p-3 text-xs text-slate-500">No students found.</div>
+          ) : (
+            results.map((u) => (
+              <button
+                key={u.id}
+                type="button"
+                onClick={() => {
+                  onSelect(u.id, `${u.fullName ?? 'Unnamed'} <${u.email}>`);
+                  setQ('');
+                  setOpen(false);
+                }}
+                className="flex w-full flex-col items-start px-3 py-2 text-left transition-colors hover:bg-slate-50"
+              >
+                <span className="text-sm font-semibold text-navy">{u.fullName ?? 'Unnamed'}</span>
+                <span className="text-xs text-slate-500">{u.email}</span>
+              </button>
+            ))
+          )}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 /* ── Entitlements browser + grant ──────────────────────────────────────────── */
 function EntitlementsSection() {
   const [userId, setUserId] = useState('');
+  const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
   const [rows, setRows] = useState<EntitlementDto[] | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const search = async () => {
-    if (!userId.trim()) return;
+  const search = async (id: string = userId) => {
+    if (!id.trim()) return;
     setBusy(true);
     try {
-      setRows(await listEntitlements({ userId: userId.trim() }));
+      setRows(await listEntitlements({ userId: id.trim() }));
     } catch {
       toast.error('Could not load entitlements');
     } finally {
@@ -295,25 +398,23 @@ function EntitlementsSection() {
       <p className="text-sm text-slate-600">Look up and manage what a student or college can access.</p>
 
       <div className="mt-4 flex flex-wrap items-end gap-2">
-        <div>
-          <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-500">Student user ID</label>
-          <input
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && void search()}
-            placeholder="uuid"
-            className="mt-1 h-10 w-72 rounded-lg border border-slate-200 px-3 text-sm focus:border-orange focus:outline-none"
-          />
-        </div>
+        <UserSearchSelect
+          selectedLabel={selectedLabel}
+          onSelect={(id, label) => {
+            setUserId(id);
+            setSelectedLabel(label);
+            void search(id);
+          }}
+        />
         <button
           type="button"
           onClick={() => void search()}
           disabled={busy || !userId.trim()}
           className="inline-flex h-10 items-center gap-1.5 rounded-full bg-navy px-4 text-sm font-bold text-white disabled:opacity-60"
         >
-          {busy ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />} Look up
+          {busy ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />} Refresh
         </button>
-        <GrantForm onGranted={() => void search()} />
+        <GrantForm defaultUserId={userId} defaultLabel={selectedLabel} onGranted={() => void search()} />
       </div>
 
       {rows !== null && (
@@ -338,7 +439,12 @@ function EntitlementsSection() {
                       {scopeName(e.scopeType)}
                       {e.scopeRef ? <span className="text-slate-500"> · {e.scopeRef}</span> : null}
                     </td>
-                    <td className="p-3 text-slate-600">{e.source}</td>
+                    <td className="p-3">
+                      {(() => {
+                        const s = sourceLabel(e.source);
+                        return <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-bold', s.tone)}>{s.label}</span>;
+                      })()}
+                    </td>
                     <td className="p-3">
                       <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-bold', e.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600')}>
                         {e.status}
@@ -365,35 +471,55 @@ function EntitlementsSection() {
   );
 }
 
-function GrantForm({ onGranted }: { onGranted: () => void }) {
+function GrantForm({
+  defaultUserId,
+  defaultLabel,
+  onGranted,
+}: {
+  defaultUserId: string;
+  defaultLabel: string | null;
+  onGranted: () => void;
+}) {
   const [open, setOpen] = useState(false);
   const [subject, setSubject] = useState<EntitlementSubject>(EntitlementSubject.USER);
-  const [uid, setUid] = useState('');
+  const [collegeId, setCollegeId] = useState('');
   const [scope, setScope] = useState<EntitlementScope>(EntitlementScope.PLATFORM);
   const [ref, setRef] = useState('');
+  const [expiry, setExpiry] = useState<'lifetime' | 'custom'>('lifetime');
   const [days, setDays] = useState('365');
   const [busy, setBusy] = useState(false);
 
   const isCollege = subject === EntitlementSubject.COLLEGE;
+  // Student grants target the user picked in the search above; college grants use an id.
+  const targetId = isCollege ? collegeId.trim() : defaultUserId.trim();
+  const canSubmit = !!targetId && (expiry === 'lifetime' || Number(days) >= 1);
 
   const submit = async () => {
+    if (!canSubmit) return;
     setBusy(true);
     try {
       await grantEntitlement({
         subjectType: subject,
-        userId: isCollege ? undefined : uid.trim(),
-        collegeId: isCollege ? uid.trim() : undefined,
+        userId: isCollege ? undefined : targetId,
+        collegeId: isCollege ? targetId : undefined,
         scope,
         scopeRef: scope === EntitlementScope.PLATFORM ? undefined : ref.trim() || undefined,
-        durationDays: days ? Number(days) : null,
+        // Lifetime = null (perpetual); custom = a positive day count. Never send 0.
+        durationDays: expiry === 'lifetime' ? null : Number(days),
       });
-      toast.success(isCollege ? 'College-wide access granted' : 'Access granted');
+      toast.success(
+        scope === EntitlementScope.PLATFORM && !isCollege
+          ? 'Complimentary full-platform access granted'
+          : isCollege
+            ? 'College-wide access granted'
+            : 'Access granted',
+      );
       setOpen(false);
-      setUid('');
       setRef('');
+      setCollegeId('');
       onGranted();
     } catch {
-      toast.error('Could not grant access (check the IDs / scope)');
+      toast.error('Could not grant access (check the selection / scope)');
     } finally {
       setBusy(false);
     }
@@ -401,8 +527,8 @@ function GrantForm({ onGranted }: { onGranted: () => void }) {
 
   if (!open) {
     return (
-      <button type="button" onClick={() => setOpen(true)} className="inline-flex h-10 items-center gap-1.5 rounded-full border border-slate-200 px-4 text-sm font-bold text-navy hover:border-orange">
-        + Grant access
+      <button type="button" onClick={() => setOpen(true)} className="inline-flex h-10 items-center gap-1.5 rounded-full border border-slate-200 px-4 text-sm font-bold text-navy transition-colors hover:border-orange">
+        <Gift className="size-4" /> Grant complimentary access
       </button>
     );
   }
@@ -412,15 +538,27 @@ function GrantForm({ onGranted }: { onGranted: () => void }) {
         <option value={EntitlementSubject.USER}>Student</option>
         <option value={EntitlementSubject.COLLEGE}>College</option>
       </select>
-      <input value={uid} onChange={(e) => setUid(e.target.value)} placeholder={isCollege ? 'college ID' : 'student user ID'} className="h-9 w-56 rounded-lg border border-slate-200 px-2 text-sm" />
+      {isCollege ? (
+        <input value={collegeId} onChange={(e) => setCollegeId(e.target.value)} placeholder="college ID" className="h-9 w-56 rounded-lg border border-slate-200 px-2 text-sm" />
+      ) : (
+        <span className="inline-flex h-9 max-w-[16rem] items-center truncate rounded-lg border border-slate-200 bg-white px-2 text-xs font-semibold text-navy">
+          {defaultLabel ?? 'Search + pick a student above'}
+        </span>
+      )}
       <select value={scope} onChange={(e) => setScope(e.target.value as EntitlementScope)} className="h-9 rounded-lg border border-slate-200 px-2 text-sm">
         {Object.values(EntitlementScope).map((s) => <option key={s} value={s}>{s}</option>)}
       </select>
       {scope !== EntitlementScope.PLATFORM && (
         <input value={ref} onChange={(e) => setRef(e.target.value)} placeholder="slug (topic/section/company)" className="h-9 w-48 rounded-lg border border-slate-200 px-2 text-sm" />
       )}
-      <input value={days} onChange={(e) => setDays(e.target.value)} placeholder="days" inputMode="numeric" className="h-9 w-20 rounded-lg border border-slate-200 px-2 text-sm" />
-      <button type="button" onClick={() => void submit()} disabled={busy || !uid.trim()} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-orange px-4 text-sm font-bold text-[#171717] disabled:opacity-60">
+      <select value={expiry} onChange={(e) => setExpiry(e.target.value as 'lifetime' | 'custom')} className="h-9 rounded-lg border border-slate-200 px-2 text-sm">
+        <option value="lifetime">Lifetime</option>
+        <option value="custom">Custom expiry</option>
+      </select>
+      {expiry === 'custom' && (
+        <input value={days} onChange={(e) => setDays(e.target.value)} placeholder="days" inputMode="numeric" className="h-9 w-20 rounded-lg border border-slate-200 px-2 text-sm" />
+      )}
+      <button type="button" onClick={() => void submit()} disabled={busy || !canSubmit} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-orange px-4 text-sm font-bold text-[#171717] disabled:opacity-60">
         {busy ? <Loader2 className="size-4 animate-spin" /> : 'Grant'}
       </button>
       <button type="button" onClick={() => setOpen(false)} className="h-9 px-2 text-sm font-semibold text-slate-600">Cancel</button>
