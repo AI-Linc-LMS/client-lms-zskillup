@@ -32,7 +32,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen">
       {/* ── Left brand panel (hidden on mobile) ────────────────────────────── */}
-      <aside className="relative hidden w-[42%] shrink-0 overflow-x-hidden bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] text-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:max-h-screen lg:flex-col lg:gap-8 lg:self-start lg:overflow-y-auto lg:p-10 xl:p-14">
+      <aside className="relative hidden w-[42%] shrink-0 overflow-x-hidden bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] text-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:max-h-screen lg:flex-col lg:gap-6 lg:self-start lg:overflow-hidden lg:p-10 xl:p-12">
         {/* Glow orbs */}
         <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-[#f5b400]/25 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute -bottom-24 -right-16 h-64 w-64 rounded-full bg-white/[0.06] blur-3xl" />
@@ -53,7 +53,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
         </div>
 
         {/* Main copy */}
-        <div className="relative space-y-8">
+        <div className="relative space-y-6">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white/80">
               <ShinyText
@@ -77,23 +77,23 @@ export function AuthShell({ children }: { children: ReactNode }) {
             </p>
           </div>
 
-          {/* Feature list */}
-          <ul className="space-y-3">
+          {/* Feature grid (2×2 - keeps the panel short enough to never scroll) */}
+          <ul className="grid grid-cols-2 gap-x-4 gap-y-3">
             {BRAND_FEATURES.map((f) => (
-              <li key={f.label} className="flex items-start gap-3">
+              <li key={f.label} className="flex items-start gap-2.5">
                 <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10">
                   <f.icon className="h-4 w-4 text-white/80" />
                 </span>
-                <span>
-                  <span className="block text-sm font-semibold">{f.label}</span>
-                  <span className="text-xs text-white/60">{f.desc}</span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold leading-tight">{f.label}</span>
+                  <span className="text-xs leading-snug text-white/60">{f.desc}</span>
                 </span>
               </li>
             ))}
           </ul>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-3 border-t border-white/10 pt-6">
+          <div className="grid grid-cols-3 gap-3 border-t border-white/10 pt-5">
             {[
               { to: 240, separator: '', suffix: 'k+', label: 'Students' },
               { to: 1200, separator: ',', suffix: '+', label: 'Colleges' },
@@ -111,7 +111,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
         </div>
 
         {/* Testimonial */}
-        <div className="relative lg:mt-auto rounded-2xl border border-white/10 bg-white/[0.06] p-5">
+        <div className="relative lg:mt-auto rounded-2xl border border-white/10 bg-white/[0.06] p-4">
           <div className="mb-2 flex items-center gap-0.5">
             {Array.from({ length: 5 }).map((_, k) => (
               <Star key={k} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden />
