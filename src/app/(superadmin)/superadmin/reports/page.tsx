@@ -1,11 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
-import { Building2, Download, FileText, IndianRupee, Loader2, School } from 'lucide-react';
+import { ReportDateRange } from '@/components/layout/ReportDateRange';
+import { Building2, Download, FileText, IndianRupee, Loader2, School, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { getAdminStats, getAdminCompanyStats, type AdminPlatformStats, type AdminCompanyStat } from '@/lib/api/admin';
+import {
+  getAdminStats,
+  getAdminCompanyStats,
+  getUserReport,
+  type AdminPlatformStats,
+  type AdminCompanyStat,
+} from '@/lib/api/admin';
 import { getFinancialsPayments } from '@/lib/api/financials';
 import type { FinancialsPaymentsDto } from '@/shared/dto/financials.dto';
 
@@ -23,6 +30,9 @@ function download(name: string, csv: string) {
   URL.revokeObjectURL(url);
 }
 const rupees = (cents: number) => Math.round(cents) / 100;
+/** `<input type=date>` value → inclusive UTC bound (matches the financials contract). */
+const toIso = (d: string | null, end: boolean): string | undefined =>
+  d ? `${d}T${end ? '23:59:59.999' : '00:00:00.000'}Z` : undefined;
 
 export default function SuperadminReportsPage() {
   const [stats, setStats] = useState<AdminPlatformStats | null>(null);
@@ -30,9 +40,19 @@ export default function SuperadminReportsPage() {
   const [companies, setCompanies] = useState<AdminCompanyStat[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [from, setFrom] = useState<string | null>(null);
+  const [to, setTo] = useState<string | null>(null);
+  const [usersBusy, setUsersBusy] = useState(false);
 
-  useEffect(() => {
-    Promise.all([getAdminStats(), getFinancialsPayments(), getAdminCompanyStats()])
+  const load = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    // Financial figures respect the range; Platform + Company are point-in-time snapshots.
+    Promise.all([
+      getAdminStats(),
+      getFinancialsPayments({ from: toIso(from, false), to: toIso(to, true) }),
+      getAdminCompanyStats(),
+    ])
       .then(([s, f, c]) => {
         setStats(s);
         setFin(f);
@@ -40,7 +60,11 @@ export default function SuperadminReportsPage() {
       })
       .catch((e) => setError(e instanceof Error ? e.message : 'Failed to load report data'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [from, to]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const exportPlatform = () => {
     if (!stats) return;
@@ -91,6 +115,45 @@ export default function SuperadminReportsPage() {
     );
   };
 
+  const exportUsers = async () => {
+    setUsersBusy(true);
+    setError(null);
+    try {
+      const rows = await getUserReport({ from: toIso(from, false), to: toIso(to, true) });
+      const headers = [
+        'User ID',
+        'Full Name',
+        'Email',
+        'Phone',
+        'Role',
+        'College Name',
+        'Registration Date',
+        'Last Login',
+        'Account Status',
+        'Subscription Plan',
+        'Subscription Status',
+      ];
+      const csvRows: (string | number)[][] = rows.map((r) => [
+        r.id,
+        r.fullName ?? '',
+        r.email,
+        r.phone ?? '',
+        r.role,
+        r.collegeName ?? '',
+        new Date(r.createdAt).toLocaleString('en-IN'),
+        r.lastLoginAt ? new Date(r.lastLoginAt).toLocaleString('en-IN') : 'Never',
+        r.status,
+        r.subscriptionPlan,
+        r.subscriptionStatus,
+      ]);
+      download(`user-information-report${from ? `-${from}` : ''}.csv`, toCsv(headers, csvRows));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to export users');
+    } finally {
+      setUsersBusy(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Super Admin', href: '/superadmin/dashboard' }, { label: 'Reports' }]} />
@@ -101,6 +164,8 @@ export default function SuperadminReportsPage() {
         description="Platform, financial and company reports - download as CSV."
       />
 
+      <ReportDateRange from={from} to={to} onChange={(f, t) => { setFrom(f); setTo(t); }} />
+
       {loading ? (
         <div className="flex items-center justify-center py-24"><Loader2 className="size-7 animate-spin text-slate-500" /></div>
       ) : error ? (
@@ -110,14 +175,14 @@ export default function SuperadminReportsPage() {
           <ReportCard
             icon={School}
             title="Platform Report"
-            desc="Institution-wide totals - students, colleges, content, activity."
+            desc="Institution-wide totals - students, colleges, content, activity (point-in-time)."
             meta={`${stats?.students ?? 0} students · ${stats?.colleges ?? 0} colleges`}
             onExport={exportPlatform}
           />
           <ReportCard
             icon={IndianRupee}
             title="Financial Report"
-            desc="Revenue, payment states, and B2C/B2B breakdowns."
+            desc="Revenue, payment states, and B2C/B2B breakdowns (respects date range)."
             meta={`${fin?.successfulPayments ?? 0} payments captured`}
             onExport={exportFinancial}
           />
@@ -127,6 +192,14 @@ export default function SuperadminReportsPage() {
             desc="Per-company registrations, assessments, and bank coverage."
             meta={`${companies.length} companies`}
             onExport={exportCompanies}
+          />
+          <ReportCard
+            icon={Users}
+            title="User Information"
+            desc="Every user with profile, last login and subscription (respects date range)."
+            meta="Full user export"
+            onExport={() => void exportUsers()}
+            busy={usersBusy}
           />
         </div>
       )}
@@ -140,12 +213,14 @@ function ReportCard({
   desc,
   meta,
   onExport,
+  busy,
 }: {
   icon: typeof School;
   title: string;
   desc: string;
   meta: string;
   onExport: () => void;
+  busy?: boolean;
 }) {
   return (
     <div className="flex flex-col rounded-2xl border border-slate-200/80 bg-white p-5">
@@ -155,8 +230,8 @@ function ReportCard({
       <h2 className="mt-3 text-base font-black text-navy">{title}</h2>
       <p className="mt-1 flex-1 text-xs leading-relaxed text-slate-600">{desc}</p>
       <p className="mt-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">{meta}</p>
-      <Button size="sm" className="mt-3 w-full" onClick={onExport}>
-        <Download className="size-4" /> Download CSV
+      <Button size="sm" className="mt-3 w-full" onClick={onExport} disabled={busy}>
+        {busy ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />} Download CSV
       </Button>
     </div>
   );

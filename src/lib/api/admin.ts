@@ -653,6 +653,36 @@ export async function getStudentReport(id: string): Promise<AdminStudentFullRepo
   return res.data;
 }
 
+// ─── User Information export (admin + super-admin) ───────────────────────────
+
+/** One row of the User Information export: every user with profile, last-login
+ *  and effective-subscription columns. A plain ADMIN never sees ADMIN/SUPER_ADMIN
+ *  rows (enforced server-side). */
+export interface AdminUserReportRow {
+  id: string;
+  fullName: string | null;
+  email: string;
+  phone: string | null;
+  role: AdminRole;
+  status: AdminUserStatus;
+  collegeName: string | null;
+  createdAt: string;
+  lastLoginAt: string | null;
+  subscriptionPlan: string;
+  subscriptionStatus: string;
+}
+
+/** Fetch the full User Information report. Optional ISO date range filters by
+ *  registration date (append `?from=&to=` like the financials endpoint). */
+export async function getUserReport(range?: { from?: string; to?: string }): Promise<AdminUserReportRow[]> {
+  const qs = new URLSearchParams();
+  if (range?.from) qs.set('from', range.from);
+  if (range?.to) qs.set('to', range.to);
+  const suffix = qs.toString() ? `?${qs.toString()}` : '';
+  const res = await apiClient.get<AdminUserReportRow[]>(`/api/v1/admin/reports/users${suffix}`);
+  return res.data;
+}
+
 // ─── Exports (question bank + mocks) ────────────────────────────────────────
 
 /** Trigger a browser download of a JSON payload. */
