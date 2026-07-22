@@ -1,6 +1,6 @@
 import type { TemplateProps } from '../types';
 import { dateRange, fullName } from '../types';
-import { groupSkills, socialList } from './parts';
+import { ExtraSections, groupSkills, hasExtraSections, languageLabels, socialList } from './parts';
 
 /* Additional resume templates (R5). Same { data } contract as the core six. */
 
@@ -51,8 +51,9 @@ export function TechnicalTemplate({ data }: TemplateProps) {
         </section>
       )}
       {data.education.length > 0 && (
-        <section>{head('education')}{data.education.map((e) => (<p key={e.id} className="text-[12px] text-slate-700">{e.degree} · {e.institution} · <span className="font-mono">{dateRange(e.startDate, e.endDate)}</span></p>))}</section>
+        <section className="mb-4">{head('education')}{data.education.map((e) => (<p key={e.id} className="text-[12px] text-slate-700">{e.degree} · {e.institution} · <span className="font-mono">{dateRange(e.startDate, e.endDate)}</span></p>))}</section>
       )}
+      <ExtraSections data={data} head={(t) => head(t.toLowerCase())} accent="#047857" sectionClass="mt-4" />
     </div>
   );
 }
@@ -79,6 +80,7 @@ export function AccentBarTemplate({ data }: TemplateProps) {
           {data.education.length > 0 && <section>{head('Education')}{data.education.map((e) => (<div key={e.id} className="mb-1"><p className="text-[12px] font-bold">{e.degree}</p><p className="text-[11.5px] text-slate-700">{e.institution} · {dateRange(e.startDate, e.endDate)}</p></div>))}</section>}
         </div>
         {data.projects.length > 0 && <section className="mt-4">{head('Projects')}{data.projects.map((p) => (<p key={p.id} className="mb-1 text-[12px] text-slate-700"><span className="font-bold">{p.name}:</span> {p.description}</p>))}</section>}
+        <ExtraSections data={data} head={head} accent="#e11d48" sectionClass="mt-4" />
       </div>
     </div>
   );
@@ -95,6 +97,7 @@ export function RightSidebarTemplate({ data }: TemplateProps) {
         {b.summary && <section className="mb-4">{head('Summary')}<p className="text-[12.5px] leading-snug text-slate-700">{b.summary}</p></section>}
         {data.workExperience.length > 0 && <section className="mb-4">{head('Experience')}{data.workExperience.map((w) => (<div key={w.id} className="mb-2.5"><div className="flex items-baseline justify-between"><p className="text-[13px] font-bold">{w.position}</p><span className="text-[11px] text-slate-600">{dateRange(w.startDate, w.endDate, w.current)}</span></div><p className="text-[12px] font-medium text-indigo-600">{w.company}</p><Bullets items={w.description} /></div>))}</section>}
         {data.projects.length > 0 && <section>{head('Projects')}{data.projects.map((p) => (<div key={p.id} className="mb-2"><p className="text-[12.5px] font-bold">{p.name}</p><p className="text-[12px] text-slate-700">{p.description}</p></div>))}</section>}
+        <ExtraSections data={data} head={head} accent="#4f46e5" sectionClass="mt-4" withLanguagesInterests={false} />
       </main>
       <aside className="w-[32%] bg-slate-100 px-6 py-8">
         {b.photo && <img src={b.photo} alt="" className="mb-4 size-20 rounded-full object-cover" />}
@@ -102,6 +105,8 @@ export function RightSidebarTemplate({ data }: TemplateProps) {
         {data.skills.length > 0 && <div className="mt-6"><p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-indigo-600">Skills</p><div className="flex flex-wrap gap-1.5">{data.skills.map((s) => (<span key={s.id} className="rounded bg-white px-2 py-0.5 text-[11px] text-slate-700">{s.name}</span>))}</div></div>}
         {data.education.length > 0 && <div className="mt-6"><p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-indigo-600">Education</p>{data.education.map((e) => (<div key={e.id} className="mb-2"><p className="text-[11.5px] font-bold text-slate-800">{e.degree}</p><p className="text-[11px] text-slate-600">{e.institution}</p></div>))}</div>}
         {data.certifications.length > 0 && <div className="mt-6"><p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-indigo-600">Certifications</p>{data.certifications.map((c) => (<p key={c.id} className="text-[11px] text-slate-600">{c.name}</p>))}</div>}
+        {data.languages.length > 0 && <div className="mt-6"><p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-indigo-600">Languages</p><div className="space-y-1 text-[11.5px] text-slate-700">{languageLabels(data.languages).map((l, i) => (<p key={i}>{l}</p>))}</div></div>}
+        {data.interests.length > 0 && <div className="mt-6"><p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-indigo-600">Interests</p><div className="flex flex-wrap gap-1.5">{data.interests.map((it) => (<span key={it.id} className="rounded bg-white px-2 py-0.5 text-[11px] text-slate-700">{it.name}</span>))}</div></div>}
       </aside>
     </div>
   );
@@ -122,11 +127,14 @@ export function WesternTemplate({ data }: TemplateProps) {
           {b.summary && <section className="mb-4">{head('Profile')}<p className="text-[12.5px] leading-snug text-slate-700">{b.summary}</p></section>}
           {data.workExperience.length > 0 && <section className="mb-4">{head('Experience')}{data.workExperience.map((w) => (<div key={w.id} className="mb-2.5"><p className="text-[13px] font-bold">{w.position}</p><p className="text-[12px] font-semibold text-amber-700">{w.company} · <span className="font-normal text-slate-600">{dateRange(w.startDate, w.endDate, w.current)}</span></p><Bullets items={w.description} /></div>))}</section>}
           {data.projects.length > 0 && <section>{head('Projects')}{data.projects.map((p) => (<div key={p.id} className="mb-2"><p className="text-[12.5px] font-bold">{p.name}</p><p className="text-[12px] text-slate-700">{p.description}</p></div>))}</section>}
+          <ExtraSections data={data} head={head} accent="#b45309" sectionClass="mt-4" withLanguagesInterests={false} />
         </div>
         <div>
           {data.skills.length > 0 && <section className="mb-4">{head('Skills')}<div className="flex flex-wrap gap-1.5">{data.skills.map((s) => (<span key={s.id} className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] text-amber-800">{s.name}</span>))}</div></section>}
           {data.education.length > 0 && <section className="mb-4">{head('Education')}{data.education.map((e) => (<div key={e.id} className="mb-2"><p className="text-[12px] font-bold">{e.degree}</p><p className="text-[11px] text-slate-600">{e.institution}</p><p className="text-[10.5px] text-slate-600">{dateRange(e.startDate, e.endDate)}</p></div>))}</section>}
-          {data.certifications.length > 0 && <section>{head('Certifications')}{data.certifications.map((c) => (<p key={c.id} className="mb-1 text-[11px] text-slate-700">{c.name}</p>))}</section>}
+          {data.certifications.length > 0 && <section className="mb-4">{head('Certifications')}{data.certifications.map((c) => (<p key={c.id} className="mb-1 text-[11px] text-slate-700">{c.name}</p>))}</section>}
+          {data.languages.length > 0 && <section className="mb-4">{head('Languages')}<div className="flex flex-wrap gap-1.5">{languageLabels(data.languages).map((l, i) => (<span key={i} className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] text-amber-800">{l}</span>))}</div></section>}
+          {data.interests.length > 0 && <section>{head('Interests')}<div className="flex flex-wrap gap-1.5">{data.interests.map((it) => (<span key={it.id} className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] text-amber-800">{it.name}</span>))}</div></section>}
         </div>
       </div>
     </div>
@@ -150,6 +158,7 @@ export function LuxSleekTemplate({ data }: TemplateProps) {
         {data.workExperience.length > 0 && <section>{head('Experience')}{data.workExperience.map((w) => (<div key={w.id} className="mb-3 text-center"><p className="text-[13px] font-bold">{w.position} - {w.company}</p><p className="text-[11px] italic text-slate-600">{dateRange(w.startDate, w.endDate, w.current)}</p><div className="mx-auto max-w-[90%]"><Bullets items={w.description} /></div></div>))}</section>}
         {data.education.length > 0 && <section>{head('Education')}{data.education.map((e) => (<p key={e.id} className="text-center text-[12px] text-slate-700">{e.degree}, {e.institution} · {dateRange(e.startDate, e.endDate)}</p>))}</section>}
         {data.skills.length > 0 && <section>{head('Skills')}<p className="text-center text-[12px] text-slate-700">{data.skills.map((s) => s.name).join('   ·   ')}</p></section>}
+        <ExtraSections data={data} head={head} accent="#b08d57" sectionClass="" />
       </div>
     </div>
   );
@@ -172,6 +181,11 @@ export function BubbleTemplate({ data }: TemplateProps) {
         {data.education.length > 0 && <section className="rounded-2xl bg-white p-4 shadow-sm">{head('Education')}{data.education.map((e) => (<div key={e.id} className="mb-1"><p className="text-[12px] font-bold">{e.degree}</p><p className="text-[11px] text-slate-600">{e.institution}</p></div>))}</section>}
       </div>
       {data.projects.length > 0 && <section className="mt-4 rounded-2xl bg-white p-4 shadow-sm">{head('Projects')}{data.projects.map((p) => (<p key={p.id} className="mb-1 text-[12px] text-slate-700"><span className="font-bold">{p.name}:</span> {p.description}</p>))}</section>}
+      {hasExtraSections(data) && (
+        <div className="mt-4 rounded-2xl bg-white p-4 shadow-sm">
+          <ExtraSections data={data} head={head} accent="#0284c7" sectionClass="mb-4" />
+        </div>
+      )}
     </div>
   );
 }

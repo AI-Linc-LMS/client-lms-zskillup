@@ -67,6 +67,76 @@ export interface Certification {
   link?: string;
 }
 
+export interface Achievement {
+  id: string;
+  title: string;
+  description?: string;
+  date?: string;
+}
+
+export interface PositionOfResponsibility {
+  id: string;
+  role: string;
+  organization: string;
+  startDate?: string;
+  endDate?: string;
+  current?: boolean;
+  description?: string;
+}
+
+export interface Publication {
+  id: string;
+  title: string;
+  venue?: string;
+  date?: string;
+  link?: string;
+  description?: string;
+}
+
+export interface Extracurricular {
+  id: string;
+  title: string;
+  organization?: string;
+  description?: string;
+}
+
+export interface Volunteering {
+  id: string;
+  role: string;
+  organization: string;
+  startDate?: string;
+  endDate?: string;
+  current?: boolean;
+  description?: string;
+}
+
+export interface Language {
+  id: string;
+  name: string;
+  proficiency?: string; // e.g. Native / Fluent / Professional / Basic
+}
+
+export interface Interest {
+  id: string;
+  name: string;
+}
+
+export interface Award {
+  id: string;
+  title: string;
+  issuer?: string;
+  date?: string;
+  description?: string;
+}
+
+export interface Course {
+  id: string;
+  name: string;
+  provider?: string;
+  date?: string;
+  link?: string;
+}
+
 export interface ResumeData {
   basicInfo: BasicInfo;
   workExperience: WorkExperience[];
@@ -74,6 +144,15 @@ export interface ResumeData {
   skills: Skill[];
   projects: Project[];
   certifications: Certification[];
+  achievements: Achievement[];
+  positionsOfResponsibility: PositionOfResponsibility[];
+  publications: Publication[];
+  extracurricular: Extracurricular[];
+  volunteering: Volunteering[];
+  languages: Language[];
+  interests: Interest[];
+  awards: Award[];
+  courses: Course[];
 }
 
 export type TemplateKey =
@@ -111,6 +190,15 @@ export function emptyResume(): ResumeData {
     skills: [],
     projects: [],
     certifications: [],
+    achievements: [],
+    positionsOfResponsibility: [],
+    publications: [],
+    extracurricular: [],
+    volunteering: [],
+    languages: [],
+    interests: [],
+    awards: [],
+    courses: [],
   };
 }
 
@@ -178,7 +266,11 @@ export function normalizeResume(raw: unknown): ResumeData {
       id: w.id ?? newId(),
       description: Array.isArray(w.description) ? w.description : [],
     })),
-    education: arr<Education>(r.education).map((e) => ({ ...e, id: e.id ?? newId() })),
+    education: arr<Education>(r.education).map((e) => ({
+      ...e,
+      id: e.id ?? newId(),
+      description: e.description ?? '',
+    })),
     skills: arr<Skill>(r.skills).map((s) => ({ ...s, id: s.id ?? newId() })),
     projects: arr<Project>(r.projects).map((p) => ({
       ...p,
@@ -186,5 +278,17 @@ export function normalizeResume(raw: unknown): ResumeData {
       technologies: Array.isArray(p.technologies) ? p.technologies : [],
     })),
     certifications: arr<Certification>(r.certifications).map((c) => ({ ...c, id: c.id ?? newId() })),
+    achievements: arr<Achievement>(r.achievements).map((a) => ({ ...a, id: a.id ?? newId() })),
+    positionsOfResponsibility: arr<PositionOfResponsibility>(r.positionsOfResponsibility).map((p) => ({
+      ...p,
+      id: p.id ?? newId(),
+    })),
+    publications: arr<Publication>(r.publications).map((p) => ({ ...p, id: p.id ?? newId() })),
+    extracurricular: arr<Extracurricular>(r.extracurricular).map((e) => ({ ...e, id: e.id ?? newId() })),
+    volunteering: arr<Volunteering>(r.volunteering).map((v) => ({ ...v, id: v.id ?? newId() })),
+    languages: arr<Language>(r.languages).map((l) => ({ ...l, id: l.id ?? newId() })),
+    interests: arr<Interest>(r.interests).map((i) => ({ ...i, id: i.id ?? newId() })),
+    awards: arr<Award>(r.awards).map((a) => ({ ...a, id: a.id ?? newId() })),
+    courses: arr<Course>(r.courses).map((c) => ({ ...c, id: c.id ?? newId() })),
   };
 }

@@ -105,8 +105,17 @@ function resumeText(d: ResumeData): string {
     ...d.skills.map((s) => s.name),
     ...d.workExperience.flatMap((w) => [w.position, w.company, ...w.description]),
     ...d.projects.flatMap((p) => [p.name, p.description, ...p.technologies]),
-    ...d.education.map((e) => `${e.degree} ${e.institution}`),
+    ...d.education.map((e) => `${e.degree} ${e.institution} ${e.description ?? ''}`),
     ...d.certifications.map((c) => `${c.name} ${c.issuer}`),
+    ...d.achievements.flatMap((a) => [a.title, a.description ?? '']),
+    ...d.positionsOfResponsibility.flatMap((p) => [p.role, p.organization, p.description ?? '']),
+    ...d.publications.flatMap((p) => [p.title, p.venue ?? '', p.description ?? '']),
+    ...d.awards.flatMap((a) => [a.title, a.issuer ?? '', a.description ?? '']),
+    ...d.courses.flatMap((c) => [c.name, c.provider ?? '']),
+    ...d.volunteering.flatMap((v) => [v.role, v.organization, v.description ?? '']),
+    ...d.extracurricular.flatMap((e) => [e.title, e.organization ?? '', e.description ?? '']),
+    ...d.languages.map((l) => l.name),
+    ...d.interests.map((i) => i.name),
   ];
   return parts.join(' ').toLowerCase();
 }
@@ -169,6 +178,16 @@ export function computeAtsScore(d: ResumeData, jobDescription = ''): AtsResult {
   else suggestions.push('Add a skills section.');
   if (projects.length > 0) format += 10;
   if (certs.length > 0) format += 10;
+  // Small additive credit for the richer ATS sections (leadership, recognition,
+  // scholarship). Bounded and clamped, so it can't lift a skeleton resume and
+  // never pushes a full resume past 100 - it only rewards genuine extra content.
+  const extrasCount =
+    d.achievements.filter((a) => hasText(a.title)).length +
+    d.awards.filter((a) => hasText(a.title)).length +
+    d.publications.filter((p) => hasText(p.title)).length +
+    d.positionsOfResponsibility.filter((p) => hasText(p.role)).length +
+    d.volunteering.filter((v) => hasText(v.role)).length;
+  if (extrasCount > 0) format += 5;
   format = clamp(format);
 
   // ── Contact & summary.

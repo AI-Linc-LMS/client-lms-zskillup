@@ -92,4 +92,81 @@ export const SAMPLE_RESUME: ResumeData = {
       link: '',
     },
   ],
+  achievements: [
+    {
+      id: 'ach1',
+      title: 'Winner, National Hackathon 2023',
+      description: 'Led a team of 4 to build an accessibility-first learning app, placing 1st out of 120 teams.',
+      date: '2023-11',
+    },
+    {
+      id: 'ach2',
+      title: 'Top 1% on LeetCode (Knight badge)',
+      description: 'Solved 600+ problems and maintained a 2100+ contest rating.',
+      date: '2024-01',
+    },
+  ],
+  positionsOfResponsibility: [
+    {
+      id: 'por1',
+      role: 'General Secretary, Coding Club',
+      organization: 'National Institute of Technology',
+      startDate: '2022-08',
+      endDate: '2023-05',
+      current: false,
+      description: 'Ran weekly problem-solving sessions for 200+ members and organised two inter-college contests.',
+    },
+  ],
+  publications: [
+    {
+      id: 'pub1',
+      title: 'Efficient Caching Strategies for Real-Time Web Applications',
+      venue: 'IEEE Student Symposium',
+      date: '2023-04',
+      link: '',
+      description: 'Co-authored a study on Redis caching patterns that reduced tail latency by 45%.',
+    },
+  ],
+  extracurricular: [
+    {
+      id: 'ec1',
+      title: 'Inter-College Football Team',
+      organization: 'NIT Trichy',
+      description: 'Played as midfielder; reached the state university quarter-finals.',
+    },
+  ],
+  volunteering: [
+    {
+      id: 'vol1',
+      role: 'STEM Mentor',
+      organization: 'Teach for Tomorrow',
+      startDate: '2022-01',
+      endDate: '',
+      current: true,
+      description: 'Mentor underprivileged high-school students in mathematics and introductory programming.',
+    },
+  ],
+  languages: [
+    { id: 'lang1', name: 'English', proficiency: 'Fluent' },
+    { id: 'lang2', name: 'Hindi', proficiency: 'Native' },
+    { id: 'lang3', name: 'Spanish', proficiency: 'Basic' },
+  ],
+  interests: [
+    { id: 'int1', name: 'Open Source' },
+    { id: 'int2', name: 'Chess' },
+    { id: 'int3', name: 'Photography' },
+  ],
+  awards: [
+    {
+      id: 'awd1',
+      title: "Dean's Merit Scholarship",
+      issuer: 'National Institute of Technology',
+      date: '2022-09',
+      description: 'Awarded for ranking in the top 5% of the department for two consecutive years.',
+    },
+  ],
+  courses: [
+    { id: 'crs1', name: 'Machine Learning', provider: 'Stanford (Coursera)', date: '2023-07', link: '' },
+    { id: 'crs2', name: 'Distributed Systems', provider: 'MIT OpenCourseWare', date: '2023-02', link: '' },
+  ],
 };
