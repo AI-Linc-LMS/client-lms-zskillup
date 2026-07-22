@@ -41,23 +41,23 @@ export function ActiveSubscriptions({ className }: { className?: string }) {
 
   return (
     <section className={className}>
-      <div className="flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-500">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="flex items-center gap-1.5 text-sm font-bold text-navy">
           <BadgeCheck className="size-4 text-emerald-500" /> Active subscriptions
         </h2>
-        <Link href="/upgrade" className="text-xs font-bold text-[#a16207] hover:underline">
-          Manage →
+        <Link href="/upgrade" className="text-xs font-semibold text-orange hover:underline">
+          Manage
         </Link>
       </div>
 
       {ents.length === 0 ? (
-        <div className="mt-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 p-6 text-center">
-          <p className="text-sm text-slate-600">No active unlocks yet - you get the first 5 questions of anything free.</p>
+        <div className="mt-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 p-5 text-center">
+          <p className="text-xs leading-relaxed text-slate-600">No active unlocks yet — the first 5 questions of anything are free.</p>
           <Link
             href="/shop"
-            className="mt-3 inline-block rounded-full bg-navy px-4 py-1.5 text-xs font-bold text-white"
+            className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-navy px-4 py-1.5 text-xs font-bold text-white transition hover:brightness-110"
           >
-            Browse the shop
+            Browse the shop <ArrowRight className="size-3.5" />
           </Link>
         </div>
       ) : (
@@ -66,28 +66,24 @@ export function ActiveSubscriptions({ className }: { className?: string }) {
             const Icon = scopeIcon(e.scopeType);
             const link = practiceLinkForEntitlement(e.scopeType, e.scopeRef);
             return (
-              <li
-                key={e.id}
-                className="rounded-2xl border border-slate-100 bg-white p-3 shadow-sm transition hover:border-slate-200"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#fff5ea] text-[#f5b400]">
+              <li key={e.id}>
+                <Link
+                  href={link.href}
+                  title={link.cta}
+                  className="group flex items-center gap-2.5 rounded-xl border border-slate-100 p-2.5 transition-colors hover:border-slate-200 hover:bg-slate-50"
+                >
+                  <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[#fff5ea] text-[#f5b400]">
                     <Icon className="size-4" />
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-semibold text-navy">
                       {entitlementLabel(e.scopeType, e.scopeRef)}
                     </span>
-                    <span className="text-xs text-slate-600">
+                    <span className="text-[11px] text-slate-500">
                       {e.daysRemaining != null ? `${e.daysRemaining} days left` : 'Lifetime access'}
                     </span>
                   </span>
-                </div>
-                <Link
-                  href={link.href}
-                  className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-full bg-navy px-3 py-2 text-xs font-bold text-white transition hover:brightness-110"
-                >
-                  {link.cta} <ArrowRight className="size-3.5" />
+                  <ArrowRight className="size-4 shrink-0 text-slate-300 transition-colors group-hover:text-navy" />
                 </Link>
               </li>
             );

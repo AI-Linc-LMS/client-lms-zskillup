@@ -62,6 +62,24 @@ export async function updateResume(
   return toDetail((await apiClient.patch<ResumeDetailDto>(`/api/v1/me/resumes/${id}`, body)).data);
 }
 
+/**
+ * Upsert the user's PRIMARY resume - the single record the profile page keeps in
+ * sync. Free and paywall-exempt (completing your profile never costs a resume run
+ * or 402), unlike {@link createResume}. Updates the existing primary or creates it.
+ */
+export async function upsertPrimaryResume(payload: {
+  title: string;
+  template: TemplateKey;
+  data: ResumeData;
+}): Promise<SavedResumeDetail> {
+  const body: SaveResumeDto = {
+    title: payload.title,
+    template: payload.template,
+    data: payload.data as unknown as Record<string, unknown>,
+  };
+  return toDetail((await apiClient.put<ResumeDetailDto>('/api/v1/me/resumes/primary', body)).data);
+}
+
 export async function deleteResume(id: string): Promise<void> {
   await apiClient.delete(`/api/v1/me/resumes/${id}`);
 }
