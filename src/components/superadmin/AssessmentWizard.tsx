@@ -19,7 +19,6 @@ import {
 import { cn } from '@/lib/utils';
 import { ApiRequestError } from '@/lib/api/types';
 import { listCompanies, listTopicsWithCounts, type ApiCompany, type ApiTopic } from '@/lib/api/catalog';
-import { listCodingTopics, type CodingTopic } from '@/lib/api/mocks';
 import { listAdminColleges, type AdminCollegeRow } from '@/lib/api/admin';
 import { getCollegeCohorts } from '@/lib/api/admin-cohorts';
 import { HIDDEN_ROOT_SLUGS } from '@/components/practice/section-meta';
@@ -28,14 +27,37 @@ import {
   createAssessment,
   generateOne,
   getEditableAssessment,
+  listBuilderCodingTopics,
   sourceTopic,
   updateAssessment,
   type AssessmentItemType,
+  type CodingTopic,
   type CreatedAssessment,
   type EditableAssessment,
 } from '@/lib/api/assessment-builder';
 
 const STEPS = ['Details', 'Questions', 'Review'];
+
+/** Sentinel picker value → source N random problems across the whole coding bank. */
+const ALL_CODING = '__ALL_CODING__';
+
+/** Static category grouping for the coding picker (mirrors the practice taxonomy).
+ *  Any topic not listed falls into "Other". */
+const CODING_CATEGORY_GROUPS: Array<{ label: string; topics: string[] }> = [
+  {
+    label: 'Data Structures',
+    topics: ['Arrays', 'Strings', 'Linked List', 'Stack', 'Queue', 'Heap', 'Hashing', 'Trees', 'Graphs', 'Matrix'],
+  },
+  {
+    label: 'Algorithms',
+    topics: ['Dynamic Programming', 'Greedy', 'Backtracking', 'Recursion', 'Searching', 'Sorting', 'Two Pointers', 'Sliding Window', 'Prefix Sum', 'Bit Manipulation'],
+  },
+  { label: 'Database', topics: ['SQL'] },
+  { label: 'Math & Patterns', topics: ['Math', 'Number Series', 'Pattern Printing', 'Geometry'] },
+];
+const CODING_GROUP_ORDER = ['Data Structures', 'Algorithms', 'Database', 'Math & Patterns', 'Other'];
+
+type CodingGroup = { label: string; options: CodingTopic[] };
 
 type Difficulty = 'EASY' | 'MEDIUM' | 'HARD';
 interface ResolvedItem {
@@ -121,7 +143,7 @@ export function AssessmentWizard({
   useEffect(() => {
     listCompanies().then(setCompanies).catch(() => {});
     listTopicsWithCounts().then(setTopics).catch(() => {});
-    listCodingTopics().then(setCodingTopics).catch(() => {});
+    listBuilderCodingTopics().then(setCodingTopics).catch(() => {});
     if (!isTpo) listAdminColleges().then(setColleges).catch(() => {});
   }, [isTpo]);
 
@@ -161,6 +183,26 @@ export function AssessmentWizard({
       }))
       .filter((g) => g.options.length > 0);
   }, [topics]);
+
+  /** Coding picker options bucketed into the static categories (unmapped → Other),
+   *  count-desc within each group (the endpoint already sorts by count desc). */
+  const codingGroups = useMemo<CodingGroup[]>(() => {
+    const topicToGroup = new Map<string, string>();
+    for (const g of CODING_CATEGORY_GROUPS) for (const t of g.topics) topicToGroup.set(t, g.label);
+    const buckets = new Map<string, CodingTopic[]>();
+    for (const t of codingTopics) {
+      const group = topicToGroup.get(t.topic) ?? 'Other';
+      const list = buckets.get(group) ?? [];
+      list.push(t);
+      buckets.set(group, list);
+    }
+    return CODING_GROUP_ORDER.filter((g) => buckets.has(g)).map((g) => ({
+      label: g,
+      options: buckets.get(g) ?? [],
+    }));
+  }, [codingTopics]);
+
+  const codingTotal = useMemo(() => codingTopics.reduce((a, t) => a + t.count, 0), [codingTopics]);
 
   // Edit mode: prefill from the existing assessment.
   useEffect(() => {
@@ -211,10 +253,11 @@ export function AssessmentWizard({
     difficulty: Difficulty,
     marks: number,
     topicId?: string,
+    allCoding?: boolean,
   ) => {
     setGen({ sectionIdx, topic, type, difficulty, marks, requested: count, phase: 'sourcing', bankCount: 0, labels: [] });
     try {
-      const sourced = await sourceTopic(topic, type, count, { topicId, difficulty });
+      const sourced = await sourceTopic(topic, type, count, { topicId, difficulty, allCoding });
       const ids = sourced.fromBank.map((b) => b.id);
       const labels = sourced.fromBank.map((b) => b.label);
       const willGen = sourced.aiAvailable ? sourced.toGenerate : 0;
@@ -497,9 +540,12 @@ export function AssessmentWizard({
                   key={si}
                   section={sec}
                   topicGroups={topicGroups}
-                  codingTopics={codingTopics}
+                  codingGroups={codingGroups}
+                  codingTotal={codingTotal}
                   onRename={(name) => setSections((p) => p.map((s, i) => (i === si ? { ...s, name } : s)))}
-                  onAddTopic={(topic, type, count, difficulty, marks, topicId) => runSource(si, topic, type, count, difficulty, marks, topicId)}
+                  onAddTopic={(topic, type, count, difficulty, marks, topicId, allCoding) =>
+                    runSource(si, topic, type, count, difficulty, marks, topicId, allCoding)
+                  }
                   onRemoveItem={(key) => removeItem(si, key)}
                   onRemoveSection={sections.length > 1 ? () => setSections((p) => p.filter((_, i) => i !== si)) : undefined}
                 />
@@ -587,7 +633,8 @@ type TopicGroup = { label: string; options: Array<{ id: string; name: string; co
 function SectionEditor({
   section,
   topicGroups,
-  codingTopics,
+  codingGroups,
+  codingTotal,
   onRename,
   onAddTopic,
   onRemoveItem,
@@ -595,7 +642,8 @@ function SectionEditor({
 }: {
   section: Section;
   topicGroups: TopicGroup[];
-  codingTopics: CodingTopic[];
+  codingGroups: CodingGroup[];
+  codingTotal: number;
   onRename: (name: string) => void;
   onAddTopic: (
     topic: string,
@@ -604,28 +652,42 @@ function SectionEditor({
     difficulty: Difficulty,
     marks: number,
     topicId?: string,
+    allCoding?: boolean,
   ) => void;
   onRemoveItem: (key: string) => void;
   onRemoveSection?: () => void;
 }) {
   const [mcqTopicId, setMcqTopicId] = useState('');
-  const [codingTopic, setCodingTopic] = useState('');
+  const [codingSelection, setCodingSelection] = useState('');
+  const [codingFilter, setCodingFilter] = useState('');
   const [type, setType] = useState<AssessmentItemType>('MCQ');
   const [count, setCount] = useState(5);
   const [difficulty, setDifficulty] = useState<Difficulty>('MEDIUM');
   const [marks, setMarks] = useState(1);
 
   const mcqName = topicGroups.flatMap((g) => g.options).find((o) => o.id === mcqTopicId)?.name ?? '';
-  const canAdd = type === 'MCQ' ? !!mcqTopicId : codingTopic.trim().length >= 2;
+  const canAdd = type === 'MCQ' ? !!mcqTopicId : !!codingSelection;
+
+  /** Client-side substring filter over topic names (the native <select> isn't type-ahead-searchable). */
+  const filteredCodingGroups = useMemo<CodingGroup[]>(() => {
+    const q = codingFilter.trim().toLowerCase();
+    if (!q) return codingGroups;
+    return codingGroups
+      .map((g) => ({ ...g, options: g.options.filter((o) => o.topic.toLowerCase().includes(q)) }))
+      .filter((g) => g.options.length > 0);
+  }, [codingGroups, codingFilter]);
 
   const submit = () => {
     if (!canAdd) return;
     if (type === 'MCQ') {
       onAddTopic(mcqName, 'MCQ', count, difficulty, Math.max(1, marks), mcqTopicId);
       setMcqTopicId('');
+    } else if (codingSelection === ALL_CODING) {
+      onAddTopic('Whole Coding Section', 'CODING', count, difficulty, Math.max(1, marks), undefined, true);
+      setCodingSelection('');
     } else {
-      onAddTopic(codingTopic.trim(), 'CODING', count, difficulty, Math.max(1, marks));
-      setCodingTopic('');
+      onAddTopic(codingSelection, 'CODING', count, difficulty, Math.max(1, marks));
+      setCodingSelection('');
     }
   };
 
@@ -656,7 +718,16 @@ function SectionEditor({
       ) : null}
 
       {/* add-topic row */}
-      <div className="mt-3 flex flex-wrap items-center gap-2">
+      {type === 'CODING' ? (
+        <input
+          value={codingFilter}
+          onChange={(e) => setCodingFilter(e.target.value)}
+          placeholder="Filter coding topics…"
+          aria-label="Filter coding topics"
+          className="mt-3 h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+        />
+      ) : null}
+      <div className={cn('flex flex-wrap items-center gap-2', type === 'CODING' ? 'mt-2' : 'mt-3')}>
         {type === 'MCQ' ? (
           <select
             value={mcqTopicId}
@@ -676,20 +747,25 @@ function SectionEditor({
             ))}
           </select>
         ) : (
-          <input
-            list="coding-topics-list"
-            value={codingTopic}
-            onChange={(e) => setCodingTopic(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && submit()}
-            placeholder="Coding topic, e.g. Arrays, Strings…"
+          <select
+            value={codingSelection}
+            onChange={(e) => setCodingSelection(e.target.value)}
+            title="Pick a coding topic or the whole coding section - problems are pulled from the bank"
             className="h-10 min-w-[12rem] flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
-          />
+          >
+            <option value="">Select a coding topic…</option>
+            <option value={ALL_CODING}>Whole Coding Section (random) · {codingTotal} problems</option>
+            {filteredCodingGroups.map((g) => (
+              <optgroup key={g.label} label={g.label}>
+                {g.options.map((o) => (
+                  <option key={o.topic} value={o.topic}>
+                    {o.topic} ({o.count})
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
         )}
-        <datalist id="coding-topics-list">
-          {codingTopics.map((t) => (
-            <option key={t.topic} value={t.topic} />
-          ))}
-        </datalist>
         <div className="inline-flex overflow-hidden rounded-lg border border-slate-200">
           {(['MCQ', 'CODING'] as const).map((t) => (
             <button key={t} type="button" onClick={() => setType(t)} className={cn('px-3 py-2 text-xs font-bold', type === t ? 'bg-navy text-white' : 'bg-white text-slate-600')}>

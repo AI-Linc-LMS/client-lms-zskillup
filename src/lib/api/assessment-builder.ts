@@ -3,6 +3,20 @@ import { apiClient } from './client';
 /** AI-assisted assessment builder. Mirrors backend assessment-builder.dto.ts. */
 export type AssessmentItemType = 'MCQ' | 'CODING';
 
+/** A distinct coding category (tags[0]) with its live bank count. */
+export interface CodingTopic {
+  topic: string;
+  count: number;
+}
+
+/** Distinct coding topics with counts for the builder's coding picker.
+ *  Served by the ADMIN/COLLEGE_ADMIN-scoped builder endpoint (the student
+ *  `/mocks/coding-topics` route 403s for admins/TPOs). */
+export async function listBuilderCodingTopics(): Promise<CodingTopic[]> {
+  const res = await apiClient.get<CodingTopic[]>('/api/v1/admin/assessment-builder/coding-topics');
+  return res.data;
+}
+
 export interface BuilderSection {
   name: string;
   questionIds?: string[];
@@ -60,7 +74,7 @@ export async function sourceTopic(
   topic: string,
   type: AssessmentItemType,
   count: number,
-  opts?: { topicId?: string; difficulty?: 'EASY' | 'MEDIUM' | 'HARD' },
+  opts?: { topicId?: string; difficulty?: 'EASY' | 'MEDIUM' | 'HARD'; allCoding?: boolean },
 ): Promise<SourcedTopic> {
   const res = await apiClient.post<SourcedTopic>('/api/v1/admin/assessment-builder/source', {
     topic,
@@ -68,6 +82,7 @@ export async function sourceTopic(
     count,
     topicId: opts?.topicId,
     difficulty: opts?.difficulty,
+    allCoding: opts?.allCoding,
   });
   return res.data;
 }
