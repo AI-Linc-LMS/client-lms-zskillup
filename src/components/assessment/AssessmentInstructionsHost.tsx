@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 import { getMock, getMockHistory, type ApiMockSummary } from '@/lib/api/mocks';
@@ -33,6 +33,24 @@ export function AssessmentInstructionsHost({
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [began, setBegan] = useState(false);
+
+  // Release the camera/mic if the gate is abandoned BEFORE "Begin". SystemCheck opens
+  // the stream (for proctored) and deliberately leaves it live on window.__assessmentStream
+  // so the runner can reuse it without a second prompt. But if we leave the gate without
+  // starting - "Maybe later", "Exit", or any soft-nav away - the runner never mounts, so
+  // useProctoring.stop() never runs and the webcam light would stay on. Stop it here.
+  const beganRef = useRef(false);
+  beganRef.current = began;
+  useEffect(() => {
+    return () => {
+      if (beganRef.current) return; // the runner took over the stream and will stop it
+      const s = typeof window !== 'undefined' ? window.__assessmentStream : null;
+      if (s) {
+        s.getTracks().forEach((t) => t.stop());
+        window.__assessmentStream = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     let alive = true;
