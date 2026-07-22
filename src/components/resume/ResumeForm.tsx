@@ -63,11 +63,11 @@ interface Props {
   /** Optional slot rendered inside a section header (e.g. AI tailor button). */
   sectionAction?: (section: 'summary' | 'skills' | 'experience' | 'projects') => React.ReactNode;
   /**
-   * Sections to NOT render. The profile page hides `basicInfo` and `skills`
-   * because it owns those (identity comes from the profile's Personal/Headline
-   * cards, skills from Career) and syncs them into the résumé itself.
+   * Sections to NOT render. The profile page hides `basicInfo`, `skills` and
+   * `education` because it owns those (identity from Personal/Headline, skills
+   * from Career, education from the Academic card) and syncs them into the résumé.
    */
-  omit?: ReadonlyArray<'basicInfo' | 'skills'>;
+  omit?: ReadonlyArray<'basicInfo' | 'skills' | 'education'>;
   /** `profile` restyles sections as native profile cards (see {@link FormVariant}). */
   variant?: FormVariantValue;
 }
@@ -150,6 +150,7 @@ export function ResumeForm({ data, onChange, sectionAction, omit = [], variant =
       </Section>
 
       {/* Education */}
+      {!omit.includes('education') && (
       <Section title="Education" icon={<GraduationCap className="size-4" />} count={data.education.length}>
         {data.education.map((e, i) => (
           <ItemCard key={e.id} onRemove={() => onChange({ ...data, education: data.education.filter((x) => x.id !== e.id) })}>
@@ -166,6 +167,7 @@ export function ResumeForm({ data, onChange, sectionAction, omit = [], variant =
         ))}
         <AddButton label="Add education" onClick={() => onChange({ ...data, education: [...data.education, blankEducation()] })} />
       </Section>
+      )}
 
       {/* Skills */}
       {!omit.includes('skills') && (
