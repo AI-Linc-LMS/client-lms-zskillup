@@ -166,6 +166,11 @@ export class CreateTpoAssessmentDto {
   @Max(20)
   codingCount?: number;
 
+  /** Restrict MCQ sampling to one difficulty band. Omit (or 'MIXED') = all bands. */
+  @IsOptional()
+  @IsIn(['EASY', 'MEDIUM', 'HARD', 'MIXED'])
+  difficulty?: string;
+
   @IsOptional()
   @IsBoolean()
   proctored?: boolean;
@@ -215,6 +220,10 @@ export class PreviewTpoAssessmentDto {
   @IsString({ each: true })
   @MaxLength(80, { each: true })
   codingTopics?: string[];
+
+  @IsOptional()
+  @IsIn(['EASY', 'MEDIUM', 'HARD', 'MIXED'])
+  difficulty?: string;
 }
 
 /** How many questions the current selection actually has. */
