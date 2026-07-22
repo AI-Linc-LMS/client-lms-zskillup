@@ -2,7 +2,7 @@ import type { BlogPostDto, TestimonialDto } from '@/shared/dto/content.dto';
 
 /**
  * Server-side fetch of public marketing content (Phase 5). Used by the public
- * landing page (a server component). Never throws — returns [] on any failure so
+ * landing page (a server component). Never throws - returns [] on any failure so
  * the page can fall back to its built-in copy. Cached for 5 minutes.
  */
 const API_BASE_URL =

@@ -15,7 +15,7 @@ import type { TpoCollegeSummary } from '@/shared';
 interface TpoConsoleValue {
   summary: TpoCollegeSummary | null;
   cohorts: Cohort[];
-  /** Selected batch — '' means "All batches". */
+  /** Selected batch - '' means "All batches". */
   cohortId: string;
   setCohortId: (id: string) => void;
   collapsed: boolean;

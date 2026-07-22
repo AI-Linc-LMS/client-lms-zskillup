@@ -1,7 +1,7 @@
 import type { ComponentType, ReactNode } from 'react';
 
 /**
- * Shared page hero for the TPO / Admin / Super-Admin consoles — the student
+ * Shared page hero for the TPO / Admin / Super-Admin consoles - the student
  * "Night Lab" canvas (deep ink → indigo, white text, gold + violet corner blurs)
  * so every console page opens with a prominent branded banner like the student
  * app, instead of a plain text heading. Eyebrow chip + big title + description,

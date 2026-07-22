@@ -2,10 +2,10 @@
  * Branded inline-SVG illustrations for the Study Plan. Self-contained (no external
  * assets), theme-consistent (navy #1e3a8a / orange #f5b400 + sky / violet / emerald
  * accents). `RoadmapJourney` reads on the dark navy hero; `CalibrationScope` reads
- * on light. Purely decorative — always aria-hidden.
+ * on light. Purely decorative - always aria-hidden.
  */
 
-/** The winding road to the summit — the roadmap-as-journey. For dark backgrounds. */
+/** The winding road to the summit - the roadmap-as-journey. For dark backgrounds. */
 export function RoadmapJourney({ className }: { className?: string }) {
   const road = 'M18,168 C70,158 44,120 96,116 C140,113 150,86 176,74 C196,64 206,58 214,52';
   return (
@@ -64,7 +64,7 @@ export function RoadmapJourney({ className }: { className?: string }) {
   );
 }
 
-/** A radar/scope calibrating skill blips — for the "take calibration" state. Light bg. */
+/** A radar/scope calibrating skill blips - for the "take calibration" state. Light bg. */
 export function CalibrationScope({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 200 200" className={className} fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>

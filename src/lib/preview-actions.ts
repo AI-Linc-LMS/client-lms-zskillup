@@ -8,7 +8,7 @@ import { impersonateStudent } from '@/lib/api/admin';
  * preview token plus a `preview=student` UX-hint cookie. The cookie does two
  * jobs: it lets the middleware admit a SUPER_ADMIN into the student route
  * group, and it lets the app re-mint the (memory-only) preview token after a
- * hard refresh instead of hitting student endpoints with the admin token —
+ * hard refresh instead of hitting student endpoints with the admin token -
  * which would surface 403 "Insufficient role" errors. The admin's real session
  * is never touched.
  */

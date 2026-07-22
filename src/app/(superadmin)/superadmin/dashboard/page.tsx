@@ -16,7 +16,7 @@ import { CompanyStatsCharts } from '@/components/superadmin/CompanyStatsCharts';
 import { RevenueCharts } from '@/components/superadmin/RevenueCharts';
 
 /**
- * Super-admin dashboard — a live, comprehensive platform overview. Counts and
+ * Super-admin dashboard - a live, comprehensive platform overview. Counts and
  * trend telemetry come from `GET /admin/stats`, the college register from
  * `GET /admin/colleges`, and service health from the real `GET /ready` probe.
  */

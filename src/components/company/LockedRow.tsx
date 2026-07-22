@@ -7,9 +7,9 @@ import { cn } from '@/lib/utils';
 
 /**
  * Freemium row wrapper (COMPANY_HUB_SPEC §3 / frontend/CLAUDE §4b). Locked
- * content is ALWAYS visible — shown dimmed with a lock icon, never hidden.
+ * content is ALWAYS visible - shown dimmed with a lock icon, never hidden.
  * Clicking a locked item opens a purchase prompt (demo: alert stub for the
- * dynamic price drawer, which is API-computed in production — never client-side).
+ * dynamic price drawer, which is API-computed in production - never client-side).
  *
  * An UNLOCKED row may pass `href` to become a real navigation target (e.g. a
  * free practice set that drops into the live question bank, or a free mock that

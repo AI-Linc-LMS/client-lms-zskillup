@@ -7,7 +7,7 @@ import { getMe } from '@/lib/api/me';
 import type { BillingPeriod, EntitlementScope } from '@/shared/enums';
 
 /** One line the student has added to their cart (pre-checkout, client-side). The
- *  amount is always (re)priced server-side at checkout — we keep only what to buy. */
+ *  amount is always (re)priced server-side at checkout - we keep only what to buy. */
 export interface CartItem {
   scope: EntitlementScope;
   scopeRef: string | null;
@@ -33,7 +33,7 @@ const CartContext = createContext<CartContextValue | null>(null);
 
 /**
  * The cart used to live under ONE global localStorage key. localStorage is scoped
- * to the BROWSER, not the account — so signing out and into a second account on the
+ * to the BROWSER, not the account - so signing out and into a second account on the
  * same machine loaded the first account's cart (and vice-versa), showing plans that
  * belonged to someone else. The key is now namespaced per user id.
  */
@@ -50,7 +50,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     let alive = true;
 
     // Drop the old shared cart. We deliberately do NOT migrate it into the current
-    // user's cart — we can't know which account it belonged to, and adopting it
+    // user's cart - we can't know which account it belonged to, and adopting it
     // would just re-create the leak. A pre-checkout cart is cheap to rebuild.
     try {
       localStorage.removeItem(LEGACY_STORAGE_KEY);
@@ -71,7 +71,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setHydrated(true);
       })
       .catch(() => {
-        // Signed out / not a student — start empty. Never inherit another account's cart.
+        // Signed out / not a student - start empty. Never inherit another account's cart.
         if (!alive) return;
         setUserId(null);
         setItems([]);
@@ -90,7 +90,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       localStorage.setItem(storageKeyFor(userId), JSON.stringify(items));
     } catch {
-      /* quota / private mode — cart just won't persist */
+      /* quota / private mode - cart just won't persist */
     }
   }, [items, hydrated, userId]);
 
@@ -126,7 +126,7 @@ export function useCart(): CartContextValue {
   return ctx;
 }
 
-/** Null-safe cart access — returns null outside a CartProvider (e.g. admin/TPO
+/** Null-safe cart access - returns null outside a CartProvider (e.g. admin/TPO
  *  areas that share the TopBar). Lets shared chrome opt into the cart gracefully. */
 export function useCartOptional(): CartContextValue | null {
   return useContext(CartContext);

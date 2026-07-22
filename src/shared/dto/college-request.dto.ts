@@ -1,5 +1,5 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at frontend-repo/src/shared/dto/college-request.dto.ts.
  *
  * College onboarding request (Batch 2). An internal ADMIN drafts a request
@@ -73,7 +73,7 @@ export class CreateCollegeRequestDto {
   students!: TpoInvitationRowDto[];
 }
 
-/** Edit a DRAFT or REJECTED request before (re)submitting — every field optional. */
+/** Edit a DRAFT or REJECTED request before (re)submitting - every field optional. */
 export class UpdateCollegeRequestDto {
   @IsOptional() @Transform(trimString) @IsString() @MinLength(2) @MaxLength(200)
   collegeName?: string;
@@ -118,7 +118,7 @@ export class RejectCollegeRequestDto {
   reason!: string;
 }
 
-/** List-row shape (summary — omits the full student array for cheap lists). */
+/** List-row shape (summary - omits the full student array for cheap lists). */
 export interface CollegeRequestSummaryDto {
   id: string;
   collegeName: string;
@@ -146,7 +146,7 @@ export interface CollegeRequestSummaryDto {
   updatedAt: string;
 }
 
-/** Detail shape — summary plus the full pending student list. */
+/** Detail shape - summary plus the full pending student list. */
 export interface CollegeRequestDetailDto extends CollegeRequestSummaryDto {
   students: Array<{ email: string; fullName?: string | null; rollNumber?: string | null }>;
 }

@@ -1,10 +1,10 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at the same path in the other repo. Change both together.
  *
  * Help assistant (student chatbot). The client sends the running conversation; the
  * server prepends a platform-knowledge system prompt and returns the next reply.
- * Stateless — no history is persisted. Frontend imports these with `import type`.
+ * Stateless - no history is persisted. Frontend imports these with `import type`.
  */
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsIn, IsString, MaxLength, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';

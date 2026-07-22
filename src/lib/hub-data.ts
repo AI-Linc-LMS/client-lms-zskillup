@@ -1,6 +1,6 @@
 /**
  * Seeded company-hub content (COMPANY_HUB_SPEC). ONE template, content instances
- * per company. The 7-tab structure is canonical — never 5 tabs (frontend/CLAUDE
+ * per company. The 7-tab structure is canonical - never 5 tabs (frontend/CLAUDE
  * §10). Freemium lock state is expressed visually; locked content stays visible
  * (frontend/CLAUDE §4b).
  */
@@ -80,7 +80,7 @@ function bySlug(slug: string): DemoCompany {
   return { ...DEMO_COMPANIES[0], slug, name };
 }
 
-/** Generic content generator — all 9 hubs are instances of the same template. */
+/** Generic content generator - all 9 hubs are instances of the same template. */
 export function getHubContent(slug: string): HubContent {
   const company = bySlug(slug);
   return {

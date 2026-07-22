@@ -16,7 +16,7 @@ import { RewardOverlay } from '@/components/gamification/RewardOverlay';
 import { notifyXpUpdated } from '@/lib/xp-events';
 
 /**
- * Daily Challenge ("Today's Questions") — a once-a-day curated set. Each answer
+ * Daily Challenge ("Today's Questions") - a once-a-day curated set. Each answer
  * grades through the practice path (per-question XP); finishing the set marks it
  * complete and awards a bonus XP, revealed with the Duolingo-style overlay.
  */

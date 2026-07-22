@@ -16,7 +16,7 @@ import { Logo } from '@/components/layout/Logo';
  * Forgot password. Submitting calls `POST /auth/forgot-password`, which always
  * returns the same response regardless of whether the email exists
  * (anti-enumeration). We then route to /reset-password with the email so the
- * user can enter the 6-digit code we emailed and set a new password — mirroring
+ * user can enter the 6-digit code we emailed and set a new password - mirroring
  * the signup email-verification flow. The code screen is shown regardless of
  * whether the account exists (it simply never arrives otherwise).
  */

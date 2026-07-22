@@ -7,7 +7,7 @@ import { TpoSidebar } from './TpoSidebar';
 import { TpoTopBar } from './TpoTopBar';
 
 /**
- * Placement Office console shell (redesign) — a dedicated sidebar-first layout
+ * Placement Office console shell (redesign) - a dedicated sidebar-first layout
  * for the /tpo route group, replacing the shared AppShell here. The sidebar spans
  * full height on the left; a sticky top bar + the module content fill the rest.
  * All console state (college identity, selected batch, sidebar collapse) is

@@ -1,5 +1,5 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at the same path in the other repo. Change both together.
  *
  * Subscription plan catalog + college subscription lifecycle (Phase 4). Gated
@@ -180,7 +180,7 @@ export interface CollegeSubscriptionDto {
   planName: string;
   seatLimit: number;
   seatsUsed: number;
-  /** Effective status — EXPIRED is computed when expiresAt has passed. */
+  /** Effective status - EXPIRED is computed when expiresAt has passed. */
   status: string;
   isTrial: boolean;
   startsAt: string;

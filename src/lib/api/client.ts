@@ -4,14 +4,14 @@ import { ApiRequestError, type ApiResponse } from './types';
 
 /**
  * The single channel to the backend (CLAUDE.md §5/§6). No component or page may
- * `fetch` the backend directly — everything goes through here so token attach,
+ * `fetch` the backend directly - everything goes through here so token attach,
  * the 401→refresh→retry-once flow, and error normalization live in ONE place.
  *
  * Auth model (ADR-006 / DATA_FLOW §2). Each request has THREE auth postures:
  *
  *   - default          : retry once on 401 via /api/auth/refresh; on second
  *                        failure clear all session state and redirect to /login.
- *   - `auth: 'login'`  : 401 means BAD CREDENTIALS — surface as ApiRequestError;
+ *   - `auth: 'login'`  : 401 means BAD CREDENTIALS - surface as ApiRequestError;
  *                        do NOT attempt refresh; do NOT redirect. Used by every
  *                        auth-token-establishing endpoint (login, register,
  *                        verify-email, refresh, forgot-password, reset-password).
@@ -36,24 +36,24 @@ type RequestOptions = Omit<RequestInit, 'body'> & {
   json?: unknown;
   /** Multipart body (file uploads). When set, Content-Type is left to the browser. */
   formData?: FormData;
-  /** Auth posture — see file header. Defaults to 'default'. */
+  /** Auth posture - see file header. Defaults to 'default'. */
   auth?: AuthPosture;
 };
 
 /**
  * Refresh verdicts are three-way, not boolean: only `unauthorized` is an auth
- * decision. `network` means the refresh endpoint was UNREACHABLE — a transient
+ * decision. `network` means the refresh endpoint was UNREACHABLE - a transient
  * (backend restart, blip) that must never tear the session down, or a few
  * seconds of downtime would mass-logout every open tab.
  */
 type RefreshOutcome = 'ok' | 'unauthorized' | 'network';
 
 let refreshInFlight: Promise<RefreshOutcome> | null = null;
-/** Module-level latch — once we've decided this session is dead, stop retrying. */
+/** Module-level latch - once we've decided this session is dead, stop retrying. */
 let sessionTerminated = false;
 
 /**
- * Read the `role` claim from a JWT access token WITHOUT verifying it — used only
+ * Read the `role` claim from a JWT access token WITHOUT verifying it - used only
  * to keep the non-sensitive `role` hint cookie in sync after a refresh. The
  * backend guards verify the signature; this is a display/routing hint only.
  */
@@ -97,12 +97,12 @@ async function refreshAccessToken(): Promise<RefreshOutcome> {
         // Re-stamp the durable `role` hint so a session resurrected from (or slid
         // forward by) the refresh cookie stays visible to the middleware. The
         // refresh endpoint returns only the token, so read the role claim from it
-        // — a UX hint only; the Nest guards remain the authority.
+        // - a UX hint only; the Nest guards remain the authority.
         const role = roleFromAccessToken(accessToken);
         if (role) writeRoleHint(role);
         return 'ok';
       } catch {
-        // fetch() rejects only on network failure — the server never answered,
+        // fetch() rejects only on network failure - the server never answered,
         // so we have NO verdict on the session. Surface as transient.
         return 'network';
       } finally {
@@ -125,11 +125,11 @@ function endSessionAndRedirect(): void {
   sessionTerminated = true;
   authToken.clear();
   clearSessionHints();
-  // The refresh cookie is HttpOnly — only the logout route handler can clear
+  // The refresh cookie is HttpOnly - only the logout route handler can clear
   // it. A dead-but-present cookie makes the middleware treat the visitor as
   // authenticated and bounce /login → /dashboard → 401 → /login in an endless
   // navigation loop (each cycle is a fresh bundle, so no in-memory latch can
-  // stop it). Purge it server-side, then hard-navigate — which also wipes all
+  // stop it). Purge it server-side, then hard-navigate - which also wipes all
   // in-flight component state so queued effects can't restart the loop.
   void fetch(`${API_BASE_URL}/api/v1/auth/logout`, { method: 'POST', credentials: 'include' })
     .catch(() => {})
@@ -139,8 +139,8 @@ function endSessionAndRedirect(): void {
 /**
  * "View as student" restore (single channel, like refresh). The preview token
  * is memory-only, so a hard refresh during a super-admin preview drops it while
- * the `preview=student` hint cookie survives. Restoring it HERE — before any
- * request leaves on a student-area page — guarantees no component ever hits a
+ * the `preview=student` hint cookie survives. Restoring it HERE - before any
+ * request leaves on a student-area page - guarantees no component ever hits a
  * STUDENT-only endpoint with the admin token (which would 403 "Insufficient
  * role"). The restorer is registered by lib/preview-actions to avoid an import
  * cycle; restoration is single-flight like refresh.
@@ -170,7 +170,7 @@ async function ensureStudentPreview(path: string): Promise<void> {
   if (!previewRestoreInFlight) {
     previewRestoreInFlight = previewRestorer()
       .catch(() => {
-        // Admin session dead or preview no longer allowed — drop the stale hint
+        // Admin session dead or preview no longer allowed - drop the stale hint
         // so requests proceed (and fail/redirect) through the normal auth flow.
         document.cookie = 'preview=; path=/; max-age=0; samesite=lax';
       })
@@ -258,7 +258,7 @@ export async function apiRequest<T>(
     if (!(err instanceof ApiRequestError)) throw err;
 
     // 403 is "you are who you say you are, but you can't have this." NEVER
-    // retry or redirect on 403 — surface to caller so the UI can show an
+    // retry or redirect on 403 - surface to caller so the UI can show an
     // empty/forbidden state instead of bouncing.
     if (err.status === 403) throw err;
 
@@ -267,11 +267,11 @@ export async function apiRequest<T>(
       // login/register/verify/forgot/reset: 401 == bad credentials. Surface.
       if (posture === 'login') throw err;
 
-      // public reads: 401 just means "no session" — no refresh, no redirect.
+      // public reads: 401 just means "no session" - no refresh, no redirect.
       if (posture === 'public') throw err;
 
       // Preview mode (super-admin "view as student"): the short-lived student
-      // token cannot be refreshed — refreshing would silently swap back to the
+      // token cannot be refreshed - refreshing would silently swap back to the
       // admin session and corrupt the preview. Surface the 401 to the caller.
       if (authToken.isPreview()) throw err;
 
@@ -288,7 +288,7 @@ export async function apiRequest<T>(
           throw retryErr;
         }
       }
-      // Transient outage — surface the failure to the caller's error state and
+      // Transient outage - surface the failure to the caller's error state and
       // keep the session; the next user action retries against a live backend.
       if (refreshed === 'network') throw err;
       endSessionAndRedirect();
@@ -313,7 +313,7 @@ export const apiClient = {
 
 /**
  * Test-only escape hatch. After a successful logout from the client, components
- * navigate (router.push('/')) and the page state is rebuilt — but the
+ * navigate (router.push('/')) and the page state is rebuilt - but the
  * `sessionTerminated` latch above persists for the lifetime of the JS bundle.
  * Call this on a fresh login to re-arm the client. The session itself is
  * authoritative on the server; this flag is purely a circuit-breaker.

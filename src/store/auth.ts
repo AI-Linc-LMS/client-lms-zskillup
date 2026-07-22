@@ -2,17 +2,17 @@ import { create } from 'zustand';
 
 /**
  * Auth store (ADR-006 / frontend/CLAUDE.md §5): the access token lives in MEMORY
- * ONLY. Never persisted to localStorage/sessionStorage/cookie — those are
+ * ONLY. Never persisted to localStorage/sessionStorage/cookie - those are
  * forbidden (XSS exfiltration risk). The refresh token is an HttpOnly cookie the
  * client JS cannot read; it is handled by the Next refresh route handler.
  *
  * Zustand is used ONLY for this token (and, later, the gamification toast queue)
- * — it is not a server-state cache.
+ * - it is not a server-state cache.
  *
  * Preview layer (super-admin "view as student"): a short-lived student access
  * token can be layered ON TOP of the real session token. While a preview is
  * active, `authToken.get()` returns the preview token so every API call runs as
- * the student — but the real `accessToken` (the admin's) is untouched, so
+ * the student - but the real `accessToken` (the admin's) is untouched, so
  * exiting the preview is instant. The preview token is also memory-only.
  */
 export interface PreviewUser {

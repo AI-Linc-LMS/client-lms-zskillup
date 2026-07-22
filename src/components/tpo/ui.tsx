@@ -6,7 +6,7 @@ import { Database } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { ReadinessBand } from '@/shared';
 
-// Student "motion as default" — subtle fade+rise on mount; motion owns the
+// Student "motion as default" - subtle fade+rise on mount; motion owns the
 // transform so `whileHover` can lift without fighting a Tailwind hover class.
 const CARD_MOTION = {
   initial: { opacity: 0, y: 12 },
@@ -15,7 +15,7 @@ const CARD_MOTION = {
 };
 
 /**
- * Presentational building blocks for the TPO Placement Office console — Blueprint
+ * Presentational building blocks for the TPO Placement Office console - Blueprint
  * light theme (white cards, 1px navy-tinted borders, orange accents), no charting
  * dependency. Every analytics surface carries a "Data Curated From" provenance
  * chip so a TPO can always see where a number comes from.
@@ -42,7 +42,7 @@ export function ReadinessBadge({ band }: { band: ReadinessBand }) {
   );
 }
 
-// ── Provenance chip — "Data Curated From" ───────────────────────────────────────
+// ── Provenance chip - "Data Curated From" ───────────────────────────────────────
 
 export function ProvenanceChip({ source, className }: { source: string; className?: string }) {
   return (
@@ -140,7 +140,7 @@ export function KpiCard({
       whileHover={{ y: -4 }}
       className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-4"
     >
-      {/* aurora top-hairline — the student KPI signature */}
+      {/* aurora top-hairline - the student KPI signature */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-1"
@@ -192,7 +192,7 @@ export function Quad({
   );
 }
 
-// ── Module scaffold — a titled "in progress" surface for not-yet-built modules ──
+// ── Module scaffold - a titled "in progress" surface for not-yet-built modules ──
 
 export function ModulePlaceholder({
   icon: Icon,

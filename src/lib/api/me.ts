@@ -9,7 +9,7 @@ import type { AdminCapabilities } from '@/shared/admin-capabilities';
  * Architecture (fixes the QA-audit polling-loop bug, amended 2026-06-11):
  *
  *   1. We DO NOT call /me if the client-side `role` cookie is missing. That
- *      cookie is set by the login flow as a UX hint and cleared on logout —
+ *      cookie is set by the login flow as a UX hint and cleared on logout -
  *      its absence means the user is not authenticated, so /me would 401.
  *
  *   2. The actual fetch is dedup'd at module scope so a page that mounts
@@ -18,15 +18,15 @@ import type { AdminCapabilities } from '@/shared/admin-capabilities';
  *
  *   3. Each component that consumes /me calls getMe() from a
  *      `useEffect(..., [])` (empty deps) so it fires once per mount, and
- *      silently no-ops on rejection — the component renders its fallback.
+ *      silently no-ops on rejection - the component renders its fallback.
  *
  *   4. The request uses the DEFAULT posture (silent refresh + retry once).
  *      It originally used `auth: 'public'` to dodge a session-tear-down loop,
  *      but that meant identity NEVER loaded on a hard navigation (the access
  *      token lives in memory, so every fresh bundle's first /me is a 401).
- *      The loop's real causes are fixed at the root now — single-flight
+ *      The loop's real causes are fixed at the root now - single-flight
  *      refresh, network-vs-auth refresh verdicts, and HttpOnly-cookie purge
- *      on session teardown — so /me refreshes like every other call.
+ *      on session teardown - so /me refreshes like every other call.
  */
 
 export interface ApiStudentProfile {
@@ -57,11 +57,11 @@ export interface UpdateMePayload {
   rolesInterested?: string[];
   collegeName?: string | null;
   /** Canonical college (tenancy.colleges.id), picked from the profile dropdown.
-   *  This is what actually sets auth.users.college_id — free-text `collegeName`
+   *  This is what actually sets auth.users.college_id - free-text `collegeName`
    *  never did, which is why the "My College" leaderboard had nothing to filter on. */
   collegeId?: string | null;
   passoutYear?: number | null;
-  /** Profile photo — hosted URL or a small client-resized data URL. "" clears it. */
+  /** Profile photo - hosted URL or a small client-resized data URL. "" clears it. */
   avatarUrl?: string | null;
 }
 

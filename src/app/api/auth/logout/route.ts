@@ -6,7 +6,7 @@ import { cookies } from 'next/headers';
  * that forwards the HttpOnly `zskillup_refresh` cookie to Nest so the backend
  * can revoke the session, then clears the cookie on the client.
  *
- * This was identified as a gap by the QA audit (release blocker) — without
+ * This was identified as a gap by the QA audit (release blocker) - without
  * it the client either had to call the backend cross-origin (works, but the
  * documented architecture says proxy through Next) or skip the server-side
  * revoke entirely.
@@ -26,7 +26,7 @@ export async function POST(): Promise<NextResponse> {
         headers: { Cookie: `${REFRESH_COOKIE}=${refresh.value}` },
       });
     } catch {
-      // Network failure shouldn't block the client-side logout — we still
+      // Network failure shouldn't block the client-side logout - we still
       // want to clear the cookie below.
     }
   }

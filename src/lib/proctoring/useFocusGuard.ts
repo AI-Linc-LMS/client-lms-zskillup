@@ -25,7 +25,7 @@ export interface FocusGuard {
 /**
  * Lightweight focus guard for the AI mock interview: runs the session in
  * fullscreen and counts tab switches + fullscreen exits (warn-only, never ends
- * the session), mirroring the AI-LINC proctored interview. No camera/mic — the
+ * the session), mirroring the AI-LINC proctored interview. No camera/mic - the
  * interview owns the mic itself. Fullscreen failures are non-fatal.
  */
 export function useFocusGuard(): FocusGuard {
@@ -63,7 +63,7 @@ export function useFocusGuard(): FocusGuard {
       await document.documentElement.requestFullscreen?.();
       setInFullscreen(!!document.fullscreenElement);
     } catch {
-      /* non-fatal — some browsers block programmatic fullscreen */
+      /* non-fatal - some browsers block programmatic fullscreen */
     }
   }, []);
 

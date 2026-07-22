@@ -24,14 +24,14 @@ import { AnimatedNumber, AuroraBackground } from '@/components/motion/primitives
 import { onXpUpdated } from '@/lib/xp-events';
 
 /**
- * The dashboard centerpiece — a personalized, AI-written briefing over the
+ * The dashboard centerpiece - a personalized, AI-written briefing over the
  * signature aurora backdrop.
  *
  * Hardened render strategy: `me` (name), `stats` (level/XP/streak) and the
  * AI `briefing` are fetched IN PARALLEL via independent effects. The hero
  * paints IMMEDIATELY from name + stats and layers the OpenAI-generated copy in
  * when it arrives. The briefing call is never on the critical path, so a slow
- * or failing GET /students/briefing can NEVER produce a bare fallback line — we
+ * or failing GET /students/briefing can NEVER produce a bare fallback line - we
  * always derive a confident, stat-backed greeting instead.
  */
 
@@ -108,7 +108,7 @@ export function AiBriefingHero() {
 
   const firstName = firstNameOf(me?.fullName);
 
-  // Effective stats: ALWAYS prefer the LIVE /students/stats — the briefing's
+  // Effective stats: ALWAYS prefer the LIVE /students/stats - the briefing's
   // stats are a cached snapshot from generation time and go stale (it only
   // regenerates on activity), which made the hero show a different level than
   // the stat cards. The briefing snapshot is only a pre-load fallback.
@@ -121,15 +121,15 @@ export function AiBriefingHero() {
 
   const nextPct = xpSpan > 0 ? Math.min(100, Math.round((xpInto / xpSpan) * 100)) : 0;
 
-  // A brand-new student (no XP, no streak, still Level 1) has never been here —
+  // A brand-new student (no XP, no streak, still Level 1) has never been here -
   // "Welcome back" is wrong. Greet with "Welcome" and soften any AI greeting
   // that says "back".
   const isReturning = totalXp > 0 || streak > 0 || level > 1;
 
   // Derived, always-confident copy. The AI briefing wins when present; otherwise
   // we build a strong personalized headline from name + stats. (The greeting line is
-  // rendered directly from firstName in the hero — "Welcome back, <name>" with the name
-  // in yellow — so no separate greeting string is needed.)
+  // rendered directly from firstName in the hero - "Welcome back, <name>" with the name
+  // in yellow - so no separate greeting string is needed.)
   const headline = useMemo(() => {
     if (briefing?.headline) return briefing.headline;
     if (!isReturning) return `Welcome aboard, ${firstName}`;
@@ -150,7 +150,7 @@ export function AiBriefingHero() {
   const nextAction = briefing?.nextAction ?? DEFAULT_ACTION;
 
   // The one-time Placement Readiness Test (the former "calibration") is the very
-  // first step of the journey — so an un-calibrated student is steered straight
+  // first step of the journey - so an un-calibrated student is steered straight
   // to it: it replaces both the "Try a mock" reco card and the mock CTA below.
   const showPlacementTest = calibration.required && !!calibration.mockTestId;
   const placementHref = calibration.mockTestId
@@ -171,7 +171,7 @@ export function AiBriefingHero() {
       ].slice(0, 3)
     : focusAreas.slice(0, 3);
 
-  // First paint: a shimmering skeleton over the aurora — never the 0-state.
+  // First paint: a shimmering skeleton over the aurora - never the 0-state.
   if (!ready) {
     return (
       <section data-tour="dash:briefing-hero" className="relative isolate overflow-hidden rounded-[1.5rem] p-6 text-white sm:rounded-[2rem] sm:p-10">

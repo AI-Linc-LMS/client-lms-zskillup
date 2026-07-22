@@ -1,5 +1,5 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011, amended 2026-06-03).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011, amended 2026-06-03).
  * Mirrored at frontend-repo/src/shared/dto/auth.dto.ts.
  *
  * Validation: **class-validator + class-transformer** (Implementation Plan §4
@@ -11,7 +11,7 @@
  * rules with the same constraints encoded here. The class instance itself is
  * only constructed server-side by Nest's global `ValidationPipe`.
  *
- * Auth request DTOs — STUDENT_JOURNEY_SPEC §1–2 / SECURITY_STANDARDS §3:
+ * Auth request DTOs - STUDENT_JOURNEY_SPEC §1–2 / SECURITY_STANDARDS §3:
  * email is normalized (trim + lowercase) and unknown fields are rejected
  * (ValidationPipe `whitelist: true` + `forbidNonWhitelisted: true`).
  */
@@ -81,7 +81,7 @@ export class AuthLoginDto {
 // ─── Password reset (Sprint 1) ──────────────────────────────────────────────
 // Single-use, short-TTL token delivered out-of-band by email
 // (SECURITY_STANDARDS §1). The /forgot-password endpoint never reveals whether
-// an email is registered (anti-enumeration — same response either way).
+// an email is registered (anti-enumeration - same response either way).
 
 export class AuthForgotPasswordDto {
   @Transform(normaliseEmail)
@@ -107,7 +107,7 @@ export class AuthResetPasswordDto {
  * OTP-based password reset (forgot-password flow). A 6-digit code is delivered
  * by email and entered alongside the new password. Distinct from the token
  * reset above (which stays in use for college set-password + admin-initiated
- * reset links). Scoped by email + code — anti-enumeration is preserved by a
+ * reset links). Scoped by email + code - anti-enumeration is preserved by a
  * uniform "invalid or expired" error for any failure.
  */
 export class AuthResetPasswordOtpDto {

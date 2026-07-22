@@ -1,5 +1,5 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at backend-repo/src/shared/certificate-tiers.ts.
  *
  * The 7 XP-based certificate tiers. Reaching a tier's XP unlocks a downloadable,

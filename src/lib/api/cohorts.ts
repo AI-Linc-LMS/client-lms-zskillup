@@ -1,7 +1,7 @@
 import { apiClient } from './client';
 import type { CohortDto, CreateCohortDto } from '@/shared';
 
-/** Cohort management (TPO console — Batch 4). College-scoped server-side. */
+/** Cohort management (TPO console - Batch 4). College-scoped server-side. */
 
 export type Cohort = CohortDto;
 

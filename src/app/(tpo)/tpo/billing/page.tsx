@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 
 /**
  * College B2B billing (TPO). Buy a recruiter company's question bank at the B2B
- * rate for the whole cohort — every student in the college inherits the access.
+ * rate for the whole cohort - every student in the college inherits the access.
  */
 export default function TpoBillingPage() {
   const [me, setMe] = useState<ApiMe | null>(null);

@@ -26,7 +26,7 @@ export interface FaceProctorController {
  * the AI mock interview, which manages its own camera). A lean sibling of
  * useProctoring's face path for surfaces that don't use the full assessment
  * controller. Same cooldown + ~10s report cadence, so it reports into the same
- * server-stamped log shape. Advisory only — never blocks the surface.
+ * server-stamped log shape. Advisory only - never blocks the surface.
  */
 export function useFaceProctor(
   videoRef: React.RefObject<HTMLVideoElement | null>,

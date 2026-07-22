@@ -3,7 +3,7 @@
 /**
  * Tiny cross-component signal so the dashboard stat cards + hero refresh the
  * moment any widget awards XP/coins/streak (Quick Aptitude, Daily Challenge,
- * Challenges, the reward overlay) — without a full page reload. Browser-only.
+ * Challenges, the reward overlay) - without a full page reload. Browser-only.
  */
 const XP_UPDATED = 'zskillup:xp-updated';
 

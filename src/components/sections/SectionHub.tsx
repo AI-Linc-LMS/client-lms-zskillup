@@ -52,7 +52,7 @@ const TAB_ICONS: Record<SectionTab, typeof BookOpen> = {
 
 const READINESS_TIP = {
   title: 'Your section readiness',
-  body: 'How strong you are in this section right now — measured from your own practice, not a community average.',
+  body: 'How strong you are in this section right now - measured from your own practice, not a community average.',
   bullets: [
     'Built from your accuracy across the topics you have practised in this section',
     'Rises as you practise more topics and answer more accurately',
@@ -93,7 +93,7 @@ function useSectionAccuracy(leaves: SectionLeaf[]): {
 }
 
 /**
- * Sectional Hub — the section analog of `CompanyHub`, built from the same visual
+ * Sectional Hub - the section analog of `CompanyHub`, built from the same visual
  * system (dark aurora hero + sticky glass tab bar + white violet-tinted cards) so
  * the two feel like one platform. Four tabs: Overview / Syllabus / Study Material /
  * Practice, with topic-level unlock (₹9/topic) and a whole-section bundle.
@@ -326,7 +326,7 @@ export function SectionHub({ section }: { section: SectionRoot }) {
               <Stat label="Practice areas" value={String(leaves.length)} />
               <Stat
                 label="Topics practised"
-                value={acc.loading ? '—' : `${acc.practised} / ${leaves.length}`}
+                value={acc.loading ? '-' : `${acc.practised} / ${leaves.length}`}
                 accent
               />
             </div>
@@ -609,7 +609,7 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
   );
 }
 
-/** Right-rail "Your access" card — unlock the whole section, or an owned badge. */
+/** Right-rail "Your access" card - unlock the whole section, or an owned badge. */
 function AccessCard({
   owned,
   sectionName,
@@ -631,7 +631,7 @@ function AccessCard({
         </span>
         <p className="mt-3 text-sm font-bold text-navy">You own this section</p>
         <p className="mt-1 text-xs leading-relaxed text-slate-600">
-          Every topic in {sectionName} is unlocked — practise without limits.
+          Every topic in {sectionName} is unlocked - practise without limits.
         </p>
       </section>
     );
@@ -728,7 +728,7 @@ function OverviewTab({
           <h2 className="mt-3 text-lg font-extrabold tracking-tight text-navy sm:text-xl">{section.name}</h2>
           <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">{desc.tagline}</p>
 
-          {/* What's inside — the content this section gives you */}
+          {/* What's inside - the content this section gives you */}
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
             {inside.map((it) => (
               <button

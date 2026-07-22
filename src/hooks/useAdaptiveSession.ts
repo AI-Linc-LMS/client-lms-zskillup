@@ -53,7 +53,7 @@ interface AdaptiveSessionState {
   answeredCount: number;
   /**
    * Per-question timer anchor (epoch ms) = the moment the question is actually
-   * SHOWN. Reset to `Date.now()` on start / advance / resume — deliberately NOT the
+   * SHOWN. Reset to `Date.now()` on start / advance / resume - deliberately NOT the
    * server `servedAt` (pin time, stamped during the previous submit), which would
    * start the clock mid-question. Drives the per-question timer AND the live points
    * meter, and is what the server scorer trusts via the client `timeMs`.
@@ -76,7 +76,7 @@ interface UseAdaptiveSessionReturn extends AdaptiveSessionState {
   askHint: () => Promise<void>;
   abandon: () => Promise<void>;
   finish: () => Promise<void>;
-  /** Re-enter the session after a purchase — resumes and pins the next question. */
+  /** Re-enter the session after a purchase - resumes and pins the next question. */
   continueAfterUnlock: () => Promise<void>;
   submitting: boolean;
 }
@@ -177,7 +177,7 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
         // Start the per-question clock when the question is actually SHOWN, not
         // when the server pinned it. The next question is pinned during the
         // previous submit, so anchoring to its `servedAt` counted the time spent
-        // reading the previous solution — the timer looked pre-started + points
+        // reading the previous solution - the timer looked pre-started + points
         // decayed before you saw the question. On resume this also restarts the
         // clock fairly instead of penalising time away.
         questionStartMs: Date.now(),
@@ -216,7 +216,7 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
         nonceRef.current += 1;
         setState((s) => ({
           ...s,
-          // Reveal the solution IN PLACE — keep the answered question mounted and
+          // Reveal the solution IN PLACE - keep the answered question mounted and
           // hold the next-question / completion / paywall transition until the
           // student taps Next (advance()).
           lastAnswer: {
@@ -268,7 +268,7 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
         pendingPaywall: null,
         // Reset the per-answer award too, or the "+N pts" burst keeps rendering
         // (it's driven off `lastPoints.earned`) and follows you into the next
-        // question. `sessionPoints` — the running banked total — is NOT cleared.
+        // question. `sessionPoints` - the running banked total - is NOT cleared.
         lastPoints: null,
       } as const;
       if (s.pendingPaywall) {
@@ -283,8 +283,8 @@ export function useAdaptiveSession(params: AdaptiveSessionParams): UseAdaptiveSe
         phase: 'active',
         currentQuestion: s.pendingNext,
         hintState: null,
-        // Clock starts now — the moment the student taps Next and sees the
-        // question — not when it was pinned during the previous submit.
+        // Clock starts now - the moment the student taps Next and sees the
+        // question - not when it was pinned during the previous submit.
         questionStartMs: Date.now(),
       };
     });

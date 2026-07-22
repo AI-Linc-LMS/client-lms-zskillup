@@ -1,5 +1,5 @@
 /**
- * Dashboard loading skeleton — shown during navigation + the first data load so
+ * Dashboard loading skeleton - shown during navigation + the first data load so
  * a returning/just-signed-in student sees a clean skeleton instead of a frozen
  * previous page or a flash of stale content. Uses the shimmer `.skeleton`
  * primitive (design-direction) instead of a flat pulse.

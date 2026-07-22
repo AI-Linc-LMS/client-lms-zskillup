@@ -7,7 +7,7 @@ import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { listAdminColleges, type AdminCollegeRow } from '@/lib/api/admin';
 import { Loader2, School, Search } from 'lucide-react';
 
-/** Admin console — read-only colleges directory with drill-down (Phase 2). */
+/** Admin console - read-only colleges directory with drill-down (Phase 2). */
 export default function AdminCollegesPage() {
   const [rows, setRows] = useState<AdminCollegeRow[]>([]);
   const [loading, setLoading] = useState(true);

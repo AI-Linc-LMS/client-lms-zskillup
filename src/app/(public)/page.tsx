@@ -71,7 +71,7 @@ const MODULES = [
   { icon: LineChart, title: 'Institutional analytics', body: 'TPOs can easily track student progress, identify placement readiness, and monitor overall performance.' },
 ];
 
-/** Practice-by-section cards — the five sections students segregate prep by. */
+/** Practice-by-section cards - the five sections students segregate prep by. */
 const SECTION_STYLE = {
   sky: { icon: 'text-sky-500/15 group-hover:text-sky-500/25', glow: 'bg-sky-400/10' },
   orange: { icon: 'text-orange-500/15 group-hover:text-orange-500/25', glow: 'bg-orange-400/10' },
@@ -245,7 +245,7 @@ export default async function HomePage() {
 
             <p className="mt-5 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg">
               Prepare smarter for top companies with real placement questions, mock tests,
-              coding practice, AI interviews, and resume building—all on one platform.
+              coding practice, AI interviews, and resume building-all on one platform.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -518,7 +518,7 @@ export default async function HomePage() {
               spotlightColor="rgba(245, 180, 0, 0.20)"
             >
               {/* Photo (white studio bg blends into the card; a missing file degrades to plain white).
-                  Taller crop (4:5) so the founder's chest — incl. the prephasz-logo pocket — is visible. */}
+                  Taller crop (4:5) so the founder's chest - incl. the prephasz-logo pocket - is visible. */}
               <div className="relative h-[26rem] w-full overflow-hidden border-b border-[var(--color-line)] bg-white">
                 <div
                   role="img"

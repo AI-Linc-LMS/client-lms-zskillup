@@ -8,7 +8,7 @@ import type { TpoStudentDetail } from '@/shared';
 import { ProvenanceChip, ReadinessBadge } from './ui';
 
 /**
- * Student drill-down drawer — slides in from the right when a student is selected
+ * Student drill-down drawer - slides in from the right when a student is selected
  * (a scatter dot or a roster row). Shows the readiness composite, per-company
  * performance and weakest topics from GET /tpo/students/:id.
  */

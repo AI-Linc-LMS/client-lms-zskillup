@@ -118,7 +118,7 @@ export default function SubscriptionPage() {
           {/* Platform plan (only when an admin has assigned one) */}
           {sub ? <PlanCard sub={sub} /> : null}
 
-          {/* Active cohort access — inherited by every student in the college */}
+          {/* Active cohort access - inherited by every student in the college */}
           <section className="rounded-2xl border border-slate-200 bg-white p-6">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-500">

@@ -1,8 +1,8 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at the same path in the other repo. Change both together.
  *
- * Student-facing "performance vs participation" scatter — the same lens the TPO
+ * Student-facing "performance vs participation" scatter - the same lens the TPO
  * sees for a cohort, but from the student's own seat: their dot among anonymized
  * peers in their college.
  */

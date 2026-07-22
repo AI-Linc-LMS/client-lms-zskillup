@@ -23,7 +23,7 @@ const TESTIMONIAL = {
 };
 
 /**
- * Shared split-panel auth shell — the animated brand showcase on the left
+ * Shared split-panel auth shell - the animated brand showcase on the left
  * (hidden on mobile) and your form on the right via {children}. Used by both
  * /login and /signup so they share one identity; only the right-panel form
  * differs between them.

@@ -15,7 +15,7 @@ import { UpgradeBanner } from '@/components/billing/UpgradeBanner';
 import { Reveal } from '@/components/motion/primitives';
 
 /**
- * Practice (Mode 1) — adaptive, non-proctored picker. Server fetches the topic
+ * Practice (Mode 1) - adaptive, non-proctored picker. Server fetches the topic
  * taxonomy + companies; the interactive, categorised, searchable picker is the
  * client component. Replaces the old linear /practice feed + Topic Mastery.
  */

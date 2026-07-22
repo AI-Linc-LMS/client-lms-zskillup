@@ -74,7 +74,7 @@ export function StudyMaterialTab({
     [data, activeSection],
   );
 
-  // The video playlist the player navigates — the current topic's VIDEO items,
+  // The video playlist the player navigates - the current topic's VIDEO items,
   // derived live from the tree so progress/done stays in sync after a toggle.
   const playlist = useMemo(() => {
     if (!playing || !data) return [] as StudyMaterialItemDto[];
@@ -98,7 +98,7 @@ export function StudyMaterialTab({
         await completeItem(slug, item.id, next);
         // Locks are computed SERVER-side, and `recompute` only fixes local progress numbers.
         // Finishing a module's last item unlocks the next one (and un-ticking re-locks it),
-        // which the client cannot know — so resync the tree instead of duplicating the rule
+        // which the client cannot know - so resync the tree instead of duplicating the rule
         // here and letting the two drift. Cheap, and it happens behind the optimistic tick.
         const fresh = await fetchTree(slug);
         setData(fresh);
@@ -221,7 +221,7 @@ export function StudyMaterialTab({
 
           <div className="space-y-2.5">
             {section.topics.map((t, ti) => {
-              // A locked module never opens — its items are not rendered at all, so there is
+              // A locked module never opens - its items are not rendered at all, so there is
               // nothing to click through to. The server rejects completing them anyway; this
               // is the visible half of the same rule.
               const open = openTopics.has(t.id) && !t.locked;

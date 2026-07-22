@@ -22,7 +22,7 @@ const SCOPES: { value: BroadcastScope; label: string; hint: string }[] = [
 /**
  * Broadcast composer (Phase 3). Sends an in-app notification to a target
  * audience. Gated by the `canBroadcast` capability (SUPER_ADMIN always holds it);
- * an ADMIN without it sees a locked state. Group-agnostic — rendered by both the
+ * an ADMIN without it sees a locked state. Group-agnostic - rendered by both the
  * /admin and /superadmin Broadcasts pages.
  */
 export function BroadcastComposer() {

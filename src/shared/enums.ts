@@ -1,5 +1,5 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at the same path in the other repo
  * (backend-repo/src/shared & frontend-repo/src/shared). Change both together.
  */
@@ -7,10 +7,10 @@
 /**
  * Four roles (SYSTEM_OVERVIEW / ADR-002 / Implementation Plan §2).
  * - STUDENT: end user.
- * - COLLEGE_ADMIN: college placement officer (TPO) — college-scoped.
- * - ADMIN: internal platform operator — creates college registration requests,
+ * - COLLEGE_ADMIN: college placement officer (TPO) - college-scoped.
+ * - ADMIN: internal platform operator - creates college registration requests,
  *   activates subscriptions, seeds imports. Below SUPER_ADMIN.
- * - SUPER_ADMIN: platform owner — approves colleges, full catalog + role mgmt.
+ * - SUPER_ADMIN: platform owner - approves colleges, full catalog + role mgmt.
  */
 export enum UserRole {
   STUDENT = 'STUDENT',
@@ -44,7 +44,7 @@ export enum CollegeRequestStatus {
   REJECTED = 'REJECTED',
 }
 
-/** College subscription lifecycle (lightweight — no billing). */
+/** College subscription lifecycle (lightweight - no billing). */
 export enum SubscriptionStatus {
   ACTIVE = 'ACTIVE',
   EXPIRED = 'EXPIRED',
@@ -136,7 +136,7 @@ export enum MockAttemptStatus {
 // ─── Billing & entitlements (Razorpay program) ───────────────────────────────
 
 /**
- * What a purchase / grant unlocks — the entitlement scope.
+ * What a purchase / grant unlocks - the entitlement scope.
  * - PLATFORM: everything (the "Upgrade Subscription" / full-generic plan).
  * - SECTION:  a whole practice section (scopeRef = section root slug, or 'coding').
  * - TOPIC:    a single topic (scopeRef = topic slug; coding topics use 'coding:<tag>').
@@ -181,7 +181,7 @@ export enum EntitlementSource {
 }
 
 /** Entitlement lifecycle. EXPIRED is derived at read time (expires_at < now),
- *  never persisted — mirrors the college-subscription lazy-expiry convention. */
+ *  never persisted - mirrors the college-subscription lazy-expiry convention. */
 export enum EntitlementStatus {
   ACTIVE = 'ACTIVE',
   CANCELLED = 'CANCELLED',

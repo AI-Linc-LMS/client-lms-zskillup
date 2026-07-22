@@ -1,8 +1,8 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at the same path in the other repo. Change both together.
  *
- * Smart Study Plan — the fixed, AI-generated 90-day placement-prep roadmap built
+ * Smart Study Plan - the fixed, AI-generated 90-day placement-prep roadmap built
  * once from a student's calibration result. Days drip-unlock one per calendar day.
  */
 
@@ -13,7 +13,7 @@ export type StudyTaskKind = 'learn' | 'practice' | 'quiz' | 'mock' | 'coding' | 
 export type StudyDayStatus = 'locked' | 'available' | 'today' | 'completed';
 
 export interface StudyTaskDto {
-  /** Stable 0-based index within the day — the completion key. */
+  /** Stable 0-based index within the day - the completion key. */
   index: number;
   kind: StudyTaskKind;
   title: string;
@@ -21,7 +21,7 @@ export interface StudyTaskDto {
   /** Deep-link into the concrete activity (e.g. /dashboard/quiz/adaptive?topic=…). */
   href: string;
   cta: string;
-  /** Leaf/section topic slug this task drills, when applicable — drives auto-verify. */
+  /** Leaf/section topic slug this task drills, when applicable - drives auto-verify. */
   targetSlug: string | null;
   estMinutes: number;
   /** True once auto-verified from real activity OR ticked manually. */
@@ -90,7 +90,7 @@ export interface StudyPlanSummaryDto {
   phases: StudyPhaseMetaDto[];
 }
 
-/** Overview payload for GET /me/study-plan/overview — powers the whole page. */
+/** Overview payload for GET /me/study-plan/overview - powers the whole page. */
 export interface StudyPlanOverviewDto {
   summary: StudyPlanSummaryDto;
   /** Today's day detail (null when no plan / plan not yet started). */

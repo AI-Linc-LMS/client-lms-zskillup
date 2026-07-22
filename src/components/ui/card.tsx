@@ -3,10 +3,10 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 /**
- * Card primitive — the workhorse surface. Per design brief:
+ * Card primitive - the workhorse surface. Per design brief:
  *  - White background
  *  - Soft slate-200 border
- *  - Minimal shadow (shadow-sm — borders do the work)
+ *  - Minimal shadow (shadow-sm - borders do the work)
  *  - Moderate radius (rounded-xl = 12px)
  *  - Generous internal padding
  */

@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 /**
  * The ONE way to render a price with an optional strike-through MRP. Shows the
- * selling price, and — when an MRP is present and higher — the struck original
+ * selling price, and - when an MRP is present and higher - the struck original
  * beside it. Collapses to selling-only when `mrpCents` is null/≤ selling, so it's
  * safe to drop in everywhere. `sellingCents` is always the charged price; `mrpCents`
  * is display-only (never touches checkout).

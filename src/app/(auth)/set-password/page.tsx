@@ -13,7 +13,7 @@ import { FormField } from '@/components/ui/form-field';
 import { Logo } from '@/components/layout/Logo';
 
 /**
- * Set-password (college onboarding — Batch 3). A provisioned account (e.g. a
+ * Set-password (college onboarding - Batch 3). A provisioned account (e.g. a
  * college TPO admin) opens the secure link from their set-up email; setting the
  * password here verifies + activates the account (server-side). Reuses the
  * reset-password endpoint (same single-use token contract) with welcome copy.

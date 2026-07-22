@@ -15,7 +15,7 @@ import {
 import type { AdminCreateCollegeDto } from '@/shared';
 
 /**
- * Colleges admin — list, create, suspend (Day 3.5 admin UI). Uses the
+ * Colleges admin - list, create, suspend (Day 3.5 admin UI). Uses the
  * `/api/v1/admin/colleges` endpoints; validation rules on the form mirror the
  * constraints encoded on `AdminCreateCollegeDto` (class-validator). The
  * backend re-validates on submit and surfaces conflict errors (409 on

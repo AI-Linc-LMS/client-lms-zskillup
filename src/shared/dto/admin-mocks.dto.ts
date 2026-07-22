@@ -1,8 +1,8 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at backend-repo/src/shared/dto/admin-mocks.dto.ts.
  *
- * Sprint 4 — Superadmin mock-test CRUD ("Mock test definitions" in the plan).
+ * Sprint 4 - Superadmin mock-test CRUD ("Mock test definitions" in the plan).
  *
  * A mock is an ordered set of PUBLISHED questions taken under a server-enforced
  * timer. The service validates that every `questionId` exists and is published
@@ -54,7 +54,7 @@ export class AdminCreateMockDto {
   questionIds!: string[];
 }
 
-/** Patch — all fields optional; supplying `questionIds` replaces the whole set. */
+/** Patch - all fields optional; supplying `questionIds` replaces the whole set. */
 export class AdminUpdateMockDto {
   @IsOptional()
   @IsString()

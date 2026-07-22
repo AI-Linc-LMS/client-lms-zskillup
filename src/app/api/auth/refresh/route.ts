@@ -43,7 +43,7 @@ export async function POST(): Promise<NextResponse> {
   }
 
   // Backend wraps every success response in `{ data, meta }` (DATA_FLOW §3).
-  // The refresh payload is `{ data: { accessToken } }` — reading `accessToken`
+  // The refresh payload is `{ data: { accessToken } }` - reading `accessToken`
   // off the envelope root yields undefined and silently logs the user out the
   // first time the in-memory access token expires. Always unwrap.
   const body = (await upstream.json()) as {

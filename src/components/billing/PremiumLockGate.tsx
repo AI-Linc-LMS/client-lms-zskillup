@@ -17,7 +17,7 @@ const INCLUDED = [
  *
  * Distinct from SubscriptionLockGate, which is bound to the CAREER TOOLS specifically
  * (`useCareerAccess(tool)`, with its one-free-run allowance). This is the general "you are
- * on the free plan" gate, driven by useUpgradeGate — so it is governed by PAYWALL_ENABLED
+ * on the free plan" gate, driven by useUpgradeGate - so it is governed by PAYWALL_ENABLED
  * and falls OPEN while the paywall is off, and open for anyone holding any plan.
  *
  * Same contained-blur shape as ProfileLockGate: the real page shows as a blurred teaser

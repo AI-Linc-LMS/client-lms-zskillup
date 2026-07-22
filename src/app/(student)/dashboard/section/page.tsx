@@ -7,7 +7,7 @@ import { AnimatedNumber, AuroraBackground, Reveal } from '@/components/motion/pr
 import { Layers, ListChecks, Sparkles } from 'lucide-react';
 
 /**
- * Sectional Hubs landing — the section-organized sibling of the Company Hubs page.
+ * Sectional Hubs landing - the section-organized sibling of the Company Hubs page.
  * Same aurora hero + glass stat cards, but the grid is the five prep sections
  * (Numerical / Logical / Verbal / Technical / …) rather than recruiters.
  */
@@ -56,7 +56,7 @@ export default async function SectionsPage() {
               Build strength <span className="text-[#ffc42d]">section by section</span>.
             </h1>
             <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-white/65 sm:text-base">
-              Pick a section and follow a guided track — syllabus, study material and topic-wise
+              Pick a section and follow a guided track - syllabus, study material and topic-wise
               practice from the real question bank. Unlock a single topic or the whole section.
             </p>
 

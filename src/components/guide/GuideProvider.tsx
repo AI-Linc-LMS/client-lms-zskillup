@@ -92,7 +92,7 @@ export function GuideProvider({ children }: { children: ReactNode }) {
 
   const prev = useCallback(() => setIndex((i) => Math.max(0, i - 1)), []);
 
-  // When a step lives on another route, navigate there — the overlay polls for
+  // When a step lives on another route, navigate there - the overlay polls for
   // the target until it mounts.
   useEffect(() => {
     if (step?.route && step.route !== pathname) router.push(step.route);

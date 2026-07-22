@@ -30,7 +30,7 @@ import { BillingPeriod, EntitlementScope } from '@/shared/enums';
 import type { PriceBookEntryDto } from '@/shared/dto/payments.dto';
 
 /**
- * Explore Plans — the entry to the buying flow. Full-width marketing + the
+ * Explore Plans - the entry to the buying flow. Full-width marketing + the
  * "How would you like to prepare?" chooser: Full Platform Access (/shop/full)
  * or Build Your Own Plan (/shop/build).
  */

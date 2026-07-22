@@ -154,7 +154,7 @@ import type {
 
 /**
  * Admin (super-admin) API client. Wraps the `/api/v1/admin/*` endpoints.
- * All routes are SUPER_ADMIN-only — backend RolesGuard enforces; this client
+ * All routes are SUPER_ADMIN-only - backend RolesGuard enforces; this client
  * is just transport. Day 3.5 brings up the colleges console first; other
  * admin entities (companies, courses, questions) will fold into this file
  * as their consoles are built (Sprint 8 polish).
@@ -192,7 +192,7 @@ export async function suspendAdminCollege(id: string): Promise<void> {
   await apiClient.delete(`/api/v1/admin/colleges/${id}`);
 }
 
-// ─── Companies (Sprint 2 — superadmin authoring) ────────────────────────────
+// ─── Companies (Sprint 2 - superadmin authoring) ────────────────────────────
 
 export interface AdminCompanyRow {
   id: string;
@@ -242,7 +242,7 @@ export async function deleteAdminCompany(id: string): Promise<void> {
   await apiClient.delete(`/api/v1/admin/companies/${id}`);
 }
 
-// ─── Questions (Sprint 3 — superadmin question-bank CRUD) ───────────────────
+// ─── Questions (Sprint 3 - superadmin question-bank CRUD) ───────────────────
 
 export interface AdminQuestionRow {
   id: string;
@@ -251,7 +251,7 @@ export interface AdminQuestionRow {
   stem: string;
   /** Optional diagram/figure (URL or data-URL) shown with the stem. */
   imageUrl?: string | null;
-  /** The (leaf) topic this question is tagged to — backend field is `subtopicId`. */
+  /** The (leaf) topic this question is tagged to - backend field is `subtopicId`. */
   subtopicId: string | null;
   companyId: string | null;
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
@@ -371,7 +371,7 @@ export async function getAdminStats(): Promise<AdminPlatformStats> {
 // ─── View-as-student preview (super-admin QA tool) ──────────────────────────
 
 export interface ImpersonatePreview {
-  /** Short-lived STUDENT access token (no refresh) — layer over the admin session. */
+  /** Short-lived STUDENT access token (no refresh) - layer over the admin session. */
   accessToken: string;
   user: {
     id: string;
@@ -390,7 +390,7 @@ export async function impersonateStudent(studentId?: string): Promise<Impersonat
   return res.data;
 }
 
-// ─── Mock-test CRUD (Sprint 4 — superadmin "Mock test definitions") ──────────
+// ─── Mock-test CRUD (Sprint 4 - superadmin "Mock test definitions") ──────────
 
 export interface AdminMockRow {
   id: string;
@@ -469,7 +469,7 @@ export async function importAdminQuestions(csv: string): Promise<AdminImportResu
   return res.data;
 }
 
-// ─── Courses / modules / lessons (Sprint 2 — superadmin authoring) ──────────
+// ─── Courses / modules / lessons (Sprint 2 - superadmin authoring) ──────────
 //
 // The public `GET /courses` filters is_published=true, so this console reads
 // through the admin-only `GET /admin/courses[/:slug]` endpoints, which include

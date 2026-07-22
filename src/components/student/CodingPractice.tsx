@@ -13,7 +13,7 @@ const DIFF_DOT: Record<string, string> = {
 };
 
 /**
- * Dashboard Coding widget — a compact teaser of coding problems that links into
+ * Dashboard Coding widget - a compact teaser of coding problems that links into
  * the full /coding workspace. Surfaces unsolved problems first so the student
  * always sees the next thing to attempt.
  */
@@ -35,7 +35,7 @@ export function CodingPractice() {
   if (!problems || problems.length === 0) return null;
 
   const solved = problems.filter((p) => p.solved).length;
-  // Unsolved first, then by reward — show the next 3 worth attempting.
+  // Unsolved first, then by reward - show the next 3 worth attempting.
   const featured = [...problems]
     .sort((a, b) => Number(a.solved) - Number(b.solved) || b.xpReward - a.xpReward)
     .slice(0, 3);

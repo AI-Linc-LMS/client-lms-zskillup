@@ -202,7 +202,7 @@ function Hero({ ov }: { ov: StudyPlanOverviewDto }) {
   );
 }
 
-/** Left-column progress panel — streak, headline stats, and per-phase progress.
+/** Left-column progress panel - streak, headline stats, and per-phase progress.
  *  Fills the space beside the tall roadmap and lives on the light column. */
 function ProgressPanel({ summary }: { summary: StudyPlanOverviewDto['summary'] }) {
   const s = summary;
@@ -259,7 +259,7 @@ function ProgressPanel({ summary }: { summary: StudyPlanOverviewDto['summary'] }
   );
 }
 
-/** Left-column "coming up" preview — the next few locked days. */
+/** Left-column "coming up" preview - the next few locked days. */
 function UpNextPanel({ days, currentDay }: { days: StudyPlanOverviewDto['days']; currentDay: number | null }) {
   const upcoming = currentDay ? days.filter((d) => d.dayNumber > currentDay).slice(0, 4) : [];
   if (upcoming.length === 0) return null;
@@ -319,7 +319,7 @@ function TodayPanel({
   const meta = PHASE_META[today.phase];
   const allDone = today.doneCount >= today.taskCount && today.taskCount > 0;
   // Free users may READ their plan but acting on a task (warm-up / timed quiz)
-  // opens paid practice — raise the upgrade modal instead of navigating.
+  // opens paid practice - raise the upgrade modal instead of navigating.
   const upgrade = useUpgradeGate();
   return (
     <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">

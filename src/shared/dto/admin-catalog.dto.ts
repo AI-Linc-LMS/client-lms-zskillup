@@ -1,8 +1,8 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011, amended 2026-06-03).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011, amended 2026-06-03).
  * Mirrored at frontend-repo/src/shared/dto/admin-catalog.dto.ts.
  *
- * Superadmin catalog CRUD — companies, courses, colleges, modules, lessons
+ * Superadmin catalog CRUD - companies, courses, colleges, modules, lessons
  * (Implementation Plan §4: `/admin/colleges`, `/admin/companies`, `/admin/courses`).
  */
 import { Type } from 'class-transformer';
@@ -36,7 +36,7 @@ const SLUG_RULE = {
   message: 'slug must be lowercase letters, digits, and dashes only',
 };
 
-// ─── Companies (Sprint 2 — superadmin CRUD) ─────────────────────────────────
+// ─── Companies (Sprint 2 - superadmin CRUD) ─────────────────────────────────
 
 export class AdminCreateCompanyDto {
   @IsString()
@@ -83,7 +83,7 @@ export class AdminCreateCompanyDto {
   @MaxLength(60)
   badge?: string;
 
-  // Card metadata (explorer grid / hub hero) — display-only catalog copy.
+  // Card metadata (explorer grid / hub hero) - display-only catalog copy.
   @IsOptional() @Type(() => Number) @IsNumber() @Min(0) @Max(5) rating?: number;
   @IsOptional() @IsString() @MaxLength(20) enrolled?: string;
   @IsOptional() @IsString() @MaxLength(40) package?: string;
@@ -101,7 +101,7 @@ export class AdminCreateCompanyDto {
   isPublished: boolean = true;
 }
 
-/** Patch — every field optional, all rules from create still apply when present. */
+/** Patch - every field optional, all rules from create still apply when present. */
 export class AdminUpdateCompanyDto {
   @IsOptional() @IsString() @MinLength(2) @MaxLength(120) @Matches(SLUG_REGEX, SLUG_RULE)
   slug?: string;
@@ -136,7 +136,7 @@ export class AdminUpdateCompanyDto {
   @IsOptional() @IsBoolean()
   isPublished?: boolean;
 
-  // Card metadata (explorer grid / hub hero) — display-only catalog copy.
+  // Card metadata (explorer grid / hub hero) - display-only catalog copy.
   @IsOptional() @Type(() => Number) @IsNumber() @Min(0) @Max(5) rating?: number;
   @IsOptional() @IsString() @MaxLength(20) enrolled?: string;
   @IsOptional() @IsString() @MaxLength(40) package?: string;
@@ -160,7 +160,7 @@ export class AdminUpsertCompanyHubDto {
   @IsArray() interviews!: unknown[];
 }
 
-// ─── Courses (Sprint 2 — superadmin CRUD) ───────────────────────────────────
+// ─── Courses (Sprint 2 - superadmin CRUD) ───────────────────────────────────
 
 export class AdminCreateCourseDto {
   @IsString() @MinLength(2) @MaxLength(120) @Matches(SLUG_REGEX, SLUG_RULE)
@@ -214,7 +214,7 @@ export class AdminUpdateCourseDto {
   isPublished?: boolean;
 }
 
-// ─── Colleges (Sprint 0 exit — superadmin can create a college) ─────────────
+// ─── Colleges (Sprint 0 exit - superadmin can create a college) ─────────────
 
 export class AdminCreateCollegeDto {
   @IsString() @MinLength(2) @MaxLength(200)
@@ -231,7 +231,7 @@ export class AdminCreateCollegeDto {
 }
 
 /**
- * Patch a college — every field optional. `status` lets a superadmin suspend a
+ * Patch a college - every field optional. `status` lets a superadmin suspend a
  * tenant without deleting it (Sprint 8 / SECURITY_STANDARDS §6). Slug change
  * checks for uniqueness server-side.
  */
@@ -252,7 +252,7 @@ export class AdminUpdateCollegeDto {
   status?: CollegeStatus;
 }
 
-// ─── Course modules + lessons (Sprint 2 — superadmin authoring) ─────────────
+// ─── Course modules + lessons (Sprint 2 - superadmin authoring) ─────────────
 
 export class AdminCreateModuleDto {
   @IsString() @MinLength(2) @MaxLength(120) @Matches(SLUG_REGEX, SLUG_RULE)

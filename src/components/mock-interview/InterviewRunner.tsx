@@ -140,7 +140,7 @@ export function InterviewRunner({ id }: { id: string }) {
         setMaxTurns(detail.maxTurns);
         for (const r of detail.transcript.responses) responsesRef.current.set(r.question_id, r.answer);
 
-        // Camera + mic (self-view + Whisper source). Best-effort — falls back to typing.
+        // Camera + mic (self-view + Whisper source). Best-effort - falls back to typing.
         const recorderOk = !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== 'undefined';
         const whisperOk = recorderOk && (await aiInterviewStatus().catch(() => false));
         if (recorderOk && whisperOk) {
@@ -156,7 +156,7 @@ export function InterviewRunner({ id }: { id: string }) {
             streamRef.current = stream;
             setCamOn(stream.getVideoTracks().length > 0);
           } catch {
-            // Camera denied/absent — try audio-only so voice answers still work.
+            // Camera denied/absent - try audio-only so voice answers still work.
             try {
               const audioOnly = await navigator.mediaDevices.getUserMedia({
                 audio: { echoCancellation: true, noiseSuppression: true },
@@ -251,12 +251,12 @@ export function InterviewRunner({ id }: { id: string }) {
   //
   // The old pipeline re-transcribed the ENTIRE growing recording every 3.5s. Each pass
   // re-uploaded and re-processed all prior audio, so at 30s into an answer it was
-  // transcribing a 30s clip on repeat — the confirmed text lagged 15-30s behind speech
+  // transcribing a 30s clip on repeat - the confirmed text lagged 15-30s behind speech
   // (bug 1), and the partial/near-silent passes are exactly what made Whisper hallucinate
   // repeated phrases into the answer (bug 3).
   //
   // Now: the LIVE transcript comes from the browser's SpeechRecognition (instant, no server
-  // — see startRecording), and Whisper runs ONCE when the candidate stops, purely to refine
+  // - see startRecording), and Whisper runs ONCE when the candidate stops, purely to refine
   // the full answer. If Whisper hallucinates or fails, the Web-Speech transcript stands.
   const runWhisper = useCallback(async () => {
     if (whisperBusyRef.current || !chunksRef.current.length) return;
@@ -273,7 +273,7 @@ export function InterviewRunner({ id }: { id: string }) {
         if (text && !looksHallucinated(text)) setAnswer(text);
       }
     } catch {
-      /* transient — the live Web-Speech transcript already stands; typing is the fallback */
+      /* transient - the live Web-Speech transcript already stands; typing is the fallback */
     } finally {
       whisperBusyRef.current = false;
       setTranscribing(false);
@@ -299,7 +299,7 @@ export function InterviewRunner({ id }: { id: string }) {
     // committed to the answer as they're recognised (no server round-trip → no latency),
     // and non-final words show as a grey interim preview. Whisper refines the whole thing
     // once at the end. On browsers without SpeechRecognition, the answer fills in on stop
-    // from the single Whisper pass — still far better than the old 15-30s progressive lag.
+    // from the single Whisper pass - still far better than the old 15-30s progressive lag.
     const w = window as unknown as {
       SpeechRecognition?: new () => SpeechRec;
       webkitSpeechRecognition?: new () => SpeechRec;
@@ -334,7 +334,7 @@ export function InterviewRunner({ id }: { id: string }) {
         recognitionRef.current = sr;
         sr.start();
       } catch {
-        /* SR unavailable — Whisper still fills the transcript every ~3.5s */
+        /* SR unavailable - Whisper still fills the transcript every ~3.5s */
       }
     }
   }, [runWhisper, typing, voiceCapable]);

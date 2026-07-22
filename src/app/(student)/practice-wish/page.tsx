@@ -48,7 +48,7 @@ function buildSectionTree(topics: ApiTopic[]) {
 }
 
 /**
- * Practice as-wish (Mode 2) — type any topic/subtopic and start an unbounded
+ * Practice as-wish (Mode 2) - type any topic/subtopic and start an unbounded
  * adaptive session, or browse every section of the bank. Bank questions are
  * served first; when the pool runs dry the backend generates fresh AI questions,
  * so free text with no taxonomy match is welcome too.

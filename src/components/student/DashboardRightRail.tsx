@@ -14,7 +14,7 @@ import { getMySchedule, type ApiScheduledAssessment } from '@/lib/api/scheduling
 const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 
 /**
- * Dashboard right rail — every number is live: recent activity from the
+ * Dashboard right rail - every number is live: recent activity from the
  * student's real mock attempts, practice totals from the accuracy endpoint,
  * and a true calendar for the current week. Assignment deadlines return when
  * the assignments model ships; until then "Up next" routes into the live

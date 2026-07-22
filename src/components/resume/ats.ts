@@ -3,7 +3,7 @@ import type { ResumeData } from './types';
 /**
  * Client-side ATS (Applicant Tracking System) heuristic scorer. Runs entirely in
  * the browser (no network). Produces an overall 0–100 score, per-dimension
- * breakdown, actionable suggestions, and — when a job description is supplied —
+ * breakdown, actionable suggestions, and - when a job description is supplied -
  * matched/missing keyword sets.
  *
  * Two things used to make this wildly over-score incomplete resumes:
@@ -13,7 +13,7 @@ import type { ResumeData } from './types';
  *      "highlights", "project / description") earned the same marks as real
  *      content.
  * Now keyword match is simply NOT SCORED without a JD (its weight is redistributed),
- * and entries must contain real content to count — see `isFiller`.
+ * and entries must contain real content to count - see `isFiller`.
  */
 
 export interface AtsBreakdown {
@@ -52,7 +52,7 @@ const FILLER = new Set([
 
 /**
  * True when a value is empty or obvious filler, so it shouldn't earn credit.
- * Catches the real-world junk we saw: "ww", "111 — 111", "highlights",
+ * Catches the real-world junk we saw: "ww", "111 - 111", "highlights",
  * "project" / "description".
  */
 export function isFiller(raw: string | null | undefined): boolean {
@@ -81,7 +81,7 @@ const ACTION_VERBS = new Set([
 ]);
 
 /**
- * A bullet counts as QUANTIFIED only with a real metric — a percentage, a
+ * A bullet counts as QUANTIFIED only with a real metric - a percentage, a
  * multiplier, or a number carrying a unit. Previously ANY digit qualified, so a
  * date ("2021") handed the resume a full 40-point impact bonus.
  */
@@ -149,14 +149,14 @@ export function computeAtsScore(d: ResumeData, jobDescription = ''): AtsResult {
     suggestions.push('Replace placeholder text with real details - empty or filler entries earn no credit.');
   }
 
-  // Bullets only count when they say something — a 1–2 word stub is not an
+  // Bullets only count when they say something - a 1–2 word stub is not an
   // achievement. Full marks require real, quantified, action-led bullets.
   const bullets = roles.flatMap((w) => w.description.filter(hasText));
   const strong = bullets.filter(isStrongBullet);
   const quantified = strong.filter(isQuantified);
   const actionLed = strong.filter(startsWithAction);
 
-  // ── Structure — sections present, with real content. Deliberately hard to max:
+  // ── Structure - sections present, with real content. Deliberately hard to max:
   // a bare "has 4 sections" resume lands ~80, not 100.
   let format = 0;
   if (roles.length > 0) format += 35;
@@ -187,7 +187,7 @@ export function computeAtsScore(d: ResumeData, jobDescription = ''): AtsResult {
   else suggestions.push('Write a professional summary (40+ words).');
   completeness = clamp(completeness);
 
-  // ── Content depth — SUBSTANTIVE bullets carry it; 10 good bullets for full marks.
+  // ── Content depth - SUBSTANTIVE bullets carry it; 10 good bullets for full marks.
   let contentDepth = 0;
   contentDepth += Math.min(strong.length, 10) * 7; // up to 70
   contentDepth += Math.min(skills.length, 8) * 2.5; // up to 20
@@ -197,7 +197,7 @@ export function computeAtsScore(d: ResumeData, jobDescription = ''): AtsResult {
   }
   contentDepth = clamp(contentDepth);
 
-  // ── Experience — roles + the PROPORTION of bullets that are quantified and
+  // ── Experience - roles + the PROPORTION of bullets that are quantified and
   // action-led. Previously a single digit anywhere (even a year) earned +40.
   let experience = Math.min(roles.length, 3) * 15; // up to 45
   if (strong.length > 0) {
@@ -221,7 +221,7 @@ export function computeAtsScore(d: ResumeData, jobDescription = ''): AtsResult {
   else suggestions.push('Add a relevant certification to strengthen this section.');
   education = clamp(education);
 
-  // ── Keyword match — ONLY scored when a JD is supplied. Previously defaulted to
+  // ── Keyword match - ONLY scored when a JD is supplied. Previously defaulted to
   // 100, silently gifting ~18% of the score to every resume.
   const hasJd = jobDescription.trim().length >= 15;
   let keywordMatch: number | null = null;

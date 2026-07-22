@@ -3,9 +3,9 @@ import { TopBar } from './TopBar';
 
 /**
  * Lighter authenticated shell: persistent TopBar + full-width content, no left
- * sidebar. Used by Companies, the company hub (COMPANY_HUB_SPEC §1 — "no left
+ * sidebar. Used by Companies, the company hub (COMPANY_HUB_SPEC §1 - "no left
  * sidebar inside the hub"), and Prepare. Reuses the same TopBar chrome as the
- * full AppShell — the shell is never re-implemented per page.
+ * full AppShell - the shell is never re-implemented per page.
  *
  * Aurora redesign: a soft ambient glow bleeds down from the top of the page,
  * sitting behind the bar and content so the glassy TopBar reads against gentle

@@ -8,7 +8,7 @@ import { themeForTier } from '@/lib/certificates/themes';
 import { CertificatePreview } from './CertificatePreview';
 import { certificateToPdfBlob, downloadBlob } from '@/lib/certificates/pdf';
 
-/** Public, shareable certificate page — anyone with the link can view + verify it. */
+/** Public, shareable certificate page - anyone with the link can view + verify it. */
 export function PublicCertificateView({ id }: { id: string }) {
   const [data, setData] = useState<CertificateVerifyDto | null>(null);
   const [loading, setLoading] = useState(true);

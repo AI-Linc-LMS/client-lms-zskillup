@@ -3,7 +3,7 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { SubscriptionsManager } from '@/components/admin/SubscriptionsManager';
 
-/** Super-admin — subscription plans + college lifecycle. */
+/** Super-admin - subscription plans + college lifecycle. */
 export default function SuperadminSubscriptionsPage() {
   return (
     <div className="space-y-6">

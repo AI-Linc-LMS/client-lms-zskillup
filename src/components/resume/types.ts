@@ -129,7 +129,7 @@ export function formatMonth(value: string): string {
   return idx >= 0 && idx < 12 ? `${months[idx]} ${m[1]}` : value;
 }
 
-/** "Jan 2022 — Present" style range for a role/education entry. */
+/** "Jan 2022 - Present" style range for a role/education entry. */
 export function dateRange(start: string, end: string, current?: boolean): string {
   const s = formatMonth(start);
   const e = current ? 'Present' : formatMonth(end);
@@ -151,8 +151,8 @@ export function isTemplateKey(v: unknown): v is TemplateKey {
 }
 
 /**
- * Coerce arbitrary (possibly stale/partial) input — a localStorage draft or a
- * loaded record — into a complete ResumeData so templates never crash on a
+ * Coerce arbitrary (possibly stale/partial) input - a localStorage draft or a
+ * loaded record - into a complete ResumeData so templates never crash on a
  * missing section or field.
  */
 export function normalizeResume(raw: unknown): ResumeData {

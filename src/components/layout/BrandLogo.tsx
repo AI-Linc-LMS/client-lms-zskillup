@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 /**
- * Brand wordmark — "prephasz · Powered by ZSkillup".
+ * Brand wordmark - "prephasz · Powered by ZSkillup".
  *
  * Ships in two variants so it stays legible on any surface:
  *   - `light`  → white/yellow lockup, for DARK backgrounds.

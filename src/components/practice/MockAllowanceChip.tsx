@@ -7,7 +7,7 @@ import { useMySubscription } from '@/hooks/useMySubscription';
  * Honest, plan-aware "how many mocks you get" chip for the Mock Assessment hero.
  * Free users receive ONE complimentary mock then hit the upgrade modal (enforced
  * server-side by mockAssessmentAccess), so promising "unlimited attempts" to
- * everyone was misleading — premium keeps unlimited, free sees the real allowance.
+ * everyone was misleading - premium keeps unlimited, free sees the real allowance.
  */
 export function MockAllowanceChip() {
   const { planStatus } = useMySubscription(true);

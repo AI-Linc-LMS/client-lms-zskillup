@@ -13,7 +13,7 @@ import { hasPreviewHint } from '@/lib/session-hints';
  * one-click way back to the admin view. Renders nothing when not previewing.
  *
  * Also the janitor for the preview hint cookie: when the admin hard-navigates
- * back to a console while the cookie lingers, the preview is over — clear it
+ * back to a console while the cookie lingers, the preview is over - clear it
  * so middleware routing and the API client stay honest.
  */
 export function PreviewBanner() {

@@ -9,10 +9,10 @@ import { StatusPill, type StatusTone } from './StatusPill';
 import { listCourses, type ApiCourseSummary } from '@/lib/api/catalog';
 
 /**
- * Prep-track table — live course catalog (`GET /courses`, Sprint 2). Tabs
+ * Prep-track table - live course catalog (`GET /courses`, Sprint 2). Tabs
  * filter by the real category enum; difficulty renders as a §4.11 tone pill.
  * Per-student progress/score columns return with the Sprint 5 enrollment
- * ledger — until then the table only shows catalog truth.
+ * ledger - until then the table only shows catalog truth.
  */
 
 const CATEGORY_TABS: Array<{ key: string; label: string }> = [

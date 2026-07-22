@@ -4,7 +4,7 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { MocksAdmin } from '@/components/superadmin/MocksAdmin';
 
-/** Admin console — Mock tests (company-wise + sectional mocks). */
+/** Admin console - Mock tests (company-wise + sectional mocks). */
 export default function AdminMocksPage() {
   return (
     <div className="space-y-6">

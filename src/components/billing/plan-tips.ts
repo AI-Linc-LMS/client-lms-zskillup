@@ -5,7 +5,7 @@ import type { ApiCompany, ApiTopic } from '@/lib/api/catalog';
  * "What you get" copy for every buyable item on Build Your Own Plan.
  *
  * House rule (see PR #29): student-facing surfaces never lead with raw question
- * inventory — no "480 questions", no PYQ/coding tallies. Say what they GET, and
+ * inventory - no "480 questions", no PYQ/coding tallies. Say what they GET, and
  * say it qualitatively. Structural **sub-section** counts are fine ("all 12
  * sub-sections"); it's the question tally that's banned.
  *

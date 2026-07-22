@@ -78,7 +78,7 @@ export function CollegeCombobox({
         state: other.state.trim() || undefined,
       });
     } catch {
-      /* best-effort — still let them save the name */
+      /* best-effort - still let them save the name */
     }
     setSubmitting(false);
     onSelect({ id: '', name });

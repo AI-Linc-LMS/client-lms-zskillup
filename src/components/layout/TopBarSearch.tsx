@@ -6,14 +6,14 @@ import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
- * TopBar search — Sprint 3 wires this to do something useful even though there's
+ * TopBar search - Sprint 3 wires this to do something useful even though there's
  * no full-text search endpoint yet. Submitting:
  *
  *   - Routes the query into a known surface (company hub if the term matches a
  *     known company slug, otherwise the prepare catalog with the query baked
  *     into the URL for client-side filtering).
  *
- * A real search index lands later — this gives the user a sensible jump now.
+ * A real search index lands later - this gives the user a sensible jump now.
  */
 const KNOWN_COMPANIES = new Set([
   'tcs', 'infosys', 'wipro', 'cognizant', 'capgemini', 'accenture', 'deloitte', 'amazon', 'google',

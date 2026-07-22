@@ -6,7 +6,7 @@ import { startPurchase, type PurchaseResult } from '@/lib/payments/razorpay-chec
 import type { BillingPeriod, EntitlementScope } from '@/shared/enums';
 
 export interface BuyArgs {
-  /** A stable key for this buyable (e.g. `topic:profit-loss:MONTHLY`) — drives the busy state. */
+  /** A stable key for this buyable (e.g. `topic:profit-loss:MONTHLY`) - drives the busy state. */
   key: string;
   scope: EntitlementScope;
   scopeRef?: string | null;

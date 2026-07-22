@@ -16,7 +16,7 @@ export interface BuilderSection {
 export interface CreateAssessmentPayload {
   /** Omit for a platform-wide assessment (all students). */
   companyId?: string;
-  /** Restrict to one college (all its cohorts) — cohort-wise scope. */
+  /** Restrict to one college (all its cohorts) - cohort-wise scope. */
   collegeId?: string;
   /** Restrict to a single cohort/batch (implies its college). */
   cohortId?: string;
@@ -55,7 +55,7 @@ export interface GeneratedItem {
 }
 
 /** Resolve a topic + count → bank items + shortfall to generate. Prefer `topicId`
- *  (from the section/topic picker) — it samples the whole subtree from the bank. */
+ *  (from the section/topic picker) - it samples the whole subtree from the bank. */
 export async function sourceTopic(
   topic: string,
   type: AssessmentItemType,

@@ -11,7 +11,7 @@ export const metadata = {
 
 // The interview IS proctored: InterviewProctorGate puts it behind a fullscreen gate and
 // tracks tab switches + fullscreen exits, blocking until the candidate returns. This copy
-// predates that gate and still promised "no proctoring" — which was simply false, and a
+// predates that gate and still promised "no proctoring" - which was simply false, and a
 // nasty surprise for a student who starts the interview expecting none.
 // "No camera" stays: that part is true, and it's the reassuring half.
 const PILLS = [

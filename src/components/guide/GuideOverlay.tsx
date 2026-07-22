@@ -49,7 +49,7 @@ function useTargetRect(target?: string) {
         return;
       }
       if (++tries > 90) {
-        // ~1.5s — give up and let the card center itself.
+        // ~1.5s - give up and let the card center itself.
         setReady(true);
         return;
       }

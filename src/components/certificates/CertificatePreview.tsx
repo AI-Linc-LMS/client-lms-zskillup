@@ -5,7 +5,7 @@ import { Certificate, CERT_W, CERT_H, type CertificateData } from './Certificate
 
 /**
  * Scales the fixed-size certificate to fit `width` while forwarding a ref to the
- * full-size inner node — so a scaled-down preview still exports to PDF at native
+ * full-size inner node - so a scaled-down preview still exports to PDF at native
  * resolution (html-to-image neutralises the transform during capture).
  */
 export const CertificatePreview = forwardRef<HTMLDivElement, CertificateData & { width: number }>(

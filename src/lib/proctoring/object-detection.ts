@@ -4,7 +4,7 @@ import '@tensorflow/tfjs-backend-webgl';
 import '@tensorflow/tfjs-core';
 
 /**
- * Object-in-frame detection (COCO-SSD lite) for proctoring — catches a phone,
+ * Object-in-frame detection (COCO-SSD lite) for proctoring - catches a phone,
  * printed notes/book, or a second person, none of which the face models see.
  * Heavy relative to BlazeFace, so the caller runs it on a slow cadence, and it
  * falls back silently if the model won't load. `laptop`/`tv` are deliberately

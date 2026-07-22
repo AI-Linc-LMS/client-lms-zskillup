@@ -47,7 +47,7 @@ export function CodingProblemsList({
     };
   }, [company]);
 
-  // A coding sub-topic == a problem's PRIMARY tag (tags[0]) — the same key the
+  // A coding sub-topic == a problem's PRIMARY tag (tags[0]) - the same key the
   // catalogue groups by (below), the coding-topics picker lists by, AND the
   // backend free-access meter counts by (codingTopicAccess keys on tags[0]).
   // Filtering by any tag position broke that alignment: a "Hashing" view would

@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from 'react';
 
 /**
- * An external illustration (Popsy — free, hotlinkable SVGs) with a resilient inline
+ * An external illustration (Popsy - free, hotlinkable SVGs) with a resilient inline
  * fallback. If the asset fails to load (offline / blocked), the `fallback` inline
  * SVG renders instead, so the UI never shows a broken image.
  */

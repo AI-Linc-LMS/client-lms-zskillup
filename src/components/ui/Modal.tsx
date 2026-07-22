@@ -3,7 +3,7 @@
 import { useEffect, type ReactNode } from 'react';
 
 /**
- * Minimal centered modal — a fixed translucent backdrop + a card. No portal
+ * Minimal centered modal - a fixed translucent backdrop + a card. No portal
  * (a top-level fixed overlay is enough) and no external deps. Esc + backdrop
  * click close it when `dismissible`. First reusable dialog primitive in the app.
  */

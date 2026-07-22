@@ -34,7 +34,7 @@ import { getQuestionSolution, type QuestionSolutionDto } from '@/lib/api/questio
 import { MarkdownLite } from '@/components/ui/MarkdownLite';
 import { QuestionStem } from '@/components/practice/QuestionStem';
 
-/* Brand quiz palette — light surface with an orange accent. */
+/* Brand quiz palette - light surface with an orange accent. */
 const BRAND_GRAD = 'linear-gradient(135deg,#ffd24d 0%,#f5b400 100%)';
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -65,7 +65,7 @@ const CONFIDENCE = [
   { value: 4, label: 'Certain', emoji: '💯' },
 ];
 
-/* Clean brand mark — orange disc with a soft halo (no flashy ping). */
+/* Clean brand mark - orange disc with a soft halo (no flashy ping). */
 function QuizMark({ size = 32 }: { size?: number }) {
   return (
     <span className="relative inline-flex" style={{ width: size, height: size }}>
@@ -135,10 +135,10 @@ function AdaptiveQuizRunner({
     }
   }, [currentQuestion]);
 
-  // Per-question elapsed timer — anchored to `questionStartMs`, the moment the
+  // Per-question elapsed timer - anchored to `questionStartMs`, the moment the
   // question was actually SHOWN (the hook resets it to now on start/advance/resume).
   // It must NOT anchor to the server `servedAt`: the next question is pinned during
-  // the PREVIOUS submit, so `servedAt` predates the student ever seeing it — using
+  // the PREVIOUS submit, so `servedAt` predates the student ever seeing it - using
   // it made the new question's timer start at the seconds spent reading the previous
   // solution instead of 0:00. `questionStartMs` is exactly what the server scorer
   // trusts (client show-time `timeMs`), so the timer, points meter and award agree.
@@ -216,7 +216,7 @@ function AdaptiveQuizRunner({
   // Difficulty-meter marker: driven by the QUESTION'S difficulty band (which
   // visibly adapts EASY↔MEDIUM↔HARD), nudged slightly by predicted correctness.
   // (The selector targets p≈0.5 by design, so predictedPCorrect alone would keep
-  // the marker glued to the centre — the band is what actually moves.)
+  // the marker glued to the centre - the band is what actually moves.)
   const DIFF_POS: Record<string, number> = { EASY: 0.16, MEDIUM: 0.5, HARD: 0.84 };
   const markerFrac = Math.min(
     0.94,

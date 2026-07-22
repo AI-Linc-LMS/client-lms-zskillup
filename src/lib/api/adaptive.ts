@@ -28,7 +28,7 @@ export interface AdaptivePendingQuestion {
   selectorRationale: string;
   predictedPCorrect: number;
   hintTokensRemaining: number;
-  /** PYQ tag — company tag ids + years this question was asked in. */
+  /** PYQ tag - company tag ids + years this question was asked in. */
   companyIds?: string[];
   yearTags?: number[];
   /** Question source; PATTERN_BASED (no company/year) → "SIMILAR PATTERN" tag. */
@@ -41,7 +41,7 @@ export interface AdaptivePendingQuestion {
 
 export type AdaptiveMode = 'MOCK' | 'PRACTICE' | 'AS_WISH';
 
-/** Freemium paywall marker — present when the free question limit is hit and the
+/** Freemium paywall marker - present when the free question limit is hit and the
  *  scope isn't owned. The runner shows a Buy card for `scope`/`scopeRef`. */
 export interface AdaptivePaywall {
   scope: 'PLATFORM' | 'SECTION' | 'TOPIC' | 'COMPANY';
@@ -75,13 +75,13 @@ export interface SkillDelta {
 
 export interface AdaptiveAnswerResult {
   isCorrect: boolean;
-  /** Id of the correct option — for the instant inline review below the question. */
+  /** Id of the correct option - for the instant inline review below the question. */
   correctOptionId: string | null;
   /** Worked solution / explanation for the answered question (may be empty). */
   explanation: string;
   /** Server-truth time spent on this question (ms). */
   timeMs: number;
-  /** Speed vs the question's par time — the engine weighted θ by this. */
+  /** Speed vs the question's par time - the engine weighted θ by this. */
   speedLabel: 'fast' | 'on_par' | 'slow';
   thetaDelta: Record<string, SkillDelta>;
   nextQuestion: AdaptivePendingQuestion | null;
@@ -132,7 +132,7 @@ export interface AdaptiveResults {
   sessionId: string;
   mockTestId: string;
   status: string;
-  /** Scope the session was started in — drives the context-aware "back" CTA, so a
+  /** Scope the session was started in - drives the context-aware "back" CTA, so a
    *  quiz launched from a Company Hub doesn't send you to Practice. */
   topicSlug: string | null;
   companySlug: string | null;

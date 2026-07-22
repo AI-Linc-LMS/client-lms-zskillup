@@ -10,7 +10,7 @@ import { BillingPeriod, EntitlementScope } from '@/shared/enums';
 import { cn } from '@/lib/utils';
 
 /**
- * Card display shape — accepts either a live API company (most fields nullable)
+ * Card display shape - accepts either a live API company (most fields nullable)
  * or a fully-hydrated demo company. The footer surfaces REAL counts from the
  * question/coding banks (questionCount/pyqCount/codingCount) and renders the
  * real company logo when available (monogram fallback on missing/broken image).
@@ -27,7 +27,7 @@ export interface CompanyCardData {
   questionCount?: number;
   pyqCount?: number;
   codingCount?: number;
-  /** When true the hub isn't available yet — the card renders locked + non-navigating. */
+  /** When true the hub isn't available yet - the card renders locked + non-navigating. */
   locked?: boolean;
 }
 
@@ -48,7 +48,7 @@ const DIFFICULTY_TONE: Record<string, string> = {
 /**
  * "Add to cart" on a purchasable company card. It renders INSIDE the card's
  * `<Link>`, so the click must be swallowed (preventDefault stops the anchor's
- * navigation; stopPropagation stops Next's Link handler) — otherwise adding to the
+ * navigation; stopPropagation stops Next's Link handler) - otherwise adding to the
  * cart would also navigate you into the hub. Adds at ANNUAL (best value); the plan
  * length is changeable in the cart.
  */
@@ -63,7 +63,7 @@ function CardCartAction({
 }) {
   const cart = useCartOptional();
 
-  // Already unlocked (Full Platform, or this hub) — nothing to buy.
+  // Already unlocked (Full Platform, or this hub) - nothing to buy.
   if (owned) {
     return (
       <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1.5 text-[11px] font-bold text-emerald-700 ring-1 ring-inset ring-emerald-200/70">
@@ -126,7 +126,7 @@ export function CompanyCard({
   company: CompanyCardData;
   /** Student already has this hub (or Full Platform) → show "Owned", not a buy CTA. */
   owned?: boolean;
-  /** Formatted annual company price, e.g. "₹599" — shown on the Add button. */
+  /** Formatted annual company price, e.g. "₹599" - shown on the Add button. */
   priceLabel?: string | null;
 }) {
   const accent = company.accent ?? 'from-slate-700 to-slate-900';
@@ -137,7 +137,7 @@ export function CompanyCard({
     (company.difficulty && DIFFICULTY_TONE[company.difficulty]) ??
     'bg-slate-50 text-slate-600 ring-slate-200/70';
 
-  // What's inside — surfaced as content-type chips (no counts), so students see
+  // What's inside - surfaced as content-type chips (no counts), so students see
   // what they get without the offering being reduced to a raw question tally.
   const feats: Array<{ icon: typeof ClipboardList; label: string }> = [];
   if ((company.questionCount ?? 0) > 0) feats.push({ icon: ClipboardList, label: 'Practice Qs' });

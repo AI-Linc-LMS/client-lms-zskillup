@@ -21,7 +21,7 @@ import { BillingPeriod, EntitlementScope } from '@/shared/enums';
 import type { PriceBookEntryDto } from '@/shared/dto/payments.dto';
 
 /**
- * Sectional Hubs explorer — the section analog of `CompaniesExplorer`. Derives the
+ * Sectional Hubs explorer - the section analog of `CompaniesExplorer`. Derives the
  * section list from the live topic tree (`/topics/with-counts`), reads the SECTION
  * price + the student's entitlements, and renders a `SectionCard` grid. Owned
  * sections (Full Platform or a SECTION grant for that root) show "Owned".

@@ -8,7 +8,7 @@ import { getTopicAccuracy, type ApiTopicAccuracy } from '@/lib/api/practice';
 import { cn } from '@/lib/utils';
 
 /**
- * Dynamic "Practice" tab for the company hub — driven by the live question bank
+ * Dynamic "Practice" tab for the company hub - driven by the live question bank
  * (GET /companies/:slug/prep): year-wise previous-year papers and all topics
  * with question counts. Overlays the student's own practice progress (per-topic
  * accuracy from GET /me/practice/topic-accuracy) and lets them search + filter
@@ -57,9 +57,9 @@ export function CompanyPrepPanel({
       .catch(() => {
         if (!cancelled) setErrored(true);
       });
-    // Per-topic practice progress for THIS company (best-effort — absent = "not started").
+    // Per-topic practice progress for THIS company (best-effort - absent = "not started").
     // Scoped deliberately: this panel is headed "Your progress across <Company>'s topics",
-    // and calling it unscoped returned the student's progress across EVERY company — so a
+    // and calling it unscoped returned the student's progress across EVERY company - so a
     // quiz finished in the Accenture hub showed the topic as practised here too.
     getTopicAccuracy(companySlug)
       .then((rows) => {
@@ -259,7 +259,7 @@ export function CompanyPrepPanel({
   );
 }
 
-/** Progress rollup card — coverage + attempts + accuracy across the company's topics. */
+/** Progress rollup card - coverage + attempts + accuracy across the company's topics. */
 function ProgressCard({
   progress,
   companyName,
@@ -317,7 +317,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   );
 }
 
-/** One topic card — question counts + the student's per-topic progress. */
+/** One topic card - question counts + the student's per-topic progress. */
 function TopicCard({
   name,
   count,

@@ -73,7 +73,7 @@ export interface StartPurchaseParams {
   scope: EntitlementScope;
   scopeRef?: string | null;
   period: BillingPeriod;
-  /** Shown in the Razorpay widget (e.g. "Profit & Loss — monthly"). */
+  /** Shown in the Razorpay widget (e.g. "Profit & Loss - monthly"). */
   description?: string;
   prefill?: { name?: string | null; email?: string | null };
   /** College B2B purchase (cohort-wide) instead of an individual student buy. */

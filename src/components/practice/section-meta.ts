@@ -36,14 +36,14 @@ export const SECTION_META: Record<string, SectionMeta> = {
   'section-5-interview-preparation': { icon: Users, accent: 'amber', order: 6 },
 };
 
-/** Coding is section 5 — a separate Judge0 system, so it renders synthetically. */
+/** Coding is section 5 - a separate Judge0 system, so it renders synthetically. */
 export const CODING_META: SectionMeta = { icon: Code2, accent: 'indigo', order: 5 };
 
 /**
  * Leftover AI-experiment roots we never surface in the pickers (they're not part
  * of the five-section model). Their questions stay in the bank; they're just not
  * offered as a section. `*-ai` flat roots have no children so they're already
- * excluded by the children filter — `ai-practice-topics` is the only one with a
+ * excluded by the children filter - `ai-practice-topics` is the only one with a
  * child, so it needs an explicit hide.
  */
 export const HIDDEN_ROOT_SLUGS = new Set(['ai-practice-topics']);
@@ -53,7 +53,7 @@ export function sectionMetaFor(slug: string, index: number): SectionMeta {
   return SECTION_META[slug] ?? { icon: Layers, accent: ACCENT_CYCLE[index % ACCENT_CYCLE.length], order: 90 + index };
 }
 
-/** Editorial card copy for a section — category eyebrow, difficulty descriptor and
+/** Editorial card copy for a section - category eyebrow, difficulty descriptor and
  *  a punchier tagline than the generic default, used by the Sectional Hubs cards. */
 export type SectionDifficulty = 'Easy' | 'Medium' | 'Hard';
 export interface SectionDescriptor {
@@ -90,7 +90,7 @@ export const SECTION_DESCRIPTORS: Record<string, SectionDescriptor> = {
   'section-5-interview-preparation': {
     category: 'Soft Skills',
     difficulty: 'Easy',
-    tagline: 'HR, behavioural and technical interview prep — communication and confidence.',
+    tagline: 'HR, behavioural and technical interview prep - communication and confidence.',
   },
 };
 export function sectionDescriptorFor(slug: string): SectionDescriptor {
@@ -98,7 +98,7 @@ export function sectionDescriptorFor(slug: string): SectionDescriptor {
     SECTION_DESCRIPTORS[slug] ?? {
       category: 'Section',
       difficulty: 'Medium',
-      tagline: 'Master this section end to end — guided syllabus, study material and topic-wise practice.',
+      tagline: 'Master this section end to end - guided syllabus, study material and topic-wise practice.',
     }
   );
 }

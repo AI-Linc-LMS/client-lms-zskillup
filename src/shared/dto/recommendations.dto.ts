@@ -1,5 +1,5 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at backend-repo/src/shared/dto/recommendations.dto.ts.
  *
  * Post-calibration, CSV-driven recommendations for the student dashboard. The

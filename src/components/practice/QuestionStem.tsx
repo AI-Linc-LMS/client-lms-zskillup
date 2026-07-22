@@ -1,6 +1,6 @@
 /**
  * Renders a question stem, formatting any embedded code (Pseudocode / C / Java /
- * Python / SQL snippets) as a monospace block with preserved line breaks — so
+ * Python / SQL snippets) as a monospace block with preserved line breaks - so
  * questions like "What is the output of: #include<stdio.h> int main(){…}" stop
  * rendering as one flattened, unreadable run-on line.
  *
@@ -13,7 +13,7 @@ const CODE_MARKERS =
   /#include|#define|\bint\s+main\b|\bvoid\s+main\b|\bprintf\s*\(|\bscanf\s*\(|System\.out|\bpublic\s+(?:static|class)\b|\bdef\s+\w+\s*\(|\bconsole\.log\b|\bcout\s*<<|\bfun\s+\w+\s*\(|\bSELECT\b[\s\S]*\bFROM\b/;
 
 // Pseudocode / structural markers (case-insensitive). Aptitude "pseudocode"
-// questions rarely use printf/#include — they read "Integer n", "Set a = 3",
+// questions rarely use printf/#include - they read "Integer n", "Set a = 3",
 // "for (i = 1; …)", "for each ch in s", "count <- 0", numbered steps, or fenced
 // code. These were previously undetected and rendered as flat prose. Each pattern
 // is deliberately code-specific (requires a paren, assignment, arrow, declaration
@@ -42,12 +42,12 @@ function splitStem(text: string): { prose: string; code: string | null } {
 /** Re-break a single-line C/Java-style snippet at statement boundaries. Data that
  *  already carries newlines is trusted as-is (admin may have formatted it). */
 function formatCode(code: string): string {
-  // Drop markdown code fences (```csharp … ```) — some stems wrap code in them.
+  // Drop markdown code fences (```csharp … ```) - some stems wrap code in them.
   code = code.replace(/```[a-zA-Z]*/g, '').trim();
   if (code.includes('\n')) return code;
   // Single-line snippet → re-break at statement boundaries WITHOUT splitting array
-  // or object literals. Break after '{' only when a block body (a letter) follows —
-  // never inside "int[] a = {1, 2, 3}" — and break at ';' (statement ends). The old
+  // or object literals. Break after '{' only when a block body (a letter) follows -
+  // never inside "int[] a = {1, 2, 3}" - and break at ';' (statement ends). The old
   // rule split on every '{'/'}', which mangled literals across lines.
   return code
     .replace(/\{\s*(?=[A-Za-z_])/g, '{\n')

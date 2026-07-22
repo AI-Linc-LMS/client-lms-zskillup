@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils';
 import { HOMEPAGE_FEATURED_TRACKS } from '@/lib/demo-data-extra';
 
 /**
- * Explore mega-menu — a discovery hub that surfaces the platform's key
+ * Explore mega-menu - a discovery hub that surfaces the platform's key
  * destinations (Practice · Grow · Companies) plus the Plus promo. Redesign of
  * the earlier two-column (Tracks · Companies) layout: every destination now
  * carries an icon + one-line description so the menu reads as a map of the app.
@@ -30,7 +30,7 @@ import { HOMEPAGE_FEATURED_TRACKS } from '@/lib/demo-data-extra';
  *
  *  - Hover-in on either the trigger button OR the dropdown opens immediately.
  *  - Hover-out starts a short close timer (150ms). Re-entering either region
- *    cancels the timer. This is the standard mega-menu pattern — without the
+ *    cancels the timer. This is the standard mega-menu pattern - without the
  *    delay, the small visual gap between the trigger and the full-width panel
  *    closes the menu as the cursor crosses it.
  *  - Click on the trigger toggles open/closed (keyboard- and tap-friendly).
@@ -288,7 +288,7 @@ export function ExploreMenu() {
   );
 }
 
-/** Company logo chip — real brand logo on a white tile, monogram fallback. */
+/** Company logo chip - real brand logo on a white tile, monogram fallback. */
 function CompanyChip({ name, accent, logo }: { name: string; accent: string; logo?: string }) {
   const [failed, setFailed] = useState(false);
   const showLogo = !!logo && !failed;

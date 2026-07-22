@@ -9,7 +9,7 @@ const BAR_GRAD = 'linear-gradient(90deg,#ffd24d,#f5b400)';
 
 /**
  * Super-admin dashboard charts: per-company registrations + active drives, and
- * question-bank coverage — rendered as animated bars (no chart dependency).
+ * question-bank coverage - rendered as animated bars (no chart dependency).
  */
 export function CompanyStatsCharts() {
   const [stats, setStats] = useState<AdminCompanyStat[] | null>(null);

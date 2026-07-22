@@ -12,7 +12,7 @@ import { UpgradeModal } from '@/components/billing/UpgradeModal';
 import { HIDDEN_ROOT_SLUGS, sectionMetaFor } from './section-meta';
 
 /**
- * Mode 3 — self-serve Mock Assessment builder. Pick whole sections and/or single
+ * Mode 3 - self-serve Mock Assessment builder. Pick whole sections and/or single
  * topics, set size + duration, then launch a PROCTORED, unlimited, non-adaptive
  * mock assembled from the published bank.
  */
@@ -67,8 +67,8 @@ export function CustomMockBuilder() {
   /**
    * How many MCQs the current selection can actually yield.
    *
-   * The bank is very unevenly stocked — several leaf topics hold 1-2 questions ("Ages" has
-   * 2, "Data Structures & Algorithms" has 1) — so asking for 20 from them was silently
+   * The bank is very unevenly stocked - several leaf topics hold 1-2 questions ("Ages" has
+   * 2, "Data Structures & Algorithms" has 1) - so asking for 20 from them was silently
    * producing a 1-question mock. Cap the stepper at what exists rather than letting the
    * student request questions that cannot be served.
    *
@@ -121,7 +121,7 @@ export function CustomMockBuilder() {
       // Say so when it came up short. The stepper is capped at the topic pool, but the
       // sampler is seen-aware and free students are capped per topic, so the real yield can
       // still land under the ask. Silently opening a 2-question "20-question mock" is the
-      // bug being fixed — don't reintroduce it one layer up.
+      // bug being fixed - don't reintroduce it one layer up.
       const short = built.mcqCount < effectiveCount;
       if (short) {
         toast.warning(
@@ -136,7 +136,7 @@ export function CustomMockBuilder() {
       if (e instanceof ApiRequestError && e.code === 'PAYWALL') {
         setUpgradeMsg(e.message);
       } else {
-        // Surface the EXACT backend message in a popup — never a bare "Something
+        // Surface the EXACT backend message in a popup - never a bare "Something
         // went wrong". Include the support reference (requestId) on a server fault
         // so it isn't a dead end.
         const msg =
@@ -325,8 +325,8 @@ export function CustomMockBuilder() {
 }
 
 // The local UpgradeModal that used to live here has been folded into
-// @/components/billing/UpgradeModal. Three surfaces now raise the same prompt — the
-// custom-mock builder, the mock runner's free-mock limit, and the recommendations hub —
+// @/components/billing/UpgradeModal. Three surfaces now raise the same prompt - the
+// custom-mock builder, the mock runner's free-mock limit, and the recommendations hub -
 // and two of them were about to ship with different designs, different copy, and
 // different destinations (/upgrade vs /shop). One modal, one upgrade path.
 

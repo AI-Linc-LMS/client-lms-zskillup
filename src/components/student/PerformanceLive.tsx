@@ -32,7 +32,7 @@ import {
 import { getMockHistory, type ApiMockAttemptHistory } from '@/lib/api/mocks';
 
 /**
- * Performance report — fully live (Sprint 3 exit: "reports show accuracy" +
+ * Performance report - fully live (Sprint 3 exit: "reports show accuracy" +
  * the Sprint 4 mock report surface). Practice numbers come from
  * `GET /practice/accuracy` (+ per-topic), assessment numbers from
  * `GET /mocks/attempts/mine`. The PPS readiness score arrives in Sprint 7.
@@ -306,7 +306,7 @@ export function PerformanceLive() {
 }
 
 /* ----------------------------------------------------------------------------
- * Stat hero — featured accuracy ring on deep navy glass + supporting KPI tiles.
+ * Stat hero - featured accuracy ring on deep navy glass + supporting KPI tiles.
  * ------------------------------------------------------------------------- */
 function PerformanceHero({
   accuracyPct,
@@ -521,7 +521,7 @@ function SectionCard({
   );
 }
 
-/* Animated gradient accuracy bar — fills on scroll into view. */
+/* Animated gradient accuracy bar - fills on scroll into view. */
 function AccuracyBar({
   value,
   tone,
@@ -590,7 +590,7 @@ function ScoreMeter({
   );
 }
 
-/* Shared empty-state block — preserves the original CTA copy + routing. */
+/* Shared empty-state block - preserves the original CTA copy + routing. */
 function EmptyState({
   title,
   detail,

@@ -48,7 +48,7 @@ export function RewardOverlay({
     };
   }, [summary.xpEarned, nextPct]);
 
-  // Confetti — fire on mount, an extra volley on level-up.
+  // Confetti - fire on mount, an extra volley on level-up.
   useEffect(() => {
     let cancelled = false;
     void import('canvas-confetti').then(({ default: confetti }) => {

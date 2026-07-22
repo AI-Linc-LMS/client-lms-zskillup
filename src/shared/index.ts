@@ -1,9 +1,9 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011, amended 2026-06-03).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011, amended 2026-06-03).
  * Mirrored byte-for-byte at the same path in frontend-repo/src/shared.
  *
  * Validation engine: class-validator + class-transformer (Implementation Plan
- * §4 line 311 — chosen alternative to Zod). The DTO classes carry the
+ * §4 line 311 - chosen alternative to Zod). The DTO classes carry the
  * decorators; the backend's global ValidationPipe wires them in. The frontend
  * imports each class `import type` so the decorator runtime never fires
  * client-side; forms use react-hook-form native rules with the same

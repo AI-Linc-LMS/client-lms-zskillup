@@ -1,7 +1,7 @@
 import { apiClient } from './client';
 
 /**
- * Catalog API client — public reads for companies + courses (Sprint 3).
+ * Catalog API client - public reads for companies + courses (Sprint 3).
  * Mirrors the backend `CompanyDto` / `CompanyHubDto` / `CourseSummaryDto`
  * shapes. Will be replaced by generated openapi-typescript types when CI
  * generation lands.
@@ -18,7 +18,7 @@ export interface ApiCompany {
   accent: string | null;
   description: string | null;
   badge: string | null;
-  // Card metadata (explorer grid / hub hero) — DB-backed, was demo-data.
+  // Card metadata (explorer grid / hub hero) - DB-backed, was demo-data.
   rating: number | null;
   enrolled: string | null;
   package: string | null;
@@ -100,10 +100,10 @@ export interface ApiCourseDetail extends ApiCourseSummary {
 }
 
 /**
- * All catalog reads are `auth: 'public'` posture (CLAUDE.md §3 — the prepare
+ * All catalog reads are `auth: 'public'` posture (CLAUDE.md §3 - the prepare
  * catalog, homepage, and company hubs are all guest-accessible). This prevents
  * a logged-out visitor from triggering the silent-refresh + /login redirect
- * cycle on first page load — the bug surfaced in the QA audit on /prepare.
+ * cycle on first page load - the bug surfaced in the QA audit on /prepare.
  */
 export async function listCompanies(): Promise<ApiCompany[]> {
   const res = await apiClient.get<ApiCompany[]>('/api/v1/companies', { auth: 'public' });
@@ -136,7 +136,7 @@ export interface ApiCompanyPyq {
   options: Array<{ text: string; isCorrect: boolean; orderIndex: number }>;
 }
 
-/** PYQ list result — metered: a non-entitled student gets `items` (the first
+/** PYQ list result - metered: a non-entitled student gets `items` (the first
  *  `freeLimit`) with `lockedCount` more behind the paywall. */
 export interface ApiCompanyPyqsResult {
   items: ApiCompanyPyq[];
@@ -187,7 +187,7 @@ export interface ApiTopic {
   slug: string;
   name: string;
   parentId: string | null;
-  /** PUBLISHED-question count — only present from listTopicsWithCounts(). */
+  /** PUBLISHED-question count - only present from listTopicsWithCounts(). */
   questionCount?: number;
 }
 

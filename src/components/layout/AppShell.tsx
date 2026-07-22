@@ -7,7 +7,7 @@ import { CommandPalette } from './CommandPalette';
 
 /**
  * Persistent authenticated chrome (frontend/CLAUDE §4): top bar + left sidebar +
- * content. Built ONCE and composed by each authenticated page — never
+ * content. Built ONCE and composed by each authenticated page - never
  * re-implemented per page. Pages compose their own contextual right rail inside
  * the content area so the layout stays flexible.
  *

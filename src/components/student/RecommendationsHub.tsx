@@ -40,7 +40,7 @@ export function RecommendationsHub() {
   const [failed, setFailed] = useState(false);
   const { mockTestId } = useCalibrationStatus();
   // Free students read every recommendation; acting on one prompts an upgrade. Inert while
-  // PAYWALL_ENABLED is off — see useUpgradeGate.
+  // PAYWALL_ENABLED is off - see useUpgradeGate.
   const upgrade = useUpgradeGate();
 
   useEffect(() => {
@@ -70,7 +70,7 @@ export function RecommendationsHub() {
     );
   }
 
-  // Transient fetch failure — don't mistake it for "not calibrated".
+  // Transient fetch failure - don't mistake it for "not calibrated".
   if (failed || !data) {
     return (
       <div className="mx-auto max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center">
@@ -80,7 +80,7 @@ export function RecommendationsHub() {
     );
   }
 
-  // Not calibrated yet — recommendations are driven by the calibration + practice.
+  // Not calibrated yet - recommendations are driven by the calibration + practice.
   if (!data.calibrated) {
     return (
       <div className="mx-auto max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center">

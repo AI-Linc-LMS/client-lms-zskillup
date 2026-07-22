@@ -8,14 +8,14 @@ import { InterviewRunner } from './InterviewRunner';
 /**
  * Wraps the AI mock interview in a lightweight proctored session: a pre-start
  * fullscreen gate, then a live indicator of tab switches + fullscreen exits, and
- * a blocking prompt to return to fullscreen if the candidate leaves it — mirroring
+ * a blocking prompt to return to fullscreen if the candidate leaves it - mirroring
  * the AI-LINC proctored interview. No camera; the interview owns the mic.
  */
 export function InterviewProctorGate({ id }: { id: string }) {
   const guard = useFocusGuard();
   const [started, setStarted] = useState(false);
   const [starting, setStarting] = useState(false);
-  // Only enforce a return-to-fullscreen once we've actually achieved fullscreen —
+  // Only enforce a return-to-fullscreen once we've actually achieved fullscreen -
   // otherwise a browser that blocks/doesn't support it would strand the candidate.
   const [everFullscreen, setEverFullscreen] = useState(false);
   useEffect(() => {
@@ -39,7 +39,7 @@ export function InterviewProctorGate({ id }: { id: string }) {
   }
 
   return (
-    // Full-bleed surface — covers the AppShell sidebar + top bar so the proctored
+    // Full-bleed surface - covers the AppShell sidebar + top bar so the proctored
     // interview owns the whole screen (browser fullscreen removes browser chrome;
     // this removes the app chrome).
     <div className="fixed inset-0 z-50 overflow-y-auto bg-background">

@@ -6,7 +6,7 @@ import { CompanyPrepPanel } from '@/components/company/CompanyPrepPanel';
 import { getCompany } from '@/lib/api/catalog';
 
 /**
- * Standalone prep workspace for a company — the full-page version of the hub's
+ * Standalone prep workspace for a company - the full-page version of the hub's
  * Practice tab: year-wise previous-year papers, target roles, and all topics
  * with live counts. Everything is dynamic (GET /companies/:slug/prep) and links
  * into the real practice engine.

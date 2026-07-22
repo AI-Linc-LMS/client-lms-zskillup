@@ -45,7 +45,7 @@ export function safeHttpUrl(url: string | null | undefined): string | null {
   return /^https?:\/\//i.test(t) ? t : null;
 }
 
-/** Compact relative time — "just now", "3h", "2d", or a date. */
+/** Compact relative time - "just now", "3h", "2d", or a date. */
 export function timeAgo(iso: string): string {
   const then = new Date(iso).getTime();
   const secs = Math.max(0, Math.floor((Date.now() - then) / 1000));

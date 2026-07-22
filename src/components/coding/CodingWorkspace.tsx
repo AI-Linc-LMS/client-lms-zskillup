@@ -52,7 +52,7 @@ const VERDICT_LABEL: Record<string, string> = {
 
 export function CodingWorkspace({ slug }: { slug: string }) {
   const router = useRouter();
-  // Coding problems are opened from the dashboard or a company hub — there is no
+  // Coding problems are opened from the dashboard or a company hub - there is no
   // standalone /coding index. "Back" returns to wherever the user came from,
   // falling back to the dashboard (never a dead /coding route).
   const goBack = () => {
@@ -145,7 +145,7 @@ export function CodingWorkspace({ slug }: { slug: string }) {
     );
   }
   // Open-time paywall: the problem itself is gated (free coding allowance spent), so
-  // there's no statement/editor to show — render the Buy card full-width. A successful
+  // there's no statement/editor to show - render the Buy card full-width. A successful
   // unlock re-runs the loader (reloadKey) and the problem then opens normally.
   if (paywall && !problem) {
     return (
@@ -289,7 +289,7 @@ export function CodingWorkspace({ slug }: { slug: string }) {
           ) : null}
 
           {sqlTables ? (
-            /* SQL problem — render the seed as a schema + sample-data table instead
+            /* SQL problem - render the seed as a schema + sample-data table instead
                of raw CREATE TABLE / INSERT text, and the expected query result. */
             <div className="relative mt-5 space-y-3">
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Database</p>

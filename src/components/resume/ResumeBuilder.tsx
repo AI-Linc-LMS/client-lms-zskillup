@@ -67,7 +67,7 @@ function isResumeEmpty(d: ResumeData): boolean {
   return noBasics && noSections;
 }
 
-/** Seed a resume from the student's profile — name, contact, education, skills —
+/** Seed a resume from the student's profile - name, contact, education, skills -
  *  so the builder opens pre-filled instead of blank. Leaves summary/experience/
  *  projects for the student (or the AI tailor) to complete. */
 function resumeFromProfile(me: ApiMe): ResumeData {
@@ -126,7 +126,7 @@ export function ResumeBuilder() {
   useEffect(() => {
     // Purge the legacy GLOBAL draft first so no account ever inherits it (this is
     // the cross-account leak). Then identify the user and read only THAT user's
-    // draft — never a global one.
+    // draft - never a global one.
     try {
       localStorage.removeItem(LEGACY_DRAFT_KEY);
       localStorage.removeItem(LEGACY_TEMPLATE_KEY);
@@ -207,7 +207,7 @@ export function ResumeBuilder() {
     // meter (parity with Mock Interview, whose "start" always persists a row).
     // Persisting an unsaved resume here routes the export through the metered
     // POST /me/resumes, which the backend blocks with CAREER_PAYWALL after the
-    // free run — without this, build-and-download never counted and never locked.
+    // free run - without this, build-and-download never counted and never locked.
     if (!currentId) {
       try {
         const created = await createResume({ title, template, data });
@@ -224,7 +224,7 @@ export function ResumeBuilder() {
           return;
         }
         // A transient (non-paywall) save failure shouldn't block the export the
-        // user explicitly asked for — fall through and still generate the PDF.
+        // user explicitly asked for - fall through and still generate the PDF.
       }
     }
     flash('Generating PDF…');

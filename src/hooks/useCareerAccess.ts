@@ -24,7 +24,7 @@ export interface CareerAccessState {
  * Whether the signed-in student can still use a career tool (Mock Interview /
  * Resume Builder). They're bundled with a paid plan; unpaid students get one free
  * run each, then it locks. Re-checks on focus so a purchase made mid-flow unlocks
- * on return. **Fails OPEN** — any fetch error leaves it unlocked.
+ * on return. **Fails OPEN** - any fetch error leaves it unlocked.
  */
 export function useCareerAccess(tool: CareerTool): CareerAccessState {
   const [state, setState] = useState<CareerAccessState>({

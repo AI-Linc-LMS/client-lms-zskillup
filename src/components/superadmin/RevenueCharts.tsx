@@ -28,7 +28,7 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
   );
 }
 
-/** Revenue & subscription graphs (recharts donuts) — MRR by plan + subscription mix. */
+/** Revenue & subscription graphs (recharts donuts) - MRR by plan + subscription mix. */
 export function RevenueCharts() {
   const [d, setD] = useState<FinancialsOverviewDto | null | 'err'>(null);
 

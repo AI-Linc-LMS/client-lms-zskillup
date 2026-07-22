@@ -40,19 +40,19 @@ import {
  * Sidebar navigation model (frontend/CLAUDE.md §4), now ROLE/ROUTE-AWARE.
  *
  * The AppShell is shared by the student, super-admin and TPO route groups, so
- * the sidebar must adapt to where the user is — an admin should never see
+ * the sidebar must adapt to where the user is - an admin should never see
  * "My Learning". `navForPath()` selects the right section list from the current
  * pathname (which also makes the super-admin "view as student" preview render
  * the student nav automatically, since it lives on `/dashboard`).
  *
- * Every link here points to a page that is actually wired to live data — no
+ * Every link here points to a page that is actually wired to live data - no
  * placeholder routes in the primary nav.
  */
 export interface NavItem {
   label: string;
   href: string;
   icon: LucideIcon;
-  /** Optional one-line explainer shown via an (ⓘ) tooltip next to the item — for
+  /** Optional one-line explainer shown via an (ⓘ) tooltip next to the item - for
    *  platform-specific concepts a first-time user may not recognise. */
   tip?: string;
 }
@@ -60,7 +60,7 @@ export interface NavItem {
 export interface NavSection {
   heading: string;
   items: NavItem[];
-  /** Render each item as an INDIVIDUAL top-level nav link — no group header, no
+  /** Render each item as an INDIVIDUAL top-level nav link - no group header, no
    *  accordion. Used for Plans & Support so Explore Plans / Upgrade & Renew /
    *  Help & Support each stand on their own rather than nesting under a heading. */
   standalone?: boolean;
@@ -70,10 +70,10 @@ export const STUDENT_NAV: NavSection[] = [
   {
     heading: 'WORKSPACE',
     items: [
-      { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, tip: 'Your personalized home — progress, streak, readiness and your next best step at a glance.' },
+      { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, tip: 'Your personalized home - progress, streak, readiness and your next best step at a glance.' },
       { label: 'Study Plan', href: '/study-plan', icon: ListChecks, tip: 'Your day-by-day placement roadmap, generated from the Placement Readiness Test.' },
-      { label: 'Performance', href: '/performance', icon: TrendingUp, tip: 'Detailed analytics — accuracy, speed and readiness across sections and topics.' },
-      { label: 'Leaderboard', href: '/leaderboard', icon: Trophy, tip: 'See how you rank against peers — nationally, by college, company or city.' },
+      { label: 'Performance', href: '/performance', icon: TrendingUp, tip: 'Detailed analytics - accuracy, speed and readiness across sections and topics.' },
+      { label: 'Leaderboard', href: '/leaderboard', icon: Trophy, tip: 'See how you rank against peers - nationally, by college, company or city.' },
       { label: 'Community', href: '/community', icon: MessagesSquare, tip: 'Ask doubts, share tips and connect with other students in discussion threads.' },
       { label: 'Live Sessions', href: '/live-sessions', icon: Video, tip: 'Scheduled live classes and webinars (Zoom/Meet) you can join.' },
     ],
@@ -81,7 +81,7 @@ export const STUDENT_NAV: NavSection[] = [
   {
     heading: 'PRACTICE',
     items: [
-      { label: 'Adaptive', href: '/practice', icon: Target, tip: 'Questions adapt to your performance — difficulty rises or falls as you answer.' },
+      { label: 'Adaptive', href: '/practice', icon: Target, tip: 'Questions adapt to your performance - difficulty rises or falls as you answer.' },
       { label: 'Non-Adaptive', href: '/practice-wish', icon: Sparkles, tip: 'Questions stay at a fixed difficulty throughout the session.' },
     ],
   },
@@ -101,21 +101,21 @@ export const STUDENT_NAV: NavSection[] = [
     ],
   },
   {
-    // Single destination — render it as one standalone top-level item rather than a
+    // Single destination - render it as one standalone top-level item rather than a
     // "COMPANY HUBS" header ABOVE a "Company Hubs" link (which read as a duplicate).
     heading: 'COMPANY HUBS',
     standalone: true,
     items: [{ label: 'Company Hubs', href: '/dashboard/company', icon: Building2, tip: 'Company-specific prep: hiring process, study material, practice, previous-year questions, mocks and interview prep.' }],
   },
   {
-    // Section-organized prep (Numerical / Logical / Verbal / Technical …) — the
+    // Section-organized prep (Numerical / Logical / Verbal / Technical …) - the
     // sibling of Company Hubs, one standalone top-level destination.
     heading: 'SECTIONAL HUBS',
     standalone: true,
     items: [{ label: 'Sectional Hubs', href: '/dashboard/section', icon: Layers, tip: 'Section-by-section prep: syllabus, study material and topic-wise practice. Unlock a single topic or the whole section.' }],
   },
   {
-    // Individual top-level items — deliberately NOT grouped under a "Plans &
+    // Individual top-level items - deliberately NOT grouped under a "Plans &
     // Support" header (the heading is kept only as a stable React key / icon lookup).
     heading: 'PLANS & SUPPORT',
     standalone: true,
@@ -129,20 +129,20 @@ export const STUDENT_NAV: NavSection[] = [
 
 /** Student nav items shown ONLY to users who already hold a paid plan
  *  (platform or any granular purchase). "Upgrade & Renew" is meaningless to a
- *  free user — they use "Explore Plans" to buy first. The Sidebar filters these
+ *  free user - they use "Explore Plans" to buy first. The Sidebar filters these
  *  out via the live subscription status (falls open while the paywall is off). */
 export const PLAN_ONLY_HREFS = new Set<string>(['/upgrade']);
 
-/** Student features gated behind a 100%-complete profile — "Complete your
+/** Student features gated behind a 100%-complete profile - "Complete your
  *  profile" card in-page + a lock in the sidebar until the profile is finished.
  *  Kept to core practice/assessment surfaces so a new user isn't walled off. */
 export const PROFILE_GATED_HREFS = new Set<string>(['/practice', '/mock-assessment', '/assessments']);
 
-/** Student features gated behind a paid plan — a premium-upgrade card in-page +
+/** Student features gated behind a paid plan - a premium-upgrade card in-page +
  *  a lock in the sidebar until the student has an active plan. */
 export const PREMIUM_GATED_HREFS = new Set<string>(['/practice-wish', '/mock-interview']);
 
-/** Student features GENERATED from the one-time Placement Readiness Test — locked
+/** Student features GENERATED from the one-time Placement Readiness Test - locked
  *  until it's completed because they're derived from its result. Deliberately
  *  narrow (only these two) so calibration never makes the whole platform feel
  *  locked to a brand-new user. */
@@ -202,9 +202,9 @@ export const SUPERADMIN_NAV: NavSection[] = [
 ];
 
 /**
- * TPO / Placement Office console nav — the 11-module console (redesign). Rendered
+ * TPO / Placement Office console nav - the 11-module console (redesign). Rendered
  * by the dedicated `TpoShell` (not the shared Sidebar). Modules not yet built ship
- * as labeled scaffolds, so every link resolves — no 404s in the rail.
+ * as labeled scaffolds, so every link resolves - no 404s in the rail.
  */
 export const TPO_NAV: NavSection[] = [
   {
@@ -245,7 +245,7 @@ export const TPO_NAV: NavSection[] = [
 
 /**
  * Platform Admin (internal operator, below Super Admin). Owns college
- * onboarding — registration requests, subscription activation, seeding imports.
+ * onboarding - registration requests, subscription activation, seeding imports.
  * More items land as those batches ship; only wired pages appear here.
  */
 export const ADMIN_NAV: NavSection[] = [

@@ -8,7 +8,7 @@ const PREVIEW_COOKIE = 'preview';
 const AUTH_ROUTES = ['/login', '/signup'];
 
 /**
- * Protected route prefixes — unauthenticated visitors are redirected to /login.
+ * Protected route prefixes - unauthenticated visitors are redirected to /login.
  * RBAC in the UI is UX only; Nest guards are the security boundary (CLAUDE.md §5).
  */
 const PROTECTED_PREFIXES = [
@@ -65,14 +65,14 @@ function roleHome(role: string | undefined): string {
 
 /**
  * Route-group RBAC + role redirect (CLAUDE.md §3 / ADR-003). The role cookie is
- * a client-set UX hint — backend guards remain the authority — but honouring it
+ * a client-set UX hint - backend guards remain the authority - but honouring it
  * here means a role-mismatched visit (e.g. an admin opening /mock-tests) lands
  * on the right workspace instead of a page full of 403 "Insufficient role"
  * errors. A SUPER_ADMIN with the preview cookie is deliberately allowed into
  * the student area ("view as student").
  */
 /** The only domain the app may run on. Razorpay live checkout is registered to
- *  it, and session cookies are host-scoped — so the raw Netlify subdomain must
+ *  it, and session cookies are host-scoped - so the raw Netlify subdomain must
  *  never serve the app (a payment there fails "Website Mismatch", and a login
  *  there doesn't carry to prephasz.com). */
 const CANONICAL_HOST = 'prephasz.com';
@@ -81,7 +81,7 @@ const NETLIFY_HOST = 'zskilluplms.netlify.app';
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Canonical-domain guard — runs BEFORE the auth gate so it catches protected
+  // Canonical-domain guard - runs BEFORE the auth gate so it catches protected
   // routes too (the netlify.toml edge redirect is shadowed by this middleware
   // for those paths, so the redirect has to live here as well). Preserves path
   // + query; deploy previews (deploy-preview-*--…) don't match the exact host.
@@ -92,7 +92,7 @@ export function middleware(request: NextRequest) {
     );
   }
 
-  // Company hubs are PUBLICLY browsable — they're linked from the marketing/
+  // Company hubs are PUBLICLY browsable - they're linked from the marketing/
   // landing pages and their backend endpoints are @Public. Allow everyone
   // (logged-out visitors, students, and admins) through without the auth gate
   // or the role-mismatch redirect, so "Company Hub" never bounces to /login.
@@ -103,7 +103,7 @@ export function middleware(request: NextRequest) {
   // Frontend and API are on different domains in prod, so the HttpOnly refresh
   // cookie (set on the API domain) is invisible to this middleware. Use the
   // first-party `role` hint cookie (set by the client on login, cleared on
-  // logout) as the session signal for routing — Nest guards remain the security
+  // logout) as the session signal for routing - Nest guards remain the security
   // boundary (CLAUDE.md §5).
   const role = request.cookies.get(ROLE_COOKIE)?.value;
   const hasSession = role !== undefined;

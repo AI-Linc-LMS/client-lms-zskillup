@@ -27,9 +27,9 @@ const ACCENT_TEXT: Record<Accent, string> = {
 };
 
 /**
- * One Sectional Hub card — the section analog of `CompanyCard`, styled to match
+ * One Sectional Hub card - the section analog of `CompanyCard`, styled to match
  * the Sectional Hubs mockup: a category eyebrow + difficulty pill, an accent icon
- * tile, a two-stat strip (structural counts only — no raw question inventory, per
+ * tile, a two-stat strip (structural counts only - no raw question inventory, per
  * the student-facing counts rule) and an accent "Explore now" CTA. Owned sections
  * show "Owned"; otherwise a SECTION-scope "Add · ₹N" cart action.
  */

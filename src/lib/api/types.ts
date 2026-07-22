@@ -1,6 +1,6 @@
 /**
  * Frontend transport types. The envelope shapes (`ApiResponse`, `ApiError`) are
- * the SHARED contract from `@/shared` (ADR-011) — re-exported here so API code
+ * the SHARED contract from `@/shared` (ADR-011) - re-exported here so API code
  * has one import site. `ApiRequestError` is the FE-only throwable the client
  * raises for non-2xx responses; it carries the stable backend error `code`.
  */

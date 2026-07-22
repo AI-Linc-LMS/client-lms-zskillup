@@ -24,7 +24,7 @@ const TYPE_TABS: Array<{ key: 'All' | ApiCompany['type']; label: string }> = [
 /**
  * Companies explorer. Fetches the live catalog from `GET /companies` (public).
  * Type AND card metadata (rating/enrolled/package/difficulty/mcqs/rounds) now
- * come straight from the API (DB-backed catalog.companies) — no demo overlay.
+ * come straight from the API (DB-backed catalog.companies) - no demo overlay.
  *
  * If the API is unreachable (preview), falls back to the demo grid so the page
  * still renders something instead of an empty state.

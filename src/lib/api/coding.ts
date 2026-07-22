@@ -2,13 +2,13 @@ import { apiClient } from './client';
 import type { GamificationSummary } from './gamification-types';
 
 /**
- * Coding API client. Code never executes in the browser — it is sent to the
+ * Coding API client. Code never executes in the browser - it is sent to the
  * backend, which runs it on the self-hosted Judge0 and returns graded results.
  * Hidden test cases (input/expected) are redacted server-side and never arrive.
  */
 
 export interface CodingLanguage {
-  /** Backend key, e.g. "python" — pass this to run/submit. */
+  /** Backend key, e.g. "python" - pass this to run/submit. */
   name: string;
   label: string;
   /** Monaco language id, e.g. "python" / "cpp". */
@@ -70,7 +70,7 @@ export interface CodingResult {
   gamification?: GamificationSummary | null;
 }
 
-/** Free-form runner result (POST /coding/run) — no grading. */
+/** Free-form runner result (POST /coding/run) - no grading. */
 export interface CodingRunOutput {
   ok: boolean;
   error?: string;
@@ -144,7 +144,7 @@ export interface AdminCodingProblemSummary {
   verified?: boolean;
   tags?: string[];
   xpReward?: number;
-  // Full problem body — the admin list endpoint returns whole entities, so the
+  // Full problem body - the admin list endpoint returns whole entities, so the
   // detail drawer renders straight from the row (no extra fetch).
   statement?: string;
   inputFormat?: string | null;

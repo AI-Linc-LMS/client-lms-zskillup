@@ -33,7 +33,7 @@ const STATUS_COLORS: Record<AdminUserRow['status'], string> = {
 const PAGE_SIZE = 20;
 
 /**
- * User Management (ADMIN). Operators manage student + college accounts — lock,
+ * User Management (ADMIN). Operators manage student + college accounts - lock,
  * unlock, verify email, send reset links, edit profile, review sign-ins. The
  * backend list excludes peer ADMIN / SUPER_ADMIN rows for a non-super operator,
  * and role changes / capability grants stay SUPER_ADMIN-only (no role-changer

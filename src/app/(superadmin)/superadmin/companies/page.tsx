@@ -5,14 +5,14 @@ import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { CompaniesAdmin } from '@/components/superadmin/CompaniesAdmin';
 
 /**
- * Super-admin: Companies management (Implementation Plan §4 / Sprint 2 —
+ * Super-admin: Companies management (Implementation Plan §4 / Sprint 2 -
  * "superadmin can author content"). Lists every recruiter hub (including
  * unpublished drafts) and lets the operator add a new one or toggle publish.
  *
  * Endpoint surface (backend):
- *   GET   /api/v1/admin/companies      — full list (published + draft)
- *   POST  /api/v1/admin/companies      — create (409 on duplicate slug)
- *   PATCH /api/v1/admin/companies/:id  — update / publish toggle
+ *   GET   /api/v1/admin/companies      - full list (published + draft)
+ *   POST  /api/v1/admin/companies      - create (409 on duplicate slug)
+ *   PATCH /api/v1/admin/companies/:id  - update / publish toggle
  */
 export default function AdminCompaniesPage() {
   return (

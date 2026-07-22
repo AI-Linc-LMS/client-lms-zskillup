@@ -13,7 +13,7 @@ import type {
 /**
  * Student payments API client (billing program). Purchase a topic / section /
  * company / platform via Razorpay, confirm the checkout, and read "My
- * Subscription". Server prices everything — the client never sends an amount.
+ * Subscription". Server prices everything - the client never sends an amount.
  */
 
 export async function getPricing(): Promise<PriceBookEntryDto[]> {

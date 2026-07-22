@@ -14,10 +14,10 @@ import { AuthShell } from '@/components/auth/AuthShell';
 import type { LoginResult } from '@/lib/api/auth';
 
 /**
- * Signup step 1 — personal details (STUDENT_JOURNEY_SPEC §1). Shares the same
+ * Signup step 1 - personal details (STUDENT_JOURNEY_SPEC §1). Shares the same
  * split-panel shell as /login (AuthShell) so the two pages are one identity;
  * only this right-panel form differs. react-hook-form native validation rules
- * mirror the shared class-validator DTO (`AuthRegisterDto`) — the server
+ * mirror the shared class-validator DTO (`AuthRegisterDto`) - the server
  * re-validates on submit. On success → /signup/verify?email=… (Block 5).
  */
 export default function SignupPage() {

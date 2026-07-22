@@ -10,10 +10,10 @@ import { CollegesAdmin } from '@/components/superadmin/CollegesAdmin';
  * lets the operator add a new one or suspend an existing tenant.
  *
  * Endpoint surface (already shipped on the backend):
- *   GET    /api/v1/admin/colleges     — full list (ACTIVE + SUSPENDED)
- *   POST   /api/v1/admin/colleges     — create (409 on duplicate slug)
- *   PATCH  /api/v1/admin/colleges/:id — update (slug uniqueness enforced)
- *   DELETE /api/v1/admin/colleges/:id — soft delete (sets status=SUSPENDED)
+ *   GET    /api/v1/admin/colleges     - full list (ACTIVE + SUSPENDED)
+ *   POST   /api/v1/admin/colleges     - create (409 on duplicate slug)
+ *   PATCH  /api/v1/admin/colleges/:id - update (slug uniqueness enforced)
+ *   DELETE /api/v1/admin/colleges/:id - soft delete (sets status=SUSPENDED)
  *
  * The page itself is a Server Component; the interactive table + form is a
  * client leaf (`CollegesAdmin`). Auth + role gating is handled by the

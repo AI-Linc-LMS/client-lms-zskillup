@@ -10,7 +10,7 @@ const TONE = [
 ];
 
 /**
- * Homepage "Top of cohort" — live top-3 from the public leaderboard
+ * Homepage "Top of cohort" - live top-3 from the public leaderboard
  * (GET /students/leaderboard), replacing the previously hardcoded names. Falls
  * back to a neutral empty state if the leaderboard is unreachable/empty.
  */

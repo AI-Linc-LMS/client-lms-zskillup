@@ -145,7 +145,7 @@ export function AssessmentWizard({
   /** Cohorts shown in the picker: the TPO's own list, or the selected college's. */
   const cohortOptions: Array<{ id: string; name: string }> = isTpo ? tpoCohorts ?? [] : cohorts;
 
-  /** MCQ picker options grouped by section (root topic) — pick a whole section or a
+  /** MCQ picker options grouped by section (root topic) - pick a whole section or a
    *  specific topic; the backend samples the whole subtree by id. */
   const topicGroups = useMemo(() => {
     const roots = topics.filter((t) => t.parentId === null && !HIDDEN_ROOT_SLUGS.has(t.slug) && (t.questionCount ?? 0) > 0);
@@ -153,7 +153,7 @@ export function AssessmentWizard({
       .map((r) => ({
         label: r.name,
         options: [
-          { id: r.id, name: `${r.name} — whole section`, count: r.questionCount ?? 0 },
+          { id: r.id, name: `${r.name} - whole section`, count: r.questionCount ?? 0 },
           ...topics
             .filter((c) => c.parentId === r.id && (c.questionCount ?? 0) > 0)
             .map((c) => ({ id: c.id, name: c.name, count: c.questionCount ?? 0 })),
@@ -661,7 +661,7 @@ function SectionEditor({
           <select
             value={mcqTopicId}
             onChange={(e) => setMcqTopicId(e.target.value)}
-            title="Pick a section or topic — questions are pulled from the bank"
+            title="Pick a section or topic - questions are pulled from the bank"
             className="h-10 min-w-[12rem] flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
           >
             <option value="">Select a section or topic…</option>
@@ -723,7 +723,7 @@ function SectionEditor({
   );
 }
 
-/** Live AI generation modal — bank items + each generated item streaming in. */
+/** Live AI generation modal - bank items + each generated item streaming in. */
 function GenerationModal({ gen, onClose }: { gen: GenState; onClose: () => void }) {
   const generatedCount = Math.max(0, gen.labels.length - gen.bankCount);
   const toGen = Math.max(0, gen.requested - gen.bankCount);

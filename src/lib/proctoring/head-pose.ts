@@ -4,7 +4,7 @@ import '@tensorflow/tfjs-backend-webgl';
 import '@tensorflow/tfjs-core';
 
 /**
- * Head-pose estimation via MediaPipe FaceMesh (468 landmarks) — the accuracy win
+ * Head-pose estimation via MediaPipe FaceMesh (468 landmarks) - the accuracy win
  * over BlazeFace's box heuristic. It returns raw geometric ratios; the caller
  * calibrates a per-user neutral baseline (faces differ) and flags deviations.
  * The key gain is the VERTICAL axis: looking down at notes/a phone keeps the face
@@ -18,7 +18,7 @@ export interface HeadPose {
   /** In-plane head tilt, degrees. */
   roll: number;
   /** Person-specific facial proportions, all normalised by inter-ocular distance
-   *  (scale/distance-invariant). A different person yields a different vector —
+   *  (scale/distance-invariant). A different person yields a different vector -
    *  used for lightweight identity-continuity, not biometric-grade matching. */
   signature: number[];
 }
@@ -86,7 +86,7 @@ export class HeadPoseEstimator {
     const faceWidth = rightFace.x - leftFace.x;
     if (span === 0 || faceWidth === 0) return null;
 
-    // Identity signature — proportions normalised by inter-ocular distance so
+    // Identity signature - proportions normalised by inter-ocular distance so
     // they're stable across distance/scale. Absent landmarks fall back to 0.
     const io = dist(leftEye, rightEye) || 1;
     const noseL = kp[NOSE_L];

@@ -9,10 +9,10 @@ type IconType = LucideIcon;
 /**
  * Shared chrome for the plans/checkout surfaces (Explore Plans, Full Platform,
  * Build Your Own, Cart, Upgrade & Renew). Palette convention for these screens:
- *   • violet/indigo — the plan-commerce accent ("choose / add / checkout")
- *   • orange        — the final commit CTA ("Proceed to Payment") + brand chrome
- *   • emerald       — savings + success (checks, "Best Value", "Save 37%")
- *   • navy          — text + structure
+ *   • violet/indigo - the plan-commerce accent ("choose / add / checkout")
+ *   • orange        - the final commit CTA ("Proceed to Payment") + brand chrome
+ *   • emerald       - savings + success (checks, "Best Value", "Save 37%")
+ *   • navy          - text + structure
  * This keeps a distinct "premium" language on billing while the rest of the app
  * stays navy+orange.
  */
@@ -128,7 +128,7 @@ export function StatBand({
   );
 }
 
-/** "Everything includes" grid — icon cards describing what a plan unlocks. */
+/** "Everything includes" grid - icon cards describing what a plan unlocks. */
 export function IncludedGrid({
   items,
   className,
@@ -156,7 +156,7 @@ export function IncludedGrid({
   );
 }
 
-/** Three (or more) value props in a row — icon tile + title + one line. */
+/** Three (or more) value props in a row - icon tile + title + one line. */
 export function ValueProps({
   items,
   className,

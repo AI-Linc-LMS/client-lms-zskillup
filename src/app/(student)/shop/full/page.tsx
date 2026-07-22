@@ -47,7 +47,7 @@ const UNLIMITED = [
 const FLOATERS = [BarChart3, FileText, Code2, Target];
 
 /**
- * Full Platform Access — the all-access buying page (reached from Explore Plans →
+ * Full Platform Access - the all-access buying page (reached from Explore Plans →
  * "Get Full Access"). Pick 1 / 3 / 12 months; "Proceed to Checkout" adds the
  * PLATFORM line to the cart at the chosen period and jumps to the cart.
  */

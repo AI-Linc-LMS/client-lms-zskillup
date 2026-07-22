@@ -24,7 +24,7 @@ export interface ApiQuestion {
   stem: string;
   /** Optional diagram/figure (URL or data-URL) shown with the stem. */
   imageUrl?: string | null;
-  /** Backend `QuestionPublicDto` field names — was previously mistyped as
+  /** Backend `QuestionPublicDto` field names - was previously mistyped as
    *  topicId/companyId, which never matched the wire shape. */
   subtopicId: string;
   companyTags: ApiQuestionCompanyTag[];
@@ -61,7 +61,7 @@ export interface ApiTopicAccuracy {
 }
 
 export async function listPracticeQuestions(filters: {
-  /** Subtopic slug — the backend filters on `subtopic`. `topic` is accepted as
+  /** Subtopic slug - the backend filters on `subtopic`. `topic` is accepted as
    *  an alias for back-compat. */
   topic?: string;
   subtopic?: string;

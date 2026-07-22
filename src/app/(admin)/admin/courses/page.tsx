@@ -4,7 +4,7 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { CoursesAdmin } from '@/components/superadmin/CoursesAdmin';
 
-/** Admin console — Courses / content (videos, text, concept reels). */
+/** Admin console - Courses / content (videos, text, concept reels). */
 export default function AdminCoursesPage() {
   return (
     <div className="space-y-6">

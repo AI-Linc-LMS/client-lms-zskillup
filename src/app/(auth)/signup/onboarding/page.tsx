@@ -23,7 +23,7 @@ import { Logo } from '@/components/layout/Logo';
 import { cn } from '@/lib/utils';
 
 /**
- * Onboarding wizard — steps 2 (college) & 3 (targets) (STUDENT_JOURNEY_SPEC §1).
+ * Onboarding wizard - steps 2 (college) & 3 (targets) (STUDENT_JOURNEY_SPEC §1).
  * Dependent dropdowns: state → city → college (college list fetched from the
  * API per state/city, with free-text fallback). On step-3 submit → /dashboard.
  */
@@ -44,21 +44,21 @@ export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState<2 | 3 | 4>(2);
 
-  // Step 2 state — college
+  // Step 2 state - college
   const [state, setState] = useState('');
   const [city, setCity] = useState('');
   const [collegeName, setCollegeName] = useState('');
   const [passoutYear, setPassoutYear] = useState<number | ''>('');
   const [colleges, setColleges] = useState<College[]>([]);
 
-  // Step 3 state — profile completion
+  // Step 3 state - profile completion
   const [phone, setPhone] = useState('');
   const [course, setCourse] = useState('');
   const [yearOfStudy, setYearOfStudy] = useState<number | ''>('');
   const [skillsInput, setSkillsInput] = useState('');
   const [roles, setRoles] = useState<string[]>([]);
 
-  // Step 4 state — target companies
+  // Step 4 state - target companies
   const [selected, setSelected] = useState<{ serviceBased: string[]; productBased: string[] }>({
     serviceBased: [],
     productBased: [],

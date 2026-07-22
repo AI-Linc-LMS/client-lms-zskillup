@@ -7,10 +7,10 @@ import { ProctoredAssessmentHost } from '@/components/proctoring/ProctoredAssess
 /**
  * Full-screen assessment route (Zone B, no AppShell).
  *
- * `?mock=<id>`            — runs the real server-timed mock engine.
- * `?mock=<id>&proctored=1`— proctored ASSESSMENT: device-check → proctored run.
- * `?report=<id>`          — re-opens the persisted report for a finalized attempt.
- * Neither                 — a landing that sends the student to the catalog.
+ * `?mock=<id>`            - runs the real server-timed mock engine.
+ * `?mock=<id>&proctored=1`- proctored ASSESSMENT: device-check → proctored run.
+ * `?report=<id>`          - re-opens the persisted report for a finalized attempt.
+ * Neither                 - a landing that sends the student to the catalog.
  */
 export default async function FullMockQuizPage({
   searchParams,

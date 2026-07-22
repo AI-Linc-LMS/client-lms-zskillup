@@ -73,7 +73,7 @@ export function downloadBlob(blob: Blob, fileName: string): void {
 /**
  * JPEG quality for the embedded page image. At 2× pixel-ratio this is visually
  * indistinguishable from the lossless PNG for text/vector-style resumes, but ~20×
- * smaller — a one-page export drops from ~10MB to well under 1MB.
+ * smaller - a one-page export drops from ~10MB to well under 1MB.
  */
 const JPEG_QUALITY = 0.9;
 

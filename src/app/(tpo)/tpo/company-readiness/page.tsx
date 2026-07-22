@@ -51,7 +51,7 @@ export default function CompanyReadinessPage() {
         icon={Building2}
         eyebrow="Placement Office"
         title="Company Readiness"
-        description="How your students stack up against each recruiter's bar — company by company."
+        description="How your students stack up against each recruiter's bar - company by company."
         actions={
           <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white/80 ring-1 ring-inset ring-white/15">
             {cohortLabel}

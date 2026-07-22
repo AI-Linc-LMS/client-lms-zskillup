@@ -2,10 +2,10 @@
  * Presentation content for the marketing / hub surfaces that do not yet have a
  * dedicated content API (company hub tiles, the Explore mega-menu, the practice
  * hub cards). The auth/onboarding spine and every dashboard metric use the real
- * backend — this file holds ONLY the static catalog copy that has no live
+ * backend - this file holds ONLY the static catalog copy that has no live
  * endpoint behind it.
  *
- * The client NEVER computes business values (XP/PPS/rank/scores) — those come
+ * The client NEVER computes business values (XP/PPS/rank/scores) - those come
  * from the API exactly as the backend returns them (frontend/CLAUDE.md §4).
  */
 

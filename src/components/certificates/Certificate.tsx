@@ -29,7 +29,7 @@ function fmtDate(iso: string | null): string {
   return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
 }
 
-/** Concentric-rosette guilloché — the security-paper look. Density scales with prestige. */
+/** Concentric-rosette guilloché - the security-paper look. Density scales with prestige. */
 function Guilloche({ color, prestige }: { color: string; prestige: number }) {
   const rings = 6 + prestige * 3;
   const opacity = prestige >= 4 ? 0.1 : 0.06;
@@ -166,7 +166,7 @@ function starPath(cx: number, cy: number, r: number): string {
 }
 
 /**
- * A single, print-ready certificate. Parametric across all 7 tiers — the same
+ * A single, print-ready certificate. Parametric across all 7 tiers - the same
  * elegant layout, with ornamentation (guilloché, frame flourishes, laurel seal)
  * escalating by prestige so higher tiers look richer.
  */

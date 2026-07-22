@@ -4,7 +4,7 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { SchedulingAdmin } from '@/components/superadmin/SchedulingAdmin';
 
-/** Admin console — scheduled (company/campus) assessments. */
+/** Admin console - scheduled (company/campus) assessments. */
 export default function AdminScheduledAssessmentsPage() {
   return (
     <div className="space-y-6">

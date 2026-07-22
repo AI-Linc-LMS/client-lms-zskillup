@@ -4,10 +4,10 @@ import { cn } from '@/lib/utils';
 import { PRACTICE_HUB } from '@/lib/demo-data';
 
 /**
- * Practice hub — 3-card grid below the course table on the student dashboard.
+ * Practice hub - 3-card grid below the course table on the student dashboard.
  * Each card has a colored icon tile, a heading, a 2-line body, and a "Start /
- * Build / Browse →" link. The middle card (Practice) is the active accent —
- * ring + soft orange tint — so the user's eye lands there first.
+ * Build / Browse →" link. The middle card (Practice) is the active accent -
+ * ring + soft orange tint - so the user's eye lands there first.
  */
 
 const ACCENTS = [

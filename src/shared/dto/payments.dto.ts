@@ -1,5 +1,5 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at the same path in the other repo. Change both together.
  *
  * Razorpay payments + entitlements (billing program). Student purchase endpoints
@@ -34,7 +34,7 @@ import {
 // ─── Student purchase ────────────────────────────────────────────────────────
 
 /** Start a purchase: create a Razorpay order for one scope + period. The amount
- *  is computed server-side from the price book — never sent by the client. */
+ *  is computed server-side from the price book - never sent by the client. */
 export class CreateOrderDto {
   @IsEnum(EntitlementScope)
   scope!: EntitlementScope;
@@ -51,7 +51,7 @@ export class CreateOrderDto {
 
 /** Confirm a checkout from the Razorpay handler callback. The server re-verifies
  *  the HMAC signature before minting anything (the webhook is the other, primary
- *  path — both converge idempotently on the same order). */
+ *  path - both converge idempotently on the same order). */
 export class VerifyPaymentDto {
   @IsString()
   @MaxLength(64)
@@ -158,14 +158,14 @@ export interface PriceBookEntryDto {
   period: BillingPeriod;
   amountCents: number;
   /** Original/MRP price for a strike-through (same minor units). NULL = no MRP.
-   *  Display-only — amountCents is the charged price; MRP never hits Razorpay. */
+   *  Display-only - amountCents is the charged price; MRP never hits Razorpay. */
   mrpCents: number | null;
   currency: string;
   durationDays: number;
   isActive: boolean;
 }
 
-/** Returned by create-order — everything the Razorpay Checkout widget needs. */
+/** Returned by create-order - everything the Razorpay Checkout widget needs. */
 export interface CreateOrderResultDto {
   orderId: string;
   razorpayOrderId: string;
@@ -186,7 +186,7 @@ export interface EntitlementDto {
   scopeType: EntitlementScope;
   scopeRef: string | null;
   source: string;
-  /** Effective status — EXPIRED is computed when expiresAt has passed. */
+  /** Effective status - EXPIRED is computed when expiresAt has passed. */
   status: string;
   startsAt: string;
   expiresAt: string | null;
@@ -203,7 +203,7 @@ export interface CartLineDto {
   durationDays: number;
 }
 
-/** Returned by cart-checkout — one order for the whole cart + its priced lines. */
+/** Returned by cart-checkout - one order for the whole cart + its priced lines. */
 export interface CartOrderResultDto {
   orderId: string;
   razorpayOrderId: string;
@@ -216,7 +216,7 @@ export interface CartOrderResultDto {
 }
 
 /** One line of the student's purchase history. scopeType/period are null for a
- *  multi-item cart order — read `items` for its lines instead. */
+ *  multi-item cart order - read `items` for its lines instead. */
 export interface PurchaseHistoryItemDto {
   orderId: string;
   scopeType: EntitlementScope | null;
@@ -237,7 +237,7 @@ export interface MySubscriptionDto {
   history: PurchaseHistoryItemDto[];
   /** Server view of the paywall switch (false → everything is open / dormant). */
   paywallEnabled: boolean;
-  /** Career tools (Mock Interview, Resume Builder) unlocked — bundled with a
+  /** Career tools (Mock Interview, Resume Builder) unlocked - bundled with a
    *  Company hub or the Full Platform plan (true while the paywall is off). */
   careerToolsEntitled: boolean;
 }

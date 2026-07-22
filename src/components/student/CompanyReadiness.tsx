@@ -337,7 +337,7 @@ function SkillPill({
   );
 }
 
-/** Beautiful aurora empty state — gradient icon, glow, and a clear CTA. */
+/** Beautiful aurora empty state - gradient icon, glow, and a clear CTA. */
 function EmptyState() {
   return (
     <motion.div

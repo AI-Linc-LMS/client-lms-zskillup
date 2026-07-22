@@ -26,7 +26,7 @@ export function GuideLauncher() {
   const ref = useRef<HTMLDivElement>(null);
 
   // A page mini-tour that drills into gated content is only useful once the page
-  // is actually unlocked — otherwise it would spotlight the blurred lock overlay.
+  // is actually unlocked - otherwise it would spotlight the blurred lock overlay.
   const pageLocked =
     (calibrationRequired && CALIBRATION_GATED_HREFS.has(pathname)) ||
     (!profileComplete && PROFILE_GATED_HREFS.has(pathname)) ||

@@ -4,7 +4,7 @@ import type { GamificationSummary } from './gamification-types';
 
 /**
  * Mock-test API client (Sprint 4). All endpoints are auth-gated and STUDENT-only.
- * Timing is server-authoritative — the client countdown is driven by `expiresAt`
+ * Timing is server-authoritative - the client countdown is driven by `expiresAt`
  * returned from `startMock`, never by a local timer the user could tamper with.
  */
 
@@ -47,7 +47,7 @@ export interface ApiMockQuestion {
   /** Root section name (e.g. "Numerical Ability"); "Coding" for coding items.
    *  Drives the per-section tabs in the runner. */
   section?: string | null;
-  /** PYQ tag — company tag ids + years this question was asked in. */
+  /** PYQ tag - company tag ids + years this question was asked in. */
   companyIds?: string[];
   yearTags?: number[];
   /** Question source; PATTERN_BASED (no company/year) → "SIMILAR PATTERN" tag. */
@@ -204,9 +204,9 @@ export interface CustomMockCreated {
 /**
  * Build a self-serve Mock Assessment (Mode 3) and get its id to run proctored.
  *
- * Returns the REAL counts, not just the id. A custom mock can legitimately come up short —
+ * Returns the REAL counts, not just the id. A custom mock can legitimately come up short -
  * thin topics, the seen-aware sampler skipping questions you've already answered, or a free
- * student's per-topic cap — and this used to return a bare `{ mockId }`, so asking for 20
+ * student's per-topic cap - and this used to return a bare `{ mockId }`, so asking for 20
  * and getting 2 dropped you into a 2-question mock with no explanation.
  */
 export async function createCustomMock(body: CreateCustomMockBody): Promise<CustomMockCreated> {
@@ -258,7 +258,7 @@ export interface ProctorViolationReport {
   message?: string;
   confidence?: number;
   occurredAt?: string;
-  /** Base64 JPEG data URL — high-severity events only. */
+  /** Base64 JPEG data URL - high-severity events only. */
   snapshot?: string;
 }
 

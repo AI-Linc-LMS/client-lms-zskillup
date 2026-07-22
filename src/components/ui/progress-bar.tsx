@@ -1,12 +1,12 @@
 import { cn } from '@/lib/utils';
 
 /**
- * Shared progress bar. Display-only — `value` is a server/seeded number, never
+ * Shared progress bar. Display-only - `value` is a server/seeded number, never
  * computed client-side (FRONTEND_STANDARDS §3).
  *
  * `variant`:
- *  - `default` — solid navy/blue (course completion, general progress)
- *  - `xp`      — colorful gradient matching the reference dashboard XP bar
+ *  - `default` - solid navy/blue (course completion, general progress)
+ *  - `xp`      - colorful gradient matching the reference dashboard XP bar
  *                (gold)
  */
 export function ProgressBar({

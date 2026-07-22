@@ -16,13 +16,13 @@ import type {
 /**
  * Per-domain API module (FRONTEND_STANDARDS §4). Components call these typed
  * functions, not the client directly. Backend payload types will be generated
- * from OpenAPI (Block 4 contract) — these local shapes mirror that contract
+ * from OpenAPI (Block 4 contract) - these local shapes mirror that contract
  * until the generator is wired into CI.
  *
  * Every credential-establishing endpoint passes `auth: 'login'` so a 401
  * surfaces as "bad credentials" instead of triggering the silent refresh +
  * /login redirect cycle (which used to nuke the form's error-state component
- * — the silent-login-failure bug from the QA audit).
+ * - the silent-login-failure bug from the QA audit).
  */
 
 export interface AuthUser {
@@ -60,7 +60,7 @@ function establishSession(result: LoginResult): void {
 /**
  * Verify the email OTP. The backend now issues a full login session on success
  * (symmetric with login/Google), so a freshly-verified account enters the
- * workspace authenticated — this is the root-cause fix for new users being
+ * workspace authenticated - this is the root-cause fix for new users being
  * bounced to /login on /practice and /mock-assessment.
  */
 export async function verifyEmail(dto: AuthVerifyEmailDto): Promise<LoginResult> {
@@ -69,7 +69,7 @@ export async function verifyEmail(dto: AuthVerifyEmailDto): Promise<LoginResult>
   });
   // The backend issues a session on success. Guard the establish step so a
   // staggered polyrepo deploy is safe: an older backend that still returns only
-  // `{ message }` (no accessToken) leaves signup exactly as it was — no crash.
+  // `{ message }` (no accessToken) leaves signup exactly as it was - no crash.
   if (res.data?.accessToken && res.data.user) {
     establishSession(res.data);
   }
@@ -136,7 +136,7 @@ export async function saveOnboardingTargets(
 ): Promise<{ isComplete: boolean }> {
   const res = await apiClient.post<{ isComplete: boolean }>('/api/v1/onboarding/step/targets', dto);
   if (res.data.isComplete) {
-    // Update the middleware onboarding hint (UX only — server is authority).
+    // Update the middleware onboarding hint (UX only - server is authority).
     writeOnboardedHint(true);
   }
   return res.data;
@@ -163,7 +163,7 @@ export async function resetPassword(dto: AuthResetPasswordDto): Promise<{ messag
   return res.data;
 }
 
-/** OTP-based reset (forgot-password flow) — {email, code, password}. */
+/** OTP-based reset (forgot-password flow) - {email, code, password}. */
 export async function resetPasswordOtp(
   dto: AuthResetPasswordOtpDto,
 ): Promise<{ message: string }> {
@@ -185,12 +185,12 @@ export async function listColleges(params: {
   if (params.search) qs.set('search', params.search);
   if (params.limit) qs.set('limit', String(params.limit));
   const suffix = qs.toString() ? `?${qs.toString()}` : '';
-  // Public endpoint — used by the signup wizard + profile picker.
+  // Public endpoint - used by the signup wizard + profile picker.
   const res = await apiClient.get<College[]>(`/api/v1/colleges${suffix}`, { auth: 'public' });
   return res.data;
 }
 
-/** "Other" option — request a college be added to the directory. Best-effort. */
+/** "Other" option - request a college be added to the directory. Best-effort. */
 export async function suggestCollege(body: { name: string; city?: string; state?: string }): Promise<void> {
   await apiClient.post('/api/v1/colleges/suggestions', body, { auth: 'public' });
 }

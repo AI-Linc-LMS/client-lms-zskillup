@@ -54,7 +54,7 @@ function CardHeader({ title }: { title: string }) {
   );
 }
 
-/** OTP flow — the forgot-password path. */
+/** OTP flow - the forgot-password path. */
 function OtpResetForm({ email }: { email: string }) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -152,7 +152,7 @@ function OtpResetForm({ email }: { email: string }) {
   );
 }
 
-/** Token flow — college set-password / admin-initiated reset links. */
+/** Token flow - college set-password / admin-initiated reset links. */
 function TokenResetForm({ token }: { token: string }) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);

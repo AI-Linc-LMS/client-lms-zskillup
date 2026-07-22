@@ -1,11 +1,11 @@
 /**
- * Client-side session HINT cookies — ONE reader module (no per-component
+ * Client-side session HINT cookies - ONE reader module (no per-component
  * regexes). These are UX hints set by the login/preview flows; the backend
  * guards remain the security boundary (CLAUDE.md §5).
  *
- *   role=STUDENT|COLLEGE_ADMIN|SUPER_ADMIN  — set on login, cleared on logout
- *   onboarded=0|1                            — set on login/onboarding
- *   preview=student                          — set while a super-admin runs the
+ *   role=STUDENT|COLLEGE_ADMIN|SUPER_ADMIN  - set on login, cleared on logout
+ *   onboarded=0|1                            - set on login/onboarding
+ *   preview=student                          - set while a super-admin runs the
  *                                              "view as student" preview
  */
 
@@ -13,12 +13,12 @@
  * Hint cookies are given the SAME lifetime as the refresh session (7 days) and
  * are re-stamped on every token refresh (see client.ts). A session cookie (no
  * Max-Age) vanished on a browser restart while the HttpOnly refresh session was
- * still alive — leaving the middleware, whose ONLY session signal is `role`,
+ * still alive - leaving the middleware, whose ONLY session signal is `role`,
  * bouncing a genuinely-authenticated user to /login.
  */
 export const SESSION_HINT_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
 
-/** Write the durable `role` hint (UX only — Nest guards are the authority). */
+/** Write the durable `role` hint (UX only - Nest guards are the authority). */
 export function writeRoleHint(role: string): void {
   if (typeof document === 'undefined') return;
   document.cookie = `role=${role}; path=/; max-age=${SESSION_HINT_MAX_AGE_SECONDS}; samesite=lax`;

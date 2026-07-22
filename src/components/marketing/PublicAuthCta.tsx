@@ -16,7 +16,7 @@ function roleHome(role: string | null): string {
  * Public-header auth CTA. Logged-out visitors see "Log in" + "Get started free";
  * an already-authenticated visitor (role hint cookie present) sees a single
  * "Go to dashboard" button instead. Renders the logged-out markup on the server
- * / first paint (matches SSR), then swaps after mount once the cookie is read —
+ * / first paint (matches SSR), then swaps after mount once the cookie is read -
  * so there's no hydration mismatch.
  */
 export function PublicAuthCta() {

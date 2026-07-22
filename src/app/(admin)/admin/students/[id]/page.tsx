@@ -9,7 +9,7 @@ import { deleteAdminStudent, getStudentReport, type AdminStudentFullReport } fro
 import { getMe } from '@/lib/api/me';
 import { ArrowLeft, BadgeCheck, Loader2, Trash2, XCircle } from 'lucide-react';
 
-/** Admin console — read-only per-student report (Phase 2 insights). */
+/** Admin console - read-only per-student report (Phase 2 insights). */
 export default function AdminStudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();

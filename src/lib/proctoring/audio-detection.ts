@@ -1,9 +1,9 @@
 /**
- * Audio-presence detection for proctoring — flags sustained voice-level audio
+ * Audio-presence detection for proctoring - flags sustained voice-level audio
  * (someone dictating answers, the candidate reading aloud, background voices).
  * Pure Web Audio (no model): RMS over the mic's time-domain data, requiring the
  * level to hold above a threshold for `sustainMs` so a single cough or key-clack
- * doesn't trigger. Conservative by design — false positives erode trust in the
+ * doesn't trigger. Conservative by design - false positives erode trust in the
  * whole system.
  */
 export class AudioProctor {

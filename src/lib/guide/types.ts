@@ -1,5 +1,5 @@
 /**
- * Types for the in-app platform guide — a spotlight coachmark tour that walks a
+ * Types for the in-app platform guide - a spotlight coachmark tour that walks a
  * student across modules, navigating between routes and scrolling sub-sections
  * into view. Steps are data-driven (see registry.ts) so the tour is easy to edit.
  */
@@ -28,7 +28,7 @@ export interface GuideStep {
   pad?: number;
   /** Optional eyebrow shown above the title, e.g. the module group ("PRACTICE"). */
   eyebrow?: string;
-  /** Target only exists on ≥lg screens (sidebar / top-bar search) — filtered out
+  /** Target only exists on ≥lg screens (sidebar / top-bar search) - filtered out
    *  of the tour on smaller viewports so mobile users don't get dead highlights. */
   desktopOnly?: boolean;
 }

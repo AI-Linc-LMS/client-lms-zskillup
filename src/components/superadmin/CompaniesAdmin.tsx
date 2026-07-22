@@ -17,7 +17,7 @@ import { CompanyType } from '@/shared/enums';
 import type { AdminCreateCompanyDto } from '@/shared';
 
 /**
- * Companies admin — list, create, publish/unpublish (Sprint 2 "superadmin can
+ * Companies admin - list, create, publish/unpublish (Sprint 2 "superadmin can
  * author content"). Uses `/api/v1/admin/companies`; the form's rules mirror
  * `AdminCreateCompanyDto` (class-validator) and the backend re-validates,
  * surfacing 409 on a duplicate slug as an inline error.

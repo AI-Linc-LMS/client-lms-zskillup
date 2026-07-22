@@ -1,5 +1,5 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at the same path in the other repo. Change both together.
  *
  * Marketing content CMS (Phase 5): blog posts + testimonials. Admin write DTOs
@@ -20,7 +20,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-/** http/https URLs only — blocks javascript:/data: injection in image src. */
+/** http/https URLs only - blocks javascript:/data: injection in image src. */
 const URL_OPTS = { require_protocol: true, protocols: ['http', 'https'] };
 
 export type BlogStatusValue = 'DRAFT' | 'PUBLISHED';

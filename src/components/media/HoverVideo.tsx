@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import { Play, Volume2 } from 'lucide-react';
 
 /**
- * Self-hosted landing video in a player we fully control — no third-party chrome
+ * Self-hosted landing video in a player we fully control - no third-party chrome
  * (no pop-out button, no progress bar) until the viewer asks for it.
  *
  * - Resting: poster image + a branded play overlay.
@@ -77,7 +77,7 @@ export function HoverVideo({
         className="absolute inset-0 h-full w-full object-cover"
       />
 
-      {/* Pre-activation overlay — click to watch with sound. Unmounts once activated
+      {/* Pre-activation overlay - click to watch with sound. Unmounts once activated
           so the native controls underneath become fully operable. */}
       {!activated && (
         <button
@@ -104,7 +104,7 @@ export function HoverVideo({
           <p className="relative max-w-sm text-lg font-bold leading-snug text-white">{title}</p>
           <span className="relative inline-flex items-center gap-1.5 text-xs font-medium text-white/60">
             <Volume2 className="size-3.5" aria-hidden />
-            {hovering ? 'Muted preview — click for sound' : 'Hover to preview · click for sound'}
+            {hovering ? 'Muted preview - click for sound' : 'Hover to preview · click for sound'}
           </span>
         </button>
       )}

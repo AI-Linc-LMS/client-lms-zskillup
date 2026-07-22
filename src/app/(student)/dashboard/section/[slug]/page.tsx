@@ -11,8 +11,8 @@ import {
 } from '@/lib/sections/section-catalog';
 
 /**
- * Sectional Hub page — the section analog of the company hub. Resolves the section
- * tree from the live topic taxonomy (server-side, plain data — no icons across the
+ * Sectional Hub page - the section analog of the company hub. Resolves the section
+ * tree from the live topic taxonomy (server-side, plain data - no icons across the
  * RSC boundary) and hands it to the client `SectionHub`. Coding is a synthetic
  * section (its topics are fetched client-side by SectionHub, since the coding-topic
  * endpoint is auth-gated); Soft Skills maps to the interview-prep root. 404s on an
@@ -27,7 +27,7 @@ export default async function SectionHubPage({
 }) {
   const { slug } = await params;
 
-  // Coding is a synthetic section whose topics come from an auth-gated endpoint —
+  // Coding is a synthetic section whose topics come from an auth-gated endpoint -
   // fetch + build it client-side.
   if (slug === CODING_SECTION_SLUG) return <CodingSectionLoader />;
 

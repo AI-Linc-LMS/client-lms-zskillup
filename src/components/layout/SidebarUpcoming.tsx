@@ -24,7 +24,7 @@ function dueLabel(iso: string): string {
  */
 export function SidebarUpcoming() {
   const [items, setItems] = useState<ApiScheduledAssessment[] | null>(null);
-  // mockTestIds the student has already finalized — a completed live drive drops
+  // mockTestIds the student has already finalized - a completed live drive drops
   // its one-tap Start (the backend rejects a second attempt) and reads "Done".
   const [done, setDone] = useState<Set<string>>(new Set());
 
