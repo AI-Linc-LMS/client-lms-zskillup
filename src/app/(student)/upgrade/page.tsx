@@ -30,8 +30,9 @@ import { usePurchase } from '@/components/billing/usePurchase';
 import { FeatureItem, IncludedGrid, PlanPill, StatBand, TrustBadges, ValueProps } from '@/components/billing/plan-ui';
 import { PLAN_INCLUDED, PLAN_STATS, PLAN_VALUES } from '@/components/billing/plan-content';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { startCartPurchase } from '@/lib/payments/razorpay-checkout';
 import { BillingPeriod, EntitlementScope } from '@/shared/enums';
-import type { EntitlementDto, MySubscriptionDto, PriceBookEntryDto, PurchaseHistoryItemDto } from '@/shared/dto/payments.dto';
+import type { CartItemDto, EntitlementDto, MySubscriptionDto, PriceBookEntryDto, PurchaseHistoryItemDto } from '@/shared/dto/payments.dto';
 import { cn } from '@/lib/utils';
 
 function slugToLabel(ref: string | null): string {
@@ -103,6 +104,33 @@ export default function UpgradeRenewPage() {
       onPurchased: refresh,
     });
 
+  // Renew a Build-Your-Plan subscription: re-purchase every current à-la-carte
+  // unlock in ONE cart order. The server renews lapsed lines and skips any still
+  // active (so nothing is over-billed), each at the period it was last bought.
+  const [renewingPlan, setRenewingPlan] = useState(false);
+  const renewGranular = async () => {
+    if (renewingPlan || granular.length === 0) return;
+    const items: CartItemDto[] = granular.map((e) => ({
+      scope: e.scopeType,
+      scopeRef: e.scopeRef ?? undefined,
+      period:
+        paidHistory.find((h) => h.scopeType === e.scopeType && h.scopeRef === e.scopeRef && h.period)
+          ?.period ?? BillingPeriod.ANNUAL,
+    }));
+    setRenewingPlan(true);
+    try {
+      const res = await startCartPurchase(items, { name: me?.fullName, email: me?.email });
+      if (res.ok) {
+        toast.success('Your plan has been renewed.');
+        refresh();
+      } else if (!res.dismissed) {
+        toast.error(res.error ?? 'Could not renew your plan.');
+      }
+    } finally {
+      setRenewingPlan(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="grid place-items-center py-24">
@@ -141,6 +169,8 @@ export default function UpgradeRenewPage() {
           history={sub?.history ?? []}
           showHistory={showHistory}
           setShowHistory={setShowHistory}
+          onRenewPlan={renewGranular}
+          renewingPlan={renewingPlan}
         />
       ) : (
         <NoPlanView priceMap={priceMap} />
@@ -352,12 +382,16 @@ function CustomPlanView({
   history,
   showHistory,
   setShowHistory,
+  onRenewPlan,
+  renewingPlan,
 }: {
   granular: EntitlementDto[];
   totalPaid: number;
   history: PurchaseHistoryItemDto[];
   showHistory: boolean;
   setShowHistory: (v: boolean) => void;
+  onRenewPlan: () => void;
+  renewingPlan: boolean;
 }) {
   const companies = granular.filter((e) => e.scopeType === EntitlementScope.COMPANY);
   const sections = granular.filter((e) => e.scopeType === EntitlementScope.SECTION);
@@ -396,18 +430,31 @@ function CustomPlanView({
             <p className="text-xs text-slate-600">Total Value</p>
             <p className="text-xl font-black tabular-nums text-emerald-600">{formatPrice(totalPaid, 'INR')}</p>
             <div className="mt-4 flex w-full flex-col gap-2">
+              <button
+                type="button"
+                onClick={onRenewPlan}
+                disabled={renewingPlan}
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2 text-xs font-bold text-white transition hover:bg-navy/90 disabled:opacity-60"
+              >
+                {renewingPlan ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <RefreshCw className="size-3.5" />
+                )}
+                {renewingPlan ? 'Renewing…' : 'Renew My Plan'}
+              </button>
               <Link
                 href="/shop/build"
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2 text-xs font-bold text-white"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-navy transition hover:bg-slate-50"
               >
                 Manage My Selections
               </Link>
               <button
                 type="button"
                 onClick={openHistory}
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-navy"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-navy transition hover:bg-slate-50"
               >
-                <RefreshCw className="size-3.5" /> Payment History
+                <Receipt className="size-3.5" /> Payment History
               </button>
             </div>
           </div>
