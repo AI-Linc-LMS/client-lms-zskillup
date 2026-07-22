@@ -1,8 +1,12 @@
+import { MathText } from './MathText';
+
 /**
  * Renders a question stem, formatting any embedded code (Pseudocode / C / Java /
  * Python / SQL snippets) as a monospace block with preserved line breaks - so
  * questions like "What is the output of: #include<stdio.h> int main(){…}" stop
- * rendering as one flattened, unreadable run-on line.
+ * rendering as one flattened, unreadable run-on line. Prose (non-code) text is
+ * also run through MathText so `a^b`, `a_b` and `sqrt(...)` render as real
+ * superscripts / subscripts / radicals.
  *
  * Detection is conservative (strong language markers + real code punctuation) to
  * avoid false-positives on prose. When the stored code already has newlines we
@@ -82,14 +86,14 @@ export function QuestionStem({
     return (
       <div className={className}>
         {diagram}
-        <div className="whitespace-pre-wrap">{text}</div>
+        <div className="whitespace-pre-wrap"><MathText text={text} /></div>
       </div>
     );
   }
   return (
     <div className={className}>
       {diagram}
-      {prose ? <p className="whitespace-pre-wrap">{prose}</p> : null}
+      {prose ? <p className="whitespace-pre-wrap"><MathText text={prose} /></p> : null}
       <pre className="mt-2 overflow-x-auto whitespace-pre-wrap break-words rounded-lg border border-slate-200 bg-slate-50 p-3 font-mono text-[13px] font-normal leading-relaxed text-navy">
         {formatCode(code)}
       </pre>

@@ -33,6 +33,7 @@ import type { AdaptiveOption } from '@/lib/api/adaptive';
 import { getQuestionSolution, type QuestionSolutionDto } from '@/lib/api/question-solutions';
 import { MarkdownLite } from '@/components/ui/MarkdownLite';
 import { QuestionStem } from '@/components/practice/QuestionStem';
+import { MathText } from '@/components/practice/MathText';
 
 /* Brand quiz palette - light surface with an orange accent. */
 const BRAND_GRAD = 'linear-gradient(135deg,#ffd24d 0%,#f5b400 100%)';
@@ -490,7 +491,7 @@ function AdaptiveQuizRunner({
                             ? 'text-navy'
                             : 'text-slate-700',
                     )}>
-                      {opt.text}
+                      <MathText text={opt.text} />
                     </span>
                   </button>
                 );

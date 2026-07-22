@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { ArrowRight, Calendar, Check, Loader2, Trophy, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { QuestionStem } from '@/components/practice/QuestionStem';
+import { MathText } from '@/components/practice/MathText';
 import { PyqTag } from '@/components/practice/PyqTag';
 import { submitPracticeAttempt, type ApiAttemptResult, type ApiQuestion } from '@/lib/api/practice';
 import {
@@ -200,7 +201,7 @@ export function DailyChallenge() {
                       String.fromCharCode(65 + i)
                     )}
                   </span>
-                  <span className="flex-1">{opt.text}</span>
+                  <span className="flex-1"><MathText text={opt.text} /></span>
                 </button>
               );
             })}
