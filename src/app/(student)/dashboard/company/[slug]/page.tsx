@@ -5,7 +5,7 @@ import { getCompany } from '@/lib/api/catalog';
 import type { CompanyType, Difficulty } from '@/lib/demo-data';
 
 /**
- * Company hub page — now fully backed by the live API. The company hero + card
+ * Company hub page - now fully backed by the live API. The company hero + card
  * metadata come from `catalog.companies`, and the 7-tab body from
  * `catalog.company_hub_content` (per-company, admin-editable). The templated
  * `getHubContent` is used only as a graceful fallback if a company has no hub

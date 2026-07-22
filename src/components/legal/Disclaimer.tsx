@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
  *
  * This is a legal notice, not decoration: it disclaims affiliation with the companies whose
  * names and logos the platform uses, and disclaims any promise of placement or of questions
- * recurring. It must be authored once — three hand-copied versions would drift, and a legal
+ * recurring. It must be authored once - three hand-copied versions would drift, and a legal
  * notice that says something slightly different on each page is worse than none.
  *
  * Rendered wherever company-branded prep content appears: the landing page, the company

@@ -56,21 +56,21 @@ export async function getTpoCompanyHeatmap(cohortId?: string): Promise<TpoCompan
   return res.data;
 }
 
-/** Campus coding analytics — solve rate, difficulty breakdown, company-tagged. */
+/** Campus coding analytics - solve rate, difficulty breakdown, company-tagged. */
 export async function getTpoCodingAnalytics(cohortId?: string): Promise<TpoCodingAnalytics> {
   const qs = cohortId ? `?cohortId=${encodeURIComponent(cohortId)}` : '';
   const res = await apiClient.get<TpoCodingAnalytics>(`/api/v1/tpo/coding-analytics${qs}`);
   return res.data;
 }
 
-/** Campus interview analytics — readiness, communication, confidence, weaknesses. */
+/** Campus interview analytics - readiness, communication, confidence, weaknesses. */
 export async function getTpoInterviewAnalytics(cohortId?: string): Promise<TpoInterviewAnalytics> {
   const qs = cohortId ? `?cohortId=${encodeURIComponent(cohortId)}` : '';
   const res = await apiClient.get<TpoInterviewAnalytics>(`/api/v1/tpo/interview-analytics${qs}`);
   return res.data;
 }
 
-/** The college's current subscription (plan, seats, validity) — null if none. */
+/** The college's current subscription (plan, seats, validity) - null if none. */
 export async function getTpoSubscription(): Promise<CollegeSubscriptionDto | null> {
   const res = await apiClient.get<CollegeSubscriptionDto | null>('/api/v1/tpo/subscription');
   return res.data;
@@ -139,7 +139,7 @@ export async function previewTpoAssessment(dto: PreviewTpoAssessmentDto): Promis
 }
 
 /**
- * Coding topics for the coding round — TPO-scoped (the student /mocks/coding-topics
+ * Coding topics for the coding round - TPO-scoped (the student /mocks/coding-topics
  * endpoint is STUDENT-only). Pass a company slug for a company-wise drive, omit for
  * the whole coding bank (sectional). Returns [{ topic, count }] like the mock builder.
  */

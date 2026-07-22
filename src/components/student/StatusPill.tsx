@@ -2,12 +2,12 @@ import { cn } from '@/lib/utils';
 import type { CourseStatus } from '@/lib/demo-data';
 
 /**
- * Status pill — consistent everywhere (frontend/CLAUDE §4.11). Color is paired
+ * Status pill - consistent everywhere (frontend/CLAUDE §4.11). Color is paired
  * with text (never color alone) for accessibility (FRONTEND_STANDARDS §6).
  *
  * Two ways to use it:
- *   - `status` — the canonical course-status labels (closed map below).
- *   - `tone` + `label` — any other domain state (mock outcomes, invites, …)
+ *   - `status` - the canonical course-status labels (closed map below).
+ *   - `tone` + `label` - any other domain state (mock outcomes, invites, …)
  *     rendered with the same §4.11 treatments, so no surface ever hand-rolls
  *     status styles.
  */

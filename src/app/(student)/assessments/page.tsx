@@ -55,7 +55,7 @@ function countdown(iso: string): string {
 }
 
 /** Student assessment calendar (assessment lifecycle, Phase 2). Scheduled drives
- *  for the companies the student registered for — a premium navy hero with live
+ *  for the companies the student registered for - a premium navy hero with live
  *  stats, an interactive month grid, and a timeline of upcoming drives. */
 export default function AssessmentsPage() {
   const [items, setItems] = useState<ApiScheduledAssessment[] | null>(null);
@@ -100,7 +100,7 @@ export default function AssessmentsPage() {
     [items],
   );
 
-  // Hero stats — derived live from the schedule.
+  // Hero stats - derived live from the schedule.
   const stats = useMemo(() => {
     const monthCount = (items ?? []).filter((i) => {
       const d = new Date(i.scheduledAt);
@@ -344,7 +344,7 @@ export default function AssessmentsPage() {
                   const endMs = startMs + it.durationMinutes * 60_000;
                   const live = Date.now() >= startMs && Date.now() <= endMs;
                   // Leaderboard is only meaningful once the assessment window has
-                  // fully closed and submissions are in — hiding it for upcoming/
+                  // fully closed and submissions are in - hiding it for upcoming/
                   // live drives (a ranking before anyone has finished is misleading).
                   const ended = Date.now() > endMs;
                   return (

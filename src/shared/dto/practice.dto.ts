@@ -1,8 +1,8 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011, amended 2026-06-03).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011, amended 2026-06-03).
  * Mirrored at frontend-repo/src/shared/dto/practice.dto.ts.
  *
- * Submit a practice attempt. The client never tells us `isCorrect` — the
+ * Submit a practice attempt. The client never tells us `isCorrect` - the
  * server grades. `selectedOptionIds` is an array (MULTI_SELECT support).
  * `clientAttemptId` enables idempotent retries (DB unique constraint).
  */

@@ -419,7 +419,7 @@ export function UserDetailDrawer({
                 </p>
                 <div className="space-y-1.5">
                   {ADMIN_CAPABILITY_KEYS.map((key) => {
-                    // Baseline capabilities are held by every admin — show them as
+                    // Baseline capabilities are held by every admin - show them as
                     // an always-on "Included" row, not a grantable toggle.
                     if (isBaselineCapability(key)) {
                       return (

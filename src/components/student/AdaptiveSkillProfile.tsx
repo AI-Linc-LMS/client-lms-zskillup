@@ -77,7 +77,7 @@ export function AdaptiveSkillProfile() {
         }
         // Aggregate skill mastery across ALL completed sessions (capped for cost),
         // keeping each skill's most-recent estimate. The old code read only the
-        // latest session yet the footer said "based on N sessions" — so a profile
+        // latest session yet the footer said "based on N sessions" - so a profile
         // could claim "1 skill tracked" while 6 sessions had been completed.
         const recent = completed.slice(0, 15);
         const results = await Promise.all(

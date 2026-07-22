@@ -83,9 +83,9 @@ declare global {
 
 /**
  * Browser + camera proctoring for the assessment lifecycle. Tracks tab-switch and
- * fullscreen-exit counts, and — new in v2 — runs BlazeFace over the self-view to
+ * fullscreen-exit counts, and - new in v2 - runs BlazeFace over the self-view to
  * flag no-face / multiple-faces / obstruction / off-screen / too-close-far / poor
- * light. Warn-only (never auto-submits). Camera / model failures are non-fatal —
+ * light. Warn-only (never auto-submits). Camera / model failures are non-fatal -
  * the assessment continues; the server-stamped log is the authoritative record.
  */
 export function useProctoring(
@@ -231,7 +231,7 @@ export function useProctoring(
         videoRef.current.srcObject = stream;
         videoRef.current.play().catch(() => {});
       }
-      // Kick off camera analysis (non-blocking — the exam starts even while the
+      // Kick off camera analysis (non-blocking - the exam starts even while the
       // model downloads; detection begins once it's ready).
       if (hasCamera && videoRef.current) {
         setFaceStatus('NORMAL');
@@ -309,7 +309,7 @@ export function useProctoring(
     if (finalBatch.length) onReportRef.current?.({ violations: finalBatch });
     document.removeEventListener('visibilitychange', onVisibility);
     document.removeEventListener('fullscreenchange', onFullscreenChange);
-    // Stop EVERY acquired track — the hook's stream AND any globally-stashed one
+    // Stop EVERY acquired track - the hook's stream AND any globally-stashed one
     // (opened by the device-check) which can diverge. Nulling the global alone
     // does NOT release the device, so its tracks must be stopped explicitly or
     // the laptop camera light stays on after the assessment.

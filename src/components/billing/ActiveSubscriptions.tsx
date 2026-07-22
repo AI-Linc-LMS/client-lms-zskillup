@@ -18,7 +18,7 @@ function scopeIcon(s: EntitlementScope) {
 /**
  * The student's active purchases, each linking straight into practice for what
  * they bought (topic → adaptive runner, company → hub, coding → workspace,
- * section/platform → practice picker). Self-fetching — drop it on any page.
+ * section/platform → practice picker). Self-fetching - drop it on any page.
  */
 export function ActiveSubscriptions({ className }: { className?: string }) {
   const [ents, setEnts] = useState<EntitlementDto[] | null>(null);

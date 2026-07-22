@@ -7,7 +7,7 @@ export interface ProfileCompletion {
 }
 
 /**
- * The 8 fields that make up a "complete" student profile — the single source of
+ * The 8 fields that make up a "complete" student profile - the single source of
  * truth mirrored by the profile page, the dashboard completion banner and the
  * feature lock gate (name, phone, course, year, college, passout year, skills,
  * target roles). Non-students (e.g. an admin previewing the student app) are

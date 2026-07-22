@@ -44,7 +44,7 @@ function ScatterTip({ active, payload }: { active?: boolean; payload?: { payload
 }
 
 /**
- * Performance × Participation map — one dot per student, coloured by quadrant,
+ * Performance × Participation map - one dot per student, coloured by quadrant,
  * split at the 50-line. Faint quadrant tints + corner counts match the exec view.
  */
 export function ParticipationScatter({ students }: { students: TpoStudentRow[] }) {

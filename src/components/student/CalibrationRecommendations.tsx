@@ -7,7 +7,7 @@ import { useCalibrationStatus } from '@/hooks/useCalibrationStatus';
 import { RecoAction, RecoScopeChip } from '@/components/recommendations/reco-cart';
 
 /**
- * Dashboard "Recommended for you" — calibration-gated product picks. Before the
+ * Dashboard "Recommended for you" - calibration-gated product picks. Before the
  * first calibration it shows an unlock teaser; after, a highlighted best pick +
  * a short ranked list, each with its reason (company / section / topic /
  * platform) and a one-click Add-to-cart (or a navigate CTA for nudges).

@@ -19,7 +19,7 @@ const IDLE: CalibrationStatusDto = {
 /**
  * Live calibration status for the signed-in student. Re-checks on window focus /
  * tab visibility so finishing the calibration in another tab unlocks this one on
- * return. Fails OPEN — on a fetch error (or for non-students / when the feature
+ * return. Fails OPEN - on a fetch error (or for non-students / when the feature
  * flag is off) `required` stays false, so a transient blip never locks anyone out.
  */
 export function useCalibrationStatus(): CalibrationState {

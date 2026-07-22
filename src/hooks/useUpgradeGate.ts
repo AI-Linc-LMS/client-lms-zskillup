@@ -8,12 +8,12 @@ import { useMySubscription } from './useMySubscription';
  *
  * Two conditions, and BOTH must hold:
  *
- *  1. `paywallEnabled` — the server's PAYWALL_ENABLED switch. While it is off the whole
+ *  1. `paywallEnabled` - the server's PAYWALL_ENABLED switch. While it is off the whole
  *     paywall is dormant and every gate must fall OPEN. It is off in production today, so
  *     this gate ships inert and turns on with the flag, exactly like the rest of billing.
  *     Getting this backwards would wall every single user out of their recommendations.
  *
- *  2. `planStatus === 'none'` — no active entitlement of any kind. A student who has bought
+ *  2. `planStatus === 'none'` - no active entitlement of any kind. A student who has bought
  *     anything at all passes through here; the finer per-scope checks already happen on the
  *     destination pages (the adaptive paywall, the company hub). Re-deriving scope from an
  *     arbitrary recommendation href would be guesswork.

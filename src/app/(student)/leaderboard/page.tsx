@@ -31,7 +31,7 @@ import { XpInfoButton } from '@/components/gamification/XpInfoButton';
 
 const fmt = (n: number) => n.toLocaleString('en-IN');
 
-/** ISO week number + time until the weekly (Sunday 23:59) reset — computed
+/** ISO week number + time until the weekly (Sunday 23:59) reset - computed
  *  client-side to avoid an SSR/client hydration mismatch on the clock. */
 function useSeason() {
   const [s, setS] = useState<{ week: number; days: number; hours: number } | null>(null);

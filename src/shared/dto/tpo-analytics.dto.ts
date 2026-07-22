@@ -1,8 +1,8 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at frontend-repo/src/shared/dto/tpo-analytics.dto.ts.
  *
- * TPO dashboard analytics (Batch 5) — response shapes for GET /tpo/analytics.
+ * TPO dashboard analytics (Batch 5) - response shapes for GET /tpo/analytics.
  * All figures are college-scoped (optionally cohort-scoped) and derived from
  * existing signals (practice / mock / coding / topic coverage + last-active).
  * Interview/communication analytics are intentionally absent (no data source).
@@ -69,7 +69,7 @@ export interface TpoDashboard {
 }
 
 /** College identity + headline counts for the TPO console chrome (brand lockup,
- *  batch selector). Cheap identity read — heavy analytics stay on the dashboard. */
+ *  batch selector). Cheap identity read - heavy analytics stay on the dashboard. */
 export interface TpoCollegeSummary {
   collegeName: string;
   collegeSlug: string;
@@ -220,7 +220,7 @@ export interface TpoInterviewWeakness {
   area: string;
   count: number;
 }
-/** Scores are null when no graded interview data exists for that dimension —
+/** Scores are null when no graded interview data exists for that dimension -
  *  communication/confidence only populate on interviews graded after that
  *  pipeline shipped, so the UI can honestly show "needs data". */
 export interface TpoInterviewAnalytics {

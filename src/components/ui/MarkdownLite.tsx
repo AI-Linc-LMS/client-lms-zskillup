@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 /**
  * Tiny, dependency-free markdown renderer for AI-authored solution text
  * (bold **…**, italic *…*, inline `code`, numbered/bulleted lists, and
- * paragraphs). Deliberately minimal — enough to render the question-solution and
+ * paragraphs). Deliberately minimal - enough to render the question-solution and
  * shortcut copy without shipping a full markdown parser. Input is plain text from
  * our own solution cache, so no HTML injection surface.
  */

@@ -3,7 +3,7 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { PerformanceDashboard } from '@/components/student/PerformanceDashboard';
 
 /**
- * Performance — a visual analytics report: placement readiness (overall +
+ * Performance - a visual analytics report: placement readiness (overall +
  * per-company + per-topic), practice accuracy, assessment-score trend, and
  * focus areas. All live from the readiness/practice/mock endpoints.
  */

@@ -13,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 
 /**
- * Public /about page — Sprint 1 deliverable (Implementation Plan §7).
+ * Public /about page - Sprint 1 deliverable (Implementation Plan §7).
  * SSG by default (Server Component, no data fetch). Communicates positioning,
  * the four BRD success metrics, and the trust signals (security, transparency).
  */

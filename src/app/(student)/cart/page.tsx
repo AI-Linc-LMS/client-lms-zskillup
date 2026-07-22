@@ -65,7 +65,7 @@ export default function CartPage() {
   const total = useMemo(() => items.reduce((sum, i) => sum + (priceOf(i) ?? 0), 0), [items, priceMap]);
   const byScope = (scope: EntitlementScope) => items.filter((i) => i.scope === scope);
 
-  // Upgrade nudge — the gap to Full Platform (annual), unless it's already carted.
+  // Upgrade nudge - the gap to Full Platform (annual), unless it's already carted.
   const hasPlatform = items.some((i) => i.scope === EntitlementScope.PLATFORM);
   const platformAnnual = retailPrice(priceMap, EntitlementScope.PLATFORM, BillingPeriod.ANNUAL)?.amountCents ?? null;
   const gap = platformAnnual != null ? platformAnnual - total : null;

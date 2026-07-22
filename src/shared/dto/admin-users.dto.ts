@@ -1,11 +1,11 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at the same path in the other repo. Change both together.
  *
  * Super-admin user-account operations (Phase 2). The frontend imports these
  * classes with `import type` so the class-validator runtime never fires
  * client-side; the backend's global ValidationPipe enforces them. (No
- * `@nestjs/swagger` here — it is not a frontend dependency, matching the other
+ * `@nestjs/swagger` here - it is not a frontend dependency, matching the other
  * mirrored DTOs.)
  */
 import { IsBoolean, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';

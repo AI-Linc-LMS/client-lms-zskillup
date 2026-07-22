@@ -1,9 +1,9 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at the same path in the other repo. Change both together.
  *
  * Lightweight financials (Phase 7). A read-only revenue view derived from the
- * plan catalog × college subscriptions — no billing integration. All money in
+ * plan catalog × college subscriptions - no billing integration. All money in
  * minor units (cents/paise). MRR normalises each dated plan to 30 days; perpetual
  * plans contribute to booked value but not to MRR.
  */
@@ -57,7 +57,7 @@ export interface FinancialsRevenueByCollege {
 
 /**
  * The real-money view (Super-Admin only), computed from actual Razorpay
- * orders/payments + student entitlements — not derived from plan prices.
+ * orders/payments + student entitlements - not derived from plan prices.
  */
 export interface FinancialsPaymentsDto {
   currency: string;

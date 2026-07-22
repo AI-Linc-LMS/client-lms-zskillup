@@ -1,8 +1,8 @@
 import { parseSqlSchema, type SqlTable } from './sql-schema';
 
 /**
- * Renders a SQL problem's seed (CREATE TABLE + INSERT) as structured tables — a
- * schema table (Column / Data Type / Description) and a sample-data grid — so
+ * Renders a SQL problem's seed (CREATE TABLE + INSERT) as structured tables - a
+ * schema table (Column / Data Type / Description) and a sample-data grid - so
  * students read the database at a glance instead of parsing raw SQL. Falls back
  * to null when the seed can't be parsed, so the caller keeps the plain-text view.
  */

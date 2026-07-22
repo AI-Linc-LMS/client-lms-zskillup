@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 
 /**
  * Shared UI for turning a recommendation into either an ADD-TO-CART action (when
- * the reco maps to a purchasable product — `addable`) or a navigate CTA (nudges
+ * the reco maps to a purchasable product - `addable`) or a navigate CTA (nudges
  * like assessments / leaderboard). Reused by the top-bar "Recommended for you"
  * dropdown and the dashboard widget so the cart wiring lives in one place.
  */
@@ -40,7 +40,7 @@ const SCOPE_META: Partial<Record<EntitlementScope, { label: string; icon: typeof
   [EntitlementScope.PLATFORM]: { label: 'Full platform', icon: Sparkles },
 };
 
-/** The "why / what" chip — scope (Company/Section/Topic/Platform) + target name. */
+/** The "why / what" chip - scope (Company/Section/Topic/Platform) + target name. */
 export function RecoScopeChip({ r, className }: { r: RecommendationDto; className?: string }) {
   const meta = r.scope ? SCOPE_META[r.scope] : undefined;
   const Icon = meta?.icon ?? Sparkles;

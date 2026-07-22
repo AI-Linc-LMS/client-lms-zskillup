@@ -1,5 +1,5 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at backend-repo/src/shared/dto/certificate.dto.ts.
  *
  * XP-based certificates: the student's per-tier unlock/issue state, and the
@@ -18,9 +18,9 @@ export interface MyCertificateDto {
   unlocked: boolean;
   /** True once a certificate record has been minted for this tier. */
   issued: boolean;
-  /** The shareable, verifiable id (ZS-XX-XXXXXXXX) — present once issued. */
+  /** The shareable, verifiable id (ZS-XX-XXXXXXXX) - present once issued. */
   certificateId: string | null;
-  /** ISO issue date — present once issued. */
+  /** ISO issue date - present once issued. */
   issuedAt: string | null;
 }
 
@@ -45,7 +45,7 @@ export interface IssuedCertificateDto {
   issuedAt: string;
 }
 
-/** Public verification payload (no auth) — for the share page + verify form. */
+/** Public verification payload (no auth) - for the share page + verify form. */
 export interface CertificateVerifyDto {
   valid: boolean;
   certificateId: string;

@@ -16,7 +16,7 @@ const INCLUDED = [
  * Upgrade prompt shown when a free student activates a CTA they aren't entitled to.
  *
  * A modal rather than a page gate on purpose: the recommendations themselves stay fully
- * visible and readable — that's the whole point of recommending something — and the wall
+ * visible and readable - that's the whole point of recommending something - and the wall
  * only appears at the moment they try to act on one.
  *
  * Portalled to <body> with position:fixed. The recommendation cards live inside rounded,
@@ -33,14 +33,14 @@ export function UpgradeModal({
 }: {
   open: boolean;
   onClose: () => void;
-  /** What they just tried to open — makes the prompt specific rather than generic. */
+  /** What they just tried to open - makes the prompt specific rather than generic. */
   feature?: string;
   title?: string;
-  /** The server's own paywall message (403 PAYWALL). Preferred over the generic line —
+  /** The server's own paywall message (403 PAYWALL). Preferred over the generic line -
    *  it already says exactly which allowance ran out. */
   message?: string;
   /** Optional escape hatch to the free-taste funnel. When a locked topic/company opens
-   *  this modal we still honour "first questions in every topic are free" — this links
+   *  this modal we still honour "first questions in every topic are free" - this links
    *  straight into the runner, where the server meters the free allowance. */
   secondaryHref?: string;
   secondaryLabel?: string;

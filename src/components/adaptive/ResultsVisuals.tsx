@@ -55,7 +55,7 @@ export function Typewriter({
   );
 }
 
-/* ── "Magic" AI loader — gradient orb + cycling status + shimmer ───────────── */
+/* ── "Magic" AI loader - gradient orb + cycling status + shimmer ───────────── */
 const LOADER_MESSAGES = [
   'Reading your accuracy curve…',
   'Annotating each answer…',
@@ -167,7 +167,7 @@ const prettySkill = (s: string) =>
   (s || '').replace(/[-_]/g, ' ').replace(/section \d+\s*/i, '').replace(/\b\w/g, (m) => m.toUpperCase()).trim();
 
 export function SkillRadar({ skills: allSkills, size = 360 }: { skills: SkillMastery[]; size?: number }) {
-  // A radar is only legible up to ~8 spokes — show the strongest skills here;
+  // A radar is only legible up to ~8 spokes - show the strongest skills here;
   // the full list lives in the mastery bars below it.
   const skills = [...allSkills].sort((a, b) => b.masteryPct - a.masteryPct).slice(0, 8);
   const n = skills.length;

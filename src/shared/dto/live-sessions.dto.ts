@@ -1,8 +1,8 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at the same path in the other repo. Change both together.
  *
- * Live sessions — admin-scheduled Zoom/Meet events targeted at students
+ * Live sessions - admin-scheduled Zoom/Meet events targeted at students
  * (whole platform, or one company's registered students). The frontend imports
  * the request classes with `import type` and the response interfaces for typing.
  */

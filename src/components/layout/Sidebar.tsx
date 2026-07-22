@@ -32,7 +32,7 @@ import {
 } from './nav-config';
 
 /**
- * Workspace sidebar — route-aware.
+ * Workspace sidebar - route-aware.
  *
  * Student zone: a full-width sidebar of the five sections (Workspace / Practice
  * / Assessment / Career / Explore) as collapsible accordion headers. Hovering
@@ -43,7 +43,7 @@ import {
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-/** Sections rendered FLAT — always-open, no collapse toggle (their items stand
+/** Sections rendered FLAT - always-open, no collapse toggle (their items stand
  *  as individual nav links under a static header). */
 const FLAT_HEADINGS = new Set<string>([]);
 
@@ -106,7 +106,7 @@ export function Sidebar() {
     (!profileComplete && PROFILE_GATED_HREFS.has(href)) ||
     (planStatus === 'none' && PREMIUM_GATED_HREFS.has(href));
 
-  // Collapsible accordion sidebar for EVERY role (student / admin / super-admin) —
+  // Collapsible accordion sidebar for EVERY role (student / admin / super-admin) -
   // sections expand on click, multi-open, with the active section open by default.
   return (
     <NavAccordion
@@ -129,7 +129,7 @@ function NavAccordion({
   isLocked: (href: string) => boolean;
   reduce: boolean;
 }) {
-  // The section holding the current route — opened by default and re-opened on
+  // The section holding the current route - opened by default and re-opened on
   // navigation. Clicking a header toggles that section (multi-open: opening one
   // does NOT collapse the others).
   const activeHeading =
@@ -151,7 +151,7 @@ function NavAccordion({
       <nav className="scroll-soft relative flex-1 space-y-1.5 overflow-y-auto px-3 py-4" aria-label="Workspace">
         {sections.map((section) => {
           // Standalone: each item is its own top-level nav link (no group header,
-          // no accordion) — e.g. Explore Plans / Upgrade & Renew / Help & Support.
+          // no accordion) - e.g. Explore Plans / Upgrade & Renew / Help & Support.
           if (section.standalone) {
             return (
               <div key={section.heading} className="space-y-1.5">
@@ -268,9 +268,9 @@ function NavAccordion({
   );
 }
 
-/** A top-level, standalone nav link — same prominence as a section header, but a
+/** A top-level, standalone nav link - same prominence as a section header, but a
  *  real destination (used for the un-grouped Plans & Support items). */
-/** Inline (ⓘ) info tooltip for a nav item — a SIBLING of the nav <Link> (never a
+/** Inline (ⓘ) info tooltip for a nav item - a SIBLING of the nav <Link> (never a
  *  child, since a <button> inside an <a> is invalid HTML). When the item is active
  *  it lives INSIDE the black pill, so the dot lightens to stay legible on black. */
 function NavTip({ label, tip, active }: { label: string; tip: string; active?: boolean }) {
@@ -293,7 +293,7 @@ function StandaloneNavLink({ item, active, locked }: { item: NavItem; active: bo
   const Icon = item.icon;
   const hasTip = !!item.tip;
   // The pill (black bg + gold ring on active) lives on the LINK when there's no
-  // tip, but moves to the WRAPPER when there is one — so the (ⓘ) sits inside it.
+  // tip, but moves to the WRAPPER when there is one - so the (ⓘ) sits inside it.
   const pill = active ? 'bg-[#1a1a1a] ring-1 ring-[#ffc42d]/30' : 'hover:bg-[#fff5ea]';
   const link = (
     <Link
@@ -336,7 +336,7 @@ function StandaloneNavLink({ item, active, locked }: { item: NavItem; active: bo
   );
 }
 
-/** Accordion sub-item — compact row under a section header. */
+/** Accordion sub-item - compact row under a section header. */
 function SubNavLink({ item, active, locked }: { item: NavItem; active: boolean; locked: boolean }) {
   const Icon = item.icon;
   const hasTip = !!item.tip;

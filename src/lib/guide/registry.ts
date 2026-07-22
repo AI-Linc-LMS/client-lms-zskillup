@@ -4,14 +4,14 @@ import type { GuideStep, GuideTour } from './types';
  * The platform-guide script. Data-driven so the tour is easy to tune.
  *
  * `target` values are `data-tour` attributes placed on real elements:
- *   nav:<href>      — a sidebar nav item (added generically in Sidebar.tsx)
- *   chrome:<name>   — a persistent top-bar control
- *   <mod>:<key>     — an in-page sub-section (e.g. dash:performance, perf:focus-areas)
+ *   nav:<href>      - a sidebar nav item (added generically in Sidebar.tsx)
+ *   chrome:<name>   - a persistent top-bar control
+ *   <mod>:<key>     - an in-page sub-section (e.g. dash:performance, perf:focus-areas)
  *
  * The GRAND tour shows the chrome, walks every sidebar module ("where is
  * everything"), then drills the dashboard's own sections ("what's inside"). Each
  * route also has a mini-tour (PAGE_TOURS) launchable from the "?" menu on that page.
- * Sidebar/search steps are desktopOnly — filtered out on small screens.
+ * Sidebar/search steps are desktopOnly - filtered out on small screens.
  */
 
 export const GRAND_TOUR_ID = 'grand';
@@ -23,30 +23,30 @@ const GRAND_STEPS: GuideStep[] = [
     id: 'welcome',
     placement: 'center',
     title: 'Welcome to prephasz \u{1F44B}',
-    body: "Let's take a quick tour of the platform \u2014 where everything lives and what each part does. You can skip or replay anytime.",
+    body: "Let's take a quick tour of the platform - where everything lives and what each part does. You can skip or replay anytime.",
   },
   // \u2500\u2500 Chrome \u2500\u2500
-  { id: 'chrome-search', target: 'chrome:search', placement: 'bottom', desktopOnly: true, eyebrow: 'Quick access', title: 'Search anything', body: 'Jump to any page, company, or topic instantly \u2014 hit \u2318K from anywhere.' },
-  { id: 'chrome-streak', target: 'chrome:streak', placement: 'bottom', eyebrow: 'Momentum', title: 'Your streak & XP', body: 'Practice daily to keep your streak alive and climb levels \u2014 it powers the leaderboard.' },
+  { id: 'chrome-search', target: 'chrome:search', placement: 'bottom', desktopOnly: true, eyebrow: 'Quick access', title: 'Search anything', body: 'Jump to any page, company, or topic instantly - hit \u2318K from anywhere.' },
+  { id: 'chrome-streak', target: 'chrome:streak', placement: 'bottom', eyebrow: 'Momentum', title: 'Your streak & XP', body: 'Practice daily to keep your streak alive and climb levels - it powers the leaderboard.' },
   { id: 'chrome-notifications', target: 'chrome:notifications', placement: 'bottom', eyebrow: 'Stay in the loop', title: 'Notifications', body: 'Assessment invites, results, live sessions and reminders land here.' },
   { id: 'chrome-account', target: 'chrome:account', placement: 'bottom', eyebrow: 'Your account', title: 'Profile & settings', body: 'Open your profile, switch settings, and sign out from your avatar menu.' },
   // \u2500\u2500 Sidebar walk (where every module lives) \u2500\u2500
-  { id: 'nav-dashboard', route: '/dashboard', target: nav('/dashboard'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Dashboard \u2014 your home base', body: 'Your personalized hub: recommendations, readiness, daily challenges and quick practice, all in one place.' },
+  { id: 'nav-dashboard', route: '/dashboard', target: nav('/dashboard'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Dashboard - your home base', body: 'Your personalized hub: recommendations, readiness, daily challenges and quick practice, all in one place.' },
   { id: 'nav-study-plan', target: nav('/study-plan'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Study Plan', body: 'Your fixed 90-day placement roadmap, built from your placement readiness result - one day unlocks at a time.' },
-  { id: 'nav-performance', target: nav('/performance'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Performance', body: 'Track accuracy, strengths and \u2014 at the bottom \u2014 your focus areas to work on next.' },
+  { id: 'nav-performance', target: nav('/performance'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Performance', body: 'Track accuracy, strengths and - at the bottom - your focus areas to work on next.' },
   { id: 'nav-leaderboard', target: nav('/leaderboard'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Leaderboard', body: 'See how you rank against peers on XP. Friendly competition that keeps you sharp.' },
   { id: 'nav-community', target: nav('/community'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Community', body: 'Ask questions, share tips and discuss problems with other students.' },
-  { id: 'nav-live-sessions', target: nav('/live-sessions'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Live Sessions', body: 'Join scheduled live classes and webinars \u2014 links appear here when they go live.' },
+  { id: 'nav-live-sessions', target: nav('/live-sessions'), placement: 'right', desktopOnly: true, eyebrow: 'Workspace', title: 'Live Sessions', body: 'Join scheduled live classes and webinars - links appear here when they go live.' },
   { id: 'nav-practice', target: nav('/practice'), placement: 'right', desktopOnly: true, eyebrow: 'Practice', title: 'Adaptive', body: 'Sharpen skills with targeted question sets by topic and company. Unlocks after your placement readiness test.' },
-  { id: 'nav-practice-wish', target: nav('/practice-wish'), placement: 'right', desktopOnly: true, eyebrow: 'Practice', title: 'Non-Adaptive', body: 'Build your own custom practice set \u2014 pick topics, difficulty and length exactly as you want.' },
-  { id: 'nav-mock-assessment', target: nav('/mock-assessment'), placement: 'right', desktopOnly: true, eyebrow: 'Assessment', title: 'Mock Assessment', body: 'Full-length, timed practice tests that mirror real placement exams \u2014 with detailed reports.' },
+  { id: 'nav-practice-wish', target: nav('/practice-wish'), placement: 'right', desktopOnly: true, eyebrow: 'Practice', title: 'Non-Adaptive', body: 'Build your own custom practice set - pick topics, difficulty and length exactly as you want.' },
+  { id: 'nav-mock-assessment', target: nav('/mock-assessment'), placement: 'right', desktopOnly: true, eyebrow: 'Assessment', title: 'Mock Assessment', body: 'Full-length, timed practice tests that mirror real placement exams - with detailed reports.' },
   { id: 'nav-assessments', target: nav('/assessments'), placement: 'right', desktopOnly: true, eyebrow: 'Assessment', title: 'Assessments', body: 'Official assessments scheduled by your college or the platform show up here.' },
-  { id: 'nav-resume', target: nav('/resume-builder'), placement: 'right', desktopOnly: true, eyebrow: 'Career', title: 'Resume Builder', body: 'Craft an ATS-friendly resume from proven templates \u2014 and tailor it to any job with AI.' },
+  { id: 'nav-resume', target: nav('/resume-builder'), placement: 'right', desktopOnly: true, eyebrow: 'Career', title: 'Resume Builder', body: 'Craft an ATS-friendly resume from proven templates - and tailor it to any job with AI.' },
   { id: 'nav-mock-interview', target: nav('/mock-interview'), placement: 'right', desktopOnly: true, eyebrow: 'Career', title: 'Mock Interview', body: 'Practice a realistic AI-driven interview and get instant feedback on your answers.' },
-  { id: 'nav-certificates', target: nav('/certificates'), placement: 'right', desktopOnly: true, eyebrow: 'Career', title: 'Certificates', body: 'Earn shareable, verifiable certificates as you hit XP milestones \u2014 download them as PDFs for your applications.' },
-  { id: 'nav-company', target: nav('/dashboard/company'), placement: 'right', desktopOnly: true, eyebrow: 'Explore', title: 'Company Hubs', body: 'Company-specific prep \u2014 past questions, patterns and your readiness for each target company.' },
+  { id: 'nav-certificates', target: nav('/certificates'), placement: 'right', desktopOnly: true, eyebrow: 'Career', title: 'Certificates', body: 'Earn shareable, verifiable certificates as you hit XP milestones - download them as PDFs for your applications.' },
+  { id: 'nav-company', target: nav('/dashboard/company'), placement: 'right', desktopOnly: true, eyebrow: 'Explore', title: 'Company Hubs', body: 'Company-specific prep - past questions, patterns and your readiness for each target company.' },
   { id: 'nav-shop', target: nav('/shop'), placement: 'right', desktopOnly: true, eyebrow: 'Plans', title: 'Explore Plans', body: 'Go all-access with Full Platform, or build your own plan from the companies, sections and topics you need.' },
-  { id: 'nav-upgrade', target: nav('/upgrade'), placement: 'right', desktopOnly: true, eyebrow: 'Plans', title: 'Upgrade & Renew', body: 'Manage your membership \u2014 see what you own, renew before it lapses, or add more access.' },
+  { id: 'nav-upgrade', target: nav('/upgrade'), placement: 'right', desktopOnly: true, eyebrow: 'Plans', title: 'Upgrade & Renew', body: 'Manage your membership - see what you own, renew before it lapses, or add more access.' },
   { id: 'nav-support', target: nav('/support'), placement: 'right', desktopOnly: true, eyebrow: 'Explore', title: 'Help & Support', body: "Stuck on anything? Raise a ticket here and we'll help you out." },
   // ── Dashboard drill (what's inside your home base) ──
   { id: "dash-briefing-hero", route: "/dashboard", target: "dash:briefing-hero", placement: "auto", eyebrow: "Dashboard", title: "Your AI briefing", body: "A personalized AI greeting over the aurora hero shows your level, XP, streak, focus areas, and a one-tap next action." },
@@ -198,7 +198,7 @@ export function getTour(id?: string): GuideTour | null {
 
 /**
  * Exact-route match only. A page mini-tour is offered solely on the page it
- * describes — never on a deeper detail route (e.g. /dashboard/company/[slug]),
+ * describes - never on a deeper detail route (e.g. /dashboard/company/[slug]),
  * which would otherwise resolve to the parent list tour and navigate the user
  * away from the page they asked to tour.
  */

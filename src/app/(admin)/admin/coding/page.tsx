@@ -4,7 +4,7 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { CodingAdmin } from '@/components/superadmin/CodingAdmin';
 
-/** Admin console — Coding bank (Judge0 problems). */
+/** Admin console - Coding bank (Judge0 problems). */
 export default function AdminCodingPage() {
   return (
     <div className="space-y-6">

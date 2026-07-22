@@ -46,7 +46,7 @@ function timeAgo(iso: string): string {
 }
 
 /**
- * Top-bar notifications bell — live feed (assessment lifecycle, Phase 3).
+ * Top-bar notifications bell - live feed (assessment lifecycle, Phase 3).
  * Polls the feed for the unread count and renders rows with deep links; clicking
  * a row marks it read and navigates. Guests (no session) see the empty state.
  */

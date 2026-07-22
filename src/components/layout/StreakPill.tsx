@@ -21,12 +21,12 @@ const SPARKS = [
 /**
  * Top-bar streak pill (student-only). Shows the student's current day-streak
  * with a flame that flickers while the streak is alive, and fires a celebratory
- * burst the moment the streak CONTINUES — i.e. the day count ticks up after an
+ * burst the moment the streak CONTINUES - i.e. the day count ticks up after an
  * award (Quick Aptitude, mock submit, daily quest…). Renders nothing for
  * visitors / non-students; it never invents a number.
  *
  * The endpoint is STUDENT-only, so the fetch is gated on the role/preview hint
- * cookies — an admin console must not fire doomed 403 requests.
+ * cookies - an admin console must not fire doomed 403 requests.
  */
 export function StreakPill() {
   const [streak, setStreak] = useState<number | null>(null);

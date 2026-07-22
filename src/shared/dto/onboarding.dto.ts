@@ -1,8 +1,8 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011, amended 2026-06-03).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011, amended 2026-06-03).
  * Mirrored at frontend-repo/src/shared/dto/onboarding.dto.ts.
  *
- * Onboarding wizard DTOs — steps 2 & 3 (STUDENT_JOURNEY_SPEC §1).
+ * Onboarding wizard DTOs - steps 2 & 3 (STUDENT_JOURNEY_SPEC §1).
  */
 import { Transform, Type } from 'class-transformer';
 import {
@@ -73,7 +73,7 @@ const trimList = ({ value }: { value: unknown }): unknown =>
     ? value.map((v) => (typeof v === 'string' ? v.trim() : v)).filter((v) => v !== '')
     : value;
 
-/** Profile-completion step — phone, course, year of study, skills, roles. */
+/** Profile-completion step - phone, course, year of study, skills, roles. */
 export class OnboardingProfileDto {
   @IsOptional()
   @Transform(trimString)

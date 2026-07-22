@@ -3,8 +3,8 @@ import { CERTIFICATE_TIERS, type CertificateTier } from '@/shared/certificate-ti
 /**
  * Per-tier visual theme for the certificate. The 7 tiers escalate in prestige:
  * tiers 1-3 (Learning) are light, refined and academic; tiers 4-7 (Placement)
- * are dark, premium and increasingly ornate — bronze → platinum → gold → grand
- * gold — so a higher achievement visibly reads as more prestigious.
+ * are dark, premium and increasingly ornate - bronze → platinum → gold → grand
+ * gold - so a higher achievement visibly reads as more prestigious.
  */
 export interface CertTheme extends CertificateTier {
   /** Dark premium canvas (light ink) vs light academic canvas (dark ink). */
@@ -25,7 +25,7 @@ export interface CertTheme extends CertificateTier {
   /** Frame line color + the guilloché pattern stroke. */
   frame: string;
   pattern: string;
-  /** Metal label, e.g. "Gold" — shown as the seal ribbon. */
+  /** Metal label, e.g. "Gold" - shown as the seal ribbon. */
   metalLabel: string;
 }
 

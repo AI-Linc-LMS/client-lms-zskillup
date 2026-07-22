@@ -1,8 +1,8 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at the same path in the other repo. Change both together.
  *
- * Per-company Study Material — an admin-authored Section → Topic → Item tree shown
+ * Per-company Study Material - an admin-authored Section → Topic → Item tree shown
  * inside a Company Hub, with per-student progress. Items are a VIDEO (Vimeo /
  * Google Drive / YouTube), a QUIZ (reuses the platform quiz for a topic), or an
  * ARTICLE. Sections/topics are dynamic + different for each company.
@@ -41,7 +41,7 @@ export interface StudyMaterialTopicDto {
    * within an open module the items can be done in any order.
    *
    * Server-computed and server-ENFORCED: toggleItem() refuses to complete an item inside
-   * a locked topic, so hiding the UI is not the gate — hitting the API directly fails too.
+   * a locked topic, so hiding the UI is not the gate - hitting the API directly fails too.
    */
   locked: boolean;
   /** Student-facing reason, e.g. "Complete 'Arrays' to unlock this module." null when open. */
@@ -75,7 +75,7 @@ export interface StudyMaterialProgressResultDto {
   overallProgressPct: number;
 }
 
-// ── Admin (authoring) — includes unpublished + raw editable fields ──────────
+// ── Admin (authoring) - includes unpublished + raw editable fields ──────────
 export interface AdminStudyMaterialItemDto {
   id: string;
   kind: StudyMaterialItemKind;
@@ -104,7 +104,7 @@ export interface AdminStudyMaterialSectionDto {
   topics: AdminStudyMaterialTopicDto[];
 }
 export interface AdminStudyMaterialDto {
-  /** Company scope only — '' for a section-scoped tree. */
+  /** Company scope only - '' for a section-scoped tree. */
   companyId: string;
   /** The scope ref used for display/deep-links: company slug OR section root slug. */
   companySlug: string;

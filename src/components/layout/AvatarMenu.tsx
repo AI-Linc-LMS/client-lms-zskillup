@@ -13,7 +13,7 @@ import { useAuthStore } from '@/store/auth';
 import { cn } from '@/lib/utils';
 
 /**
- * Top-bar avatar + dropdown (CLAUDE.md §4). Client leaf — TopBar itself is RSC.
+ * Top-bar avatar + dropdown (CLAUDE.md §4). Client leaf - TopBar itself is RSC.
  *
  * Initials resolve from `GET /me` (or the previewed student's name while a
  * super-admin preview is active). A SUPER_ADMIN sees a "Switch to student view"
@@ -42,7 +42,7 @@ export function AvatarMenu({ initials = '··' }: { initials?: string }) {
   const previewUser = useAuthStore((s) => s.previewUser);
   const ref = useRef<HTMLDivElement>(null);
 
-  // Premium branding — a paying student (Full Platform or any active entitlement)
+  // Premium branding - a paying student (Full Platform or any active entitlement)
   // gets a gold ring + PRO badge. Only fetch in the student zone (fails open).
   const pathname = usePathname();
   const isStudentZone = !/^\/(admin|tpo|superadmin)(\/|$)/.test(pathname ?? '');
@@ -83,7 +83,7 @@ export function AvatarMenu({ initials = '··' }: { initials?: string }) {
   const isPreviewing = previewUser !== null;
   const canPreview = !isPreviewing && sessionRole === 'SUPER_ADMIN';
   const shownInitials = isPreviewing && previewUser?.name ? initialsFrom(previewUser.name) : resolvedInitials;
-  // The Google avatar belongs to the signed-in account — while previewing a
+  // The Google avatar belongs to the signed-in account - while previewing a
   // student we suppress it and fall back to that student's initials.
   const showAvatarImg = !isPreviewing && !!avatarUrl && !imgFailed;
   const headerName = isPreviewing ? (previewUser?.name ?? 'Student') : (fullName ?? email?.split('@')[0] ?? null);
@@ -94,8 +94,8 @@ export function AvatarMenu({ initials = '··' }: { initials?: string }) {
     exitStudentPreview();
     await logout(); // logout() never throws - it clears local state in its own finally
     // Session teardown uses a HARD navigation (not router.push) on purpose: it
-    // tears down every piece of in-memory state — the access token, any cached
-    // server data, the API-client circuit-breaker latch — instead of leaving it
+    // tears down every piece of in-memory state - the access token, any cached
+    // server data, the API-client circuit-breaker latch - instead of leaving it
     // alive to race the just-cleared cookies. router.push kept the SPA state and
     // could land the user back in an authenticated view with a dead session.
     window.location.assign('/');
@@ -158,7 +158,7 @@ export function AvatarMenu({ initials = '··' }: { initials?: string }) {
         onClick={() => setOpen((v) => !v)}
         className="group relative grid size-9 place-items-center rounded-full transition-transform duration-200 hover:scale-[1.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/50 focus-visible:ring-offset-2"
       >
-        {/* gradient ring — GOLD for Premium, understated silver for free */}
+        {/* gradient ring - GOLD for Premium, understated silver for free */}
         <span
           aria-hidden
           className={cn(

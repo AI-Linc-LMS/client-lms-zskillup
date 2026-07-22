@@ -24,7 +24,7 @@ function download(name: string, csv: string) {
 /**
  * Reports (ADMIN). Platform + Company reports are ADMIN-accessible; the Financial
  * report only appears for ADMINs with the financials capability (payments is a
- * SUPER_ADMIN endpoint) — it degrades gracefully otherwise.
+ * SUPER_ADMIN endpoint) - it degrades gracefully otherwise.
  */
 export default function AdminReportsPage() {
   const [stats, setStats] = useState<AdminPlatformStats | null>(null);

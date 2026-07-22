@@ -1,5 +1,5 @@
 /**
- * Shared hero backdrop — the "AI Briefing" black canvas + golden mesh illustration.
+ * Shared hero backdrop - the "AI Briefing" black canvas + golden mesh illustration.
  * Drop it as the FIRST child of a `relative isolate overflow-hidden` section and
  * render the hero content in a sibling `relative z-10` wrapper. Keeps the dashboard
  * briefing, the assessment calendar and the study-plan heroes visually identical.

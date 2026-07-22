@@ -19,7 +19,7 @@ function shortLabel(name: string): string {
   return s;
 }
 
-/** Single-line, right-aligned tick — plain SVG <text> never wraps (unlike recharts'
+/** Single-line, right-aligned tick - plain SVG <text> never wraps (unlike recharts'
  *  default <Text>, which wrapped the long names and overlapped adjacent rows). */
 function YTick({ x, y, payload }: { x?: number; y?: number; payload?: { value?: string } }) {
   return (

@@ -138,7 +138,7 @@ function fmtXp(n: number): string {
 }
 
 /**
- * Horizontal milestone track — the 7 XP tiers as nodes with the student's live
+ * Horizontal milestone track - the 7 XP tiers as nodes with the student's live
  * position filled in. Nodes take each tier's metal colour; the next unearned one
  * is highlighted so the goal reads at a glance.
  */

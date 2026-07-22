@@ -8,7 +8,7 @@ import { ArrowRight, UserRoundPen } from 'lucide-react';
 /**
  * Dashboard nudge for students whose profile isn't fully filled in. Mirrors the
  * 8-field completion score on the Profile page (name, phone, course, year,
- * college, passout year, skills, target roles). It is NOT dismissible — the
+ * college, passout year, skills, target roles). It is NOT dismissible - the
  * banner stays on every visit until the profile is actually complete (100%), at
  * which point it disappears on its own. A complete profile powers better
  * recommendations and auto-fills the resume builder.
@@ -48,7 +48,7 @@ export function ProfileCompletionBanner() {
           setMissing(fields.filter(([, ok]) => !ok).map(([label]) => label));
         })
         .catch(() => {
-          /* not signed in / transient — render nothing */
+          /* not signed in / transient - render nothing */
         });
     };
     check();

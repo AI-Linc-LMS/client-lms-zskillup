@@ -22,7 +22,7 @@ import { CompanyReadiness } from '@/components/student/CompanyReadiness';
 import { Reveal } from '@/components/motion/primitives';
 
 /**
- * Student dashboard — redesigned (Aurora). Above the fold is the AI-personalized
+ * Student dashboard - redesigned (Aurora). Above the fold is the AI-personalized
  * briefing hero (GET /students/briefing) over the signature aurora backdrop,
  * then live animated XP/level/streak tiles, then the learning sections, each
  * revealing on scroll.

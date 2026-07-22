@@ -20,7 +20,7 @@ function fmtWhen(iso?: string): string {
   return d.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
 }
 
-/** Platform Admin — the calibration (Placement Readiness Test) gate + which
+/** Platform Admin - the calibration (Placement Readiness Test) gate + which
  *  scheduled assessment IS the calibration. */
 export default function AdminCalibrationPage() {
   const [data, setData] = useState<CalibrationAdminSettings | null>(null);
@@ -125,7 +125,7 @@ export default function AdminCalibrationPage() {
 
             <div className="mt-4 space-y-2">
               <AssessmentRow
-                label="None — no assessment is the calibration"
+                label="None - no assessment is the calibration"
                 selected={data.calibrationAssessmentId === null}
                 disabled={saving}
                 onSelect={() => void save({ calibrationAssessmentId: null })}

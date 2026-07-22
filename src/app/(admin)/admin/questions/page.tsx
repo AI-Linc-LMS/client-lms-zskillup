@@ -4,7 +4,7 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { QuestionsAdmin } from '@/components/superadmin/QuestionsAdmin';
 
-/** Admin console — Question bank (aptitude/technical MCQs, numeric, coding stems). */
+/** Admin console - Question bank (aptitude/technical MCQs, numeric, coding stems). */
 export default function AdminQuestionsPage() {
   return (
     <div className="space-y-6">

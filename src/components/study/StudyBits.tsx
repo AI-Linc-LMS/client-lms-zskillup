@@ -56,7 +56,7 @@ export function ProgressRing({
   );
 }
 
-/** One task row — a completion toggle (auto-verified or manual) + a CTA into the
+/** One task row - a completion toggle (auto-verified or manual) + a CTA into the
  *  real activity. */
 export function TaskRow({
   task,

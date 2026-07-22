@@ -49,14 +49,14 @@ type Values = {
   phone: string;
   course: string;
   yearOfStudy: number | '';
-  /** Canonical college id — what actually gets saved (sets auth.users.college_id). */
+  /** Canonical college id - what actually gets saved (sets auth.users.college_id). */
   collegeId: string;
   /** Legacy free-text name; kept only to show what a pre-dropdown user had saved. */
   collegeName: string;
   passoutYear: number | '';
   skills: string[];
   roles: string[];
-  /** Profile photo — hosted URL or a small client-resized JPEG data URL; '' = none. */
+  /** Profile photo - hosted URL or a small client-resized JPEG data URL; '' = none. */
   avatarUrl: string;
 };
 
@@ -119,7 +119,7 @@ const snap = (v: Values) =>
     roles: [...v.roles].sort(),
   });
 
-/** Profile view + edit — grouped sections, skills chip input, completion
+/** Profile view + edit - grouped sections, skills chip input, completion
  *  checklist and a sticky unsaved-changes bar. */
 export default function ProfilePage() {
   const { planStatus } = useMySubscription(true);
@@ -153,7 +153,7 @@ export default function ProfilePage() {
     try {
       set('avatarUrl', await resizeToDataUrl(file, 256));
     } catch {
-      setAvatarErr("Couldn't process that image — try another.");
+      setAvatarErr("Couldn't process that image - try another.");
     }
   };
 
@@ -203,7 +203,7 @@ export default function ProfilePage() {
   );
   const completion = Math.round((checklist.filter((c) => c.done).length / checklist.length) * 100);
   const dirty = snap(v) !== baseline;
-  // Only flag an INVALID (non-empty) phone — empty is fine until they complete the profile.
+  // Only flag an INVALID (non-empty) phone - empty is fine until they complete the profile.
   const phoneInvalid = !!v.phone.trim() && !isValidPhone(v.phone);
 
   const addSkill = (raw: string) => {
@@ -225,14 +225,14 @@ export default function ProfilePage() {
     setSaved(false);
     try {
       // Send an explicit null (not undefined) for empty fields so cleared values
-      // actually persist — undefined is dropped by JSON.stringify, which made the
+      // actually persist - undefined is dropped by JSON.stringify, which made the
       // backend skip the field and keep the old value (profile "reverted" on refresh).
       const updated = await updateMe({
         fullName: v.fullName.trim() || null,
         phone: v.phone.trim() || null,
         course: v.course.trim() || null,
         yearOfStudy: v.yearOfStudy ? Number(v.yearOfStudy) : null,
-        // The canonical id is the source of truth — the server sets auth.users
+        // The canonical id is the source of truth - the server sets auth.users
         // .college_id from it and denormalises the display name. We ALSO send the
         // name: for the "Add it / Other" free-text flow there is no collegeId, and
         // without the name the chosen college was never persisted, so the College
@@ -243,7 +243,7 @@ export default function ProfilePage() {
         passoutYear: v.passoutYear ? Number(v.passoutYear) : null,
         skills: v.skills,
         rolesInterested: v.roles,
-        // Send the photo only when it actually changed — avoids re-uploading a
+        // Send the photo only when it actually changed - avoids re-uploading a
         // ~45KB data URL on every unrelated save. '' clears it back to no photo.
         ...(v.avatarUrl !== (me?.avatarUrl ?? '') ? { avatarUrl: v.avatarUrl } : {}),
       });
@@ -611,7 +611,7 @@ function Field({ label, done, children }: { label: string; done?: boolean; child
   );
 }
 
-/** Interactive skills tag input — type + Enter/comma to add, click ✕ to remove. */
+/** Interactive skills tag input - type + Enter/comma to add, click ✕ to remove. */
 function SkillsInput({ skills, onAdd, onRemove }: { skills: string[]; onAdd: (s: string) => void; onRemove: (s: string) => void }) {
   const [draft, setDraft] = useState('');
   const commit = () => {
@@ -659,7 +659,7 @@ function SkillsInput({ skills, onAdd, onRemove }: { skills: string[]; onAdd: (s:
   );
 }
 
-/** Profile avatar — uploaded/Google photo (via avatarUrl) with an initials fallback. */
+/** Profile avatar - uploaded/Google photo (via avatarUrl) with an initials fallback. */
 function Avatar({ src, name }: { src: string | null; name: string }) {
   const [failed, setFailed] = useState(false);
   useEffect(() => setFailed(false), [src]); // a freshly-picked photo must re-attempt

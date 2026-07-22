@@ -7,7 +7,7 @@ import { ProfileLockGate } from '@/components/student/ProfileLockGate';
 import { Reveal } from '@/components/motion/primitives';
 
 /**
- * Mock Assessment (Mode 3) — student-assembled, non-adaptive, PROCTORED practice
+ * Mock Assessment (Mode 3) - student-assembled, non-adaptive, PROCTORED practice
  * assessments. Pick sections/topics, set size + duration, and run under the same
  * proctored assessment UI as the real drives. Free users get one complimentary
  * mock (enforced server-side); premium unlocks unlimited attempts.

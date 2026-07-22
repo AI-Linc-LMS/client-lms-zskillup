@@ -12,7 +12,7 @@ export interface ProfileCompletionState extends ProfileCompletion {
 /**
  * Live profile-completion state for the signed-in student. Re-checks on window
  * focus / tab visibility so completing (or clearing) a field on the profile page
- * flips gated sections without a hard reload. Fails OPEN — on a fetch error we
+ * flips gated sections without a hard reload. Fails OPEN - on a fetch error we
  * treat the profile as complete, so a transient blip never locks a legitimate
  * user out of a feature (this is a UX nudge, not a security boundary).
  */

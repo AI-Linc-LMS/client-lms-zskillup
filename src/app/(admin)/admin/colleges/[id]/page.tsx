@@ -12,7 +12,7 @@ import {
 import { CollegeCohortsManager } from '@/components/admin/CollegeCohortsManager';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 
-/** Admin console — college detail: identity, enrolment + performance, roster. */
+/** Admin console - college detail: identity, enrolment + performance, roster. */
 export default function AdminCollegeDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [detail, setDetail] = useState<AdminCollegeDetail | null>(null);

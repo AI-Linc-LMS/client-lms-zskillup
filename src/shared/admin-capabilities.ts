@@ -1,9 +1,9 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at the same path in the other repo
  * (backend-repo/src/shared & frontend-repo/src/shared). Change both together.
  *
- * Per-ADMIN capability flags (Phase 2 — Admin/Super-Admin program). These gate
+ * Per-ADMIN capability flags (Phase 2 - Admin/Super-Admin program). These gate
  * sensitive operations for the internal ADMIN role. SUPER_ADMIN implicitly holds
  * ALL capabilities; STUDENT / COLLEGE_ADMIN hold NONE. Flags are set by a
  * SUPER_ADMIN on an ADMIN account and enforced server-side by CapabilitiesGuard
@@ -13,16 +13,16 @@
  * Enforcement is per-endpoint: a capability only gates an operation once a route
  * carries `@RequireCapability(...)`. Phase 2 wires `canDeleteStudents` (DELETE
  * /admin/students/:id); the remaining flags are stored + assignable now and get
- * their guards as their features land — canBroadcast (Phase 3 broadcasts),
+ * their guards as their features land - canBroadcast (Phase 3 broadcasts),
  * canManageSubscriptions (Phase 4 subscriptions), canViewFinancials (Phase 7).
  *
- * BASELINE vs GRANTABLE: some capabilities are inherent to the ADMIN role — every
+ * BASELINE vs GRANTABLE: some capabilities are inherent to the ADMIN role - every
  * ADMIN holds them without a per-account grant (see ADMIN_BASELINE_CAPABILITIES).
  * `canBroadcast` is baseline: sending in-app notifications is a routine admin op,
  * so all ADMINs get it. The sensitive flags (delete students, subscriptions,
  * financials) stay per-account and are granted by a SUPER_ADMIN. Baseline is
  * applied centrally in `effectiveCapabilities`, which the CapabilitiesGuard and
- * `GET /me` both read — so the server and the UI never disagree.
+ * `GET /me` both read - so the server and the UI never disagree.
  */
 
 /** The four capability flags, keyed by their camelCase wire name. */
@@ -37,7 +37,7 @@ export interface AdminCapabilities {
   canViewFinancials: boolean;
 }
 
-/** Ordered list of capability keys (stable — drives UI toggles + iteration). */
+/** Ordered list of capability keys (stable - drives UI toggles + iteration). */
 export const ADMIN_CAPABILITY_KEYS = [
   'canDeleteStudents',
   'canManageSubscriptions',
@@ -71,7 +71,7 @@ export const ADMIN_CAPABILITY_COLUMNS: Record<AdminCapabilityKey, string> = {
   canViewFinancials: 'can_view_financials',
 };
 
-/** All-false — the default for a freshly-created ADMIN (and every non-admin). */
+/** All-false - the default for a freshly-created ADMIN (and every non-admin). */
 export const EMPTY_ADMIN_CAPABILITIES: AdminCapabilities = {
   canDeleteStudents: false,
   canManageSubscriptions: false,
@@ -79,7 +79,7 @@ export const EMPTY_ADMIN_CAPABILITIES: AdminCapabilities = {
   canViewFinancials: false,
 };
 
-/** All-true — the effective set for a SUPER_ADMIN. */
+/** All-true - the effective set for a SUPER_ADMIN. */
 export const ALL_ADMIN_CAPABILITIES: AdminCapabilities = {
   canDeleteStudents: true,
   canManageSubscriptions: true,
@@ -88,7 +88,7 @@ export const ALL_ADMIN_CAPABILITIES: AdminCapabilities = {
 };
 
 /**
- * Capabilities inherent to the ADMIN role — every ADMIN holds these regardless of
+ * Capabilities inherent to the ADMIN role - every ADMIN holds these regardless of
  * per-account flags, so they are NOT shown as grantable toggles. Broadcasting is a
  * routine admin engagement op, so all admins can do it. The remaining (sensitive)
  * capabilities stay per-account grants assigned by a SUPER_ADMIN.
@@ -103,7 +103,7 @@ export const isBaselineCapability = (key: AdminCapabilityKey): boolean =>
  * Resolve the EFFECTIVE capabilities for a principal. SUPER_ADMIN always holds
  * all; ADMIN holds every BASELINE capability plus whatever grantable flags are set
  * on the account; everyone else holds none. `role` is compared as a string so this
- * stays enum-import-free. This is the single source of truth — both the server
+ * stays enum-import-free. This is the single source of truth - both the server
  * guard and `GET /me` resolve through it.
  */
 export function effectiveCapabilities(

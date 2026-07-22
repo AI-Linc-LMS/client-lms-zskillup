@@ -17,13 +17,13 @@ function roleHome(role: string | null): string {
  * Mobile menu for the PUBLIC (logged-out) navbar. The public landing header's
  * primary links are `hidden lg:flex` and "Log in" is `hidden sm:block`, and the
  * public pages do not use the AppShell (so the authenticated MobileNav drawer
- * doesn't cover them). This hamburger — shown only below `lg` — exposes those
+ * doesn't cover them). This hamburger - shown only below `lg` - exposes those
  * links on phones. Self-contained client island dropped into the server-rendered
  * header.
  */
 // Shared with the desktop nav in the landing header. This list used to be hand-copied
 // here, which is how "Companies" and "Prepare" ended up pointing at the same route in
-// BOTH navbars — fix one, miss the other. One list now.
+// BOTH navbars - fix one, miss the other. One list now.
 const LINKS = LANDING_NAV;
 
 export function PublicMobileMenu() {

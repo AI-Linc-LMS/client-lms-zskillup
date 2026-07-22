@@ -13,7 +13,7 @@ import { Modal } from '@/components/ui/Modal';
  * layout, so it overlays every student page. Shows while the student still needs
  * the calibration; "Give later" snoozes it for the session (they can explore as a
  * free user), and it re-appears every time they land back on the dashboard until
- * they take it — matching the requested behaviour.
+ * they take it - matching the requested behaviour.
  */
 export function CalibrationPrompt() {
   const { loading, required, mockTestId } = useCalibrationStatus();
@@ -30,7 +30,7 @@ export function CalibrationPrompt() {
 
   // Guide-first: hold the calibration prompt until the platform guide has been
   // seen or dismissed (and never while the tour is actively running), so a
-  // brand-new student is oriented before being asked — one overlay at a time.
+  // brand-new student is oriented before being asked - one overlay at a time.
   if (loading || guideLoading || !guideSeen || guideActive || !required || snoozed) return null;
 
   const start = () => {

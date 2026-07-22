@@ -41,7 +41,7 @@ export function AtsPanel({ data, onClose }: { data: ResumeData; onClose: () => v
   const [aiError, setAiError] = useState<string | null>(null);
 
   /** The single headline score. The AI review reads the actual content (relevance,
-   *  impact, role fit) so it supersedes the structural heuristic once it has run —
+   *  impact, role fit) so it supersedes the structural heuristic once it has run -
    *  otherwise the panel showed two contradictory "ATS scores" side by side. */
   const headline = ai?.overallScore ?? result.overall;
 

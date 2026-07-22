@@ -16,7 +16,7 @@ import { Reveal, Stagger, StaggerItem, AnimatedNumber } from '@/components/motio
 import { getTopicAccuracy, type ApiTopicAccuracy } from '@/lib/api/practice';
 
 /**
- * Live per-topic accuracy panels (Sprint 3 exit — "reports show accuracy").
+ * Live per-topic accuracy panels (Sprint 3 exit - "reports show accuracy").
  * "Weak topics" = accuracy under 60% with at least 3 attempts (weakest first);
  * "Continue where you left off" = the most recently practised topics that
  * AREN'T already flagged weak (deduped, so the two panels never show the same
@@ -24,7 +24,7 @@ import { getTopicAccuracy, type ApiTopicAccuracy } from '@/lib/api/practice';
  * the panels render an honest empty state instead of invented numbers.
  */
 
-/** Mastery band derived purely from a topic's accuracy — drives all coloring. */
+/** Mastery band derived purely from a topic's accuracy - drives all coloring. */
 type Band = 'strong' | 'developing' | 'weak';
 
 interface BandTheme {
@@ -276,7 +276,7 @@ export function TopicAccuracyPanels() {
   // "Continue where you left off" = most recently practised (rows already arrive
   // ordered by last-attempt DESC), but EXCLUDING topics already surfaced in the
   // weak panel above. Without this dedupe a student whose recent practice is all
-  // on weak topics sees the exact same three cards twice — the two panels only
+  // on weak topics sees the exact same three cards twice - the two panels only
   // differed by CTA label. Now they're complementary; if nothing distinct
   // remains the section hides itself (guard below).
   const weakSlugs = new Set(weak.map((r) => r.topicSlug));

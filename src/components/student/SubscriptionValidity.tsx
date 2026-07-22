@@ -32,7 +32,7 @@ const fmtDate = (iso: string | null) =>
 /**
  * Subscriptions card for the dashboard right rail (above the skill profile).
  * Lists every active plan with the time left + expiry date, and in the final
- * week surfaces a renewal nudge — the in-app companion to the SUBSCRIPTION
+ * week surfaces a renewal nudge - the in-app companion to the SUBSCRIPTION
  * notification the backend materialises a week before each plan ends. Renders
  * nothing for free-tier students, to keep the rail uncluttered.
  */
@@ -66,7 +66,7 @@ export function SubscriptionValidity() {
 
   return (
     <div className="overflow-hidden rounded-3xl border border-[#ffc42d]/45 bg-white shadow-sm ring-1 ring-[#ffc42d]/10">
-      {/* Premium banner — this card only renders for paying members, so it doubles
+      {/* Premium banner - this card only renders for paying members, so it doubles
           as the dashboard's Premium status marker. */}
       <div className="flex items-center gap-2 bg-gradient-to-r from-[#fff6e0] via-[#fffaf0] to-white px-4 py-2.5">
         <span className="grid size-6 shrink-0 place-items-center rounded-full bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717] shadow-[0_2px_8px_-2px_rgba(245,180,0,0.7)]">

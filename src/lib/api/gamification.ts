@@ -9,7 +9,7 @@ export interface ApiStudentStats {
   coins: number;
   currentStreakDays: number;
   longestStreakDays: number;
-  /** XP accrued within the current level — used for the XP bar fill percentage. */
+  /** XP accrued within the current level - used for the XP bar fill percentage. */
   xpIntoLevel: number;
   /** Full XP span of the current level. */
   xpForNextLevel: number;
@@ -77,7 +77,7 @@ export interface ApiLeaderboardEntry {
 }
 
 export interface ApiLeaderboard {
-  /** Asked for "My College" but no college is set on the account — the board is
+  /** Asked for "My College" but no college is set on the account - the board is
    *  empty on purpose (it used to silently fall back to the NATIONAL rankings). */
   needsCollege?: boolean;
   entries: ApiLeaderboardEntry[];
@@ -98,7 +98,7 @@ export async function getLeaderboard(
   // Default posture (NOT 'public'): a signed-in caller's token is attached (with
   // the pre-emptive refresh on a cold load) so the backend can resolve "your
   // rank". The route is @Public, so a logged-out visitor still gets the board
-  // (no 401, no redirect) — they just have no personal rank.
+  // (no 401, no redirect) - they just have no personal rank.
   const params = new URLSearchParams({ scope, limit: String(limit) });
   if (scope === 'company' && opts?.companyId) params.set('companyId', opts.companyId);
   if (scope === 'city' && opts?.city) params.set('city', opts.city);
@@ -106,7 +106,7 @@ export async function getLeaderboard(
   return res.data;
 }
 
-/** Cities that have ranked students — options for the leaderboard City filter. */
+/** Cities that have ranked students - options for the leaderboard City filter. */
 export async function getLeaderboardCities(): Promise<string[]> {
   const res = await apiClient.get<string[]>('/api/v1/students/leaderboard/cities');
   return res.data;

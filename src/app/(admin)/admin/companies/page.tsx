@@ -4,7 +4,7 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { CompaniesAdmin } from '@/components/superadmin/CompaniesAdmin';
 
-/** Admin console — Companies (recruiter hubs). Same tooling as Super Admin. */
+/** Admin console - Companies (recruiter hubs). Same tooling as Super Admin. */
 export default function AdminCompaniesPage() {
   return (
     <div className="space-y-6">

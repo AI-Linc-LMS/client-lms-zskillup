@@ -5,7 +5,7 @@ import { getMySubscription } from '@/lib/api/payments';
 import type { EntitlementDto, MySubscriptionDto } from '@/shared/dto/payments.dto';
 import { EntitlementScope } from '@/shared/enums';
 
-/** Which "tier" the student is in — drives the Upgrade & Renew module + nav. */
+/** Which "tier" the student is in - drives the Upgrade & Renew module + nav. */
 export type PlanStatus = 'none' | 'custom' | 'platform';
 
 export interface MySubscriptionState {
@@ -17,7 +17,7 @@ export interface MySubscriptionState {
   active: EntitlementDto[];
   planStatus: PlanStatus;
   /** Career tools (Mock Interview, Resume Builder) are bundled with a Company
-   *  hub or the Full Platform plan — this is the "entitled" half of the gate.
+   *  hub or the Full Platform plan - this is the "entitled" half of the gate.
    *  The free-run allowance is layered on top by the feature-specific gate. */
   careerToolsEntitled: boolean;
   /** Server-reported paywall switch. While false the whole paywall is dormant
@@ -50,7 +50,7 @@ function derive(sub: MySubscriptionDto): Omit<MySubscriptionState, 'loading' | '
 /**
  * Live subscription/entitlement status for the signed-in student. One fetch,
  * re-checked on window focus / tab visibility so a purchase made in the checkout
- * widget (or another tab) reflects here on return. **Fails OPEN** — a fetch error
+ * widget (or another tab) reflects here on return. **Fails OPEN** - a fetch error
  * leaves `planStatus: 'none'` and `paywallEnabled: false`, so a transient blip
  * never walls a user out of a feature.
  */

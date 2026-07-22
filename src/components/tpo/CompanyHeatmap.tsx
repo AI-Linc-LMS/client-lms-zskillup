@@ -1,7 +1,7 @@
 import type { TpoCompanyHeatmapRow } from '@/shared';
 
 /**
- * Company Readiness heatmap — rows = companies, columns = readiness bands. Each
+ * Company Readiness heatmap - rows = companies, columns = readiness bands. Each
  * cell is coloured by its band hue with opacity scaled to the company's largest
  * band, so the dominant readiness bucket per company reads at a glance. Pure CSS.
  */

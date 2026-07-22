@@ -1,28 +1,28 @@
 /**
  * Landing-page content config. Everything the public homepage shows that isn't
  * brand copy lives here so it can be tuned in ONE place (no values hardcoded in
- * the JSX). CTA destinations are centralized too — the old page pointed several
+ * the JSX). CTA destinations are centralized too - the old page pointed several
  * CTAs at `/prepare`, which is a dead redirect to the company hubs, so "today's
  * focus" and "coverage" wrongly dumped users on the Companies tab.
  */
 
 /** Where the marketing CTAs should go (public visitors are logged out). */
 export const LANDING_HREFS = {
-  /** "Prepare" — the practice picker: sections, topics and coding. Deliberately NOT the
+  /** "Prepare" - the practice picker: sections, topics and coding. Deliberately NOT the
    *  company hubs: `prepare` and `companies` both pointed at /dashboard/company, so the
    *  navbar shipped two links that went to the same page. */
   prepare: '/practice',
-  /** "Start a session" — practice needs an account, so start = sign up. */
+  /** "Start a session" - practice needs an account, so start = sign up. */
   start: '/signup',
-  /** "Browse the catalog" of topics — full catalog unlocks after sign-up. */
+  /** "Browse the catalog" of topics - full catalog unlocks after sign-up. */
   catalog: '/signup',
-  /** "Companies" — the company hubs (company-specific tracks). */
+  /** "Companies" - the company hubs (company-specific tracks). */
   companies: '/dashboard/company',
 } as const;
 
 /**
  * The public navbar's primary links. ONE list, consumed by both the desktop nav in the
- * landing header and the PublicMobileMenu hamburger — the mobile menu used to hand-copy
+ * landing header and the PublicMobileMenu hamburger - the mobile menu used to hand-copy
  * these, so the two could (and did) drift apart.
  */
 export const LANDING_NAV = [

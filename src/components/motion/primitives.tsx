@@ -6,7 +6,7 @@ import { animate, motion, useReducedMotion, type Variants } from 'framer-motion'
 /**
  * Shared motion + Aurora primitives for the redesigned student app. Pure
  * framer-motion; honors prefers-reduced-motion. These are the building blocks
- * every redesigned route composes — scroll reveals, staggered grids, animated
+ * every redesigned route composes - scroll reveals, staggered grids, animated
  * counters, and the signature aurora gradient backdrop.
  */
 
@@ -109,7 +109,7 @@ export function AnimatedNumber({
 }
 
 /**
- * Signature animated aurora backdrop — slow-drifting gradient meshes over a deep
+ * Signature animated aurora backdrop - slow-drifting gradient meshes over a deep
  * navy canvas. Absolutely positioned; place inside a `relative` container.
  */
 export function AuroraBackground({ className = '' }: { className?: string }) {

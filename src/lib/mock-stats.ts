@@ -1,6 +1,6 @@
 import type { ApiMockAttemptHistory } from '@/lib/api/mocks';
 
-/** Aggregated view of a student's mock history — computed ONCE, reused by the
+/** Aggregated view of a student's mock history - computed ONCE, reused by the
  *  dashboard hero, KPI row, and mock-tests history (no per-component Math.max). */
 export interface MockStats {
   taken: number;

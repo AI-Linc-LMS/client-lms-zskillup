@@ -8,7 +8,7 @@ import { getRoadmapDay, toggleRoadmapTask, type StudyDayDto } from '@/lib/api/ro
 import { PHASE_META, unlockCopy } from './study-ui';
 import { TaskRow } from './StudyBits';
 
-/** Slide-over detail for a single roadmap day — its tasks, togglable when unlocked. */
+/** Slide-over detail for a single roadmap day - its tasks, togglable when unlocked. */
 export function DayDrawer({
   dayNumber,
   onClose,

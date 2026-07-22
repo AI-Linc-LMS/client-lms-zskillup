@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
 import { getMyRegistrations, registerForCompany } from '@/lib/api/registrations';
 
-/** Dashboard companies — browse + register for a company assessment in one tap. */
+/** Dashboard companies - browse + register for a company assessment in one tap. */
 export function DashboardCompanies() {
   const [companies, setCompanies] = useState<ApiCompany[] | null>(null);
   const [registered, setRegistered] = useState<Set<string>>(new Set());
@@ -120,7 +120,7 @@ export function DashboardCompanies() {
                 ) : null;
               })()}
 
-              {/* CTA — pinned to the bottom (mt-auto) so every card's Register button
+              {/* CTA - pinned to the bottom (mt-auto) so every card's Register button
                   aligns across the row regardless of how the badge/feature rows wrap. */}
               <div className="relative mt-auto pt-3">
                 {isReg ? (

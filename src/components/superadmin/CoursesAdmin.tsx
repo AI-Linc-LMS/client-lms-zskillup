@@ -37,16 +37,16 @@ import {
 } from '@/lib/api/admin';
 
 /**
- * Superadmin course-authoring console (Sprint 2 — Courses / Modules / Lessons).
+ * Superadmin course-authoring console (Sprint 2 - Courses / Modules / Lessons).
  * Drives `/api/v1/admin/courses`, `/admin/modules`, `/admin/lessons`. A course
  * is authored as a DRAFT, given a curriculum of ordered modules and lessons,
- * then published — at which point it surfaces in the public catalog and the
+ * then published - at which point it surfaces in the public catalog and the
  * student dashboard KPI row. Mirrors the question-bank / mock-test consoles.
  *
  * Three views, one component (the established console shape):
- *   list   — every course (drafts included) with content depth + publish state
- *   form   — course metadata (create / edit)
- *   manage — the curriculum: inline module + lesson editors
+ *   list   - every course (drafts included) with content depth + publish state
+ *   form   - course metadata (create / edit)
+ *   manage - the curriculum: inline module + lesson editors
  */
 
 const CATEGORY_OPTIONS: CourseCategory[] = [

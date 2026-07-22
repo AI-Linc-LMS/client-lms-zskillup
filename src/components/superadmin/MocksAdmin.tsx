@@ -22,7 +22,7 @@ import {
 } from '@/lib/api/admin';
 
 /**
- * Superadmin mock-test console (Sprint 4 — "Mock test definitions"). Drives
+ * Superadmin mock-test console (Sprint 4 - "Mock test definitions"). Drives
  * `/api/v1/admin/mocks`. The admin authors a timed mock from a title, duration,
  * passing score and a set of PUBLISHED questions; the student engine serves and
  * grades it. Mirrors the question-bank console pattern.

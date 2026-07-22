@@ -23,7 +23,7 @@ import { CodingBlock } from './CodingBlock';
  * No lock affordances on chips/sections: every topic, section and company links
  * straight into the runner (like the Company Hub → Practice Quiz tab). The
  * free-tier meter (first N questions per scope free) is enforced INSIDE the
- * runner, which raises the PaywallCard only once the allowance is spent — so a
+ * runner, which raises the PaywallCard only once the allowance is spent - so a
  * padlock up-front (which reads as "completely inaccessible") is wrong. Ownership
  * is still surfaced positively via the "Included" pill + "Your access" panel.
  */
@@ -79,7 +79,7 @@ export function PracticePicker({
   const codingOwned = hasPlatform || ownedSections.has('coding');
 
   // Coding topics come from the coding bank (Judge0 problems), a separate system
-  // from the MCQ taxonomy — fetched client-side (guaranteed auth token) like the
+  // from the MCQ taxonomy - fetched client-side (guaranteed auth token) like the
   // custom-mock builder does.
   const [codingTopics, setCodingTopics] = useState<CodingTopic[]>([]);
   useEffect(() => {
@@ -252,7 +252,7 @@ function AccessPanel({
   setOnlyMine: (v: boolean) => void;
 }) {
   const ownsSomething = ownedSectionCount + ownedTopicCount + ownedCompanyCount > 0;
-  // Nothing to show if the paywall is off and the student owns nothing — the picker
+  // Nothing to show if the paywall is off and the student owns nothing - the picker
   // is fully open, so an access panel would just be noise.
   if (!hasPlatform && !gating && !ownsSomething) return null;
 
@@ -276,10 +276,10 @@ function AccessPanel({
           <p className="text-sm font-bold text-navy">Your access</p>
           <p className="text-xs text-slate-600">
             {hasPlatform
-              ? 'Full platform — every section, topic and company hub is unlocked.'
+              ? 'Full platform - every section, topic and company hub is unlocked.'
               : ownsSomething
                 ? `Unlocked: ${parts.join(' · ')}. First questions in every topic are free.`
-                : 'Free plan — your first questions in every topic are free.'}
+                : 'Free plan - your first questions in every topic are free.'}
           </p>
         </div>
       </div>
@@ -315,7 +315,7 @@ function AccessPanel({
 }
 
 /** One MCQ section: a section-wide CTA plus a chip per topic. Chips + the CTA link
- *  straight into the runner — no locks — and an "Included" pill positively marks a
+ *  straight into the runner - no locks - and an "Included" pill positively marks a
  *  section the student owns. The free-tier allowance is metered in the runner. */
 function SectionBlock({
   root,

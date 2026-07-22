@@ -234,7 +234,7 @@ export default function CommunityPostPage({ params }: { params: Promise<{ id: st
   );
 }
 
-/** Delete button classes — pushed to the far right only when no pin button precedes it. */
+/** Delete button classes - pushed to the far right only when no pin button precedes it. */
 function cnMod(hasPinBefore: boolean): string {
   return `${hasPinBefore ? '' : 'ml-auto '}inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-semibold text-slate-500 hover:bg-red-50 hover:text-red-500`;
 }

@@ -1,5 +1,5 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at backend-repo/src/shared/dto/calibration.dto.ts.
  *
  * The one-time calibration assessment: whether a student must take it, and their
@@ -24,9 +24,9 @@ export interface CalibrationStatusDto {
   required: boolean;
   /** Whether they have completed it. */
   completed: boolean;
-  /** Global feature switch (CALIBRATION_ENABLED) — the whole gate is off when false. */
+  /** Global feature switch (CALIBRATION_ENABLED) - the whole gate is off when false. */
   enabled: boolean;
-  /** The calibration mock's id — launch via `/dashboard/quiz?mock=<id>` (null if unseeded). */
+  /** The calibration mock's id - launch via `/dashboard/quiz?mock=<id>` (null if unseeded). */
   mockTestId: string | null;
   scheduledAssessmentId: string | null;
   /** Per-section result once completed (null otherwise). */
@@ -40,7 +40,7 @@ export interface CalibrationSectionResultDto {
   score: number;
 }
 
-/** The recommendation-centric calibration results — powers the post-assessment
+/** The recommendation-centric calibration results - powers the post-assessment
  *  results page (and mirrors the dashboard recommendations). */
 export interface CalibrationResultsDto {
   calibrated: boolean;

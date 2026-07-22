@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import type { ReadinessBand, TpoStudentRow } from '@/shared';
 
 /**
- * Performance × Participation scatter — pure SVG, no chart lib. Each dot is a
+ * Performance × Participation scatter - pure SVG, no chart lib. Each dot is a
  * student (x = participation volume, y = readiness). Two dividers split the plane
  * into the four quadrants the TPO acts on; click a dot to open the drill-down.
  */

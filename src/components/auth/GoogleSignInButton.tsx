@@ -6,7 +6,7 @@ import { Loader2 } from 'lucide-react';
 import { loginWithGoogle, type LoginResult } from '@/lib/api/auth';
 import { ApiRequestError } from '@/lib/api/types';
 
-// GIS type shim — full types available via @types/google.accounts if needed
+// GIS type shim - full types available via @types/google.accounts if needed
 declare global {
   interface Window {
     google?: {
@@ -63,7 +63,7 @@ export function GoogleSignInButton({ onSuccess, onError, text = 'signin_with' }:
     onErrorRef.current = onError;
   });
 
-  // Become "ready" as soon as window.google exists — whether the script loads now
+  // Become "ready" as soon as window.google exists - whether the script loads now
   // OR was already loaded on a previous mount/navigation. next/script's `onLoad`
   // only fires on the FIRST download and never again for the de-duped cached
   // script, which is why the button vanished on every soft navigation. So we also
@@ -168,11 +168,11 @@ export function GoogleSignInButton({ onSuccess, onError, text = 'signin_with' }:
             <Loader2 className="size-5 animate-spin text-slate-400" />
           </div>
         )}
-        {/* Genuine failure (ad-blocker / offline): don't leave dead space — point
+        {/* Genuine failure (ad-blocker / offline): don't leave dead space - point
             the user at the email form below. */}
         {failed && (
           <p className="rounded-md border border-[var(--color-line)] bg-white px-3 py-2.5 text-center text-xs text-[var(--color-text-muted)]">
-            Google sign-in is unavailable right now — please sign in with email below.
+            Google sign-in is unavailable right now - please sign in with email below.
           </p>
         )}
         <div ref={containerRef} className="w-full" aria-label="Sign in with Google" />

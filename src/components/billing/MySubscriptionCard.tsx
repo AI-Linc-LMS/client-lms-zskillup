@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 /**
  * Compact "My Subscription" card for the profile aside. Shows full-platform
  * status (with days left) or a count of active unlocks, and always links to
- * /upgrade. Fails silent — renders the upsell state if the fetch errors.
+ * /upgrade. Fails silent - renders the upsell state if the fetch errors.
  */
 export function MySubscriptionCard() {
   const [sub, setSub] = useState<MySubscriptionDto | null>(null);

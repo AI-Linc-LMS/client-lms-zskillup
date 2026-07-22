@@ -1,13 +1,13 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011, amended 2026-06-03).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011, amended 2026-06-03).
  * Mirrored at frontend-repo/src/shared/dto/admin-questions.dto.ts.
  *
- * Sprint 3 — Superadmin question-bank CRUD.
+ * Sprint 3 - Superadmin question-bank CRUD.
  *
  * The service layer enforces shape rules that don't belong in field-level
  * validation: at least 2 options, at least 1 correct option for MCQ /
  * MULTI_SELECT types; NUMERIC + CODING types must have an empty options array.
- * (Those checks live in `AdminQuestionsService` and stay there — they need
+ * (Those checks live in `AdminQuestionsService` and stay there - they need
  * access to the `type` discriminant across multiple fields.)
  */
 import { Type } from 'class-transformer';
@@ -55,7 +55,7 @@ export class AdminCreateQuestionDto {
   @MaxLength(5000)
   stem!: string;
 
-  /** Optional diagram/figure shown with the stem — a URL or a compressed data-URL
+  /** Optional diagram/figure shown with the stem - a URL or a compressed data-URL
    *  (for Data-Interpretation charts / Venn diagrams). */
   @IsOptional()
   @IsString()
@@ -93,7 +93,7 @@ export class AdminCreateQuestionDto {
   options: AdminQuestionOptionInputDto[] = [];
 }
 
-/** Patch — all fields optional; supplying `options` replaces the whole set. */
+/** Patch - all fields optional; supplying `options` replaces the whole set. */
 export class AdminUpdateQuestionDto {
   @IsOptional()
   @IsEnum(QuestionType)
@@ -150,7 +150,7 @@ export class AdminUpdateQuestionDto {
 }
 
 /**
- * Bulk question import (Sprint 3 — superadmin). The admin pastes / uploads a CSV
+ * Bulk question import (Sprint 3 - superadmin). The admin pastes / uploads a CSV
  * with a header row. Columns (case-insensitive, order-independent):
  *
  *   stem, type, difficulty, topic, company, hint, explanation,

@@ -31,7 +31,7 @@ function useCountUp(target: number, ms = 1100) {
   return n;
 }
 
-/* Compact band-coloured readiness gauge — tuned for a dark navy hero. */
+/* Compact band-coloured readiness gauge - tuned for a dark navy hero. */
 function HeroGauge({ score, size = 140 }: { score: number; size?: number }) {
   const r = size / 2 - 11;
   const circ = 2 * Math.PI * r;
@@ -70,7 +70,7 @@ function HeroGauge({ score, size = 140 }: { score: number; size?: number }) {
   );
 }
 
-/* Compact band-coloured stat bar for a component score — dark-hero variant. */
+/* Compact band-coloured stat bar for a component score - dark-hero variant. */
 function StatBar({ label, pct, icon: Icon, active, delay = 0 }: { label: string; pct: number; icon: LucideIcon; active: boolean; delay?: number }) {
   const c = active ? tone(pct) : 'rgba(255,255,255,0.28)';
   const n = useCountUp(pct);
@@ -111,7 +111,7 @@ export function ReadinessPanel({
   tour,
 }: {
   compact?: boolean;
-  /** Which route this instance renders on — scopes the guide `data-tour` anchors
+  /** Which route this instance renders on - scopes the guide `data-tour` anchors
    *  so the shared panel doesn't collide across /dashboard and /performance. */
   tour?: 'dashboard' | 'performance';
 }) {
@@ -123,7 +123,7 @@ export function ReadinessPanel({
   useEffect(() => {
     getReadiness().then(setData).catch(() => setErr(true));
     // Published companies (the live company-hub set) are the source of truth for
-    // which readiness cards to show — not whatever slugs the readiness rollup saw.
+    // which readiness cards to show - not whatever slugs the readiness rollup saw.
     listCompanies()
       .then((cs: ApiCompany[]) => setCompanies(cs))
       .catch(() => {});
@@ -240,7 +240,7 @@ export function ReadinessPanel({
           {data.topics.length ? (
             <div data-tour={tour === 'performance' ? 'perf:topic-mastery' : undefined}>
               <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Topic mastery · accuracy</p>
-              {/* Explicit: these %s are ACCURACY (correct ÷ attempted), not completion —
+              {/* Explicit: these %s are ACCURACY (correct ÷ attempted), not completion -
                   a topic can read 100% off a single correct answer. Prevents the
                   "why is Number System 100% completed?" confusion. */}
               <p className="mb-3 mt-1 text-[11px] leading-snug text-slate-400">

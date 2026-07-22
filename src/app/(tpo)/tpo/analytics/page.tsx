@@ -111,7 +111,7 @@ export default function StudentAnalyticsPage() {
         icon={TrendingUp}
         eyebrow="Placement Office"
         title="Student Analytics"
-        description="Performance mapped against participation for every student — find who's engaged, who's coasting, and who needs coaching."
+        description="Performance mapped against participation for every student - find who's engaged, who's coasting, and who needs coaching."
         actions={
           <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white/80 ring-1 ring-inset ring-white/15">
             {cohortLabel}

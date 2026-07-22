@@ -4,7 +4,7 @@
  * Used for question diagrams (Data-Interpretation charts, Venn diagrams) which
  * are stored inline as data-URLs on the question. Unlike the square-cropping
  * avatar resizer, this keeps the whole figure and only bounds the longest edge,
- * so a chart is never cropped. Returns a JPEG data-URL (small) — or PNG when the
+ * so a chart is never cropped. Returns a JPEG data-URL (small) - or PNG when the
  * source is a PNG with transparency-ish name, to keep diagram lines crisp.
  */
 export async function resizeImageToDataUrl(
@@ -34,7 +34,7 @@ export async function resizeImageToDataUrl(
   canvas.width = w;
   canvas.height = h;
   const ctx = canvas.getContext('2d');
-  if (!ctx) return dataUrl; // no canvas — fall back to the original
+  if (!ctx) return dataUrl; // no canvas - fall back to the original
   // White matte so a transparent PNG chart doesn't turn black on JPEG encode.
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, w, h);

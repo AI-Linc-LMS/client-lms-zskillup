@@ -75,7 +75,7 @@ export default function SkillGapAnalyticsPage() {
         icon={Target}
         eyebrow="Placement Office"
         title="Skill Gap Analytics"
-        description="The weakest aptitude, coding, and interview areas across your cohort — where clinics move the needle."
+        description="The weakest aptitude, coding, and interview areas across your cohort - where clinics move the needle."
         actions={
           <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white/80 ring-1 ring-inset ring-white/15">
             {cohortLabel}

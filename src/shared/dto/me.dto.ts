@@ -1,5 +1,5 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011, amended 2026-06-03).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011, amended 2026-06-03).
  * Mirrored at frontend-repo/src/shared/dto/me.dto.ts.
  *
  * Patch the authenticated user's mutable profile fields. Email + role + status

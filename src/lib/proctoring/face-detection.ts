@@ -7,14 +7,14 @@ import { ObjectProctor, type DetectedObjects } from '@/lib/proctoring/object-det
 
 /**
  * Camera-intelligence layer for proctoring (Phase 1). A focused BlazeFace face
- * analyzer that runs over a video element the caller already owns — the
+ * analyzer that runs over a video element the caller already owns - the
  * `useProctoring` controller opens the camera; this only watches it. Detection
  * heuristics (obstruction, off-centre, size, smoothing, warm-up) are ported from
  * the ai-linc engine, minus its camera/stream management.
  *
  * Face-box-centre "looking away" is a known-weak heuristic (it can't see gaze or
  * head-down); Phase 2 augments it with real head-pose. Everything here is
- * client-side and advisory — the server-stamped log is the tamper-resistant record.
+ * client-side and advisory - the server-stamped log is the tamper-resistant record.
  */
 
 export type FaceViolationType =
@@ -261,11 +261,11 @@ export class FaceProctor {
       await this.applyObjectDetection(v, result);
       this.callbacks.onFrame?.(result);
     } catch {
-      // WebGL/model warm-up glitches are common on first frames — never map to NO_FACE.
+      // WebGL/model warm-up glitches are common on first frames - never map to NO_FACE.
     }
   }
 
-  /** Every Nth tick, scan the frame for a phone / book / second person — cheating
+  /** Every Nth tick, scan the frame for a phone / book / second person - cheating
    *  aids the face models can't see. Heaviest model, so the slowest cadence. */
   private async applyObjectDetection(video: HTMLVideoElement, result: FaceFrameResult): Promise<void> {
     if (!this.objectProctor) return;
@@ -290,7 +290,7 @@ export class FaceProctor {
   /**
    * Every Nth tick, use FaceMesh head-pose to catch looking-away/down that the
    * face-box heuristic misses. First it medians a neutral baseline (the student is
-   * looking at the screen reading instructions), then flags sustained deviation —
+   * looking at the screen reading instructions), then flags sustained deviation -
    * chiefly the VERTICAL axis (reading notes/a phone below the camera), the case
    * BlazeFace is blind to. Runs single-face only; failures fall back silently.
    */
@@ -326,7 +326,7 @@ export class FaceProctor {
 
     // Identity continuity: a sustained large deviation from the enrolled facial
     // signature suggests a different person took the seat. Lightweight (reuses the
-    // FaceMesh call) — not biometric-grade; the streak requirement kills noise.
+    // FaceMesh call) - not biometric-grade; the streak requirement kills noise.
     if (this.baseSignature && pose.signature.length === this.baseSignature.length) {
       let sq = 0;
       for (let i = 0; i < pose.signature.length; i++) {
@@ -424,7 +424,7 @@ export class FaceProctor {
     return out;
   }
 
-  /** Mode over the last N frames — kills 0/1/0/1 flicker on noisy webcams. */
+  /** Mode over the last N frames - kills 0/1/0/1 flicker on noisy webcams. */
   private smoothFaceCount(rawCount: number): number {
     const n = this.config.smoothFrameCount;
     this.faceCountBuffer.push(rawCount);
@@ -459,7 +459,7 @@ function v(
   return { type, message, severity, confidence };
 }
 
-/** POOR_LIGHTING is informational only — it never escalates the status. */
+/** POOR_LIGHTING is informational only - it never escalates the status. */
 function statusOf(violations: FaceViolation[]): FaceStatus {
   const significant = violations.filter((x) => x.type !== 'POOR_LIGHTING');
   if (significant.some((x) => x.severity === 'high')) return 'VIOLATION';

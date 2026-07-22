@@ -1,7 +1,7 @@
 import type { ApiTopic } from '@/lib/api/catalog';
 
 /**
- * Section-catalog derivation — the Sectional Hubs analog of the company catalog.
+ * Section-catalog derivation - the Sectional Hubs analog of the company catalog.
  *
  * There is NO "section" table: a section IS a root topic (`parentId === null`) in
  * the bank, and the taxonomy is Section (root) → Topic → Subtopic (leaf, where the
@@ -9,7 +9,7 @@ import type { ApiTopic } from '@/lib/api/catalog';
  * nested tree the hubs render, keyed by the same root slugs `section-meta.ts` styles.
  *
  * Kept data-only (no lucide/React imports) so it is safe to call from server
- * components — the presentation layer maps slug → icon/accent via `sectionMetaFor`.
+ * components - the presentation layer maps slug → icon/accent via `sectionMetaFor`.
  */
 
 /** Roots we never surface as a section (AI-experiment buckets, not part of the model). */
@@ -37,7 +37,7 @@ export interface SectionTopic {
 }
 
 /**
- * What kind of section this is — drives the practice link + ownership scope:
+ * What kind of section this is - drives the practice link + ownership scope:
  * - `mcq`         standard bank-root section (adaptive MCQ practice)
  * - `coding`      synthetic section over the Judge0 coding bank (practice at /coding)
  * - `soft-skills` an interview-prep root (topic tree, content authored as study material)
@@ -109,7 +109,7 @@ export function buildSections(topics: ApiTopic[]): SectionRoot[] {
         topics: topicNodes,
       };
     })
-    // A real section is a curated root WITH child topics — not a flat AI-experiment
+    // A real section is a curated root WITH child topics - not a flat AI-experiment
     // bucket (arrays-ai, lr-ai, strings-ai …) that happens to hold a handful of
     // questions but no topic tree. Mirrors the practice picker's children filter, so
     // the two never disagree on what counts as a section.
@@ -118,7 +118,7 @@ export function buildSections(topics: ApiTopic[]): SectionRoot[] {
   return roots.sort((a, b) => a.order - b.order);
 }
 
-/** Build the whole tree for ONE root slug, ignoring the question-count filter — used
+/** Build the whole tree for ONE root slug, ignoring the question-count filter - used
  *  for the Soft Skills / Interview-Prep root, which has topics but no MCQ questions
  *  yet (its content lives as authored study material). Returns null if not found. */
 export function buildSoftSkillsSection(topics: ApiTopic[], name = 'Soft Skills & Interview Prep'): SectionRoot | null {

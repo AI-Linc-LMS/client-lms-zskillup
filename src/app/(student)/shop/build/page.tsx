@@ -54,7 +54,7 @@ const WHY_LONGER = [
 ];
 
 /**
- * Build Your Own Plan — à-la-carte customiser (Explore Plans → "Start
+ * Build Your Own Plan - à-la-carte customiser (Explore Plans → "Start
  * Customizing"). Pick companies, whole sections and individual sub-topics, each
  * at its own validity. Selections are staged locally in "Your Selections" and
  * committed to the shared cart on "Add to Cart".
@@ -69,7 +69,7 @@ export default function BuildYourOwnPage() {
   const [owned, setOwned] = useState<Owned>({ platform: false, scopes: new Set() });
   const [loading, setLoading] = useState(true);
 
-  // Staging — keyed by scope+ref (period lives on the value). Committed to cart on submit.
+  // Staging - keyed by scope+ref (period lives on the value). Committed to cart on submit.
   const [staged, setStaged] = useState<Record<string, CartItem>>({});
   const [companyPeriod, setCompanyPeriod] = useState<BillingPeriod>(BillingPeriod.ANNUAL);
   const [sectionPeriod, setSectionPeriod] = useState<BillingPeriod>(BillingPeriod.ANNUAL);
@@ -147,7 +147,7 @@ export default function BuildYourOwnPage() {
       .filter((s) => s.topics.length > 0);
     // Coding is a separate Judge0 system (not in assessments.topics), so inject it
     // synthetically like SectionsExplorer does. Buyable as a SECTION (scopeRef 'coding')
-    // or per coding-topic (scopeRef 'coding:<tag>') — both validated server-side by
+    // or per coding-topic (scopeRef 'coding:<tag>') - both validated server-side by
     // ScopeCatalogService. Appended AFTER the empty-topics filter so it always shows.
     if (codingTopics.length) {
       const codingSection: ApiTopic = {
@@ -579,7 +579,7 @@ function Step({
  * The company's real logo, with a graceful fall back to the generic building glyph.
  *
  * These cards rendered `<Building2 />` for every company, so "Select a Company" was five
- * identical grey icons — you had to read the label to tell TCS from Infosys. `logoUrl` was
+ * identical grey icons - you had to read the label to tell TCS from Infosys. `logoUrl` was
  * on the API payload the whole time; CompanyCard has always used it. Same treatment here:
  * lazy-loaded, and any missing or broken URL falls back rather than showing a dead image.
  */

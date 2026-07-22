@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 
-// Student "motion as default" — a subtle fade+rise on mount; motion owns the
+// Student "motion as default" - a subtle fade+rise on mount; motion owns the
 // transform so `whileHover` can lift without fighting a Tailwind hover class.
 const CARD_MOTION = {
   initial: { opacity: 0, y: 12 },
@@ -12,7 +12,7 @@ const CARD_MOTION = {
 };
 
 /**
- * Presentational building blocks for the admin / super-admin consoles — pure
+ * Presentational building blocks for the admin / super-admin consoles - pure
  * SVG/CSS, no charting dependency. Each piece is responsive (viewBox + width:100%)
  * and themed off the STUDENT design system: navy(=ink) + brand gold `#f5b400`,
  * rounded cards, borders-not-shadows, and the signature aurora top-hairline on KPI
@@ -46,7 +46,7 @@ export function StatCard({
       whileHover={{ y: -4 }}
       className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5"
     >
-      {/* aurora top-hairline — the student KPI signature */}
+      {/* aurora top-hairline - the student KPI signature */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-1"

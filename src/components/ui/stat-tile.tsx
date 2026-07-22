@@ -1,6 +1,6 @@
 /**
  * Small value-over-label stat tile (§4.4(a) standard surface) used by session
- * summaries and reports — one definition, no per-screen copies.
+ * summaries and reports - one definition, no per-screen copies.
  */
 export function StatTile({ label, value }: { label: string; value: string }) {
   return (

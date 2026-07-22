@@ -1,9 +1,9 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at the same path in the other repo. Change both together.
  *
  * Resume Builder persistence. `data` is the full editor state (ResumeData) stored
- * opaquely as JSON — the shape lives in the frontend resume module; the backend
+ * opaquely as JSON - the shape lives in the frontend resume module; the backend
  * only guarantees it is an object.
  */
 import { IsObject, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';

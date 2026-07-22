@@ -30,7 +30,7 @@ const QUICK_ACTIONS: QuickAction[] = [
 ];
 
 /**
- * Placement Office console sidebar — brand lockup, the 11-module nav (grouped),
+ * Placement Office console sidebar - brand lockup, the 11-module nav (grouped),
  * a Quick Actions block, and a persisted collapse toggle. Dedicated to the /tpo
  * route group (NOT the shared student/admin Sidebar), so its bespoke chrome
  * carries no regression risk to the other consoles.

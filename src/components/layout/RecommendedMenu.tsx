@@ -125,7 +125,7 @@ export function RecommendedMenu() {
                   <Loader2 className="size-5 animate-spin text-slate-400" />
                 </div>
               ) : !calibrated ? (
-                /* Unlock teaser — before the first calibration assessment. */
+                /* Unlock teaser - before the first calibration assessment. */
                 <div className="px-4 py-5 text-center">
                   <span className="mx-auto grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717] shadow-sm">
                     <Lock className="size-5" />

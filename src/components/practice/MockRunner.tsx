@@ -58,13 +58,13 @@ import { ProctorOverlay } from '@/components/proctoring/ProctorOverlay';
 import { CalibrationResults } from '@/components/student/CalibrationResults';
 
 /**
- * Mock-test runner — the Sprint 4 timed assessment surface (Zone B → focused
+ * Mock-test runner - the Sprint 4 timed assessment surface (Zone B → focused
  * full-screen, no AppShell). Three phases:
  *
- *   intro    — premium dark pre-start with the mock's real metadata.
- *   running  — one question at a time, a server-authoritative countdown
+ *   intro    - premium dark pre-start with the mock's real metadata.
+ *   running  - one question at a time, a server-authoritative countdown
  *              (driven by `expiresAt`), answers persisted as they're chosen.
- *   report   — server-graded score, percentile, pass/fail, topic breakdown,
+ *   report   - server-graded score, percentile, pass/fail, topic breakdown,
  *              and a per-question review with the answer key + explanations.
  *
  * The clock is NOT trusted client-side: the deadline comes from the backend and
@@ -77,7 +77,7 @@ type Phase = 'intro' | 'running' | 'report';
 export function MockRunner({ mockId, proctored = false }: { mockId: string; proctored?: boolean }) {
   // Ship the live proctoring batch to the server-stamped log. The attempt id
   // isn't known until beginAttempt resolves, so read it from a ref the callback
-  // closes over (keeps the callback stable). Failures are swallowed — proctoring
+  // closes over (keeps the callback stable). Failures are swallowed - proctoring
   // is advisory and must never break the exam.
   const attemptIdRef = useRef<string | null>(null);
   const onProctorReport = useCallback((batch: { violations: ReportedViolation[] }) => {
@@ -89,7 +89,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
   const [mock, setMock] = useState<ApiMockSummary | null>(null);
   const [start, setStart] = useState<ApiMockStart | null>(null);
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
-  // Coding answers (keyed by problemId) — recorded server-side on submit, mirrored
+  // Coding answers (keyed by problemId) - recorded server-side on submit, mirrored
   // here so the navigator + answered count reflect coding questions too.
   const [codingResults, setCodingResults] = useState<Record<string, ApiMockSavedCoding>>({});
   const [idx, setIdx] = useState(0);
@@ -146,7 +146,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
       ackedRef.current = new Map();
       for (const a of s.savedAnswers) {
         hydrated[a.questionId] = a.selectedOptionIds;
-        // Resumed answers are already on the server — no need to re-flush them.
+        // Resumed answers are already on the server - no need to re-flush them.
         ackedRef.current.set(a.questionId, JSON.stringify(a.selectedOptionIds));
       }
       setStart(s);
@@ -161,7 +161,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
       setPhase('running');
     } catch (err) {
       // Free-mock allowance spent (backend 403 PAYWALL). Convert the block into an
-      // upgrade prompt rather than a red error string — this is the moment that converts,
+      // upgrade prompt rather than a red error string - this is the moment that converts,
       // and "Could not start the mock test" tells the student nothing about why.
       if (err instanceof ApiRequestError && err.code === 'PAYWALL') {
         setUpgradeMsg(err.message);
@@ -222,7 +222,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
     return () => window.clearInterval(handle);
   }, [phase, finishAttempt]);
 
-  // Safety net: once the report is shown the assessment is over — release the
+  // Safety net: once the report is shown the assessment is over - release the
   // camera/mic even if the submit-path stop() was somehow missed (so the laptop
   // camera light never lingers after results). `stop` is a stable callback.
   const stopProctor = proctor.stop;
@@ -354,7 +354,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
   const stats = [
     { icon: BookOpen, label: 'Questions', value: String(m.totalQuestions) },
     { icon: Timer, label: 'Duration', value: `${m.durationMinutes} min` },
-    // A baseline has no pass/fail — show what it spans instead.
+    // A baseline has no pass/fail - show what it spans instead.
     isCalibration
       ? { icon: Layers, label: 'Sections', value: '4' }
       : { icon: Star, label: 'Pass mark', value: `${m.passingScore}%` },
@@ -646,7 +646,7 @@ function MockRunningView({
         JSON.stringify({ marked: [...marked], visited: [...visited] }),
       );
     } catch {
-      /* storage disabled/full — non-fatal, palette just won't survive a reload */
+      /* storage disabled/full - non-fatal, palette just won't survive a reload */
     }
   }, [marked, visited, start.attemptId]);
 
@@ -801,7 +801,7 @@ function MockRunningView({
         className={cn(
           'mx-auto grid w-full max-w-6xl flex-1 gap-5 px-4 pb-6 pt-6 sm:px-6 lg:grid-cols-[1fr_17rem]',
           // The camera bar now floats in the bottom-left corner, so no top clearance
-          // is needed — it never overlaps the section tabs or the question palette.
+          // is needed - it never overlaps the section tabs or the question palette.
         )}
       >
         {/* Question card (left/main) */}

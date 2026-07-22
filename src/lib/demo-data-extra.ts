@@ -1,5 +1,5 @@
 /**
- * SHARED DEMO DATA — leaderboard, roadmap, and homepage sections.
+ * SHARED DEMO DATA - leaderboard, roadmap, and homepage sections.
  * All display-only; client never computes scores, XP, or ranks.
  */
 
@@ -153,7 +153,7 @@ export interface HomepageTrack {
   enrolled: string;
   hours: number;
   accent: string;
-  /** Company card type — drives the explorer's Service/Product/Consulting filter. */
+  /** Company card type - drives the explorer's Service/Product/Consulting filter. */
   type: 'SERVICE' | 'PRODUCT' | 'CONSULTING';
   /** Coming-soon: the hub isn't live yet. Renders locked (no "Prepare now", no link)
    *  on both the landing tracks and the Explore grid. */
@@ -161,16 +161,16 @@ export interface HomepageTrack {
 }
 
 /**
- * The featured company set — the SINGLE ordered source of truth for BOTH the landing-page
+ * The featured company set - the SINGLE ordered source of truth for BOTH the landing-page
  * tracks and the Explore grid. Order is the display order on both surfaces.
  *
  * The first five are live hubs (published in the catalog) and render as normal tracks. The
- * last four are `locked` — their hubs aren't built yet, so they show a "Coming soon" card
+ * last four are `locked` - their hubs aren't built yet, so they show a "Coming soon" card
  * and don't navigate. "LTIMindtree" and "HCLTech" are the current brand names for the DB's
  * `mindtree` / `hcl` rows (unpublished); the slug is unchanged, only the display name.
  *
- * A locked entry auto-unlocks the moment its catalog row is published — both surfaces treat
- * "present in GET /companies" as the unlock signal — so this list won't need editing then.
+ * A locked entry auto-unlocks the moment its catalog row is published - both surfaces treat
+ * "present in GET /companies" as the unlock signal - so this list won't need editing then.
  */
 export const HOMEPAGE_FEATURED_TRACKS: HomepageTrack[] = [
   { slug: 'accenture', badge: 'Most enrolled', company: 'Accenture', type: 'CONSULTING', logoSrc: `${wiki}/c/cd/Accenture.svg`, logoAlt: 'Accenture logo', description: 'Cognitive, Technical & English tracks with adaptive section timing.', title: 'Accenture - Complete preparation', mcqs: '2.4k+', rounds: 5, rating: 4.5, enrolled: '12k+', hours: 10, accent: 'from-violet-600 to-indigo-700' },
@@ -203,7 +203,7 @@ export const HOMEPAGE_TESTIMONIALS = [
 ];
 
 // Priority recruiter set shown in the landing "Aligned with the hiring patterns
-// of" ticker (decorative only — not clickable). Logos verified live on Wikimedia.
+// of" ticker (decorative only - not clickable). Logos verified live on Wikimedia.
 export const HOMEPAGE_COMPANY_LOGOS = [
   { name: 'Accenture',     slug: 'accenture',     logoSrc: `${wiki}/c/cd/Accenture.svg`, logoAlt: 'Accenture logo' },
   { name: 'TCS',           slug: 'tcs',           logoSrc: `${wiki}/0/0e/Tata_Consultancy_Services_old_logo.svg`, logoAlt: 'TCS logo' },

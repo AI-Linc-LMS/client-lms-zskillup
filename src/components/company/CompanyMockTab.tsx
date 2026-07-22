@@ -6,7 +6,7 @@ import { ArrowRight, Brain, CalendarClock, Clock, ShieldCheck, Sparkles, Trophy,
 import type { HubContent } from '@/lib/hub-data';
 import { getCompanyScheduledAssessments, type ApiScheduledAssessment } from '@/lib/api/scheduling';
 
-/** Full Mock Assessment tab — real: this company's scheduled proctored drives +
+/** Full Mock Assessment tab - real: this company's scheduled proctored drives +
  *  a path into the adaptive (non-proctored) Mock Quiz. */
 export function CompanyMockTab({
   content,

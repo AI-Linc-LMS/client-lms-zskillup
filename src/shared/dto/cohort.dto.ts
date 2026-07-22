@@ -1,5 +1,5 @@
 /**
- * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at frontend-repo/src/shared/dto/cohort.dto.ts.
  *
  * Cohorts (Batch 4). A cohort groups a college's students. TPO creates/lists

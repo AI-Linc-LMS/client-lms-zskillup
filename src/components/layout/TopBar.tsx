@@ -21,7 +21,7 @@ import { CartButton } from '@/components/billing/CartProvider';
  * bar driven by their sidebar instead.
  *
  * Aurora redesign: a glassy sticky bar with a hairline border, a faint gradient
- * sheen and an aurora accent line along the bottom edge for depth — never a flat
+ * sheen and an aurora accent line along the bottom edge for depth - never a flat
  * shadow alone. Stays `h-14` and remains the positioning context so the Explore
  * mega-menu (anchored at `top-14`, `left-0 right-0`) keeps aligning to it.
  */
@@ -57,7 +57,7 @@ export function TopBar() {
         <>
           {/* Primary nav */}
           <nav className="relative z-10 hidden items-center gap-1 lg:flex" aria-label="Primary">
-            {/* "Companies" removed — the Explore menu already surfaces company hubs. */}
+            {/* "Companies" removed - the Explore menu already surfaces company hubs. */}
             <ExploreMenu />
             <RecommendedMenu />
           </nav>

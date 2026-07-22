@@ -1,11 +1,11 @@
 import type { StatusTone } from '@/components/student/StatusPill';
 
 /**
- * Canonical accent maps (frontend/CLAUDE §4.8/§4.11) — ONE definition each so
+ * Canonical accent maps (frontend/CLAUDE §4.8/§4.11) - ONE definition each so
  * a difficulty or category can never render two different treatments.
  */
 
-/** Difficulty as inline pill classes (quiz/practice surfaces — §4.11 ring style). */
+/** Difficulty as inline pill classes (quiz/practice surfaces - §4.11 ring style). */
 export const DIFFICULTY_RING: Record<string, string> = {
   EASY: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
   MEDIUM: 'bg-amber-50 text-amber-700 ring-amber-200',

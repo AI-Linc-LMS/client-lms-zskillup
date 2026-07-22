@@ -11,7 +11,7 @@ import { navForPath, workspaceLabelForPath } from './nav-config';
 /**
  * Mobile workspace navigation. The persistent {@link Sidebar} is `hidden md:flex`
  * and the TopBar primary nav is `hidden lg:flex`, so below `md` there is no way to
- * navigate the app — this hamburger + slide-over drawer fills that gap. It reuses
+ * navigate the app - this hamburger + slide-over drawer fills that gap. It reuses
  * the same route-aware {@link navForPath} config as the sidebar, so student,
  * super-admin and TPO workspaces all get the correct menu. Rendered inside the
  * TopBar and only visible below `md`.
@@ -92,7 +92,7 @@ export function MobileNav() {
               <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5" aria-label="Workspace">
                 {sections.map((section) => (
                   <div key={section.heading}>
-                    {/* Standalone sections (Plans & Support) drop the group heading —
+                    {/* Standalone sections (Plans & Support) drop the group heading -
                         each item stands on its own as an individual nav link. */}
                     {section.standalone ? null : (
                       <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">

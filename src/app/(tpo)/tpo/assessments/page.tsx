@@ -82,7 +82,7 @@ export default function AssessmentCenterPage() {
   const wantsCoding = (Number(form.codingCount) || 0) > 0;
   const wantsMcq = (Number(form.mcqCount) || 0) > 0;
 
-  // Coding topics (primary tags) for the picker — scoped to the chosen company in
+  // Coding topics (primary tags) for the picker - scoped to the chosen company in
   // company mode, else the whole coding bank (sectional mode). Refetch on scope change.
   // Uses the TPO-scoped endpoint (the student /mocks/coding-topics is STUDENT-only,
   // so a COLLEGE_ADMIN got a 403 and the list silently came back empty).
@@ -143,7 +143,7 @@ export default function AssessmentCenterPage() {
     const mcq = Number(form.mcqCount) || 0;
     const coding = Number(form.codingCount) || 0;
     if (mcq + coding < 1) {
-      toast.error('Add at least one round — turn on the MCQ round, the coding round, or both');
+      toast.error('Add at least one round - turn on the MCQ round, the coding round, or both');
       return;
     }
     if (form.mode === 'COMPANY' && !form.companySlug.trim()) {
@@ -268,7 +268,7 @@ export default function AssessmentCenterPage() {
               </span>
             </label>
           )}
-          {/* Assessment rounds — MCQ and/or a technical coding round. Coding used to be
+          {/* Assessment rounds - MCQ and/or a technical coding round. Coding used to be
               hidden behind the count field defaulting to 0; make it a first-class,
               discoverable choice for BOTH sectional and company-wise drives. */}
           <div className="sm:col-span-2 lg:col-span-3">
@@ -304,7 +304,7 @@ export default function AssessmentCenterPage() {
               </button>
             </div>
             <p className="mt-1.5 text-[11px] text-slate-500">
-              Run MCQs, a technical coding round, or both — a coding round samples problems from the
+              Run MCQs, a technical coding round, or both - a coding round samples problems from the
               {form.mode === 'COMPANY' ? " company's" : ''} coding bank (Judge0-graded), for both sectional and company-wise drives.
             </p>
           </div>
@@ -320,7 +320,7 @@ export default function AssessmentCenterPage() {
             </div>
           )}
 
-          {/* Coding topics — only when the drive includes coding questions. Scopes
+          {/* Coding topics - only when the drive includes coding questions. Scopes
               which coding topics (tags) the coding problems are sampled from. */}
           {wantsCoding && (
             <div className="sm:col-span-2 lg:col-span-3">

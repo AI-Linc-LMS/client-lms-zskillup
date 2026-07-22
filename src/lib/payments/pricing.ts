@@ -3,10 +3,10 @@ import { BillingPeriod, EntitlementScope, PriceTier } from '@/shared/enums';
 
 /**
  * The three billing periods in display order.
- * - `label`  — the plan-tier name ("Monthly").
- * - `short`  — a per-period price suffix ("/mo").
- * - `months` — the duration-first label the revamped billing UI uses ("1 Month").
- * - `multiple` — months of coverage, used to annualise a period for Save-% math.
+ * - `label`  - the plan-tier name ("Monthly").
+ * - `short`  - a per-period price suffix ("/mo").
+ * - `months` - the duration-first label the revamped billing UI uses ("1 Month").
+ * - `multiple` - months of coverage, used to annualise a period for Save-% math.
  */
 export const PERIODS: {
   period: BillingPeriod;
@@ -71,7 +71,7 @@ export function periodSavingsPct(
   return pct > 0 ? pct : null;
 }
 
-/** Per-month equivalent price (paise) for a period — for "Just ₹X/month" copy. */
+/** Per-month equivalent price (paise) for a period - for "Just ₹X/month" copy. */
 export function perMonthCents(entry: PriceBookEntryDto | undefined, period: BillingPeriod): number | null {
   if (!entry) return null;
   return Math.round(entry.amountCents / periodMultiple(period));

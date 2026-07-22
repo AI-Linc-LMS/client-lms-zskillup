@@ -31,8 +31,8 @@ const DIFF_TONE: Record<string, string> = {
 
 /**
  * Superadmin coding-bank console. Lists every coding problem with its company
- * tag, provenance (source + year), Judge0 verification status, and — what this
- * view is really for — its SOURCE CITATION (clickable link to where a PYQ came
+ * tag, provenance (source + year), Judge0 verification status, and - what this
+ * view is really for - its SOURCE CITATION (clickable link to where a PYQ came
  * from). The list is small (~hundreds) so filtering is client-side.
  */
 export function CodingAdmin() {

@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { loadCompanyNameMap } from '@/lib/company-name-map';
 
 /**
- * "Previous year question" tag — shows which company(ies) and year(s) a question
+ * "Previous year question" tag - shows which company(ies) and year(s) a question
  * was asked in, so a student knows it's a real PYQ while practising. For an
  * AI-generated pattern-based question (no company/year tag) it instead shows a
  * "SIMILAR PATTERN" chip. Renders nothing for a plain untagged question.

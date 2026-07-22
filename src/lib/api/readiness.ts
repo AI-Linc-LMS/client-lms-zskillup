@@ -26,7 +26,7 @@ export interface TopicReadiness {
   level: string;
 }
 /**
- * Honest headline counts. Do NOT derive these from `companies[]` — that array is
+ * Honest headline counts. Do NOT derive these from `companies[]` - that array is
  * keyed off the many-to-many company tags (a question is tagged to ~2.8 companies),
  * so summing its `questionsAttempted` double-counts (~4.5x) and any shared tag makes
  * a company look "practised". The server computes these from single-valued sources.
@@ -52,7 +52,7 @@ export async function getReadiness(): Promise<Readiness> {
   return res.data;
 }
 
-/** Performance vs participation scatter — your dot among anonymized college peers. */
+/** Performance vs participation scatter - your dot among anonymized college peers. */
 export async function getMyPerformanceScatter(): Promise<PerformanceParticipationDto> {
   return (await apiClient.get<PerformanceParticipationDto>('/api/v1/me/readiness/scatter')).data;
 }

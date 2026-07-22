@@ -10,7 +10,7 @@ import type { StudyDayNodeDto as DayNode, StudyPhase } from '@/shared/dto/study-
 const PHASES: StudyPhase[] = ['foundation', 'practice', 'interview'];
 
 /**
- * The 90-step roadmap as a vertical journey — phase-banded, with a coloured spine.
+ * The 90-step roadmap as a vertical journey - phase-banded, with a coloured spine.
  * Completed days glow in their phase colour with a check, today pulses orange with
  * a flag, unlocked past days invite catch-up, and future days sit in soft locked
  * cards with an unlock countdown. Weekly checkpoints get a star.

@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 import type { StudyMaterialItemDto } from '@/lib/api/study-material';
 
 
-/** A native-feel video theatre — branded chrome around the provider embed, with
+/** A native-feel video theatre - branded chrome around the provider embed, with
  *  fullscreen + theater modes, a watch-session timer, prev/next playlist navigation
  *  through the topic's videos, keyboard shortcuts, and a "mark as watched" control. */
 function Player({
@@ -97,7 +97,7 @@ function Player({
           </span>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-bold">{item.title}</p>
-            {/* Playlist position only — the storage provider (Google Drive/Vimeo)
+            {/* Playlist position only - the storage provider (Google Drive/Vimeo)
                 is an implementation detail and is deliberately not surfaced. */}
             {playlist.length > 1 ? (
               <p className="text-[11px] text-white/50">Lesson {index + 1} of {playlist.length}</p>

@@ -175,13 +175,13 @@ function PremiumView({
   const score = readiness?.overall.score ?? null;
 
   // Use the server's honest counts. These used to be derived from `companies[]`,
-  // which is keyed off the MANY-TO-MANY company tags — so "Questions Attempted"
+  // which is keyed off the MANY-TO-MANY company tags - so "Questions Attempted"
   // summed the same question once per tagged company (~4.5x too high) and
   // "Companies Practised" counted every company that merely shared a tag (15 for a
   // student who had actually practised 3). Fall back to the true topic-sum, which
   // is exact because subtopic_id is single-valued.
   // `companiesPractised` has no honest client-side fallback (the only other signal
-  // is the tag-inflated companies[]), so show "—" rather than a false 0 on a server
+  // is the tag-inflated companies[]), so show "-" rather than a false 0 on a server
   // that predates `stats`. The other two DO have exact fallbacks.
   const companies = readiness?.stats?.companiesPractised ?? null;
   const topics = readiness?.stats?.topicsPractised ?? readiness?.topics.length ?? 0;
@@ -192,8 +192,8 @@ function PremiumView({
 
   // The billing history renders at the BOTTOM of the page, so merely toggling it
   // looked like nothing happened ("Manage Subscription" / "Payment History" read as
-  // dead). Open it AND scroll to it. The scroll runs in an effect — i.e. AFTER the
-  // DOM commit — because doing it on a timer raced the render: the ref could still
+  // dead). Open it AND scroll to it. The scroll runs in an effect - i.e. AFTER the
+  // DOM commit - because doing it on a timer raced the render: the ref could still
   // be null and the scroll would silently no-op.
   const historyRef = useRef<HTMLDivElement | null>(null);
   const scrollToHistory = () =>
@@ -364,7 +364,7 @@ function CustomPlanView({
   const topics = granular.filter((e) => e.scopeType === EntitlementScope.TOPIC);
   const maxDays = granular.reduce((n, e) => Math.max(n, e.daysRemaining ?? 0), 0);
 
-  // Same as the premium view — reveal the history AND scroll to it (in an effect,
+  // Same as the premium view - reveal the history AND scroll to it (in an effect,
   // after the DOM commit, so the ref is guaranteed to exist).
   const historyRef = useRef<HTMLDivElement | null>(null);
   const scrollToHistory = () =>

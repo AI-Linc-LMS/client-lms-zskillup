@@ -182,7 +182,7 @@ export function MockHistory({ scope = 'all' }: { scope?: 'all' | 'custom' | 'ass
   );
 }
 
-/** A single past-result card — score ring/bar, percentile, status badge, date,
+/** A single past-result card - score ring/bar, percentile, status badge, date,
  *  deep-linking to the persisted server-graded report. */
 function ResultRow({ row }: { row: ApiMockAttemptHistory }) {
   const expired = row.status === 'EXPIRED';

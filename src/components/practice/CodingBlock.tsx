@@ -4,7 +4,7 @@ import type { CodingTopic } from '@/lib/api/mocks';
 import { ACCENT_CLASS, CODING_META } from './section-meta';
 
 /**
- * The "Coding" section block — a chip per coding topic that deep-links to
+ * The "Coding" section block - a chip per coding topic that deep-links to
  * `/coding?topic=`, optionally preceded by a "Practice all coding" CTA.
  *
  * Shared by the Practice picker AND Practice-as-wish, so the CTA is a prop rather
@@ -41,7 +41,7 @@ export function CodingBlock({
         {showPracticeAll && (
           // bg-navy, matching "Practice whole section" on every other section block. The
           // per-section accent (sky / violet / orange / emerald / indigo) dresses the icon
-          // tile and the topic chips — never the CTA. Coding was leaking its indigo accent
+          // tile and the topic chips - never the CTA. Coding was leaking its indigo accent
           // into the button, so it was the only section with a differently-coloured CTA.
           <Link
             href="/coding"

@@ -28,7 +28,7 @@ function p95(values: number[]): number {
 
 const mean = (arr: number[]) => (arr.length ? arr.reduce((s, x) => s + x, 0) / arr.length : 0);
 
-/** Percentile rank of `val` within `arr` — share of the cohort at or below it. */
+/** Percentile rank of `val` within `arr` - share of the cohort at or below it. */
 const pctRank = (val: number, arr: number[]) =>
   arr.length ? Math.round((arr.filter((a) => a <= val).length / arr.length) * 100) : 0;
 
@@ -68,7 +68,7 @@ function pathToTop(perf: number, part: number): string | null {
 }
 
 /**
- * Performance × participation quadrant for the student — your dot (orange) among
+ * Performance × participation quadrant for the student - your dot (orange) among
  * anonymized peers (grey), with the cohort-average marker, your percentile on each
  * axis, how the cohort splits across the four zones, and the concrete gap to the
  * top zone. A responsive HTML/CSS chart (not a stretched SVG) so every label stays
@@ -125,7 +125,7 @@ export function PerformanceParticipation() {
   }, [data]);
 
   // Piecewise x: 0→PART_HIGH maps to the left half, PART_HIGH→partMax to the right
-  // half — the effort divider is pinned at the midpoint (50%) regardless of spread.
+  // half - the effort divider is pinned at the midpoint (50%) regardless of spread.
   const xNorm = (p: number) =>
     p <= PART_HIGH
       ? (p / PART_HIGH) * KNEE

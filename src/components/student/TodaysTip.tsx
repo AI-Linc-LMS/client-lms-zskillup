@@ -34,7 +34,7 @@ const ICONS: Record<string, ComponentType<LucideProps>> = {
 };
 
 /**
- * Today's Tip — a small, warm dashboard card with an admin-authored placement
+ * Today's Tip - a small, warm dashboard card with an admin-authored placement
  * tip, rotated per student per day (GET /students/today-tip). Aurora styling:
  * amber-tinted glass over a faint glow, with an optional CTA.
  */

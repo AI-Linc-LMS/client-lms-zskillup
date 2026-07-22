@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
  * shown as a blurred teaser with a lock card + "Complete profile" CTA; at 100%
  * (and for non-students) the children render untouched. Re-checks on focus, so
  * finishing the profile in another tab unlocks this one on return. UI-level gate
- * — the onboarding nudge, not a security boundary.
+ * - the onboarding nudge, not a security boundary.
  */
 export function ProfileLockGate({
   feature,

@@ -16,9 +16,9 @@ import {
 import { notifyXpUpdated } from '@/lib/xp-events';
 
 /**
- * Quick Aptitude — a compact, interactive dashboard warm-up. Pulls a small
+ * Quick Aptitude - a compact, interactive dashboard warm-up. Pulls a small
  * random set from the question bank (GET /practice/quick-aptitude), runs one
- * question at a time inline, and grades each via the normal practice attempt —
+ * question at a time inline, and grades each via the normal practice attempt -
  * which awards XP + streak server-side (shown as a little +XP pop).
  */
 export function QuickAptitude() {
@@ -69,7 +69,7 @@ export function QuickAptitude() {
       setResult(r);
       if (r.gamification) notifyXpUpdated();
     } catch {
-      /* swallow — keep the widget resilient */
+      /* swallow - keep the widget resilient */
     } finally {
       setSubmitting(false);
     }

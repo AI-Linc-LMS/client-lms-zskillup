@@ -10,7 +10,7 @@ const BAND_LABELS = ['<40', '40–54', '55–69', '70+']; // readiness bands, al
 const BAND_RGB = ['220,38,38', '245,158,11', '2,132,199', '5,150,105'];
 
 /**
- * Company Readiness heatmap — rows are companies, columns are readiness bands,
+ * Company Readiness heatmap - rows are companies, columns are readiness bands,
  * each cell a colour-scaled count of students. Reads /tpo/company-heatmap.
  */
 export function CompanyHeatmap({ cohortId }: { cohortId?: string }) {

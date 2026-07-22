@@ -21,7 +21,7 @@ export function OverviewTopicGrid({ slug }: { slug: string }) {
   if (!prep) {
     return <div className="grid h-28 place-items-center rounded-2xl border border-slate-200 bg-white"><Loader2 className="size-5 animate-spin text-slate-500" /></div>;
   }
-  // Only surface topics that actually have previous-year questions — this grid
+  // Only surface topics that actually have previous-year questions - this grid
   // links straight to the PYQ page, so a topic with zero PYQs would dead-end on
   // an empty state.
   const topics = prep.topics.filter((t) => (t.pyqCount ?? 0) > 0).sort((a, b) => b.pyqCount - a.pyqCount);

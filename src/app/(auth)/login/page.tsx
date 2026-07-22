@@ -74,8 +74,8 @@ function LoginForm() {
   // older session cookie that expired, or a hint cleared out-of-band) lands here
   // even though the HttpOnly refresh session is still valid. Instead of stranding
   // an authenticated user on a login form (and looping every time they click the
-  // gated nav item), silently restore the session from the refresh cookie — which
-  // re-stamps the durable `role` hint — and send them straight back.
+  // gated nav item), silently restore the session from the refresh cookie - which
+  // re-stamps the durable `role` hint - and send them straight back.
   useEffect(() => {
     const redirect = searchParams.get('redirect');
     if (!redirect || !redirect.startsWith('/')) return;

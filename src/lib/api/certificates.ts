@@ -22,7 +22,7 @@ export async function issueCertificate(slug: string): Promise<IssuedCertificateD
   return (await apiClient.post<IssuedCertificateDto>(`/api/v1/me/certificates/${slug}/issue`, {})).data;
 }
 
-/** Public verification of a certificate id (no auth) — share page + verify form. */
+/** Public verification of a certificate id (no auth) - share page + verify form. */
 export async function verifyCertificate(certificateId: string): Promise<CertificateVerifyDto> {
   return (
     await apiClient.get<CertificateVerifyDto>(

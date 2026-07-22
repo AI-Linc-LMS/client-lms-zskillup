@@ -26,7 +26,7 @@ function parseInvites(text: string) {
 
 /**
  * Admin cohort + invitation management for a single college. Configuration that
- * used to live in the TPO console — TPOs are now read-only. Self-fetching.
+ * used to live in the TPO console - TPOs are now read-only. Self-fetching.
  */
 export function CollegeCohortsManager({ collegeId, onChange }: { collegeId: string; onChange?: () => void }) {
   const [cohorts, setCohorts] = useState<CohortDto[] | null>(null);

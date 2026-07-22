@@ -5,8 +5,8 @@ import { PlatformOverviewLive } from '@/components/superadmin/PlatformOverviewLi
 import { CompanyStatsCharts } from '@/components/superadmin/CompanyStatsCharts';
 
 /**
- * Platform Admin console home. The internal operator's overview — platform
- * counts + company activity — plus onboarding (college requests) and the catalog
+ * Platform Admin console home. The internal operator's overview - platform
+ * counts + company activity - plus onboarding (college requests) and the catalog
  * tools in the sidebar. User management + role changes remain Super-Admin-only.
  */
 export const dynamic = 'force-dynamic';

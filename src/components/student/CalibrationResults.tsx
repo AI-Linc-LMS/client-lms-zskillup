@@ -54,7 +54,7 @@ export function CalibrationResults({
     return <MockReportView report={report} reward={reward} kind="test" />;
   }
 
-  // Fallback: if the results API fails, don't strand the student — show the plain report.
+  // Fallback: if the results API fails, don't strand the student - show the plain report.
   if (failed) {
     return <MockReportView report={report} reward={reward} kind="test" />;
   }

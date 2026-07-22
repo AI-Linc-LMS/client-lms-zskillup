@@ -51,14 +51,14 @@ const TAB_ICONS: Record<HubTab, typeof BookOpen> = {
  * The hero used to render `quickStats.readiness` under the label "Community readiness".
  * That number was never computed from anything: it is a string literal in the seed
  * migration (ten companies share the identical value "74%"), and it has not changed
- * since. Presenting a hardcoded constant as a community statistic — and then adding a
- * tooltip to explain "how it is calculated" — would have been inventing a number and
+ * since. Presenting a hardcoded constant as a community statistic - and then adding a
+ * tooltip to explain "how it is calculated" - would have been inventing a number and
  * attributing it to real users.
  *
- * Sourced from `/api/v1/me/readiness` — the SAME endpoint the dashboard's readiness
+ * Sourced from `/api/v1/me/readiness` - the SAME endpoint the dashboard's readiness
  * panel uses, so the hub ring and the dashboard always show the identical figure.
  * (It previously read `/adaptive-mocks/company-readiness`, which only has a row once
- * the student completes an ADAPTIVE session for the company — so a company practised
+ * the student completes an ADAPTIVE session for the company - so a company practised
  * the normal way had no row and the ring blanked to "-" even though the dashboard
  * showed a real score.) Matched by slug, falling back to name.
  *
@@ -89,7 +89,7 @@ function useMyReadiness(slug: string, name: string): { loading: boolean; pct: nu
           if (!cancelled) setState({ loading: false, pct: null });
         });
     void sync();
-    // Recompute after any XP award — practising a company moves its readiness.
+    // Recompute after any XP award - practising a company moves its readiness.
     const off = onXpUpdated(() => void sync());
     return () => {
       cancelled = true;
@@ -110,21 +110,21 @@ const READINESS_TIP = {
 };
 
 /**
- * Rounds vs. stages — two different things that kept getting conflated.
+ * Rounds vs. stages - two different things that kept getting conflated.
  *
  * `syllabus[]` is a list of EXAM SECTIONS, not hiring rounds. Infosys's six rows are
- * Reasoning / Mathematical / Verbal / Pseudocode / SP-DSE Coding / Technical+HR — and
+ * Reasoning / Mathematical / Verbal / Pseudocode / SP-DSE Coding / Technical+HR - and
  * the first four are sections *inside a single online test*, not four separate rounds.
  *
  * An earlier pass noticed the hub said "3" while the syllabus listed 6 rows and made the
  * stat follow the list (`totalRounds = syllabus.length`). That fixed the symptom the wrong
  * way round: the list was never a list of rounds. It left the hub announcing "TOTAL ROUNDS
- * 6" while the company card next to it said "3 ROUNDS" — the same company, two numbers.
+ * 6" while the company card next to it said "3 ROUNDS" - the same company, two numbers.
  *
  * - totalRounds  = the authored hiring-round count. Same field the card reads
  *                  (companies.rounds -> quickStats.rounds), so the two cannot disagree.
  * - onlineStages = syllabus rows before the final interview. This one genuinely IS derived
- *                  from the syllabus — "the drive runs in N online stages" is about exam
+ *                  from the syllabus - "the drive runs in N online stages" is about exam
  *                  sections, and that reading was always correct.
  */
 function roundCounts(content: HubContent): { totalRounds: number; onlineStages: number } {
@@ -138,10 +138,10 @@ function roundCounts(content: HubContent): { totalRounds: number; onlineStages: 
 }
 
 /**
- * Company hub — the ONE 7-tab template (COMPANY_HUB_SPEC). All 9 hubs are
+ * Company hub - the ONE 7-tab template (COMPANY_HUB_SPEC). All 9 hubs are
  * content instances of this. Client component because the tabs are interactive;
  * content is seeded and passed in from the server page. No left sidebar inside
- * the hub (spec §1) — top tabs only.
+ * the hub (spec §1) - top tabs only.
  *
  * Aurora redesign: a dramatic dark hero carries the company identity + an
  * animated readiness ring, then a sticky glass tab bar drives crafted white
@@ -241,7 +241,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
             {tab === 'Syllabus' && <SyllabusTab content={content} />}
             {/* Study Material videos are NOT covered by the freemium question meter,
                 so they stay Premium (Watch -> upgrade modal). Practice Quiz, Coding and
-                Mock keep their own freemium allowance instead — "#9 wins": free users
+                Mock keep their own freemium allowance instead - "#9 wins": free users
                 still get their first 5 questions per company + 1 free mock. */}
             {tab === 'Study Material' && <StudyMaterialTab slug={content.company.slug} gate={upgrade.guard} />}
             {tab === 'Practice Quiz' && (
@@ -481,7 +481,7 @@ function CompanyHero({ content, reduce }: { content: HubContent; reduce: boolean
 }
 
 /** `pct === null` = no readiness computed for this company yet (never practised). Show an
- *  em-dash, not a 0% — "0%" reads as "you scored zero", a very different (and wrong) message. */
+ *  em-dash, not a 0% - "0%" reads as "you scored zero", a very different (and wrong) message. */
 function ReadinessRing({ pct, reduce }: { pct: number | null; reduce: boolean }) {
   const R = 52;
   const C = 2 * Math.PI * R;
@@ -534,7 +534,7 @@ function ReadinessRing({ pct, reduce }: { pct: number | null; reduce: boolean })
 /* Shared building blocks                                                       */
 /* ────────────────────────────────────────────────────────────────────────── */
 
-/** Violet eyebrow pill — shared section label for the employer hub. */
+/** Violet eyebrow pill - shared section label for the employer hub. */
 function SectionLabel({ icon: Icon, children }: { icon?: typeof Gauge; children: React.ReactNode }) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-violet-600 ring-1 ring-inset ring-violet-100">
@@ -544,7 +544,7 @@ function SectionLabel({ icon: Icon, children }: { icon?: typeof Gauge; children:
   );
 }
 
-/** Standout white Aurora card — violet-tinted shadow + colored glow on hover-lift. */
+/** Standout white Aurora card - violet-tinted shadow + colored glow on hover-lift. */
 function AuroraCard({
   glow,
   className,
@@ -585,7 +585,7 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
   // ("InfyTQ / SE assessment + SP/DSE coding"). Scale the type to the content so
   // short values read big & bold while long ones wrap cleanly instead of
   // overflowing/clipping the tile.
-  // Two tiers only — short values (numbers/%) read big & bold, everything longer
+  // Two tiers only - short values (numbers/%) read big & bold, everything longer
   // sits one consistent size and wraps. The label reserves two lines so values
   // start at the same height across every tile (consistent alignment).
   const isShort = value.trim().length <= 6;

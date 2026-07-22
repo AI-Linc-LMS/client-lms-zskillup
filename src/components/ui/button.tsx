@@ -5,14 +5,14 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 /**
- * Button system — premium EdTech aesthetic.
+ * Button system - premium EdTech aesthetic.
  *
- *   default    — Orange pill. The one moment of "look here" on a screen.
- *   secondary  — Navy pill. For workspace/identity actions ("Sign in", "Continue").
- *   outline    — Quiet supportive action. White, slate border.
- *   ghost      — Lowest visual weight; for table-row actions, "Skip", dismiss.
- *   destructive — Red pill. Used sparingly (delete, revoke).
- *   link       — Inline text link, hover→orange.
+ *   default    - Orange pill. The one moment of "look here" on a screen.
+ *   secondary  - Navy pill. For workspace/identity actions ("Sign in", "Continue").
+ *   outline    - Quiet supportive action. White, slate border.
+ *   ghost      - Lowest visual weight; for table-row actions, "Skip", dismiss.
+ *   destructive - Red pill. Used sparingly (delete, revoke).
+ *   link       - Inline text link, hover→orange.
  *
  * All buttons are rounded-full by default (pill-shape per design brief).
  * Size `sm` uses rounded-lg for compact contexts (filter bars, table actions).
@@ -22,11 +22,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // Primary CTA: yellow→gold gradient with DARK text — never white on yellow. Flat
+        // Primary CTA: yellow→gold gradient with DARK text - never white on yellow. Flat
         // (no shadow); the gradient itself is the elevation.
         default:
           'btn-brand rounded-full font-bold active:translate-y-px',
-        // Secondary: black pill, white text (17:1) — for the "look here" that isn't the CTA.
+        // Secondary: black pill, white text (17:1) - for the "look here" that isn't the CTA.
         secondary:
           'rounded-full bg-navy text-white hover:bg-navy/90 active:translate-y-px',
         outline:
@@ -34,7 +34,7 @@ const buttonVariants = cva(
         ghost: 'rounded-full text-slate-600 hover:bg-slate-100 hover:text-navy',
         destructive:
           'rounded-full bg-red-600 text-white hover:bg-red-700 active:translate-y-px',
-        // Link: dark readable text with a GOLD underline accent — gold/yellow as TEXT on
+        // Link: dark readable text with a GOLD underline accent - gold/yellow as TEXT on
         // white is illegible (1.8:1), so brand shows in the decoration, not the ink.
         link: 'text-[var(--color-text)] underline-offset-4 decoration-[#f5b400] decoration-2 hover:underline',
       },

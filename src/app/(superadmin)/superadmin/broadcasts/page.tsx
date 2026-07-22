@@ -3,7 +3,7 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { BroadcastComposer } from '@/components/admin/BroadcastComposer';
 
-/** Super-admin — broadcast composer (Phase 3). */
+/** Super-admin - broadcast composer (Phase 3). */
 export default function SuperadminBroadcastsPage() {
   return (
     <div className="space-y-6">

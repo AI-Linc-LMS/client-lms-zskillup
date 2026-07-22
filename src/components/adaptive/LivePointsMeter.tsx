@@ -7,12 +7,12 @@ import type { DecayParams } from '@/lib/api/adaptive';
 
 /**
  * Live time-decay points meter (ai-linc parity). Replicates the server scorer off
- * `anchorMs` — the epoch ms when the question was actually SHOWN — so the "worth
+ * `anchorMs` - the epoch ms when the question was actually SHOWN - so the "worth
  * now" value it shows is exactly what will be awarded on a correct submit. Counts
  * down from `base` (green, during grace) → amber (decaying) → `floor` (red).
  * Anchoring on the show-moment (NOT the earlier server `servedAt` pin time, which
  * is stamped during the previous submit) means the meter starts at full points the
- * instant the question appears — matching the per-question timer and the server,
+ * instant the question appears - matching the per-question timer and the server,
  * which trusts the client's show-time `timeMs`.
  */
 

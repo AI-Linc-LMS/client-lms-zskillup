@@ -7,9 +7,9 @@ import { HOMEPAGE_FEATURED_TRACKS } from '@/lib/demo-data-extra';
 import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
 
 /**
- * Homepage featured tracks. The card shows the logo, name, blurb and a CTA — no inventory
+ * Homepage featured tracks. The card shows the logo, name, blurb and a CTA - no inventory
  * counts (removed; see the note by the CTA). `GET /companies` is still read for two things:
- * the live logo, and the unlock signal — a `locked` track whose catalog row is published
+ * the live logo, and the unlock signal - a `locked` track whose catalog row is published
  * flips to a normal "Prepare now" card automatically.
  */
 export function HomeFeaturedTracks() {
@@ -28,7 +28,7 @@ export function HomeFeaturedTracks() {
   }, []);
 
   // The single featured list (5 live + 4 coming-soon). A track auto-unlocks once its
-  // catalog row is published — presence in `live` is the unlock signal, so a locked entry
+  // catalog row is published - presence in `live` is the unlock signal, so a locked entry
   // whose hub goes live starts rendering as a normal track with no code change here.
   const tracks = HOMEPAGE_FEATURED_TRACKS;
 

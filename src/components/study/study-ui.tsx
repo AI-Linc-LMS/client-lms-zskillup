@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import type { StudyPhase, StudyTaskKind } from '@/shared/dto/study-plan.dto';
 
-/** Per-phase visual identity — bands the roadmap into its three arcs. */
+/** Per-phase visual identity - bands the roadmap into its three arcs. */
 export const PHASE_META: Record<
   StudyPhase,
   { label: string; tagline: string; accent: string; text: string; grad: string; dot: string; soft: string }

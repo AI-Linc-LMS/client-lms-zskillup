@@ -30,7 +30,7 @@ export default function RoadmapPage() {
 
   // Derive each step's status from the student's REAL XP against an even XP band
   // per step (no fabricated done/active/locked). Anonymous visitors (xp 0) see
-  // step 1 active and the rest locked — an honest "starting point" view.
+  // step 1 active and the rest locked - an honest "starting point" view.
   const totalSteps = DEMO_ROADMAP_STEPS.length;
   const thresholdFor = (n: number) => Math.round((n / totalSteps) * ROADMAP_TOTAL_XP);
   const statusFor = (n: number): RoadmapStatus => {

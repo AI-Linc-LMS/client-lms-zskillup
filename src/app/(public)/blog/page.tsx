@@ -137,7 +137,7 @@ export default async function BlogIndexPage() {
             />
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/70 sm:text-lg">
-            Company-wise prep, coding patterns, aptitude shortcuts and interview playbooks — written by the
+            Company-wise prep, coding patterns, aptitude shortcuts and interview playbooks - written by the
             team behind India&apos;s #1 campus prep platform.
           </p>
           {posts.length > 0 && (

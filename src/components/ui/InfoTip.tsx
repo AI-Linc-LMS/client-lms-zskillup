@@ -28,14 +28,14 @@ const OPEN_DELAY = 120; // debounce so sweeping the cursor across a grid doesn't
  * Rendered through a PORTAL with `position: fixed`, not absolutely inside the
  * anchor. That isn't a stylistic choice: the sub-section table lives in an
  * `overflow-x-auto` wrapper, and CSS computes `overflow-y` to `auto` whenever
- * the other axis isn't `visible` — so an in-flow tooltip gets clipped by (and
+ * the other axis isn't `visible` - so an in-flow tooltip gets clipped by (and
  * scrolls with) that container. Fixed + portal escapes it entirely.
  *
  * Three ways in, because the anchors are `<button>` cards:
  *   - hover anywhere on the anchor (the whole card is the target, not a 12px dot)
  *   - keyboard focus (focusin/focusout bubble, so the wrapper catches both the
  *     card and the ⓘ; `relatedTarget` keeps it open while focus moves between them)
- *   - tap the ⓘ, which is a SIBLING of the card button, never a child — nesting a
+ *   - tap the ⓘ, which is a SIBLING of the card button, never a child - nesting a
  *     button inside a button is invalid HTML and swallows the card's own click.
  *     Touch devices have no hover, so without this they'd get nothing.
  */

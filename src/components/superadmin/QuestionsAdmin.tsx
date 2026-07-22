@@ -83,8 +83,8 @@ const PAGE_SIZE = 15;
 /**
  * Superadmin question-bank console. Server-side paginated + filtered (the bank
  * is ~17k questions across companies, so loading all client-side throttles).
- * Surfaces the enriched metadata — provenance/source, year tags, target roles,
- * hint/solution — inline and in a per-question detail drawer.
+ * Surfaces the enriched metadata - provenance/source, year tags, target roles,
+ * hint/solution - inline and in a per-question detail drawer.
  */
 export function QuestionsAdmin() {
   const [rows, setRows] = useState<AdminQuestionRow[] | null>(null);
@@ -156,7 +156,7 @@ export function QuestionsAdmin() {
     void loadPage();
   }, [loadPage]);
 
-  // Metric cards — small count-only queries (limit 1, read `total`).
+  // Metric cards - small count-only queries (limit 1, read `total`).
   const loadCounts = useCallback(async () => {
     try {
       const [all, published, draft, archived] = await Promise.all([
@@ -942,7 +942,7 @@ interface OptionDraft {
 }
 
 /**
- * Diagram picker for a question — upload an image (downscaled + compressed to a
+ * Diagram picker for a question - upload an image (downscaled + compressed to a
  * data-URL, aspect preserved) or paste an image URL. Used by the create form and
  * the detail drawer so the 300-odd Data-Interpretation/Venn questions can finally
  * carry their figure. `value` is the URL/data-URL; '' means no image.
@@ -959,7 +959,7 @@ function QuestionImageField({ value, onChange }: { value: string; onChange: (v: 
       return;
     }
     if (file.size > 8 * 1024 * 1024) {
-      setErr('Image is over 8 MB — use a smaller file.');
+      setErr('Image is over 8 MB - use a smaller file.');
       return;
     }
     setBusy(true);
@@ -975,7 +975,7 @@ function QuestionImageField({ value, onChange }: { value: string; onChange: (v: 
   return (
     <div className="mt-4 space-y-1.5">
       <label className="block text-sm font-medium text-navy">
-        Diagram / figure <span className="font-normal text-slate-500">(optional — for DI charts &amp; Venn diagrams)</span>
+        Diagram / figure <span className="font-normal text-slate-500">(optional - for DI charts &amp; Venn diagrams)</span>
       </label>
       <div className="flex flex-wrap items-center gap-2">
         <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-navy hover:border-orange">

@@ -3,7 +3,7 @@
 /**
  * Cross-component signal so profile-completion consumers (the dashboard banner,
  * the sidebar/feature lock gates) re-fetch the instant the student saves their
- * profile — instead of staying stale until the next window focus. Browser-only.
+ * profile - instead of staying stale until the next window focus. Browser-only.
  */
 const PROFILE_UPDATED = 'zskillup:profile-updated';
 

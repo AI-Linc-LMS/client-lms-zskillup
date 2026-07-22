@@ -3,7 +3,7 @@ import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { Megaphone } from 'lucide-react';
 import { BroadcastComposer } from '@/components/admin/BroadcastComposer';
 
-/** Admin console — broadcast composer (Phase 3, requires canBroadcast). */
+/** Admin console - broadcast composer (Phase 3, requires canBroadcast). */
 export default function AdminBroadcastsPage() {
   return (
     <div className="space-y-6">

@@ -8,7 +8,7 @@ import { navForPath } from './nav-config';
 import { ArrowRight, Building2, Search } from 'lucide-react';
 
 /**
- * ⌘K command palette (design-direction: app-feel upgrades). Role-aware — it
+ * ⌘K command palette (design-direction: app-feel upgrades). Role-aware - it
  * reuses the same nav model as the sidebar, so admins never see student
  * destinations. Company quick-jumps mirror the TopBarSearch known-slug list.
  */

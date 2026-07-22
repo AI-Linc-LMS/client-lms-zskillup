@@ -17,7 +17,7 @@ export interface GuideSeenState {
 /**
  * Whether the signed-in student has seen the platform guide. Drives the
  * first-login walkthrough prompt and gates the calibration prompt so the guide
- * always comes first. Fails "seen" — a fetch blip never re-nags the user.
+ * always comes first. Fails "seen" - a fetch blip never re-nags the user.
  *
  * It also listens for the GUIDE_SEEN_EVENT that markGuideSeen() fires, so the
  * moment the guide ends the flag flips to seen everywhere in-session (the

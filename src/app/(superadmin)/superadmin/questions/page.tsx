@@ -5,16 +5,16 @@ import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { QuestionsAdmin } from '@/components/superadmin/QuestionsAdmin';
 
 /**
- * Super-admin: Question-bank console (Implementation Plan §4 / Sprint 3 exit —
+ * Super-admin: Question-bank console (Implementation Plan §4 / Sprint 3 exit -
  * "superadmin question-bank CRUD"). Lists questions with status, lets the
  * operator author a new one (options + correct-answer marking, hint,
  * explanation), publish/unpublish, and archive.
  *
  * Endpoint surface (backend):
- *   GET    /api/v1/admin/questions      — paginated list (status / topic filters)
- *   POST   /api/v1/admin/questions      — create question + options
- *   PATCH  /api/v1/admin/questions/:id  — partial update (publish toggle)
- *   DELETE /api/v1/admin/questions/:id  — soft delete (status = ARCHIVED)
+ *   GET    /api/v1/admin/questions      - paginated list (status / topic filters)
+ *   POST   /api/v1/admin/questions      - create question + options
+ *   PATCH  /api/v1/admin/questions/:id  - partial update (publish toggle)
+ *   DELETE /api/v1/admin/questions/:id  - soft delete (status = ARCHIVED)
  */
 export default function AdminQuestionsPage() {
   return (

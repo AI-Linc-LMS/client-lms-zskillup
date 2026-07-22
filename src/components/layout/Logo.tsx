@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 /**
  * Brand lockup. The ZSkillup logo ALWAYS links to `/` (homepage), never the
- * dashboard (frontend/CLAUDE.md §4b — homepage-first routing).
+ * dashboard (frontend/CLAUDE.md §4b - homepage-first routing).
  *
  * Uses the official ZSkillup wordmark (the same asset as the marketing site).
  * The lockup lifts subtly on hover.

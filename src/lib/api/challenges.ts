@@ -42,7 +42,7 @@ export interface ApiChallenge {
   xpReward: number;
   coinReward: number;
   completed: boolean;
-  /** For CODING challenges — slug of the linked coding problem (deep-link target). */
+  /** For CODING challenges - slug of the linked coding problem (deep-link target). */
   codingProblemSlug: string | null;
 }
 

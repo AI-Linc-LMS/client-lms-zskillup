@@ -16,7 +16,7 @@ const VISIBLE_MS = 1400;
  * and since nothing ever reset that, the pill mounted on the first correct answer
  * and then stayed pinned to the viewport across every following question (the
  * `exit` animation only runs when the element actually leaves the tree). The
- * timer makes the burst the transient celebration it was always meant to be —
+ * timer makes the burst the transient celebration it was always meant to be -
  * and the runner also clears `lastPoints` on Next, so the next question is clean
  * even if you advance before the timer fires.
  */

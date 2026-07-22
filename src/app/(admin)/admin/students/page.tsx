@@ -9,7 +9,7 @@ import { BarChart3, Loader2, Search } from 'lucide-react';
 
 const PAGE_SIZE = 25;
 
-/** Admin console — read-only student performance roster (Phase 2 insights). */
+/** Admin console - read-only student performance roster (Phase 2 insights). */
 export default function AdminStudentsPage() {
   const [rows, setRows] = useState<AdminStudentReportRow[]>([]);
   const [total, setTotal] = useState(0);

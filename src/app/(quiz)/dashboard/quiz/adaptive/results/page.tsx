@@ -112,11 +112,11 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
   const back = results.companySlug
     ? { href: `/dashboard/company/${results.companySlug}`, label: 'Back to Company Hubs' }
     : { href: '/practice', label: 'Back to Practice' };
-  // Weakest skills (lowest mastery) — labels the re-quiz CTA. The weak skill is
+  // Weakest skills (lowest mastery) - labels the re-quiz CTA. The weak skill is
   // resolved to a topic server-side by the requiz endpoint (skill name → slug).
   const weakSkills = [...results.skillMastery].sort((a, b) => a.masteryPct - b.masteryPct);
   const requizHref = `/dashboard/quiz/adaptive?requiz=${sessionId}`;
-  // A section is "settled" once it resolves to data OR an error — gating the
+  // A section is "settled" once it resolves to data OR an error - gating the
   // composer on data alone hangs the loader forever if any section errors.
   const settled = [headline, perQuestion, misconceptions, remediation].filter(
     (s) => s.data || s.error,

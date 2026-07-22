@@ -24,7 +24,7 @@ function moduleTitle(pathname: string): string {
 }
 
 /**
- * Placement Office top bar — page title + welcome, a global Batch selector that
+ * Placement Office top bar - page title + welcome, a global Batch selector that
  * scopes every module (via TpoConsole context), a data-freshness chip, the
  * notifications bell and the avatar menu. The heavy nav lives in the sidebar, so
  * this bar stays clean.
@@ -37,7 +37,7 @@ export function TpoTopBar() {
 
   return (
     <header className="glass sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-slate-200/70 px-4 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6),0_8px_24px_-18px_rgba(11,18,32,0.45)] sm:px-6">
-      {/* aurora hairline — matches the student TopBar */}
+      {/* aurora hairline - matches the student TopBar */}
       <span
         aria-hidden
         className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#ffc42d]/40 to-transparent"

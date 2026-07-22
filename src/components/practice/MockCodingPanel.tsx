@@ -8,7 +8,7 @@ import { getCodingLanguages, runCodingSample, type CodingLanguage } from '@/lib/
 import { submitMockCode, type ApiMockCodeResult, type ApiMockQuestion, type ApiMockSavedCoding } from '@/lib/api/mocks';
 
 /**
- * In-mock coding question — statement + editor + run-sample / submit. The
+ * In-mock coding question - statement + editor + run-sample / submit. The
  * submission is graded on Judge0 server-side and recorded against the attempt;
  * the final mock score counts an ACCEPTED verdict as one correct question.
  */

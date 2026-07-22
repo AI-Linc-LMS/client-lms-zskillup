@@ -8,7 +8,7 @@ import { getMySchedule, type ApiScheduledAssessment } from '@/lib/api/scheduling
 import { getMockHistory } from '@/lib/api/mocks';
 
 /**
- * Live-assessment banner — pinned to the very top of the dashboard. Renders ONLY
+ * Live-assessment banner - pinned to the very top of the dashboard. Renders ONLY
  * when the student has an assessment inside its live window (now between start
  * and start+duration); otherwise it returns null and stays out of the way.
  * Highlighted with an emerald glow + pulsing LIVE and a one-tap Start.
