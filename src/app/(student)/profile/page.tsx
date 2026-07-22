@@ -10,7 +10,6 @@ import {
   Camera,
   Check,
   Crown,
-  FileText,
   GraduationCap,
   Loader2,
   Mail,
@@ -21,20 +20,17 @@ import {
   User,
   X,
 } from 'lucide-react';
-import { toast } from 'sonner';
 import { getMe, updateMe, type ApiMe } from '@/lib/api/me';
-import { SubscriptionLockGate } from '@/components/billing/SubscriptionLockGate';
-import { Button } from '@/components/ui/button';
 import { ResumeForm } from '@/components/resume/ResumeForm';
-import { createResume, getResume, listResumes, updateResume } from '@/lib/api/resumes';
+import { getResume, listResumes, upsertPrimaryResume } from '@/lib/api/resumes';
 import {
   isTemplateKey,
+  newId,
   normalizeResume,
   resumeFromProfile,
   type ResumeData,
   type TemplateKey,
 } from '@/components/resume/types';
-import { describeError } from '@/lib/api/errors';
 import { notifyProfileUpdated } from '@/lib/profile-events';
 import { COURSE_OPTIONS, PASSOUT_YEARS, YEAR_OF_STUDY_OPTIONS, yearOfStudyLabel } from '@/lib/profile/academic-options';
 import { useMySubscription } from '@/hooks/useMySubscription';
@@ -131,8 +127,43 @@ const snap = (v: Values) =>
     roles: [...v.roles].sort(),
   });
 
-/** Profile view + edit - grouped sections, skills chip input, completion
- *  checklist and a sticky unsaved-changes bar. */
+/**
+ * Fold the profile's identity + skills INTO the résumé so saving the profile keeps
+ * the résumé in sync - the student never re-enters their name/skills, and never
+ * even sees it as a "résumé": it just happens. Non-destructive: identity is set
+ * from the account, but skills are *unioned* (existing résumé skills, with any
+ * levels/categories set in the builder, are preserved; new profile skills appended).
+ */
+function syncedResume(resume: ResumeData, v: Values, email: string): ResumeData {
+  const parts = v.fullName.trim().split(/\s+/).filter(Boolean);
+  const seen = new Set(resume.skills.map((s) => s.name.trim().toLowerCase()));
+  const skills = [...resume.skills];
+  for (const raw of v.skills) {
+    const name = raw.trim();
+    const key = name.toLowerCase();
+    if (name && !seen.has(key)) {
+      skills.push({ id: newId(), name });
+      seen.add(key);
+    }
+  }
+  return {
+    ...resume,
+    basicInfo: {
+      ...resume.basicInfo,
+      // Only let the profile OVERWRITE identity when it actually has a value -
+      // never wipe a name/phone the student typed straight into the résumé with an
+      // empty (optional) profile field. Mirrors the email guard.
+      ...(parts.length ? { firstName: parts[0], lastName: parts.slice(1).join(' ') } : {}),
+      email: email || resume.basicInfo.email,
+      phone: v.phone.trim() || resume.basicInfo.phone,
+    },
+    skills,
+  };
+}
+
+/** Profile view + edit - grouped sections (Personal / Academic / Career / Resume),
+ *  skills chip input, completion checklist and ONE sticky unsaved-changes bar that
+ *  saves the profile fields AND the résumé together. */
 export default function ProfilePage() {
   const { planStatus } = useMySubscription(true);
   const isPremium = planStatus !== 'none';
@@ -146,6 +177,15 @@ export default function ProfilePage() {
   const [v, setV] = useState<Values>(EMPTY);
   const [baseline, setBaseline] = useState<string>(snap(EMPTY));
   const set = <K extends keyof Values>(k: K, val: Values[K]) => setV((p) => ({ ...p, [k]: val }));
+
+  // ── Résumé (the full ATS record, shared with the Resume Builder) ─────────────
+  // Lifted onto the page so the ONE "Save profile" bar persists it alongside the
+  // profile fields. Backed by the SAME `students.resumes` record the builder uses,
+  // seeded from the profile only when the student has none - one source of truth.
+  const [resume, setResume] = useState<ResumeData | null>(null);
+  const [resumeBase, setResumeBase] = useState<ResumeData | null>(null);
+  const [resumeTitle, setResumeTitle] = useState('My Resume');
+  const [resumeTemplate, setResumeTemplate] = useState<TemplateKey>('modern');
 
   // Profile-photo upload: resize client-side to a small JPEG data URL (no object
   // storage needed) then stage it in `v.avatarUrl`; it persists on Save.
@@ -171,8 +211,13 @@ export default function ProfilePage() {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getMe(), getMyRegistrations().catch(() => [] as ApiRegistration[])])
-      .then(([m, r]) => {
+    void (async () => {
+      try {
+        const [m, r, resumeList] = await Promise.all([
+          getMe(),
+          getMyRegistrations().catch(() => [] as ApiRegistration[]),
+          listResumes().catch(() => []),
+        ]);
         if (cancelled) return;
         setMe(m);
         setRegs(r);
@@ -191,9 +236,25 @@ export default function ProfilePage() {
         };
         setV(loaded);
         setBaseline(snap(loaded));
-      })
-      .catch(() => setErr('Could not load your profile.'))
-      .finally(() => !cancelled && setLoading(false));
+
+        // The profile edits the student's PRIMARY résumé - the first record the
+        // builder lists. Load its full blob; if there is none, seed from profile.
+        const first = resumeList[0];
+        const detail = first ? await getResume(first.id).catch(() => null) : null;
+        if (cancelled) return;
+        const seeded = detail ? normalizeResume(detail.data) : resumeFromProfile(m);
+        setResume(seeded);
+        setResumeBase(seeded);
+        if (detail) {
+          setResumeTitle(detail.title || 'My Resume');
+          setResumeTemplate(isTemplateKey(detail.template) ? detail.template : 'modern');
+        }
+      } catch {
+        if (!cancelled) setErr('Could not load your profile.');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
     return () => {
       cancelled = true;
     };
@@ -214,7 +275,9 @@ export default function ProfilePage() {
     [v],
   );
   const completion = Math.round((checklist.filter((c) => c.done).length / checklist.length) * 100);
-  const dirty = snap(v) !== baseline;
+  const profileDirty = snap(v) !== baseline;
+  const resumeDirty = resume !== null && JSON.stringify(resume) !== JSON.stringify(resumeBase);
+  const dirty = profileDirty || resumeDirty;
   // Only flag an INVALID (non-empty) phone - empty is fine until they complete the profile.
   const phoneInvalid = !!v.phone.trim() && !isValidPhone(v.phone);
 
@@ -226,6 +289,21 @@ export default function ProfilePage() {
   const toggleRole = (name: string) =>
     setV((p) => ({ ...p, roles: p.roles.includes(name) ? p.roles.filter((r) => r !== name) : [...p.roles, name] }));
 
+  /** Patch a field of the résumé's basicInfo (headline, bio, links) from the profile. */
+  const patchBasic = (p: Partial<ResumeData['basicInfo']>) =>
+    setResume((r) => (r ? { ...r, basicInfo: { ...r.basicInfo, ...p } } : r));
+
+  /** Persist the résumé blob via the FREE primary-résumé upsert (never paywalled). */
+  const persistResume = async (next: ResumeData) => {
+    await upsertPrimaryResume({
+      title: resumeTitle.trim() || 'My Resume',
+      template: resumeTemplate,
+      data: next,
+    });
+    setResumeBase(next);
+  };
+
+  // ONE save: profile fields first, then the résumé (only what actually changed).
   const save = async () => {
     // Never persist a malformed phone number.
     if (phoneInvalid) {
@@ -236,35 +314,46 @@ export default function ProfilePage() {
     setErr(null);
     setSaved(false);
     try {
-      // Send an explicit null (not undefined) for empty fields so cleared values
-      // actually persist - undefined is dropped by JSON.stringify, which made the
-      // backend skip the field and keep the old value (profile "reverted" on refresh).
-      const updated = await updateMe({
-        fullName: v.fullName.trim() || null,
-        phone: v.phone.trim() || null,
-        course: v.course.trim() || null,
-        yearOfStudy: v.yearOfStudy || null,
-        // The canonical id is the source of truth - the server sets auth.users
-        // .college_id from it and denormalises the display name. We ALSO send the
-        // name: for the "Add it / Other" free-text flow there is no collegeId, and
-        // without the name the chosen college was never persisted, so the College
-        // field stayed incomplete forever. (When collegeId IS set the server
-        // ignores this and uses the canonical name.)
-        collegeId: v.collegeId || null,
-        collegeName: v.collegeName.trim() || null,
-        passoutYear: v.passoutYear ? Number(v.passoutYear) : null,
-        skills: v.skills,
-        rolesInterested: v.roles,
-        // Send the photo only when it actually changed - avoids re-uploading a
-        // ~45KB data URL on every unrelated save. '' clears it back to no photo.
-        ...(v.avatarUrl !== (me?.avatarUrl ?? '') ? { avatarUrl: v.avatarUrl } : {}),
-      });
-      setMe(updated);
-      setBaseline(snap(v));
+      if (profileDirty) {
+        // Send an explicit null (not undefined) for empty fields so cleared values
+        // actually persist - undefined is dropped by JSON.stringify, which made the
+        // backend skip the field and keep the old value (profile "reverted" on refresh).
+        const updated = await updateMe({
+          fullName: v.fullName.trim() || null,
+          phone: v.phone.trim() || null,
+          course: v.course.trim() || null,
+          yearOfStudy: v.yearOfStudy || null,
+          // The canonical id is the source of truth - the server sets auth.users
+          // .college_id from it and denormalises the display name. We ALSO send the
+          // name: for the "Add it / Other" free-text flow there is no collegeId, and
+          // without the name the chosen college was never persisted, so the College
+          // field stayed incomplete forever. (When collegeId IS set the server
+          // ignores this and uses the canonical name.)
+          collegeId: v.collegeId || null,
+          collegeName: v.collegeName.trim() || null,
+          passoutYear: v.passoutYear ? Number(v.passoutYear) : null,
+          skills: v.skills,
+          rolesInterested: v.roles,
+          // Send the photo only when it actually changed - avoids re-uploading a
+          // ~45KB data URL on every unrelated save. '' clears it back to no photo.
+          ...(v.avatarUrl !== (me?.avatarUrl ?? '') ? { avatarUrl: v.avatarUrl } : {}),
+        });
+        setMe(updated);
+        setBaseline(snap(v));
+        // Flip the dashboard banner + feature lock gates (server-driven completion)
+        // immediately, rather than leaving them stale until the next window focus.
+        notifyProfileUpdated();
+      }
+      // Silently keep the résumé in sync with the profile. Completing the profile
+      // is FREE (the primary-résumé upsert is paywall-exempt), so this always runs.
+      if (resume) {
+        const next = syncedResume(resume, v, me?.email ?? '');
+        if (JSON.stringify(next) !== JSON.stringify(resumeBase)) {
+          await persistResume(next);
+          setResume(next);
+        }
+      }
       setSaved(true);
-      // Flip the dashboard banner + feature lock gates (server-driven completion)
-      // immediately, rather than leaving them stale until the next window focus.
-      notifyProfileUpdated();
       setTimeout(() => setSaved(false), 2500);
     } catch (e) {
       setErr(e instanceof ApiRequestError ? e.message : 'Could not save. Please try again.');
@@ -275,6 +364,7 @@ export default function ProfilePage() {
 
   const discard = () => {
     if (!me) return;
+    setErr(null);
     const p = me.studentProfile;
     setV({
       fullName: me.fullName ?? '',
@@ -288,6 +378,7 @@ export default function ProfilePage() {
       roles: p?.rolesInterested ?? [],
       avatarUrl: me.avatarUrl ?? '',
     });
+    setResume(resumeBase);
   };
 
   if (loading) {
@@ -376,7 +467,7 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_24rem]">
+      <div className="mt-6 grid items-start gap-6 lg:grid-cols-[1fr_24rem]">
         {/* ── Edit form (grouped) ────────────────────────────────────────── */}
         <div className="space-y-5">
           <SectionCard data-tour="profile:personal" icon={User} title="Personal" subtitle="How we address you and reach out.">
@@ -482,10 +573,73 @@ export default function ProfilePage() {
               </div>
             </div>
           </SectionCard>
+
+          {/* ── Professional profile ──────────────────────────────────────────
+              The richer profile fields. Framed as a profile - NOT a "résumé": the
+              student is simply completing their profile, and the résumé is kept in
+              sync underneath (see save()). Completing the profile is FREE; flows
+              right after Career so there is no gap. */}
+          <div data-tour="profile:pro" className="space-y-5">
+            <div className="px-1">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Professional profile</p>
+              <p className="mt-0.5 text-sm text-slate-500">
+                Your experience, projects and achievements — the complete picture recruiters see.
+              </p>
+            </div>
+
+            {resume ? (
+              <div className="space-y-5">
+                <SectionCard icon={Briefcase} title="Headline & links" subtitle="A one-line title, a short bio, and where to find you online.">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label="Professional title">
+                      <input value={resume.basicInfo.professionalTitle} onChange={(e) => patchBasic({ professionalTitle: e.target.value })} className={inputCls} placeholder="e.g. Frontend Engineer" />
+                    </Field>
+                    <Field label="Location">
+                      <input value={resume.basicInfo.location} onChange={(e) => patchBasic({ location: e.target.value })} className={inputCls} placeholder="e.g. Bengaluru, India" />
+                    </Field>
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Short bio</p>
+                      <textarea
+                        value={resume.basicInfo.summary}
+                        onChange={(e) => patchBasic({ summary: e.target.value })}
+                        rows={3}
+                        className={cn(inputCls, 'h-auto py-2 leading-relaxed')}
+                        placeholder="2-3 sentences about your strengths and what you're aiming for."
+                      />
+                    </div>
+                    <Field label="GitHub">
+                      <input value={resume.basicInfo.github ?? ''} onChange={(e) => patchBasic({ github: e.target.value })} className={inputCls} placeholder="github.com/you" />
+                    </Field>
+                    <Field label="LinkedIn">
+                      <input value={resume.basicInfo.linkedin ?? ''} onChange={(e) => patchBasic({ linkedin: e.target.value })} className={inputCls} placeholder="linkedin.com/in/you" />
+                    </Field>
+                    <Field label="Portfolio">
+                      <input value={resume.basicInfo.portfolio ?? ''} onChange={(e) => patchBasic({ portfolio: e.target.value })} className={inputCls} placeholder="your-site.com" />
+                    </Field>
+                    <Field label="LeetCode">
+                      <input value={resume.basicInfo.leetcode ?? ''} onChange={(e) => patchBasic({ leetcode: e.target.value })} className={inputCls} placeholder="leetcode.com/u/you" />
+                    </Field>
+                  </div>
+                </SectionCard>
+
+                <ResumeForm data={resume} onChange={setResume} omit={['basicInfo', 'skills']} variant="profile" />
+
+                <div className="flex justify-end px-1">
+                  <Link href="/resume-builder" className="text-xs font-semibold text-slate-500 transition-colors hover:text-navy">
+                    Turn this into a downloadable resume →
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-3xl border border-slate-200 bg-white p-6">
+                <p className="text-sm font-semibold text-rose-600">Could not load your professional details.</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* ── Aside ──────────────────────────────────────────────────────── */}
-        <aside className="space-y-4">
+        <aside className="space-y-4 lg:sticky lg:top-6">
           {completion < 100 && (
             <div data-tour="profile:completion" className="rounded-3xl border border-orange/25 bg-gradient-to-b from-orange/[0.06] to-white p-5">
               <h2 className="flex items-center justify-between text-sm font-bold text-navy">
@@ -545,15 +699,18 @@ export default function ProfilePage() {
         </aside>
       </div>
 
-      {/* ── Full ATS resume (shared with the Resume Builder, own paywall + save) ── */}
-      {me && <ResumeDetailsSection me={me} />}
-
-      {/* ── Sticky save bar ──────────────────────────────────────────────── */}
-      {(dirty || saved) && (
+      {/* ── Sticky save bar (profile + résumé, one action) ───────────────────
+          Stays mounted while saving OR while an error is showing, so the spinner
+          never blinks out mid-save (profile PATCH resolves before the résumé PATCH)
+          and a save failure is always visible with a retry, even once both dirty
+          flags have collapsed. */}
+      {(dirty || saved || saving || err) && (
         <div className="sticky bottom-4 z-20 mt-6 flex justify-center px-4">
           <div className="flex items-center gap-3 rounded-full border border-slate-200 bg-white/95 py-2 pl-5 pr-2 shadow-[0_16px_40px_-16px_rgba(11,18,32,0.4)] backdrop-blur">
             {err ? (
               <span className="text-sm font-semibold text-rose-600">{err}</span>
+            ) : saving ? (
+              <span className="text-sm font-semibold text-slate-600">Saving…</span>
             ) : saved && !dirty ? (
               <span className="flex items-center gap-1.5 text-sm font-semibold text-emerald-600">
                 <Check className="size-4" /> All changes saved
@@ -561,7 +718,7 @@ export default function ProfilePage() {
             ) : (
               <span className="text-sm font-semibold text-slate-600">You have unsaved changes</span>
             )}
-            {dirty && (
+            {(dirty || err) && (
               <>
                 <button onClick={discard} disabled={saving} className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-navy disabled:opacity-50">
                   <RotateCcw className="size-3.5" /> Discard
@@ -571,7 +728,7 @@ export default function ProfilePage() {
                   disabled={saving || phoneInvalid}
                   className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-5 py-2 text-sm font-extrabold text-[#171717] shadow-[0_10px_24px_-10px_rgba(245,180,0,0.5)] disabled:opacity-60"
                 >
-                  {saving ? <Loader2 className="size-4 animate-spin" /> : 'Save changes'}
+                  {saving ? <Loader2 className="size-4 animate-spin" /> : err ? 'Retry' : 'Save profile'}
                 </button>
               </>
             )}
@@ -584,132 +741,6 @@ export default function ProfilePage() {
 
 const inputCls =
   'flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors placeholder:text-slate-500 focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30';
-
-/**
- * The full ATS résumé editor, embedded on the profile below the profile fields.
- * It is backed by the SAME `students.resumes` record the Resume Builder uses -
- * loaded via listResumes() → getResume(), seeded from the profile only when the
- * student has none - so the profile and the builder are one source of truth (no
- * duplicated copy of the résumé). Gated by SubscriptionLockGate (a paid career
- * tool); it owns its OWN dirty-tracking + Save, independent of the profile Save.
- */
-function ResumeDetailsSection({ me }: { me: ApiMe }) {
-  // `me` changes reference whenever the profile Save runs (setMe). Capture it in
-  // a ref so a profile save never re-triggers the load and discards unsaved
-  // résumé edits - seeding from the profile only happens when there is no record.
-  const meRef = useRef(me);
-  meRef.current = me;
-
-  const [data, setData] = useState<ResumeData | null>(null);
-  const [resumeId, setResumeId] = useState<string | null>(null);
-  const [title, setTitle] = useState('My Resume');
-  const [template, setTemplate] = useState<TemplateKey>('modern');
-  const [loading, setLoading] = useState(true);
-  const [loadErr, setLoadErr] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [baseline, setBaseline] = useState('');
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        // The profile edits the student's PRIMARY résumé - the first record the
-        // builder lists. Load its full blob; if there is none, seed from profile.
-        const list = await listResumes();
-        const first = list[0];
-        const detail = first ? await getResume(first.id) : null;
-        if (cancelled) return;
-        const seeded = detail ? normalizeResume(detail.data) : resumeFromProfile(meRef.current);
-        setData(seeded);
-        setBaseline(JSON.stringify(seeded));
-        if (detail) {
-          setResumeId(detail.id);
-          setTitle(detail.title || 'My Resume');
-          setTemplate(isTemplateKey(detail.template) ? detail.template : 'modern');
-        }
-      } catch {
-        if (!cancelled) setLoadErr('Could not load your resume details.');
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const dirty = data !== null && JSON.stringify(data) !== baseline;
-
-  const save = async () => {
-    if (!data) return;
-    setSaving(true);
-    try {
-      const name = title.trim() || 'My Resume';
-      if (resumeId) {
-        await updateResume(resumeId, { title: name, template, data });
-      } else {
-        const created = await createResume({ title: name, template, data });
-        setResumeId(created.id);
-      }
-      setBaseline(JSON.stringify(data));
-      toast.success('Resume details saved.');
-    } catch (err) {
-      // The gate blocks unpaid users, but a first-ever save can still 402 once the
-      // free résumé run is spent - surface that clearly, not a generic message.
-      if (err instanceof ApiRequestError && err.code === 'CAREER_PAYWALL') {
-        toast.error("You've used your free resume", {
-          description: 'Upgrade to save and export more resumes.',
-        });
-      } else {
-        toast.error(describeError(err, 'Could not save your resume. Please try again.'));
-      }
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <section className="mt-6">
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-orange/10 text-orange">
-            <FileText className="size-[18px]" />
-          </span>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Resume</p>
-            <h2 className="text-sm font-black text-navy">Full ATS resume details</h2>
-            <p className="text-xs text-slate-500">Every résumé section, in one place — shared with your Resume Builder.</p>
-          </div>
-        </div>
-        <Link href="/resume-builder" className="text-xs font-semibold text-orange hover:underline">
-          These fields power your Resume Builder (templates + PDF export) →
-        </Link>
-      </div>
-
-      <SubscriptionLockGate tool="resume" feature="Resume">
-        {loading ? (
-          <div className="grid place-items-center rounded-3xl border border-slate-200 bg-white py-16">
-            <Loader2 className="size-6 animate-spin text-slate-500" />
-          </div>
-        ) : !data ? (
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 text-center">
-            <p className="text-sm font-semibold text-rose-600">{loadErr ?? 'Could not load your resume details.'}</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <ResumeForm data={data} onChange={setData} />
-            <div className="flex items-center justify-end">
-              <Button onClick={save} disabled={!dirty || saving}>
-                {saving ? <Loader2 className="size-4 animate-spin" /> : null}
-                Save resume details
-              </Button>
-            </div>
-          </div>
-        )}
-      </SubscriptionLockGate>
-    </section>
-  );
-}
 
 function SectionCard({
   icon: Icon,
@@ -730,7 +761,7 @@ function SectionCard({
         <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-orange/10 text-orange">
           <Icon className="size-[18px]" />
         </span>
-        <div>
+        <div className="min-w-0 flex-1">
           <h2 className="text-sm font-black text-navy">{title}</h2>
           <p className="text-xs text-slate-500">{subtitle}</p>
         </div>

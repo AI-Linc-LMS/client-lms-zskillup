@@ -303,6 +303,8 @@ export const apiClient = {
     apiRequest<T>(path, { ...options, method: 'GET' }),
   post: <T>(path: string, json?: unknown, options?: RequestOptions) =>
     apiRequest<T>(path, { ...options, method: 'POST', json }),
+  put: <T>(path: string, json?: unknown, options?: RequestOptions) =>
+    apiRequest<T>(path, { ...options, method: 'PUT', json }),
   postForm: <T>(path: string, formData: FormData, options?: RequestOptions) =>
     apiRequest<T>(path, { ...options, method: 'POST', formData }),
   patch: <T>(path: string, json?: unknown, options?: RequestOptions) =>

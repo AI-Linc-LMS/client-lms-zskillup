@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type {
   Achievement,
@@ -44,17 +44,35 @@ import {
 import { cn } from '@/lib/utils';
 
 const input =
-  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange';
+  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy transition-colors placeholder:text-slate-500 focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30';
 const lbl = 'mb-1 block text-[11px] font-medium text-slate-600';
+
+/**
+ * Presentation mode. `builder` (default) is the standalone Resume Builder look
+ * (compact collapsible cards). `profile` makes the sections read as native
+ * profile cards (rounded-3xl, orange icon tiles, no résumé-builder count badges,
+ * open when they already hold content) so the profile page never looks like a
+ * résumé editor.
+ */
+type FormVariantValue = 'builder' | 'profile';
+const FormVariant = createContext<FormVariantValue>('builder');
 
 interface Props {
   data: ResumeData;
   onChange: (next: ResumeData) => void;
   /** Optional slot rendered inside a section header (e.g. AI tailor button). */
   sectionAction?: (section: 'summary' | 'skills' | 'experience' | 'projects') => React.ReactNode;
+  /**
+   * Sections to NOT render. The profile page hides `basicInfo` and `skills`
+   * because it owns those (identity comes from the profile's Personal/Headline
+   * cards, skills from Career) and syncs them into the résumé itself.
+   */
+  omit?: ReadonlyArray<'basicInfo' | 'skills'>;
+  /** `profile` restyles sections as native profile cards (see {@link FormVariant}). */
+  variant?: FormVariantValue;
 }
 
-export function ResumeForm({ data, onChange, sectionAction }: Props) {
+export function ResumeForm({ data, onChange, sectionAction, omit = [], variant = 'builder' }: Props) {
   const patchBasic = (p: Partial<ResumeData['basicInfo']>) =>
     onChange({ ...data, basicInfo: { ...data.basicInfo, ...p } });
 
@@ -66,8 +84,10 @@ export function ResumeForm({ data, onChange, sectionAction }: Props) {
   };
 
   return (
-    <div className="space-y-3" data-tour="resume:editor">
+    <FormVariant.Provider value={variant}>
+    <div className={cn(variant === 'profile' ? 'space-y-5' : 'space-y-3')} data-tour={variant === 'profile' ? undefined : 'resume:editor'}>
       {/* Basic info */}
+      {!omit.includes('basicInfo') && (
       <Section title="Basic Information" icon={<User className="size-4" />} defaultOpen>
         <div className="grid grid-cols-2 gap-3">
           <Field label="First name"><input className={input} value={data.basicInfo.firstName} onChange={(e) => patchBasic({ firstName: e.target.value })} /></Field>
@@ -103,6 +123,7 @@ export function ResumeForm({ data, onChange, sectionAction }: Props) {
           </div>
         </div>
       </Section>
+      )}
 
       {/* Experience */}
       <Section title="Work Experience" icon={<Briefcase className="size-4" />} count={data.workExperience.length} action={sectionAction?.('experience')}>
@@ -147,6 +168,7 @@ export function ResumeForm({ data, onChange, sectionAction }: Props) {
       </Section>
 
       {/* Skills */}
+      {!omit.includes('skills') && (
       <Section title="Skills" icon={<Wrench className="size-4" />} count={data.skills.length} action={sectionAction?.('skills')}>
         {data.skills.map((s, i) => (
           <div key={s.id} className="mb-2 flex items-center gap-2">
@@ -160,6 +182,7 @@ export function ResumeForm({ data, onChange, sectionAction }: Props) {
         ))}
         <AddButton label="Add skill" onClick={() => onChange({ ...data, skills: [...data.skills, { id: newId(), name: '', level: 3, category: '' }] })} />
       </Section>
+      )}
 
       {/* Projects */}
       <Section title="Projects" icon={<FolderGit2 className="size-4" />} count={data.projects.length}>
@@ -326,6 +349,7 @@ export function ResumeForm({ data, onChange, sectionAction }: Props) {
         <AddButton label="Add interest" onClick={() => onChange({ ...data, interests: [...data.interests, blankInterest()] })} />
       </Section>
     </div>
+    </FormVariant.Provider>
   );
 }
 
@@ -412,14 +436,34 @@ function Section({
   action?: React.ReactNode;
   children: React.ReactNode;
 }) {
-  const [open, setOpen] = useState(defaultOpen ?? false);
+  const variant = useContext(FormVariant);
+  const profile = variant === 'profile';
+  // In the profile, sections that already hold content open by default (so the
+  // student sees what they've filled); empty ones stay tucked away.
+  const [open, setOpen] = useState(profile ? (count ?? 0) > 0 : defaultOpen ?? false);
   return (
-    <div className={cn('overflow-hidden rounded-xl border bg-white shadow-sm transition-colors', open ? 'border-orange/30' : 'border-slate-200')}>
-      <div className="flex items-center justify-between px-3 py-2.5">
-        <button onClick={() => setOpen((o) => !o)} className="flex flex-1 items-center gap-2.5 text-left">
-          <span className={cn('grid size-7 shrink-0 place-items-center rounded-lg transition-colors', open ? 'bg-orange/10 text-orange' : 'bg-slate-100 text-slate-600')}>{icon}</span>
-          <span className="text-sm font-bold text-navy">{title}</span>
-          {count !== undefined && count > 0 && <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">{count}</span>}
+    <div
+      className={cn(
+        'overflow-hidden border bg-white transition-colors',
+        profile ? 'rounded-3xl' : 'rounded-xl shadow-sm',
+        open ? 'border-orange/30' : 'border-slate-200',
+      )}
+    >
+      <div className={cn('flex items-center justify-between', profile ? 'px-5 py-4' : 'px-3 py-2.5')}>
+        <button onClick={() => setOpen((o) => !o)} className="flex flex-1 items-center gap-3 text-left">
+          <span
+            className={cn(
+              'grid shrink-0 place-items-center transition-colors',
+              profile ? 'size-9 rounded-xl' : 'size-7 rounded-lg',
+              open || profile ? 'bg-orange/10 text-orange' : 'bg-slate-100 text-slate-600',
+            )}
+          >
+            {icon}
+          </span>
+          <span className={cn('text-navy', profile ? 'text-sm font-black' : 'text-sm font-bold')}>{title}</span>
+          {!profile && count !== undefined && count > 0 && (
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">{count}</span>
+          )}
         </button>
         <div className="flex items-center gap-2">
           {action}
@@ -437,7 +481,7 @@ function Section({
             transition={{ duration: 0.22, ease: 'easeInOut' }}
             className="overflow-hidden"
           >
-            <div className="border-t border-slate-100 p-4">{children}</div>
+            <div className={cn('border-t border-slate-100', profile ? 'p-5' : 'p-4')}>{children}</div>
           </motion.div>
         )}
       </AnimatePresence>
