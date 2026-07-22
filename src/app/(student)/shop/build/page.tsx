@@ -225,11 +225,39 @@ export default function BuildYourOwnPage() {
       return;
     }
     if (!items.length) return;
-    items.forEach((it) => cart.add(it));
+    // Map each buyable sub-topic to its parent section, so we can (a) drop sub-topics
+    // already covered by a section chosen in the SAME selection - the cart's own
+    // conflict check can't see intra-batch overlap during a synchronous add loop -
+    // and (b) stamp `sectionRef` so a later cross-surface add still detects the overlap.
+    const topicToSection = new Map<string, string>();
+    for (const s of sections) for (const t of s.topics) topicToSection.set(t.slug, s.section.slug);
+    const stagedSections = new Set(
+      items.filter((i) => i.scope === EntitlementScope.SECTION && i.scopeRef).map((i) => i.scopeRef as string),
+    );
+    let skipped = 0;
+    const toAdd: CartItem[] = [];
+    for (const it of items) {
+      if (it.scope === EntitlementScope.TOPIC) {
+        const sec = it.scopeRef ? topicToSection.get(it.scopeRef) ?? null : null;
+        if (sec && stagedSections.has(sec)) {
+          skipped += 1; // this section already includes the sub-topic
+          continue;
+        }
+        toAdd.push({ ...it, sectionRef: sec });
+      } else {
+        toAdd.push(it);
+      }
+    }
+    toAdd.forEach((it) => cart.add(it));
+    if (skipped > 0) {
+      toast.info(
+        `${skipped} sub-topic${skipped === 1 ? '' : 's'} already covered by a selected section ${skipped === 1 ? 'was' : 'were'} skipped.`,
+      );
+    }
     if (goToCart) {
       router.push('/cart');
     } else {
-      toast.success(`Saved ${items.length} item${items.length === 1 ? '' : 's'} to your cart.`);
+      toast.success(`Saved ${toAdd.length} item${toAdd.length === 1 ? '' : 's'} to your cart.`);
       setStaged({});
     }
   };

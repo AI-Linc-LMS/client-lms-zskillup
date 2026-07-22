@@ -2,9 +2,10 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ShoppingCart } from 'lucide-react';
+import { AlertTriangle, Crown, Layers, ShoppingCart } from 'lucide-react';
 import { getMe } from '@/lib/api/me';
-import type { BillingPeriod, EntitlementScope } from '@/shared/enums';
+import { EntitlementScope } from '@/shared/enums';
+import type { BillingPeriod } from '@/shared/enums';
 
 /** One line the student has added to their cart (pre-checkout, client-side). The
  *  amount is always (re)priced server-side at checkout - we keep only what to buy. */
@@ -14,10 +15,53 @@ export interface CartItem {
   period: BillingPeriod;
   /** Human label for the cart list, e.g. "Profit & Loss" or "TCS". */
   label: string;
+  /** For a TOPIC (sub-section): its parent SECTION slug. Lets the cart detect when a
+   *  whole section already covers (or would replace) individual sub-topics. */
+  sectionRef?: string | null;
 }
 
 export const cartKey = (i: Pick<CartItem, 'scope' | 'scopeRef' | 'period'>): string =>
   `${i.scope}:${i.scopeRef ?? ''}:${i.period}`;
+
+/**
+ * A cart-composition conflict surfaced as a popup before the item is added:
+ * - `platform-only`     adding Full Platform, which must be the ONLY line → replace all.
+ * - `platform-present`  adding anything while Full Platform is in the cart → it already covers it.
+ * - `section-covers`    adding a sub-topic already covered by a whole section in the cart.
+ * - `section-replaces`  adding a section that covers sub-topics already in the cart → replace them.
+ */
+export type CartConflict =
+  | { kind: 'platform-only'; pending: CartItem }
+  | { kind: 'platform-present'; pending: CartItem }
+  | { kind: 'section-covers'; pending: CartItem; section: CartItem }
+  | { kind: 'section-replaces'; pending: CartItem; topics: CartItem[] };
+
+/** Pure rule check: does adding `item` to `items` create a composition conflict? */
+function detectConflict(items: CartItem[], item: CartItem): CartConflict | null {
+  const platform = items.find((i) => i.scope === EntitlementScope.PLATFORM);
+  if (item.scope === EntitlementScope.PLATFORM) {
+    // Full Platform includes everything, so it must be the only thing in the cart.
+    const others = items.filter((i) => i.scope !== EntitlementScope.PLATFORM);
+    return others.length > 0 ? { kind: 'platform-only', pending: item } : null;
+  }
+  // Adding a granular item while Full Platform is already selected: it's redundant.
+  if (platform) return { kind: 'platform-present', pending: item };
+  // Sub-topic already covered by a whole section in the cart.
+  if (item.scope === EntitlementScope.TOPIC && item.sectionRef) {
+    const section = items.find(
+      (i) => i.scope === EntitlementScope.SECTION && i.scopeRef === item.sectionRef,
+    );
+    if (section) return { kind: 'section-covers', pending: item, section };
+  }
+  // Section that covers sub-topics already in the cart.
+  if (item.scope === EntitlementScope.SECTION) {
+    const topics = items.filter(
+      (i) => i.scope === EntitlementScope.TOPIC && i.sectionRef === item.scopeRef,
+    );
+    if (topics.length > 0) return { kind: 'section-replaces', pending: item, topics };
+  }
+  return null;
+}
 
 interface CartContextValue {
   items: CartItem[];
@@ -94,15 +138,42 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, hydrated, userId]);
 
-  const add = useCallback((item: CartItem) => {
-    setItems((prev) =>
-      prev.some((p) => cartKey(p) === cartKey(item)) ? prev : [...prev, item],
-    );
-  }, []);
+  const [conflict, setConflict] = useState<CartConflict | null>(null);
+
+  const add = useCallback(
+    (item: CartItem) => {
+      // Exact duplicate (same scope+ref+period) is a silent no-op, as before.
+      if (items.some((p) => cartKey(p) === cartKey(item))) return;
+      const c = detectConflict(items, item);
+      if (c) {
+        setConflict(c);
+        return;
+      }
+      setItems((prev) => (prev.some((p) => cartKey(p) === cartKey(item)) ? prev : [...prev, item]));
+    },
+    [items],
+  );
   const remove = useCallback((key: string) => {
     setItems((prev) => prev.filter((p) => cartKey(p) !== key));
   }, []);
   const clear = useCallback(() => setItems([]), []);
+
+  // Resolve the pending conflict: 'replace' commits the destructive fix (swap the
+  // cart for the pending item), else the popup just dismisses (nothing added).
+  const resolveConflict = useCallback(() => {
+    setConflict((c) => {
+      if (!c) return null;
+      if (c.kind === 'platform-only') {
+        setItems([c.pending]); // Full Platform becomes the whole cart
+      } else if (c.kind === 'section-replaces') {
+        const drop = new Set(c.topics.map((t) => cartKey(t)));
+        setItems((prev) => [...prev.filter((p) => !drop.has(cartKey(p))), c.pending]);
+      }
+      // 'platform-present' / 'section-covers' are informational blocks - add nothing.
+      return null;
+    });
+  }, []);
+  const dismissConflict = useCallback(() => setConflict(null), []);
   const has = useCallback(
     (scope: EntitlementScope, scopeRef: string | null) =>
       items.some((p) => p.scope === scope && p.scopeRef === scopeRef),
@@ -117,7 +188,93 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [items, add, remove, clear, has, setPeriod],
   );
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={value}>
+      {children}
+      <CartConflictModal conflict={conflict} onReplace={resolveConflict} onDismiss={dismissConflict} />
+    </CartContext.Provider>
+  );
+}
+
+/** Popup shown when an Add would create a duplicate/redundant cart (items 22 + 23). */
+function CartConflictModal({
+  conflict,
+  onReplace,
+  onDismiss,
+}: {
+  conflict: CartConflict | null;
+  onReplace: () => void;
+  onDismiss: () => void;
+}) {
+  if (!conflict) return null;
+
+  const isPlatform = conflict.kind === 'platform-only' || conflict.kind === 'platform-present';
+  const canReplace = conflict.kind === 'platform-only' || conflict.kind === 'section-replaces';
+
+  const title = isPlatform ? 'Full Platform Already Selected' : 'Duplicate Content Selected';
+  const Icon = isPlatform ? Crown : Layers;
+
+  let body: string;
+  switch (conflict.kind) {
+    case 'platform-only':
+      body =
+        'Full Platform Access already includes every company, section and sub-topic. Your cart can only contain Full Platform - replace your other selections with it?';
+      break;
+    case 'platform-present':
+      body = `Full Platform Access is already in your cart and includes "${conflict.pending.label}". There's nothing more to add.`;
+      break;
+    case 'section-covers':
+      body = `The section "${conflict.section.label}" is already in your cart and includes "${conflict.pending.label}". You don't need to add it separately.`;
+      break;
+    case 'section-replaces':
+      body = `"${conflict.pending.label}" includes ${conflict.topics.length} sub-topic${conflict.topics.length === 1 ? '' : 's'} already in your cart. Replace ${conflict.topics.length === 1 ? 'it' : 'them'} with the whole section?`;
+      break;
+  }
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      className="fixed inset-0 z-[120] grid place-items-center bg-slate-900/40 p-4"
+      onClick={onDismiss}
+    >
+      <div
+        className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-lg"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start gap-3">
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-amber-50 text-amber-600 ring-1 ring-amber-100">
+            <AlertTriangle className="size-5" />
+          </span>
+          <div className="min-w-0">
+            <h2 className="flex items-center gap-1.5 text-base font-bold text-navy">
+              <Icon className="size-4 text-slate-400" /> {title}
+            </h2>
+            <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{body}</p>
+          </div>
+        </div>
+        <div className="mt-5 flex justify-end gap-2.5">
+          <button
+            type="button"
+            onClick={onDismiss}
+            className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+          >
+            {canReplace ? 'Keep current' : 'Got it'}
+          </button>
+          {canReplace ? (
+            <button
+              type="button"
+              onClick={onReplace}
+              className="rounded-full bg-navy px-4 py-2 text-sm font-bold text-white transition hover:bg-navy/90"
+            >
+              Replace
+            </button>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function useCart(): CartContextValue {
