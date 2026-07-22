@@ -238,7 +238,6 @@ export const TPO_NAV: NavSection[] = [
     items: [
       { label: 'Reports & Exports', href: '/tpo/reports', icon: FileText },
       { label: 'Subscription', href: '/tpo/subscription', icon: CreditCard },
-      { label: 'Cohort Access', href: '/tpo/billing', icon: Wallet },
     ],
   },
 ];
