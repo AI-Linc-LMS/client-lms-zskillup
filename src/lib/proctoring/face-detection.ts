@@ -87,23 +87,27 @@ export interface FaceProctorConfig {
 }
 
 export const DEFAULT_FACE_CONFIG: FaceProctorConfig = {
-  detectionInterval: 800,
+  // Stricter proctoring (#7). Face proctoring now runs ONLY on graded assessments
+  // (removed from the mock interview), so we can afford a faster, more sensitive
+  // cadence: check ~1.7x/sec, flag after fewer smoothing frames, and run the
+  // head-pose (looking away) + object (phone/2nd person) models more often.
+  detectionInterval: 600,
   minFaceSize: 20,
   maxFaceSize: 75,
-  lookingAwayThreshold: 0.3,
+  lookingAwayThreshold: 0.28,
   minConfidence: 0.4,
-  smoothFrameCount: 3,
-  poorLightingThreshold: 0.4,
-  minConfidenceForValidFace: 0.78,
+  smoothFrameCount: 2,
+  poorLightingThreshold: 0.42,
+  minConfidenceForValidFace: 0.8,
   minEyeSpreadRatio: 0.22,
-  startupWarmupMs: 5500,
+  startupWarmupMs: 5000,
   enableHeadPose: true,
-  poseIntervalTicks: 3,
-  pitchDeltaThreshold: 0.16,
+  poseIntervalTicks: 2,
+  pitchDeltaThreshold: 0.14,
   poseCalibrationSamples: 6,
   enableObjectDetection: true,
-  objectIntervalTicks: 6,
-  objectMinScore: 0.5,
+  objectIntervalTicks: 4,
+  objectMinScore: 0.45,
   identityThreshold: 0.34,
   identityStreak: 2,
 };

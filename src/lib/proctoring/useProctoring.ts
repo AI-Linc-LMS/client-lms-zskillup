@@ -54,6 +54,8 @@ export interface ProctoringController {
   micGranted: boolean;
   tabSwitches: number;
   fullscreenExits: number;
+  windowBlurs: number;
+  clipboardEvents: number;
   snapshotCount: number;
   faceStatus: FaceStatus | 'OFF';
   faceCount: number;
@@ -68,8 +70,9 @@ export interface ProctoringController {
 const SNAPSHOT_EVERY_MS = 15_000;
 const MAX_EVENTS = 120;
 const MAX_PENDING_SNAPSHOTS = 20;
-/** Don't re-log/re-warn the same face-violation type more often than this. */
-const FACE_VIOLATION_COOLDOWN_MS = 4_000;
+/** Don't re-log/re-warn the same face-violation type more often than this. Tightened
+ *  for stricter proctoring (#7) so a sustained violation re-flags sooner. */
+const FACE_VIOLATION_COOLDOWN_MS = 2_500;
 /** Cadence of the server-stamped heartbeat + violation flush. */
 const REPORT_EVERY_MS = 10_000;
 /** Cap violations carried in a single batch so the POST stays well under the body limit. */
@@ -118,6 +121,9 @@ export function useProctoring(
   const [micGranted, setMicGranted] = useState(false);
   const [tabSwitches, setTabSwitches] = useState(0);
   const [fullscreenExits, setFullscreenExits] = useState(0);
+  // Strict-proctoring signals (#7): window blur/minimize + copy/paste/cut.
+  const [windowBlurs, setWindowBlurs] = useState(0);
+  const [clipboardEvents, setClipboardEvents] = useState(0);
   const [snapshotCount, setSnapshotCount] = useState(0);
   const [faceStatus, setFaceStatus] = useState<FaceStatus | 'OFF'>('OFF');
   const [faceCount, setFaceCount] = useState(0);
@@ -162,6 +168,43 @@ export function useProctoring(
       warn('You exited fullscreen - please return to fullscreen.');
     }
   }, [logEvent, queueReport, warn]);
+
+  // Losing window focus WITHOUT the tab going hidden = minimized / alt-tabbed to
+  // another app (a tab switch fires visibilitychange, handled above). Defer a tick
+  // and only count it when the tab is still visible, so the two never double-count.
+  const onWindowBlur = useCallback(() => {
+    window.setTimeout(() => {
+      if (document.visibilityState === 'hidden') return;
+      setWindowBlurs((n) => n + 1);
+      logEvent('window_blur');
+      queueReport({
+        type: 'window_blur',
+        severity: 'high',
+        message: 'Left the assessment window (minimized or switched app)',
+        occurredAt: new Date().toISOString(),
+      });
+      warn('You left the assessment window - this is logged.');
+    }, 0);
+  }, [logEvent, queueReport, warn]);
+
+  // Copy / cut / paste during the assessment. Detected + logged (not blocked, so a
+  // legitimate coding-editor paste still works) and clearly warned.
+  const onClipboard = useCallback(
+    (e: Event) => {
+      const kind = e.type; // 'copy' | 'cut' | 'paste'
+      const label = kind.charAt(0).toUpperCase() + kind.slice(1);
+      setClipboardEvents((n) => n + 1);
+      logEvent(`clipboard_${kind}`);
+      queueReport({
+        type: `clipboard_${kind}`,
+        severity: kind === 'paste' ? 'high' : 'medium',
+        message: `${label} detected during the assessment`,
+        occurredAt: new Date().toISOString(),
+      });
+      warn(`${label} is flagged during a proctored assessment - this is logged.`);
+    },
+    [logEvent, queueReport, warn],
+  );
 
   /** Process one detection frame: update live status, and log/warn/snapshot new
    *  violations (cooldown-gated so a sustained state logs once, not every frame). */
@@ -271,6 +314,10 @@ export function useProctoring(
     }
     document.addEventListener('visibilitychange', onVisibility);
     document.addEventListener('fullscreenchange', onFullscreenChange);
+    window.addEventListener('blur', onWindowBlur);
+    document.addEventListener('copy', onClipboard);
+    document.addEventListener('cut', onClipboard);
+    document.addEventListener('paste', onClipboard);
     logEvent('session_start');
     snapTimer.current = setInterval(() => {
       const dataUrl = faceProctorRef.current?.snapshot();
@@ -289,7 +336,7 @@ export function useProctoring(
       const drained = pendingReportRef.current.splice(0, MAX_BATCH);
       onReportRef.current?.({ violations: drained });
     }, REPORT_EVERY_MS);
-  }, [enabled, onVisibility, onFullscreenChange, onFrame, logEvent, queueReport, warn]);
+  }, [enabled, onVisibility, onFullscreenChange, onWindowBlur, onClipboard, onFrame, logEvent, queueReport, warn]);
 
   const stop = useCallback(() => {
     setActive(false);
@@ -309,6 +356,10 @@ export function useProctoring(
     if (finalBatch.length) onReportRef.current?.({ violations: finalBatch });
     document.removeEventListener('visibilitychange', onVisibility);
     document.removeEventListener('fullscreenchange', onFullscreenChange);
+    window.removeEventListener('blur', onWindowBlur);
+    document.removeEventListener('copy', onClipboard);
+    document.removeEventListener('cut', onClipboard);
+    document.removeEventListener('paste', onClipboard);
     // Stop EVERY acquired track - the hook's stream AND any globally-stashed one
     // (opened by the device-check) which can diverge. Nulling the global alone
     // does NOT release the device, so its tracks must be stopped explicitly or
@@ -326,7 +377,7 @@ export function useProctoring(
     window.__assessmentStream = null;
     if (videoRef.current) videoRef.current.srcObject = null;
     if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
-  }, [onVisibility, onFullscreenChange]);
+  }, [onVisibility, onFullscreenChange, onWindowBlur, onClipboard]);
 
   // Re-attach the stream if the <video> mounts after start.
   useEffect(() => {
@@ -343,7 +394,10 @@ export function useProctoring(
       proctored: true,
       tabSwitches,
       fullscreenExits,
-      violations: tabSwitches + fullscreenExits + faceViolations,
+      // Total incidents across all channels. window-blur + clipboard are folded into
+      // the count and the events[] log (NOT new top-level fields) so the whitelisted
+      // ProctoringSummaryDto still accepts the payload.
+      violations: tabSwitches + fullscreenExits + faceViolations + windowBlurs + clipboardEvents,
       faceViolations,
       faceViolationsByType: { ...faceCountsRef.current },
       snapshotCount,
@@ -351,7 +405,7 @@ export function useProctoring(
       micGranted,
       events: eventsRef.current.slice(-MAX_EVENTS),
     }),
-    [tabSwitches, fullscreenExits, faceViolations, snapshotCount, cameraGranted, micGranted],
+    [tabSwitches, fullscreenExits, faceViolations, windowBlurs, clipboardEvents, snapshotCount, cameraGranted, micGranted],
   );
 
   return {
@@ -361,6 +415,8 @@ export function useProctoring(
     micGranted,
     tabSwitches,
     fullscreenExits,
+    windowBlurs,
+    clipboardEvents,
     snapshotCount,
     faceStatus,
     faceCount,
