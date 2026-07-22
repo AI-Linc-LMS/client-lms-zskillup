@@ -15,7 +15,7 @@ export const metadata = {
   description: 'Placement prep insights, company-wise guides, coding patterns, and success stories.',
 };
 
-const HERO_TOPICS = ['DSA', 'aptitude', 'TCS NQT', 'interviews', 'resumes', 'company drives'];
+const HERO_TOPICS = ['DSA', 'aptitude', 'TCS NQT', 'interviews', 'resumes', 'company assessments'];
 
 function fmtDate(iso: string | null) {
   if (!iso) return null;

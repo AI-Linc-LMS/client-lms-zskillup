@@ -24,7 +24,7 @@ import { getTopicAccuracy, type ApiTopicAccuracy } from '@/lib/api/practice';
  * the panels render an honest empty state instead of invented numbers.
  */
 
-/** Mastery band derived purely from a topic's accuracy - drives all coloring. */
+/** Mastery band derived purely from a topic's accuracy - assessments all coloring. */
 type Band = 'strong' | 'developing' | 'weak';
 
 interface BandTheme {

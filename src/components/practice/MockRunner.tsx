@@ -418,7 +418,7 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
         <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#ffc42d]">
-              {proctored ? 'ZSkillup placement assessment' : isCalibration ? 'ZSkillup placement readiness' : 'ZSkillup mock drive'}
+              {proctored ? 'ZSkillup placement assessment' : isCalibration ? 'ZSkillup placement readiness' : 'ZSkillup mock assessment'}
             </p>
             <h1 className="mt-3 text-3xl font-black leading-[1.08] tracking-tight sm:text-4xl sm:leading-[1.05] md:text-[52px]">
               {m.title}

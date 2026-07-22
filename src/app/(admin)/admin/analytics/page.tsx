@@ -87,7 +87,7 @@ export default function AdminAnalyticsPage() {
               ) : (
                 <div className="space-y-3">
                   {topCompanies.map((c) => (
-                    <ProgressRow key={c.id} label={c.name} value={c.registrations} total={regMax} color="#f5b400" hint={`${c.assessments} drives`} />
+                    <ProgressRow key={c.id} label={c.name} value={c.registrations} total={regMax} color="#f5b400" hint={`${c.assessments} assessments`} />
                   ))}
                 </div>
               )}

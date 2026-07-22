@@ -74,7 +74,7 @@ const inputCls =
 const PLATFORM = '__platform__';
 
 /** AI-assisted assessment builder wizard. Pass `editId` to edit an existing one.
- *  Pass `tpoCohorts` to run in TPO mode: the drive is confined to the caller's own
+ *  Pass `tpoCohorts` to run in TPO mode: the assessment is confined to the caller's own
  *  college (enforced server-side too), so the college picker + platform-wide option
  *  are hidden and cohorts come from the TPO's own list. */
 export function AssessmentWizard({
@@ -384,7 +384,7 @@ export function AssessmentWizard({
                 <select value={companyId} onChange={(e) => setCompanyId(e.target.value)} className={inputCls}>
                   <option value="">Select audience</option>
                   {!isTpo && <option value={PLATFORM}>🌐 Platform-wide (all students)</option>}
-                  {companies.map((c) => <option key={c.id} value={c.id}>{c.name} drive</option>)}
+                  {companies.map((c) => <option key={c.id} value={c.id}>{c.name} assessment</option>)}
                 </select>
               </label>
 

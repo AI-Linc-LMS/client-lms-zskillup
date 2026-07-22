@@ -28,7 +28,7 @@ const instrument = Instrument_Serif({
 export const metadata: Metadata = {
   title: 'Prephasz | ZSkillup',
   description:
-    'Real previous-year questions for TCS, Infosys, Wipro, Cognizant, Capgemini and Accenture. Live mock drives, expert instructors, and verified certificates accepted by 1,200+ campus placement cells.',
+    'Real previous-year questions for TCS, Infosys, Wipro, Cognizant, Capgemini and Accenture. Live mock assessments, expert instructors, and verified certificates accepted by 1,200+ campus placement cells.',
   icons: {
     // Theme-aware "Z" mark: black favicon on light browser tabs, white on dark.
     icon: [

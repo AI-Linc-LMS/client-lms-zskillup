@@ -17,7 +17,7 @@ import { AnimatedNumber } from '@/components/motion/primitives';
 import { getCompanyReadiness, type CompanyReadiness } from '@/lib/api/adaptive';
 
 /**
- * Per-band visual recipe. `from`/`to` drive gradient bars, icon chips and the
+ * Per-band visual recipe. `from`/`to` assessment gradient bars, icon chips and the
  * conic readiness ring; `glow` is the ambient blob; `text`/`badge` keep the
  * legible accents. Aurora depth = layered gradient + glow + ring, never a flat fill.
  */

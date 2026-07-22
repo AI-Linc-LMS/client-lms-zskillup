@@ -9,7 +9,7 @@ import { listCourses, type ApiCourseSummary } from '@/lib/api/catalog';
 import { CATEGORY_LABEL } from '@/lib/ui-maps';
 
 const DIFFICULTIES = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'] as const;
-const TYPES = ['Self-paced course', 'Mock drive', 'Live cohort', 'Drill set'];
+const TYPES = ['Self-paced course', 'Mock assessment', 'Live cohort', 'Drill set'];
 const RECRUITERS = ['TCS', 'Infosys', 'Wipro', 'Cognizant', 'Capgemini', 'Accenture', 'Amazon'];
 
 /**
@@ -21,7 +21,7 @@ const TABS: Array<{ label: string; category: ApiCourseSummary['category'] | 'ALL
   { label: 'Aptitude & Reasoning', category: 'APTITUDE' },
   { label: 'Programming & DSA', category: 'PROGRAMMING_DSA' },
   { label: 'Communication & HR', category: 'COMMUNICATION_HR' },
-  { label: 'Mock Drives', category: 'MOCK_DRIVE' },
+  { label: 'Mock Assessments', category: 'MOCK_DRIVE' },
 ];
 
 const HERO_STATS = [
@@ -51,7 +51,7 @@ export function PrepareHero() {
         </h1>
         <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-white/70">
           Structured preparation for TCS, Infosys, Wipro, Cognizant, Capgemini and Accenture. Real
-          previous-year questions, live mock drives, expert instructors, and verified certificates
+          previous-year questions, live mock assessments, expert instructors, and verified certificates
           accepted by 1,200+ campus placement cells.
         </p>
 

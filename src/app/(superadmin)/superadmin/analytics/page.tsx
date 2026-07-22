@@ -87,7 +87,7 @@ export default function SuperadminAnalyticsPage() {
                       value={c.registrations}
                       total={regMax}
                       color="#f5b400"
-                      hint={`${c.assessments} drives`}
+                      hint={`${c.assessments} assessments`}
                     />
                   ))}
                 </div>

@@ -354,7 +354,7 @@ export default function ProfilePage() {
               {v.yearOfStudy ? <Chip icon={CalendarClock}>Year {v.yearOfStudy}</Chip> : null}
               {v.passoutYear ? <Chip icon={GraduationCap}>Class of {v.passoutYear}</Chip> : null}
               {regs.length ? (
-                <Chip icon={Building2}>{regs.length} drive{regs.length === 1 ? '' : 's'}</Chip>
+                <Chip icon={Building2}>{regs.length} assessment{regs.length === 1 ? '' : 's'}</Chip>
               ) : null}
             </div>
           </div>
@@ -498,11 +498,11 @@ export default function ProfilePage() {
 
           <div className="rounded-3xl border border-slate-200 bg-white p-5">
             <h2 className="flex items-center gap-1.5 text-sm font-bold text-navy">
-              <Building2 className="size-4 text-orange" /> My drives
+              <Building2 className="size-4 text-orange" /> My assessments
             </h2>
             {regs.length === 0 ? (
               <p className="mt-2 text-xs leading-relaxed text-slate-600">
-                You haven&apos;t registered for any company drives yet.{' '}
+                You haven&apos;t registered for any company assessments yet.{' '}
                 <Link href="/dashboard/company" className="font-semibold text-orange hover:underline">Browse companies →</Link>
               </p>
             ) : (

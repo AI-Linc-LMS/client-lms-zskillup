@@ -24,7 +24,7 @@ export default function AdminScheduledAssessmentsPage() {
         icon={CalendarClock}
         eyebrow="Super Admin"
         title="Assessments"
-        description="Schedule a company drive's assessment. It blocks the calendar of every student registered for that company and triggers their reminders."
+        description="Schedule a company assessment's assessment. It blocks the calendar of every student registered for that company and triggers their reminders."
       />
 
       <Suspense

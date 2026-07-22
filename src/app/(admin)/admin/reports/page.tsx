@@ -101,7 +101,7 @@ export default function AdminReportsPage() {
           <ReportCard
             icon={Building2}
             title="Company Report"
-            desc="Per-company registrations, drives, and bank coverage."
+            desc="Per-company registrations, assessments, and bank coverage."
             meta={`${companies.length} companies`}
             onExport={exportCompanies}
           />
