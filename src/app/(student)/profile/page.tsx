@@ -28,6 +28,7 @@ import {
   newId,
   normalizeResume,
   resumeFromProfile,
+  type Education,
   type ResumeData,
   type TemplateKey,
 } from '@/components/resume/types';
@@ -157,8 +158,29 @@ function syncedResume(resume: ResumeData, v: Values, email: string): ResumeData 
       email: email || resume.basicInfo.email,
       phone: v.phone.trim() || resume.basicInfo.phone,
     },
+    education: foldEducation(resume, v),
     skills,
   };
+}
+
+/** Fold the Academic card (degree / college / passout) into the primary education
+ *  entry, preserving GPA/location/description and any additional entries. */
+function foldEducation(resume: ResumeData, v: Values): Education[] {
+  const degree = v.course.trim();
+  const institution = v.collegeName.trim();
+  const hasAcademic = degree || institution || v.passoutYear;
+  if (!hasAcademic && resume.education.length === 0) return resume.education;
+  const edu = [...resume.education];
+  const primary: Education = edu[0] ?? {
+    id: newId(), degree: '', institution: '', location: '', startDate: '', endDate: '', gpa: '', description: '',
+  };
+  edu[0] = {
+    ...primary,
+    degree: degree || primary.degree,
+    institution: institution || primary.institution,
+    endDate: v.passoutYear ? `${v.passoutYear}-06` : primary.endDate,
+  };
+  return edu;
 }
 
 /** Profile view + edit - grouped sections (Personal / Academic / Career / Resume),
@@ -292,6 +314,20 @@ export default function ProfilePage() {
   /** Patch a field of the résumé's basicInfo (headline, bio, links) from the profile. */
   const patchBasic = (p: Partial<ResumeData['basicInfo']>) =>
     setResume((r) => (r ? { ...r, basicInfo: { ...r.basicInfo, ...p } } : r));
+
+  /** Patch the primary education entry (GPA / coursework) - the Academic card owns
+   *  the degree/college/passout; these enrich the SAME primary résumé entry. */
+  const patchEdu0 = (p: Partial<Education>) =>
+    setResume((r) => {
+      if (!r) return r;
+      const edu = [...r.education];
+      edu[0] = {
+        ...(edu[0] ?? { id: newId(), degree: '', institution: '', location: '', startDate: '', endDate: '', gpa: '', description: '' }),
+        ...p,
+      };
+      return { ...r, education: edu };
+    });
+  const edu0 = resume?.education?.[0];
 
   /** Persist the résumé blob via the FREE primary-résumé upsert (never paywalled). */
   const persistResume = async (next: ResumeData) => {
@@ -492,7 +528,7 @@ export default function ProfilePage() {
             </div>
           </SectionCard>
 
-          <SectionCard data-tour="profile:academic" icon={GraduationCap} title="Academic" subtitle="Your college and where you are in your degree.">
+          <SectionCard data-tour="profile:academic" icon={GraduationCap} title="Education" subtitle="Your degree and college — powers your college leaderboard and your resume.">
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Course / degree" done={!!v.course.trim()}>
                 <input
@@ -545,6 +581,22 @@ export default function ProfilePage() {
                   ))}
                 </select>
               </Field>
+              <Field label="GPA / CGPA">
+                <input value={edu0?.gpa ?? ''} onChange={(e) => patchEdu0({ gpa: e.target.value })} className={inputCls} placeholder="e.g. 8.7/10" />
+              </Field>
+              <Field label="Location">
+                <input value={edu0?.location ?? ''} onChange={(e) => patchEdu0({ location: e.target.value })} className={inputCls} placeholder="e.g. Trichy, India" />
+              </Field>
+              <div className="space-y-1.5 sm:col-span-2">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Relevant coursework <span className="font-medium normal-case tracking-normal text-slate-400">(optional)</span></p>
+                <textarea
+                  value={edu0?.description ?? ''}
+                  onChange={(e) => patchEdu0({ description: e.target.value })}
+                  rows={2}
+                  className={cn(inputCls, 'h-auto py-2 leading-relaxed')}
+                  placeholder="Data Structures, DBMS, Operating Systems, Distributed Systems…"
+                />
+              </div>
             </div>
           </SectionCard>
 
@@ -622,7 +674,7 @@ export default function ProfilePage() {
                   </div>
                 </SectionCard>
 
-                <ResumeForm data={resume} onChange={setResume} omit={['basicInfo', 'skills']} variant="profile" />
+                <ResumeForm data={resume} onChange={setResume} omit={['basicInfo', 'skills', 'education']} variant="profile" />
 
                 <div className="flex justify-end px-1">
                   <Link href="/resume-builder" className="text-xs font-semibold text-slate-500 transition-colors hover:text-navy">

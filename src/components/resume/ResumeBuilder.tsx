@@ -101,7 +101,7 @@ export function ResumeBuilder() {
       /* private mode / SSR */
     }
     getMe()
-      .then((me) => {
+      .then(async (me) => {
         setUserId(me.id);
         let hasDraft = false;
         try {
@@ -115,10 +115,25 @@ export function ResumeBuilder() {
         } catch {
           /* ignore corrupt draft */
         }
-        // No per-user draft → seed the editor from the student's profile so
-        // contact + education + skills are prefilled instead of a blank page.
+        // No per-user draft → open with the student's SAVED primary résumé (the same
+        // record the profile page maintains, with all their professional data), so
+        // the builder never shows a bare seed while real data sits on the server.
+        // Only when they have no résumé yet do we seed contact + education + skills.
         if (!hasDraft) {
-          setData((prev) => (isResumeEmpty(prev) ? resumeFromProfile(me) : prev));
+          try {
+            const primary = (await listResumes())[0];
+            const r = primary ? await getResume(primary.id) : null;
+            if (r) {
+              setData((prev) => (isResumeEmpty(prev) ? normalizeResume(r.data) : prev));
+              setTemplate(isTemplateKey(r.template) ? r.template : 'modern');
+              setCurrentId(r.id);
+              setSavedTitle(r.title);
+            } else {
+              setData((prev) => (isResumeEmpty(prev) ? resumeFromProfile(me) : prev));
+            }
+          } catch {
+            setData((prev) => (isResumeEmpty(prev) ? resumeFromProfile(me) : prev));
+          }
         }
         setHydrated(true);
       })
@@ -245,6 +260,22 @@ export function ResumeBuilder() {
 
   const fillFromProfile = async () => {
     try {
+      // The profile page maintains the student's PRIMARY résumé - "From profile"
+      // must load THAT (everything they entered on /profile: experience, projects,
+      // education, links, …), not re-seed from the bare account fields. Only when
+      // they have no résumé yet do we fall back to seeding contact + education.
+      const list = await listResumes();
+      const primary = list[0];
+      if (primary) {
+        const r = await getResume(primary.id);
+        setData(normalizeResume(r.data));
+        setTemplate(isTemplateKey(r.template) ? r.template : 'modern');
+        setTitle(r.title);
+        setSavedTitle(r.title);
+        setCurrentId(r.id);
+        flash('Loaded everything from your profile.');
+        return;
+      }
       const me = await getMe();
       setData(resumeFromProfile(me));
       setCurrentId(null);
