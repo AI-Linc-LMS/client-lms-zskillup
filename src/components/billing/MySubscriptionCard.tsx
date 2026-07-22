@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ArrowRight, Crown, Sparkles, Ticket } from 'lucide-react';
 import { getMySubscription } from '@/lib/api/payments';
 import type { MySubscriptionDto } from '@/shared/dto/payments.dto';
-import { EntitlementScope } from '@/shared/enums';
+import { EntitlementScope, EntitlementSource } from '@/shared/enums';
 import { cn } from '@/lib/utils';
 
 /**
@@ -31,8 +31,12 @@ export function MySubscriptionCard() {
   const platform = sub?.entitlements.find(
     (e) => e.scopeType === EntitlementScope.PLATFORM && e.status === 'ACTIVE',
   );
-  const activeCount = (sub?.entitlements ?? []).filter((e) => e.status === 'ACTIVE').length;
+  const activeEnts = (sub?.entitlements ?? []).filter((e) => e.status === 'ACTIVE');
+  const activeCount = activeEnts.length;
   const isPremium = (sub?.hasPlatform ?? false) || activeCount > 0;
+  // Admin-granted (complimentary) access - shown so the student's own account
+  // reflects the "Complimentary / Admin Granted" status, not just the admin console.
+  const isComplimentary = activeEnts.some((e) => e.source === EntitlementSource.ADMIN_GRANT);
 
   return (
     <div
@@ -43,7 +47,11 @@ export function MySubscriptionCard() {
     >
       <h2 className="flex items-center gap-1.5 text-sm font-bold text-navy">
         <Ticket className="size-4 text-[#f5b400]" /> My subscription
-        {isPremium ? (
+        {isComplimentary ? (
+          <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-emerald-700 ring-1 ring-inset ring-emerald-200">
+            <Crown className="size-2.5" strokeWidth={2.75} /> Complimentary
+          </span>
+        ) : isPremium ? (
           <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#171717]">
             <Crown className="size-2.5" strokeWidth={2.75} /> Premium
           </span>
@@ -58,7 +66,12 @@ export function MySubscriptionCard() {
             <Sparkles className="size-4 text-[#f5b400]" /> Full platform
           </p>
           <p className="mt-0.5 text-xs text-slate-600">
-            {platform?.daysRemaining != null ? `${platform.daysRemaining} days remaining` : 'Active'}
+            {platform?.daysRemaining != null
+              ? `${platform.daysRemaining} days remaining`
+              : isComplimentary
+                ? 'Lifetime access'
+                : 'Active'}
+            {isComplimentary ? ' · granted by admin' : ''}
           </p>
         </div>
       ) : activeCount > 0 ? (

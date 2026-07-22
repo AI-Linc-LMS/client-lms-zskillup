@@ -447,30 +447,49 @@ export function AssessmentWizard({
                   </span>
                 </label>
               ) : (
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <label className="block">
-                    <span className={labelCls}>College (optional)</span>
-                    <select value={collegeId} onChange={(e) => setCollegeId(e.target.value)} className={inputCls}>
-                      <option value="">All colleges</option>
-                      {colleges.map((c) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="block">
-                    <span className={labelCls}>Cohort / batch (optional)</span>
-                    <select
-                      value={cohortId}
-                      onChange={(e) => setCohortId(e.target.value)}
-                      disabled={!collegeId}
-                      className={cn(inputCls, !collegeId && 'cursor-not-allowed opacity-50')}
+                <div className="space-y-2">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <label className="block">
+                      <span className={labelCls}>College (optional)</span>
+                      <select value={collegeId} onChange={(e) => setCollegeId(e.target.value)} className={inputCls}>
+                        <option value="">All colleges</option>
+                        {colleges.map((c) => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="block">
+                      <span className={labelCls}>Cohort / batch (optional)</span>
+                      <select
+                        value={cohortId}
+                        onChange={(e) => setCohortId(e.target.value)}
+                        disabled={!collegeId}
+                        className={cn(inputCls, !collegeId && 'cursor-not-allowed opacity-50')}
+                      >
+                        <option value="">{collegeId ? 'All cohorts in this college' : 'Select a college first'}</option>
+                        {cohortOptions.map((c) => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                  {/* Discoverability (#2): cohorts are CREATED under Colleges, not here.
+                      Point admins straight to the create/import flow (new tab keeps the
+                      in-progress assessment draft). */}
+                  {collegeId ? (
+                    <a
+                      href={`/admin/colleges/${collegeId}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-orange hover:underline"
                     >
-                      <option value="">{collegeId ? 'All cohorts in this college' : 'Select a college first'}</option>
-                      {cohortOptions.map((c) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
-                      ))}
-                    </select>
-                  </label>
+                      + Create or manage cohorts (add students / import CSV) for this college →
+                    </a>
+                  ) : (
+                    <p className="text-[11px] text-slate-500">
+                      To make a cohort, open <span className="font-semibold text-navy">Admin → Colleges</span> → a college → <span className="font-semibold text-navy">Cohorts</span> (create, add students, or import CSV), then pick it here.
+                    </p>
+                  )}
                 </div>
               )}
               <div className="grid gap-4 sm:grid-cols-3">

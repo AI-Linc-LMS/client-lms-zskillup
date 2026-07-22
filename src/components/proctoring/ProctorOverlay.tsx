@@ -3,9 +3,11 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   AlertTriangle,
+  ClipboardX,
   Maximize2,
   Mic,
   MicOff,
+  Minimize2,
   Repeat,
   ScanFace,
   Video,
@@ -32,6 +34,8 @@ export function ProctorOverlay({ controller }: { controller: ProctoringControlle
     micGranted,
     tabSwitches,
     fullscreenExits,
+    windowBlurs,
+    clipboardEvents,
     faceStatus,
     faceCount,
     faceViolations,
@@ -81,22 +85,32 @@ export function ProctorOverlay({ controller }: { controller: ProctoringControlle
             </span>
             <span className="inline-flex items-center gap-0.5" title="Tab switches"><Repeat className="size-3" /> {tabSwitches}</span>
             <span className="inline-flex items-center gap-0.5" title="Fullscreen exits"><Maximize2 className="size-3" /> {fullscreenExits}</span>
+            <span className="inline-flex items-center gap-0.5" title="Left the window / minimized"><Minimize2 className="size-3" /> {windowBlurs}</span>
+            <span className="inline-flex items-center gap-0.5" title="Copy / paste flags"><ClipboardX className="size-3" /> {clipboardEvents}</span>
           </span>
         </div>
       </div>
 
-      {/* warn-only toast */}
+      {/* Prominent, hard-to-miss violation warning (top-center) - #7. */}
       <AnimatePresence>
         {lastWarning ? (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="fixed bottom-[10.5rem] left-4 z-[80]"
+            initial={{ opacity: 0, y: -16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -16, scale: 0.96 }}
+            transition={{ type: 'spring', stiffness: 420, damping: 30 }}
+            className="pointer-events-none fixed left-1/2 top-4 z-[95] w-[min(92vw,34rem)] -translate-x-1/2"
+            role="alert"
+            aria-live="assertive"
           >
-            <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2 text-[12px] font-medium text-amber-700 shadow-sm">
-              <AlertTriangle className="size-4 shrink-0" />
-              {lastWarning}
+            <div className="flex items-center gap-3 rounded-2xl border border-rose-400/50 bg-rose-600 px-4 py-3 text-white shadow-lg ring-1 ring-rose-400/40">
+              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/15">
+                <AlertTriangle className="size-5" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[11px] font-black uppercase tracking-widest text-rose-100">Proctoring alert</p>
+                <p className="text-sm font-bold leading-snug">{lastWarning}</p>
+              </div>
             </div>
           </motion.div>
         ) : null}
