@@ -1037,6 +1037,14 @@ function MockRunningView({
                 {counts.notAnswered + counts.notVisited} question(s) still unanswered.
               </p>
             ) : null}
+            {/* Surface a failed submit HERE (the modal is above the runner, so an
+                error rendered behind it would be invisible - which reads as
+                "submit does nothing"). */}
+            {error ? (
+              <p role="alert" className="mt-3 rounded-md bg-red-50 px-3 py-2 text-xs font-medium text-red-700 ring-1 ring-red-200">
+                {error}
+              </p>
+            ) : null}
             <div className="mt-5 flex items-center justify-end gap-3">
               <Button variant="outline" size="sm" onClick={() => setConfirming(false)} disabled={submitting}>
                 Keep going
