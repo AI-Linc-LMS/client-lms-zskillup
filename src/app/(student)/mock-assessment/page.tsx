@@ -9,7 +9,7 @@ import { Reveal } from '@/components/motion/primitives';
 /**
  * Mock Assessment (Mode 3) - student-assembled, non-adaptive, PROCTORED practice
  * assessments. Pick sections/topics, set size + duration, and run under the same
- * proctored assessment UI as the real drives. Free users get one complimentary
+ * proctored assessment UI as the real assessments. Free users get one complimentary
  * mock (enforced server-side); premium unlocks unlimited attempts.
  */
 export default function MockAssessmentPage() {
@@ -35,7 +35,7 @@ export default function MockAssessmentPage() {
             <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Build your own mock, exam-style</h1>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/60">
               Choose the sections and topics you want, set the length, and sit a full proctored mock -
-              the same experience as a real drive, just for practice.
+              the same experience as a real assessment, just for practice.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Feature icon={ShieldCheck} text="Camera-proctored, full-screen" />

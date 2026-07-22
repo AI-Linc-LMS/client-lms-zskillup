@@ -248,7 +248,7 @@ export default function TpoExecutiveDashboard() {
       <BentoCard
         n={6}
         title="Assessment Center"
-        subtitle="Create sectional or company drives, schedule them, and track attendance & results."
+        subtitle="Create sectional or company assessments, schedule them, and track attendance & results."
         action={
           <Button asChild size="sm">
             <Link href="/tpo/assessments">

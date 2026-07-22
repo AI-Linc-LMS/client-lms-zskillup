@@ -116,7 +116,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         <div className="mt-14 overflow-hidden rounded-[var(--radius-card-lg)] border border-[var(--color-line)] bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] p-7 text-white sm:p-9">
           <h3 className="text-xl font-extrabold tracking-tight">Put this into practice</h3>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/70">
-            Drill these exact patterns with adaptive practice, timed mocks and company-wise drives on prephasz.
+            Drill these exact patterns with adaptive practice, timed mocks and company-wise assessments on prephasz.
           </p>
           <Link
             href="/signup"

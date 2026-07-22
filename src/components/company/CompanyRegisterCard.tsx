@@ -21,7 +21,7 @@ import { AuroraBackground } from '@/components/motion/primitives';
 type Phase = 'loading' | 'guest' | 'idle' | 'registered';
 
 /**
- * "Register for this drive" card on the company hub (assessment lifecycle P1).
+ * "Register for this assessment" card on the company hub (assessment lifecycle P1).
  * Shows a confirmation dialog, then a success state. Logged-out visitors (the
  * hub is public) get a sign-in prompt instead.
  */
@@ -125,7 +125,7 @@ export function CompanyRegisterCard({
               <p className="mt-1 text-xs leading-relaxed text-white/65">
                 {justRegistered
                   ? `Registration successful - you're in for ${companyName}. Any scheduled assessment will appear on your calendar.`
-                  : `You're registered for the ${companyName} drive. Watch your calendar for the assessment slot.`}
+                  : `You're registered for the ${companyName} assessment. Watch your calendar for the assessment slot.`}
               </p>
               <button
                 type="button"
@@ -138,9 +138,9 @@ export function CompanyRegisterCard({
             </>
           ) : phase === 'guest' ? (
             <>
-              <p className="mt-3 text-sm font-bold">Register for this drive</p>
+              <p className="mt-3 text-sm font-bold">Register for this assessment</p>
               <p className="mt-1 text-xs leading-relaxed text-white/65">
-                Sign in to register for the {companyName} drive and get your assessment scheduled.
+                Sign in to register for the {companyName} assessment and get your assessment scheduled.
               </p>
               <Link
                 href={`/login?redirect=/dashboard/company/${companySlug}`}
@@ -151,9 +151,9 @@ export function CompanyRegisterCard({
             </>
           ) : (
             <>
-              <p className="mt-3 text-sm font-bold">Register for this drive</p>
+              <p className="mt-3 text-sm font-bold">Register for this assessment</p>
               <p className="mt-1 text-xs leading-relaxed text-white/65">
-                Lock in your spot for the {companyName} hiring drive. We&apos;ll schedule your
+                Lock in your spot for the {companyName} hiring assessment. We&apos;ll schedule your
                 assessment and remind you before it starts.
               </p>
               <button
@@ -229,7 +229,7 @@ export function CompanyRegisterCard({
                       Confirm registration
                     </h3>
                     <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
-                      You&apos;re about to register for the <strong>{companyName}</strong> hiring drive.
+                      You&apos;re about to register for the <strong>{companyName}</strong> hiring assessment.
                       Once registered, your assessment slot (when scheduled) will be blocked on your
                       calendar and you&apos;ll get reminders before it starts.
                     </p>

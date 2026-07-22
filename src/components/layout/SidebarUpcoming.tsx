@@ -19,12 +19,12 @@ function dueLabel(iso: string): string {
 
 /**
  * Compact upcoming-assessments card (students). Lives in the dashboard right rail
- * under the skill profile; live drives are highlighted and start in one tap.
+ * under the skill profile; live assessments are highlighted and start in one tap.
  * Hidden when the student has nothing scheduled.
  */
 export function SidebarUpcoming() {
   const [items, setItems] = useState<ApiScheduledAssessment[] | null>(null);
-  // mockTestIds the student has already finalized - a completed live drive drops
+  // mockTestIds the student has already finalized - a completed live assessment drops
   // its one-tap Start (the backend rejects a second attempt) and reads "Done".
   const [done, setDone] = useState<Set<string>>(new Set());
 

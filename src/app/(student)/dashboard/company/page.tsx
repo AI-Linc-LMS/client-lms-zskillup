@@ -53,7 +53,7 @@ export default async function CompaniesPage() {
             </h1>
             <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-white/65 sm:text-base">
               Pick a recruiter and follow a guided track - process overview, topic-wise practice
-              from the real question bank, and timed mocks pattern-matched to the actual drive.
+              from the real question bank, and timed mocks pattern-matched to the actual assessment.
             </p>
 
             {stats ? (

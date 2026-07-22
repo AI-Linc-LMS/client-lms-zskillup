@@ -93,7 +93,7 @@ export default function AssessmentCenterPage() {
       .catch(() => setCodingTopics([]));
   }, [form.mode, form.companySlug]);
 
-  // Live "questions available" for the current selection (debounced), so a drive is
+  // Live "questions available" for the current selection (debounced), so an assessment is
   // never built blind or short of the requested count.
   useEffect(() => {
     if (!showForm || (form.mode === 'COMPANY' && !form.companySlug.trim())) {
@@ -207,7 +207,7 @@ export default function AssessmentCenterPage() {
         icon={ClipboardCheck}
         eyebrow="Placement Office"
         title="Assessment Center"
-        description="Schedule proctored MCQ and coding drives for your batches, then release results to students."
+        description="Schedule proctored MCQ and coding assessments for your batches, then release results to students."
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-bold text-white/70 ring-1 ring-inset ring-white/15">
@@ -270,7 +270,7 @@ export default function AssessmentCenterPage() {
           )}
           {/* Assessment rounds - MCQ and/or a technical coding round. Coding used to be
               hidden behind the count field defaulting to 0; make it a first-class,
-              discoverable choice for BOTH sectional and company-wise drives. */}
+              discoverable choice for BOTH sectional and company-wise assessments. */}
           <div className="sm:col-span-2 lg:col-span-3">
             <span className="text-xs font-semibold text-slate-600">Assessment rounds</span>
             <div className="mt-1.5 flex flex-wrap gap-2">
@@ -305,7 +305,7 @@ export default function AssessmentCenterPage() {
             </div>
             <p className="mt-1.5 text-[11px] text-slate-500">
               Run MCQs, a technical coding round, or both - a coding round samples problems from the
-              {form.mode === 'COMPANY' ? " company's" : ''} coding bank (Judge0-graded), for both sectional and company-wise drives.
+              {form.mode === 'COMPANY' ? " company's" : ''} coding bank (Judge0-graded), for both sectional and company-wise assessments.
             </p>
           </div>
 
@@ -320,7 +320,7 @@ export default function AssessmentCenterPage() {
             </div>
           )}
 
-          {/* Coding topics - only when the drive includes coding questions. Scopes
+          {/* Coding topics - only when the assessment includes coding questions. Scopes
               which coding topics (tags) the coding problems are sampled from. */}
           {wantsCoding && (
             <div className="sm:col-span-2 lg:col-span-3">
@@ -424,7 +424,7 @@ export default function AssessmentCenterPage() {
               {(avail.mcqAvailable < (Number(form.mcqCount) || 0) ||
                 avail.codingAvailable < (Number(form.codingCount) || 0)) && (
                 <span className="mt-1 block font-semibold">
-                  You requested more than the bank has - the drive will include only what&apos;s available. Lower the
+                  You requested more than the bank has - the assessment will include only what&apos;s available. Lower the
                   count or widen the scope.
                 </span>
               )}
@@ -443,7 +443,7 @@ export default function AssessmentCenterPage() {
           <h2 className="text-sm font-bold text-navy">Scheduled Assessments</h2>
         </div>
         {(data?.assessments.length ?? 0) === 0 ? (
-          <p className="px-5 py-10 text-center text-sm text-slate-500">No assessments yet. Create your first drive above.</p>
+          <p className="px-5 py-10 text-center text-sm text-slate-500">No assessments yet. Create your first assessment above.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[820px] text-sm">

@@ -8,7 +8,7 @@ import { getAdminCompanyStats, type AdminCompanyStat } from '@/lib/api/admin';
 const BAR_GRAD = 'linear-gradient(90deg,#ffd24d,#f5b400)';
 
 /**
- * Super-admin dashboard charts: per-company registrations + active drives, and
+ * Super-admin dashboard charts: per-company registrations + active assessments, and
  * question-bank coverage - rendered as animated bars (no chart dependency).
  */
 export function CompanyStatsCharts() {
@@ -47,7 +47,7 @@ export function CompanyStatsCharts() {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Kpi icon={Building2} label="Companies" value={stats.length} tone="text-navy" />
         <Kpi icon={Users} label="Registrations" value={totalReg} tone="text-[#1a1a1a]" />
-        <Kpi icon={CalendarClock} label="Active drives" value={totalDrives} tone="text-violet-600" />
+        <Kpi icon={CalendarClock} label="Active assessments" value={totalDrives} tone="text-violet-600" />
         <Kpi
           icon={ClipboardList}
           label="Bank questions"
@@ -70,7 +70,7 @@ export function CompanyStatsCharts() {
                   <span className="font-bold tabular-nums text-slate-600">
                     {c.registrations}
                     {c.assessments > 0 ? (
-                      <span className="ml-2 font-medium text-violet-500">· {c.assessments} drive{c.assessments === 1 ? '' : 's'}</span>
+                      <span className="ml-2 font-medium text-violet-500">· {c.assessments} assessment{c.assessments === 1 ? '' : 's'}</span>
                     ) : null}
                   </span>
                 </div>

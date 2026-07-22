@@ -190,7 +190,7 @@ export default function OnboardingPage() {
             </h1>
             <p className="mt-0.5 text-sm text-slate-600">
               {step === 2
-                ? 'We use this to surface drives and benchmarks for your campus.'
+                ? 'We use this to surface assessments and benchmarks for your campus.'
                 : step === 3
                   ? 'This tailors your dashboard, recommended roles, and skill tracking.'
                   : 'Choose all that interest you - we personalise your roadmap to these.'}

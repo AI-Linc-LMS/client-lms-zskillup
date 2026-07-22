@@ -306,7 +306,7 @@ function EmptyState({ reduce }: { reduce: boolean }) {
 
       <p className="relative mt-4 text-sm font-bold text-navy">You&apos;re all caught up</p>
       <p className="relative mx-auto mt-1 max-w-[15rem] text-xs leading-relaxed text-slate-500">
-        Badges, quest results, and drive invites will land here.
+        Badges, quest results, and assessment invites will land here.
       </p>
 
       {/* preview chips of what's coming - gradient icon fills */}
@@ -314,7 +314,7 @@ function EmptyState({ reduce }: { reduce: boolean }) {
         {[
           { icon: Award, from: '#34d399', to: '#059669', label: 'Badges' },
           { icon: Trophy, from: '#f5c451', to: '#e0a91b', label: 'Quests' },
-          { icon: Target, from: '#7c6cf5', to: '#5b3bf5', label: 'Drives' },
+          { icon: Target, from: '#7c6cf5', to: '#5b3bf5', label: 'Assessments' },
         ].map(({ icon: Icon, from, to, label }) => (
           <span
             key={label}

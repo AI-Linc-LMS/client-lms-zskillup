@@ -61,7 +61,7 @@ function parseHeroStat(value: string): { to: number; separator: string; suffix: 
 
 /** The eight modules that make up the platform (was four). */
 const MODULES = [
-  { icon: Compass, title: 'Company-specific drives', body: 'Practice company-specific questions based on the latest placement patterns and previous-year questions.' },
+  { icon: Compass, title: 'Company-specific assessments', body: 'Practice company-specific questions based on the latest placement patterns and previous-year questions.' },
   { icon: Zap, title: 'Adaptive practice', body: 'Questions automatically adjust to your skill level so you keep improving with every practice session.' },
   { icon: ClipboardList, title: 'Timed mock assessments', body: 'Take mock tests that feel just like real placement exams with actual timing and question patterns.' },
   { icon: MessageSquare, title: 'AI mock interviews', body: 'Practice interviews with AI and receive instant feedback on your communication, confidence, and interview skills.' },
@@ -487,7 +487,7 @@ export default async function HomePage() {
                 <ul className="relative mt-6 space-y-5">
                   {[
                     { icon: Brain, t: 'Adaptive practice', d: 'Questions that adjust to your level, section by section.' },
-                    { icon: Compass, t: 'Company-specific drives', d: 'Pattern-matched paths for TCS, Infosys, Accenture and more.' },
+                    { icon: Compass, t: 'Company-specific assessments', d: 'Pattern-matched paths for TCS, Infosys, Accenture and more.' },
                     { icon: ClipboardList, t: 'Timed mock assessments', d: 'Full-length mocks that mirror the real paper and the clock.' },
                     { icon: LineChart, t: 'Placement readiness', d: 'Track accuracy, speed and readiness as your scores climb.' },
                   ].map(({ icon: Icon, t, d }) => (

@@ -15,7 +15,7 @@ import { getMockHistory } from '@/lib/api/mocks';
  */
 export function LiveAssessmentBanner() {
   const [schedule, setSchedule] = useState<ApiScheduledAssessment[] | null>(null);
-  // mockTestId → latest finalized attemptId, so a drive the student has already
+  // mockTestId → latest finalized attemptId, so an assessment the student has already
   // completed flips from "Start now" to "View result" (the backend allows only
   // one attempt per assessment and rejects a re-start).
   const [attempts, setAttempts] = useState<Map<string, string>>(new Map());
@@ -55,7 +55,7 @@ export function LiveAssessmentBanner() {
 
   if (live.length === 0) return null;
 
-  // Surface a drive the student can still take before one they've finished, so
+  // Surface an assessment the student can still take before one they've finished, so
   // the banner keeps nudging toward the actionable assessment.
   const a = live.find((x) => x.mockTestId && !attempts.has(x.mockTestId)) ?? live[0];
   const doneAttemptId = a.mockTestId ? attempts.get(a.mockTestId) : undefined;

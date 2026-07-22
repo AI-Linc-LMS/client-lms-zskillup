@@ -254,7 +254,7 @@ export function ExploreMenu() {
                         prephasz Plus
                       </span>
                       <p className="mt-3 text-sm font-semibold leading-snug text-white">
-                        Practice like the real drive.
+                        Practice like the real assessment.
                       </p>
                       <ul className="mt-3 space-y-1.5">
                         {PLUS_PERKS.map((perk) => (

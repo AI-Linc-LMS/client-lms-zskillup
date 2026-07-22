@@ -54,9 +54,9 @@ function countdown(iso: string): string {
   return 'starting now';
 }
 
-/** Student assessment calendar (assessment lifecycle, Phase 2). Scheduled drives
+/** Student assessment calendar (assessment lifecycle, Phase 2). Scheduled assessments
  *  for the companies the student registered for - a premium navy hero with live
- *  stats, an interactive month grid, and a timeline of upcoming drives. */
+ *  stats, an interactive month grid, and a timeline of upcoming assessments. */
 export default function AssessmentsPage() {
   const [items, setItems] = useState<ApiScheduledAssessment[] | null>(null);
   const [cursor, setCursor] = useState(() => {
@@ -64,7 +64,7 @@ export default function AssessmentsPage() {
     return { year: n.getFullYear(), month: n.getMonth() };
   });
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
-  // mockTestId → finalized attemptId, so a completed drive shows "View result"
+  // mockTestId → finalized attemptId, so a completed assessment shows "View result"
   // instead of "Start" (only one attempt per assessment is allowed server-side).
   const [attempts, setAttempts] = useState<Map<string, string>>(new Map());
 
@@ -142,20 +142,20 @@ export default function AssessmentsPage() {
               </span>
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-white/50">
-                  Your drives · 2026
+                  Your assessments · 2026
                 </p>
                 <h1 className="text-2xl font-black tracking-tight sm:text-[28px]">Assessment calendar</h1>
               </div>
             </div>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/60">
-              Every drive for the companies you&apos;ve registered for, blocked on your calendar so
+              Every assessment for the companies you&apos;ve registered for, blocked on your calendar so
               nothing slips. Start live assessments straight from here.
             </p>
 
             <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
               <HeroStat
                 icon={CalendarClock}
-                label="Next drive"
+                label="Next assessment"
                 value={stats.next ? countdown(stats.next.scheduledAt) : '-'}
                 sub={stats.next?.companyName ?? 'Nothing scheduled'}
               />
@@ -296,7 +296,7 @@ export default function AssessmentsPage() {
 
               <div className="mt-4 flex items-center gap-4 border-t border-slate-100 pt-3 text-[11px] font-medium text-slate-500">
                 <span className="flex items-center gap-1.5">
-                  <span className="size-2 rounded-full bg-orange" /> Drive scheduled
+                  <span className="size-2 rounded-full bg-orange" /> Assessment scheduled
                 </span>
                 <span className="flex items-center gap-1.5">
                   <span className="size-2 rounded-md bg-navy" /> Today
@@ -317,7 +317,7 @@ export default function AssessmentsPage() {
           {/* ── Upcoming timeline ───────────────────────────────────────── */}
           <aside data-tour="assess:upcoming" className="order-1 space-y-3">
             <h2 className="px-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-              {selectedDay ? fmtDate(`${selectedDay}T00:00:00`) : 'Upcoming drives'}
+              {selectedDay ? fmtDate(`${selectedDay}T00:00:00`) : 'Upcoming assessments'}
             </h2>
             {upcoming.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center">
@@ -326,7 +326,7 @@ export default function AssessmentsPage() {
                 </span>
                 <p className="mt-3 text-sm font-bold text-navy">No assessments scheduled</p>
                 <p className="mt-1 text-xs text-slate-600">
-                  Register for a company drive to see it blocked here.
+                  Register for a company assessment to see it blocked here.
                 </p>
                 <Link
                   href="/dashboard/company"
@@ -345,7 +345,7 @@ export default function AssessmentsPage() {
                   const live = Date.now() >= startMs && Date.now() <= endMs;
                   // Leaderboard is only meaningful once the assessment window has
                   // fully closed and submissions are in - hiding it for upcoming/
-                  // live drives (a ranking before anyone has finished is misleading).
+                  // live assessments (a ranking before anyone has finished is misleading).
                   const ended = Date.now() > endMs;
                   return (
                     <StaggerItem key={it.id}>

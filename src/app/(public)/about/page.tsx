@@ -206,7 +206,7 @@ export default function AboutPage() {
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-600">
             Create a free account in under a minute. We&apos;ll match you to the right tracks for
-            your campus drives.
+            your campus assessments.
           </p>
           <Button size="lg" className="mt-6" asChild>
             <Link href="/signup">

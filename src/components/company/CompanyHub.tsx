@@ -124,7 +124,7 @@ const READINESS_TIP = {
  * - totalRounds  = the authored hiring-round count. Same field the card reads
  *                  (companies.rounds -> quickStats.rounds), so the two cannot disagree.
  * - onlineStages = syllabus rows before the final interview. This one genuinely IS derived
- *                  from the syllabus - "the drive runs in N online stages" is about exam
+ *                  from the syllabus - "the assessment runs in N online stages" is about exam
  *                  sections, and that reading was always correct.
  */
 function roundCounts(content: HubContent): { totalRounds: number; onlineStages: number } {
@@ -144,7 +144,7 @@ function roundCounts(content: HubContent): { totalRounds: number; onlineStages: 
  * the hub (spec §1) - top tabs only.
  *
  * Aurora redesign: a dramatic dark hero carries the company identity + an
- * animated readiness ring, then a sticky glass tab bar drives crafted white
+ * animated readiness ring, then a sticky glass tab bar assessments crafted white
  * Aurora cards (layered glow + gradient washes) with scroll reveals.
  */
 export function CompanyHub({ content }: { content: HubContent }) {
@@ -270,7 +270,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
         </div>
 
         <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
-          {/* Register for this drive (assessment lifecycle) */}
+          {/* Register for this assessment (assessment lifecycle) */}
           <CompanyRegisterCard companySlug={c.slug} companyName={c.name} />
 
           {/* Quick stats - standout violet Aurora card */}
@@ -620,7 +620,7 @@ function OverviewTab({ content }: { content: HubContent }) {
       <Reveal>
         <VideoPlaceholder
           eyebrow="Company intro"
-          title={`Inside the ${content.company.name} drive`}
+          title={`Inside the ${content.company.name} assessment`}
           subtitle="A short walkthrough of the hiring rounds, cut-offs and what to expect - video coming soon."
         />
       </Reveal>
@@ -665,7 +665,7 @@ function SyllabusTab({ content }: { content: HubContent }) {
           {content.company.name} syllabus
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">
-          The drive is usually structured in {roundCounts(content).onlineStages} online stages before
+          The assessment is usually structured in {roundCounts(content).onlineStages} online stages before
           interviews, then a final interview round.
         </p>
 

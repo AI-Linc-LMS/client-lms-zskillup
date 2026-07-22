@@ -87,7 +87,7 @@ export default function SuperAdminDashboardPage() {
       </div>
 
       <div>
-        <h2 className="mb-4 text-lg font-extrabold tracking-tight text-navy">Company drives & coverage</h2>
+        <h2 className="mb-4 text-lg font-extrabold tracking-tight text-navy">Company assessments & coverage</h2>
         <CompanyStatsCharts />
       </div>
     </div>

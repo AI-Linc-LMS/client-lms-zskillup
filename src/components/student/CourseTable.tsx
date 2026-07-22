@@ -20,7 +20,7 @@ const CATEGORY_TABS: Array<{ key: string; label: string }> = [
   { key: 'APTITUDE', label: 'Aptitude' },
   { key: 'PROGRAMMING_DSA', label: 'Programming · DSA' },
   { key: 'COMMUNICATION_HR', label: 'Communication' },
-  { key: 'MOCK_DRIVE', label: 'Mock drives' },
+  { key: 'MOCK_DRIVE', label: 'Mock assessments' },
 ];
 
 export function CourseTable() {
