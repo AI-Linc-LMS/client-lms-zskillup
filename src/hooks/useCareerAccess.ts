@@ -7,8 +7,13 @@ import { listResumes } from '@/lib/api/resumes';
 
 export type CareerTool = 'mock-interview' | 'resume';
 
-/** Free lifetime runs of a career tool before a Company/Full-Platform plan is needed. */
-const FREE_LIMIT = 1;
+/**
+ * Free lifetime runs of a career tool before a Company/Full-Platform plan is needed.
+ * Mock Interview is fully gated (0 free runs): unpaid students hit the upsell lock
+ * immediately - before any camera/mic permission prompt or the interview loading.
+ * Resume Builder keeps its one free build so a student can try it once.
+ */
+const FREE_LIMIT: Record<CareerTool, number> = { 'mock-interview': 0, resume: 1 };
 
 export interface CareerAccessState {
   loading: boolean;
