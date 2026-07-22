@@ -17,6 +17,12 @@ export interface ApiScheduledAssessment {
   registrationCloseAt: string | null;
   proctored: boolean;
   isActive: boolean;
+  /** When the assessment window closes (scheduledAt + duration). Backend-computed. */
+  endsAt: string | null;
+  /** Free-form description shown on the pre-assessment instructions screen. */
+  description?: string | null;
+  /** Candidate-facing instructions shown on the pre-assessment screen. */
+  instructions?: string | null;
 }
 
 export interface CreateScheduledAssessmentPayload {
@@ -35,6 +41,12 @@ export interface CreateScheduledAssessmentPayload {
 /** The signed-in student's scheduled assessments (registered companies). */
 export async function getMySchedule(): Promise<ApiScheduledAssessment[]> {
   const res = await apiClient.get<ApiScheduledAssessment[]>('/api/v1/me/schedule');
+  return res.data;
+}
+
+/** A single scheduled assessment by id (STUDENT-scoped to the caller's eligibility). */
+export async function getScheduledAssessment(id: string): Promise<ApiScheduledAssessment> {
+  const res = await apiClient.get<ApiScheduledAssessment>(`/api/v1/scheduled-assessments/${id}`);
   return res.data;
 }
 

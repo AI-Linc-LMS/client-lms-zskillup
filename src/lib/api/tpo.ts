@@ -160,6 +160,11 @@ export async function releaseTpoAssessment(id: string): Promise<void> {
   await apiClient.post(`/api/v1/tpo/assessments/${id}/release`, {});
 }
 
+/** Publish a (draft/scheduled) assessment and email every assigned cohort student. */
+export async function publishTpoAssessment(id: string): Promise<void> {
+  await apiClient.post(`/api/v1/tpo/assessments/${id}/publish`, {});
+}
+
 export async function deleteTpoAssessment(id: string): Promise<void> {
   await apiClient.delete(`/api/v1/tpo/assessments/${id}`);
 }

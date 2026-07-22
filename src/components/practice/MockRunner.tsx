@@ -75,7 +75,19 @@ import { CalibrationResults } from '@/components/student/CalibrationResults';
 
 type Phase = 'intro' | 'running' | 'report';
 
-export function MockRunner({ mockId, proctored = false }: { mockId: string; proctored?: boolean }) {
+export function MockRunner({
+  mockId,
+  proctored = false,
+  startImmediately = false,
+}: {
+  mockId: string;
+  proctored?: boolean;
+  /** Skip the intro screen and start the attempt on mount - used when a dedicated
+   *  pre-start gate (AssessmentInstructionsHost) has already been shown, so "Begin"
+   *  there is what starts the server timer (beginAttempt is still the only caller
+   *  of startMock, so the timer invariant holds). */
+  startImmediately?: boolean;
+}) {
   // Ship the live proctoring batch to the server-stamped log. The attempt id
   // isn't known until beginAttempt resolves, so read it from a ref the callback
   // closes over (keeps the callback stable). Failures are swallowed - proctoring
@@ -209,6 +221,18 @@ export function MockRunner({ mockId, proctored = false }: { mockId: string; proc
       setSubmitting(false);
     }
   }, [start, proctored, proctor]);
+
+  // When launched from the pre-start instructions gate, begin the attempt once on
+  // mount (the gate already collected the ack + system check). Guarded so it never
+  // re-fires; beginAttempt remains the sole caller of startMock, so the server timer
+  // still starts exactly here (i.e. at "Begin Assessment"), not on page load.
+  const autoStartedRef = useRef(false);
+  useEffect(() => {
+    if (startImmediately && !autoStartedRef.current && phase === 'intro') {
+      autoStartedRef.current = true;
+      void beginAttempt();
+    }
+  }, [startImmediately, phase, beginAttempt]);
 
   // ── Server-authoritative countdown ────────────────────────────────────────
   useEffect(() => {

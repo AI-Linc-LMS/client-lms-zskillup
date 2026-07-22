@@ -3,22 +3,28 @@ import { ArrowLeft, ArrowRight, BarChart3, Sparkles, Target, Timer } from 'lucid
 import { Button } from '@/components/ui/button';
 import { MockReportLoader, MockRunner } from '@/components/practice/MockRunner';
 import { ProctoredAssessmentHost } from '@/components/proctoring/ProctoredAssessmentHost';
+import { AssessmentInstructionsHost } from '@/components/assessment/AssessmentInstructionsHost';
 
 /**
  * Full-screen assessment route (Zone B, no AppShell).
  *
- * `?mock=<id>`            - runs the real server-timed mock engine.
- * `?mock=<id>&proctored=1`- proctored ASSESSMENT: device-check → proctored run.
- * `?report=<id>`          - re-opens the persisted report for a finalized attempt.
- * Neither                 - a landing that sends the student to the catalog.
+ * `?mock=<id>&assessment=<id>` - SCHEDULED assessment: instructions + system-check
+ *                                gate (#29), then the run. Timer starts on "Begin".
+ * `?mock=<id>`                 - runs the real server-timed mock engine.
+ * `?mock=<id>&proctored=1`     - proctored ASSESSMENT: device-check → proctored run.
+ * `?report=<id>`               - re-opens the persisted report for a finalized attempt.
+ * Neither                      - a landing that sends the student to the catalog.
  */
 export default async function FullMockQuizPage({
   searchParams,
 }: {
-  searchParams: Promise<{ mock?: string; report?: string; proctored?: string }>;
+  searchParams: Promise<{ mock?: string; report?: string; proctored?: string; assessment?: string }>;
 }) {
-  const { mock, report, proctored } = await searchParams;
+  const { mock, report, proctored, assessment } = await searchParams;
   if (report) return <MockReportLoader attemptId={report} />;
+  // Scheduled-assessment launch: gate behind the instructions + system-check screen.
+  if (mock && assessment)
+    return <AssessmentInstructionsHost mockId={mock} scheduledId={assessment} proctored={proctored === '1'} />;
   if (mock && proctored === '1') return <ProctoredAssessmentHost mockId={mock} />;
   if (mock) return <MockRunner mockId={mock} />;
   return <QuizLanding />;

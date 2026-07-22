@@ -404,7 +404,7 @@ export default function AssessmentsPage() {
                           </Link>
                         ) : live && it.mockTestId ? (
                           <Link
-                            href={`/dashboard/quiz?mock=${it.mockTestId}${it.proctored ? '&proctored=1' : ''}`}
+                            href={`/dashboard/quiz?mock=${it.mockTestId}&assessment=${it.id}${it.proctored ? '&proctored=1' : ''}`}
                             className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-3 py-2 text-xs font-extrabold text-[#171717] transition-transform hover:brightness-105"
                           >
                             <ShieldCheck className="size-4" /> Start assessment now

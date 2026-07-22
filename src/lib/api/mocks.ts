@@ -16,6 +16,8 @@ export interface ApiMockSummary {
   totalQuestions: number;
   passingScore: number;
   isAdaptive: boolean;
+  /** Sum of per-question marks. Server-computed (business value) - omitted by older backends. */
+  totalMarks?: number;
 }
 
 export interface ApiMockOption {

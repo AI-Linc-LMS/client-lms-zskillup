@@ -76,7 +76,7 @@ export function SidebarUpcoming() {
               <Link
                 href={
                   liveOpen && a.mockTestId
-                    ? `/dashboard/quiz?mock=${a.mockTestId}${a.proctored ? '&proctored=1' : ''}`
+                    ? `/dashboard/quiz?mock=${a.mockTestId}&assessment=${a.id}${a.proctored ? '&proctored=1' : ''}`
                     : '/assessments'
                 }
                 className={cn(

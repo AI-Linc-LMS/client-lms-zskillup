@@ -1,5 +1,11 @@
 import { apiClient } from './client';
-import type { CohortDto, CreateCohortDto, TpoBulkInviteDto, TpoBulkInviteResult } from '@/shared';
+import type {
+  AssignCohortMembersDto,
+  CohortDto,
+  CreateCohortDto,
+  TpoBulkInviteDto,
+  TpoBulkInviteResult,
+} from '@/shared';
 
 /**
  * Admin-side cohort + invitation management, scoped to a college by id. Backing
@@ -22,5 +28,18 @@ export async function inviteCollegeStudents(
   dto: TpoBulkInviteDto,
 ): Promise<TpoBulkInviteResult> {
   const res = await apiClient.post<TpoBulkInviteResult>(`/api/v1/admin/colleges/${collegeId}/invitations`, dto);
+  return res.data;
+}
+
+/** Move existing college students into a cohort (bulk membership set). */
+export async function assignStudentsToCohort(
+  collegeId: string,
+  cohortId: string,
+  userIds: string[],
+): Promise<{ assigned: number }> {
+  const res = await apiClient.post<{ assigned: number }>(
+    `/api/v1/admin/colleges/${collegeId}/cohorts/${cohortId}/members`,
+    { userIds } satisfies AssignCohortMembersDto,
+  );
   return res.data;
 }
