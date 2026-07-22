@@ -10,6 +10,7 @@ import {
   Camera,
   Check,
   Crown,
+  FileText,
   GraduationCap,
   Loader2,
   Mail,
@@ -20,7 +21,20 @@ import {
   User,
   X,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { getMe, updateMe, type ApiMe } from '@/lib/api/me';
+import { SubscriptionLockGate } from '@/components/billing/SubscriptionLockGate';
+import { Button } from '@/components/ui/button';
+import { ResumeForm } from '@/components/resume/ResumeForm';
+import { createResume, getResume, listResumes, updateResume } from '@/lib/api/resumes';
+import {
+  isTemplateKey,
+  normalizeResume,
+  resumeFromProfile,
+  type ResumeData,
+  type TemplateKey,
+} from '@/components/resume/types';
+import { describeError } from '@/lib/api/errors';
 import { notifyProfileUpdated } from '@/lib/profile-events';
 import { COURSE_OPTIONS, PASSOUT_YEARS, YEAR_OF_STUDY_OPTIONS, yearOfStudyLabel } from '@/lib/profile/academic-options';
 import { useMySubscription } from '@/hooks/useMySubscription';
@@ -531,6 +545,9 @@ export default function ProfilePage() {
         </aside>
       </div>
 
+      {/* ── Full ATS resume (shared with the Resume Builder, own paywall + save) ── */}
+      {me && <ResumeDetailsSection me={me} />}
+
       {/* ── Sticky save bar ──────────────────────────────────────────────── */}
       {(dirty || saved) && (
         <div className="sticky bottom-4 z-20 mt-6 flex justify-center px-4">
@@ -567,6 +584,132 @@ export default function ProfilePage() {
 
 const inputCls =
   'flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors placeholder:text-slate-500 focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30';
+
+/**
+ * The full ATS résumé editor, embedded on the profile below the profile fields.
+ * It is backed by the SAME `students.resumes` record the Resume Builder uses -
+ * loaded via listResumes() → getResume(), seeded from the profile only when the
+ * student has none - so the profile and the builder are one source of truth (no
+ * duplicated copy of the résumé). Gated by SubscriptionLockGate (a paid career
+ * tool); it owns its OWN dirty-tracking + Save, independent of the profile Save.
+ */
+function ResumeDetailsSection({ me }: { me: ApiMe }) {
+  // `me` changes reference whenever the profile Save runs (setMe). Capture it in
+  // a ref so a profile save never re-triggers the load and discards unsaved
+  // résumé edits - seeding from the profile only happens when there is no record.
+  const meRef = useRef(me);
+  meRef.current = me;
+
+  const [data, setData] = useState<ResumeData | null>(null);
+  const [resumeId, setResumeId] = useState<string | null>(null);
+  const [title, setTitle] = useState('My Resume');
+  const [template, setTemplate] = useState<TemplateKey>('modern');
+  const [loading, setLoading] = useState(true);
+  const [loadErr, setLoadErr] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [baseline, setBaseline] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        // The profile edits the student's PRIMARY résumé - the first record the
+        // builder lists. Load its full blob; if there is none, seed from profile.
+        const list = await listResumes();
+        const first = list[0];
+        const detail = first ? await getResume(first.id) : null;
+        if (cancelled) return;
+        const seeded = detail ? normalizeResume(detail.data) : resumeFromProfile(meRef.current);
+        setData(seeded);
+        setBaseline(JSON.stringify(seeded));
+        if (detail) {
+          setResumeId(detail.id);
+          setTitle(detail.title || 'My Resume');
+          setTemplate(isTemplateKey(detail.template) ? detail.template : 'modern');
+        }
+      } catch {
+        if (!cancelled) setLoadErr('Could not load your resume details.');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const dirty = data !== null && JSON.stringify(data) !== baseline;
+
+  const save = async () => {
+    if (!data) return;
+    setSaving(true);
+    try {
+      const name = title.trim() || 'My Resume';
+      if (resumeId) {
+        await updateResume(resumeId, { title: name, template, data });
+      } else {
+        const created = await createResume({ title: name, template, data });
+        setResumeId(created.id);
+      }
+      setBaseline(JSON.stringify(data));
+      toast.success('Resume details saved.');
+    } catch (err) {
+      // The gate blocks unpaid users, but a first-ever save can still 402 once the
+      // free résumé run is spent - surface that clearly, not a generic message.
+      if (err instanceof ApiRequestError && err.code === 'CAREER_PAYWALL') {
+        toast.error("You've used your free resume", {
+          description: 'Upgrade to save and export more resumes.',
+        });
+      } else {
+        toast.error(describeError(err, 'Could not save your resume. Please try again.'));
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <section className="mt-6">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-orange/10 text-orange">
+            <FileText className="size-[18px]" />
+          </span>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Resume</p>
+            <h2 className="text-sm font-black text-navy">Full ATS resume details</h2>
+            <p className="text-xs text-slate-500">Every résumé section, in one place — shared with your Resume Builder.</p>
+          </div>
+        </div>
+        <Link href="/resume-builder" className="text-xs font-semibold text-orange hover:underline">
+          These fields power your Resume Builder (templates + PDF export) →
+        </Link>
+      </div>
+
+      <SubscriptionLockGate tool="resume" feature="Resume">
+        {loading ? (
+          <div className="grid place-items-center rounded-3xl border border-slate-200 bg-white py-16">
+            <Loader2 className="size-6 animate-spin text-slate-500" />
+          </div>
+        ) : !data ? (
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 text-center">
+            <p className="text-sm font-semibold text-rose-600">{loadErr ?? 'Could not load your resume details.'}</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <ResumeForm data={data} onChange={setData} />
+            <div className="flex items-center justify-end">
+              <Button onClick={save} disabled={!dirty || saving}>
+                {saving ? <Loader2 className="size-4 animate-spin" /> : null}
+                Save resume details
+              </Button>
+            </div>
+          </div>
+        )}
+      </SubscriptionLockGate>
+    </section>
+  );
+}
 
 function SectionCard({
   icon: Icon,
