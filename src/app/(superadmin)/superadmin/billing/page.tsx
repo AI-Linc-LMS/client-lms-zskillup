@@ -115,17 +115,25 @@ function PaymentsSection() {
 }
 
 /* ── Price book editor ─────────────────────────────────────────────────────── */
+type PriceDraft = { rupees: string; mrp: string; days: string; active: boolean };
+
 function PricingSection() {
   const [rows, setRows] = useState<PriceBookEntryDto[] | null>(null);
-  const [draft, setDraft] = useState<Record<string, { rupees: string; days: string; active: boolean }>>({});
+  const [draft, setDraft] = useState<Record<string, PriceDraft>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
 
   const load = () =>
     getPriceBook()
       .then((r) => {
         setRows(r);
-        const d: Record<string, { rupees: string; days: string; active: boolean }> = {};
-        for (const p of r) d[p.id] = { rupees: String(p.amountCents / 100), days: String(p.durationDays), active: p.isActive };
+        const d: Record<string, PriceDraft> = {};
+        for (const p of r)
+          d[p.id] = {
+            rupees: String(p.amountCents / 100),
+            mrp: p.mrpCents != null ? String(p.mrpCents / 100) : '',
+            days: String(p.durationDays),
+            active: p.isActive,
+          };
         setDraft(d);
       })
       .catch(() => setRows([]));
@@ -142,9 +150,23 @@ function PricingSection() {
       toast.error('Enter a valid amount');
       return;
     }
+    // Blank MRP clears the strike-through (null); otherwise it must be a valid,
+    // non-negative amount not below the selling price.
+    let mrpCents: number | null = null;
+    if (d.mrp.trim() !== '') {
+      mrpCents = Math.round(Number(d.mrp) * 100);
+      if (!Number.isFinite(mrpCents) || mrpCents < 0) {
+        toast.error('Enter a valid MRP (or leave it blank)');
+        return;
+      }
+      if (mrpCents < amountCents) {
+        toast.error('MRP should be at least the selling price');
+        return;
+      }
+    }
     setSavingId(p.id);
     try {
-      await updatePrice(p.id, { amountCents, durationDays: Number(d.days) || p.durationDays, isActive: d.active });
+      await updatePrice(p.id, { amountCents, mrpCents, durationDays: Number(d.days) || p.durationDays, isActive: d.active });
       toast.success('Price updated');
       await load();
     } catch {
@@ -166,6 +188,7 @@ function PricingSection() {
               <th className="p-3">Tier</th>
               <th className="p-3">Period</th>
               <th className="p-3">Amount (₹)</th>
+              <th className="p-3">MRP / strike (₹)</th>
               <th className="p-3">Days</th>
               <th className="p-3">Active</th>
               <th className="p-3"></th>
@@ -173,7 +196,7 @@ function PricingSection() {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {rows === null ? (
-              <tr><td colSpan={7} className="p-8 text-center"><Loader2 className="mx-auto size-5 animate-spin text-slate-500" /></td></tr>
+              <tr><td colSpan={8} className="p-8 text-center"><Loader2 className="mx-auto size-5 animate-spin text-slate-500" /></td></tr>
             ) : (
               rows.map((p) => {
                 const d = draft[p.id] ?? { rupees: '', days: '', active: p.isActive };
@@ -188,6 +211,16 @@ function PricingSection() {
                         onChange={(e) => setDraft((s) => ({ ...s, [p.id]: { ...d, rupees: e.target.value } }))}
                         inputMode="decimal"
                         className="h-9 w-24 rounded-lg border border-slate-200 px-2 text-sm tabular-nums focus:border-orange focus:outline-none"
+                      />
+                    </td>
+                    <td className="p-3">
+                      <input
+                        value={d.mrp}
+                        onChange={(e) => setDraft((s) => ({ ...s, [p.id]: { ...d, mrp: e.target.value } }))}
+                        inputMode="decimal"
+                        placeholder="none"
+                        title="Original / strike-through price (display only). Blank = no strike."
+                        className="h-9 w-24 rounded-lg border border-slate-200 px-2 text-sm tabular-nums placeholder:text-slate-400 focus:border-orange focus:outline-none"
                       />
                     </td>
                     <td className="p-3">

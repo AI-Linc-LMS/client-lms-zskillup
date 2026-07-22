@@ -5,6 +5,9 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { ArrowRight, ArrowUpRight, Check, ListChecks, ShoppingCart } from 'lucide-react';
 import { useCartOptional } from '@/components/billing/CartProvider';
+import { PriceTag } from '@/components/billing/PriceTag';
+import { formatPrice } from '@/lib/api/subscriptions';
+import type { PriceBookEntryDto } from '@/shared/dto/payments.dto';
 import {
   ACCENT_CLASS,
   DIFFICULTY_TONE,
@@ -36,11 +39,11 @@ const ACCENT_TEXT: Record<Accent, string> = {
 function SectionCartAction({
   section,
   owned,
-  priceLabel,
+  priceEntry,
 }: {
   section: SectionRoot;
   owned?: boolean;
-  priceLabel?: string | null;
+  priceEntry?: PriceBookEntryDto | null;
 }) {
   const cart = useCartOptional();
 
@@ -62,7 +65,7 @@ function SectionCartAction({
     cart.add({
       scope: EntitlementScope.SECTION,
       scopeRef: section.slug,
-      period: BillingPeriod.ANNUAL,
+      period: BillingPeriod.MONTHLY,
       label: section.name,
     });
     toast.success(`${section.name} added to cart`, {
@@ -90,7 +93,7 @@ function SectionCartAction({
       ) : (
         <>
           <ShoppingCart className="size-3" />
-          {priceLabel ? `Add · ${priceLabel}` : 'Add to cart'}
+          {priceEntry ? `Add · ${formatPrice(priceEntry.amountCents, 'INR')}` : 'Add to cart'}
         </>
       )}
     </button>
@@ -110,12 +113,12 @@ export function SectionCard({
   section,
   index,
   owned,
-  priceLabel,
+  priceEntry,
 }: {
   section: SectionRoot;
   index: number;
   owned?: boolean;
-  priceLabel?: string | null;
+  priceEntry?: PriceBookEntryDto | null;
 }) {
   const meta = sectionMetaFor(section.slug, index);
   const desc = sectionDescriptorFor(section.slug);
@@ -199,13 +202,21 @@ export function SectionCard({
             </span>
           </div>
 
+          {/* 1-Month plan price with struck MRP (hidden once owned) */}
+          {!owned && priceEntry ? (
+            <div className="mt-4 flex items-baseline gap-1">
+              <PriceTag sellingCents={priceEntry.amountCents} mrpCents={priceEntry.mrpCents} size="sm" />
+              <span className="text-[11px] font-semibold text-slate-500">/mo · 1-Month plan</span>
+            </div>
+          ) : null}
+
           {/* Footer CTA */}
           <div className="mt-4 flex items-center justify-between gap-2">
             <span className={cn('flex items-center gap-1 text-[13px] font-bold transition-colors group-hover:brightness-90', accentText)}>
               Explore now
               <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
             </span>
-            <SectionCartAction section={section} owned={owned} priceLabel={priceLabel} />
+            <SectionCartAction section={section} owned={owned} priceEntry={priceEntry} />
           </div>
         </div>
       </Link>
