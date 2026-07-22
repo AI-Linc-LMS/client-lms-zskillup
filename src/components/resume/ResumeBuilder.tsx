@@ -6,9 +6,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { ApiRequestError } from '@/lib/api/types';
 import type { ResumeData, TemplateKey } from './types';
-import { emptyResume, fullName, isTemplateKey, newId, normalizeResume } from './types';
+import { emptyResume, fullName, isTemplateKey, normalizeResume, resumeFromProfile } from './types';
 import { SAMPLE_RESUME } from './sample-data';
-import { getMe, type ApiMe } from '@/lib/api/me';
+import { getMe } from '@/lib/api/me';
 import { TEMPLATES } from './templates';
 import { computeAtsScore } from './ats';
 import { ResumeForm } from './ResumeForm';
@@ -42,16 +42,6 @@ function atsColor(n: number): string {
   return 'text-red-500';
 }
 
-const BRANCH_LABEL: Record<string, string> = {
-  CSE: 'Computer Science Engineering',
-  IT: 'Information Technology',
-  ECE: 'Electronics & Communication Engineering',
-  EEE: 'Electrical & Electronics Engineering',
-  MECH: 'Mechanical Engineering',
-  CIVIL: 'Civil Engineering',
-  OTHER: '',
-};
-
 /** True when the editor is still a blank slate (no identity + no sections), so
  *  it's safe to seed from the profile without clobbering anything the user typed. */
 function isResumeEmpty(d: ResumeData): boolean {
@@ -74,38 +64,6 @@ function isResumeEmpty(d: ResumeData): boolean {
     d.awards.length === 0 &&
     d.courses.length === 0;
   return noBasics && noSections;
-}
-
-/** Seed a resume from the student's profile - name, contact, education, skills -
- *  so the builder opens pre-filled instead of blank. Leaves summary/experience/
- *  projects for the student (or the AI tailor) to complete. */
-function resumeFromProfile(me: ApiMe): ResumeData {
-  const r = emptyResume();
-  const p = me.studentProfile;
-  const parts = (me.fullName ?? '').trim().split(/\s+/).filter(Boolean);
-  r.basicInfo.firstName = parts[0] ?? '';
-  r.basicInfo.lastName = parts.slice(1).join(' ');
-  r.basicInfo.email = me.email ?? '';
-  r.basicInfo.phone = p?.phone ?? '';
-  if (p?.rolesInterested?.length) r.basicInfo.professionalTitle = p.rolesInterested[0];
-  if (p?.collegeName || p?.course || p?.branch || p?.passoutYear) {
-    r.education = [
-      {
-        id: newId(),
-        degree: p?.course || (p?.branch ? BRANCH_LABEL[p.branch] ?? '' : '') || '',
-        institution: p?.collegeName ?? '',
-        location: '',
-        startDate: p?.passoutYear ? `${p.passoutYear - 4}-08` : '',
-        endDate: p?.passoutYear ? `${p.passoutYear}-06` : '',
-        gpa: '',
-        description: '',
-      },
-    ];
-  }
-  if (p?.skills?.length) {
-    r.skills = p.skills.map((name) => ({ id: newId(), name }));
-  }
-  return r;
 }
 
 export function ResumeBuilder() {

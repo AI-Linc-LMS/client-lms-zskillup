@@ -4,6 +4,8 @@
  * export. Dates are stored as ISO-ish `YYYY-MM` strings; templates localise them.
  */
 
+import type { ApiMe } from '@/lib/api/me';
+
 export interface BasicInfo {
   firstName: string;
   lastName: string;
@@ -291,4 +293,50 @@ export function normalizeResume(raw: unknown): ResumeData {
     awards: arr<Award>(r.awards).map((a) => ({ ...a, id: a.id ?? newId() })),
     courses: arr<Course>(r.courses).map((c) => ({ ...c, id: c.id ?? newId() })),
   };
+}
+
+const BRANCH_LABEL: Record<string, string> = {
+  CSE: 'Computer Science Engineering',
+  IT: 'Information Technology',
+  ECE: 'Electronics & Communication Engineering',
+  EEE: 'Electrical & Electronics Engineering',
+  MECH: 'Mechanical Engineering',
+  CIVIL: 'Civil Engineering',
+  OTHER: '',
+};
+
+/**
+ * Seed a resume from the student's profile - name, contact, education, skills -
+ * so an editor opens pre-filled instead of blank. Leaves summary/experience/
+ * projects for the student (or the AI tailor) to complete. Shared by the Resume
+ * Builder and the profile page so both seed from the SAME logic and back the
+ * same `students.resumes` record.
+ */
+export function resumeFromProfile(me: ApiMe): ResumeData {
+  const r = emptyResume();
+  const p = me.studentProfile;
+  const parts = (me.fullName ?? '').trim().split(/\s+/).filter(Boolean);
+  r.basicInfo.firstName = parts[0] ?? '';
+  r.basicInfo.lastName = parts.slice(1).join(' ');
+  r.basicInfo.email = me.email ?? '';
+  r.basicInfo.phone = p?.phone ?? '';
+  if (p?.rolesInterested?.length) r.basicInfo.professionalTitle = p.rolesInterested[0];
+  if (p?.collegeName || p?.course || p?.branch || p?.passoutYear) {
+    r.education = [
+      {
+        id: newId(),
+        degree: p?.course || (p?.branch ? BRANCH_LABEL[p.branch] ?? '' : '') || '',
+        institution: p?.collegeName ?? '',
+        location: '',
+        startDate: p?.passoutYear ? `${p.passoutYear - 4}-08` : '',
+        endDate: p?.passoutYear ? `${p.passoutYear}-06` : '',
+        gpa: '',
+        description: '',
+      },
+    ];
+  }
+  if (p?.skills?.length) {
+    r.skills = p.skills.map((name) => ({ id: newId(), name }));
+  }
+  return r;
 }
