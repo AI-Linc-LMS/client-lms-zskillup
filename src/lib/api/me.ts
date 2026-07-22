@@ -37,7 +37,7 @@ export interface ApiStudentProfile {
   rollNumber: string | null;
   phone: string | null;
   course: string | null;
-  yearOfStudy: number | null;
+  yearOfStudy: string | null;
   skills: string[];
   rolesInterested: string[];
   isOnboarded: boolean;
@@ -52,7 +52,7 @@ export interface UpdateMePayload {
   fullName?: string | null;
   phone?: string | null;
   course?: string | null;
-  yearOfStudy?: number | null;
+  yearOfStudy?: string | null;
   skills?: string[];
   rolesInterested?: string[];
   collegeName?: string | null;
