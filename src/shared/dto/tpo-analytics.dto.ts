@@ -220,6 +220,35 @@ export interface TpoInterviewWeakness {
   area: string;
   count: number;
 }
+/** Per-student interview breakdown row (capped, readiness-desc). */
+export interface TpoInterviewStudentRow {
+  id: string;
+  name: string | null;
+  branch: string | null;
+  interviews: number;
+  readiness: number | null;
+  communication: number | null;
+  confidence: number | null;
+  lastAt: string | null;
+}
+/** Department (branch) roll-up of interview performance. */
+export interface TpoInterviewBranchRow {
+  branch: string;
+  students: number;
+  interviews: number;
+  readiness: number | null;
+}
+/** Readiness-score distribution bucket (0-20 … 80-100). */
+export interface TpoInterviewBucket {
+  bucket: string;
+  count: number;
+}
+/** Interviews taken + avg readiness per day (days with activity). */
+export interface TpoInterviewTrendPoint {
+  date: string;
+  interviews: number;
+  readiness: number | null;
+}
 /** Scores are null when no graded interview data exists for that dimension -
  *  communication/confidence only populate on interviews graded after that
  *  pipeline shipped, so the UI can honestly show "needs data". */
@@ -230,6 +259,14 @@ export interface TpoInterviewAnalytics {
   communicationScore: number | null;
   confidenceScore: number | null;
   commonWeaknesses: TpoInterviewWeakness[];
+  /** Per-student breakdown (readiness-desc, capped). */
+  students: TpoInterviewStudentRow[];
+  /** Department / branch roll-up. */
+  byBranch: TpoInterviewBranchRow[];
+  /** Readiness score distribution. */
+  distribution: TpoInterviewBucket[];
+  /** Activity + avg readiness over time. */
+  trend: TpoInterviewTrendPoint[];
 }
 
 // ── Assessment Center ───────────────────────────────────────────────────────────
