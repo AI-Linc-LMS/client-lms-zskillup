@@ -9,7 +9,6 @@ import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
 import { HOMEPAGE_FEATURED_TRACKS } from '@/lib/demo-data-extra';
 import { useMySubscription } from '@/hooks/useMySubscription';
 import { getPricing } from '@/lib/api/payments';
-import { formatPrice } from '@/lib/api/subscriptions';
 import { buildPriceMap, retailPrice } from '@/lib/payments/pricing';
 import { BillingPeriod, EntitlementScope } from '@/shared/enums';
 import type { PriceBookEntryDto } from '@/shared/dto/payments.dto';
@@ -61,11 +60,11 @@ export function CompaniesExplorer() {
   );
   const isOwned = (slug: string) => hasPlatform || ownedSlugs.has(slug);
 
-  /** Annual company price, shown on the Add button (e.g. "₹599"). */
-  const priceLabel = useMemo(() => {
-    const entry = retailPrice(buildPriceMap(prices), EntitlementScope.COMPANY, BillingPeriod.ANNUAL);
-    return entry ? formatPrice(entry.amountCents, 'INR') : null;
-  }, [prices]);
+  /** 1-Month company price entry (selling + MRP) shown on the card. */
+  const priceEntry = useMemo(
+    () => retailPrice(buildPriceMap(prices), EntitlementScope.COMPANY, BillingPeriod.MONTHLY) ?? null,
+    [prices],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -255,7 +254,7 @@ export function CompaniesExplorer() {
                   show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } },
                 }}
               >
-                <CompanyCard company={c} owned={isOwned(c.slug)} priceLabel={priceLabel} />
+                <CompanyCard company={c} owned={isOwned(c.slug)} priceEntry={priceEntry} />
               </motion.div>
             ))}
           </motion.div>

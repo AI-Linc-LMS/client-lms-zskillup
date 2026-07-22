@@ -6,7 +6,10 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { ArrowRight, ArrowUpRight, Check, ClipboardList, Code2, History, Lock, ShoppingCart } from 'lucide-react';
 import { useCartOptional } from '@/components/billing/CartProvider';
+import { PriceTag } from '@/components/billing/PriceTag';
+import { formatPrice } from '@/lib/api/subscriptions';
 import { BillingPeriod, EntitlementScope } from '@/shared/enums';
+import type { PriceBookEntryDto } from '@/shared/dto/payments.dto';
 import { cn } from '@/lib/utils';
 
 /**
@@ -49,17 +52,17 @@ const DIFFICULTY_TONE: Record<string, string> = {
  * "Add to cart" on a purchasable company card. It renders INSIDE the card's
  * `<Link>`, so the click must be swallowed (preventDefault stops the anchor's
  * navigation; stopPropagation stops Next's Link handler) - otherwise adding to the
- * cart would also navigate you into the hub. Adds at ANNUAL (best value); the plan
- * length is changeable in the cart.
+ * cart would also navigate you into the hub. Adds the 1-Month plan (the price the
+ * card leads with); the plan length is changeable in the cart.
  */
 function CardCartAction({
   company,
   owned,
-  priceLabel,
+  priceEntry,
 }: {
   company: CompanyCardData;
   owned?: boolean;
-  priceLabel?: string | null;
+  priceEntry?: PriceBookEntryDto | null;
 }) {
   const cart = useCartOptional();
 
@@ -82,7 +85,7 @@ function CardCartAction({
     cart.add({
       scope: EntitlementScope.COMPANY,
       scopeRef: company.slug,
-      period: BillingPeriod.ANNUAL,
+      period: BillingPeriod.MONTHLY,
       label: company.name,
     });
     toast.success(`${company.name} added to cart`, {
@@ -110,7 +113,7 @@ function CardCartAction({
       ) : (
         <>
           <ShoppingCart className="size-3" />
-          {priceLabel ? `Add · ${priceLabel}` : 'Add to cart'}
+          {priceEntry ? `Add · ${formatPrice(priceEntry.amountCents, 'INR')}` : 'Add to cart'}
         </>
       )}
     </button>
@@ -121,13 +124,13 @@ function CardCartAction({
 export function CompanyCard({
   company,
   owned,
-  priceLabel,
+  priceEntry,
 }: {
   company: CompanyCardData;
   /** Student already has this hub (or Full Platform) → show "Owned", not a buy CTA. */
   owned?: boolean;
-  /** Formatted annual company price, e.g. "₹599" - shown on the Add button. */
-  priceLabel?: string | null;
+  /** 1-Month company price entry (selling + MRP) - shown on the card + Add button. */
+  priceEntry?: PriceBookEntryDto | null;
 }) {
   const accent = company.accent ?? 'from-slate-700 to-slate-900';
   const monogram = monogramOf(company.name);
@@ -244,6 +247,14 @@ export function CompanyCard({
             </div>
           ) : null}
 
+          {/* 1-Month plan price with struck MRP (hidden once owned or locked) */}
+          {!owned && !company.locked && priceEntry ? (
+            <div className="mt-4 flex items-baseline gap-1">
+              <PriceTag sellingCents={priceEntry.amountCents} mrpCents={priceEntry.mrpCents} size="sm" />
+              <span className="text-[11px] font-semibold text-slate-500">/mo · 1-Month plan</span>
+            </div>
+          ) : null}
+
           {/* CTA + buy action. Locked ("coming soon") hubs never offer a cart action. */}
           <div className="mt-4 flex items-center justify-between gap-2">
             <span className="flex items-center gap-1 text-[13px] font-bold text-orange transition-colors group-hover:text-[#d9610f]">
@@ -251,7 +262,7 @@ export function CompanyCard({
               <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
             </span>
             {!company.locked && (
-              <CardCartAction company={company} owned={owned} priceLabel={priceLabel} />
+              <CardCartAction company={company} owned={owned} priceEntry={priceEntry} />
             )}
           </div>
         </div>

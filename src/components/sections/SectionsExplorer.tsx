@@ -15,7 +15,6 @@ import {
 } from '@/lib/sections/section-catalog';
 import { useMySubscription } from '@/hooks/useMySubscription';
 import { getPricing } from '@/lib/api/payments';
-import { formatPrice } from '@/lib/api/subscriptions';
 import { buildPriceMap, retailPrice } from '@/lib/payments/pricing';
 import { BillingPeriod, EntitlementScope } from '@/shared/enums';
 import type { PriceBookEntryDto } from '@/shared/dto/payments.dto';
@@ -51,11 +50,11 @@ export function SectionsExplorer() {
   );
   const isOwned = (slug: string) => hasPlatform || ownedRoots.has(slug);
 
-  /** Annual section price shown on the Add button (e.g. "₹399"). */
-  const priceLabel = useMemo(() => {
-    const entry = retailPrice(buildPriceMap(prices), EntitlementScope.SECTION, BillingPeriod.ANNUAL);
-    return entry ? formatPrice(entry.amountCents, 'INR') : null;
-  }, [prices]);
+  /** 1-Month section price entry (selling + MRP) shown on the card. */
+  const priceEntry = useMemo(
+    () => retailPrice(buildPriceMap(prices), EntitlementScope.SECTION, BillingPeriod.MONTHLY) ?? null,
+    [prices],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -121,7 +120,7 @@ export function SectionsExplorer() {
             show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } },
           }}
         >
-          <SectionCard section={s} index={i} owned={isOwned(s.slug)} priceLabel={priceLabel} />
+          <SectionCard section={s} index={i} owned={isOwned(s.slug)} priceEntry={priceEntry} />
         </motion.div>
       ))}
     </motion.div>
