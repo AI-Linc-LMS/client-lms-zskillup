@@ -58,7 +58,7 @@ export function CompanyRegisterCard({
   const isLive = next ? now >= startAt && now <= endAt : false;
   const startHref =
     next && next.mockTestId
-      ? `/dashboard/quiz?mock=${next.mockTestId}${next.proctored ? '&proctored=1' : ''}`
+      ? `/dashboard/quiz?mock=${next.mockTestId}&assessment=${next.id}${next.proctored ? '&proctored=1' : ''}`
       : null;
 
   const fmt = (iso: string) =>

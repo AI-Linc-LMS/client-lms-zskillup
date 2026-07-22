@@ -122,7 +122,7 @@ export function LiveAssessmentBanner() {
             </Link>
           ) : (
             <Link
-              href={`/dashboard/quiz?mock=${a.mockTestId}${a.proctored ? '&proctored=1' : ''}`}
+              href={`/dashboard/quiz?mock=${a.mockTestId}&assessment=${a.id}${a.proctored ? '&proctored=1' : ''}`}
               className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-3 text-sm font-extrabold text-white shadow-[0_12px_28px_-10px_rgba(16,185,129,0.9)] transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
             >
               Start now <ArrowRight className="size-4" />

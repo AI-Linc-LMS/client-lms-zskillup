@@ -7,7 +7,18 @@
  * request's student list into a new cohort.
  */
 import { Transform } from 'class-transformer';
-import { IsInt, IsOptional, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  MaxLength,
+  Min,
+  MinLength,
+} from 'class-validator';
 
 const trimString = ({ value }: { value: unknown }): unknown =>
   typeof value === 'string' ? value.trim() : value;
@@ -16,11 +27,20 @@ export class CreateCohortDto {
   @Transform(trimString) @IsString() @MinLength(2) @MaxLength(160)
   name!: string;
 
+  @IsOptional() @Transform(trimString) @IsString() @MaxLength(500)
+  description?: string;
+
   @IsOptional() @IsInt() @Min(1900) @Max(2100)
   year?: number;
 
   @IsOptional() @Transform(trimString) @IsString() @MaxLength(20)
   branch?: string;
+}
+
+/** Assign existing college students to a cohort (bulk membership move). */
+export class AssignCohortMembersDto {
+  @IsArray() @ArrayMaxSize(1000) @IsUUID('all', { each: true })
+  userIds!: string[];
 }
 
 /** Admin one-time import of an approved request's student list into a new cohort. */
@@ -39,6 +59,7 @@ export interface CohortDto {
   id: string;
   collegeId: string;
   name: string;
+  description: string | null;
   year: number | null;
   branch: string | null;
   studentCount: number;

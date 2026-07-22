@@ -12,6 +12,7 @@ import {
   Loader2,
   Plus,
   Radio,
+  Send,
   Sparkles,
   Trash2,
   Users,
@@ -25,6 +26,7 @@ import {
   getTpoAssessments,
   getTpoCodingTopics,
   previewTpoAssessment,
+  publishTpoAssessment,
   releaseTpoAssessment,
 } from '@/lib/api/tpo';
 import { listCompanies } from '@/lib/api/catalog';
@@ -187,6 +189,21 @@ export default function AssessmentCenterPage() {
       load();
     } catch {
       toast.error('Could not delete');
+    }
+  }
+
+  const [publishingId, setPublishingId] = useState<string | null>(null);
+  async function publish(a: TpoAssessment) {
+    if (!confirm(`Publish "${a.title}" and email every assigned student a link?`)) return;
+    setPublishingId(a.id);
+    try {
+      await publishTpoAssessment(a.id);
+      toast.success('Published - students notified');
+      load();
+    } catch {
+      toast.error('Could not publish');
+    } finally {
+      setPublishingId(null);
     }
   }
 
@@ -492,6 +509,15 @@ export default function AssessmentCenterPage() {
                     </td>
                     <td className="px-4 py-2.5">
                       <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => publish(a)}
+                          disabled={publishingId === a.id}
+                          className="text-slate-500 transition-colors hover:text-orange disabled:opacity-50"
+                          title="Publish & notify students"
+                        >
+                          {publishingId === a.id ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+                        </button>
                         <button type="button" onClick={() => setResultsFor(a)} className="text-slate-500 hover:text-navy" title="Results">
                           <BarChart3 className="size-4" />
                         </button>

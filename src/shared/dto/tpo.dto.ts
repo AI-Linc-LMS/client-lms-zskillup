@@ -147,6 +147,18 @@ export class CreateTpoAssessmentDto {
   @MaxLength(200)
   title!: string;
 
+  /** Free-form description shown on the instructions screen + assignment email. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  description?: string;
+
+  /** Candidate-facing instructions shown on the pre-assessment screen. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  instructions?: string;
+
   @IsDateString()
   scheduledAt!: string;
 
