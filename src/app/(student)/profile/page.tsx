@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { getMe, updateMe, type ApiMe } from '@/lib/api/me';
 import { notifyProfileUpdated } from '@/lib/profile-events';
+import { COURSE_OPTIONS, PASSOUT_YEARS, YEAR_OF_STUDY_OPTIONS, yearOfStudyLabel } from '@/lib/profile/academic-options';
 import { useMySubscription } from '@/hooks/useMySubscription';
 import { CollegeCombobox } from '@/components/student/CollegeCombobox';
 import { getMyRegistrations, type ApiRegistration } from '@/lib/api/registrations';
@@ -48,7 +49,9 @@ type Values = {
   fullName: string;
   phone: string;
   course: string;
-  yearOfStudy: number | '';
+  /** Free-form category: "1".."5" (mapped to "Nth year") or "Graduate" /
+   *  "Working professional" / "Not applicable"; '' = not set. */
+  yearOfStudy: string;
   /** Canonical college id - what actually gets saved (sets auth.users.college_id). */
   collegeId: string;
   /** Legacy free-text name; kept only to show what a pre-dropdown user had saved. */
@@ -64,12 +67,7 @@ const EMPTY: Values = {
   fullName: '', phone: '', course: '', yearOfStudy: '', collegeId: '', collegeName: '', passoutYear: '', skills: [], roles: [], avatarUrl: '',
 };
 
-/** Common degrees for the Course/Degree autocomplete (free text still allowed). */
-const COURSES = [
-  'B.Tech', 'B.E.', 'B.Sc', 'BCA', 'B.Com', 'B.A', 'B.Arch', 'B.Pharm', 'BBA',
-  'B.Tech CSE', 'B.Tech IT', 'B.Tech ECE', 'B.Tech EEE', 'B.Tech Mechanical', 'B.Tech Civil',
-  'M.Tech', 'M.E.', 'M.Sc', 'MCA', 'M.Com', 'M.A', 'MBA', 'PhD', 'Diploma',
-];
+const COURSES = COURSE_OPTIONS;
 
 /** Keep only digits, preserving an optional leading "+", capped at 15 digits. */
 const sanitizePhone = (s: string) => {
@@ -231,7 +229,7 @@ export default function ProfilePage() {
         fullName: v.fullName.trim() || null,
         phone: v.phone.trim() || null,
         course: v.course.trim() || null,
-        yearOfStudy: v.yearOfStudy ? Number(v.yearOfStudy) : null,
+        yearOfStudy: v.yearOfStudy || null,
         // The canonical id is the source of truth - the server sets auth.users
         // .college_id from it and denormalises the display name. We ALSO send the
         // name: for the "Add it / Other" free-text flow there is no collegeId, and
@@ -351,7 +349,7 @@ export default function ProfilePage() {
             <div className="mt-2.5 flex flex-wrap items-center gap-2">
               {v.collegeName ? <Chip icon={GraduationCap}>{v.collegeName}</Chip> : null}
               {v.course ? <Chip icon={Briefcase}>{v.course}</Chip> : null}
-              {v.yearOfStudy ? <Chip icon={CalendarClock}>Year {v.yearOfStudy}</Chip> : null}
+              {v.yearOfStudy ? <Chip icon={CalendarClock}>{yearOfStudyLabel(v.yearOfStudy)}</Chip> : null}
               {v.passoutYear ? <Chip icon={GraduationCap}>Class of {v.passoutYear}</Chip> : null}
               {regs.length ? (
                 <Chip icon={Building2}>{regs.length} assessment{regs.length === 1 ? '' : 's'}</Chip>
@@ -407,10 +405,10 @@ export default function ProfilePage() {
                 </datalist>
               </Field>
               <Field label="Year of study" done={!!v.yearOfStudy}>
-                <select value={v.yearOfStudy} onChange={(e) => set('yearOfStudy', e.target.value ? Number(e.target.value) : '')} className={inputCls}>
+                <select value={v.yearOfStudy} onChange={(e) => set('yearOfStudy', e.target.value)} className={inputCls}>
                   <option value="">Select</option>
-                  {[1, 2, 3, 4, 5].map((y) => (
-                    <option key={y} value={y}>{y === 1 ? '1st' : y === 2 ? '2nd' : y === 3 ? '3rd' : `${y}th`} year</option>
+                  {YEAR_OF_STUDY_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
                   ))}
                 </select>
               </Field>
@@ -436,8 +434,8 @@ export default function ProfilePage() {
               </Field>
               <Field label="Passout year" done={!!v.passoutYear}>
                 <select value={v.passoutYear} onChange={(e) => set('passoutYear', e.target.value ? Number(e.target.value) : '')} className={inputCls}>
-                  <option value="">Select</option>
-                  {Array.from({ length: 7 }, (_, i) => 2024 + i).map((y) => (
+                  <option value="">Not applicable</option>
+                  {PASSOUT_YEARS.map((y) => (
                     <option key={y} value={y}>{y}</option>
                   ))}
                 </select>

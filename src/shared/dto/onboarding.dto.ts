@@ -87,12 +87,14 @@ export class OnboardingProfileDto {
   @MaxLength(160)
   course?: string;
 
+  // Free-form category, not a number: "1st year"…"5th year", "Graduate",
+  // "Working professional", "Not applicable" or blank. Coerce legacy numeric
+  // values to strings so older clients keep working (mirrors the backend DTO).
   @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(5)
-  yearOfStudy?: number;
+  @Transform(({ value }) => (value === null || value === undefined ? value : String(value)))
+  @IsString()
+  @MaxLength(40)
+  yearOfStudy?: string;
 
   @IsOptional()
   @IsArray()

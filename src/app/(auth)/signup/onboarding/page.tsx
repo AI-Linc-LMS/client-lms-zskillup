@@ -11,6 +11,7 @@ import {
   type College,
 } from '@/lib/api/auth';
 import { ApiRequestError } from '@/lib/api/types';
+import { YEAR_OF_STUDY_OPTIONS } from '@/lib/profile/academic-options';
 import {
   INDIA_LOCATIONS,
   INDIA_STATES,
@@ -54,7 +55,7 @@ export default function OnboardingPage() {
   // Step 3 state - profile completion
   const [phone, setPhone] = useState('');
   const [course, setCourse] = useState('');
-  const [yearOfStudy, setYearOfStudy] = useState<number | ''>('');
+  const [yearOfStudy, setYearOfStudy] = useState<string>('');
   const [skillsInput, setSkillsInput] = useState('');
   const [roles, setRoles] = useState<string[]>([]);
 
@@ -129,7 +130,7 @@ export default function OnboardingPage() {
       await saveOnboardingProfile({
         phone: phone.trim() || undefined,
         course: course.trim() || undefined,
-        yearOfStudy: yearOfStudy ? Number(yearOfStudy) : undefined,
+        yearOfStudy: yearOfStudy || undefined,
         skills,
         rolesInterested: roles,
       });
@@ -308,13 +309,13 @@ export default function OnboardingPage() {
                   <select
                     id="year"
                     value={yearOfStudy}
-                    onChange={(e) => setYearOfStudy(e.target.value ? Number(e.target.value) : '')}
+                    onChange={(e) => setYearOfStudy(e.target.value)}
                     className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
                   >
                     <option value="">Select</option>
-                    {[1, 2, 3, 4, 5].map((y) => (
-                      <option key={y} value={y}>
-                        {y === 1 ? '1st' : y === 2 ? '2nd' : y === 3 ? '3rd' : `${y}th`} year
+                    {YEAR_OF_STUDY_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
                       </option>
                     ))}
                   </select>
