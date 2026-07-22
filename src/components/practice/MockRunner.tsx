@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { QuestionStem } from '@/components/practice/QuestionStem';
+import { MathText } from '@/components/practice/MathText';
 import { formatClock, formatDuration } from '@/lib/format';
 import { DIFFICULTY_RING } from '@/lib/ui-maps';
 import { Button } from '@/components/ui/button';
@@ -873,7 +874,7 @@ function MockRunningView({
                     <span className={cn('grid size-7 shrink-0 place-items-center rounded-full text-xs font-bold', isSelected ? 'bg-orange text-[#171717]' : 'bg-slate-100 text-slate-600')}>
                       {String.fromCharCode(65 + i)}
                     </span>
-                    <span className="flex-1">{opt.text}</span>
+                    <span className="flex-1"><MathText text={opt.text} /></span>
                     {isSelected ? <Check className="size-4 shrink-0 text-orange" aria-hidden="true" /> : null}
                   </button>
                 );
@@ -1289,7 +1290,7 @@ export function MockReportView({
                             >
                               {String.fromCharCode(65 + i)}
                             </span>
-                            <span className="flex-1">{opt.text}</span>
+                            <span className="flex-1"><MathText text={opt.text} /></span>
                             {correct ? (
                               <span className="text-[11px] font-semibold text-emerald-700">Correct</span>
                             ) : chosen ? (

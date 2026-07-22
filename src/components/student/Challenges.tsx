@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, Check, Code2, Loader2, Sparkles, Swords, Trophy, X, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { QuestionStem } from '@/components/practice/QuestionStem';
+import { MathText } from '@/components/practice/MathText';
 import {
   getChallenge,
   listChallenges,
@@ -288,7 +289,7 @@ function ChallengeSolveModal({
                     >
                       {String.fromCharCode(65 + i)}
                     </span>
-                    <span className="flex-1">{opt.text}</span>
+                    <span className="flex-1"><MathText text={opt.text} /></span>
                   </button>
                 );
               })}

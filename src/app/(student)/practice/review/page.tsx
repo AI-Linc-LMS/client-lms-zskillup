@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, Check, Loader2, RefreshCw, Sparkles, X } from 'l
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { cn } from '@/lib/utils';
 import { QuestionStem } from '@/components/practice/QuestionStem';
+import { MathText } from '@/components/practice/MathText';
 import { PyqTag } from '@/components/practice/PyqTag';
 import { submitPracticeAttempt, type ApiAttemptResult, type ApiQuestion } from '@/lib/api/practice';
 import { getReviewDue } from '@/lib/api/study';
@@ -147,7 +148,7 @@ export default function ReviewPage() {
                     <span className={cn('grid size-7 shrink-0 place-items-center rounded-lg text-xs font-bold', result && isCorrect ? 'bg-emerald-500 text-white' : result && isSel ? 'bg-rose-500 text-white' : isSel ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600')}>
                       {result && isCorrect ? <Check className="size-3.5" /> : result && isSel ? <X className="size-3.5" /> : String.fromCharCode(65 + i)}
                     </span>
-                    <span className="flex-1">{opt.text}</span>
+                    <span className="flex-1"><MathText text={opt.text} /></span>
                   </button>
                 );
               })}

@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, Check, Loader2, RefreshCw, Sparkles, X, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { QuestionStem } from '@/components/practice/QuestionStem';
+import { MathText } from '@/components/practice/MathText';
 import { PyqTag } from '@/components/practice/PyqTag';
 import {
   getQuickAptitude,
@@ -177,7 +178,7 @@ export function QuickAptitude() {
                       String.fromCharCode(65 + i)
                     )}
                   </span>
-                  <span className="flex-1">{opt.text}</span>
+                  <span className="flex-1"><MathText text={opt.text} /></span>
                 </button>
               );
             })}
