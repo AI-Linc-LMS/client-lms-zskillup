@@ -63,7 +63,16 @@ function isResumeEmpty(d: ResumeData): boolean {
     d.education.length === 0 &&
     d.skills.length === 0 &&
     d.projects.length === 0 &&
-    d.certifications.length === 0;
+    d.certifications.length === 0 &&
+    d.achievements.length === 0 &&
+    d.positionsOfResponsibility.length === 0 &&
+    d.publications.length === 0 &&
+    d.extracurricular.length === 0 &&
+    d.volunteering.length === 0 &&
+    d.languages.length === 0 &&
+    d.interests.length === 0 &&
+    d.awards.length === 0 &&
+    d.courses.length === 0;
   return noBasics && noSections;
 }
 

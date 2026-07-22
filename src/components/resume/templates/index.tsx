@@ -1,7 +1,7 @@
 import type { ComponentType } from 'react';
 import type { ResumeData, TemplateKey, TemplateProps } from '../types';
 import { dateRange, fullName } from '../types';
-import { groupSkills, socialList } from './parts';
+import { ExtraSections, groupSkills, languageLabels, socialList } from './parts';
 import {
   AccentBarTemplate,
   BubbleTemplate,
@@ -71,6 +71,22 @@ function ModernTemplate({ data }: TemplateProps) {
             </div>
           </div>
         )}
+        {data.languages.length > 0 && (
+          <div className="mt-6">
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-sky-300">Languages</p>
+            <div className="space-y-1 text-[11.5px] text-slate-200">
+              {languageLabels(data.languages).map((l, i) => (<p key={i}>{l}</p>))}
+            </div>
+          </div>
+        )}
+        {data.interests.length > 0 && (
+          <div className="mt-6">
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-sky-300">Interests</p>
+            <div className="flex flex-wrap gap-1.5">
+              {data.interests.map((it) => (<span key={it.id} className="rounded-full bg-white/10 px-2 py-0.5 text-[11px]">{it.name}</span>))}
+            </div>
+          </div>
+        )}
       </aside>
       <main className="flex-1 px-7 py-8">
         {b.summary && (
@@ -123,7 +139,7 @@ function ModernTemplate({ data }: TemplateProps) {
           </section>
         )}
         {data.certifications.length > 0 && (
-          <section>
+          <section className="mb-5">
             <H>Certifications</H>
             {data.certifications.map((c) => (
               <p key={c.id} className="text-[12px] text-slate-700">
@@ -132,6 +148,7 @@ function ModernTemplate({ data }: TemplateProps) {
             ))}
           </section>
         )}
+        <ExtraSections data={data} head={(t) => <H>{t}</H>} accent="#0f2544" sectionClass="mb-5" withLanguagesInterests={false} />
       </main>
     </div>
   );
@@ -200,6 +217,7 @@ function ClassicTemplate({ data }: TemplateProps) {
             <p key={c.id} className="text-[12px] text-slate-700"><span className="font-semibold">{c.name}</span> - {c.issuer} {c.date ? `(${c.date})` : ''}</p>
           ))}</section>
         )}
+        <ExtraSections data={data} head={(t) => <H>{t}</H>} sectionClass="" />
       </div>
     </div>
   );
@@ -251,6 +269,11 @@ function MinimalTemplate({ data }: TemplateProps) {
             <p className="text-[12.5px] text-slate-700">{data.skills.map((s) => s.name).join('   ·   ')}</p>
           </section>
         )}
+        <ExtraSections
+          data={data}
+          head={(t) => <p className="mb-3 border-b border-slate-200 pb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">{t}</p>}
+          sectionClass=""
+        />
       </div>
     </div>
   );
@@ -284,6 +307,18 @@ function CreativeTemplate({ data }: TemplateProps) {
             {data.certifications.map((c) => (<p key={c.id} className="text-[11.5px] text-purple-50">{c.name} - {c.issuer}</p>))}
           </div>
         )}
+        {data.languages.length > 0 && (
+          <div className="mt-6">
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-purple-200">Languages</p>
+            <div className="space-y-1 text-[11.5px] text-purple-50">{languageLabels(data.languages).map((l, i) => (<p key={i}>{l}</p>))}</div>
+          </div>
+        )}
+        {data.interests.length > 0 && (
+          <div className="mt-6">
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-purple-200">Interests</p>
+            <div className="flex flex-wrap gap-1.5">{data.interests.map((it) => (<span key={it.id} className="rounded-full bg-white/15 px-2 py-0.5 text-[11px]">{it.name}</span>))}</div>
+          </div>
+        )}
       </aside>
       <main className="flex-1 px-7 py-8">
         {b.summary && (<section className="mb-5"><H color="#6d3bf5">About</H><p className="text-[12.5px] leading-snug text-slate-700">{b.summary}</p></section>)}
@@ -300,10 +335,11 @@ function CreativeTemplate({ data }: TemplateProps) {
           </section>
         )}
         {data.education.length > 0 && (
-          <section><H color="#6d3bf5">Education</H>
+          <section className="mb-5"><H color="#6d3bf5">Education</H>
             {data.education.map((e) => (<div key={e.id} className="mb-2"><p className="text-[12.5px] font-bold">{e.degree}</p><p className="text-[12px] text-slate-700">{e.institution}{e.gpa ? ` · ${e.gpa}` : ''} · {dateRange(e.startDate, e.endDate)}</p></div>))}
           </section>
         )}
+        <ExtraSections data={data} head={(t) => <H color="#6d3bf5">{t}</H>} accent="#6d3bf5" sectionClass="mb-5" withLanguagesInterests={false} />
       </main>
     </div>
   );
@@ -343,6 +379,7 @@ function ExecutiveTemplate({ data }: TemplateProps) {
         {data.projects.length > 0 && (
           <section><H color="#0f172a">Selected Projects</H>{data.projects.map((p) => (<p key={p.id} className="mb-1 text-[12px] text-slate-700"><span className="font-bold">{p.name}:</span> {p.description}</p>))}</section>
         )}
+        <ExtraSections data={data} head={(t) => <H color="#0f172a">{t}</H>} sectionClass="" />
       </div>
     </div>
   );
@@ -368,8 +405,9 @@ function TwoColumnTemplate({ data }: TemplateProps) {
             </section>
           )}
           {data.projects.length > 0 && (
-            <section><H color="#0f766e">Projects</H>{data.projects.map((p) => (<div key={p.id} className="mb-2"><p className="text-[12px] font-bold">{p.name}</p><p className="text-[11.5px] text-slate-700">{p.description}</p></div>))}</section>
+            <section className="mb-4"><H color="#0f766e">Projects</H>{data.projects.map((p) => (<div key={p.id} className="mb-2"><p className="text-[12px] font-bold">{p.name}</p><p className="text-[11.5px] text-slate-700">{p.description}</p></div>))}</section>
           )}
+          <ExtraSections data={data} head={(t) => <H color="#0f766e">{t}</H>} accent="#0f766e" sectionClass="mb-4" withLanguagesInterests={false} />
         </div>
         <div>
           {data.skills.length > 0 && (
@@ -379,7 +417,13 @@ function TwoColumnTemplate({ data }: TemplateProps) {
             <section className="mb-4"><H color="#0f766e">Education</H>{data.education.map((e) => (<div key={e.id} className="mb-2"><p className="text-[11.5px] font-bold">{e.degree}</p><p className="text-[11px] text-slate-700">{e.institution}</p><p className="text-[10.5px] text-slate-600">{dateRange(e.startDate, e.endDate)}{e.gpa ? ` · ${e.gpa}` : ''}</p></div>))}</section>
           )}
           {data.certifications.length > 0 && (
-            <section><H color="#0f766e">Certifications</H>{data.certifications.map((c) => (<p key={c.id} className="mb-1 text-[11px] text-slate-700"><span className="font-semibold">{c.name}</span><br />{c.issuer}{c.date ? ` · ${c.date}` : ''}</p>))}</section>
+            <section className="mb-4"><H color="#0f766e">Certifications</H>{data.certifications.map((c) => (<p key={c.id} className="mb-1 text-[11px] text-slate-700"><span className="font-semibold">{c.name}</span><br />{c.issuer}{c.date ? ` · ${c.date}` : ''}</p>))}</section>
+          )}
+          {data.languages.length > 0 && (
+            <section className="mb-4"><H color="#0f766e">Languages</H><p className="text-[11.5px] text-slate-700">{languageLabels(data.languages).join(', ')}</p></section>
+          )}
+          {data.interests.length > 0 && (
+            <section><H color="#0f766e">Interests</H><p className="text-[11.5px] text-slate-700">{data.interests.map((i) => i.name).filter(Boolean).join(', ')}</p></section>
           )}
         </div>
       </div>

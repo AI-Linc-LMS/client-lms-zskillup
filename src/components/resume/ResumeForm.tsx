@@ -3,11 +3,20 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type {
+  Achievement,
+  Award,
   Certification,
+  Course,
   Education,
+  Extracurricular,
+  Interest,
+  Language,
+  PositionOfResponsibility,
   Project,
+  Publication,
   ResumeData,
   Skill,
+  Volunteering,
   WorkExperience,
 } from './types';
 import { newId } from './types';
@@ -21,7 +30,16 @@ import {
   Wrench,
   Briefcase,
   FolderGit2,
-  Award,
+  Award as AwardIcon,
+  Trophy,
+  Users,
+  BookOpen,
+  Sparkle,
+  HeartHandshake,
+  Languages as LanguagesIcon,
+  Heart,
+  Medal,
+  Library,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -122,6 +140,7 @@ export function ResumeForm({ data, onChange, sectionAction }: Props) {
               <Field label="Start (YYYY-MM)"><input className={input} value={e.startDate} onChange={(ev) => updateArr(data, onChange, 'education', i, { startDate: ev.target.value })} /></Field>
               <Field label="End (YYYY-MM)"><input className={input} value={e.endDate} onChange={(ev) => updateArr(data, onChange, 'education', i, { endDate: ev.target.value })} /></Field>
             </div>
+            <div className="mt-2"><label className={lbl}>Description (optional)</label><textarea rows={2} className={input} value={e.description} onChange={(ev) => updateArr(data, onChange, 'education', i, { description: ev.target.value })} placeholder="Relevant coursework, honours, activities." /></div>
           </ItemCard>
         ))}
         <AddButton label="Add education" onClick={() => onChange({ ...data, education: [...data.education, blankEducation()] })} />
@@ -158,7 +177,7 @@ export function ResumeForm({ data, onChange, sectionAction }: Props) {
       </Section>
 
       {/* Certifications */}
-      <Section title="Certifications" icon={<Award className="size-4" />} count={data.certifications.length}>
+      <Section title="Certifications" icon={<AwardIcon className="size-4" />} count={data.certifications.length}>
         {data.certifications.map((c, i) => (
           <ItemCard key={c.id} onRemove={() => onChange({ ...data, certifications: data.certifications.filter((x) => x.id !== c.id) })}>
             <div className="grid grid-cols-2 gap-3">
@@ -171,12 +190,161 @@ export function ResumeForm({ data, onChange, sectionAction }: Props) {
         ))}
         <AddButton label="Add certification" onClick={() => onChange({ ...data, certifications: [...data.certifications, blankCert()] })} />
       </Section>
+
+      {/* Achievements */}
+      <Section title="Achievements" icon={<Trophy className="size-4" />} count={data.achievements.length}>
+        {data.achievements.map((a, i) => (
+          <ItemCard key={a.id} onRemove={() => onChange({ ...data, achievements: data.achievements.filter((x) => x.id !== a.id) })}>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Title" full><input className={input} value={a.title} onChange={(e) => updateArr(data, onChange, 'achievements', i, { title: e.target.value })} /></Field>
+              <Field label="Date (YYYY-MM)"><input className={input} value={a.date ?? ''} onChange={(e) => updateArr(data, onChange, 'achievements', i, { date: e.target.value })} /></Field>
+            </div>
+            <div className="mt-2"><label className={lbl}>Description (optional)</label><textarea rows={2} className={input} value={a.description ?? ''} onChange={(e) => updateArr(data, onChange, 'achievements', i, { description: e.target.value })} /></div>
+          </ItemCard>
+        ))}
+        <AddButton label="Add achievement" onClick={() => onChange({ ...data, achievements: [...data.achievements, blankAchievement()] })} />
+      </Section>
+
+      {/* Positions of Responsibility */}
+      <Section title="Positions of Responsibility" icon={<Users className="size-4" />} count={data.positionsOfResponsibility.length}>
+        {data.positionsOfResponsibility.map((p, i) => (
+          <ItemCard key={p.id} onRemove={() => onChange({ ...data, positionsOfResponsibility: data.positionsOfResponsibility.filter((x) => x.id !== p.id) })}>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Role"><input className={input} value={p.role} onChange={(e) => updateArr(data, onChange, 'positionsOfResponsibility', i, { role: e.target.value })} /></Field>
+              <Field label="Organization"><input className={input} value={p.organization} onChange={(e) => updateArr(data, onChange, 'positionsOfResponsibility', i, { organization: e.target.value })} /></Field>
+              <Field label="Start (YYYY-MM)"><input className={input} value={p.startDate ?? ''} onChange={(e) => updateArr(data, onChange, 'positionsOfResponsibility', i, { startDate: e.target.value })} /></Field>
+              <Field label="End (YYYY-MM)"><input className={input} value={p.endDate ?? ''} disabled={p.current} onChange={(e) => updateArr(data, onChange, 'positionsOfResponsibility', i, { endDate: e.target.value })} /></Field>
+            </div>
+            <label className="mt-2 flex items-center gap-2 text-xs text-slate-600">
+              <input type="checkbox" checked={p.current ?? false} onChange={(e) => updateArr(data, onChange, 'positionsOfResponsibility', i, { current: e.target.checked })} /> Currently holding this position
+            </label>
+            <div className="mt-2"><label className={lbl}>Description (optional)</label><textarea rows={2} className={input} value={p.description ?? ''} onChange={(e) => updateArr(data, onChange, 'positionsOfResponsibility', i, { description: e.target.value })} /></div>
+          </ItemCard>
+        ))}
+        <AddButton label="Add position" onClick={() => onChange({ ...data, positionsOfResponsibility: [...data.positionsOfResponsibility, blankPosition()] })} />
+      </Section>
+
+      {/* Publications */}
+      <Section title="Publications" icon={<BookOpen className="size-4" />} count={data.publications.length}>
+        {data.publications.map((p, i) => (
+          <ItemCard key={p.id} onRemove={() => onChange({ ...data, publications: data.publications.filter((x) => x.id !== p.id) })}>
+            <Field label="Title" full><input className={input} value={p.title} onChange={(e) => updateArr(data, onChange, 'publications', i, { title: e.target.value })} /></Field>
+            <div className="mt-2 grid grid-cols-2 gap-3">
+              <Field label="Venue / Journal"><input className={input} value={p.venue ?? ''} onChange={(e) => updateArr(data, onChange, 'publications', i, { venue: e.target.value })} /></Field>
+              <Field label="Date (YYYY-MM)"><input className={input} value={p.date ?? ''} onChange={(e) => updateArr(data, onChange, 'publications', i, { date: e.target.value })} /></Field>
+              <Field label="Link" full><input className={input} value={p.link ?? ''} onChange={(e) => updateArr(data, onChange, 'publications', i, { link: e.target.value })} /></Field>
+            </div>
+            <div className="mt-2"><label className={lbl}>Description (optional)</label><textarea rows={2} className={input} value={p.description ?? ''} onChange={(e) => updateArr(data, onChange, 'publications', i, { description: e.target.value })} /></div>
+          </ItemCard>
+        ))}
+        <AddButton label="Add publication" onClick={() => onChange({ ...data, publications: [...data.publications, blankPublication()] })} />
+      </Section>
+
+      {/* Awards */}
+      <Section title="Awards & Honors" icon={<Medal className="size-4" />} count={data.awards.length}>
+        {data.awards.map((a, i) => (
+          <ItemCard key={a.id} onRemove={() => onChange({ ...data, awards: data.awards.filter((x) => x.id !== a.id) })}>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Title"><input className={input} value={a.title} onChange={(e) => updateArr(data, onChange, 'awards', i, { title: e.target.value })} /></Field>
+              <Field label="Issuer"><input className={input} value={a.issuer ?? ''} onChange={(e) => updateArr(data, onChange, 'awards', i, { issuer: e.target.value })} /></Field>
+              <Field label="Date (YYYY-MM)"><input className={input} value={a.date ?? ''} onChange={(e) => updateArr(data, onChange, 'awards', i, { date: e.target.value })} /></Field>
+            </div>
+            <div className="mt-2"><label className={lbl}>Description (optional)</label><textarea rows={2} className={input} value={a.description ?? ''} onChange={(e) => updateArr(data, onChange, 'awards', i, { description: e.target.value })} /></div>
+          </ItemCard>
+        ))}
+        <AddButton label="Add award" onClick={() => onChange({ ...data, awards: [...data.awards, blankAward()] })} />
+      </Section>
+
+      {/* Courses */}
+      <Section title="Relevant Courses" icon={<Library className="size-4" />} count={data.courses.length}>
+        {data.courses.map((c, i) => (
+          <ItemCard key={c.id} onRemove={() => onChange({ ...data, courses: data.courses.filter((x) => x.id !== c.id) })}>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Name"><input className={input} value={c.name} onChange={(e) => updateArr(data, onChange, 'courses', i, { name: e.target.value })} /></Field>
+              <Field label="Provider"><input className={input} value={c.provider ?? ''} onChange={(e) => updateArr(data, onChange, 'courses', i, { provider: e.target.value })} /></Field>
+              <Field label="Date (YYYY-MM)"><input className={input} value={c.date ?? ''} onChange={(e) => updateArr(data, onChange, 'courses', i, { date: e.target.value })} /></Field>
+              <Field label="Link"><input className={input} value={c.link ?? ''} onChange={(e) => updateArr(data, onChange, 'courses', i, { link: e.target.value })} /></Field>
+            </div>
+          </ItemCard>
+        ))}
+        <AddButton label="Add course" onClick={() => onChange({ ...data, courses: [...data.courses, blankCourse()] })} />
+      </Section>
+
+      {/* Volunteering */}
+      <Section title="Volunteering" icon={<HeartHandshake className="size-4" />} count={data.volunteering.length}>
+        {data.volunteering.map((v, i) => (
+          <ItemCard key={v.id} onRemove={() => onChange({ ...data, volunteering: data.volunteering.filter((x) => x.id !== v.id) })}>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Role"><input className={input} value={v.role} onChange={(e) => updateArr(data, onChange, 'volunteering', i, { role: e.target.value })} /></Field>
+              <Field label="Organization"><input className={input} value={v.organization} onChange={(e) => updateArr(data, onChange, 'volunteering', i, { organization: e.target.value })} /></Field>
+              <Field label="Start (YYYY-MM)"><input className={input} value={v.startDate ?? ''} onChange={(e) => updateArr(data, onChange, 'volunteering', i, { startDate: e.target.value })} /></Field>
+              <Field label="End (YYYY-MM)"><input className={input} value={v.endDate ?? ''} disabled={v.current} onChange={(e) => updateArr(data, onChange, 'volunteering', i, { endDate: e.target.value })} /></Field>
+            </div>
+            <label className="mt-2 flex items-center gap-2 text-xs text-slate-600">
+              <input type="checkbox" checked={v.current ?? false} onChange={(e) => updateArr(data, onChange, 'volunteering', i, { current: e.target.checked })} /> Currently volunteering here
+            </label>
+            <div className="mt-2"><label className={lbl}>Description (optional)</label><textarea rows={2} className={input} value={v.description ?? ''} onChange={(e) => updateArr(data, onChange, 'volunteering', i, { description: e.target.value })} /></div>
+          </ItemCard>
+        ))}
+        <AddButton label="Add volunteering" onClick={() => onChange({ ...data, volunteering: [...data.volunteering, blankVolunteering()] })} />
+      </Section>
+
+      {/* Extracurricular */}
+      <Section title="Extracurricular" icon={<Sparkle className="size-4" />} count={data.extracurricular.length}>
+        {data.extracurricular.map((x, i) => (
+          <ItemCard key={x.id} onRemove={() => onChange({ ...data, extracurricular: data.extracurricular.filter((y) => y.id !== x.id) })}>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Title"><input className={input} value={x.title} onChange={(e) => updateArr(data, onChange, 'extracurricular', i, { title: e.target.value })} /></Field>
+              <Field label="Organization"><input className={input} value={x.organization ?? ''} onChange={(e) => updateArr(data, onChange, 'extracurricular', i, { organization: e.target.value })} /></Field>
+            </div>
+            <div className="mt-2"><label className={lbl}>Description (optional)</label><textarea rows={2} className={input} value={x.description ?? ''} onChange={(e) => updateArr(data, onChange, 'extracurricular', i, { description: e.target.value })} /></div>
+          </ItemCard>
+        ))}
+        <AddButton label="Add activity" onClick={() => onChange({ ...data, extracurricular: [...data.extracurricular, blankExtracurricular()] })} />
+      </Section>
+
+      {/* Languages */}
+      <Section title="Languages" icon={<LanguagesIcon className="size-4" />} count={data.languages.length}>
+        {data.languages.map((l, i) => (
+          <div key={l.id} className="mb-2 flex items-center gap-2">
+            <input className={cn(input, 'flex-1')} placeholder="Language" value={l.name} onChange={(e) => updateArr(data, onChange, 'languages', i, { name: e.target.value })} />
+            <input className={cn(input, 'w-40')} placeholder="Proficiency" value={l.proficiency ?? ''} onChange={(e) => updateArr(data, onChange, 'languages', i, { proficiency: e.target.value })} />
+            <button onClick={() => onChange({ ...data, languages: data.languages.filter((x) => x.id !== l.id) })} className="rounded-lg border border-red-200 p-2 text-red-500 hover:bg-red-50"><Trash2 className="size-4" /></button>
+          </div>
+        ))}
+        <AddButton label="Add language" onClick={() => onChange({ ...data, languages: [...data.languages, blankLanguage()] })} />
+      </Section>
+
+      {/* Interests */}
+      <Section title="Interests" icon={<Heart className="size-4" />} count={data.interests.length}>
+        {data.interests.map((it, i) => (
+          <div key={it.id} className="mb-2 flex items-center gap-2">
+            <input className={cn(input, 'flex-1')} placeholder="Interest" value={it.name} onChange={(e) => updateArr(data, onChange, 'interests', i, { name: e.target.value })} />
+            <button onClick={() => onChange({ ...data, interests: data.interests.filter((x) => x.id !== it.id) })} className="rounded-lg border border-red-200 p-2 text-red-500 hover:bg-red-50"><Trash2 className="size-4" /></button>
+          </div>
+        ))}
+        <AddButton label="Add interest" onClick={() => onChange({ ...data, interests: [...data.interests, blankInterest()] })} />
+      </Section>
     </div>
   );
 }
 
 // ── helpers ────────────────────────────────────────────────────────────────
-type ArrKey = 'workExperience' | 'education' | 'skills' | 'projects' | 'certifications';
+type ArrKey =
+  | 'workExperience'
+  | 'education'
+  | 'skills'
+  | 'projects'
+  | 'certifications'
+  | 'achievements'
+  | 'positionsOfResponsibility'
+  | 'publications'
+  | 'extracurricular'
+  | 'volunteering'
+  | 'languages'
+  | 'interests'
+  | 'awards'
+  | 'courses';
 function updateArr<K extends ArrKey>(
   data: ResumeData,
   onChange: (d: ResumeData) => void,
@@ -200,6 +368,33 @@ function blankProject(): Project {
 }
 function blankCert(): Certification {
   return { id: newId(), name: '', issuer: '', date: '', link: '' };
+}
+function blankAchievement(): Achievement {
+  return { id: newId(), title: '', description: '', date: '' };
+}
+function blankPosition(): PositionOfResponsibility {
+  return { id: newId(), role: '', organization: '', startDate: '', endDate: '', current: false, description: '' };
+}
+function blankPublication(): Publication {
+  return { id: newId(), title: '', venue: '', date: '', link: '', description: '' };
+}
+function blankExtracurricular(): Extracurricular {
+  return { id: newId(), title: '', organization: '', description: '' };
+}
+function blankVolunteering(): Volunteering {
+  return { id: newId(), role: '', organization: '', startDate: '', endDate: '', current: false, description: '' };
+}
+function blankLanguage(): Language {
+  return { id: newId(), name: '', proficiency: '' };
+}
+function blankInterest(): Interest {
+  return { id: newId(), name: '' };
+}
+function blankAward(): Award {
+  return { id: newId(), title: '', issuer: '', date: '', description: '' };
+}
+function blankCourse(): Course {
+  return { id: newId(), name: '', provider: '', date: '', link: '' };
 }
 
 function Section({
