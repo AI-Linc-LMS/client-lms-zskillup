@@ -72,6 +72,7 @@ export default function AssessmentCenterPage() {
     durationMinutes: '60',
     mcqCount: '20',
     codingCount: '0',
+    difficulty: 'MIXED',
     proctored: true,
     cohortId: '',
   });
@@ -106,6 +107,7 @@ export default function AssessmentCenterPage() {
         companySlug: form.mode === 'COMPANY' ? form.companySlug || undefined : undefined,
         topicIds: topicSel.size > 0 ? [...topicSel] : undefined,
         codingTopics: codingSel.size > 0 ? [...codingSel] : undefined,
+        difficulty: form.difficulty,
       })
         .then(setAvail)
         .catch(() => setAvail(null));
@@ -160,6 +162,7 @@ export default function AssessmentCenterPage() {
         durationMinutes: Number(form.durationMinutes),
         mcqCount: Number(form.mcqCount),
         codingCount: Number(form.codingCount) || undefined,
+        difficulty: form.difficulty,
         proctored: form.proctored,
         cohortId: form.cohortId || undefined,
         topicIds: topicSel.size > 0 ? [...topicSel] : undefined,
@@ -398,6 +401,17 @@ export default function AssessmentCenterPage() {
             <label className="text-xs font-semibold text-slate-600">
               MCQ count
               <input type="number" min="1" max="100" value={form.mcqCount} onChange={(e) => setForm((f) => ({ ...f, mcqCount: e.target.value }))} className={`mt-1 ${inputCls}`} />
+            </label>
+          )}
+          {wantsMcq && (
+            <label className="text-xs font-semibold text-slate-600">
+              MCQ difficulty
+              <select value={form.difficulty} onChange={(e) => setForm((f) => ({ ...f, difficulty: e.target.value }))} className={`mt-1 ${inputCls}`}>
+                <option value="MIXED">Mixed (all levels)</option>
+                <option value="EASY">Easy</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HARD">Hard</option>
+              </select>
             </label>
           )}
           {wantsCoding && (
