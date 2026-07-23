@@ -2,14 +2,16 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Loader2, Plus, Search, Trash2 } from 'lucide-react';
+import { Film, Loader2, Plus, Search, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/ui/form-field';
 import { ApiRequestError } from '@/lib/api/types';
 import {
   createAdminCompany,
   deleteAdminCompany,
+  getAdminCompanyHub,
   listAdminCompanies,
+  setCompanyIntroVideo,
   updateAdminCompany,
   type AdminCompanyRow,
 } from '@/lib/api/admin';
@@ -28,6 +30,7 @@ export function CompaniesAdmin() {
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [introFor, setIntroFor] = useState<string | null>(null); // company whose intro-video editor is open
 
   const refresh = useCallback(async () => {
     setLoadError(null);
@@ -140,7 +143,7 @@ export function CompaniesAdmin() {
                 </td>
               </tr>
             ) : (
-              filtered.map((c) => (
+              filtered.flatMap((c) => [
                 <tr key={c.id} className="border-t border-slate-100">
                   <td className="px-4 py-3 font-semibold text-navy">{c.name}</td>
                   <td className="px-4 py-3 font-mono text-xs text-slate-600">{c.slug}</td>
@@ -151,6 +154,15 @@ export function CompaniesAdmin() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setIntroFor((prev) => (prev === c.id ? null : c.id))}
+                        className={`inline-flex items-center gap-1 text-xs font-semibold transition-colors ${
+                          introFor === c.id ? 'text-[#f5b400]' : 'text-slate-500 hover:text-navy'
+                        }`}
+                      >
+                        <Film className="size-3.5" /> Intro video
+                      </button>
                       <button
                         type="button"
                         disabled={busyId === c.id}
@@ -170,8 +182,15 @@ export function CompaniesAdmin() {
                       </button>
                     </div>
                   </td>
-                </tr>
-              ))
+                </tr>,
+                introFor === c.id ? (
+                  <tr key={`${c.id}-intro`} className="border-t border-slate-100 bg-slate-50/60">
+                    <td colSpan={6} className="px-4 py-4">
+                      <IntroVideoEditor companyId={c.id} companyName={c.name} onClose={() => setIntroFor(null)} />
+                    </td>
+                  </tr>
+                ) : null,
+              ])
             )}
           </tbody>
         </table>
@@ -311,5 +330,125 @@ function StatusPill({ published }: { published: boolean }) {
     <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600 ring-1 ring-slate-200">
       Draft
     </span>
+  );
+}
+
+// ─── Intro-video editor (Company Hub Overview) ──────────────────────────────
+
+/**
+ * Sets the Company Hub Overview intro video. Paste a Vimeo / Google Drive / YouTube
+ * link — the provider is detected and the embeddable URL derived server-side. Empty
+ * + Save clears it (back to the placeholder). Prefilled from the current hub.
+ */
+function IntroVideoEditor({
+  companyId,
+  companyName,
+  onClose,
+}: {
+  companyId: string;
+  companyName: string;
+  onClose: () => void;
+}) {
+  const [url, setUrl] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [embedUrl, setEmbedUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    getAdminCompanyHub(companyId)
+      .then((hub) => {
+        if (alive) setUrl(hub?.overview?.introVideoUrl ?? '');
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [companyId]);
+
+  const save = async () => {
+    setSaving(true);
+    setError(null);
+    setSaved(false);
+    try {
+      const res = await setCompanyIntroVideo(companyId, url.trim());
+      setEmbedUrl(res.introEmbedUrl);
+      setSaved(true);
+    } catch (e) {
+      setError(e instanceof ApiRequestError ? e.message : 'Could not save the intro video.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+          {companyName} · Company Hub intro video
+        </p>
+        <button type="button" onClick={onClose} className="text-xs font-semibold text-slate-500 hover:text-navy">
+          Close
+        </button>
+      </div>
+      {loading ? (
+        <Loader2 className="size-4 animate-spin text-slate-400" aria-hidden="true" />
+      ) : (
+        <>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              value={url}
+              onChange={(e) => {
+                setUrl(e.target.value);
+                setSaved(false);
+              }}
+              placeholder="Paste a Vimeo / Google Drive / YouTube link — provider is detected automatically"
+              className="h-10 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors focus:border-[#ffc42d] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ffc42d]/30"
+            />
+            <div className="flex items-center gap-2">
+              <Button type="button" size="sm" onClick={save} disabled={saving}>
+                {saving ? <Loader2 className="size-4 animate-spin" /> : 'Save'}
+              </Button>
+              {url.trim() ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setUrl('');
+                    setSaved(false);
+                  }}
+                  disabled={saving}
+                >
+                  Clear
+                </Button>
+              ) : null}
+            </div>
+          </div>
+          {error ? <p className="text-xs font-medium text-red-600">{error}</p> : null}
+          {saved ? (
+            <p className="text-xs font-medium text-emerald-600">
+              Saved — {embedUrl ? 'the Overview tab now plays this video.' : 'intro video cleared (placeholder restored).'}
+            </p>
+          ) : null}
+          {saved && embedUrl ? (
+            <div className="relative aspect-video w-full max-w-md overflow-hidden rounded-xl border border-slate-200 bg-black">
+              <iframe
+                src={embedUrl}
+                className="absolute inset-0 size-full"
+                allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+                allowFullScreen
+                title={`${companyName} intro preview`}
+              />
+            </div>
+          ) : null}
+        </>
+      )}
+    </div>
   );
 }

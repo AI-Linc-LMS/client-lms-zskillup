@@ -242,6 +242,29 @@ export async function deleteAdminCompany(id: string): Promise<void> {
   await apiClient.delete(`/api/v1/admin/companies/${id}`);
 }
 
+/** Current hub body for a company (null if not yet authored). Used to prefill the
+ *  intro-video editor with `overview.introVideoUrl`. */
+export interface AdminCompanyHub {
+  overview?: { introVideoUrl?: string | null } & Record<string, unknown>;
+}
+
+export async function getAdminCompanyHub(id: string): Promise<AdminCompanyHub | null> {
+  const res = await apiClient.get<AdminCompanyHub | null>(`/api/v1/admin/companies/${id}/hub`);
+  return res.data;
+}
+
+/** Set (or clear, with '') the Company Hub intro video — a pasted Vimeo/Drive/YouTube link. */
+export async function setCompanyIntroVideo(
+  id: string,
+  introVideoUrl: string,
+): Promise<{ introEmbedUrl: string | null }> {
+  const res = await apiClient.patch<{ introEmbedUrl: string | null }>(
+    `/api/v1/admin/companies/${id}/intro-video`,
+    { introVideoUrl },
+  );
+  return res.data;
+}
+
 // ─── Questions (Sprint 3 - superadmin question-bank CRUD) ───────────────────
 
 export interface AdminQuestionRow {
