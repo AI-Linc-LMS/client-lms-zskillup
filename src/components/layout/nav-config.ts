@@ -262,6 +262,7 @@ export const ADMIN_NAV: NavSection[] = [
       { label: 'Platform Analytics', href: '/admin/analytics', icon: TrendingUp },
       { label: 'Student Reports', href: '/admin/students', icon: BarChart3 },
       { label: 'Colleges', href: '/admin/colleges', icon: School },
+      { label: 'Individual Cohorts', href: '/admin/individual-cohorts', icon: Users },
       { label: 'Reports', href: '/admin/reports', icon: FileText },
     ],
   },

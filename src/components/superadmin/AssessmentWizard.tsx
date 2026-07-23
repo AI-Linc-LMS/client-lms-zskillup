@@ -21,6 +21,7 @@ import { ApiRequestError } from '@/lib/api/types';
 import { listCompanies, listTopicsWithCounts, type ApiCompany, type ApiTopic } from '@/lib/api/catalog';
 import { listAdminColleges, type AdminCollegeRow } from '@/lib/api/admin';
 import { getCollegeCohorts } from '@/lib/api/admin-cohorts';
+import { listIndividualCohorts, type IndividualCohort } from '@/lib/api/individual-cohorts';
 import { HIDDEN_ROOT_SLUGS } from '@/components/practice/section-meta';
 import type { CohortDto } from '@/shared';
 import {
@@ -131,6 +132,7 @@ export function AssessmentWizard({
   const [codingTopics, setCodingTopics] = useState<CodingTopic[]>([]);
   const [colleges, setColleges] = useState<AdminCollegeRow[]>([]);
   const [cohorts, setCohorts] = useState<CohortDto[]>([]);
+  const [individualCohorts, setIndividualCohorts] = useState<IndividualCohort[]>([]);
 
   // sections
   const [sections, setSections] = useState<Section[]>([{ name: 'Section 1', items: [] }]);
@@ -144,7 +146,10 @@ export function AssessmentWizard({
     listCompanies().then(setCompanies).catch(() => {});
     listTopicsWithCounts().then(setTopics).catch(() => {});
     listBuilderCodingTopics().then(setCodingTopics).catch(() => {});
-    if (!isTpo) listAdminColleges().then(setColleges).catch(() => {});
+    if (!isTpo) {
+      listAdminColleges().then(setColleges).catch(() => {});
+      listIndividualCohorts().then(setIndividualCohorts).catch(() => {});
+    }
   }, [isTpo]);
 
   // Load the selected college's cohorts (admin scope). TPO mode uses its own list.
@@ -462,34 +467,41 @@ export function AssessmentWizard({
                       <span className={labelCls}>Cohort / batch (optional)</span>
                       <select
                         value={cohortId}
-                        onChange={(e) => setCohortId(e.target.value)}
-                        disabled={!collegeId}
-                        className={cn(inputCls, !collegeId && 'cursor-not-allowed opacity-50')}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          setCohortId(v);
+                          // An individual cohort has no college - clear the college so the
+                          // drive is scoped to just that cohort (server derives NULL college).
+                          if (v && individualCohorts.some((c) => c.id === v)) setCollegeId('');
+                        }}
+                        className={inputCls}
                       >
-                        <option value="">{collegeId ? 'All cohorts in this college' : 'Select a college first'}</option>
-                        {cohortOptions.map((c) => (
-                          <option key={c.id} value={c.id}>{c.name}</option>
-                        ))}
+                        <option value="">All (no specific cohort)</option>
+                        {collegeId && cohortOptions.length > 0 ? (
+                          <optgroup label="This college’s cohorts">
+                            {cohortOptions.map((c) => (
+                              <option key={c.id} value={c.id}>{c.name}</option>
+                            ))}
+                          </optgroup>
+                        ) : null}
+                        {individualCohorts.length > 0 ? (
+                          <optgroup label="Individual cohorts (no college)">
+                            {individualCohorts.map((c) => (
+                              <option key={c.id} value={c.id}>{c.name} ({c.studentCount})</option>
+                            ))}
+                          </optgroup>
+                        ) : null}
                       </select>
                     </label>
                   </div>
-                  {/* Discoverability (#2): cohorts are CREATED under Colleges, not here.
-                      Point admins straight to the create/import flow (new tab keeps the
-                      in-progress assessment draft). */}
-                  {collegeId ? (
-                    <a
-                      href={`/admin/colleges/${collegeId}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-orange hover:underline"
-                    >
-                      + Create or manage cohorts (add students / import CSV) for this college →
+                  {/* Cohort creation lives elsewhere - point admins to both flows. */}
+                  <p className="text-[11px] text-slate-500">
+                    College batches: <span className="font-semibold text-navy">Admin → Colleges</span> → a college → Cohorts.{' '}
+                    Groups of non-college users:{' '}
+                    <a href="/admin/individual-cohorts" target="_blank" rel="noreferrer" className="font-semibold text-orange hover:underline">
+                      Admin → Individual Cohorts →
                     </a>
-                  ) : (
-                    <p className="text-[11px] text-slate-500">
-                      To make a cohort, open <span className="font-semibold text-navy">Admin → Colleges</span> → a college → <span className="font-semibold text-navy">Cohorts</span> (create, add students, or import CSV), then pick it here.
-                    </p>
-                  )}
+                  </p>
                 </div>
               )}
               <div className="grid gap-4 sm:grid-cols-3">

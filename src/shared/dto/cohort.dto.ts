@@ -6,7 +6,7 @@
  * cohorts and imports students into them; Admin one-time-seeds an approved
  * request's student list into a new cohort.
  */
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
@@ -18,6 +18,7 @@ import {
   MaxLength,
   Min,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
 
 const trimString = ({ value }: { value: unknown }): unknown =>
@@ -57,11 +58,52 @@ export class ImportRequestStudentsDto {
 
 export interface CohortDto {
   id: string;
-  collegeId: string;
+  /** Null for an individual (non-college) cohort. */
+  collegeId: string | null;
   name: string;
   description: string | null;
   year: number | null;
   branch: string | null;
   studentCount: number;
   createdAt: string;
+}
+
+// ── Individual (non-college) cohorts ─────────────────────────────────────────
+
+/** Create an individual (non-college) cohort - just a name + optional description. */
+export class CreateIndividualCohortDto {
+  @Transform(trimString) @IsString() @MinLength(2) @MaxLength(160)
+  name!: string;
+
+  @IsOptional() @Transform(trimString) @IsString() @MaxLength(500)
+  description?: string;
+}
+
+export class IndividualCohortEntryDto {
+  @Transform(trimString) @IsString() @MaxLength(200)
+  email!: string;
+
+  @IsOptional() @Transform(trimString) @IsString() @MaxLength(160)
+  fullName?: string;
+}
+
+/** Add users to an individual cohort by email. Existing non-college users are
+ *  assigned; unknown emails are invited as new (non-college) students. */
+export class AddIndividualCohortUsersDto {
+  @IsArray() @ArrayMaxSize(2000) @ValidateNested({ each: true }) @Type(() => IndividualCohortEntryDto)
+  entries!: IndividualCohortEntryDto[];
+}
+
+export interface IndividualCohortMemberDto {
+  id: string;
+  fullName: string | null;
+  email: string;
+  status: string;
+}
+
+export interface AddCohortUsersResultDto {
+  added: number;
+  invited: number;
+  skipped: number;
+  rows: Array<{ email: string; status: 'added' | 'invited' | 'skipped' | 'invalid'; reason?: string }>;
 }
