@@ -2,6 +2,7 @@ import { apiClient } from './client';
 import type {
   EntitlementDto,
   GrantEntitlementDto,
+  GrantedEntitlementDto,
   PriceBookEntryDto,
   UpdatePriceBookDto,
 } from '@/shared/dto/payments.dto';
@@ -30,6 +31,11 @@ export async function listEntitlements(params?: {
   if (params?.collegeId) qs.set('collegeId', params.collegeId);
   const suffix = qs.toString() ? `?${qs.toString()}` : '';
   return (await apiClient.get<EntitlementDto[]>(`/api/v1/admin/entitlements${suffix}`)).data;
+}
+
+/** All complimentary (admin-granted) entitlements + the granted user's identity. */
+export async function listAdminGrants(): Promise<GrantedEntitlementDto[]> {
+  return (await apiClient.get<GrantedEntitlementDto[]>('/api/v1/admin/entitlements/grants')).data;
 }
 
 export async function grantEntitlement(dto: GrantEntitlementDto): Promise<EntitlementDto> {

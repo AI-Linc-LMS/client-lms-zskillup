@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import {
   BadgeIndianRupee,
@@ -23,11 +23,12 @@ import {
   getPriceBook,
   updatePrice,
   listEntitlements,
+  listAdminGrants,
   revokeEntitlement,
   grantEntitlement,
 } from '@/lib/api/admin-payments';
 import type { FinancialsPaymentsDto } from '@/shared/dto/financials.dto';
-import type { EntitlementDto, PriceBookEntryDto } from '@/shared/dto/payments.dto';
+import type { EntitlementDto, GrantedEntitlementDto, PriceBookEntryDto } from '@/shared/dto/payments.dto';
 import { listAdminUsers, type AdminUserRow } from '@/lib/api/admin';
 import { BillingPeriod, EntitlementScope, EntitlementSource, EntitlementSubject } from '@/shared/enums';
 import { cn } from '@/lib/utils';
@@ -368,6 +369,14 @@ function EntitlementsSection() {
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
   const [rows, setRows] = useState<EntitlementDto[] | null>(null);
   const [busy, setBusy] = useState(false);
+  const [grants, setGrants] = useState<GrantedEntitlementDto[] | null>(null);
+
+  const loadGrants = useCallback(() => {
+    listAdminGrants()
+      .then(setGrants)
+      .catch(() => setGrants([]));
+  }, []);
+  useEffect(() => loadGrants(), [loadGrants]);
 
   const search = async (id: string = userId) => {
     if (!id.trim()) return;
@@ -386,7 +395,8 @@ function EntitlementsSection() {
     try {
       await revokeEntitlement(id);
       toast.success('Entitlement revoked');
-      await search();
+      loadGrants();
+      if (userId.trim()) await search();
     } catch {
       toast.error('Could not revoke');
     }
@@ -470,6 +480,63 @@ function EntitlementsSection() {
           </table>
         </div>
       )}
+
+      {/* Everyone you've granted complimentary (admin-granted) access to. */}
+      <div className="mt-8">
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-base font-black tracking-tight text-navy">Complimentary access grants</h3>
+          {grants ? <span className="text-xs font-semibold text-slate-500">{grants.length} user{grants.length === 1 ? '' : 's'}</span> : null}
+        </div>
+        <p className="text-xs text-slate-500">Every user you&apos;ve given free (admin-granted) access to. Revoke here anytime.</p>
+        <div className="mt-3 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+          <table className="w-full min-w-[640px] text-sm">
+            <thead>
+              <tr className="border-b border-slate-100 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <th className="p-3">Student</th>
+                <th className="p-3">Access</th>
+                <th className="p-3">Status</th>
+                <th className="p-3">Expires</th>
+                <th className="p-3" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {grants === null ? (
+                <tr><td colSpan={5} className="p-6 text-center text-slate-500"><Loader2 className="mx-auto size-5 animate-spin" /></td></tr>
+              ) : grants.length === 0 ? (
+                <tr><td colSpan={5} className="p-6 text-center text-slate-500">No complimentary grants yet. Use “Grant complimentary access” above.</td></tr>
+              ) : (
+                grants.map((e) => (
+                  <tr key={e.id} className="text-navy">
+                    <td className="p-3">
+                      <span className="block font-semibold">{e.userName ?? e.userEmail ?? 'Unknown user'}</span>
+                      {e.userEmail ? <span className="text-[11px] text-slate-500">{e.userEmail}</span> : null}
+                    </td>
+                    <td className="p-3">
+                      {scopeName(e.scopeType)}
+                      {e.scopeRef ? <span className="text-slate-500"> · {e.scopeRef}</span> : null}
+                    </td>
+                    <td className="p-3">
+                      <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-bold', e.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600')}>
+                        {e.status}
+                      </span>
+                    </td>
+                    <td className="p-3 tabular-nums text-slate-600">
+                      {e.daysRemaining != null ? `${e.daysRemaining}d` : e.expiresAt ? new Date(e.expiresAt).toLocaleDateString() : 'Lifetime'}
+                    </td>
+                    <td className="p-3">
+                      {e.status === 'ACTIVE' ? (
+                        <button type="button" onClick={() => void revoke(e.id)} className="text-xs font-bold text-rose-600 hover:underline">
+                          Revoke
+                        </button>
+                      ) : null}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </section>
   );
 }
