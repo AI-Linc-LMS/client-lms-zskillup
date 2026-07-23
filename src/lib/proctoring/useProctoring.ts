@@ -54,6 +54,8 @@ export interface ProctoringController {
   micGranted: boolean;
   tabSwitches: number;
   fullscreenExits: number;
+  inFullscreen: boolean;
+  enterFullscreen: () => void;
   windowBlurs: number;
   clipboardEvents: number;
   snapshotCount: number;
@@ -121,6 +123,7 @@ export function useProctoring(
   const [micGranted, setMicGranted] = useState(false);
   const [tabSwitches, setTabSwitches] = useState(0);
   const [fullscreenExits, setFullscreenExits] = useState(0);
+  const [inFullscreen, setInFullscreen] = useState(false);
   // Strict-proctoring signals (#7): window blur/minimize + copy/paste/cut.
   const [windowBlurs, setWindowBlurs] = useState(0);
   const [clipboardEvents, setClipboardEvents] = useState(0);
@@ -156,7 +159,9 @@ export function useProctoring(
   }, [logEvent, queueReport, warn]);
 
   const onFullscreenChange = useCallback(() => {
-    if (!document.fullscreenElement) {
+    const fs = !!document.fullscreenElement;
+    setInFullscreen(fs);
+    if (!fs) {
       setFullscreenExits((n) => n + 1);
       logEvent('fullscreen_exit');
       queueReport({
@@ -168,6 +173,13 @@ export function useProctoring(
       warn('You exited fullscreen - please return to fullscreen.');
     }
   }, [logEvent, queueReport, warn]);
+
+  /** Re-enter fullscreen from a user gesture (the runner's "Return to fullscreen"
+   *  button). Fullscreen requests are rejected without an activation, so this must
+   *  be called from a click handler - not programmatically. */
+  const enterFullscreen = useCallback(() => {
+    document.documentElement.requestFullscreen?.().catch(() => {});
+  }, []);
 
   // Losing window focus WITHOUT the tab going hidden = minimized / alt-tabbed to
   // another app (a tab switch fires visibilitychange, handled above). Defer a tick
@@ -274,16 +286,12 @@ export function useProctoring(
         videoRef.current.srcObject = stream;
         videoRef.current.play().catch(() => {});
       }
-      // Kick off camera analysis (non-blocking - the exam starts even while the
-      // model downloads; detection begins once it's ready).
-      if (hasCamera && videoRef.current) {
-        setFaceStatus('NORMAL');
-        const proctor = new FaceProctor();
-        faceProctorRef.current = proctor;
-        void proctor.start(videoRef.current, { onFrame }).catch(() => {
-          setFaceStatus('OFF');
-        });
-      }
+      // NOTE: the FaceProctor is NOT started here. When a stream is reused from the
+      // device-check (window.__assessmentStream) start() runs synchronously, BEFORE
+      // the <video> (in ProctorOverlay, rendered only once phase==='running') mounts,
+      // so videoRef.current is null and detection would silently never begin (the
+      // "Camera check: off" bug). It's started from the effect below, which fires on
+      // the render where the <video> actually exists.
       // Audio-presence watch (dictation / background voices). Advisory, medium.
       if (stream.getAudioTracks().length > 0) {
         const audio = new AudioProctor();
@@ -306,12 +314,15 @@ export function useProctoring(
         }
       }
     }
-    // Fullscreen (non-fatal).
+    // Fullscreen (non-fatal). May reject silently in the scheduled path (no user
+    // activation left after the network round-trip) - the runner's re-entry button
+    // recovers it from a real gesture.
     try {
       await document.documentElement.requestFullscreen?.();
     } catch {
       /* ignore */
     }
+    setInFullscreen(!!document.fullscreenElement);
     document.addEventListener('visibilitychange', onVisibility);
     document.addEventListener('fullscreenchange', onFullscreenChange);
     window.addEventListener('blur', onWindowBlur);
@@ -379,11 +390,20 @@ export function useProctoring(
     if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
   }, [onVisibility, onFullscreenChange, onWindowBlur, onClipboard]);
 
-  // Re-attach the stream if the <video> mounts after start.
+  // The <video> mounts AFTER start() (phase flips to 'running'), so both the
+  // self-view srcObject AND the FaceProctor must be (re)wired here, on the render
+  // where the element first exists. Guarded refs => each runs exactly once.
   useEffect(() => {
-    if (active && streamRef.current && videoRef.current && !videoRef.current.srcObject) {
+    if (!active || !streamRef.current || !videoRef.current) return;
+    if (!videoRef.current.srcObject) {
       videoRef.current.srcObject = streamRef.current;
       videoRef.current.play().catch(() => {});
+    }
+    if (cameraGranted && !faceProctorRef.current) {
+      setFaceStatus('NORMAL');
+      const proctor = new FaceProctor();
+      faceProctorRef.current = proctor;
+      void proctor.start(videoRef.current, { onFrame }).catch(() => setFaceStatus('OFF'));
     }
   });
 
@@ -415,6 +435,8 @@ export function useProctoring(
     micGranted,
     tabSwitches,
     fullscreenExits,
+    inFullscreen,
+    enterFullscreen,
     windowBlurs,
     clipboardEvents,
     snapshotCount,

@@ -91,11 +91,8 @@ export function CompanyMockTab({
           <p className="mt-3 text-xs text-slate-500">Loading…</p>
         ) : scheduled.length === 0 ? (
           <p className="mt-3 text-sm text-slate-600">
-            No assessment scheduled yet.{' '}
-            <Link href={`/dashboard/company/${slug}`} className="font-semibold text-violet-600 hover:underline">
-              Register
-            </Link>{' '}
-            to be notified when {name} schedules one - it&apos;ll appear on your calendar.
+            No assessment scheduled yet. When {name} schedules one - or your placement cell assigns you an
+            assessment - it appears here and on your dashboard automatically. No sign-up needed.
           </p>
         ) : (
           <ul className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -112,8 +109,8 @@ export function CompanyMockTab({
                     {s.proctored ? <span className="flex items-center gap-1 text-violet-600"><Video className="size-3" /> Proctored</span> : null}
                   </p>
                 </div>
-                <Link href="/assessments" className="shrink-0 text-xs font-bold text-violet-600 hover:underline">
-                  Calendar →
+                <Link href={`/assessments/${s.id}`} className="shrink-0 text-xs font-bold text-violet-600 hover:underline">
+                  Open →
                 </Link>
               </li>
             ))}

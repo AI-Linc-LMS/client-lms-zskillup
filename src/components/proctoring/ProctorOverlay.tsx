@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   AlertTriangle,
@@ -7,7 +8,7 @@ import {
   Maximize2,
   Mic,
   MicOff,
-  Minimize2,
+  Monitor,
   Repeat,
   ScanFace,
   Video,
@@ -34,6 +35,8 @@ export function ProctorOverlay({ controller }: { controller: ProctoringControlle
     micGranted,
     tabSwitches,
     fullscreenExits,
+    inFullscreen,
+    enterFullscreen,
     windowBlurs,
     clipboardEvents,
     faceStatus,
@@ -41,6 +44,18 @@ export function ProctorOverlay({ controller }: { controller: ProctoringControlle
     faceViolations,
     lastWarning,
   } = controller;
+
+  // Only enforce return-to-fullscreen once we've actually BEEN in fullscreen, so a
+  // browser that blocks/doesn't support it never strands the candidate.
+  const [everFullscreen, setEverFullscreen] = useState(false);
+  useEffect(() => {
+    if (inFullscreen) setEverFullscreen(true);
+  }, [inFullscreen]);
+
+  // A tab switch and an app/window switch (blur) are both "left the assessment" -
+  // show them as ONE number so repeated leaves are visibly counted (they were split
+  // across two icons before, which read as "stuck at 1").
+  const leftAssessment = tabSwitches + windowBlurs;
 
   return (
     <>
@@ -83,13 +98,36 @@ export function ProctorOverlay({ controller }: { controller: ProctoringControlle
             >
               <ScanFace className={`size-3.5 ${FACE_TONE[faceStatus] ?? FACE_TONE.OFF}`} /> {faceViolations}
             </span>
-            <span className="inline-flex items-center gap-0.5" title="Tab switches"><Repeat className="size-3" /> {tabSwitches}</span>
+            <span className="inline-flex items-center gap-0.5" title="Left the assessment (tab / window / app switch)"><Repeat className="size-3" /> {leftAssessment}</span>
             <span className="inline-flex items-center gap-0.5" title="Fullscreen exits"><Maximize2 className="size-3" /> {fullscreenExits}</span>
-            <span className="inline-flex items-center gap-0.5" title="Left the window / minimized"><Minimize2 className="size-3" /> {windowBlurs}</span>
             <span className="inline-flex items-center gap-0.5" title="Copy / paste flags"><ClipboardX className="size-3" /> {clipboardEvents}</span>
           </span>
         </div>
       </div>
+
+      {/* Fullscreen enforcer (#4): after an exit, block the assessment until the
+          candidate returns to fullscreen (from a real click, so it isn't rejected).
+          This also makes each exit RECOVERABLE, so repeated exits get counted. */}
+      {everFullscreen && !inFullscreen ? (
+        <div className="fixed inset-0 z-[95] grid place-items-center bg-slate-900/80 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-3xl border border-slate-200 bg-white p-7 text-center shadow-lg">
+            <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-amber-100 text-amber-600">
+              <Monitor className="size-7" />
+            </span>
+            <h2 className="mt-4 text-lg font-black text-navy">You left fullscreen</h2>
+            <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
+              This assessment is proctored. Return to fullscreen to continue - this exit has been logged.
+            </p>
+            <button
+              type="button"
+              onClick={enterFullscreen}
+              className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-5 py-2.5 text-sm font-extrabold text-[#171717] shadow-sm transition hover:brightness-105"
+            >
+              <Maximize2 className="size-4" /> Return to fullscreen
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {/* Prominent, hard-to-miss violation warning (top-center) - #7. */}
       <AnimatePresence>
