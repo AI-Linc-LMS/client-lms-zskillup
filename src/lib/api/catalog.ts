@@ -37,7 +37,11 @@ export interface ApiCompanyHubContent {
     summary: string;
     process: { stage: string; detail: string }[];
     topicGrid: { group: string; topics: string[] }[];
+    /** Raw admin-set intro-video link (edited in the admin hub editor). */
+    introVideoUrl?: string | null;
   };
+  /** Ready-to-embed intro-video player URL (server-derived from overview.introVideoUrl). */
+  introEmbedUrl?: string | null;
   quickStats: {
     rounds: number;
     examType: string;
