@@ -194,6 +194,13 @@ export interface EntitlementDto {
   daysRemaining: number | null;
 }
 
+/** An entitlement enriched with the granted user's identity - for the admin
+ *  "who has complimentary access" list. */
+export interface GrantedEntitlementDto extends EntitlementDto {
+  userName: string | null;
+  userEmail: string | null;
+}
+
 /** One priced line of a cart order (read shape). */
 export interface CartLineDto {
   scopeType: EntitlementScope;
