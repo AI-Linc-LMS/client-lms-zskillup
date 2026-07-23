@@ -15,7 +15,7 @@ export class AudioProctor {
 
   constructor(
     /** RMS (0-1) above which audio counts as voice-level. */
-    private readonly threshold = 0.12,
+    private readonly threshold = 0.08,
     /** Must hold above threshold this long before it's a violation. */
     private readonly sustainMs = 1500,
   ) {}
@@ -28,6 +28,11 @@ export class AudioProctor {
         window.AudioContext ??
         (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       this.ctx = new Ctx();
+      // The assessment auto-starts outside a user gesture, so Chrome creates the
+      // context SUSPENDED (autoplay policy). A suspended graph never pulls the
+      // analyser -> every sample reads the flat midpoint (128) -> RMS 0 -> voice
+      // is never detected. Resume it (best-effort; also self-heals on each sample).
+      void this.ctx.resume().catch(() => {});
       this.source = this.ctx.createMediaStreamSource(stream);
       this.analyser = this.ctx.createAnalyser();
       this.analyser.fftSize = 512;
@@ -43,6 +48,12 @@ export class AudioProctor {
   /** True once voice-level audio has been sustained past the threshold. */
   sampleVoiceActive(): boolean {
     if (!this.analyser || !this.data) return false;
+    // Self-heal: if the context is still suspended (gesture expired at create
+    // time), resume it and skip this frame - it'll read live audio next tick.
+    if (this.ctx?.state === 'suspended') {
+      void this.ctx.resume().catch(() => {});
+      return false;
+    }
     this.analyser.getByteTimeDomainData(this.data);
     let sum = 0;
     for (let i = 0; i < this.data.length; i++) {

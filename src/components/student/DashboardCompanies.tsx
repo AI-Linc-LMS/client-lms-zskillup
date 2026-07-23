@@ -108,7 +108,7 @@ export function DashboardCompanies() {
                 lives). No registration step: assigned assessments start directly. */}
             <div className="relative mt-auto pt-3">
               <Link
-                href={`/dashboard/company/${c.slug}`}
+                href={`/dashboard/company/${c.slug}?tab=${encodeURIComponent('Full Mock Assessment')}`}
                 className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] py-2 text-sm font-extrabold text-[#171717] shadow-[0_10px_24px_-12px_rgba(245,180,0,0.5)] transition-transform hover:brightness-105 active:scale-[0.99]"
               >
                 Open assessments <ArrowRight className="size-4" />
