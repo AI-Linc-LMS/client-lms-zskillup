@@ -59,13 +59,20 @@ export async function nextInterviewQuestion(
   ).data;
 }
 
-/** Whisper speech-to-text: upload a recorded answer, get the transcript back. */
-export async function transcribeAnswer(audio: Blob, filename = 'answer.webm'): Promise<string> {
+/** Whisper speech-to-text: upload a recorded answer, get the transcript back.
+ *  Pass an AbortSignal to bound the request (the caller times out a stalled upload
+ *  on a flaky network so the interview UI can never hang waiting on it). */
+export async function transcribeAnswer(
+  audio: Blob,
+  filename = 'answer.webm',
+  signal?: AbortSignal,
+): Promise<string> {
   const form = new FormData();
   form.append('audio', audio, filename);
   const res = await apiClient.postForm<{ text: string }>(
     '/api/v1/me/mock-interviews/transcribe',
     form,
+    signal ? { signal } : undefined,
   );
   return res.data.text;
 }
