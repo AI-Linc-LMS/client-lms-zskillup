@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FileText, Loader2, Plus, PlayCircle, ListChecks, Sparkles, Trash2, X } from 'lucide-react';
+import { FileText, Film, Loader2, Plus, PlayCircle, ListChecks, Sparkles, Trash2, X } from 'lucide-react';
+import { VimeoPicker } from '@/components/media/VimeoPicker';
 import { cn } from '@/lib/utils';
 import { listAdminCompanies, type AdminCompanyRow } from '@/lib/api/admin';
 import { listTopicsWithCounts, type ApiTopic } from '@/lib/api/catalog';
@@ -318,6 +319,7 @@ function ItemForm({
   const [description, setDescription] = useState(item?.description ?? '');
   const [url, setUrl] = useState(item?.url ?? '');
   const [durationLabel, setDurationLabel] = useState(item?.durationLabel ?? '');
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [quizTopicSlug, setQuizTopicSlug] = useState(item?.quizTopicSlug ?? '');
   const [quizQuestionCount, setQuizQuestionCount] = useState(item?.quizQuestionCount?.toString() ?? '');
   void topicId;
@@ -375,13 +377,37 @@ function ItemForm({
           {kind !== 'QUIZ' ? (
             <>
               <Field label={kind === 'VIDEO' ? 'Video link (Vimeo / Google Drive / YouTube)' : 'Article link'}>
-                <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Paste the share link - provider is detected automatically" className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Paste the share link - provider is detected automatically" className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+                  {kind === 'VIDEO' && (
+                    <button
+                      type="button"
+                      onClick={() => setPickerOpen(true)}
+                      className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:border-[#ffc42d] hover:text-navy"
+                    >
+                      <Film className="size-4" /> Browse Vimeo
+                    </button>
+                  )}
+                </div>
               </Field>
               {kind === 'VIDEO' && (
                 <Field label="Duration label (optional)">
                   <input value={durationLabel} onChange={(e) => setDurationLabel(e.target.value)} placeholder="e.g. 24:15" className="w-40 rounded-lg border border-slate-300 px-3 py-2 text-sm" />
                 </Field>
               )}
+              {pickerOpen ? (
+                <VimeoPicker
+                  onPick={(v) => {
+                    setUrl(v.link);
+                    if (!durationLabel && v.durationSeconds > 0) {
+                      const m = Math.floor(v.durationSeconds / 60);
+                      const s = Math.floor(v.durationSeconds % 60);
+                      setDurationLabel(`${m}:${s.toString().padStart(2, '0')}`);
+                    }
+                  }}
+                  onClose={() => setPickerOpen(false)}
+                />
+              ) : null}
             </>
           ) : (
             <div className="grid grid-cols-[1fr_auto] gap-3">
