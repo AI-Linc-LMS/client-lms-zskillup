@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, BarChart3, Loader2, Pencil, Plus, ShieldAlert, Sparkles, Trash2, Users, Video, X } from 'lucide-react';
+import { ArrowRight, BarChart3, Loader2, Pencil, Plus, Sparkles, Trash2, Users, Video, X } from 'lucide-react';
 import { AssessmentWizard } from '@/components/superadmin/AssessmentWizard';
+import { ResultsReport } from '@/components/assessment/ResultsReport';
 import { cn } from '@/lib/utils';
 import { ApiRequestError } from '@/lib/api/types';
 import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
@@ -407,7 +408,7 @@ export function SchedulingAdmin() {
             onClick={() => setResults(null)}
             className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
           />
-          <div className="relative flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
+          <div className="relative flex max-h-[88vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
             {resultsLoading || !results ? (
               <div className="grid h-64 place-items-center">
                 <Loader2 className="size-6 animate-spin text-slate-500" />
@@ -433,60 +434,7 @@ export function SchedulingAdmin() {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 px-6 py-4 sm:grid-cols-5">
-                  {[
-                    { label: 'Registered', value: results.stats.registered },
-                    { label: 'Attempted', value: results.stats.attempted },
-                    { label: 'Avg score', value: `${results.stats.avgScorePct}%` },
-                    { label: 'Top score', value: `${results.stats.topScorePct}%` },
-                    { label: 'Flagged', value: results.stats.flagged },
-                  ].map((s) => (
-                    <div key={s.label} className="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
-                      <p className="text-xl font-black text-navy tabular-nums">{s.value}</p>
-                      <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">{s.label}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6">
-                  {results.rows.length === 0 ? (
-                    <p className="py-8 text-center text-sm text-slate-600">No attempts yet.</p>
-                  ) : (
-                    <table className="w-full text-left text-sm">
-                      <thead className="sticky top-0 bg-white">
-                        <tr className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-                          <th className="py-2">Student</th>
-                          <th className="py-2">Score</th>
-                          <th className="py-2">%ile</th>
-                          <th className="py-2">Integrity</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {results.rows.map((r) => (
-                          <tr key={r.userId} className="border-t border-slate-100">
-                            <td className="py-2.5">
-                              <span className="block font-semibold text-navy">{r.fullName ?? r.email}</span>
-                              <span className="text-[11px] text-slate-500">{r.email}</span>
-                            </td>
-                            <td className="py-2.5 font-semibold text-navy">
-                              {r.score}/{r.total} <span className="text-slate-500">({r.scorePct}%)</span>
-                            </td>
-                            <td className="py-2.5 text-slate-600">{r.percentile}th</td>
-                            <td className="py-2.5">
-                              {r.violations > 0 ? (
-                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700">
-                                  <ShieldAlert className="size-3.5" /> {r.tabSwitches}⇄ {r.fullscreenExits}⤢
-                                </span>
-                              ) : (
-                                <span className="text-[11px] text-emerald-600">Clean</span>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
+                <ResultsReport data={results} />
               </>
             )}
           </div>
