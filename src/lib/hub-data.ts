@@ -52,6 +52,8 @@ export interface InterviewExp {
 
 export interface HubContent {
   company: DemoCompany;
+  /** Ready-to-embed intro-video player URL (server-derived). Null → show placeholder. */
+  introEmbedUrl?: string | null;
   overview: {
     summary: string;
     process: { stage: string; detail: string }[];

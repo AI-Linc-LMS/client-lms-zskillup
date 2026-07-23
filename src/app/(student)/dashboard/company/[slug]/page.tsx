@@ -55,6 +55,7 @@ export default async function CompanyHubPage({
   const content: HubContent = h
     ? {
         company,
+        introEmbedUrl: h.introEmbedUrl ?? null,
         overview: h.overview,
         syllabus: h.syllabus,
         quickStats: h.quickStats,

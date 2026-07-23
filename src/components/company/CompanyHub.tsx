@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { CompanyRegisterCard } from '@/components/company/CompanyRegisterCard';
-import { VideoPlaceholder } from '@/components/media/VideoPlaceholder';
+import { HubVideoEmbed } from '@/components/media/HubVideoEmbed';
 import { cn } from '@/lib/utils';
 import { HUB_TABS, type HubContent, type HubTab } from '@/lib/hub-data';
 import { getReadiness } from '@/lib/api/readiness';
@@ -618,7 +618,8 @@ function OverviewTab({ content }: { content: HubContent }) {
   return (
     <div className="space-y-6">
       <Reveal>
-        <VideoPlaceholder
+        <HubVideoEmbed
+          embedUrl={content.introEmbedUrl}
           eyebrow="Company intro"
           title={`Inside the ${content.company.name} assessment`}
           subtitle="A short walkthrough of the hiring rounds, cut-offs and what to expect - video coming soon."
