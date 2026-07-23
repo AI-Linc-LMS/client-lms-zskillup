@@ -51,7 +51,10 @@ interface SpeechRec {
   stop: () => void;
   onresult: ((e: { resultIndex: number; results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }> }) => void) | null;
   onend: (() => void) | null;
-  onerror: (() => void) | null;
+  /** `error` carries the failure code: `network`/`service-not-allowed` (cloud STT
+   *  endpoint blocked — common on college/corporate Wi-Fi), `not-allowed`,
+   *  `audio-capture`, or the benign `no-speech`/`aborted`. */
+  onerror: ((e: { error: string }) => void) | null;
 }
 
 function pickVoice(): SpeechSynthesisVoice | null {
@@ -90,6 +93,7 @@ export function InterviewRunner({ id }: { id: string }) {
   const [transcribing, setTranscribing] = useState(false);
   const [typing, setTyping] = useState(false); // typed fallback
   const [interim, setInterim] = useState(''); // live browser-SR words (instant preview)
+  const [sttFallback, setSttFallback] = useState(false); // browser SR dead/absent → server Whisper is doing the transcript
 
   const responsesRef = useRef<Map<number, string>>(new Map());
   const submitRef = useRef<() => void>(() => {});
@@ -110,10 +114,21 @@ export function InterviewRunner({ id }: { id: string }) {
   const srFinalRef = useRef('');
   const recognitionRef = useRef<SpeechRec | null>(null);
   const recordingRef = useRef(false); // sync flag so SR onend can auto-restart while recording
+  const srDeadRef = useRef(false); // browser SR hit a fatal error (blocked cloud endpoint) THIS answer — stop restarting it
+  const srEverDeadRef = useRef(false); // SR proved unusable earlier this session — seed fallback immediately (no "Listening…" flash)
+  const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null); // server-Whisper fallback poll (self-scheduling, backs off)
+  const whisperInFlightRef = useRef<Promise<unknown> | null>(null); // the current Whisper pass, so stopRecording can await it
+  const whisperCtrlRef = useRef<AbortController | null>(null); // abort a stalled poll upload instead of blocking the stop
+  const turnRef = useRef(0); // bumped on every stop; a Whisper pass whose captured turn is stale must not write
+  const advancingRef = useRef(false); // re-entrancy latch for doNext (a double-click must not double-advance)
   const voiceOnRef = useRef(voiceOn);
   voiceOnRef.current = voiceOn;
   const answerRef = useRef('');
   answerRef.current = answer;
+  const typingRef = useRef(typing); // sync mirror so an async Whisper pass never clobbers a manual edit
+  typingRef.current = typing;
+  const questionIdRef = useRef<number | null>(null); // latest question id, so a superseded TTS callback can't arm a stale answer
+  questionIdRef.current = question?.id ?? null;
 
   // ── init: interview + camera/mic ─────────────────────────────────────────
   useEffect(() => {
@@ -247,26 +262,62 @@ export function InterviewRunner({ id }: { id: string }) {
   // Now: the LIVE transcript comes from the browser's SpeechRecognition (instant, no server
   // - see startRecording), and Whisper runs ONCE when the candidate stops, purely to refine
   // the full answer. If Whisper hallucinates or fails, the Web-Speech transcript stands.
-  const runWhisper = useCallback(async () => {
-    if (whisperBusyRef.current || !chunksRef.current.length) return;
+  //
+  // Whisper is ALSO the near-real-time fallback: on browsers where SpeechRecognition is
+  // absent (Firefox) or its cloud endpoint is firewalled (Chrome/Edge on college Wi-Fi -
+  // the audio never reaches Google so no words ever come back), a poll in startRecording
+  // calls this every few seconds while the candidate speaks, so the transcript still fills
+  // in from OUR server instead of showing nothing. Self-guarded by whisperBusyRef so passes
+  // never overlap; only applies a clean, non-hallucinated result.
+  // `final` = the single accurate pass fired by stopRecording (it drives the `transcribing`
+  // spinner and is allowed to overwrite even committed SR text to refine it). A poll pass
+  // (final=false) is silent (no spinner churn) and only writes while SR has produced nothing.
+  // Returns the text it committed, or null — so stopRecording can hand the caller a definitive
+  // answer instead of racing the async setAnswer → answerRef re-render.
+  const runWhisper = useCallback(async (final = false): Promise<string | null> => {
+    if (whisperBusyRef.current || !chunksRef.current.length) return null;
     whisperBusyRef.current = true;
-    setTranscribing(true);
+    const turn = turnRef.current; // a pass that outlives its answer must not write into the next
+    if (final) setTranscribing(true);
+    // Bound every upload so a stalled request on a flaky/firewalled link (the target cohort)
+    // can never wedge the pass — stopRecording awaits the in-flight pass, so an unbounded fetch
+    // would hang Next / Finish forever. On abort, transcribeAnswer rejects → catch → finally.
+    const ctrl = new AbortController();
+    whisperCtrlRef.current = ctrl;
+    const timeoutMs = final ? 30000 : 20000;
+    const to = setTimeout(() => ctrl.abort(), timeoutMs);
     try {
       const type = recorderRef.current?.mimeType || 'audio/webm';
       const ext = type.includes('mp4') ? 'mp4' : type.includes('ogg') ? 'ogg' : 'webm';
       const blob = new Blob(chunksRef.current, { type });
       if (blob.size > 1200) {
-        const text = (await transcribeAnswer(blob, `answer.${ext}`)).trim();
-        // Accept only a clean transcript. A hallucinated repeat, or empty text, leaves the
-        // live Web-Speech answer untouched rather than overwriting it with garbage.
-        if (text && !looksHallucinated(text)) setAnswer(text);
+        const text = (await transcribeAnswer(blob, `answer.${ext}`, ctrl.signal)).trim();
+        // Accept only a clean transcript for the CURRENT answer. Skip if: hallucinated/empty,
+        // the answer already advanced (turn changed), or the user switched to typing. A
+        // background poll pass also won't clobber LIVE SR words — but once SR has died
+        // (srDead), the server transcript takes over (S1: the live box mustn't freeze). answerRef
+        // is committed SYNCHRONOUSLY so a caller reading it right after the await sees this result.
+        if (
+          text &&
+          !looksHallucinated(text) &&
+          turn === turnRef.current &&
+          !typingRef.current &&
+          (final || srDeadRef.current || !srFinalRef.current)
+        ) {
+          answerRef.current = text;
+          setAnswer(text);
+          return text;
+        }
       }
     } catch {
-      /* transient - the live Web-Speech transcript already stands; typing is the fallback */
+      /* transient/aborted - the live Web-Speech transcript already stands; typing is the fallback */
     } finally {
+      clearTimeout(to);
+      if (whisperCtrlRef.current === ctrl) whisperCtrlRef.current = null;
       whisperBusyRef.current = false;
-      setTranscribing(false);
+      if (final) setTranscribing(false);
     }
+    return null;
   }, []);
 
   const startRecording = useCallback(() => {
@@ -274,21 +325,45 @@ export function InterviewRunner({ id }: { id: string }) {
     if (!stream || !voiceCapable || typing) return;
     const audio = new MediaStream(stream.getAudioTracks());
     if (!audio.getAudioTracks().length) return;
+    // Tear down any still-live session first. Arming twice without a stop (e.g. clicking Next
+    // to skip a question mid-readout) would otherwise leave the OLD MediaRecorder pushing into
+    // the new answer's chunk buffer — two interleaved streams = garbage Whisper — and orphan an
+    // auto-restarting recogniser.
+    recordingRef.current = false;
+    if (pollRef.current) {
+      clearTimeout(pollRef.current);
+      pollRef.current = null;
+    }
+    whisperInFlightRef.current = null;
+    try {
+      recognitionRef.current?.stop();
+    } catch {
+      /* noop */
+    }
+    recognitionRef.current = null;
+    try {
+      if (recorderRef.current && recorderRef.current.state !== 'inactive') recorderRef.current.stop();
+    } catch {
+      /* noop */
+    }
     chunksRef.current = [];
     srFinalRef.current = '';
+    srDeadRef.current = false;
+    // Seed the fallback flag from session history: if SR already proved blocked earlier, skip
+    // the misleading "Listening…" flash and show the server-transcribing note straight away.
+    setSttFallback(srEverDeadRef.current);
     const mime = ['audio/webm', 'audio/mp4', 'audio/ogg'].find((m) => MediaRecorder.isTypeSupported?.(m));
     const rec = new MediaRecorder(audio, mime ? { mimeType: mime } : undefined);
     recorderRef.current = rec;
     rec.ondataavailable = (e) => e.data.size && chunksRef.current.push(e.data);
-    rec.start(1000); // 1s chunks - buffered for ONE Whisper pass at the end
+    rec.start(1000); // 1s chunks - accumulated for the Whisper pass(es)
     setRecording(true);
     recordingRef.current = true;
 
     // Near-real-time transcript via the browser's SpeechRecognition: FINAL segments are
     // committed to the answer as they're recognised (no server round-trip → no latency),
     // and non-final words show as a grey interim preview. Whisper refines the whole thing
-    // once at the end. On browsers without SpeechRecognition, the answer fills in on stop
-    // from the single Whisper pass - still far better than the old 15-30s progressive lag.
+    // once at the end.
     const w = window as unknown as {
       SpeechRecognition?: new () => SpeechRec;
       webkitSpeechRecognition?: new () => SpeechRec;
@@ -301,17 +376,23 @@ export function InterviewRunner({ id }: { id: string }) {
         sr.interimResults = true;
         sr.lang = 'en-US';
         sr.onresult = (e) => {
+          if (typingRef.current) return; // user switched to manual typing - don't fight the edit
           let live = '';
           for (let i = e.resultIndex; i < e.results.length; i++) {
             const seg = e.results[i][0].transcript;
             if (e.results[i].isFinal) srFinalRef.current = `${srFinalRef.current} ${seg}`.trim();
             else live += seg;
           }
+          if (srFinalRef.current) setSttFallback(false); // SR is delivering - hide the server-fallback note
+          answerRef.current = srFinalRef.current; // sync commit so a submit right now reads it
           setAnswer(srFinalRef.current);
           setInterim(live.trim());
         };
         sr.onend = () => {
-          if (recordingRef.current) {
+          // Only auto-restart while recording AND the recogniser is still healthy. After a
+          // fatal error (blocked cloud endpoint) restarting just hammers the firewall and
+          // burns battery while never producing a word - let the Whisper poll carry it.
+          if (recordingRef.current && !srDeadRef.current) {
             try {
               sr.start();
             } catch {
@@ -319,17 +400,68 @@ export function InterviewRunner({ id }: { id: string }) {
             }
           }
         };
-        sr.onerror = () => {};
+        sr.onerror = (ev) => {
+          const code = ev?.error;
+          // `no-speech`/`aborted` are benign (the user just paused) - let onend restart.
+          // The rest are fatal for this session: the cloud STT endpoint is unreachable
+          // (firewalled college/corporate Wi-Fi) or mic access broke. Stop restarting and
+          // fall back to server Whisper so the answer still gets transcribed.
+          if (code && code !== 'no-speech' && code !== 'aborted') {
+            srDeadRef.current = true;
+            srEverDeadRef.current = true;
+            setSttFallback(true);
+            setInterim(''); // drop stale grey words so they don't duplicate beside the Whisper answer
+          }
+        };
         recognitionRef.current = sr;
         sr.start();
       } catch {
-        /* SR unavailable - Whisper still fills the transcript every ~3.5s */
+        // SR construction failed - server Whisper is the transcript path.
+        srDeadRef.current = true;
+        srEverDeadRef.current = true;
+        setSttFallback(true);
       }
+    } else {
+      // No SpeechRecognition at all (e.g. Firefox) - server Whisper is the only path.
+      srEverDeadRef.current = true;
+      setSttFallback(true);
     }
+
+    // Server-Whisper fallback poll. Fires while SpeechRecognition has produced NOTHING
+    // (srFinal empty) OR has died mid-answer (srDead) — i.e. SR is absent, blocked, or went
+    // silent — so the transcript fills in from OUR backend instead of a dead "Listening…" box.
+    // Whole-clip re-transcription is O(n²) in the worst case, so the interval BACKS OFF as the
+    // clip grows: a long answer on a firewalled network won't hammer the backend or reintroduce
+    // the very lag this fix removes. The moment SR commits a word, srFinal is non-empty and
+    // (unless SR later dies) this backs off — SR wins, it's zero-latency. whisperInFlightRef
+    // lets stopRecording await the pass in flight before its final accurate pass.
+    const scheduleFallbackPoll = () => {
+      const delay = Math.min(4000 + Math.floor(chunksRef.current.length / 10) * 2000, 15000);
+      pollRef.current = setTimeout(() => {
+        if (
+          recordingRef.current &&
+          (srDeadRef.current || !srFinalRef.current) &&
+          chunksRef.current.length >= 3 &&
+          !whisperBusyRef.current
+        ) {
+          whisperInFlightRef.current = runWhisper(false);
+        }
+        if (recordingRef.current) scheduleFallbackPoll();
+      }, delay);
+    };
+    if (pollRef.current) clearTimeout(pollRef.current);
+    scheduleFallbackPoll();
   }, [runWhisper, typing, voiceCapable]);
 
-  const stopRecording = useCallback(async () => {
+  // Returns the definitive final answer text so callers don't race the async setAnswer →
+  // answerRef re-render (which, on the fallback path, would submit an empty/stale transcript).
+  const stopRecording = useCallback(async (): Promise<string> => {
     recordingRef.current = false;
+    turnRef.current += 1; // invalidate any in-flight poll pass from THIS answer
+    if (pollRef.current) {
+      clearTimeout(pollRef.current);
+      pollRef.current = null;
+    }
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
@@ -340,23 +472,40 @@ export function InterviewRunner({ id }: { id: string }) {
     }
     setInterim('');
     const rec = recorderRef.current;
-    if (!rec || rec.state === 'inactive') {
-      setRecording(false);
-      return;
+    if (rec && rec.state !== 'inactive') {
+      await new Promise<void>((resolve) => {
+        rec.onstop = () => resolve();
+        rec.stop();
+      });
     }
-    await new Promise<void>((resolve) => {
-      rec.onstop = () => resolve();
-      rec.stop();
-    });
     setRecording(false);
-    await runWhisper(); // single accurate refinement pass
+    // Settle any in-flight fallback pass so whisperBusyRef clears, THEN run the single accurate
+    // whole-clip pass over the complete post-stop audio (including the tail chunk flushed by
+    // rec.stop()). We ABORT the in-flight pass rather than waiting out its (bounded) upload —
+    // it captured the now-stale turn so its result is discarded anyway, and this keeps Next /
+    // Finish snappy on a slow link. Awaiting the promise guarantees its finally has run
+    // (whisperBusyRef=false) before the final pass, so the final pass is never a no-op.
+    if (whisperInFlightRef.current) {
+      whisperCtrlRef.current?.abort();
+      try {
+        await whisperInFlightRef.current;
+      } catch {
+        /* noop */
+      }
+      whisperInFlightRef.current = null;
+    }
+    const finalText = await runWhisper(true);
+    return finalText ?? answerRef.current;
   }, [runWhisper]);
 
   // Speak each new question, then auto-arm recording when it finishes.
   useEffect(() => {
     if (!question || busy || loading) return;
+    const qid = question.id;
     const armRecording = () => {
-      if (voiceCapable && !typing) startRecording();
+      // Bail if this callback was superseded: the answer already moved on (question changed) or
+      // we're submitting. Prevents a cancelled utterance's onend from arming a stale recording.
+      if (voiceCapable && !typing && !submittingRef.current && questionIdRef.current === qid) startRecording();
     };
     if (voiceOnRef.current) speak(question.question_text, armRecording);
     else {
@@ -382,6 +531,11 @@ export function InterviewRunner({ id }: { id: string }) {
     () => () => {
       stopSpeaking();
       recordingRef.current = false;
+      turnRef.current += 1; // invalidate any in-flight Whisper pass so it can't setState post-unmount
+      if (pollRef.current) {
+        clearTimeout(pollRef.current);
+        pollRef.current = null;
+      }
       try {
         recognitionRef.current?.stop();
       } catch {
@@ -403,9 +557,9 @@ export function InterviewRunner({ id }: { id: string }) {
     if (submittingRef.current) return;
     submittingRef.current = true;
     stopSpeaking();
-    await stopRecording();
+    const finalAnswer = await stopRecording();
     setSubmitting(true);
-    if (question) responsesRef.current.set(question.id, answerRef.current);
+    if (question) responsesRef.current.set(question.id, finalAnswer);
     const responses = [...responsesRef.current.entries()].map(([questionId, a]) => ({ questionId, answer: a }));
     try {
       await submitInterview(id, responses);
@@ -421,36 +575,56 @@ export function InterviewRunner({ id }: { id: string }) {
   submitRef.current = doSubmit;
 
   const doNext = async () => {
-    if (!question || busy || transcribing) return;
-    await stopRecording();
-    const finalAnswer = answerRef.current;
-    responsesRef.current.set(question.id, finalAnswer);
-    if (isFinal) {
-      doSubmit();
-      return;
-    }
-    setBusy(true);
-    setError(null);
+    // advancingRef latches synchronously: during stopRecording's await window busy/transcribing
+    // are still false, so without it a double-click would start two stopRecordings + two
+    // next-question calls and double-advance.
+    if (!question || busy || transcribing || advancingRef.current) return;
+    advancingRef.current = true;
     try {
-      const t = await nextInterviewQuestion(id, question.id, finalAnswer);
-      if (!t.question) {
-        doSubmit();
+      const finalAnswer = await stopRecording();
+      responsesRef.current.set(question.id, finalAnswer);
+      if (isFinal) {
+        await doSubmit();
         return;
       }
-      setQuestion(t.question);
-      setTurnNumber(t.turnNumber);
-      setIsFinal(t.isFinal);
-      setAnswer('');
-    } catch (err) {
-      setError(describeError(err, 'Could not fetch the next question.'));
+      setBusy(true);
+      setError(null);
+      try {
+        const t = await nextInterviewQuestion(id, question.id, finalAnswer);
+        if (!t.question) {
+          await doSubmit();
+          return;
+        }
+        setQuestion(t.question);
+        setTurnNumber(t.turnNumber);
+        setIsFinal(t.isFinal);
+        setAnswer('');
+      } catch (err) {
+        setError(describeError(err, 'Could not fetch the next question.'));
+      } finally {
+        setBusy(false);
+      }
     } finally {
-      setBusy(false);
+      advancingRef.current = false;
     }
   };
 
   const quit = () => {
     if (!window.confirm('Leave this interview? Your progress is saved and you can resume it.')) return;
     stopSpeaking();
+    // Full teardown so a fallback-Whisper POST or an SR auto-restart can't fire after leaving.
+    recordingRef.current = false;
+    turnRef.current += 1;
+    if (pollRef.current) {
+      clearTimeout(pollRef.current);
+      pollRef.current = null;
+    }
+    try {
+      recognitionRef.current?.stop();
+    } catch {
+      /* noop */
+    }
+    recognitionRef.current = null;
     try {
       if (recorderRef.current && recorderRef.current.state !== 'inactive') recorderRef.current.stop();
     } catch {
@@ -578,7 +752,7 @@ export function InterviewRunner({ id }: { id: string }) {
             Your answer
             {recording && (
               <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-bold text-orange">
-                <Mic className="size-3" /> live · Whisper
+                <Mic className="size-3" /> {sttFallback ? 'live · server' : 'live'}
               </span>
             )}
             {transcribing && <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-500"><Loader2 className="size-3 animate-spin" /> finalising</span>}
@@ -614,7 +788,12 @@ export function InterviewRunner({ id }: { id: string }) {
                 )}
               </p>
             ) : recording ? (
-              <span className="flex items-center gap-2 text-slate-500"><EqBars /> Listening - start speaking, your words appear here…</span>
+              <span className="flex items-center gap-2 text-slate-500">
+                <EqBars />
+                {sttFallback
+                  ? 'Recording — transcribing on our server, your words appear here in a moment…'
+                  : 'Listening - start speaking, your words appear here…'}
+              </span>
             ) : (
               <span className="text-slate-500">The interviewer will speak, then your answer records automatically.</span>
             )}
