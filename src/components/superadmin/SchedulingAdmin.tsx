@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, BarChart3, Loader2, Pencil, Plus, Sparkles, Trash2, Users, Video, X } from 'lucide-react';
 import { AssessmentWizard } from '@/components/superadmin/AssessmentWizard';
+import { AdminAssessmentCreator } from '@/components/superadmin/AdminAssessmentCreator';
 import { ResultsReport } from '@/components/assessment/ResultsReport';
 import { cn } from '@/lib/utils';
 import { ApiRequestError } from '@/lib/api/types';
@@ -39,6 +40,7 @@ export function SchedulingAdmin() {
   const [resultsLoading, setResultsLoading] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [editWizardId, setEditWizardId] = useState<string | null>(null);
+  const [showExistingMock, setShowExistingMock] = useState(false);
 
   // filters
   const [fCompany, setFCompany] = useState('');
@@ -190,11 +192,23 @@ export function SchedulingAdmin() {
         </span>
       </Link>
 
-      {/* Quick schedule (bind an existing mock) */}
+      {/* Primary creator — TPO-style bank-sampling flow (mode → rounds → sections →
+          coding topics → counts). Matches the TPO Assessment Center. */}
+      <AdminAssessmentCreator onCreated={load} />
+
+      {/* Advanced: bind a pre-built mock (collapsed by default). */}
       <div className="rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="flex items-center gap-2 text-sm font-bold text-navy">
-          <Plus className="size-4 text-[#f5b400]" /> Quick schedule (existing mock)
-        </h2>
+        <button
+          type="button"
+          onClick={() => setShowExistingMock((v) => !v)}
+          className="flex w-full items-center gap-2 text-sm font-bold text-navy"
+        >
+          <Plus className={cn('size-4 text-[#f5b400] transition-transform', showExistingMock && 'rotate-45')} />
+          Advanced: bind a pre-built mock
+          <span className="ml-auto text-[11px] font-semibold text-slate-500">{showExistingMock ? 'Hide' : 'Show'}</span>
+        </button>
+        {showExistingMock && (
+        <>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <label className="space-y-1">
             <span className={labelCls}>Company</span>
@@ -268,6 +282,8 @@ export function SchedulingAdmin() {
         >
           {creating ? <Loader2 className="size-4 animate-spin" /> : 'Schedule'}
         </button>
+        </>
+        )}
       </div>
 
       {/* Filters */}

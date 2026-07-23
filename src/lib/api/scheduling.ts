@@ -78,6 +78,65 @@ export async function createScheduledAssessment(
   return res.data;
 }
 
+// ── Bank-sampling creator (matches the TPO Assessment Center flow) ──────────────
+
+/** Build an admin drive by sampling the bank — same MCQ/coding-round flow as the TPO
+ *  panel (mode → sections → coding topics → counts). Mirrors AdminBuildAssessmentDto. */
+export interface BuildAssessmentPayload {
+  mode: 'SECTIONAL' | 'COMPANY';
+  companySlug?: string;
+  title: string;
+  scheduledAt: string;
+  durationMinutes: number;
+  mcqCount?: number;
+  codingCount?: number;
+  difficulty?: 'EASY' | 'MEDIUM' | 'HARD' | 'MIXED';
+  proctored?: boolean;
+  /** Target a single individual (non-college) cohort — members-only visibility. */
+  cohortId?: string;
+  topicIds?: string[];
+  codingTopics?: string[];
+}
+
+export interface BuildAvailability {
+  mcqAvailable: number;
+  codingAvailable: number;
+}
+
+export async function buildScheduledAssessment(
+  payload: BuildAssessmentPayload,
+): Promise<ApiScheduledAssessment> {
+  const res = await apiClient.post<ApiScheduledAssessment>(
+    '/api/v1/admin/scheduled-assessments/build',
+    payload,
+  );
+  return res.data;
+}
+
+export async function previewBuildAssessment(payload: {
+  mode: 'SECTIONAL' | 'COMPANY';
+  companySlug?: string;
+  difficulty?: 'EASY' | 'MEDIUM' | 'HARD' | 'MIXED';
+  topicIds?: string[];
+  codingTopics?: string[];
+}): Promise<BuildAvailability> {
+  const res = await apiClient.post<BuildAvailability>(
+    '/api/v1/admin/scheduled-assessments/build/preview',
+    payload,
+  );
+  return res.data;
+}
+
+export async function getAdminCodingTopics(
+  companySlug?: string,
+): Promise<Array<{ topic: string; count: number }>> {
+  const qs = companySlug ? `?companySlug=${encodeURIComponent(companySlug)}` : '';
+  const res = await apiClient.get<Array<{ topic: string; count: number }>>(
+    `/api/v1/admin/scheduled-assessments/build/coding-topics${qs}`,
+  );
+  return res.data;
+}
+
 export async function updateScheduledAssessment(
   id: string,
   patch: Partial<CreateScheduledAssessmentPayload>,
