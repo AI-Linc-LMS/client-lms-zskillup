@@ -15,6 +15,7 @@ import {
   updateAdminCompany,
   type AdminCompanyRow,
 } from '@/lib/api/admin';
+import { VimeoPicker } from '@/components/media/VimeoPicker';
 import { CompanyType } from '@/shared/enums';
 import type { AdminCreateCompanyDto } from '@/shared';
 
@@ -355,6 +356,7 @@ function IntroVideoEditor({
   const [embedUrl, setEmbedUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -411,6 +413,9 @@ function IntroVideoEditor({
               className="h-10 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors focus:border-[#ffc42d] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ffc42d]/30"
             />
             <div className="flex items-center gap-2">
+              <Button type="button" size="sm" variant="outline" onClick={() => setPickerOpen(true)} disabled={saving}>
+                <Film className="size-3.5" /> Browse Vimeo
+              </Button>
               <Button type="button" size="sm" onClick={save} disabled={saving}>
                 {saving ? <Loader2 className="size-4 animate-spin" /> : 'Save'}
               </Button>
@@ -430,6 +435,15 @@ function IntroVideoEditor({
               ) : null}
             </div>
           </div>
+          {pickerOpen ? (
+            <VimeoPicker
+              onPick={(v) => {
+                setUrl(v.link);
+                setSaved(false);
+              }}
+              onClose={() => setPickerOpen(false)}
+            />
+          ) : null}
           {error ? <p className="text-xs font-medium text-red-600">{error}</p> : null}
           {saved ? (
             <p className="text-xs font-medium text-emerald-600">
