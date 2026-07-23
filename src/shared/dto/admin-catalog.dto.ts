@@ -160,6 +160,15 @@ export class AdminUpsertCompanyHubDto {
   @IsArray() interviews!: unknown[];
 }
 
+/** Set (or clear) the Company Hub intro video — a pasted Vimeo / Google Drive /
+ *  YouTube link. Empty string clears it. Stored on the hub overview; the public
+ *  DTO derives the embeddable `introEmbedUrl` server-side. */
+export class SetCompanyIntroVideoDto {
+  @IsString()
+  @MaxLength(500)
+  introVideoUrl!: string;
+}
+
 // ─── Courses (Sprint 2 - superadmin CRUD) ───────────────────────────────────
 
 export class AdminCreateCourseDto {
