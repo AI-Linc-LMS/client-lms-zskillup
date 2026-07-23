@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { getMe } from '@/lib/api/me';
 import { listAdminColleges, type AdminCollegeRow } from '@/lib/api/admin';
 import {
@@ -75,6 +76,19 @@ export function SubscriptionsManager() {
 
   return (
     <div className="space-y-5">
+      {/* Discoverability (#6): this page assigns plans to COLLEGES. Granting free
+          access to an INDIVIDUAL user lives under Billing & Revenue -> Entitlements. */}
+      <Link
+        href="/superadmin/billing#entitlements"
+        className="flex items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 transition-colors hover:bg-amber-100"
+      >
+        <span>
+          <span className="font-bold">Grant free access to an individual user?</span> This page assigns plans to whole
+          colleges. For complimentary (admin-granted) access to a single student, go to Billing &amp; Revenue → Entitlements.
+        </span>
+        <span className="shrink-0 font-bold whitespace-nowrap">Open Entitlements →</span>
+      </Link>
+
       <div className="flex gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1 text-sm font-semibold">
         {(['subscriptions', 'plans'] as Tab[]).map((t) => (
           <button

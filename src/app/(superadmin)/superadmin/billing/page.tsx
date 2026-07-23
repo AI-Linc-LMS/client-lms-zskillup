@@ -393,9 +393,12 @@ function EntitlementsSection() {
   };
 
   return (
-    <section className="mt-8">
+    <section id="entitlements" className="mt-8 scroll-mt-24">
       <h2 className="text-lg font-black tracking-tight text-navy">Entitlements</h2>
-      <p className="text-sm text-slate-600">Look up and manage what a student or college can access.</p>
+      <p className="text-sm text-slate-600">
+        Look up and manage what a student or college can access - including granting free
+        (complimentary / admin-granted) full-platform access to an individual student.
+      </p>
 
       <div className="mt-4 flex flex-wrap items-end gap-2">
         <UserSearchSelect

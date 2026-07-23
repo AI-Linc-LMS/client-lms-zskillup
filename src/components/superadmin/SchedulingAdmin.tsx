@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { BarChart3, Loader2, Pencil, Plus, ShieldAlert, Sparkles, Trash2, Video, X } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowRight, BarChart3, Loader2, Pencil, Plus, ShieldAlert, Sparkles, Trash2, Users, Video, X } from 'lucide-react';
 import { AssessmentWizard } from '@/components/superadmin/AssessmentWizard';
 import { cn } from '@/lib/utils';
 import { ApiRequestError } from '@/lib/api/types';
@@ -167,6 +168,26 @@ export function SchedulingAdmin() {
           Build assessment
         </button>
       </div>
+
+      {/* Cohort discoverability (#5): cohort CREATION (name, add students, import CSV)
+          lives under Colleges, not here - the builder only PICKS an existing cohort. */}
+      <Link
+        href="/admin/colleges"
+        className="flex items-center justify-between gap-3 rounded-2xl border border-sky-200 bg-sky-50 px-5 py-3.5 text-sm text-sky-900 transition-colors hover:bg-sky-100"
+      >
+        <span className="flex items-start gap-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-sky-100 text-sky-600">
+            <Users className="size-5" />
+          </span>
+          <span>
+            <span className="font-bold">Create &amp; manage cohorts (batches)</span> — to assign an assessment to a group of
+            students, first build a cohort (name, add students or import a CSV) under <span className="font-semibold">Colleges → open a college → Cohorts</span>, then pick it in the builder.
+          </span>
+        </span>
+        <span className="flex shrink-0 items-center gap-1 font-bold whitespace-nowrap">
+          Manage cohorts <ArrowRight className="size-4" />
+        </span>
+      </Link>
 
       {/* Quick schedule (bind an existing mock) */}
       <div className="rounded-2xl border border-slate-200 bg-white p-5">
