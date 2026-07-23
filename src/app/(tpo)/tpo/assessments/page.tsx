@@ -34,6 +34,7 @@ import type { CodingTopic } from '@/lib/api/mocks';
 import type { AssessmentResults } from '@/lib/api/scheduling';
 import type { TpoAssessment, TpoAssessmentAvailability, TpoAssessmentList, TpoAssessmentStatus } from '@/shared';
 import { useTpoConsole } from '@/components/tpo/TpoConsole';
+import { ResultsReport } from '@/components/assessment/ResultsReport';
 import { KpiCard } from '@/components/tpo/ui';
 import { SectionTopicPicker } from '@/components/tpo/SectionTopicPicker';
 import { AssessmentWizard } from '@/components/superadmin/AssessmentWizard';
@@ -581,51 +582,23 @@ function ResultsModal({ assessment, onClose, onReleased }: { assessment: TpoAsse
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 bg-navy/30 backdrop-blur-[2px]" />
-      <div className="relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+      <div className="relative flex max-h-[88vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
         <div className="flex items-start justify-between gap-3 border-b border-slate-100 p-5">
           <div>
             <h2 className="text-lg font-black text-navy">{assessment.title}</h2>
-            <p className="text-xs text-slate-500">Results &amp; participation</p>
+            <p className="text-xs text-slate-500">Cohort-wise results &amp; participation</p>
           </div>
           <button type="button" onClick={onClose} className="grid size-8 place-items-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50">
             <X className="size-4" />
           </button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto p-5">
-          {loading ? (
-            <div className="flex items-center justify-center py-12"><Loader2 className="size-5 animate-spin text-slate-500" /></div>
-          ) : results ? (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <Stat label="Attempted" value={results.stats.attempted} />
-                <Stat label="Avg score" value={`${results.stats.avgScorePct}%`} />
-                <Stat label="Top score" value={`${results.stats.topScorePct}%`} />
-                <Stat label="Flagged" value={results.stats.flagged} />
-              </div>
-              <div className="overflow-x-auto rounded-xl border border-slate-100">
-                <table className="w-full min-w-[420px] text-sm">
-                  <thead className="bg-slate-50 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-                    <tr><th className="px-3 py-2">Student</th><th className="px-3 py-2">Score</th><th className="px-3 py-2">Status</th></tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {results.rows.slice(0, 50).map((r) => (
-                      <tr key={r.userId}>
-                        <td className="px-3 py-2 font-medium text-navy">{r.fullName ?? r.email}</td>
-                        <td className="px-3 py-2 tabular-nums text-slate-600">{r.scorePct}%</td>
-                        <td className="px-3 py-2 text-xs text-slate-600">{r.status}</td>
-                      </tr>
-                    ))}
-                    {results.rows.length === 0 && (
-                      <tr><td colSpan={3} className="px-3 py-6 text-center text-slate-500">No submissions yet.</td></tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          ) : (
-            <p className="py-8 text-center text-sm text-slate-500">Results unavailable.</p>
-          )}
-        </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-12"><Loader2 className="size-5 animate-spin text-slate-500" /></div>
+        ) : results ? (
+          <ResultsReport data={results} />
+        ) : (
+          <p className="py-8 text-center text-sm text-slate-500">Results unavailable.</p>
+        )}
         <div className="flex items-center justify-end gap-2 border-t border-slate-100 p-4">
           {released ? (
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600"><CheckCircle2 className="size-4" /> Results released</span>

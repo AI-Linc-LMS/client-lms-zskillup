@@ -89,21 +89,47 @@ export async function deleteScheduledAssessment(id: string): Promise<void> {
   await apiClient.delete(`/api/v1/admin/scheduled-assessments/${id}`);
 }
 
+export interface AssessmentResultSection {
+  name: string;
+  correct: number;
+  total: number;
+}
+
 export interface AssessmentResultRow {
   userId: string;
   fullName: string | null;
   email: string;
+  phone: string | null;
+  collegeName: string | null;
+  cohort: string | null;
   score: number;
+  /** Maximum marks. */
   total: number;
   scorePct: number;
+  /** 1-based overall rank (by score desc, time asc). */
+  rank: number;
+  passed: boolean;
   percentile: number;
-  timeTakenSec: number;
-  status: string;
+  startedAt: string | null;
   submittedAt: string | null;
+  timeTakenSec: number;
+  totalQuestions: number;
+  attemptedQuestions: number;
+  correctAnswers: number;
+  incorrectAnswers: number;
+  /** Correct / attempted, %. */
+  accuracy: number;
+  status: string;
   proctored: boolean;
   tabSwitches: number;
   fullscreenExits: number;
+  faceViolations: number;
+  faceValidationFailures: number;
+  multipleFaceDetections: number;
+  /** Total logged violations. */
   violations: number;
+  integrityScore: number | null;
+  sections: AssessmentResultSection[];
 }
 
 export interface AssessmentResults {
@@ -112,8 +138,12 @@ export interface AssessmentResults {
     title: string;
     companyId: string;
     companyName: string;
+    cohort: string | null;
     scheduledAt: string;
     proctored: boolean;
+    passingScore: number;
+    totalQuestions: number;
+    maxMarks: number;
   };
   stats: {
     registered: number;
@@ -121,6 +151,7 @@ export interface AssessmentResults {
     avgScorePct: number;
     topScorePct: number;
     flagged: number;
+    passed: number;
   };
   rows: AssessmentResultRow[];
 }
