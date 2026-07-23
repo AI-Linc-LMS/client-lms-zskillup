@@ -736,17 +736,54 @@ function SectionEditor({
         </div>
       ) : null}
 
-      {/* add-topic row */}
+      {/* add-topic row. Coding uses a TPO-style CHIPS picker (all topics + a prominent
+          "Whole Coding Section" chip + search) instead of a buried dropdown. */}
       {type === 'CODING' ? (
-        <input
-          value={codingFilter}
-          onChange={(e) => setCodingFilter(e.target.value)}
-          placeholder="Filter coding topics…"
-          aria-label="Filter coding topics"
-          className="mt-3 h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
-        />
+        <div className="mt-3">
+          <input
+            value={codingFilter}
+            onChange={(e) => setCodingFilter(e.target.value)}
+            placeholder="Search coding topics (SQL, Trees, Graphs, DP, …)"
+            aria-label="Search coding topics"
+            className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+          />
+          <p className="mb-1.5 mt-2 text-[11px] font-semibold text-slate-500">
+            Coding topics{' '}
+            <span className="font-normal">
+              · {codingSelection === ALL_CODING ? 'whole section (random mix)' : codingSelection ? codingSelection : 'pick a topic, or the whole section'}
+            </span>
+          </p>
+          <div className="flex max-h-44 flex-wrap gap-2 overflow-y-auto rounded-lg border border-slate-100 bg-slate-50/40 p-2.5">
+            <button
+              type="button"
+              onClick={() => setCodingSelection(ALL_CODING)}
+              className={cn(
+                'inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-bold transition-colors',
+                codingSelection === ALL_CODING ? 'border-navy bg-navy text-white' : 'border-orange/40 bg-orange/5 text-orange hover:bg-orange/10',
+              )}
+            >
+              <Sparkles className="size-3" /> Whole Coding Section · {codingTotal}
+            </button>
+            {filteredCodingGroups.flatMap((g) => g.options).map((o) => (
+              <button
+                key={o.topic}
+                type="button"
+                onClick={() => setCodingSelection(codingSelection === o.topic ? '' : o.topic)}
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold transition-colors',
+                  codingSelection === o.topic ? 'border-orange bg-orange/10 text-orange' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50',
+                )}
+              >
+                {o.topic} <span className="text-[10px] opacity-60">{o.count}</span>
+              </button>
+            ))}
+            {filteredCodingGroups.length === 0 ? (
+              <span className="px-1 py-1 text-xs text-slate-400">No coding topics match your search.</span>
+            ) : null}
+          </div>
+        </div>
       ) : null}
-      <div className={cn('flex flex-wrap items-center gap-2', type === 'CODING' ? 'mt-2' : 'mt-3')}>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
         {type === 'MCQ' ? (
           <select
             value={mcqTopicId}
@@ -765,26 +802,7 @@ function SectionEditor({
               </optgroup>
             ))}
           </select>
-        ) : (
-          <select
-            value={codingSelection}
-            onChange={(e) => setCodingSelection(e.target.value)}
-            title="Pick a coding topic or the whole coding section - problems are pulled from the bank"
-            className="h-10 min-w-[12rem] flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
-          >
-            <option value="">Select a coding topic…</option>
-            <option value={ALL_CODING}>Whole Coding Section (random) · {codingTotal} problems</option>
-            {filteredCodingGroups.map((g) => (
-              <optgroup key={g.label} label={g.label}>
-                {g.options.map((o) => (
-                  <option key={o.topic} value={o.topic}>
-                    {o.topic} ({o.count})
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        )}
+        ) : null}
         <div className="inline-flex overflow-hidden rounded-lg border border-slate-200">
           {(['MCQ', 'CODING'] as const).map((t) => (
             <button key={t} type="button" onClick={() => setType(t)} className={cn('px-3 py-2 text-xs font-bold', type === t ? 'bg-navy text-white' : 'bg-white text-slate-600')}>
