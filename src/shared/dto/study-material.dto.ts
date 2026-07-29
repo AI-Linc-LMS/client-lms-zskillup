@@ -1,8 +1,8 @@
 /**
- * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at the same path in the other repo. Change both together.
  *
- * Per-company Study Material - an admin-authored Section → Topic → Item tree shown
+ * Per-company Study Material — an admin-authored Section → Topic → Item tree shown
  * inside a Company Hub, with per-student progress. Items are a VIDEO (Vimeo /
  * Google Drive / YouTube), a QUIZ (reuses the platform quiz for a topic), or an
  * ARTICLE. Sections/topics are dynamic + different for each company.
@@ -41,11 +41,22 @@ export interface StudyMaterialTopicDto {
    * within an open module the items can be done in any order.
    *
    * Server-computed and server-ENFORCED: toggleItem() refuses to complete an item inside
-   * a locked topic, so hiding the UI is not the gate - hitting the API directly fails too.
+   * a locked topic, so hiding the UI is not the gate — hitting the API directly fails too.
    */
   locked: boolean;
   /** Student-facing reason, e.g. "Complete 'Arrays' to unlock this module." null when open. */
   lockedReason: string | null;
+  /**
+   * Phase 8 PAYWALL lock — DISTINCT from `locked` (the sequential-completion lock).
+   * True → this module is paid and the caller isn't entitled: the server has STRIPPED
+   * its non-free items' embed/quiz URLs (so the asset can't be harvested via the API)
+   * and the client should render a buy affordance. Absent/false = open — fail-open on
+   * old clients, paywall off, owner (platform/section/company/topic), or a module the
+   * student already has progress in (grandfathered). Free items stay playable regardless.
+   */
+  paywallLocked?: boolean;
+  /** The scope ref the caller would buy to unlock this module (for the CTA); null = the section/company itself. */
+  paywallScopeRef?: string | null;
 }
 
 export interface StudyMaterialSectionDto {
@@ -65,6 +76,14 @@ export interface StudyMaterialDto {
   itemCount: number;
   doneCount: number;
   progressPct: number;
+  /**
+   * Phase 8: the caller does NOT own this whole section/company and isn't a platform
+   * owner — the FE shows a "unlock this section/company" banner. Individual modules may
+   * still be open (a la carte topic purchase, free items, or grandfathered progress),
+   * so read `topics[].paywallLocked` for per-module state. Absent/false = full access
+   * (fail-open: paywall off, owner, or old client).
+   */
+  accessLocked?: boolean;
 }
 
 export interface StudyMaterialProgressResultDto {
@@ -75,7 +94,7 @@ export interface StudyMaterialProgressResultDto {
   overallProgressPct: number;
 }
 
-// ── Admin (authoring) - includes unpublished + raw editable fields ──────────
+// ── Admin (authoring) — includes unpublished + raw editable fields ──────────
 export interface AdminStudyMaterialItemDto {
   id: string;
   kind: StudyMaterialItemKind;
@@ -104,7 +123,7 @@ export interface AdminStudyMaterialSectionDto {
   topics: AdminStudyMaterialTopicDto[];
 }
 export interface AdminStudyMaterialDto {
-  /** Company scope only - '' for a section-scoped tree. */
+  /** Company scope only — '' for a section-scoped tree. */
   companyId: string;
   /** The scope ref used for display/deep-links: company slug OR section root slug. */
   companySlug: string;
