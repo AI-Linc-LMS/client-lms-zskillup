@@ -12,6 +12,7 @@ import { useCartOptional } from './CartProvider';
 import { BillingPeriod, EntitlementScope } from '@/shared/enums';
 import type { PriceBookEntryDto } from '@/shared/dto/payments.dto';
 import type { AdaptivePaywall } from '@/lib/api/adaptive';
+import { Logo } from '@/components/layout/Logo';
 import { cn } from '@/lib/utils';
 
 function prettyRef(ref: string | null): string {
@@ -88,6 +89,9 @@ export function PaywallCard({
 
   return (
     <div className="mx-auto max-w-lg rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-[0_24px_60px_-30px_rgba(11,18,32,0.4)] sm:p-8">
+      <div className="mb-5 flex justify-center">
+        <Logo />
+      </div>
       <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717] shadow-[0_12px_28px_-12px_rgba(245,180,0,0.9)]">
         <Lock className="size-6" />
       </span>
