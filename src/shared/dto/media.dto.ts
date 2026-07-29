@@ -1,0 +1,41 @@
+/**
+ * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * Mirrored byte-for-byte at the same path in the other repo. Change both together.
+ *
+ * Media uploads — the admin asks the backend to presign a short-lived S3 PUT URL,
+ * uploads the file straight to S3 from the browser, then stores the returned
+ * public URL on the owning record (e.g. a live-session cover). Credentials never
+ * leave the backend; the browser only ever sees a scoped, expiring upload URL.
+ */
+import { IsIn, IsString } from 'class-validator';
+
+/** The image content-types we allow for admin cover uploads. */
+export const ALLOWED_IMAGE_CONTENT_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+] as const;
+
+export type AllowedImageContentType = (typeof ALLOWED_IMAGE_CONTENT_TYPES)[number];
+
+// ── Request ─────────────────────────────────────────────────────────────────
+
+export class PresignUploadDto {
+  /** MIME type of the file about to be uploaded — must be an allowed image type. */
+  @IsString()
+  @IsIn(ALLOWED_IMAGE_CONTENT_TYPES as unknown as string[])
+  contentType!: AllowedImageContentType;
+}
+
+// ── Response ────────────────────────────────────────────────────────────────
+
+export interface PresignUploadResultDto {
+  /** Presigned S3 PUT URL — the browser uploads the raw file body here. */
+  uploadUrl: string;
+  /** The permanent, public URL to store on the record once the PUT succeeds. */
+  publicUrl: string;
+  /** The object key (path) inside the bucket. */
+  key: string;
+  /** How long `uploadUrl` stays valid, in seconds. */
+  expiresInSeconds: number;
+}

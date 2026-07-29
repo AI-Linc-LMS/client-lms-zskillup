@@ -64,47 +64,80 @@ function StudentCard({ s, past }: { s: LiveSessionDto; past?: boolean }) {
   const link = safeHttpUrl(s.meetingUrl);
   const recording = safeHttpUrl(s.recordingUrl);
   const isLive = s.status === 'LIVE';
+  const speakerLine = [s.speakerRole, s.speakerCompany].filter(Boolean).join(' · ');
+  const hasSpeaker = Boolean(s.speakerName || s.speakerBio);
   return (
-    <div data-tour="live:session-card" className={cn('rounded-2xl border bg-white p-5 shadow-sm', isLive ? 'border-red-200 ring-1 ring-red-100' : 'border-slate-200')}>
-      <div className="flex flex-wrap items-center gap-2">
-        <StatusBadge status={s.status} />
-        <AudiencePill audience={s.audience} companyName={s.companyName} />
-        {!past && <span className="text-xs font-semibold text-slate-500">· {relWhen(s.scheduledAt)}</span>}
-      </div>
-
-      <h3 className="mt-2.5 text-lg font-black text-navy">{s.title}</h3>
-      {s.description && <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-600">{s.description}</p>}
-
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
-          <span className="inline-flex items-center gap-1"><Clock className="size-3.5" /> {fmtWhen(s.scheduledAt)}</span>
-          <span>{s.durationMinutes} min</span>
+    <div data-tour="live:session-card" className={cn('overflow-hidden rounded-2xl border bg-white shadow-sm', isLive ? 'border-red-200 ring-1 ring-red-100' : 'border-slate-200')}>
+      {s.coverImageUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={s.coverImageUrl} alt="" className="h-36 w-full object-cover" />
+      )}
+      <div className="p-5">
+        <div className="flex flex-wrap items-center gap-2">
+          <StatusBadge status={s.status} />
+          <AudiencePill audience={s.audience} companyName={s.companyName} />
+          {!past && <span className="text-xs font-semibold text-slate-500">· {relWhen(s.scheduledAt)}</span>}
         </div>
-        {!past && link ? (
-          <a
-            href={link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(
-              'inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-bold text-white shadow-sm transition-colors',
-              isLive ? 'bg-red-500 hover:bg-red-600' : 'bg-navy hover:bg-navy/90',
+
+        <h3 className="mt-2.5 text-lg font-black text-navy">{s.title}</h3>
+        {s.description && <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-600">{s.description}</p>}
+
+        {hasSpeaker && (
+          <div className="mt-3 flex items-start gap-3 border-t border-slate-100 pt-3">
+            {s.speakerAvatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={s.speakerAvatarUrl} alt="" className="size-10 shrink-0 rounded-full object-cover" />
+            ) : (
+              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-sky-50 text-xs font-bold text-sky-600 ring-1 ring-sky-100">
+                {speakerInitials(s.speakerName)}
+              </span>
             )}
-          >
-            <Video className="size-4" /> {isLive ? 'Join now' : 'Join'}
-          </a>
-        ) : past && recording ? (
-          <a
-            href={recording}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full bg-navy px-5 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-navy/90"
-          >
-            <PlayCircle className="size-4" /> Watch recording
-          </a>
-        ) : past ? (
-          <span className="text-xs font-semibold text-slate-500">Session ended</span>
-        ) : null}
+            <div className="min-w-0">
+              {s.speakerName && <p className="text-sm font-bold text-navy">{s.speakerName}</p>}
+              {speakerLine && <p className="text-xs font-medium text-slate-500">{speakerLine}</p>}
+              {s.speakerBio && <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-slate-500">{s.speakerBio}</p>}
+            </div>
+          </div>
+        )}
+
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
+            <span className="inline-flex items-center gap-1"><Clock className="size-3.5" /> {fmtWhen(s.scheduledAt)}</span>
+            <span>{s.durationMinutes} min</span>
+          </div>
+          {!past && link ? (
+            <a
+              href={link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                'inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-bold text-white shadow-sm transition-colors',
+                isLive ? 'bg-red-500 hover:bg-red-600' : 'bg-navy hover:bg-navy/90',
+              )}
+            >
+              <Video className="size-4" /> {isLive ? 'Join now' : 'Join'}
+            </a>
+          ) : past && recording ? (
+            <a
+              href={recording}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-navy px-5 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-navy/90"
+            >
+              <PlayCircle className="size-4" /> Watch recording
+            </a>
+          ) : past ? (
+            <span className="text-xs font-semibold text-slate-500">Session ended</span>
+          ) : null}
+        </div>
       </div>
     </div>
   );
+}
+
+/** Two-letter initials for the speaker avatar fallback. */
+function speakerInitials(name: string | null): string {
+  const parts = (name ?? '').trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '★';
+  return (parts[0][0] + (parts[1]?.[0] ?? '')).toUpperCase();
 }

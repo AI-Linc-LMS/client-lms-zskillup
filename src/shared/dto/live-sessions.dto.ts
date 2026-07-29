@@ -1,8 +1,8 @@
 /**
- * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at the same path in the other repo. Change both together.
  *
- * Live sessions - admin-scheduled Zoom/Meet events targeted at students
+ * Live sessions — admin-scheduled Zoom/Meet events targeted at students
  * (whole platform, or one company's registered students). The frontend imports
  * the request classes with `import type` and the response interfaces for typing.
  */
@@ -40,6 +40,38 @@ export class CreateLiveSessionDto {
   @IsString()
   @MaxLength(1000)
   recordingUrl?: string | null;
+
+  /** Admin-uploaded cover image (S3 public URL from the presign upload). */
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  coverImageUrl?: string | null;
+
+  /** Featured-speaker details (all optional). */
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  speakerName?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  speakerRole?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  speakerCompany?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  speakerBio?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  speakerAvatarUrl?: string | null;
 
   /** ISO timestamp for when the session starts. */
   @IsDateString()
@@ -82,6 +114,36 @@ export class UpdateLiveSessionDto {
   recordingUrl?: string | null;
 
   @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  coverImageUrl?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  speakerName?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  speakerRole?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  speakerCompany?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  speakerBio?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  speakerAvatarUrl?: string | null;
+
+  @IsOptional()
   @IsDateString()
   scheduledAt?: string;
 
@@ -110,6 +172,12 @@ export interface LiveSessionDto {
   description: string;
   meetingUrl: string;
   recordingUrl: string | null;
+  coverImageUrl: string | null;
+  speakerName: string | null;
+  speakerRole: string | null;
+  speakerCompany: string | null;
+  speakerBio: string | null;
+  speakerAvatarUrl: string | null;
   scheduledAt: string;
   durationMinutes: number;
   audience: LiveSessionAudience;
