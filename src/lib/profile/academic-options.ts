@@ -26,9 +26,10 @@ export const yearOfStudyLabel = (v: string): string =>
 export const PASSOUT_YEARS = Array.from({ length: 16 }, (_, i) => 2018 + i);
 
 /** Common degrees for the Course/Degree autocomplete (free text still allowed).
- *  "Other" is offered explicitly for anyone whose course isn't listed. */
+ *  No "Other" entry: the field is a free-text datalist, so picking a literal
+ *  "Other" only forced the student to delete it before typing their real course. */
 export const COURSE_OPTIONS = [
   'B.Tech', 'B.E.', 'B.Sc', 'BCA', 'B.Com', 'B.A', 'B.Arch', 'B.Pharm', 'BBA',
   'B.Tech CSE', 'B.Tech IT', 'B.Tech ECE', 'B.Tech EEE', 'B.Tech Mechanical', 'B.Tech Civil',
-  'M.Tech', 'M.E.', 'M.Sc', 'MCA', 'M.Com', 'M.A', 'MBA', 'PhD', 'Diploma', 'Other',
+  'M.Tech', 'M.E.', 'M.Sc', 'MCA', 'M.Com', 'M.A', 'MBA', 'PhD', 'Diploma',
 ];
