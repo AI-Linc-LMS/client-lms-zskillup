@@ -27,6 +27,7 @@ import {
   Quote,
   School,
   ScrollText,
+  Search,
   Sparkles,
   Target,
   TrendingUp,
@@ -279,6 +280,7 @@ export const ADMIN_NAV: NavSection[] = [
     items: [
       { label: 'Blog', href: '/admin/blogs', icon: Newspaper },
       { label: 'Testimonials', href: '/admin/testimonials', icon: Quote },
+      { label: 'SEO', href: '/admin/seo', icon: Search },
     ],
   },
   {

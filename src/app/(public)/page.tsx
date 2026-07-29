@@ -36,6 +36,17 @@ import RotatingText from '@/components/reactbits/RotatingText';
 import SpotlightCard from '@/components/reactbits/SpotlightCard';
 import CountUp from '@/components/reactbits/CountUp';
 import { getPublicBlogs, getPublicTestimonials } from '@/lib/server/public-content';
+import type { Metadata } from 'next';
+import { seoMetadataFor } from '@/lib/seo/page-metadata';
+
+/** SEO merged from admin-editable overrides (Admin → SEO) over these defaults. */
+export async function generateMetadata(): Promise<Metadata> {
+  return seoMetadataFor('/', {
+    title: 'prephasz — Placement Preparation Platform',
+    description:
+      'Practice aptitude, coding and interviews, track your placement readiness, and prepare for your dream company — all in one platform.',
+  });
+}
 import {
   LANDING_FOOTER,
   LANDING_HERO_STATS,
