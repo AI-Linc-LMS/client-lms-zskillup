@@ -11,6 +11,7 @@ import type { BlogPostDto } from '@/shared/dto/content.dto';
 import { describeError } from '@/lib/api/errors';
 import { BadgeCheck, Loader2, Plus, Trash2, Upload, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { MarkdownEditor } from '@/components/admin/MarkdownEditor';
 
 const inputCls =
   'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#ffc42d] focus:outline-none focus:ring-1 focus:ring-[#ffc42d]';
@@ -166,9 +167,9 @@ export function BlogsManager() {
           <span className="mb-1 block text-xs font-medium text-slate-600">Excerpt</span>
           <input value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} className={inputCls} />
         </label>
-        <label className="block sm:col-span-2">
+        <div className="block sm:col-span-2">
           <span className="mb-1 flex items-center justify-between text-xs font-medium text-slate-600">
-            Body (markdown)
+            Body
             <span className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-[11px] font-semibold text-navy transition hover:bg-slate-50">
               <Upload className="size-3" />
               Upload .md / .txt
@@ -180,8 +181,8 @@ export function BlogsManager() {
               />
             </span>
           </span>
-          <textarea rows={6} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} className={inputCls} />
-        </label>
+          <MarkdownEditor value={form.body} onChange={(v) => setForm((f) => ({ ...f, body: v }))} />
+        </div>
         <label className="block">
           <span className="mb-1 block text-xs font-medium text-slate-600">Cover image URL</span>
           <input value={form.coverUrl} onChange={(e) => setForm({ ...form, coverUrl: e.target.value })} className={inputCls} />
