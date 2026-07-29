@@ -2,333 +2,180 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { ArrowRight, Brain, Info, Loader2, Sparkles, Trophy, X } from 'lucide-react';
+import { BarChart3, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { listAdaptiveSessions, getAdaptiveResults, type SkillMastery } from '@/lib/api/adaptive';
-import { AnimatedNumber } from '@/components/motion/primitives';
-
-interface SkillProfileState {
-  loading: boolean;
-  skills: SkillMastery[];
-  sessionId: string | null;
-  sessionCount: number;
-  topSkill: string | null;
-  weakestSkill: string | null;
-}
-
-const BAND_LABEL = {
-  emerging: 'Emerging',
-  developing: 'Developing',
-  proficient: 'Proficient',
-  mastered: 'Mastered',
-} as const;
-
-const BAND_BADGE = {
-  emerging: 'bg-red-50 text-red-700 ring-red-200',
-  developing: 'bg-amber-50 text-amber-700 ring-amber-200',
-  proficient: 'bg-blue-50 text-blue-700 ring-blue-200',
-  mastered: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
-} as const;
-
-/** Two-stop gradients per band for the animated mastery fills. */
-const BAND_GRADIENT = {
-  emerging: 'linear-gradient(90deg, #fb7185, #ef4444)',
-  developing: 'linear-gradient(90deg, #fbbf24, #f59e0b)',
-  proficient: 'linear-gradient(90deg, #60a5fa, #2563eb)',
-  mastered: 'linear-gradient(90deg, #34d399, #059669)',
-} as const;
-
-const BAND_GLOW = {
-  emerging: '#ef4444',
-  developing: '#f59e0b',
-  proficient: '#2563eb',
-  mastered: '#059669',
-} as const;
+import { ProgressBar } from '@/components/ui/progress-bar';
+import {
+  getSectionMastery,
+  type ApiSectionMasterySummary,
+} from '@/lib/api/practice';
 
 /**
- * Personalized skill profile card for the student dashboard.
- * Loads the most recent completed adaptive session and surfaces:
- * - Per-skill mastery bars
- * - Top (strongest) and weakest skill callout
- * - CTA to retake or view full report
+ * Dashboard "Skill Mastery" card — accuracy across ALL sections with a section
+ * filter, so every MCQ section is visible (fixing the "only Numerical Ability
+ * visible" bug where a flat top-N slice hid the rest). Data + all business values
+ * come from GET /practice/section-mastery (server-computed, zero-filled); this
+ * component only renders and filters (FRONTEND_STANDARDS §3).
+ *
+ * (Export name kept as `AdaptiveSkillProfile` for the dashboard mount; the card is
+ * now accuracy-based, not the adaptive/IRT estimate.)
  */
-export function AdaptiveSkillProfile() {
-  const [state, setState] = useState<SkillProfileState>({
-    loading: true,
-    skills: [],
-    sessionId: null,
-    sessionCount: 0,
-    topSkill: null,
-    weakestSkill: null,
-  });
+type Filter = 'all' | string;
 
-  const [showInfo, setShowInfo] = useState(false);
+export function AdaptiveSkillProfile() {
+  const [data, setData] = useState<ApiSectionMasterySummary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [active, setActive] = useState<Filter>('all');
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      try {
-        const sessions = await listAdaptiveSessions();
-        const completed = sessions.filter((s) => s.status === 'completed'); // newest first
-        if (completed.length === 0) {
-          if (!cancelled) setState((s) => ({ ...s, loading: false, sessionCount: 0 }));
-          return;
-        }
-        // Aggregate skill mastery across ALL completed sessions (capped for cost),
-        // keeping each skill's most-recent estimate. The old code read only the
-        // latest session yet the footer said "based on N sessions" - so a profile
-        // could claim "1 skill tracked" while 6 sessions had been completed.
-        const recent = completed.slice(0, 15);
-        const results = await Promise.all(
-          recent.map((s) => getAdaptiveResults(s.sessionId).catch(() => null)),
-        );
-        if (cancelled) return;
-
-        const bySkill = new Map<string, SkillMastery>();
-        for (const r of results) {
-          if (!r) continue;
-          for (const sm of r.skillMastery) {
-            if (!bySkill.has(sm.skill)) bySkill.set(sm.skill, sm); // first hit = most recent
-          }
-        }
-        const sorted = [...bySkill.values()].sort((a, b) => b.masteryPct - a.masteryPct);
-        setState({
-          loading: false,
-          skills: sorted,
-          sessionId: completed[0].sessionId,
-          sessionCount: completed.length,
-          topSkill: sorted[0]?.skill ?? null,
-          weakestSkill: sorted[sorted.length - 1]?.skill ?? null,
-        });
-      } catch {
-        if (!cancelled) setState((s) => ({ ...s, loading: false }));
-      }
-    })();
-    return () => { cancelled = true; };
+    getSectionMastery()
+      .then((d) => {
+        if (!cancelled) setData(d);
+      })
+      .catch(() => {
+        /* fetch failed — render nothing, never block the dashboard */
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  if (state.loading) {
+  if (loading) {
     return (
-      <div className="flex items-center gap-3 rounded-3xl border border-slate-200/80 bg-white p-5 text-sm text-slate-500">
-        <Loader2 className="size-4 animate-spin text-[#f5b400]" />
-        Loading your skill profile…
+      <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-500 shadow-sm">
+        <Loader2 className="size-4 animate-spin text-orange" />
+        Loading your skill mastery…
       </div>
     );
   }
 
-  if (state.sessionCount === 0) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="group relative overflow-hidden rounded-3xl border border-[#ffc42d]/30 bg-white p-5 transition-all hover:-translate-y-0.5"
-      >
-        {/* warm gradient wash + glow */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#ffc42d]/[0.08] via-transparent to-amber-100/30" />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-10 -top-10 size-32 rounded-full bg-[#ffc42d]/25 opacity-60 blur-2xl transition-opacity group-hover:opacity-90"
-        />
-        <div className="relative flex items-start gap-3.5">
-          <span
-            className="grid size-11 shrink-0 place-items-center rounded-2xl text-[#171717] shadow-sm"
-            style={{ background: 'linear-gradient(135deg, #ffd24d, #f5b400)' }}
-          >
-            <Sparkles className="size-5" />
-          </span>
-          <div>
-            <p className="text-sm font-bold text-[#1a1d29]">Discover your skill level</p>
-            <p className="mt-0.5 text-xs leading-relaxed text-slate-600">
-              Take an AI adaptive quiz to get a personalised skill profile and study plan.
-            </p>
-            <Link
-              href="/mock-assessment"
-              className="group/cta mt-3 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-3.5 py-2 text-xs font-bold text-[#171717] shadow-[0_10px_24px_-12px_rgba(245,180,0,0.9)] transition-transform active:scale-[0.98]"
-            >
-              Take your first adaptive test
-              <ArrowRight className="size-3.5 transition-transform group-hover/cta:translate-x-0.5" />
-            </Link>
-          </div>
-        </div>
-      </motion.div>
-    );
-  }
+  if (!data) return null;
 
-  const overallMastery = state.skills.length
-    ? Math.round(state.skills.reduce((sum, s) => sum + s.masteryPct, 0) / state.skills.length)
-    : 0;
+  const { sections, overallAccuracyPct, totalAttempted } = data;
+  const activeSection = active === 'all' ? null : sections.find((s) => s.sectionSlug === active) ?? null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-      className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 transition-all hover:-translate-y-0.5"
-    >
-      {/* layered depth: gradient wash + colored glow blob */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-50/80 via-transparent to-[#ffc42d]/[0.05]" />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-12 -top-12 size-36 rounded-full bg-[#ffc42d]/20 opacity-50 blur-3xl transition-opacity group-hover:opacity-80"
-      />
-
-      <div className="relative">
-        {/* Header */}
-        <div className="mb-5 flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <span
-              className="grid size-10 shrink-0 place-items-center rounded-2xl text-[#171717] shadow-sm"
-              style={{ background: 'linear-gradient(135deg, #ffd24d, #f5b400)' }}
-            >
-              <Brain className="size-5" />
-            </span>
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-                Adaptive
-              </p>
-              <p className="flex items-center gap-1.5 text-sm font-bold text-[#1a1d29]">
-                Your Skill Profile
-                <button
-                  type="button"
-                  onClick={() => setShowInfo((v) => !v)}
-                  aria-label="How is this calculated?"
-                  aria-expanded={showInfo}
-                  className="grid size-4 place-items-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-                >
-                  <Info className="size-3.5" />
-                </button>
-              </p>
-            </div>
+    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      {/* Header */}
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-violet-50 text-violet-600 ring-1 ring-violet-100">
+            <BarChart3 className="size-5" />
+          </span>
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Skill Mastery</p>
+            <p className="text-base font-bold text-navy">Accuracy by section</p>
           </div>
-          <Link
-            href={`/dashboard/quiz/adaptive/results?session=${state.sessionId}`}
-            className="group/link mt-1 inline-flex shrink-0 items-center gap-1 text-[11px] font-bold text-[#f5b400] transition-colors hover:text-[#c99200]"
-          >
-            Full report
-            <ArrowRight className="size-3 transition-transform group-hover/link:translate-x-0.5" />
+        </div>
+        <Link href="/practice" className="mt-1 shrink-0 text-[11px] font-semibold text-orange hover:underline">
+          Practice →
+        </Link>
+      </div>
+
+      {totalAttempted === 0 ? (
+        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-6 text-center">
+          <p className="text-sm font-semibold text-navy">Build your skill mastery</p>
+          <p className="mt-1 text-xs text-slate-500">
+            Practise across sections and your accuracy for each will show up here.
+          </p>
+          <Link href="/practice" className="mt-3 inline-block text-xs font-semibold text-orange hover:underline">
+            Start practising →
           </Link>
         </div>
-
-        {/* How it's calculated */}
-        {showInfo ? (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            className="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/80 p-3.5 text-[11px] leading-relaxed text-slate-600"
-          >
-            <div className="mb-1 flex items-center justify-between">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">How this is calculated</p>
-              <button type="button" onClick={() => setShowInfo(false)} aria-label="Close" className="text-slate-400 hover:text-slate-600"><X className="size-3.5" /></button>
+      ) : (
+        <>
+          {/* Overall accuracy */}
+          <div className="mb-4 flex items-end justify-between rounded-xl border border-slate-200 bg-white px-4 py-3">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Overall accuracy</p>
+              <p className="mt-0.5 text-[26px] font-extrabold leading-none text-navy">{overallAccuracyPct}%</p>
             </div>
-            <p>
-              This is an <span className="font-semibold text-[#1a1d29]">adaptive (IRT) estimate</span>. Each
-              adaptive quiz updates a difficulty score (θ) per skill from <span className="font-semibold">which
-              questions you get right and how hard they are</span>, then maps it to 0–100% mastery. It reflects
-              the level you can <span className="font-semibold">reliably</span> answer - not your raw % correct.
-            </p>
-            <p className="mt-1.5">
-              That&apos;s why it differs from <span className="font-semibold text-[#1a1d29]">Topic Mastery</span>, which is
-              simply accuracy (correct ÷ attempted) on practice questions - a topic can read 100% there while its
-              adaptive mastery here is still building.
-            </p>
-          </motion.div>
-        ) : null}
-
-        {/* Overall mastery */}
-        <div className="mb-5 flex items-end justify-between rounded-2xl border border-slate-200/70 bg-slate-50/60 px-4 py-3">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-              Overall mastery
-            </p>
-            <p className="mt-0.5 text-3xl font-black leading-none tracking-tight text-[#1a1d29]">
-              <AnimatedNumber value={overallMastery} format={(n) => `${n}%`} />
-            </p>
+            <span className="text-[11px] font-semibold text-slate-500 tabular-nums">
+              {totalAttempted} question{totalAttempted !== 1 ? 's' : ''} attempted
+            </span>
           </div>
-          <span className="text-[11px] font-semibold text-slate-500 tabular-nums">
-            {state.skills.length} skill{state.skills.length !== 1 ? 's' : ''} tracked
+
+          {/* Section filter chips (§4.12) */}
+          <div className="mb-4 flex flex-wrap gap-2">
+            <FilterChip label="All" selected={active === 'all'} onClick={() => setActive('all')} />
+            {sections.map((s) => (
+              <FilterChip
+                key={s.sectionSlug}
+                label={s.sectionLabel}
+                selected={active === s.sectionSlug}
+                onClick={() => setActive(s.sectionSlug)}
+              />
+            ))}
+          </div>
+
+          {/* Bars: all → per-section; a section → its topics */}
+          {active === 'all' ? (
+            <div className="space-y-3.5">
+              {sections.map((s) => (
+                <MasteryRow key={s.sectionSlug} label={s.sectionLabel} attempted={s.attempted} pct={s.accuracyPct} />
+              ))}
+            </div>
+          ) : activeSection && activeSection.attempted && activeSection.topics.length > 0 ? (
+            <div className="space-y-3.5">
+              {activeSection.topics.map((t) => (
+                <MasteryRow key={t.topicSlug} label={t.topicName} attempted pct={t.accuracyPct} />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-6 text-center">
+              <p className="text-sm font-semibold text-navy">Not practised yet</p>
+              <p className="mt-1 text-xs text-slate-500">
+                Practise {activeSection?.sectionLabel ?? 'this section'} to see your accuracy here.
+              </p>
+              <Link href="/practice" className="mt-3 inline-block text-xs font-semibold text-orange hover:underline">
+                Start practising →
+              </Link>
+            </div>
+          )}
+
+          <p className="mt-4 text-[10px] font-medium text-slate-400">
+            Accuracy (correct ÷ attempted) across your practice. Sections you haven&apos;t practised show as Not attempted.
+          </p>
+        </>
+      )}
+    </div>
+  );
+}
+
+function FilterChip({ label, selected, onClick }: { label: string; selected: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={selected}
+      className={cn(
+        'rounded-full px-3 py-1 text-xs font-semibold transition-colors',
+        selected ? 'bg-navy text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
+      )}
+    >
+      {label}
+    </button>
+  );
+}
+
+function MasteryRow({ label, attempted, pct }: { label: string; attempted: boolean; pct: number }) {
+  return (
+    <div>
+      <div className="mb-1.5 flex items-center justify-between gap-2">
+        <span className="truncate text-xs font-semibold text-navy">{label}</span>
+        {attempted ? (
+          <span className="shrink-0 text-xs font-extrabold tabular-nums text-navy">{pct}%</span>
+        ) : (
+          <span className="shrink-0 rounded-full bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600 ring-1 ring-slate-200">
+            Not attempted
           </span>
-        </div>
-
-        {/* Skills bars */}
-        <div className="mb-5 space-y-3.5">
-          {state.skills.slice(0, 5).map((s, i) => (
-            <div key={s.skill}>
-              <div className="mb-1.5 flex items-center justify-between gap-2">
-                <span className="truncate text-xs font-semibold text-[#1a1d29]">{s.skill}</span>
-                <div className="flex shrink-0 items-center gap-1.5">
-                  <span
-                    className={cn(
-                      'rounded-full px-1.5 py-0.5 text-[10px] font-semibold ring-1 ring-inset',
-                      BAND_BADGE[s.band],
-                    )}
-                  >
-                    {BAND_LABEL[s.band]}
-                  </span>
-                  <span className="text-xs font-extrabold text-[#1a1d29] tabular-nums">
-                    <AnimatedNumber value={s.masteryPct} format={(n) => `${n}%`} />
-                  </span>
-                </div>
-              </div>
-              <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-                <motion.div
-                  className="h-full rounded-full"
-                  style={{
-                    background: BAND_GRADIENT[s.band],
-                    boxShadow: `0 0 10px -2px ${BAND_GLOW[s.band]}66`,
-                  }}
-                  initial={{ width: 0 }}
-                  animate={{ width: `${s.masteryPct}%` }}
-                  transition={{ duration: 0.9, delay: 0.15 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Callout row */}
-        <div className="grid grid-cols-2 gap-3 border-t border-slate-100 pt-4">
-          {state.topSkill && (
-            <div className="relative overflow-hidden rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-emerald-100/40 p-3 transition-transform hover:-translate-y-0.5">
-              <div
-                aria-hidden
-                className="pointer-events-none absolute -right-4 -top-4 size-14 rounded-full bg-emerald-400/25 blur-xl"
-              />
-              <div className="relative">
-                <div className="mb-1 flex items-center gap-1.5">
-                  <Trophy className="size-3.5 text-emerald-600" />
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-700">
-                    Strongest
-                  </p>
-                </div>
-                <p className="truncate text-sm font-bold text-emerald-900">{state.topSkill}</p>
-              </div>
-            </div>
-          )}
-          {state.weakestSkill && state.weakestSkill !== state.topSkill && (
-            <div className="relative overflow-hidden rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-amber-100/40 p-3 transition-transform hover:-translate-y-0.5">
-              <div
-                aria-hidden
-                className="pointer-events-none absolute -right-4 -top-4 size-14 rounded-full bg-amber-400/25 blur-xl"
-              />
-              <div className="relative">
-                <div className="mb-1 flex items-center gap-1.5">
-                  <Sparkles className="size-3.5 text-amber-600" />
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-700">
-                    Needs work
-                  </p>
-                </div>
-                <p className="truncate text-sm font-bold text-amber-900">{state.weakestSkill}</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <p className="mt-3 text-[10px] font-medium text-slate-500">
-          Based on {state.sessionCount} adaptive session{state.sessionCount !== 1 ? 's' : ''}
-        </p>
+        )}
       </div>
-    </motion.div>
+      <ProgressBar value={attempted ? pct : 0} label={`${label} accuracy`} />
+    </div>
   );
 }
