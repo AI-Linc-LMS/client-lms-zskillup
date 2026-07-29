@@ -222,17 +222,41 @@ export function InterviewRunner({ id }: { id: string }) {
       if (v) u.voice = v;
       u.lang = v?.lang ?? 'en-US';
       u.rate = 1;
+      // Safety net: Safari (and Chrome on long text) can silently drop an utterance
+      // and fire NEITHER onend nor onerror — which would leave the interview waiting
+      // on the interviewer "finishing speaking" forever, so the candidate can never
+      // answer or advance (the "won't work on non-Chrome / can't complete" bug).
+      // Guarantee onDone fires once, via whichever comes first: onend/onerror or a
+      // generous duration estimate. Also keep long utterances alive on Chrome.
+      let done = false;
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      let keepAlive: ReturnType<typeof setInterval> | undefined;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        if (timer) clearTimeout(timer);
+        if (keepAlive) clearInterval(keepAlive);
+        setInterviewerSpeaking(false);
+        onDone?.();
+      };
       u.onstart = () => setInterviewerSpeaking(true);
-      u.onend = () => {
-        setInterviewerSpeaking(false);
-        onDone?.();
-      };
-      u.onerror = () => {
-        setInterviewerSpeaking(false);
-        onDone?.();
-      };
+      u.onend = finish;
+      u.onerror = finish;
+      // ~80ms/char + 2s buffer, clamped [4s, 45s] — long enough that this only
+      // fires when the browser never signals completion.
+      timer = setTimeout(finish, Math.min(45000, Math.max(4000, text.length * 80 + 2000)));
+      // Chrome pauses speech after ~15s; nudging resume() keeps long questions going.
+      keepAlive = setInterval(() => {
+        if (done) return;
+        try {
+          window.speechSynthesis.resume();
+        } catch {
+          /* noop */
+        }
+      }, 8000);
       window.speechSynthesis.speak(u);
     } catch {
+      setInterviewerSpeaking(false);
       onDone?.();
     }
   }, []);
