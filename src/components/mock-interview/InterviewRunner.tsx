@@ -229,13 +229,12 @@ export function InterviewRunner({ id }: { id: string }) {
       // Guarantee onDone fires once, via whichever comes first: onend/onerror or a
       // generous duration estimate. Also keep long utterances alive on Chrome.
       let done = false;
-      let timer: ReturnType<typeof setTimeout> | undefined;
-      let keepAlive: ReturnType<typeof setInterval> | undefined;
+      const h: { timer?: ReturnType<typeof setTimeout>; keepAlive?: ReturnType<typeof setInterval> } = {};
       const finish = () => {
         if (done) return;
         done = true;
-        if (timer) clearTimeout(timer);
-        if (keepAlive) clearInterval(keepAlive);
+        if (h.timer) clearTimeout(h.timer);
+        if (h.keepAlive) clearInterval(h.keepAlive);
         setInterviewerSpeaking(false);
         onDone?.();
       };
@@ -244,9 +243,9 @@ export function InterviewRunner({ id }: { id: string }) {
       u.onerror = finish;
       // ~80ms/char + 2s buffer, clamped [4s, 45s] — long enough that this only
       // fires when the browser never signals completion.
-      timer = setTimeout(finish, Math.min(45000, Math.max(4000, text.length * 80 + 2000)));
+      h.timer = setTimeout(finish, Math.min(45000, Math.max(4000, text.length * 80 + 2000)));
       // Chrome pauses speech after ~15s; nudging resume() keeps long questions going.
-      keepAlive = setInterval(() => {
+      h.keepAlive = setInterval(() => {
         if (done) return;
         try {
           window.speechSynthesis.resume();
