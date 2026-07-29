@@ -6,6 +6,7 @@ import type {
   CreateOrderResultDto,
   EntitlementDto,
   MySubscriptionDto,
+  PracticeAccessMapDto,
   PriceBookEntryDto,
   VerifyPaymentDto,
 } from '@/shared/dto/payments.dto';
@@ -23,6 +24,13 @@ export async function getPricing(): Promise<PriceBookEntryDto[]> {
 
 export async function getMySubscription(): Promise<MySubscriptionDto> {
   const res = await apiClient.get<MySubscriptionDto>('/api/v1/payments/my-subscription');
+  return res.data;
+}
+
+/** Server-truth for Practice Hub up-front locks (Phase 8). Fails open server-side —
+ *  while the paywall/single-scope is off, hasPlatform is true + the free maps empty. */
+export async function getPracticeAccessMap(): Promise<PracticeAccessMapDto> {
+  const res = await apiClient.get<PracticeAccessMapDto>('/api/v1/payments/practice-access-map');
   return res.data;
 }
 
