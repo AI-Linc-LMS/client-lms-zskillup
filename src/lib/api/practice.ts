@@ -126,3 +126,39 @@ export async function getTopicAccuracy(companySlug?: string): Promise<ApiTopicAc
   const res = await apiClient.get<ApiTopicAccuracy[]>(`/api/v1/practice/accuracy/topics${qs}`);
   return res.data;
 }
+
+export interface ApiSectionTopicMastery {
+  topicSlug: string;
+  topicName: string;
+  total: number;
+  correct: number;
+  accuracyPct: number;
+}
+
+export interface ApiSectionMastery {
+  sectionSlug: string;
+  sectionLabel: string;
+  /** False when the student has no practice attempts in this section (zero-filled). */
+  attempted: boolean;
+  total: number;
+  correct: number;
+  accuracyPct: number;
+  topics: ApiSectionTopicMastery[];
+}
+
+export interface ApiSectionMasterySummary {
+  sections: ApiSectionMastery[];
+  overallAccuracyPct: number;
+  totalAttempted: number;
+}
+
+/**
+ * Per-section accuracy across all 4 MCQ sections, ZERO-FILLED — powers the
+ * dashboard Skill Mastery card + its section filter, so every section renders even
+ * before it is practised (attempted:false, 0%). All values are server-computed;
+ * the client only renders and filters (FRONTEND_STANDARDS §3).
+ */
+export async function getSectionMastery(): Promise<ApiSectionMasterySummary> {
+  const res = await apiClient.get<ApiSectionMasterySummary>('/api/v1/practice/section-mastery');
+  return res.data;
+}
