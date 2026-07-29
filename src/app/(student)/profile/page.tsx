@@ -34,6 +34,7 @@ import {
 } from '@/components/resume/types';
 import { notifyProfileUpdated } from '@/lib/profile-events';
 import { COURSE_OPTIONS, PASSOUT_YEARS, YEAR_OF_STUDY_OPTIONS, yearOfStudyLabel } from '@/lib/profile/academic-options';
+import { SKILL_OPTIONS } from '@/lib/profile/skill-options';
 import { useMySubscription } from '@/hooks/useMySubscription';
 import { CollegeCombobox } from '@/components/student/CollegeCombobox';
 import { getMyRegistrations, type ApiRegistration } from '@/lib/api/registrations';
@@ -80,16 +81,10 @@ const EMPTY: Values = {
 
 const COURSES = COURSE_OPTIONS;
 
-/** Keep only digits, preserving an optional leading "+", capped at 15 digits. */
-const sanitizePhone = (s: string) => {
-  const hasPlus = s.trimStart().startsWith('+');
-  return (hasPlus ? '+' : '') + s.replace(/\D/g, '').slice(0, 15);
-};
-/** A valid phone is 10–15 digits (covers a bare 10-digit number up to +country code). */
-const isValidPhone = (s: string) => {
-  const d = s.replace(/\D/g, '');
-  return d.length >= 10 && d.length <= 15;
-};
+/** Keep only digits, capped at 10 — a bare 10-digit mobile number (no country code). */
+const sanitizePhone = (s: string) => s.replace(/\D/g, '').slice(0, 10);
+/** A valid phone is exactly 10 digits. */
+const isValidPhone = (s: string) => s.replace(/\D/g, '').length === 10;
 
 /** Load an image File, center-crop to a square, downscale to `size`px, and return a
  *  compressed JPEG data URL. Keeps the stored avatar tiny (~15-30KB) so it fits the
@@ -341,9 +336,20 @@ export default function ProfilePage() {
 
   // ONE save: profile fields first, then the résumé (only what actually changed).
   const save = async () => {
-    // Never persist a malformed phone number.
-    if (phoneInvalid) {
-      setErr('Please enter a valid phone number (10–15 digits).');
+    // Mandatory profile: every required field must be filled before we save.
+    const gpa = (resume?.education?.[0]?.gpa ?? '').trim();
+    const missing: string[] = [];
+    if (!v.avatarUrl) missing.push('Photograph');
+    if (!v.fullName.trim()) missing.push('Full name');
+    if (!v.phone.trim() || !isValidPhone(v.phone)) missing.push('Phone (10-digit)');
+    if (!v.course.trim()) missing.push('Course / degree');
+    if (!v.yearOfStudy) missing.push('Year of study');
+    if (!v.collegeId) missing.push('College');
+    if (!v.passoutYear) missing.push('Passout year');
+    if (!gpa) missing.push('GPA / CGPA');
+    if (v.skills.length === 0) missing.push('Skills');
+    if (missing.length) {
+      setErr(`Please complete required fields: ${missing.join(', ')}.`);
       return;
     }
     setSaving(true);
@@ -475,6 +481,10 @@ export default function ProfilePage() {
               <p className="mb-1.5 inline-flex items-center gap-1 rounded-full bg-rose-500/15 px-2.5 py-1 text-[11px] font-semibold text-rose-200 ring-1 ring-inset ring-rose-400/30">
                 {avatarErr}
               </p>
+            ) : !v.avatarUrl ? (
+              <p className="mb-1.5 inline-flex items-center gap-1 text-[11px] font-semibold text-white/75">
+                Add a profile photo <span className="text-rose-400" aria-label="required">*</span>
+              </p>
             ) : null}
             {isPremium ? (
               <span className="mb-1.5 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-[#171717] shadow-[0_2px_10px_-2px_rgba(245,180,0,0.7)]">
@@ -508,21 +518,21 @@ export default function ProfilePage() {
         <div className="space-y-5">
           <SectionCard data-tour="profile:personal" icon={User} title="Personal" subtitle="How we address you and reach out.">
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Full name" done={!!v.fullName.trim()}>
+              <Field label="Full name" required done={!!v.fullName.trim()}>
                 <input value={v.fullName} onChange={(e) => set('fullName', e.target.value)} className={inputCls} placeholder="Your name" />
               </Field>
-              <Field label="Phone" done={!!v.phone.trim() && isValidPhone(v.phone)}>
+              <Field label="Phone" required done={!!v.phone.trim() && isValidPhone(v.phone)}>
                 <input
                   value={v.phone}
                   onChange={(e) => set('phone', sanitizePhone(e.target.value))}
                   inputMode="numeric"
-                  maxLength={16}
+                  maxLength={10}
                   className={cn(inputCls, phoneInvalid && 'border-rose-300 focus:border-rose-400 focus:ring-rose-200')}
                   placeholder="10-digit mobile number"
                   aria-invalid={phoneInvalid}
                 />
                 {phoneInvalid ? (
-                  <p className="mt-1 text-xs font-medium text-rose-500">Enter a valid phone number (10–15 digits).</p>
+                  <p className="mt-1 text-xs font-medium text-rose-500">Enter a valid 10-digit mobile number.</p>
                 ) : null}
               </Field>
             </div>
@@ -530,7 +540,7 @@ export default function ProfilePage() {
 
           <SectionCard data-tour="profile:academic" icon={GraduationCap} title="Education" subtitle="Your degree and college — powers your college leaderboard and your resume.">
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Course / degree" done={!!v.course.trim()}>
+              <Field label="Course / degree" required done={!!v.course.trim()}>
                 <input
                   value={v.course}
                   onChange={(e) => set('course', e.target.value)}
@@ -545,7 +555,7 @@ export default function ProfilePage() {
                   ))}
                 </datalist>
               </Field>
-              <Field label="Year of study" done={!!v.yearOfStudy}>
+              <Field label="Year of study" required done={!!v.yearOfStudy}>
                 <select value={v.yearOfStudy} onChange={(e) => set('yearOfStudy', e.target.value)} className={inputCls}>
                   <option value="">Select</option>
                   {YEAR_OF_STUDY_OPTIONS.map((o) => (
@@ -557,7 +567,7 @@ export default function ProfilePage() {
                   college sets the real college_id, which is what the "My College"
                   leaderboard (and cohort scoping) filter on. Typing it never did -
                   which is why that board silently showed national rankings. */}
-              <Field label="College" done={!!v.collegeId}>
+              <Field label="College" required done={!!v.collegeId}>
                 <CollegeCombobox
                   collegeId={v.collegeId}
                   collegeName={v.collegeName}
@@ -573,7 +583,7 @@ export default function ProfilePage() {
                   </p>
                 ) : null}
               </Field>
-              <Field label="Passout year" done={!!v.passoutYear}>
+              <Field label="Passout year" required done={!!v.passoutYear}>
                 <select value={v.passoutYear} onChange={(e) => set('passoutYear', e.target.value ? Number(e.target.value) : '')} className={inputCls}>
                   <option value="">Not applicable</option>
                   {PASSOUT_YEARS.map((y) => (
@@ -581,7 +591,7 @@ export default function ProfilePage() {
                   ))}
                 </select>
               </Field>
-              <Field label="GPA / CGPA">
+              <Field label="GPA / CGPA" required done={!!(edu0?.gpa ?? '').trim()}>
                 <input value={edu0?.gpa ?? ''} onChange={(e) => patchEdu0({ gpa: e.target.value })} className={inputCls} placeholder="e.g. 8.7/10" />
               </Field>
               <Field label="Location">
@@ -823,11 +833,26 @@ function SectionCard({
   );
 }
 
-function Field({ label, done, children }: { label: string; done?: boolean; children: React.ReactNode }) {
+function Field({
+  label,
+  done,
+  required,
+  children,
+}: {
+  label: string;
+  done?: boolean;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
   return (
     <div className="space-y-1.5">
       <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-500">
         {label}
+        {required && (
+          <span className="text-rose-500" aria-label="required">
+            *
+          </span>
+        )}
         {done && <Check className="size-3 text-emerald-500" />}
       </p>
       {children}
@@ -835,50 +860,83 @@ function Field({ label, done, children }: { label: string; done?: boolean; child
   );
 }
 
-/** Interactive skills tag input - type + Enter/comma to add, click ✕ to remove. */
+/** Interactive skills tag input with typeahead — type + Enter/comma to add, pick a
+ *  suggestion, or click ✕ to remove. Free text is still allowed; suggestions just
+ *  make adding a common skill one click. */
 function SkillsInput({ skills, onAdd, onRemove }: { skills: string[]; onAdd: (s: string) => void; onRemove: (s: string) => void }) {
   const [draft, setDraft] = useState('');
-  const commit = () => {
-    if (draft.trim()) onAdd(draft);
+  const [focused, setFocused] = useState(false);
+  const commit = (val?: string) => {
+    const s = (val ?? draft).trim();
+    if (s) onAdd(s);
     setDraft('');
   };
+  const suggestions = useMemo(() => {
+    const q = draft.trim().toLowerCase();
+    if (!q) return [];
+    const have = new Set(skills.map((s) => s.toLowerCase()));
+    return SKILL_OPTIONS.filter((s) => s.toLowerCase().includes(q) && !have.has(s.toLowerCase())).slice(0, 6);
+  }, [draft, skills]);
   return (
     <div>
       <p className="mb-2 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-500">
         Skills
+        <span className="text-rose-500" aria-label="required">*</span>
         {skills.length > 0 && <Check className="size-3 text-emerald-500" />}
       </p>
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 focus-within:border-orange focus-within:ring-2 focus-within:ring-orange/30">
-        {skills.map((s) => (
-          <span key={s} className="inline-flex items-center gap-1 rounded-full bg-orange/10 py-1 pl-2.5 pr-1 text-xs font-semibold text-orange">
-            {s}
-            <button type="button" onClick={() => onRemove(s)} aria-label={`Remove ${s}`} className="grid size-4 place-items-center rounded-full text-orange/70 hover:bg-orange/20 hover:text-orange">
-              <X className="size-3" />
-            </button>
-          </span>
-        ))}
-        <input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ',') {
-              e.preventDefault();
+      <div className="relative">
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 focus-within:border-orange focus-within:ring-2 focus-within:ring-orange/30">
+          {skills.map((s) => (
+            <span key={s} className="inline-flex items-center gap-1 rounded-full bg-orange/10 py-1 pl-2.5 pr-1 text-xs font-semibold text-orange">
+              {s}
+              <button type="button" onClick={() => onRemove(s)} aria-label={`Remove ${s}`} className="grid size-4 place-items-center rounded-full text-orange/70 hover:bg-orange/20 hover:text-orange">
+                <X className="size-3" />
+              </button>
+            </span>
+          ))}
+          <input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                commit();
+              } else if (e.key === 'Backspace' && !draft && skills.length) {
+                onRemove(skills[skills.length - 1]);
+              }
+            }}
+            onBlur={() => {
+              // Delay hiding so a suggestion's mousedown registers before blur.
+              setTimeout(() => setFocused(false), 120);
               commit();
-            } else if (e.key === 'Backspace' && !draft && skills.length) {
-              onRemove(skills[skills.length - 1]);
-            }
-          }}
-          onBlur={commit}
-          placeholder={skills.length ? 'Add a skill…' : 'e.g. Java, SQL, React, DSA'}
-          className="min-w-[8rem] flex-1 bg-transparent px-1.5 py-1 text-sm text-navy outline-none placeholder:text-slate-500"
-        />
-        {draft.trim() && (
-          <button type="button" onClick={commit} className="grid size-6 place-items-center rounded-full bg-orange text-[#171717]">
-            <Plus className="size-3.5" />
-          </button>
+            }}
+            placeholder={skills.length ? 'Add a skill…' : 'e.g. Java, SQL, React, DSA'}
+            className="min-w-[8rem] flex-1 bg-transparent px-1.5 py-1 text-sm text-navy outline-none placeholder:text-slate-500"
+          />
+          {draft.trim() && (
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); commit(); }} className="grid size-6 place-items-center rounded-full bg-orange text-[#171717]">
+              <Plus className="size-3.5" />
+            </button>
+          )}
+        </div>
+        {focused && suggestions.length > 0 && (
+          <ul className="absolute left-0 right-0 z-20 mt-1 max-h-52 overflow-auto rounded-lg border border-slate-200 bg-white py-1 shadow-md">
+            {suggestions.map((s) => (
+              <li key={s}>
+                <button
+                  type="button"
+                  onMouseDown={(e) => { e.preventDefault(); commit(s); }}
+                  className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm font-medium text-navy transition-colors hover:bg-slate-50"
+                >
+                  <Plus className="size-3.5 text-orange" /> {s}
+                </button>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
-      <p className="mt-1.5 text-[11px] text-slate-500">Press Enter or comma to add each skill.</p>
+      <p className="mt-1.5 text-[11px] text-slate-500">Press Enter or comma to add each skill, or pick a suggestion.</p>
     </div>
   );
 }
