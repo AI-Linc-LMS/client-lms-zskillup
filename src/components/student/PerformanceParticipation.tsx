@@ -79,17 +79,21 @@ export function PerformanceParticipation() {
   const reduce = useReducedMotion();
   const [data, setData] = useState<PerformanceParticipationDto | null>(null);
   const [loading, setLoading] = useState(true);
+  // B2B filters (college callers only). '' = all. Kept on re-fetch so the card
+  // and its dropdowns stay put while new peers load.
+  const [cohort, setCohort] = useState('');
+  const [company, setCompany] = useState('');
 
   useEffect(() => {
     let alive = true;
-    getMyPerformanceScatter()
+    getMyPerformanceScatter({ cohort: cohort || null, company: company || null })
       .then((d) => alive && setData(d))
       .catch(() => {})
       .finally(() => alive && setLoading(false));
     return () => {
       alive = false;
     };
-  }, []);
+  }, [cohort, company]);
 
   const partMax = useMemo(() => {
     const parts = [...(data?.peers ?? []).map((p) => p.participation), data?.you?.participation ?? 0];
@@ -166,6 +170,35 @@ export function PerformanceParticipation() {
           Details <ArrowRight className="size-3.5" />
         </Link>
       </div>
+
+      {/* B2B filter row — only when the caller is college-scoped and has cohorts/companies. */}
+      {data?.scope === 'college' &&
+        ((data.cohorts?.length ?? 0) > 0 || (data.companies?.length ?? 0) > 0) && (
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+            {(data.cohorts?.length ?? 0) > 0 && (
+              <FilterSelect
+                label="Cohort"
+                value={cohort}
+                onChange={setCohort}
+                options={[
+                  { value: '', label: 'All cohorts' },
+                  ...data.cohorts!.map((c) => ({ value: c.id, label: c.name })),
+                ]}
+              />
+            )}
+            {(data.companies?.length ?? 0) > 0 && (
+              <FilterSelect
+                label="Company"
+                value={company}
+                onChange={setCompany}
+                options={[
+                  { value: '', label: 'All companies' },
+                  ...data.companies!.map((c) => ({ value: c.slug, label: c.name })),
+                ]}
+              />
+            )}
+          </div>
+        )}
 
       {loading ? (
         <div className="flex h-56 items-center justify-center">
@@ -418,5 +451,35 @@ function Metric({ label, value, sub }: { label: string; value: string; sub: stri
       <p className="mt-0.5 font-display text-lg font-bold leading-none tabular-nums text-navy">{value}</p>
       <p className="mt-1 truncate text-[10px] font-medium text-slate-500">{sub}</p>
     </div>
+  );
+}
+
+/** Compact labelled dropdown for the B2B cohort/company filters. */
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: Array<{ value: string; label: string }>;
+}) {
+  return (
+    <label className="inline-flex items-center gap-1.5">
+      <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-8 max-w-[10rem] truncate rounded-lg border border-slate-200 bg-white px-2 text-xs font-semibold text-navy focus:border-orange focus-visible:ring-2 focus-visible:ring-orange/30"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }

@@ -1,7 +1,12 @@
 import { apiClient } from './client';
 import type { PerformanceParticipationDto } from '@/shared/dto/me-analytics.dto';
 
-export type { PerformanceParticipationDto, ScatterPoint } from '@/shared/dto/me-analytics.dto';
+export type {
+  PerformanceParticipationDto,
+  ScatterPoint,
+  CohortOption,
+  CompanyOption,
+} from '@/shared/dto/me-analytics.dto';
 
 export interface ReadinessComponent {
   label: string;
@@ -52,7 +57,19 @@ export async function getReadiness(): Promise<Readiness> {
   return res.data;
 }
 
-/** Performance vs participation scatter - your dot among anonymized college peers. */
-export async function getMyPerformanceScatter(): Promise<PerformanceParticipationDto> {
-  return (await apiClient.get<PerformanceParticipationDto>('/api/v1/me/readiness/scatter')).data;
+/**
+ * Performance vs participation scatter - your dot among anonymized college peers.
+ * B2B (college) callers may narrow peers to one cohort and/or one purchased company;
+ * the response echoes the available cohorts/companies for the filter dropdowns.
+ */
+export async function getMyPerformanceScatter(opts?: {
+  cohort?: string | null;
+  company?: string | null;
+}): Promise<PerformanceParticipationDto> {
+  const qs = new URLSearchParams();
+  if (opts?.cohort) qs.set('cohort', opts.cohort);
+  if (opts?.company) qs.set('company', opts.company);
+  const suffix = qs.toString() ? `?${qs.toString()}` : '';
+  return (await apiClient.get<PerformanceParticipationDto>(`/api/v1/me/readiness/scatter${suffix}`))
+    .data;
 }
