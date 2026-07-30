@@ -95,12 +95,21 @@ export function PracticePicker({
     };
   }, []);
   const singleScope = gating && !!accessMap?.singleScopeEnabled;
-  const topicLocked = (rootSlug: string, slug: string) =>
-    singleScope && !topicOwned(rootSlug, slug) && accessMap?.freeSubtopicSlugBySection?.[rootSlug] !== slug;
+  // Claim-on-first-use: a sub-topic only locks once ANOTHER sub-topic is already the
+  // claimed free one in its section (matches the server gate — an unclaimed section
+  // still serves the first sub-topic the student opens). Same for the free company.
+  const topicLocked = (rootSlug: string, slug: string) => {
+    if (!singleScope || topicOwned(rootSlug, slug)) return false;
+    const claimed = accessMap?.freeSubtopicSlugBySection?.[rootSlug];
+    return !!claimed && claimed !== slug;
+  };
   // Under single-scope the whole-section drill is always locked (only one sub-topic is free).
   const sectionLocked = (slug: string) => singleScope && !sectionOwned(slug);
-  const companyLocked = (slug: string) =>
-    singleScope && !companyOwned(slug) && accessMap?.freeCompanySlug !== slug;
+  const companyLocked = (slug: string) => {
+    if (!singleScope || companyOwned(slug)) return false;
+    const claimed = accessMap?.freeCompanySlug;
+    return !!claimed && claimed !== slug;
+  };
 
   // Coding topics come from the coding bank (Judge0 problems), a separate system
   // from the MCQ taxonomy - fetched client-side (guaranteed auth token) like the
