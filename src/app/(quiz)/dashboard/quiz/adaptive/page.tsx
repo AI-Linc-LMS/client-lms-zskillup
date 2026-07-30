@@ -31,7 +31,7 @@ import { LivePointsMeter } from '@/components/adaptive/LivePointsMeter';
 import { PointsBurst } from '@/components/adaptive/PointsBurst';
 import { ConceptVideoModal } from '@/components/adaptive/ConceptVideoModal';
 import type { AdaptiveOption } from '@/lib/api/adaptive';
-import { getQuestionSolution, type QuestionSolutionDto } from '@/lib/api/question-solutions';
+import { getConceptVideo, getQuestionSolution, type QuestionSolutionDto } from '@/lib/api/question-solutions';
 import { MarkdownLite } from '@/components/ui/MarkdownLite';
 import { QuestionStem } from '@/components/practice/QuestionStem';
 import { MathText } from '@/components/practice/MathText';
@@ -128,6 +128,9 @@ function AdaptiveQuizRunner({
   // opening it never touches the selected answer, timer, or adaptive flow, and it
   // never fetches the attempt-gated solution (no answer leak before submitting).
   const [conceptOpen, setConceptOpen] = useState(false);
+  // The topic concept video for the current question (answer-safe — no solution text),
+  // so the modal can play it before or after submitting. Null = "coming soon".
+  const [conceptVideoUrl, setConceptVideoUrl] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
   const [elapsed, setElapsed] = useState(0);
 
@@ -138,6 +141,14 @@ function AdaptiveQuizRunner({
       setSelected(null);
       setConfidence(null);
       setElapsed(0);
+      // Prefetch this question's topic concept video (answer-safe endpoint).
+      const qid = currentQuestion.questionId;
+      setConceptVideoUrl(null);
+      getConceptVideo(qid)
+        .then((r) => {
+          if (prevQuestionId.current === qid) setConceptVideoUrl(r.url);
+        })
+        .catch(() => {});
     }
   }, [currentQuestion]);
 
@@ -578,6 +589,7 @@ function AdaptiveQuizRunner({
             <ConceptVideoModal
               open={conceptOpen}
               onClose={() => setConceptOpen(false)}
+              videoUrl={conceptVideoUrl}
               topicLabel={prettySkill(q.targetSkill)}
             />
           </motion.div>
