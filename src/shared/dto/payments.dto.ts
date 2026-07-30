@@ -286,9 +286,14 @@ export interface AdminTransactionDto {
   userName: string | null;
   email: string | null;
   phone: string | null;
-  /** Purchased product: scope (PLATFORM/COMPANY/SECTION/TOPIC/null) + optional ref. */
+  /** Purchased product: scope (PLATFORM/COMPANY/SECTION/TOPIC/null) + optional ref.
+   *  Order-level; often null for multi-item carts — see `products` for the truth. */
   scopeType: string | null;
   scopeRef: string | null;
+  /** The exact line items purchased (an order is a cart). Each is what was bought:
+   *  e.g. {PLATFORM}, {COMPANY, infosys}, {TOPIC, …blood-relations}. Falls back to
+   *  the order-level scope when there are no line items. */
+  products: Array<{ scopeType: string; scopeRef: string | null }>;
   tier: string | null;
   period: string | null;
   amountCents: number;
