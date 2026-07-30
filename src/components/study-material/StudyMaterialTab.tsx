@@ -52,6 +52,8 @@ export function StudyMaterialTab({
   const [openTopics, setOpenTopics] = useState<Set<string>>(new Set());
   const [playing, setPlaying] = useState<{ topicId: string; index: number } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  // "Show only my content" — hide the modules the student hasn't unlocked (Phase-8).
+  const [onlyMine, setOnlyMine] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -160,9 +162,48 @@ export function StudyMaterialTab({
   }
 
   const sectionIndex = data.sections.findIndex((s) => s.id === section.id);
+  // Paywall (Phase-8): whether anything here is locked behind a subscription, and
+  // the current section's topics filtered by the "Show only my content" toggle.
+  const anyPaywallLocked = data.sections.some((s) => s.topics.some((t) => t.paywallLocked));
+  const showOnlyMineToggle = !!data.accessLocked || anyPaywallLocked;
+  const visibleTopics = onlyMine ? section.topics.filter((t) => !t.paywallLocked) : section.topics;
 
   return (
     <div>
+      {/* Paywall access banner + owner-only filter (Phase-8) */}
+      {showOnlyMineToggle ? (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-orange/25 bg-gradient-to-r from-orange/5 to-amber-50/60 px-4 py-3">
+          <p className="flex items-center gap-2 text-xs font-semibold text-navy">
+            <Lock className="size-3.5 shrink-0 text-orange" />
+            {data.accessLocked
+              ? 'Some modules need a subscription. Unlock them to access all study material.'
+              : 'You own part of this — use the toggle to focus on your content.'}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setOnlyMine((v) => !v)}
+              aria-pressed={onlyMine}
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-bold transition',
+                onlyMine
+                  ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+                  : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300',
+              )}
+            >
+              {onlyMine ? 'Showing my content' : 'Show only my content'}
+            </button>
+            {data.accessLocked ? (
+              <Link
+                href="/shop"
+                className="inline-flex items-center gap-1.5 rounded-full bg-navy px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-navy/90"
+              >
+                Unlock
+              </Link>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
       {/* Overall progress banner */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
         <div className="flex items-center gap-2.5">
@@ -239,22 +280,25 @@ export function StudyMaterialTab({
           </div>
 
           <div className="space-y-2.5">
-            {section.topics.map((t, ti) => {
+            {visibleTopics.map((t, ti) => {
               // A locked module never opens - its items are not rendered at all, so there is
               // nothing to click through to. The server rejects completing them anyway; this
-              // is the visible half of the same rule.
-              const open = openTopics.has(t.id) && !t.locked;
+              // is the visible half of the same rule. `locked` covers BOTH the sequential
+              // completion lock and the Phase-8 paywall lock; `paywall` is the latter only.
+              const paywall = !!t.paywallLocked && !t.locked;
+              const locked = t.locked || paywall;
+              const open = openTopics.has(t.id) && !locked;
               return (
                 <div
                   key={t.id}
                   className={cn(
                     'overflow-hidden rounded-2xl border',
-                    t.locked ? 'border-slate-200/70 bg-slate-50/40' : 'border-slate-200',
+                    locked ? 'border-slate-200/70 bg-slate-50/40' : 'border-slate-200',
                   )}
                 >
                   <button
                     type="button"
-                    disabled={t.locked}
+                    disabled={locked}
                     aria-expanded={open}
                     onClick={() =>
                       setOpenTopics((prev) => {
@@ -266,13 +310,13 @@ export function StudyMaterialTab({
                     }
                     className={cn(
                       'flex w-full items-center gap-3 px-4 py-3 text-left transition',
-                      t.locked
+                      locked
                         ? 'cursor-not-allowed bg-slate-50/60'
                         : 'bg-slate-50/60 hover:bg-slate-50',
                     )}
                   >
-                    {t.locked ? (
-                      <Lock className="size-4 shrink-0 text-slate-500" />
+                    {locked ? (
+                      <Lock className={cn('size-4 shrink-0', paywall ? 'text-orange' : 'text-slate-500')} />
                     ) : (
                       <ChevronDown
                         className={cn('size-4 shrink-0 text-slate-500 transition-transform', open && 'rotate-180')}
@@ -281,14 +325,19 @@ export function StudyMaterialTab({
                     <span
                       className={cn(
                         'flex-1 truncate text-sm font-bold',
-                        t.locked ? 'text-slate-500' : 'text-navy',
+                        locked ? 'text-slate-500' : 'text-navy',
                       )}
                     >
                       {sectionIndex + 1}.{ti + 1} {t.title}
                     </span>
-                    {t.locked ? (
-                      <span className="shrink-0 rounded-full bg-slate-200/70 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-600">
-                        Locked
+                    {locked ? (
+                      <span
+                        className={cn(
+                          'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide',
+                          paywall ? 'bg-orange/10 text-orange' : 'bg-slate-200/70 text-slate-600',
+                        )}
+                      >
+                        {paywall ? 'Subscription' : 'Locked'}
                       </span>
                     ) : (
                       <>
@@ -300,12 +349,25 @@ export function StudyMaterialTab({
                     )}
                   </button>
 
-                  {t.locked && (
+                  {t.locked ? (
                     <p className="flex items-center gap-1.5 border-t border-slate-200/70 px-4 py-2.5 text-xs text-slate-600">
                       <Lock className="size-3 shrink-0" />
                       {t.lockedReason ?? 'Complete the previous module to unlock this module.'}
                     </p>
-                  )}
+                  ) : paywall ? (
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-orange/20 bg-orange/[0.04] px-4 py-2.5">
+                      <p className="flex items-center gap-1.5 text-xs font-medium text-slate-700">
+                        <Lock className="size-3 shrink-0 text-orange" />
+                        This module needs a subscription.
+                      </p>
+                      <Link
+                        href="/shop"
+                        className="inline-flex items-center gap-1 rounded-full bg-orange px-3 py-1 text-[11px] font-bold text-[#171717] transition hover:brightness-105"
+                      >
+                        Unlock
+                      </Link>
+                    </div>
+                  ) : null}
 
                   <AnimatePresence initial={false}>
                     {open && (

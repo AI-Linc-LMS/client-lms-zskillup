@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Brain, CalendarClock, Clock, ShieldCheck, Sparkles, Trophy, Video } from 'lucide-react';
+import { ArrowRight, Brain, CalendarClock, Clock, Lock, ShieldCheck, Sparkles, Trophy, Video } from 'lucide-react';
 import type { HubContent } from '@/lib/hub-data';
 import { getCompanyScheduledAssessments, type ApiScheduledAssessment } from '@/lib/api/scheduling';
 
@@ -11,10 +11,13 @@ import { getCompanyScheduledAssessments, type ApiScheduledAssessment } from '@/l
 export function CompanyMockTab({
   content,
   gate,
+  locked = false,
 }: {
   content: HubContent;
   /** Company-hub free-tier gate: swallow "Start"/practice clicks into the upgrade modal. */
   gate?: (e: React.MouseEvent, what: string) => boolean;
+  /** Full Mock needs THIS company's subscription (or full platform) — show a lock. */
+  locked?: boolean;
 }) {
   const { slug, name } = content.company;
   const [scheduled, setScheduled] = useState<ApiScheduledAssessment[] | null>(null);
@@ -46,10 +49,10 @@ export function CompanyMockTab({
         </p>
       </div>
 
-      {/* Adaptive mock quiz - standout violet card */}
+      {/* Adaptive mock quiz - standout violet card (locked without this company's sub) */}
       <Link
-        href="/mock-assessment"
-        onClick={(e) => gate?.(e, 'the Adaptive Mock Quiz')}
+        href={locked ? '/shop' : '/mock-assessment'}
+        onClick={(e) => !locked && gate?.(e, 'the Adaptive Mock Quiz')}
         className="group relative flex items-center justify-between gap-3 overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_-30px_rgba(124,58,237,0.22)] transition-shadow hover:shadow-[0_24px_60px_-28px_rgba(124,58,237,0.35)] sm:gap-4 sm:p-6"
       >
         <div
@@ -66,12 +69,25 @@ export function CompanyMockTab({
               <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-violet-600 ring-1 ring-inset ring-violet-100">
                 <Sparkles className="size-3" /> AI
               </span>
+              {locked ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-orange">
+                  <Lock className="size-3" /> Subscription
+                </span>
+              ) : null}
             </p>
-            <p className="mt-0.5 text-sm text-slate-600">AI-evaluated, non-proctored practice that adapts to you.</p>
+            <p className="mt-0.5 text-sm text-slate-600">
+              {locked
+                ? `Unlock with a ${name} subscription or full platform access.`
+                : 'AI-evaluated, non-proctored practice that adapts to you.'}
+            </p>
           </div>
         </div>
         <span className="relative flex shrink-0 items-center gap-1 text-sm font-extrabold text-violet-600">
-          Practice <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+          {locked ? (
+            <>Unlock <Lock className="size-3.5" /></>
+          ) : (
+            <>Practice <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" /></>
+          )}
         </span>
       </Link>
 

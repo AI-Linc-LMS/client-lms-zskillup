@@ -34,6 +34,8 @@ import { CompanyMockTab as MockTab } from './CompanyMockTab';
 import { StudyMaterialTab } from '@/components/study-material/StudyMaterialTab';
 import { CodingProblemsList } from '@/components/coding/CodingProblemsList';
 import { useUpgradeGate } from '@/hooks/useUpgradeGate';
+import { useMySubscription } from '@/hooks/useMySubscription';
+import { EntitlementScope } from '@/shared/enums';
 import { UpgradeModal } from '@/components/billing/UpgradeModal';
 
 const TAB_ICONS: Record<HubTab, typeof BookOpen> = {
@@ -159,6 +161,13 @@ export function CompanyHub({ content }: { content: HubContent }) {
   // assessment) raises the upgrade modal. Inert for entitled users / while the
   // paywall is off.
   const upgrade = useUpgradeGate();
+  // Full Mock is gated to THIS company's subscription (or full platform). Inert while
+  // the paywall is off / for entitled users.
+  const { hasPlatform, active, paywallEnabled } = useMySubscription();
+  const ownsThisCompany =
+    hasPlatform ||
+    active.some((e) => e.scopeType === EntitlementScope.COMPANY && e.scopeRef === content.company.slug);
+  const mockLocked = paywallEnabled && !ownsThisCompany;
   const urlTab = searchParams.get('tab');
   const [tab, setTab] = useState<HubTab>(
     urlTab && (HUB_TABS as readonly string[]).includes(urlTab) ? (urlTab as HubTab) : 'Overview',
@@ -248,6 +257,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
               <CompanyPrepPanel
                 companySlug={content.company.slug}
                 companyName={content.company.name}
+                gate={upgrade.guard}
               />
             )}
             {tab === 'Coding' && (
@@ -265,7 +275,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
                 <CodingProblemsList company={content.company.slug} />
               </div>
             )}
-            {tab === 'Full Mock Assessment' && <MockTab content={content} />}
+            {tab === 'Full Mock Assessment' && <MockTab content={content} locked={mockLocked} />}
           </motion.div>
         </div>
 
