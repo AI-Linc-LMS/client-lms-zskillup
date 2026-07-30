@@ -26,6 +26,13 @@ export interface StudyMaterialItemDto {
   quizQuestionCount: number | null;
   isFree: boolean;
   done: boolean;
+  /** VIDEO watch state (absent for non-video / never-watched). Drives resume, the
+   *  live progress bar, and the first-attempt seek lock. */
+  positionSeconds?: number;
+  /** Furthest second ever reached — the seek ceiling until the video is completed once. */
+  maxWatchedSeconds?: number;
+  /** Player-reported duration in seconds (0/absent until known). */
+  durationSeconds?: number;
 }
 
 export interface StudyMaterialTopicDto {
@@ -92,6 +99,15 @@ export interface StudyMaterialProgressResultDto {
   topicProgressPct: number;
   sectionProgressPct: number;
   overallProgressPct: number;
+}
+
+/** Result of a watch-progress ping. `completed` flips true the moment the watch
+ *  threshold is first crossed → the client refetches the tree to reflect the new
+ *  completion (and, task 2, the now-unlocked seek/speed controls). */
+export interface WatchSaveResultDto {
+  completed: boolean;
+  /** Furthest second reached, echoed back so the client's seek ceiling stays in sync. */
+  maxWatchedSeconds: number;
 }
 
 // ── Admin (authoring) — includes unpublished + raw editable fields ──────────

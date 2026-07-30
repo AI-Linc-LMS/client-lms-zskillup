@@ -21,6 +21,7 @@ import {
   completeStudyMaterialItem,
   getSectionStudyMaterial,
   getStudyMaterial,
+  saveStudyMaterialWatch,
   type StudyMaterialDto,
   type StudyMaterialItemDto,
 } from '@/lib/api/study-material';
@@ -87,6 +88,24 @@ export function StudyMaterialTab({
     const i = videoItems.findIndex((v) => v.id === item.id);
     setPlaying({ topicId, index: Math.max(0, i) });
   }, []);
+
+  // Persist a Vimeo watch ping; when the server reports the item newly completed,
+  // resync the tree so progress + the checkmark (+ the now-unlocked controls) update.
+  const saveWatch = useCallback(
+    async (item: StudyMaterialItemDto, positionSeconds: number, durationSeconds: number): Promise<boolean> => {
+      try {
+        const res = await saveStudyMaterialWatch(scope, slug, item.id, positionSeconds, durationSeconds);
+        if (res.completed && !item.done) {
+          const fresh = await fetchTree(slug);
+          setData(fresh);
+        }
+        return res.completed;
+      } catch {
+        return false;
+      }
+    },
+    [scope, slug, fetchTree],
+  );
 
   const toggleItem = useCallback(
     async (item: StudyMaterialItemDto) => {
@@ -325,6 +344,7 @@ export function StudyMaterialTab({
         playlist={playlist}
         index={playing?.index ?? null}
         onIndex={(i) => setPlaying((p) => (p ? { ...p, index: i } : p))}
+        onSaveWatch={saveWatch}
         onToggleDone={(item) => toggleItem(item)}
         busy={playing != null && busy === playlist[playing.index]?.id}
         onClose={() => setPlaying(null)}
