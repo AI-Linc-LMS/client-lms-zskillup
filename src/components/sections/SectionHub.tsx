@@ -292,7 +292,7 @@ export function SectionHub({ section }: { section: SectionRoot }) {
               />
             )}
             {tab === 'Syllabus' && (
-              <SyllabusTab section={section} topicOwned={topicOwned} practiceHref={practiceHref} />
+              <SyllabusTab section={section} topicOwned={topicOwned} />
             )}
             {tab === 'Study Material' && (
               <StudyMaterialTab slug={section.slug} scope="section" gate={upgrade.guard} />
@@ -824,11 +824,9 @@ function OverviewTab({
 function SyllabusTab({
   section,
   topicOwned,
-  practiceHref,
 }: {
   section: SectionRoot;
   topicOwned: (slug: string) => boolean;
-  practiceHref: (slug: string) => string;
 }) {
   return (
     <Reveal>
@@ -836,8 +834,8 @@ function SyllabusTab({
         <SectionLabel icon={ClipboardList}>Syllabus</SectionLabel>
         <h2 className="mt-3 text-lg font-extrabold tracking-tight text-navy sm:text-xl">{section.name} syllabus</h2>
         <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">
-          Everything this section covers, grouped by topic. Unlocked topics are marked; the rest stay
-          practiceable with your free allowance.
+          Everything this section covers, grouped by topic. Unlocked topics are marked. Head to the
+          Practice tab to start drilling.
         </p>
 
         <Stagger className="mt-5 space-y-3">
@@ -866,14 +864,7 @@ function SyllabusTab({
                             <span className="inline-flex shrink-0 items-center gap-1 text-[11px] font-bold text-emerald-600">
                               <Check className="size-3" /> Unlocked
                             </span>
-                          ) : (
-                            <Link
-                              href={practiceHref(s.slug)}
-                              className="shrink-0 text-[11px] font-bold text-orange hover:text-[#d9610f]"
-                            >
-                              Practise →
-                            </Link>
-                          )}
+                          ) : null}
                         </li>
                       );
                     })}

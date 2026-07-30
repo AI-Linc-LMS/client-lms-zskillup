@@ -10,8 +10,10 @@ import { useMySubscription } from '@/hooks/useMySubscription';
  * everyone was misleading - premium keeps unlimited, free sees the real allowance.
  */
 export function MockAllowanceChip() {
-  const { planStatus } = useMySubscription(true);
-  const isPremium = planStatus !== 'none';
+  // Mock access is gated on FULL-PLATFORM or COMPANY entitlement (careerToolsEntitled),
+  // NOT on owning any scope — a Topic/Section-only owner is still on the 1-free meter.
+  const { careerToolsEntitled } = useMySubscription(true);
+  const isPremium = careerToolsEntitled;
   const Icon = isPremium ? Brain : Crown;
   const text = isPremium ? 'Unlimited attempts' : '1 free mock, then upgrade';
   return (
