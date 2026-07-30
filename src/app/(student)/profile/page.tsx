@@ -194,6 +194,13 @@ export default function ProfilePage() {
   const [v, setV] = useState<Values>(EMPTY);
   const [baseline, setBaseline] = useState<string>(snap(EMPTY));
   const set = <K extends keyof Values>(k: K, val: Values[K]) => setV((p) => ({ ...p, [k]: val }));
+  // Course "Other" escape hatch: when the student's degree isn't in the list they
+  // pick "Other" and type it in a blank input. We NEVER store the literal word
+  // "Other" — the custom input binds straight to `course`. A stored course that
+  // isn't a listed option is treated as an already-entered custom value.
+  const [courseOther, setCourseOther] = useState(false);
+  const courseListed = COURSE_OPTIONS.includes(v.course);
+  const showCourseOther = courseOther || (!!v.course && !courseListed);
 
   // ── Résumé (the full ATS record, shared with the Resume Builder) ─────────────
   // Lifted onto the page so the ONE "Save profile" bar persists it alongside the
@@ -541,19 +548,36 @@ export default function ProfilePage() {
           <SectionCard data-tour="profile:academic" icon={GraduationCap} title="Education" subtitle="Your degree and college — powers your college leaderboard and your resume.">
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Course / degree" required done={!!v.course.trim()}>
-                <input
-                  value={v.course}
-                  onChange={(e) => set('course', e.target.value)}
-                  placeholder="e.g. B.Tech CSE"
-                  list="course-options"
+                <select
+                  value={showCourseOther ? '__OTHER__' : v.course}
+                  onChange={(e) => {
+                    if (e.target.value === '__OTHER__') {
+                      // Reveal a BLANK input — never pre-fill the literal word "Other".
+                      setCourseOther(true);
+                      set('course', '');
+                    } else {
+                      setCourseOther(false);
+                      set('course', e.target.value);
+                    }
+                  }}
                   className={inputCls}
-                  autoComplete="off"
-                />
-                <datalist id="course-options">
+                >
+                  <option value="">Select</option>
                   {COURSES.map((c) => (
-                    <option key={c} value={c} />
+                    <option key={c} value={c}>{c}</option>
                   ))}
-                </datalist>
+                  <option value="__OTHER__">Other</option>
+                </select>
+                {showCourseOther ? (
+                  <input
+                    value={v.course}
+                    onChange={(e) => set('course', e.target.value)}
+                    placeholder="Enter your course / degree"
+                    className={cn(inputCls, 'mt-2')}
+                    autoComplete="off"
+                    aria-label="Custom course or degree"
+                  />
+                ) : null}
               </Field>
               <Field label="Year of study" required done={!!v.yearOfStudy}>
                 <select value={v.yearOfStudy} onChange={(e) => set('yearOfStudy', e.target.value)} className={inputCls}>
