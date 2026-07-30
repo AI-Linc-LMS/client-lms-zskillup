@@ -138,11 +138,12 @@ export default function LeaderboardPage() {
   const scopeLabel =
     scope === 'college' ? 'College Leaderboard' : scope === 'company' ? 'Company Leaderboard' : 'National Leaderboard';
 
-  // B2C learners (no college on the account) don't get the "My College" or "City"
-  // scopes — those only make sense inside a college cohort. Hidden until `me` loads
-  // so a B2B student's tabs appear (rather than college/city flashing then vanishing).
-  const hasCollege = !!me?.collegeId;
-  const visibleTabs = SCOPE_TABS.filter((t) => hasCollege || (t.key !== 'college' && t.key !== 'city'));
+  // Only MANAGED-college (B2B) students get the "My College" / "City" scopes —
+  // gate on cohort membership, NOT collegeId: a B2C learner who merely self-selected
+  // a college at signup has a collegeId but no cohort, and a college/city board is
+  // meaningless for them. Hidden until `me` loads so a B2B student's tabs don't flash.
+  const isB2b = !!me?.cohortId;
+  const visibleTabs = SCOPE_TABS.filter((t) => isB2b || (t.key !== 'college' && t.key !== 'city'));
   const visibleRows = showAll ? rest : rest.slice(0, 7);
 
   return (
