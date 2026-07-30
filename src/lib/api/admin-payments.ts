@@ -1,5 +1,6 @@
 import { apiClient } from './client';
 import type {
+  AdminTransactionsPageDto,
   EntitlementDto,
   GrantEntitlementDto,
   GrantedEntitlementDto,
@@ -44,4 +45,19 @@ export async function grantEntitlement(dto: GrantEntitlementDto): Promise<Entitl
 
 export async function revokeEntitlement(id: string): Promise<EntitlementDto> {
   return (await apiClient.post<EntitlementDto>(`/api/v1/admin/entitlements/${id}/revoke`, {})).data;
+}
+
+// ── Transactions ledger ────────────────────────────────────────────────────
+/** Paginated transactions: payment + buyer identity + purchased product + validity. */
+export async function listAdminTransactions(opts: {
+  limit?: number;
+  offset?: number;
+  status?: string;
+} = {}): Promise<AdminTransactionsPageDto> {
+  const p = new URLSearchParams();
+  if (opts.limit != null) p.set('limit', String(opts.limit));
+  if (opts.offset != null) p.set('offset', String(opts.offset));
+  if (opts.status) p.set('status', opts.status);
+  const qs = p.toString();
+  return (await apiClient.get<AdminTransactionsPageDto>(`/api/v1/admin/transactions${qs ? `?${qs}` : ''}`)).data;
 }

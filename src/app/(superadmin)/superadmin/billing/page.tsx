@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
+import { TransactionsLedger } from '@/components/admin/TransactionsLedger';
 import { formatPrice } from '@/lib/api/subscriptions';
 import { getFinancialsPayments } from '@/lib/api/financials';
 import {
@@ -45,6 +46,7 @@ export default function SuperAdminBillingPage() {
         description="Real payments, configurable pricing, and student access."
       />
       <PaymentsSection />
+      <TransactionsLedger />
       <PricingSection />
       <EntitlementsSection />
     </div>
