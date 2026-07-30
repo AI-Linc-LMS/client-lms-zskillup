@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Building2, Globe2, ImagePlus, Loader2, UserRound, X } from 'lucide-react';
+import { Building2, Globe2, Loader2, UserRound, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { listAdminCompanies, type AdminCompanyRow } from '@/lib/api/admin';
@@ -12,7 +12,7 @@ import {
   LiveSessionAudience,
   type LiveSessionDto,
 } from '@/lib/api/live-sessions';
-import { uploadLiveSessionCover } from '@/lib/api/media';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 import { describeError } from '@/lib/api/errors';
 
 /** ISO → value for <input type="datetime-local"> (local time, minute precision). */
@@ -43,14 +43,12 @@ export function SessionComposer({
   const [companyId, setCompanyId] = useState('');
   const [companies, setCompanies] = useState<AdminCompanyRow[]>([]);
   const [coverImageUrl, setCoverImageUrl] = useState('');
-  const [uploadingCover, setUploadingCover] = useState(false);
   const [speakerName, setSpeakerName] = useState('');
   const [speakerRole, setSpeakerRole] = useState('');
   const [speakerCompany, setSpeakerCompany] = useState('');
   const [speakerBio, setSpeakerBio] = useState('');
   const [speakerAvatarUrl, setSpeakerAvatarUrl] = useState('');
   const [saving, setSaving] = useState(false);
-  const coverInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     listAdminCompanies().then(setCompanies).catch(() => {});
@@ -92,18 +90,6 @@ export function SessionComposer({
     }
   }, [open, editing]);
 
-  const onPickCover = async (file: File | undefined) => {
-    if (!file) return;
-    setUploadingCover(true);
-    try {
-      setCoverImageUrl(await uploadLiveSessionCover(file));
-    } catch (err) {
-      toast.error(describeError(err, 'Could not upload the cover image.'));
-    } finally {
-      setUploadingCover(false);
-      if (coverInputRef.current) coverInputRef.current.value = '';
-    }
-  };
 
   const submit = async () => {
     if (title.trim().length < 3) return toast.error('Add a title (min 3 chars).');
@@ -170,48 +156,7 @@ export function SessionComposer({
               </Field>
 
               <Field label="Cover image (optional — shown atop the student card)">
-                <div className="space-y-2">
-                  {coverImageUrl && (
-                    <div className="relative overflow-hidden rounded-lg border border-slate-200">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={coverImageUrl} alt="Cover preview" className="h-32 w-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => setCoverImageUrl('')}
-                        className="absolute right-2 top-2 rounded-full bg-slate-900/60 p-1 text-white transition-colors hover:bg-slate-900/80"
-                        aria-label="Remove cover image"
-                      >
-                        <X className="size-3.5" />
-                      </button>
-                    </div>
-                  )}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <input
-                      ref={coverInputRef}
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      className="hidden"
-                      onChange={(e) => onPickCover(e.target.files?.[0])}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => coverInputRef.current?.click()}
-                      disabled={uploadingCover}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-navy transition-colors hover:bg-slate-50 disabled:opacity-50"
-                    >
-                      {uploadingCover ? <Loader2 className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
-                      {coverImageUrl ? 'Replace image' : 'Upload image'}
-                    </button>
-                    <span className="text-xs text-slate-400">JPG / PNG / WebP · max 5 MB</span>
-                  </div>
-                  <input
-                    value={coverImageUrl}
-                    onChange={(e) => setCoverImageUrl(e.target.value)}
-                    maxLength={1000}
-                    placeholder="…or paste an image URL"
-                    className={input}
-                  />
-                </div>
+                <ImageUpload value={coverImageUrl} onChange={setCoverImageUrl} purpose="live-session-cover" />
               </Field>
 
               <Field label="Meeting link (Zoom / Google Meet)">
@@ -282,8 +227,13 @@ export function SessionComposer({
                 <Field label="Short bio">
                   <textarea value={speakerBio} onChange={(e) => setSpeakerBio(e.target.value)} maxLength={2000} rows={2} placeholder="One or two lines about the speaker" className={cn(input, 'resize-y')} />
                 </Field>
-                <Field label="Photo URL">
-                  <input value={speakerAvatarUrl} onChange={(e) => setSpeakerAvatarUrl(e.target.value)} maxLength={1000} placeholder="https://… headshot" className={input} />
+                <Field label="Photo">
+                  <ImageUpload
+                    value={speakerAvatarUrl}
+                    onChange={setSpeakerAvatarUrl}
+                    purpose="speaker-photo"
+                    urlPlaceholder="…or paste a headshot URL"
+                  />
                 </Field>
               </div>
             </div>

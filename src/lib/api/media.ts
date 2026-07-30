@@ -2,6 +2,7 @@ import { apiClient } from './client';
 import {
   ALLOWED_IMAGE_CONTENT_TYPES,
   type AllowedImageContentType,
+  type MediaUploadPurpose,
   type PresignUploadResultDto,
 } from '@/shared/dto/media.dto';
 
@@ -26,13 +27,10 @@ function assertImage(file: File): AllowedImageContentType {
  * public URL to store on the session. The raw PUT deliberately does NOT go
  * through apiClient (no auth cookies to S3) — it hits the presigned URL directly.
  */
-export async function uploadLiveSessionCover(file: File): Promise<string> {
+export async function uploadAdminImage(file: File, purpose: MediaUploadPurpose): Promise<string> {
   const contentType = assertImage(file);
   const { uploadUrl, publicUrl } = (
-    await apiClient.post<PresignUploadResultDto>(
-      '/api/v1/admin/media/live-session-cover/presign',
-      { contentType },
-    )
+    await apiClient.post<PresignUploadResultDto>('/api/v1/admin/media/presign', { contentType, purpose })
   ).data;
   const res = await fetch(uploadUrl, {
     method: 'PUT',
@@ -41,4 +39,9 @@ export async function uploadLiveSessionCover(file: File): Promise<string> {
   });
   if (!res.ok) throw new Error('Upload to storage failed. Please try again.');
   return publicUrl;
+}
+
+/** Live-session cover (kept for existing callers). */
+export function uploadLiveSessionCover(file: File): Promise<string> {
+  return uploadAdminImage(file, 'live-session-cover');
 }
