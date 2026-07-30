@@ -12,6 +12,7 @@ import { describeError } from '@/lib/api/errors';
 import { BadgeCheck, Loader2, Plus, Trash2, Upload, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MarkdownEditor } from '@/components/admin/MarkdownEditor';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 
 const inputCls =
   'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#ffc42d] focus:outline-none focus:ring-1 focus:ring-[#ffc42d]';
@@ -183,10 +184,15 @@ export function BlogsManager() {
           </span>
           <MarkdownEditor value={form.body} onChange={(v) => setForm((f) => ({ ...f, body: v }))} />
         </div>
-        <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">Cover image URL</span>
-          <input value={form.coverUrl} onChange={(e) => setForm({ ...form, coverUrl: e.target.value })} className={inputCls} />
-        </label>
+        <div className="block">
+          <span className="mb-1 block text-xs font-medium text-slate-600">Cover image</span>
+          <ImageUpload
+            value={form.coverUrl}
+            onChange={(url) => setForm((f) => ({ ...f, coverUrl: url }))}
+            purpose="blog-cover"
+            urlPlaceholder="…or paste an image URL"
+          />
+        </div>
         <label className="block">
           <span className="mb-1 block text-xs font-medium text-slate-600">Author</span>
           <input value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} className={inputCls} />

@@ -7,7 +7,7 @@
  * public URL on the owning record (e.g. a live-session cover). Credentials never
  * leave the backend; the browser only ever sees a scoped, expiring upload URL.
  */
-import { IsIn, IsString } from 'class-validator';
+import { IsIn, IsOptional, IsString } from 'class-validator';
 
 /** The image content-types we allow for admin cover uploads. */
 export const ALLOWED_IMAGE_CONTENT_TYPES = [
@@ -18,6 +18,12 @@ export const ALLOWED_IMAGE_CONTENT_TYPES = [
 
 export type AllowedImageContentType = (typeof ALLOWED_IMAGE_CONTENT_TYPES)[number];
 
+/** What the uploaded image is for — drives the S3 key prefix. All land under the
+ *  publicly-readable `live-sessions/` umbrella (the only prefix the bucket policy
+ *  exposes for public read). */
+export const MEDIA_UPLOAD_PURPOSES = ['live-session-cover', 'blog-cover', 'speaker-photo'] as const;
+export type MediaUploadPurpose = (typeof MEDIA_UPLOAD_PURPOSES)[number];
+
 // ── Request ─────────────────────────────────────────────────────────────────
 
 export class PresignUploadDto {
@@ -25,6 +31,11 @@ export class PresignUploadDto {
   @IsString()
   @IsIn(ALLOWED_IMAGE_CONTENT_TYPES as unknown as string[])
   contentType!: AllowedImageContentType;
+
+  /** Upload purpose (default: live-session-cover). Determines the object prefix. */
+  @IsOptional()
+  @IsIn(MEDIA_UPLOAD_PURPOSES as unknown as string[])
+  purpose?: MediaUploadPurpose;
 }
 
 // ── Response ────────────────────────────────────────────────────────────────
