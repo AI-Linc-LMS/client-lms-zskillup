@@ -5,7 +5,7 @@ import { StudyMaterialAdmin } from '@/components/superadmin/StudyMaterialAdmin';
 
 /**
  * Admin: per-company Study Material editor. Author a company's Section → Topic →
- * Item tree (concept videos via Vimeo / Google Drive / YouTube links, topic
+ * Item tree (videos via Vimeo / YouTube links, topic
  * quizzes, articles). Everything published here shows on the student side instantly.
  */
 export default function AdminStudyMaterialPage() {
@@ -16,7 +16,7 @@ export default function AdminStudyMaterialPage() {
         icon={FileText}
         eyebrow="Platform Admin"
         title="Study Material"
-        description="Pick a company, then build its study material - sections, topics, and video / quiz / article items. Paste a Vimeo, Google Drive or YouTube link for videos; changes appear on the student hub instantly."
+        description="Pick a company, then build its study material - sections, topics, and video / quiz / article items. Paste a Vimeo (or YouTube) link for videos; changes appear on the student hub instantly."
       />
       <StudyMaterialAdmin />
     </div>

@@ -376,7 +376,7 @@ function ItemForm({
 
           {kind !== 'QUIZ' ? (
             <>
-              <Field label={kind === 'VIDEO' ? 'Video link (Vimeo / Google Drive / YouTube)' : 'Article link'}>
+              <Field label={kind === 'VIDEO' ? 'Video link (Vimeo or YouTube)' : 'Article link'}>
                 <div className="flex flex-col gap-2 sm:flex-row">
                   <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Paste the share link - provider is detected automatically" className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
                   {kind === 'VIDEO' && (
