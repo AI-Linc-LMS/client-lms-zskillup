@@ -268,3 +268,43 @@ export interface PracticeAccessMapDto {
   /** The single free company slug (null = none claimed / no locks). */
   freeCompanySlug: string | null;
 }
+
+/**
+ * One row of the Super-Admin transactions ledger (Billing → Transactions). Joins a
+ * captured/failed/pending payment to its order, the buyer's identity, the purchased
+ * product scope, and the resulting access validity — everything needed to verify a
+ * transaction or support a customer from one place.
+ */
+export interface AdminTransactionDto {
+  paymentId: string;
+  /** Gateway payment/transaction id (razorpay_payment_id); null if never captured. */
+  transactionId: string | null;
+  orderId: string;
+  /** Gateway order id (razorpay_order_id). */
+  gatewayOrderId: string | null;
+  userId: string | null;
+  userName: string | null;
+  email: string | null;
+  phone: string | null;
+  /** Purchased product: scope (PLATFORM/COMPANY/SECTION/TOPIC/null) + optional ref. */
+  scopeType: string | null;
+  scopeRef: string | null;
+  tier: string | null;
+  period: string | null;
+  amountCents: number;
+  currency: string;
+  /** Payment status (CAPTURED / FAILED / PENDING / …). */
+  status: string;
+  method: string | null;
+  /** ISO timestamp the payment was captured/created. */
+  capturedAt: string | null;
+  /** Access validity granted by this order (entitlement expiry ISO; null = perpetual/none). */
+  validUntil: string | null;
+}
+
+export interface AdminTransactionsPageDto {
+  items: AdminTransactionDto[];
+  total: number;
+  limit: number;
+  offset: number;
+}
