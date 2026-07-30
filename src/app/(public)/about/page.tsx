@@ -11,6 +11,15 @@ import {
   Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { seoMetadataFor } from '@/lib/seo/page-metadata';
+
+export function generateMetadata() {
+  return seoMetadataFor('/about', {
+    title: 'About · ZSkillup',
+    description:
+      'Why ZSkillup exists — real recruiter patterns, honest gamification, and tools built for placement cells.',
+  });
+}
 
 /**
  * Public /about page - Sprint 1 deliverable (Implementation Plan §7).

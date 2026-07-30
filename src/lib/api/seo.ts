@@ -2,6 +2,8 @@ import { apiClient } from './client';
 
 export interface SeoMetadata {
   key: string;
+  /** Friendly page name for the admin list (e.g. 'About'). */
+  label?: string;
   title: string | null;
   description: string | null;
   keywords: string | null;

@@ -7,13 +7,16 @@ import ShinyText from '@/components/reactbits/ShinyText';
 import CountUp from '@/components/reactbits/CountUp';
 import SpotlightCard from '@/components/reactbits/SpotlightCard';
 import { readingMinutes } from '@/components/blog/BlogContent';
+import { seoMetadataFor } from '@/lib/seo/page-metadata';
 
 export const revalidate = 300;
 
-export const metadata = {
-  title: 'Blog · ZSkillup',
-  description: 'Placement prep insights, company-wise guides, coding patterns, and success stories.',
-};
+export function generateMetadata() {
+  return seoMetadataFor('/blog', {
+    title: 'Blog · ZSkillup',
+    description: 'Placement prep insights, company-wise guides, coding patterns, and success stories.',
+  });
+}
 
 const HERO_TOPICS = ['DSA', 'aptitude', 'TCS NQT', 'interviews', 'resumes', 'company assessments'];
 
