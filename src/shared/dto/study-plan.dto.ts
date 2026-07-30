@@ -7,7 +7,7 @@
  */
 
 export type StudyPhase = 'foundation' | 'practice' | 'interview';
-export type StudyTaskKind = 'learn' | 'practice' | 'quiz' | 'mock' | 'coding' | 'review';
+export type StudyTaskKind = 'learn' | 'video' | 'practice' | 'quiz' | 'mock' | 'coding' | 'review';
 /** locked = not yet unlocked; available = unlocked past day (catch-up); today =
  *  the current day; completed = every task done. */
 export type StudyDayStatus = 'locked' | 'available' | 'today' | 'completed';

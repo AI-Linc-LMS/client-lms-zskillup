@@ -2,6 +2,7 @@ import {
   BookOpen,
   ClipboardCheck,
   Code2,
+  PlayCircle,
   RefreshCw,
   Target,
   Timer,
@@ -46,6 +47,7 @@ export const PHASE_META: Record<
 /** Per-task-kind icon + colour. */
 export const TASK_META: Record<StudyTaskKind, { icon: LucideIcon; label: string; text: string; bg: string }> = {
   learn: { icon: BookOpen, label: 'Learn', text: 'text-indigo-600', bg: 'bg-indigo-50' },
+  video: { icon: PlayCircle, label: 'Concept video', text: 'text-violet-600', bg: 'bg-violet-50' },
   practice: { icon: Target, label: 'Practice', text: 'text-[#f5b400]', bg: 'bg-orange-50' },
   quiz: { icon: Timer, label: 'Quiz', text: 'text-amber-600', bg: 'bg-amber-50' },
   mock: { icon: ClipboardCheck, label: 'Mock', text: 'text-violet-600', bg: 'bg-violet-50' },
