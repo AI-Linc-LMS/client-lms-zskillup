@@ -7,6 +7,7 @@ import { MobileNav } from './MobileNav';
 import { AvatarMenu } from './AvatarMenu';
 import { ExploreMenu } from './ExploreMenu';
 import { RecommendedMenu } from './RecommendedMenu';
+import { TodaysTipLauncher } from '@/components/student/TodaysTipLauncher';
 import { StreakPill } from './StreakPill';
 import { TopBarSearch } from './TopBarSearch';
 import { NotificationsBell } from './NotificationsBell';
@@ -60,6 +61,7 @@ export function TopBar() {
             {/* "Companies" removed - the Explore menu already surfaces company hubs. */}
             <ExploreMenu />
             <RecommendedMenu />
+            <TodaysTipLauncher />
           </nav>
 
           <TopBarSearch />

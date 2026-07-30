@@ -3,7 +3,6 @@ import { AiBriefingHero } from '@/components/student/AiBriefingHero';
 import { LiveAssessmentBanner } from '@/components/student/LiveAssessmentBanner';
 import { ProfileCompletionBanner } from '@/components/student/ProfileCompletionBanner';
 import { AuroraStats } from '@/components/student/AuroraStats';
-import { TodaysTip } from '@/components/student/TodaysTip';
 import { QuickAptitude } from '@/components/student/QuickAptitude';
 import { DailyChallenge } from '@/components/student/DailyChallenge';
 import { CodingPractice } from '@/components/student/CodingPractice';
@@ -57,7 +56,6 @@ export default function StudentDashboardPage() {
               cards read as columns, not one long horizontal stack. */}
           <div className="grid items-start gap-6 lg:grid-cols-2">
             <div className="min-w-0 space-y-6">
-              <TodaysTip />
               <Reveal>
                 <QuickAptitude />
               </Reveal>
