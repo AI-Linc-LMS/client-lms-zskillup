@@ -29,6 +29,7 @@ import { useAdaptiveSession } from '@/hooks/useAdaptiveSession';
 import { PaywallCard } from '@/components/billing/PaywallCard';
 import { LivePointsMeter } from '@/components/adaptive/LivePointsMeter';
 import { PointsBurst } from '@/components/adaptive/PointsBurst';
+import { ConceptVideoModal } from '@/components/adaptive/ConceptVideoModal';
 import type { AdaptiveOption } from '@/lib/api/adaptive';
 import { getQuestionSolution, type QuestionSolutionDto } from '@/lib/api/question-solutions';
 import { MarkdownLite } from '@/components/ui/MarkdownLite';
@@ -123,6 +124,10 @@ function AdaptiveQuizRunner({
   } = useAdaptiveSession({ mockTestId: mockId, topicSlug, companySlug, asWishTopic, requizSourceId, year });
 
   const [selected, setSelected] = useState<string | null>(null);
+  // Concept-video overlay — opened from the CTA beside Submit. A pure overlay, so
+  // opening it never touches the selected answer, timer, or adaptive flow, and it
+  // never fetches the attempt-gated solution (no answer leak before submitting).
+  const [conceptOpen, setConceptOpen] = useState(false);
   const [confidence, setConfidence] = useState<number | null>(null);
   const [elapsed, setElapsed] = useState(0);
 
@@ -537,7 +542,18 @@ function AdaptiveQuizRunner({
             </div>
             )}
 
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex items-center justify-between gap-3">
+              {/* Concept video — always available (before and after submitting) so
+                  students can revise the concept just-in-time. Opens an overlay;
+                  never mutates the answer, timer, or adaptive flow. */}
+              <button
+                type="button"
+                onClick={() => setConceptOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-navy transition-colors hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/40"
+              >
+                <PlayCircle className="size-4" /> Concept video
+              </button>
+
               {revealed ? (
                 <button
                   onClick={handleAdvance}
@@ -558,6 +574,12 @@ function AdaptiveQuizRunner({
                 </button>
               )}
             </div>
+
+            <ConceptVideoModal
+              open={conceptOpen}
+              onClose={() => setConceptOpen(false)}
+              topicLabel={prettySkill(q.targetSkill)}
+            />
           </motion.div>
 
           {/* RIGHT - coaching sidecar */}
@@ -658,7 +680,7 @@ function adaptNote(correct: boolean, speed: 'fast' | 'on_par' | 'slow'): string 
   return 'We ease the difficulty on the next question.';
 }
 
-type SolTab = 'detailed' | 'shortcut' | 'video';
+type SolTab = 'detailed' | 'shortcut';
 
 /** The instant inline solution shown below the question the moment you answer.
  *  Three sections: Detailed (bank/AI), Shortcut (AI, platform-cached), and a
@@ -696,10 +718,11 @@ function SolutionReveal({
   }, [questionId]);
 
   const detailed = sol?.detailed || result.explanation || '';
+  // Concept Video moved OUT of this post-submit panel into a CTA beside Submit
+  // (available before and after answering) — see ConceptVideoModal.
   const TABS: { key: SolTab; label: string; icon: typeof BookOpen }[] = [
     { key: 'detailed', label: 'Detailed', icon: BookOpen },
     { key: 'shortcut', label: 'Shortcut', icon: Zap },
-    { key: 'video', label: 'Concept Video', icon: PlayCircle },
   ];
 
   return (
@@ -783,20 +806,6 @@ function SolutionReveal({
               No quicker route than the detailed method for this one - solve it step by step.
             </p>
           ))}
-
-        {/* Concept video - coming soon */}
-        {tab === 'video' && (
-          <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-slate-200 bg-white/60 py-7 text-center">
-            <span className="grid size-11 place-items-center rounded-full bg-navy/5 text-navy">
-              <PlayCircle className="size-6" />
-            </span>
-            <p className="text-sm font-bold text-navy">Concept video - coming soon</p>
-            <p className="max-w-xs text-xs text-slate-600">
-              We&apos;re adding short concept videos for each topic. You&apos;ll be able to watch the idea behind this
-              question right here.
-            </p>
-          </div>
-        )}
 
         <p className="mt-3 flex items-center gap-1.5 border-t border-slate-100 pt-2.5 text-[11.5px] font-medium text-slate-600">
           <TrendingUp className="size-3.5 shrink-0 text-slate-500" />
