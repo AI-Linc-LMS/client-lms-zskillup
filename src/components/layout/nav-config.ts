@@ -12,6 +12,7 @@ import {
   Crown,
   FileCheck2,
   FileText,
+  Film,
   GraduationCap,
   MonitorPlay,
   LayoutDashboard,
@@ -190,6 +191,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
       { label: 'Challenges', href: '/superadmin/challenges', icon: Trophy },
       { label: 'Courses', href: '/superadmin/courses', icon: GraduationCap },
       { label: 'Study Material', href: '/superadmin/study-material', icon: MonitorPlay },
+      { label: 'Concept Videos', href: '/superadmin/concept-videos', icon: Film },
     ],
   },
   {
