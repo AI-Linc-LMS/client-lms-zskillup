@@ -18,11 +18,11 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { SkillMasteryHeatmap } from '@/components/adaptive/SkillMasteryHeatmap';
+import { SkillMasterySection } from '@/components/adaptive/SkillMasterySection';
 import { MisconceptionCallout } from '@/components/adaptive/MisconceptionCallout';
 import { RemediationPath } from '@/components/adaptive/RemediationPath';
 import { PerQuestionBreakdown } from '@/components/adaptive/PerQuestionBreakdown';
-import { AccuracyDonut, MagicLoader, SkillRadar, Typewriter } from '@/components/adaptive/ResultsVisuals';
+import { AccuracyDonut, MagicLoader, Typewriter } from '@/components/adaptive/ResultsVisuals';
 import {
   getAdaptiveResults,
   getNarrationSection,
@@ -210,21 +210,9 @@ function AdaptiveResultsView({ sessionId }: { sessionId: string }) {
       {/* ── Single-scroll sections ───────────────────────────────────────── */}
       <div className="mx-auto max-w-5xl space-y-6 px-5 py-6 sm:px-6">
         <Section title="Skill mastery" icon={Brain}>
-          {results.skillMastery.length >= 3 ? (
-            <div className="mb-4 space-y-4">
-              {/* Skill radar - its own prominent card so every skill + score is
-                  clearly visible (full names, no truncation). */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-                <p className="mb-2 text-center text-[11px] font-bold uppercase tracking-widest text-slate-500">
-                  Skill radar
-                </p>
-                <SkillRadar skills={results.skillMastery} size={380} />
-              </div>
-              <SkillMasteryHeatmap skillMastery={results.skillMastery} />
-            </div>
-          ) : (
-            <SkillMasteryHeatmap skillMastery={results.skillMastery} />
-          )}
+          {/* Session skills by default, with a filter to view accuracy across every
+              practised section (not just the one drilled this session). */}
+          <SkillMasterySection sessionSkills={results.skillMastery} />
         </Section>
 
         <Section title="Your next 15 minutes" icon={TrendingUp}>
