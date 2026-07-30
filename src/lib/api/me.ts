@@ -73,6 +73,9 @@ export interface ApiMe {
   status: 'INVITED' | 'ACTIVE' | 'SUSPENDED';
   isEmailVerified: boolean;
   collegeId: string | null;
+  /** Managed cohort membership — the B2B signal (a B2C learner who self-selected a
+   *  college at signup has a collegeId but null cohortId). */
+  cohortId: string | null;
   studentProfile: ApiStudentProfile | null;
   avatarUrl?: string | null;
   /** Effective admin capability flags (SUPER_ADMIN → all; ADMIN → per-account;
