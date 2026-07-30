@@ -27,6 +27,26 @@ const PRESETS: { key: Preset; label: string }[] = [
   { key: 'custom', label: 'Custom' },
 ];
 
+/** Human label for a B2C purchase scope. `null` = legacy retail purchases made
+ *  before the scope taxonomy existed (full-access buys) — shown as "Other" rather
+ *  than the raw "null". */
+function scopeLabel(scope: string | null | undefined): string {
+  switch (scope) {
+    case 'PLATFORM':
+      return 'Full platform';
+    case 'COMPANY':
+      return 'Company';
+    case 'SECTION':
+      return 'Section';
+    case 'SUBTOPIC':
+      return 'Sub-topic';
+    case 'TOPIC':
+      return 'Topic';
+    default:
+      return 'Other';
+  }
+}
+
 /** Resolve a preset to an ISO {from,to}; undefined lets the backend default to month. */
 function resolveRange(preset: Preset, customFrom: string, customTo: string): { from?: string; to?: string } {
   const now = new Date();
@@ -148,12 +168,13 @@ export function FinancialsPaymentsBoard() {
                 <div className="space-y-3">
                   {data.rangeRevenueByScope.map((s) => (
                     <ProgressRow
-                      key={s.scope}
-                      label={`${s.scope} (${s.count})`}
+                      key={s.scope ?? 'other'}
+                      label={`${scopeLabel(s.scope)} (${s.count})`}
                       value={s.amountCents}
                       total={scopeMax}
                       color="#059669"
                       hint={formatPrice(s.amountCents, data.currency)}
+                      hintOnly
                     />
                   ))}
                 </div>
@@ -176,6 +197,7 @@ export function FinancialsPaymentsBoard() {
                       total={collegeMax}
                       color="#1e3a8a"
                       hint={formatPrice(c.amountCents, data.currency)}
+                      hintOnly
                     />
                   ))}
                 </div>

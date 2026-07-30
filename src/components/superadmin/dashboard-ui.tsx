@@ -262,12 +262,17 @@ export function ProgressRow({
   total,
   color = BRAND,
   hint,
+  hintOnly = false,
 }: {
   label: string;
   value: number;
   total: number;
   color?: string;
   hint?: string;
+  /** When true, show ONLY the hint (e.g. a formatted amount) — `value` still
+   *  drives the bar width but is not printed. Used for money rows where the raw
+   *  value is in cents and printing it (e.g. "7,900 ₹79") is confusing. */
+  hintOnly?: boolean;
 }) {
   const pct = total > 0 ? Math.round((value / total) * 100) : 0;
   return (
@@ -275,8 +280,14 @@ export function ProgressRow({
       <div className="mb-1.5 flex items-baseline justify-between">
         <span className="text-sm font-medium text-slate-600">{label}</span>
         <span className="text-xs text-slate-500">
-          <span className="font-bold text-navy">{value.toLocaleString()}</span>
-          {hint ? ` ${hint}` : ` / ${total.toLocaleString()}`}
+          {hintOnly && hint ? (
+            <span className="font-bold text-navy">{hint}</span>
+          ) : (
+            <>
+              <span className="font-bold text-navy">{value.toLocaleString()}</span>
+              {hint ? ` ${hint}` : ` / ${total.toLocaleString()}`}
+            </>
+          )}
         </span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-slate-100">

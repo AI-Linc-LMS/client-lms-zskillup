@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import {
   BadgeIndianRupee,
@@ -30,7 +30,7 @@ import {
 import type { FinancialsPaymentsDto } from '@/shared/dto/financials.dto';
 import type { EntitlementDto, GrantedEntitlementDto, PriceBookEntryDto } from '@/shared/dto/payments.dto';
 import { listAdminUsers, type AdminUserRow } from '@/lib/api/admin';
-import { BillingPeriod, EntitlementScope, EntitlementSource, EntitlementSubject } from '@/shared/enums';
+import { EntitlementScope, EntitlementSource, EntitlementSubject } from '@/shared/enums';
 import { cn } from '@/lib/utils';
 
 export default function SuperAdminBillingPage() {
@@ -637,13 +637,14 @@ function GrantForm({
 }
 
 /* ── Small presentational helpers ──────────────────────────────────────────── */
-function scopeName(scope: string): string {
+function scopeName(scope: string | null | undefined): string {
   switch (scope) {
     case EntitlementScope.PLATFORM: return 'Full platform';
     case EntitlementScope.SECTION: return 'Section';
     case EntitlementScope.TOPIC: return 'Topic';
     case EntitlementScope.COMPANY: return 'Company';
-    default: return scope;
+    // null = legacy retail purchases made before the scope taxonomy existed.
+    default: return scope || 'Other';
   }
 }
 
