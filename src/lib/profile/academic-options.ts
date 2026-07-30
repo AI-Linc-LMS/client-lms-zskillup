@@ -25,9 +25,11 @@ export const yearOfStudyLabel = (v: string): string =>
  *  through several ahead (expected graduation). Blank stays allowed. */
 export const PASSOUT_YEARS = Array.from({ length: 16 }, (_, i) => 2018 + i);
 
-/** Common degrees for the Course/Degree autocomplete (free text still allowed).
- *  No "Other" entry: the field is a free-text datalist, so picking a literal
- *  "Other" only forced the student to delete it before typing their real course. */
+/** Common degrees for the Course/Degree dropdown. There is no literal "Other"
+ *  option in THIS list — the UI adds an explicit "Other" choice that reveals a
+ *  BLANK custom input (see the profile editor), so the student's real course is
+ *  stored, never the word "Other". A stored course that isn't listed here is
+ *  treated as an already-entered custom value. */
 export const COURSE_OPTIONS = [
   'B.Tech', 'B.E.', 'B.Sc', 'BCA', 'B.Com', 'B.A', 'B.Arch', 'B.Pharm', 'BBA',
   'B.Tech CSE', 'B.Tech IT', 'B.Tech ECE', 'B.Tech EEE', 'B.Tech Mechanical', 'B.Tech Civil',
