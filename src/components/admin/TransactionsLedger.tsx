@@ -19,20 +19,36 @@ function inr(cents: number, currency = 'INR'): string {
   return `${currency === 'INR' ? '₹' : ''}${(cents / 100).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
 }
 
-function productLabel(t: AdminTransactionDto): string {
-  const scope =
-    t.scopeType === 'PLATFORM'
-      ? 'Full platform'
-      : t.scopeType === 'COMPANY'
-        ? 'Company'
-        : t.scopeType === 'SECTION'
-          ? 'Section'
-          : t.scopeType === 'SUBTOPIC'
-            ? 'Sub-topic'
-            : t.scopeType === 'TOPIC'
-              ? 'Topic'
-              : 'Other';
-  return t.scopeRef ? `${scope} · ${t.scopeRef}` : scope;
+function scopeName(scope: string): string {
+  return scope === 'PLATFORM'
+    ? 'Full platform'
+    : scope === 'COMPANY'
+      ? 'Company'
+      : scope === 'SECTION'
+        ? 'Section'
+        : scope === 'SUBTOPIC'
+          ? 'Sub-topic'
+          : scope === 'TOPIC'
+            ? 'Topic'
+            : 'Other';
+}
+
+/** "section-2-logical-reasoning--blood-relations" → "Blood Relations"; "infosys" → "Infosys". */
+function prettyRef(ref: string): string {
+  const last = ref.split('--').pop() ?? ref;
+  return last.replace(/-/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase());
+}
+
+/** One line item → "Company: Infosys" / "Full platform" / "Topic: Blood Relations". */
+function formatProduct(p: { scopeType: string; scopeRef: string | null }): string {
+  return p.scopeRef ? `${scopeName(p.scopeType)}: ${prettyRef(p.scopeRef)}` : scopeName(p.scopeType);
+}
+
+/** Compact label for the Product column (full list is in the expanded detail). */
+function productSummary(t: AdminTransactionDto): string {
+  if (!t.products.length) return t.scopeType ? formatProduct({ scopeType: t.scopeType, scopeRef: t.scopeRef }) : 'Other';
+  if (t.products.length === 1) return formatProduct(t.products[0]);
+  return `${t.products.length} items`;
 }
 
 function fmtDate(iso: string | null): string {
@@ -177,7 +193,7 @@ export function TransactionsLedger() {
                         <p className="font-semibold text-navy">{t.userName || '—'}</p>
                         <p className="text-xs text-slate-500">{t.email || '—'}</p>
                       </td>
-                      <td className="p-3 text-slate-600">{productLabel(t)}</td>
+                      <td className="p-3 text-slate-600">{productSummary(t)}</td>
                       <td className="p-3 text-right font-bold tabular-nums text-navy">{inr(t.amountCents, t.currency)}</td>
                       <td className="p-3"><StatusChip status={t.status} /></td>
                       <td className="p-3 capitalize text-slate-600">{t.method || '—'}</td>
@@ -193,7 +209,22 @@ export function TransactionsLedger() {
                             <Detail label="Email" value={t.email} />
                             <Detail label="Mobile" value={t.phone} />
                             <Detail label="User ID" value={t.userId} mono />
-                            <Detail label="Product" value={productLabel(t)} />
+                            <div className="sm:col-span-2">
+                              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                                Purchased {t.products.length > 1 ? `(${t.products.length} items)` : ''}
+                              </p>
+                              {t.products.length ? (
+                                <ul className="mt-0.5 space-y-0.5">
+                                  {t.products.map((p, i) => (
+                                    <li key={i} className="text-sm font-semibold text-navy">
+                                      {formatProduct(p)}
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <p className="mt-0.5 text-sm text-navy">{productSummary(t)}</p>
+                              )}
+                            </div>
                             <Detail label="Tier" value={t.tier} />
                             <Detail label="Period" value={t.period} />
                             <Detail label="Amount" value={inr(t.amountCents, t.currency)} />
