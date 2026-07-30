@@ -6,6 +6,8 @@ import { ArrowRight, Building2, Check, Crown, Layers, ListTree, Lock, Search, Sl
 import type { ApiTopic } from '@/lib/api/catalog';
 import { listCodingTopics, type CodingTopic } from '@/lib/api/mocks';
 import { useMySubscription } from '@/hooks/useMySubscription';
+import { getPracticeAccessMap } from '@/lib/api/payments';
+import type { PracticeAccessMapDto } from '@/shared/dto/payments.dto';
 import { EntitlementScope } from '@/shared/enums';
 import { cn } from '@/lib/utils';
 import { ACCENT_CLASS, HIDDEN_ROOT_SLUGS, sectionMetaFor, type Accent } from './section-meta';
@@ -77,6 +79,28 @@ export function PracticePicker({
     hasPlatform || ownedSections.has(rootSlug) || ownedTopics.has(slug);
   const companyOwned = (slug: string) => hasPlatform || ownedCompanies.has(slug);
   const codingOwned = hasPlatform || ownedSections.has('coding');
+
+  // Up-front visible locks under the single-scope free tier (one free sub-topic per
+  // section + one free company). Server-driven — inert until FREEMIUM_SINGLE_SCOPE is
+  // on, at which point the runner also enforces it. Never locks anything the student
+  // owns or a free scope.
+  const [accessMap, setAccessMap] = useState<PracticeAccessMapDto | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    getPracticeAccessMap()
+      .then((m) => !cancelled && setAccessMap(m))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const singleScope = gating && !!accessMap?.singleScopeEnabled;
+  const topicLocked = (rootSlug: string, slug: string) =>
+    singleScope && !topicOwned(rootSlug, slug) && accessMap?.freeSubtopicSlugBySection?.[rootSlug] !== slug;
+  // Under single-scope the whole-section drill is always locked (only one sub-topic is free).
+  const sectionLocked = (slug: string) => singleScope && !sectionOwned(slug);
+  const companyLocked = (slug: string) =>
+    singleScope && !companyOwned(slug) && accessMap?.freeCompanySlug !== slug;
 
   // Coding topics come from the coding bank (Judge0 problems), a separate system
   // from the MCQ taxonomy - fetched client-side (guaranteed auth token) like the
@@ -192,16 +216,28 @@ export function PracticePicker({
             Practice a company&apos;s question style
           </h2>
           <div className="flex flex-wrap gap-2">
-            {filteredCompanies.map((c) => (
-              <Link
-                key={c.id}
-                href={`/dashboard/quiz/adaptive?company=${encodeURIComponent(c.slug)}`}
-                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors hover:border-violet-300 hover:bg-violet-50/70"
-              >
-                <Building2 className="size-3.5 text-violet-500" />
-                {c.name}
-              </Link>
-            ))}
+            {filteredCompanies.map((c) =>
+              companyLocked(c.slug) ? (
+                <Link
+                  key={c.id}
+                  href="/shop"
+                  title="Unlock with a subscription"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-semibold text-slate-400 transition-colors hover:border-slate-300"
+                >
+                  <Lock className="size-3.5" />
+                  {c.name}
+                </Link>
+              ) : (
+                <Link
+                  key={c.id}
+                  href={`/dashboard/quiz/adaptive?company=${encodeURIComponent(c.slug)}`}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors hover:border-violet-300 hover:bg-violet-50/70"
+                >
+                  <Building2 className="size-3.5 text-violet-500" />
+                  {c.name}
+                </Link>
+              ),
+            )}
           </div>
         </div>
       ) : null}
@@ -222,6 +258,8 @@ export function PracticePicker({
                 root={root}
                 topicHref={adaptiveTopicHref}
                 owned={sectionOwned(root.slug)}
+                sectionLocked={sectionLocked(root.slug)}
+                topicLocked={(slug) => topicLocked(root.slug, slug)}
               />
             ))}
             {codingVisible ? <CodingBlock topics={filteredCodingTopics} /> : null}
@@ -321,10 +359,14 @@ function SectionBlock({
   root,
   topicHref,
   owned,
+  sectionLocked = false,
+  topicLocked,
 }: {
   root: RootTopic;
   topicHref: (slug: string) => string;
   owned: boolean;
+  sectionLocked?: boolean;
+  topicLocked?: (slug: string) => boolean;
 }) {
   const Icon = root.icon;
   const a = ACCENT_CLASS[root.accent];
@@ -350,24 +392,46 @@ function SectionBlock({
             </p>
           </div>
         </div>
-        <Link
-          href={topicHref(root.slug)}
-          className="inline-flex items-center gap-1.5 rounded-full bg-navy px-4 py-2 text-xs font-extrabold text-white transition-transform hover:-translate-y-0.5"
-        >
-          Practice whole section <ArrowRight className="size-3.5" />
-        </Link>
+        {sectionLocked ? (
+          <Link
+            href="/shop"
+            title="The whole-section drill needs a subscription"
+            className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-4 py-2 text-xs font-extrabold text-slate-400 transition-colors hover:bg-slate-200"
+          >
+            <Lock className="size-3.5" /> Practice whole section
+          </Link>
+        ) : (
+          <Link
+            href={topicHref(root.slug)}
+            className="inline-flex items-center gap-1.5 rounded-full bg-navy px-4 py-2 text-xs font-extrabold text-white transition-transform hover:-translate-y-0.5"
+          >
+            Practice whole section <ArrowRight className="size-3.5" />
+          </Link>
+        )}
       </div>
 
       <div className="relative mt-4 flex flex-wrap gap-2">
-        {root.children.map((child) => (
-          <Link
-            key={child.id}
-            href={topicHref(child.slug)}
-            className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors ${a.chip}`}
-          >
-            {child.name}
-          </Link>
-        ))}
+        {root.children.map((child) =>
+          topicLocked?.(child.slug) ? (
+            <Link
+              key={child.id}
+              href="/shop"
+              title="Unlock with a subscription"
+              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-semibold text-slate-400 transition-colors hover:border-slate-300"
+            >
+              <Lock className="size-3 shrink-0" />
+              {child.name}
+            </Link>
+          ) : (
+            <Link
+              key={child.id}
+              href={topicHref(child.slug)}
+              className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors ${a.chip}`}
+            >
+              {child.name}
+            </Link>
+          ),
+        )}
       </div>
     </div>
   );
