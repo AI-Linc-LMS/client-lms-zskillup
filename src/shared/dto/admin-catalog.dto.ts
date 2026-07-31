@@ -9,6 +9,7 @@ import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
+  IsEmail,
   IsEnum,
   IsInt,
   IsNumber,
@@ -237,6 +238,17 @@ export class AdminCreateCollegeDto {
 
   @IsString() @MinLength(2) @MaxLength(100)
   city!: string;
+
+  /**
+   * Optional placement-cell admin to provision alongside the college. When
+   * present, a COLLEGE_ADMIN account is created (INVITED) and a set-password
+   * link is emailed to this address so the college can sign in.
+   */
+  @IsOptional() @IsEmail() @MaxLength(200)
+  adminEmail?: string;
+
+  @IsOptional() @IsString() @MaxLength(200)
+  adminName?: string;
 }
 
 /**

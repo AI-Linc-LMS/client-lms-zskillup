@@ -175,8 +175,13 @@ export async function listAdminColleges(): Promise<AdminCollegeRow[]> {
   return res.data;
 }
 
-export async function createAdminCollege(dto: AdminCreateCollegeDto): Promise<{ id: string }> {
-  const res = await apiClient.post<{ id: string }>('/api/v1/admin/colleges', dto);
+export async function createAdminCollege(
+  dto: AdminCreateCollegeDto,
+): Promise<{ id: string; adminInvited: boolean }> {
+  const res = await apiClient.post<{ id: string; adminInvited: boolean }>(
+    '/api/v1/admin/colleges',
+    dto,
+  );
   return res.data;
 }
 

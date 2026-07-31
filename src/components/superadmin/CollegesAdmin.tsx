@@ -90,7 +90,7 @@ export function CollegesAdmin() {
         </Button>
       </div>
 
-      {showForm ? <AddCollegeForm onCreated={() => { setShowForm(false); void refresh(); }} /> : null}
+      {showForm ? <AddCollegeForm onCreated={() => void refresh()} /> : null}
 
       {loadError ? (
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">
@@ -169,6 +169,7 @@ export function CollegesAdmin() {
 
 function AddCollegeForm({ onCreated }: { onCreated: () => void }) {
   const [serverError, setServerError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -178,8 +179,25 @@ function AddCollegeForm({ onCreated }: { onCreated: () => void }) {
 
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
+    setSuccess(null);
+    // Normalise the optional admin fields: blank strings must not be sent (the
+    // backend @IsEmail would reject '').
+    const adminEmail = values.adminEmail?.trim();
+    const payload: AdminCreateCollegeDto = {
+      name: values.name,
+      slug: values.slug,
+      state: values.state,
+      city: values.city,
+      ...(adminEmail ? { adminEmail } : {}),
+      ...(values.adminName?.trim() ? { adminName: values.adminName.trim() } : {}),
+    };
     try {
-      await createAdminCollege(values);
+      const res = await createAdminCollege(payload);
+      setSuccess(
+        res.adminInvited
+          ? `College created. A set-password link was emailed to ${adminEmail} — they can sign in once they set their password.`
+          : 'College created.',
+      );
       reset();
       onCreated();
     } catch (err) {
@@ -251,12 +269,57 @@ function AddCollegeForm({ onCreated }: { onCreated: () => void }) {
         />
       </div>
 
+      <div className="mt-5 border-t border-slate-100 pt-4">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+          Placement-cell admin — optional
+        </p>
+        <p className="mb-3 mt-1 text-xs text-slate-500">
+          Add the college admin&apos;s email to provision their account now. They&apos;ll receive a
+          secure set-password link by email and can sign in as the placement office once they set a
+          password. Leave blank to add the admin later.
+        </p>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <FormField
+            id="adminEmail"
+            type="email"
+            label="Admin email"
+            placeholder="placements@vit.ac.in"
+            error={errors.adminEmail?.message}
+            {...register('adminEmail', {
+              maxLength: { value: 200, message: 'Email must be 200 characters or fewer' },
+              pattern: {
+                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: 'Enter a valid email address',
+              },
+            })}
+          />
+          <FormField
+            id="adminName"
+            label="Admin name"
+            placeholder="Placement Office"
+            error={errors.adminName?.message}
+            {...register('adminName', {
+              maxLength: { value: 200, message: 'Name must be 200 characters or fewer' },
+            })}
+          />
+        </div>
+      </div>
+
       {serverError ? (
         <p
           role="alert"
           className="mt-4 rounded-md bg-red-50 p-3 text-sm font-medium text-red-700 ring-1 ring-red-200"
         >
           {serverError}
+        </p>
+      ) : null}
+
+      {success ? (
+        <p
+          role="status"
+          className="mt-4 rounded-md bg-emerald-50 p-3 text-sm font-medium text-emerald-700 ring-1 ring-emerald-200"
+        >
+          {success}
         </p>
       ) : null}
 
