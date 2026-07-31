@@ -102,7 +102,7 @@ export function CollegesAdmin() {
         <div className="overflow-x-auto">
         <table className="w-full min-w-[680px] text-left text-sm">
           <thead className="bg-slate-50">
-            <tr className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+            <tr className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Slug</th>
               <th className="px-4 py-3">Location</th>
@@ -213,7 +213,7 @@ function AddCollegeForm({ onCreated }: { onCreated: () => void }) {
       className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
       noValidate
     >
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
         New college
       </p>
       <h2 className="mb-4 text-base font-bold text-navy">Onboard a partner institution</h2>
@@ -270,7 +270,7 @@ function AddCollegeForm({ onCreated }: { onCreated: () => void }) {
       </div>
 
       <div className="mt-5 border-t border-slate-100 pt-4">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
           Placement-cell admin — optional
         </p>
         <p className="mb-3 mt-1 text-xs text-slate-500">

@@ -7,6 +7,13 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 type SeoRow = { key: string; title: string | null };
 
+/**
+ * The document title present on first client evaluation — the SSR default from
+ * the root layout. Restored when a route has no configured SEO title, so a stale
+ * title never carries over from a previously-matched route.
+ */
+const DEFAULT_TITLE = typeof document !== 'undefined' ? document.title : '';
+
 /** Fetched once per session and shared across every mount. */
 let cache: Promise<SeoRow[]> | null = null;
 
@@ -48,6 +55,7 @@ export function SeoTitle() {
       if (!active) return;
       const match = matchKey(rows, pathname);
       if (match?.title) document.title = match.title;
+      else if (DEFAULT_TITLE) document.title = DEFAULT_TITLE;
     });
     return () => {
       active = false;

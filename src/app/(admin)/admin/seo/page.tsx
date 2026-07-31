@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Check, Loader2 } from 'lucide-react';
 import { listSeo, upsertSeo, type SeoMetadata } from '@/lib/api/seo';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const inputCls =
@@ -134,15 +135,10 @@ function SeoRow({
             {row.key}
           </span>
         </span>
-        <button
-          type="button"
-          onClick={save}
-          disabled={saving}
-          className="inline-flex items-center gap-1.5 rounded-full bg-navy px-4 py-1.5 text-xs font-bold text-white transition-colors hover:bg-navy/90 disabled:opacity-60"
-        >
-          {saving ? <Loader2 className="size-3.5 animate-spin" /> : saved ? <Check className="size-3.5" /> : null}
+        <Button type="button" variant="secondary" size="sm" onClick={save} disabled={saving}>
+          {saving ? <Loader2 className="animate-spin" /> : saved ? <Check /> : null}
           {saved ? 'Saved' : 'Save'}
-        </button>
+        </Button>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="space-y-1 sm:col-span-2">
