@@ -4,6 +4,7 @@ import { TopBar } from './TopBar';
 import { Sidebar } from './Sidebar';
 import { PreviewBanner } from './PreviewBanner';
 import { CommandPalette } from './CommandPalette';
+import { SeoTitle } from './SeoTitle';
 
 /**
  * Persistent authenticated chrome (frontend/CLAUDE §4): top bar + left sidebar +
@@ -17,6 +18,7 @@ import { CommandPalette } from './CommandPalette';
 export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <SeoTitle />
       <CommandPalette />
       <Toaster
         position="bottom-center"

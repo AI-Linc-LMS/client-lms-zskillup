@@ -4,6 +4,8 @@ export interface SeoMetadata {
   key: string;
   /** Friendly page name for the admin list (e.g. 'About'). */
   label?: string;
+  /** Audience group for the admin list (e.g. 'Public', 'Student', 'Admin'). */
+  section?: string;
   title: string | null;
   description: string | null;
   keywords: string | null;

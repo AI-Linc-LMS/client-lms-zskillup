@@ -5,6 +5,7 @@ import { Toaster } from 'sonner';
 import { TpoConsoleProvider } from './TpoConsole';
 import { TpoSidebar } from './TpoSidebar';
 import { TpoTopBar } from './TpoTopBar';
+import { SeoTitle } from '@/components/layout/SeoTitle';
 
 /**
  * Placement Office console shell (redesign) - a dedicated sidebar-first layout
@@ -16,6 +17,7 @@ import { TpoTopBar } from './TpoTopBar';
 export function TpoShell({ children }: { children: ReactNode }) {
   return (
     <TpoConsoleProvider>
+      <SeoTitle />
       <div className="flex min-h-dvh bg-background">
         <TpoSidebar />
         <div className="flex min-w-0 flex-1 flex-col">

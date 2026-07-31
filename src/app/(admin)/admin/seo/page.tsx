@@ -31,14 +31,17 @@ export default function AdminSeoPage() {
     );
   }
 
+  const sections = groupBySection(rows);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
         <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Admin</p>
         <h1 className="text-[28px] font-extrabold tracking-tight text-navy">SEO metadata</h1>
         <p className="mt-1 text-sm text-slate-600">
-          Meta title, description, keywords and social image for each public page. Changes go live
-          within ~5 minutes — no deploy needed.
+          Meta title, description, keywords and social image for every page, grouped by audience.
+          Each page ships with a sensible default — edit only what you want to override. Changes go
+          live within ~5 minutes — no deploy needed.
         </p>
       </div>
       {err && (
@@ -46,16 +49,48 @@ export default function AdminSeoPage() {
           {err}
         </div>
       )}
-      <div className="space-y-5">
-        {rows.map((r) => (
-          <SeoRow key={r.key} row={r} onPatch={(f, v) => patch(r.key, f, v)} />
-        ))}
-        {rows.length === 0 && !err && (
-          <p className="text-sm text-slate-500">No public pages configured yet.</p>
-        )}
-      </div>
+      {sections.map(({ section, rows: sectionRows }) => (
+        <section key={section} className="space-y-5">
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-bold text-navy">{section}</h2>
+            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-500">
+              {sectionRows.length} {sectionRows.length === 1 ? 'page' : 'pages'}
+            </span>
+            <span className="h-px flex-1 bg-slate-200" />
+          </div>
+          <div className="space-y-5">
+            {sectionRows.map((r) => (
+              <SeoRow key={r.key} row={r} onPatch={(f, v) => patch(r.key, f, v)} />
+            ))}
+          </div>
+        </section>
+      ))}
+      {rows.length === 0 && !err && (
+        <p className="text-sm text-slate-500">No pages configured yet.</p>
+      )}
     </div>
   );
+}
+
+/** Canonical section order for display; anything else falls to the end (A→Z). */
+const SECTION_ORDER = ['Public', 'Auth', 'Student', 'Admin', 'Super Admin', 'College (TPO)', 'Other'];
+
+function groupBySection(rows: SeoMetadata[]): { section: string; rows: SeoMetadata[] }[] {
+  const map = new Map<string, SeoMetadata[]>();
+  for (const r of rows) {
+    const s = r.section ?? 'Other';
+    (map.get(s) ?? map.set(s, []).get(s)!).push(r);
+  }
+  return [...map.entries()]
+    .sort(([a], [b]) => {
+      const ia = SECTION_ORDER.indexOf(a);
+      const ib = SECTION_ORDER.indexOf(b);
+      if (ia !== -1 && ib !== -1) return ia - ib;
+      if (ia !== -1) return -1;
+      if (ib !== -1) return 1;
+      return a.localeCompare(b);
+    })
+    .map(([section, sectionRows]) => ({ section, rows: sectionRows }));
 }
 
 function SeoRow({
