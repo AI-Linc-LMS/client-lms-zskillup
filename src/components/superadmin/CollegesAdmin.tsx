@@ -10,8 +10,10 @@ import {
   createAdminCollege,
   listAdminColleges,
   suspendAdminCollege,
+  updateAdminCollege,
   type AdminCollegeRow,
 } from '@/lib/api/admin';
+import { CollegeStatus } from '@/shared/enums';
 import type { AdminCreateCollegeDto } from '@/shared';
 
 /**
@@ -64,6 +66,20 @@ export function CollegesAdmin() {
       } catch (err) {
         window.alert(
           err instanceof ApiRequestError ? err.message : 'Could not suspend college.',
+        );
+      }
+    },
+    [refresh],
+  );
+
+  const handleReactivate = useCallback(
+    async (row: AdminCollegeRow) => {
+      try {
+        await updateAdminCollege(row.id, { status: CollegeStatus.ACTIVE });
+        await refresh();
+      } catch (err) {
+        window.alert(
+          err instanceof ApiRequestError ? err.message : 'Could not reactivate college.',
         );
       }
     },
@@ -146,7 +162,13 @@ export function CollegesAdmin() {
                         Suspend
                       </button>
                     ) : (
-                      <span className="text-xs text-slate-500">Suspended</span>
+                      <button
+                        type="button"
+                        onClick={() => handleReactivate(c)}
+                        className="text-xs font-semibold text-emerald-700 transition-colors hover:text-emerald-800"
+                      >
+                        Reactivate
+                      </button>
                     )}
                   </td>
                 </tr>
@@ -193,10 +215,13 @@ function AddCollegeForm({ onCreated }: { onCreated: () => void }) {
     };
     try {
       const res = await createAdminCollege(payload);
+      const verb = res.reactivated ? 'reactivated' : 'created';
       setSuccess(
         res.adminInvited
-          ? `College created. A set-password link was emailed to ${adminEmail} — they can sign in once they set their password.`
-          : 'College created.',
+          ? `College ${verb}. A set-password link was emailed to ${adminEmail} — they can sign in once they set their password.`
+          : res.reactivated
+            ? 'College reactivated — a suspended college with this slug was restored with these details.'
+            : 'College created.',
       );
       reset();
       onCreated();

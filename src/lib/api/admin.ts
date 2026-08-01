@@ -177,8 +177,8 @@ export async function listAdminColleges(): Promise<AdminCollegeRow[]> {
 
 export async function createAdminCollege(
   dto: AdminCreateCollegeDto,
-): Promise<{ id: string; adminInvited: boolean }> {
-  const res = await apiClient.post<{ id: string; adminInvited: boolean }>(
+): Promise<{ id: string; adminInvited: boolean; reactivated: boolean }> {
+  const res = await apiClient.post<{ id: string; adminInvited: boolean; reactivated: boolean }>(
     '/api/v1/admin/colleges',
     dto,
   );
