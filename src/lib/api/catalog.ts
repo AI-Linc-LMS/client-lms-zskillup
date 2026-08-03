@@ -205,3 +205,25 @@ export async function listTopicsWithCounts(): Promise<ApiTopic[]> {
   const res = await apiClient.get<ApiTopic[]>('/api/v1/topics/with-counts', { auth: 'public' });
   return res.data;
 }
+
+/**
+ * A company's WhatsApp community link. The ENDPOINT requires auth on purpose: the
+ * public company list is anonymous, and putting invite links there would let a
+ * scraper harvest every community in one request. Null = none configured.
+ *
+ * The CLIENT posture is nonetheless 'public', because the company hub itself is
+ * publicly browsable (middleware lets signed-out visitors in). With the default
+ * posture a 401 here would trigger a refresh attempt and then tear the session
+ * down and redirect to /login - throwing an anonymous visitor off a page they are
+ * allowed to read. 'public' surfaces the 401 to the caller instead, which the CTA
+ * swallows by simply not rendering.
+ */
+export async function getCompanyCommunity(
+  slug: string,
+): Promise<{ whatsappCommunityUrl: string | null }> {
+  const res = await apiClient.get<{ whatsappCommunityUrl: string | null }>(
+    `/api/v1/companies/${encodeURIComponent(slug)}/community`,
+    { auth: 'public' },
+  );
+  return res.data;
+}

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Film, Loader2, Plus, Search, Trash2 } from 'lucide-react';
+import { ExternalLink, Film, Loader2, MessageCircle, Plus, Search, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/ui/form-field';
 import { ApiRequestError } from '@/lib/api/types';
@@ -12,6 +12,7 @@ import {
   getAdminCompanyHub,
   listAdminCompanies,
   setCompanyIntroVideo,
+  setCompanyWhatsappCommunity,
   updateAdminCompany,
   type AdminCompanyRow,
 } from '@/lib/api/admin';
@@ -32,6 +33,7 @@ export function CompaniesAdmin() {
   const [showForm, setShowForm] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [introFor, setIntroFor] = useState<string | null>(null); // company whose intro-video editor is open
+  const [waFor, setWaFor] = useState<string | null>(null); // company whose WhatsApp-community editor is open
 
   const refresh = useCallback(async () => {
     setLoadError(null);
@@ -166,6 +168,21 @@ export function CompaniesAdmin() {
                       </button>
                       <button
                         type="button"
+                        onClick={() => setWaFor((prev) => (prev === c.id ? null : c.id))}
+                        className={`inline-flex items-center gap-1 text-xs font-semibold transition-colors ${
+                          waFor === c.id
+                            ? 'text-emerald-600'
+                            : c.whatsappCommunityUrl
+                              ? 'text-emerald-600 hover:text-emerald-700'
+                              : 'text-slate-500 hover:text-navy'
+                        }`}
+                        title={c.whatsappCommunityUrl ?? 'No community link set'}
+                      >
+                        <MessageCircle className="size-3.5" /> WhatsApp
+                        {c.whatsappCommunityUrl ? ' · set' : ''}
+                      </button>
+                      <button
+                        type="button"
                         disabled={busyId === c.id}
                         onClick={() => togglePublish(c)}
                         className="text-xs font-semibold text-navy transition-colors hover:text-[#1a1a1a] disabled:opacity-50"
@@ -188,6 +205,19 @@ export function CompaniesAdmin() {
                   <tr key={`${c.id}-intro`} className="border-t border-slate-100 bg-slate-50/60">
                     <td colSpan={6} className="px-4 py-4">
                       <IntroVideoEditor companyId={c.id} companyName={c.name} onClose={() => setIntroFor(null)} />
+                    </td>
+                  </tr>
+                ) : null,
+                waFor === c.id ? (
+                  <tr key={`${c.id}-wa`} className="border-t border-slate-100 bg-slate-50/60">
+                    <td colSpan={6} className="px-4 py-4">
+                      <WhatsappCommunityEditor
+                        companyId={c.id}
+                        companyName={c.name}
+                        initialUrl={c.whatsappCommunityUrl}
+                        onSaved={() => void refresh()}
+                        onClose={() => setWaFor(null)}
+                      />
                     </td>
                   </tr>
                 ) : null,
@@ -463,6 +493,121 @@ function IntroVideoEditor({
           ) : null}
         </>
       )}
+    </div>
+  );
+}
+
+// ─── WhatsApp community editor (Company Hub CTA) ────────────────────────────
+
+/**
+ * Sets the company's WhatsApp community invite link. Saving a link makes the
+ * "Join WhatsApp Community" CTA appear on that company's hub; clearing it hides
+ * the CTA again - the link's presence IS the on/off switch, so there is nothing
+ * else to toggle.
+ *
+ * Prefilled from the row so the current value is editable rather than re-typed.
+ * The server re-validates the host, and that error is surfaced inline.
+ */
+function WhatsappCommunityEditor({
+  companyId,
+  companyName,
+  initialUrl,
+  onSaved,
+  onClose,
+}: {
+  companyId: string;
+  companyName: string;
+  initialUrl: string | null;
+  onSaved: () => void;
+  onClose: () => void;
+}) {
+  const [url, setUrl] = useState(initialUrl ?? '');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [savedUrl, setSavedUrl] = useState<string | null | undefined>(undefined);
+
+  const save = async (next: string) => {
+    setSaving(true);
+    setError(null);
+    setSavedUrl(undefined);
+    try {
+      const res = await setCompanyWhatsappCommunity(companyId, next);
+      setUrl(res.whatsappCommunityUrl ?? '');
+      setSavedUrl(res.whatsappCommunityUrl);
+      onSaved();
+    } catch (e) {
+      setError(e instanceof ApiRequestError ? e.message : 'Could not save the community link.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+          {companyName} · WhatsApp community
+        </p>
+        <button type="button" onClick={onClose} className="text-xs font-semibold text-slate-500 hover:text-navy">
+          Close
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <input
+          value={url}
+          onChange={(e) => {
+            setUrl(e.target.value);
+            setSavedUrl(undefined);
+            setError(null);
+          }}
+          placeholder="https://chat.whatsapp.com/…"
+          aria-label={`WhatsApp community link for ${companyName}`}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `wa-err-${companyId}` : undefined}
+          className="h-10 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+        />
+        <div className="flex items-center gap-2">
+          <Button type="button" size="sm" onClick={() => save(url)} disabled={saving}>
+            {saving ? <Loader2 className="size-4 animate-spin" /> : 'Save'}
+          </Button>
+          {initialUrl || url.trim() ? (
+            <Button type="button" size="sm" variant="outline" onClick={() => save('')} disabled={saving}>
+              Remove
+            </Button>
+          ) : null}
+        </div>
+      </div>
+
+      <p className="text-[11px] text-slate-500">
+        Students see a &ldquo;Join WhatsApp Community&rdquo; button on this company&apos;s hub while a
+        link is set. Removing it hides the button.
+      </p>
+
+      {error ? (
+        <p id={`wa-err-${companyId}`} role="alert" className="text-xs font-medium text-red-600">
+          {error}
+        </p>
+      ) : null}
+      <div role="status" aria-live="polite">
+      {savedUrl !== undefined ? (
+        savedUrl ? (
+          <p className="flex flex-wrap items-center gap-1.5 text-xs font-medium text-emerald-600">
+            Saved — the hub now shows the Join button.
+            <a
+              href={savedUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 underline underline-offset-2"
+            >
+              Open link <ExternalLink className="size-3" />
+            </a>
+          </p>
+        ) : (
+          <p className="text-xs font-medium text-emerald-600">Removed — the hub no longer shows the button.</p>
+        )
+      ) : null}
+      </div>
     </div>
   );
 }

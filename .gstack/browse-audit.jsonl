@@ -1,0 +1,19 @@
+{"ts":"2026-08-03T06:16:26.919Z","cmd":"goto","args":"https://prephasz.com/login","origin":"https://prephasz.com/login","durationMs":6701,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-03T06:16:27.062Z","cmd":"snapshot","args":"-i","origin":"https://prephasz.com/login","durationMs":51,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-03T06:16:35.877Z","cmd":"fill","args":"@e2 zsk-verify+admin@prephasz.dev","origin":"https://prephasz.com/login","durationMs":30,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-03T06:16:35.943Z","cmd":"fill","args":"@e3 VerifyFlow!2026x","origin":"https://prephasz.com/login","durationMs":11,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-03T06:16:36.053Z","cmd":"click","args":"@e6","origin":"https://prephasz.com/login","durationMs":56,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-03T06:16:40.112Z","cmd":"url","args":"","origin":"https://prephasz.com/login","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-03T06:16:47.774Z","cmd":"text","args":"","origin":"https://prephasz.com/admin/dashboard","durationMs":4,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-03T06:16:47.824Z","cmd":"console","args":"--errors","origin":"https://prephasz.com/admin/dashboard","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-03T06:16:59.617Z","cmd":"goto","args":"https://prephasz.com/admin/college-requests/new","origin":"https://prephasz.com/admin/college-requests/new","durationMs":799,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-03T06:17:03.694Z","cmd":"url","args":"","origin":"https://prephasz.com/admin/college-requests/new","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-03T06:17:03.745Z","cmd":"text","args":"","origin":"https://prephasz.com/admin/college-requests/new","durationMs":1,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-03T06:17:13.952Z","cmd":"snapshot","args":"-i","origin":"https://prephasz.com/admin/college-requests/new","durationMs":27,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-03T06:17:14.013Z","cmd":"snapshot","args":"-i","origin":"https://prephasz.com/admin/college-requests/new","durationMs":8,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-03T06:17:14.090Z","cmd":"click","args":"@e23","origin":"https://prephasz.com/admin/college-requests/new","durationMs":26,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-03T06:17:17.156Z","cmd":"text","args":"","origin":"https://prephasz.com/admin/college-requests/new","durationMs":1,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-03T06:17:28.080Z","cmd":"screenshot","args":"/tmp/subscription-picker.png","origin":"https://prephasz.com/admin/college-requests/new","durationMs":271,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-03T06:17:29.153Z","cmd":"goto","args":"https://prephasz.com/admin/colleges/28f61834-0207-41a0-9358-c85320aceaf0","origin":"https://prephasz.com/admin/colleges/28f61834-0207-41a0-9358-c85320aceaf0","durationMs":1014,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-03T06:17:34.234Z","cmd":"text","args":"","origin":"https://prephasz.com/admin/colleges/28f61834-0207-41a0-9358-c85320aceaf0","durationMs":2,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-03T06:17:34.380Z","cmd":"screenshot","args":"/tmp/college-scope-card.png","origin":"https://prephasz.com/admin/colleges/28f61834-0207-41a0-9358-c85320aceaf0","durationMs":94,"status":"ok","hasCookies":false,"mode":"launched"}

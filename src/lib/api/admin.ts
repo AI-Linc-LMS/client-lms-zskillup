@@ -207,6 +207,8 @@ export interface AdminCompanyRow {
   tagline: string | null;
   displayOrder: number;
   isPublished: boolean;
+  /** Null = no community configured; the hub hides its Join CTA. */
+  whatsappCommunityUrl: string | null;
 }
 
 export async function listAdminCompanies(): Promise<AdminCompanyRow[]> {
@@ -255,6 +257,22 @@ export interface AdminCompanyHub {
 
 export async function getAdminCompanyHub(id: string): Promise<AdminCompanyHub | null> {
   const res = await apiClient.get<AdminCompanyHub | null>(`/api/v1/admin/companies/${id}/hub`);
+  return res.data;
+}
+
+/**
+ * Set (or clear, with '') a company's WhatsApp community invite link. Clearing it
+ * is what hides the "Join WhatsApp Community" CTA on that hub. The server rejects
+ * any host that isn't WhatsApp's.
+ */
+export async function setCompanyWhatsappCommunity(
+  id: string,
+  whatsappCommunityUrl: string,
+): Promise<{ whatsappCommunityUrl: string | null }> {
+  const res = await apiClient.patch<{ whatsappCommunityUrl: string | null }>(
+    `/api/v1/admin/companies/${id}/whatsapp-community`,
+    { whatsappCommunityUrl },
+  );
   return res.data;
 }
 
