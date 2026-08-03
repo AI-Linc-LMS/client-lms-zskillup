@@ -9,9 +9,11 @@ import {
   BookOpen,
   ClipboardList,
   Code2,
+  ExternalLink,
   Gauge,
   LayoutGrid,
   ListChecks,
+  MessageCircle,
   MonitorPlay,
   Sparkles,
   Star,
@@ -20,10 +22,13 @@ import {
   Users,
 } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { Button } from '@/components/ui/button';
 import { CompanyRegisterCard } from '@/components/company/CompanyRegisterCard';
 import { HubVideoEmbed } from '@/components/media/HubVideoEmbed';
 import { cn } from '@/lib/utils';
 import { HUB_TABS, type HubContent, type HubTab } from '@/lib/hub-data';
+import { hasRoleHint } from '@/lib/session-hints';
+import { getCompanyCommunity } from '@/lib/api/catalog';
 import { getReadiness } from '@/lib/api/readiness';
 import { onXpUpdated } from '@/lib/xp-events';
 import { InfoTip } from '@/components/ui/InfoTip';
@@ -295,6 +300,11 @@ export function CompanyHub({ content }: { content: HubContent }) {
               <Stat label="Open roles (est.)" value={content.quickStats.openRoles} />
             </div>
           </AuroraCard>
+
+          {/* Company WhatsApp community - only when a link is configured. Last in
+              the rail on purpose: it resolves asynchronously, so arriving late
+              extends the column instead of shoving Quick stats down the page. */}
+          <WhatsappCommunityCard companySlug={c.slug} companyName={c.name} />
         </aside>
       </div>
 
@@ -309,6 +319,84 @@ export function CompanyHub({ content }: { content: HubContent }) {
         }
       />
     </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* WhatsApp community                                                           */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * "Join WhatsApp Community" CTA for this company's hub. Renders NOTHING until a
+ * link resolves - the presence of a link is the whole on/off switch, so a company
+ * without a community shows no empty card, no skeleton and no disabled button.
+ *
+ * The link is fetched from an AUTHENTICATED endpoint rather than carried on the
+ * public company payload: the company list is anonymous, so shipping invite links
+ * there would let anyone harvest every community in a single request.
+ *
+ * The href is admin-set and host-validated server-side (only WhatsApp hosts are
+ * storable). `rel="noopener noreferrer"` because it opens a third-party tab.
+ */
+function WhatsappCommunityCard({
+  companySlug,
+  companyName,
+}: {
+  companySlug: string;
+  companyName: string;
+}) {
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Signed-out visitors can browse the hub but the endpoint is authenticated,
+    // so skip the round trip entirely rather than firing a request that 401s.
+    if (!hasRoleHint()) return;
+    let alive = true;
+    getCompanyCommunity(companySlug)
+      .then((r) => {
+        if (alive) setUrl(r.whatsappCommunityUrl);
+      })
+      .catch(() => {
+        // Signed-out or transient failure: just don't offer the CTA.
+        if (alive) setUrl(null);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [companySlug]);
+
+  if (!url) return null;
+  return (
+    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex items-start gap-3">
+        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
+          <MessageCircle className="size-5" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            Community
+          </p>
+          <p className="text-base font-bold text-navy">{companyName} aspirants</p>
+          <p className="mt-1 text-sm leading-relaxed text-slate-600">
+            Compare prep notes, share interview experiences and get drive updates from others
+            targeting {companyName}.
+          </p>
+        </div>
+      </div>
+      {/* variant=outline, not the gold pill: the ONE primary action in this rail
+          is the assessment/upgrade CTA above. This is a supportive action. */}
+      <Button asChild variant="outline" className="mt-4 w-full">
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Join the ${companyName} WhatsApp community (opens in a new tab)`}
+        >
+          <MessageCircle className="size-4" aria-hidden /> Join WhatsApp Community
+          <ExternalLink className="size-3.5 opacity-70" aria-hidden />
+        </a>
+      </Button>
+    </section>
   );
 }
 
