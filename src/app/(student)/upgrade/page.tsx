@@ -24,7 +24,7 @@ import {
 import { getMe, type ApiMe } from '@/lib/api/me';
 import { getMySubscription, getPricing } from '@/lib/api/payments';
 import { getReadiness, type Readiness } from '@/lib/api/readiness';
-import { formatPrice } from '@/lib/api/subscriptions';
+import { formatMoney, formatPrice } from '@/lib/api/subscriptions';
 import { buildPriceMap, periodMonths, retailPrice } from '@/lib/payments/pricing';
 import { usePurchase } from '@/components/billing/usePurchase';
 import { FeatureItem, IncludedGrid, PlanPill, StatBand, TrustBadges, ValueProps } from '@/components/billing/plan-ui';
@@ -459,7 +459,7 @@ function CustomPlanView({
             ) : (
               <>
                 <p className="text-xs text-slate-600">Total Value</p>
-                <p className="text-xl font-black tabular-nums text-emerald-600">{formatPrice(totalPaid, 'INR')}</p>
+                <p className="text-xl font-black tabular-nums text-emerald-600">{formatMoney(totalPaid, 'INR')}</p>
               </>
             )}
             <div className="mt-4 flex w-full flex-col gap-2">

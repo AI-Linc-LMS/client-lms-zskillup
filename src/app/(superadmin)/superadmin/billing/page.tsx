@@ -18,7 +18,7 @@ import {
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { TransactionsLedger } from '@/components/admin/TransactionsLedger';
-import { formatPrice } from '@/lib/api/subscriptions';
+import { formatMoney } from '@/lib/api/subscriptions';
 import { getFinancialsPayments } from '@/lib/api/financials';
 import {
   getPriceBook,
@@ -74,14 +74,16 @@ function PaymentsSection() {
   return (
     <section className="mt-6">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <Kpi icon={BadgeIndianRupee} label="This month" value={formatPrice(data.monthlyRevenueCents)} tone="orange" />
-        <Kpi icon={TrendingUp} label="This year" value={formatPrice(data.annualRevenueCents)} tone="navy" />
-        <Kpi icon={CreditCard} label="Lifetime collected" value={formatPrice(data.lifetimeRevenueCents)} tone="navy" />
+        <Kpi icon={BadgeIndianRupee} label="This month" value={formatMoney(data.monthlyRevenueCents)} tone="orange" />
+        <Kpi icon={TrendingUp} label="This year" value={formatMoney(data.annualRevenueCents)} tone="navy" />
+        <Kpi icon={CreditCard} label="Lifetime collected" value={formatMoney(data.lifetimeRevenueCents)} tone="navy" />
       </div>
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <Mini label="Successful" value={data.successfulPayments} tone="emerald" icon={CheckCircle2} />
-        <Mini label="Failed" value={data.failedPayments} tone="rose" icon={XCircle} />
-        <Mini label="Pending" value={data.pendingPayments} tone="amber" icon={CalendarClock} />
+        {/* All-time counts, unlike the three period KPIs above - labelled so they
+            can't be read as "this month". */}
+        <Mini label="Successful (all time)" value={data.successfulPayments} tone="emerald" icon={CheckCircle2} />
+        <Mini label="Failed (all time)" value={data.failedPayments} tone="rose" icon={XCircle} />
+        <Mini label="Pending (all time)" value={data.pendingPayments} tone="amber" icon={CalendarClock} />
         <Mini label="Active plans" value={data.activeEntitlements} tone="slate" icon={CheckCircle2} />
         <Mini label="Subscribers" value={data.activeSubscribers} tone="slate" icon={Users} />
         <Mini label="Expiring ≤7d" value={data.expiringSoon} tone="amber" icon={CalendarClock} />
@@ -96,12 +98,12 @@ function PaymentsSection() {
               rows={data.revenueByScope.map((r) => ({
                 label: scopeName(r.scope),
                 sub: `${r.count} order${r.count === 1 ? '' : 's'}`,
-                value: formatPrice(r.amountCents),
+                value: formatMoney(r.amountCents),
               }))}
             />
           )}
         </Panel>
-        <Panel title="Revenue by college (B2B)">
+        <Panel title="Collected by college (B2B)">
           {data.revenueByCollege.length === 0 ? (
             <Empty>No college subscriptions yet.</Empty>
           ) : (
@@ -109,7 +111,7 @@ function PaymentsSection() {
               rows={data.revenueByCollege.map((r) => ({
                 label: r.collegeName,
                 sub: `${r.subscriptions} sub${r.subscriptions === 1 ? '' : 's'}`,
-                value: formatPrice(r.amountCents),
+                value: formatMoney(r.amountCents),
               }))}
             />
           )}

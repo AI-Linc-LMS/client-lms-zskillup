@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { getMe } from '@/lib/api/me';
 import { getFinancialsOverview } from '@/lib/api/financials';
-import { formatPrice } from '@/lib/api/subscriptions';
+import { formatMoney } from '@/lib/api/subscriptions';
 import type { FinancialsOverviewDto } from '@/shared/dto/financials.dto';
 import { CreditCard, IndianRupee, Loader2, Lock, TrendingUp, Users } from 'lucide-react';
 
@@ -82,9 +82,9 @@ export function FinancialsDashboard() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Kpi icon={<TrendingUp className="size-5" />} label="MRR" value={formatPrice(data.mrrCents, cur)} accent="from-emerald-500 to-emerald-600" />
-        <Kpi icon={<IndianRupee className="size-5" />} label="ARR" value={formatPrice(data.arrCents, cur)} accent="from-indigo-500 to-indigo-600" />
-        <Kpi icon={<CreditCard className="size-5" />} label="Booked value" value={formatPrice(data.bookedValueCents, cur)} accent="from-orange-500 to-orange-600" />
+        <Kpi icon={<TrendingUp className="size-5" />} label="MRR" value={formatMoney(data.mrrCents, cur)} accent="from-emerald-500 to-emerald-600" />
+        <Kpi icon={<IndianRupee className="size-5" />} label="ARR" value={formatMoney(data.arrCents, cur)} accent="from-indigo-500 to-indigo-600" />
+        <Kpi icon={<CreditCard className="size-5" />} label="Booked value" value={formatMoney(data.bookedValueCents, cur)} accent="from-orange-500 to-orange-600" />
         <Kpi icon={<Users className="size-5" />} label="Paying colleges" value={String(data.payingSubscriptions)} accent="from-slate-600 to-slate-700" />
       </div>
 
@@ -122,7 +122,7 @@ export function FinancialsDashboard() {
                 <tr key={p.planId ?? p.planName} className="hover:bg-slate-50">
                   <td className="px-4 py-3 font-semibold text-navy">{p.planName}</td>
                   <td className="px-4 py-3 text-right tabular-nums text-slate-700">{p.activeCount}</td>
-                  <td className="px-4 py-3 text-right tabular-nums text-slate-700">{formatPrice(p.monthlyCents, cur)}</td>
+                  <td className="px-4 py-3 text-right tabular-nums text-slate-700">{formatMoney(p.monthlyCents, cur)}</td>
                 </tr>
               ))}
             </tbody>

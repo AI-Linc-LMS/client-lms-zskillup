@@ -71,9 +71,28 @@ export async function cancelSubscription(id: string): Promise<CollegeSubscriptio
 }
 
 /**
- * Format minor units as a currency string (e.g. 4999900 → ₹49,999; 0 → Free).
- * Shows paise only when the amount isn't a whole major unit, so display stays
- * consistent for the common whole-rupee plan prices.
+ * Format a MONEY AMOUNT. Zero renders as a real zero (₹0), never "Free" —
+ * a revenue figure of nothing collected is still an amount, and labelling it
+ * "Free" makes a financials KPI read like a pricing tier. Use this for anything
+ * collected, owed, or refunded; use formatPrice for a PLAN's price, where "Free"
+ * is a genuine tier.
+ */
+export function formatMoney(cents: number, currency = 'INR'): string {
+  const symbol = currency === 'INR' ? '₹' : currency === 'USD' ? '$' : `${currency} `;
+  const major = cents / 100;
+  const fractionDigits = Number.isInteger(major) ? 0 : 2;
+  // Sign before the symbol: a refund reads "-₹79", not "₹-79".
+  const sign = major < 0 ? '-' : '';
+  return `${sign}${symbol}${Math.abs(major).toLocaleString('en-IN', {
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  })}`;
+}
+
+/**
+ * Format a PLAN PRICE, where a zero price genuinely means a free tier
+ * (e.g. 4999900 → ₹49,999; 0 → Free). Shows paise only when the amount isn't a
+ * whole major unit, so display stays consistent for whole-rupee plan prices.
  */
 export function formatPrice(cents: number, currency = 'INR'): string {
   if (cents === 0) return 'Free';

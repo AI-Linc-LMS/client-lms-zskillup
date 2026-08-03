@@ -6,7 +6,7 @@ import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { BarChart3, Loader2 } from 'lucide-react';
 import { getAdminStats, getAdminCompanyStats, type AdminPlatformStats, type AdminCompanyStat } from '@/lib/api/admin';
 import { getFinancialsPayments } from '@/lib/api/financials';
-import { formatPrice } from '@/lib/api/subscriptions';
+import { formatMoney } from '@/lib/api/subscriptions';
 import type { FinancialsPaymentsDto } from '@/shared/dto/financials.dto';
 import { AreaChart, Donut, Panel, ProgressRow } from '@/components/superadmin/dashboard-ui';
 
@@ -103,12 +103,13 @@ export default function SuperadminAnalyticsPage() {
                 <div className="space-y-3">
                   {fin.revenueByScope.map((s) => (
                     <ProgressRow
-                      key={s.scope}
-                      label={`${s.scope} (${s.count})`}
+                      key={s.scope ?? 'other'}
+                      label={`${scopeLabel(s.scope)} (${s.count})`}
                       value={s.amountCents}
                       total={scopeMax}
                       color="#059669"
-                      hint={formatPrice(s.amountCents, fin.currency)}
+                      hint={formatMoney(s.amountCents, fin.currency)}
+                      hintOnly
                     />
                   ))}
                 </div>
@@ -119,4 +120,11 @@ export default function SuperadminAnalyticsPage() {
       )}
     </div>
   );
+}
+
+/** A purchase scope for display. NULL is a CART order (its lines live in
+ *  payment_order_items), which is how most real purchases are recorded. */
+function scopeLabel(scope: string | null): string {
+  if (!scope) return 'Cart / other';
+  return scope.charAt(0) + scope.slice(1).toLowerCase();
 }

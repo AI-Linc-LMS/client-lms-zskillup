@@ -36,7 +36,13 @@ export function MySubscriptionCard() {
   const isPremium = (sub?.hasPlatform ?? false) || activeCount > 0;
   // Admin-granted (complimentary) access - shown so the student's own account
   // reflects the "Complimentary / Admin Granted" status, not just the admin console.
-  const isComplimentary = activeEnts.some((e) => e.source === EntitlementSource.ADMIN_GRANT);
+  // Purchase-dominant, mirroring the viaCollege rule below: a student who has
+  // actually bought something is Premium, even if they ALSO hold a comp. Without
+  // this, relabelling an unpaid grant as ADMIN_GRANT silently demotes the badge,
+  // and a later real purchase would still read "Complimentary".
+  const isComplimentary =
+    !activeEnts.some((e) => e.source === EntitlementSource.PURCHASE) &&
+    activeEnts.some((e) => e.source === EntitlementSource.ADMIN_GRANT);
   // Provided by the student's college rather than bought - labelled so they know
   // why they have it, and why there is nothing for them to renew. A student who
   // ALSO bought something keeps the Premium badge: telling a paying customer
