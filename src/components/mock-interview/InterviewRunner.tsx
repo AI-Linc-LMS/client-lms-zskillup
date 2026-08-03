@@ -13,8 +13,13 @@ import {
 } from '@/lib/api/mock-interviews';
 import type { InterviewQuestionDto } from '@/shared/dto/mock-interview.dto';
 import { describeError } from '@/lib/api/errors';
-import { Bot, Keyboard, Loader2, Mic, Send, Sparkles, Video, VideoOff, Volume2, VolumeX, X } from 'lucide-react';
+import { Bot, Keyboard, Loader2, Mic, MicOff, Send, Sparkles, Video, VideoOff, Volume2, VolumeX, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+/** Persisted microphone selection — survives reloads so a working mic sticks. */
+const MIC_STORAGE_KEY = 'zskillup:interview:micId';
+/** Shared self-view video constraint (used on initial acquire and on mic switch). */
+const VIDEO_CONSTRAINTS: MediaTrackConstraints = { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } };
 
 /**
  * Whisper hallucinates a short phrase repeated over and over when it's fed silence or
@@ -130,9 +135,58 @@ export function InterviewRunner({ id }: { id: string }) {
   const questionIdRef = useRef<number | null>(null); // latest question id, so a superseded TTS callback can't arm a stale answer
   questionIdRef.current = question?.id ?? null;
 
+  // ── mic selection + live level meter (device-specific STT fix) ────────────
+  // A persisted mic choice + a live capture meter so a candidate on a laptop whose default
+  // input is a silent virtual device (Nvidia Broadcast / Realtek MaxxAudio) can pick a real
+  // mic and SEE that audio is reaching us. Purely additive — streamRef stays the single
+  // source of truth for the current capture stream.
+  const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([]);
+  const [micId, setMicId] = useState<string | null>(null);
+  const [micSwitchError, setMicSwitchError] = useState(false);
+  const [micLevel, setMicLevel] = useState(0);
+  const [lowAudioWarning, setLowAudioWarning] = useState(false);
+  const [streamGen, setStreamGen] = useState(0); // bumped whenever streamRef swaps → rebuilds the meter
+  const micIdRef = useRef<string | null>(null); // authoritative selected deviceId (sync-readable by audioConstraints)
+  const peakLevelRef = useRef(0); // loudest level since recording armed → drives the "can't hear you" hint
+
+  /** Audio constraints honouring the saved/selected mic. `ideal` (not `exact`) so a stale or
+   *  unplugged saved device degrades to the system default instead of hard-failing getUserMedia. */
+  const audioConstraints = useCallback((deviceId?: string): MediaTrackConstraints => {
+    const id = deviceId ?? micIdRef.current;
+    return { deviceId: id ? { ideal: id } : undefined, echoCancellation: true, noiseSuppression: true };
+  }, []);
+
+  /** After permission is granted, list labelled audio inputs and adopt the active device id
+   *  when nothing was saved. Fails open — no picker if enumerateDevices is unsupported/blocked. */
+  const refreshAudioDevices = useCallback(async (stream: MediaStream) => {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      setAudioDevices(devices.filter((d) => d.kind === 'audioinput' && !!d.label));
+      if (!micIdRef.current) {
+        const active = stream.getAudioTracks()[0]?.getSettings().deviceId;
+        if (active) {
+          micIdRef.current = active;
+          setMicId(active);
+        }
+      }
+    } catch {
+      /* enumerateDevices unsupported/blocked → no picker (fail open) */
+    }
+  }, []);
+
   // ── init: interview + camera/mic ─────────────────────────────────────────
   useEffect(() => {
     let alive = true;
+    // Seed the saved mic BEFORE the first getUserMedia so audioConstraints() honours it.
+    try {
+      const saved = localStorage.getItem(MIC_STORAGE_KEY);
+      if (saved) {
+        micIdRef.current = saved;
+        setMicId(saved);
+      }
+    } catch {
+      /* localStorage blocked (private mode) — fall back to the system default mic */
+    }
     (async () => {
       try {
         const detail = await getInterview(id);
@@ -150,8 +204,8 @@ export function InterviewRunner({ id }: { id: string }) {
         if (recorderOk && whisperOk) {
           try {
             const stream = await navigator.mediaDevices.getUserMedia({
-              video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
-              audio: { echoCancellation: true, noiseSuppression: true },
+              video: VIDEO_CONSTRAINTS,
+              audio: audioConstraints(),
             });
             if (!alive) {
               stream.getTracks().forEach((t) => t.stop());
@@ -159,11 +213,13 @@ export function InterviewRunner({ id }: { id: string }) {
             }
             streamRef.current = stream;
             setCamOn(stream.getVideoTracks().length > 0);
+            setStreamGen((g) => g + 1);
+            void refreshAudioDevices(stream);
           } catch {
             // Camera denied/absent - try audio-only so voice answers still work.
             try {
               const audioOnly = await navigator.mediaDevices.getUserMedia({
-                audio: { echoCancellation: true, noiseSuppression: true },
+                audio: audioConstraints(),
               });
               if (!alive) {
                 audioOnly.getTracks().forEach((t) => t.stop());
@@ -171,6 +227,8 @@ export function InterviewRunner({ id }: { id: string }) {
               }
               streamRef.current = audioOnly;
               setCamError(true);
+              setStreamGen((g) => g + 1);
+              void refreshAudioDevices(audioOnly);
             } catch {
               setCamError(true);
               setVoiceCapable(false);
@@ -202,12 +260,93 @@ export function InterviewRunner({ id }: { id: string }) {
     return () => {
       alive = false;
     };
-  }, [id, router]);
+  }, [id, router, audioConstraints, refreshAudioDevices]);
 
   // attach camera stream to the video element
   useEffect(() => {
     if (videoRef.current && streamRef.current) videoRef.current.srcObject = streamRef.current;
   }, [camOn, loading]);
+
+  // ── live mic level meter (rebuilt on every stream swap) ───────────────────
+  // The key diagnostic: RMS of the CURRENT stream → a 0..1 level so the candidate can SEE
+  // audio arriving (or not). Rebuilt whenever streamRef swaps (streamGen). Never throws —
+  // degrades to no meter if Web Audio is unavailable. Cleans up on unmount + before rebuild.
+  useEffect(() => {
+    const stream = streamRef.current;
+    const tracks = stream?.getAudioTracks() ?? [];
+    if (!tracks.length) return;
+    const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AC) return;
+    let ctx: AudioContext | null = null;
+    let raf: number | null = null;
+    try {
+      ctx = new AC();
+      void ctx.resume().catch(() => {});
+      const source = ctx.createMediaStreamSource(new MediaStream(tracks));
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 512;
+      source.connect(analyser);
+      const data = new Uint8Array(analyser.fftSize);
+      let lastLevel = -1;
+      let lastAt = 0;
+      const loop = () => {
+        analyser.getByteTimeDomainData(data);
+        let sum = 0;
+        for (let i = 0; i < data.length; i++) {
+          const v = (data[i] - 128) / 128;
+          sum += v * v;
+        }
+        const level = Math.min(1, Math.sqrt(sum / data.length) * 3);
+        if (level > peakLevelRef.current) peakLevelRef.current = level;
+        // Throttle React updates: only on a meaningful change, at most ~12/s.
+        const now = performance.now();
+        if (Math.abs(level - lastLevel) > 0.04 && now - lastAt > 80) {
+          lastLevel = level;
+          lastAt = now;
+          setMicLevel(level);
+        }
+        raf = requestAnimationFrame(loop);
+      };
+      raf = requestAnimationFrame(loop);
+    } catch {
+      // Web Audio unavailable/blocked → degrade to no meter.
+      if (raf) cancelAnimationFrame(raf);
+      try {
+        ctx?.close();
+      } catch {
+        /* noop */
+      }
+      return;
+    }
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      try {
+        ctx?.close();
+      } catch {
+        /* noop */
+      }
+      setMicLevel(0);
+    };
+  }, [streamGen]);
+
+  // "Can't hear you" hint: recording has run a few seconds with a near-zero peak level.
+  useEffect(() => {
+    if (!recording) {
+      setLowAudioWarning(false);
+      return;
+    }
+    peakLevelRef.current = 0;
+    setLowAudioWarning(false);
+    const t = setTimeout(() => {
+      if (peakLevelRef.current < 0.04) setLowAudioWarning(true);
+    }, 4000);
+    return () => clearTimeout(t);
+  }, [recording]);
+
+  // Clear the hint the moment real audio comes through.
+  useEffect(() => {
+    if (lowAudioWarning && micLevel >= 0.06) setLowAudioWarning(false);
+  }, [lowAudioWarning, micLevel]);
 
   // ── interviewer TTS ──────────────────────────────────────────────────────
   const speak = useCallback((text: string, onDone?: () => void) => {
@@ -521,6 +660,41 @@ export function InterviewRunner({ id }: { id: string }) {
     return finalText ?? answerRef.current;
   }, [runWhisper]);
 
+  // ── switch microphone (re-acquire the stream) ─────────────────────────────
+  // Re-acquires a fresh stream on the chosen device and swaps it into streamRef (kept
+  // authoritative), stopping the old tracks and re-arming recording if it was live. On
+  // failure the previous stream is left untouched and a small inline note is shown.
+  const switchMic = useCallback(async (deviceId: string) => {
+    if (!deviceId || deviceId === micIdRef.current) return;
+    const wasRecording = recordingRef.current;
+    const prev = streamRef.current;
+    const wantsVideo = camOn;
+    micIdRef.current = deviceId;
+    setMicId(deviceId);
+    try {
+      localStorage.setItem(MIC_STORAGE_KEY, deviceId);
+    } catch {
+      /* localStorage blocked — selection still applies for this session */
+    }
+    try {
+      const next = await navigator.mediaDevices.getUserMedia({
+        video: wantsVideo ? VIDEO_CONSTRAINTS : false,
+        audio: audioConstraints(deviceId),
+      });
+      prev?.getTracks().forEach((t) => t.stop());
+      streamRef.current = next;
+      if (videoRef.current) videoRef.current.srcObject = next;
+      setCamOn(next.getVideoTracks().length > 0);
+      setMicSwitchError(false);
+      setStreamGen((g) => g + 1); // rebuild the level meter on the new stream
+      if (wasRecording) startRecording(); // re-arm recorder + recogniser on the new stream
+      void refreshAudioDevices(next);
+    } catch {
+      // Keep the old stream working; just surface that the switch failed.
+      setMicSwitchError(true);
+    }
+  }, [audioConstraints, camOn, refreshAudioDevices, startRecording]);
+
   // Speak each new question, then auto-arm recording when it finishes.
   useEffect(() => {
     if (!question || busy || loading) return;
@@ -770,21 +944,42 @@ export function InterviewRunner({ id }: { id: string }) {
 
       {/* Live transcript */}
       <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="mb-2 flex items-center justify-between">
-          <label className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <label className="flex min-w-0 items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
             Your answer
             {recording && (
               <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-bold text-orange">
                 <Mic className="size-3" /> {sttFallback ? 'live · server' : 'live'}
               </span>
             )}
+            {recording && voiceCapable && !typing && <MicMeter level={micLevel} />}
             {transcribing && <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-500"><Loader2 className="size-3 animate-spin" /> finalising</span>}
           </label>
-          {voiceCapable && (
-            <button onClick={() => setTyping((t) => !t)} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50">
-              {typing ? <><Mic className="size-3.5" /> Use voice</> : <><Keyboard className="size-3.5" /> Type</>}
-            </button>
-          )}
+          <div className="flex shrink-0 items-center gap-2">
+            {/* Mic picker — the fix for laptops whose DEFAULT input is a silent/virtual
+               device (Nvidia Broadcast, Realtek/MaxxAudio). Shown only when there's a real
+               choice; switching re-acquires the stream both STT paths share. */}
+            {voiceCapable && !typing && audioDevices.length > 1 && (
+              <select
+                aria-label="Microphone"
+                title="Choose your microphone"
+                value={micId ?? ''}
+                onChange={(e) => void switchMic(e.target.value)}
+                className="max-w-[9rem] truncate rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-600 focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
+              >
+                {audioDevices.map((d) => (
+                  <option key={d.deviceId} value={d.deviceId}>
+                    {d.label || 'Microphone'}
+                  </option>
+                ))}
+              </select>
+            )}
+            {voiceCapable && (
+              <button onClick={() => setTyping((t) => !t)} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50">
+                {typing ? <><Mic className="size-3.5" /> Use voice</> : <><Keyboard className="size-3.5" /> Type</>}
+              </button>
+            )}
+          </div>
         </div>
 
         {typing || !voiceCapable ? (
@@ -824,6 +1019,20 @@ export function InterviewRunner({ id }: { id: string }) {
         )}
         {answer && !typing && voiceCapable && (
           <button onClick={() => setTyping(true)} className="mt-2 text-xs font-medium text-slate-500 transition-colors hover:text-navy">Edit transcript</button>
+        )}
+
+        {micSwitchError && (
+          <p className="mt-2 text-xs font-medium text-amber-600">Couldn&apos;t switch microphone — keeping the previous one.</p>
+        )}
+        {lowAudioWarning && !typing && voiceCapable && (
+          <div className="mt-2 flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700 ring-1 ring-amber-200">
+            <MicOff className="mt-0.5 size-3.5 shrink-0" />
+            <span>
+              We can&apos;t hear you.{' '}
+              {audioDevices.length > 1 ? 'Pick a different microphone above' : 'Check your system mic settings'} — some laptops
+              default to a silent or AI-processed input. You can also switch to typing.
+            </span>
+          </div>
         )}
 
         {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
@@ -931,6 +1140,24 @@ function ThinkingDots() {
       {[0, 1, 2].map((i) => (
         <motion.span key={i} className="size-1.5 rounded-full bg-slate-400" animate={{ opacity: [0.3, 1, 0.3], y: [0, -2, 0] }} transition={{ duration: 1, repeat: Infinity, delay: i * 0.18 }} />
       ))}
+    </span>
+  );
+}
+
+/** Live microphone input level bar. A flat bar while the candidate is clearly speaking
+ *  is the visible tell that the selected input is silent/virtual — prompting them to pick
+ *  a different mic (the fix for the TUF F15 / G15 default-device issue). */
+function MicMeter({ level }: { level: number }) {
+  const pct = Math.round(Math.min(1, Math.max(0, level)) * 100);
+  const dead = level < 0.04;
+  return (
+    <span className="inline-flex items-center" title="Microphone input level" aria-hidden>
+      <span className="h-1.5 w-14 overflow-hidden rounded-full bg-slate-200">
+        <span
+          className={cn('block h-full rounded-full transition-[width] duration-75', dead ? 'bg-slate-300' : 'bg-emerald-500')}
+          style={{ width: `${pct}%` }}
+        />
+      </span>
     </span>
   );
 }
