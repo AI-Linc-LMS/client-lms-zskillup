@@ -589,8 +589,6 @@ function FilterSelect({
 
 // ─── Previous-Year-Questions spotlight ──────────────────────────────────────
 
-const PYQ_COMPANIES = ['tcs', 'accenture', 'capgemini', 'infosys'];
-
 function PyqSpotlight({
   companyNameBySlug,
   active,
@@ -602,10 +600,15 @@ function PyqSpotlight({
 }) {
   const [counts, setCounts] = useState<Record<string, number> | null>(null);
 
+  // Fetch PYQ counts for EVERY company (not a hardcoded few) so the spotlight always
+  // reflects the full set of companies that actually have previous-year questions.
+  const slugs = Object.keys(companyNameBySlug);
+  const slugKey = slugs.slice().sort().join(',');
   useEffect(() => {
+    if (slugs.length === 0) return;
     let cancelled = false;
     Promise.all(
-      PYQ_COMPANIES.map((slug) =>
+      slugs.map((slug) =>
         listAdminQuestions({ company: slug, source: 'PREVIOUS_YEAR_QUESTIONS', limit: 1, offset: 0 })
           .then((r) => [slug, r.total] as const)
           .catch(() => [slug, 0] as const),
@@ -616,9 +619,16 @@ function PyqSpotlight({
     return () => {
       cancelled = true;
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slugKey]);
 
   const totalPyq = counts ? Object.values(counts).reduce((a, b) => a + b, 0) : null;
+  // Only companies that actually have PYQs, richest first.
+  const shown = counts
+    ? Object.keys(counts)
+        .filter((s) => (counts[s] ?? 0) > 0)
+        .sort((a, b) => (counts[b] ?? 0) - (counts[a] ?? 0))
+    : slugs;
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-[#ffc42d]/30 bg-gradient-to-br from-[#fff5ea] via-white to-white p-5">
@@ -640,7 +650,7 @@ function PyqSpotlight({
       </div>
 
       <div className="relative grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {PYQ_COMPANIES.map((slug) => {
+        {shown.map((slug) => {
           const isActive = active === slug;
           const n = counts?.[slug];
           return (

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Lock } from 'lucide-react';
 import type { CodingTopic } from '@/lib/api/mocks';
 import { ACCENT_CLASS, CODING_META } from './section-meta';
 
@@ -11,13 +11,19 @@ import { ACCENT_CLASS, CODING_META } from './section-meta';
  * than removed outright: Practice-as-wish is about picking a *specific* thing to
  * drill, and a bulk "practice everything" button cuts against that page's whole
  * premise. The Practice picker still wants it.
+ *
+ * `locked` (single-scope free tier): coding is a paid-only section for the unpaid, so
+ * the topic chips + the "Practice all coding" CTA route to /shop and show a lock,
+ * matching the whole-section lock on every other section block.
  */
 export function CodingBlock({
   topics,
   showPracticeAll = true,
+  locked = false,
 }: {
   topics: CodingTopic[];
   showPracticeAll?: boolean;
+  locked?: boolean;
 }) {
   const Icon = CODING_META.icon;
   const a = ACCENT_CLASS[CODING_META.accent];
@@ -38,31 +44,52 @@ export function CodingBlock({
             </p>
           </div>
         </div>
-        {showPracticeAll && (
-          // bg-navy, matching "Practice whole section" on every other section block. The
-          // per-section accent (sky / violet / orange / emerald / indigo) dresses the icon
-          // tile and the topic chips - never the CTA. Coding was leaking its indigo accent
-          // into the button, so it was the only section with a differently-coloured CTA.
-          <Link
-            href="/coding"
-            className="inline-flex items-center gap-1.5 rounded-full bg-navy px-4 py-2 text-xs font-extrabold text-white transition-transform hover:-translate-y-0.5"
-          >
-            Practice all coding <ArrowRight className="size-3.5" />
-          </Link>
-        )}
+        {showPracticeAll &&
+          (locked ? (
+            <Link
+              href="/shop"
+              title="Coding needs a subscription"
+              className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-4 py-2 text-xs font-extrabold text-slate-400 transition-colors hover:bg-slate-200"
+            >
+              <Lock className="size-3.5" /> Practice all coding
+            </Link>
+          ) : (
+            // bg-navy, matching "Practice whole section" on every other section block. The
+            // per-section accent (sky / violet / orange / emerald / indigo) dresses the icon
+            // tile and the topic chips - never the CTA. Coding was leaking its indigo accent
+            // into the button, so it was the only section with a differently-coloured CTA.
+            <Link
+              href="/coding"
+              className="inline-flex items-center gap-1.5 rounded-full bg-navy px-4 py-2 text-xs font-extrabold text-white transition-transform hover:-translate-y-0.5"
+            >
+              Practice all coding <ArrowRight className="size-3.5" />
+            </Link>
+          ))}
       </div>
 
       {topics.length ? (
         <div className="relative mt-4 flex flex-wrap gap-2">
-          {topics.map((t) => (
-            <Link
-              key={t.topic}
-              href={`/coding?topic=${encodeURIComponent(t.topic)}`}
-              className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors ${a.chip}`}
-            >
-              {t.topic}
-            </Link>
-          ))}
+          {topics.map((t) =>
+            locked ? (
+              <Link
+                key={t.topic}
+                href="/shop"
+                title="Unlock with a subscription"
+                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-semibold text-slate-400 transition-colors hover:border-slate-300"
+              >
+                <Lock className="size-3 shrink-0" />
+                {t.topic}
+              </Link>
+            ) : (
+              <Link
+                key={t.topic}
+                href={`/coding?topic=${encodeURIComponent(t.topic)}`}
+                className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy transition-colors ${a.chip}`}
+              >
+                {t.topic}
+              </Link>
+            ),
+          )}
         </div>
       ) : (
         <p className="relative mt-3 text-xs text-slate-600">

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ProfileLockGate } from '@/components/student/ProfileLockGate';
+import { PremiumLockGate } from '@/components/billing/PremiumLockGate';
 import { BriefingHeroCanvas } from '@/components/student/BriefingHeroCanvas';
 import {
   CalendarDays,
@@ -133,6 +134,7 @@ export default function AssessmentsPage() {
     <div className="w-full">
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Assessments' }]} />
 
+      <PremiumLockGate feature="Assessments">
       <ProfileLockGate feature="Assessments">
       {/* ── AI-Briefing black hero + golden mesh, with live stats ─────────── */}
       <Reveal>
@@ -525,6 +527,7 @@ export default function AssessmentsPage() {
         </aside>
       </div>
       </ProfileLockGate>
+      </PremiumLockGate>
     </div>
   );
 }

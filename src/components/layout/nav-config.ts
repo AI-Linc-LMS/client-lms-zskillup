@@ -141,8 +141,16 @@ export const PLAN_ONLY_HREFS = new Set<string>(['/upgrade']);
 export const PROFILE_GATED_HREFS = new Set<string>(['/practice', '/mock-assessment', '/assessments']);
 
 /** Student features gated behind a paid plan - a premium-upgrade card in-page +
- *  a lock in the sidebar until the student has an active plan. */
-export const PREMIUM_GATED_HREFS = new Set<string>(['/practice-wish', '/mock-interview']);
+ *  a lock in the sidebar until the student has an active plan. Non-adaptive practice,
+ *  the career tools, and the whole Assessment section (mock builder + scheduled drives)
+ *  are paid-only, so they show a sidebar lock for a student with no active plan. */
+export const PREMIUM_GATED_HREFS = new Set<string>([
+  '/practice-wish',
+  '/mock-interview',
+  '/resume-builder',
+  '/mock-assessment',
+  '/assessments',
+]);
 
 /** Student features GENERATED from the one-time Placement Readiness Test - locked
  *  until it's completed because they're derived from its result. Deliberately

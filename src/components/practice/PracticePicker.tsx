@@ -273,7 +273,9 @@ export function PracticePicker({
                 topicLocked={(slug) => topicLocked(root.slug, slug)}
               />
             ))}
-            {codingVisible ? <CodingBlock topics={filteredCodingTopics} /> : null}
+            {codingVisible ? (
+              <CodingBlock topics={filteredCodingTopics} locked={singleScope && !codingOwned} />
+            ) : null}
           </div>
         </div>
       ) : null}
