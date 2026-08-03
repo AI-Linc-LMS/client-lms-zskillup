@@ -82,12 +82,18 @@ export class TpoBulkInviteDto {
 export interface TpoBulkInviteResult {
   /** Number of new invitations created. */
   created: number;
+  /**
+   * Number of EXISTING student accounts attached to the college + cohort. They
+   * keep their account, password and history, and inherit the college's
+   * subscription like any imported student - no second account, no re-onboarding.
+   */
+  attached: number;
   /** Number skipped because the email is already registered (any role). */
   skipped: number;
   /** Per-row outcome for client-side reporting. */
   rows: Array<{
     email: string;
-    status: 'created' | 'skipped' | 'invalid';
+    status: 'created' | 'attached' | 'skipped' | 'invalid';
     reason?: string;
   }>;
 }

@@ -114,6 +114,8 @@ export default function CollegeRequestDetailPage({ params }: { params: Promise<{
                 planName: req.planName,
                 seatLimit: req.seatLimit,
                 durationMonths: req.durationMonths ?? '',
+                subscriptionKind: req.subscriptionKind ?? '',
+                subscriptionCompanySlugs: req.subscriptionCompanySlugs ?? [],
                 students: req.students.map((s) => ({
                   email: s.email,
                   fullName: s.fullName ?? undefined,
@@ -215,7 +217,9 @@ function StudentImportPanel({
 }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const [result, setResult] = useState<{ created: number; skipped: number } | null>(null);
+  const [result, setResult] = useState<{ created: number; attached: number; skipped: number } | null>(
+    null,
+  );
   const [cohortName, setCohortName] = useState('');
   const imported = Boolean(req.studentsImportedAt);
 
@@ -225,7 +229,11 @@ function StudentImportPanel({
     try {
       const res = await importRequestStudents(req.id, { cohortName: cohortName.trim() || undefined });
       onChange(res.request);
-      setResult({ created: res.result.created, skipped: res.result.skipped });
+      setResult({
+        created: res.result.created,
+        attached: res.result.attached,
+        skipped: res.result.skipped,
+      });
     } catch (e) {
       setErr(e instanceof Error ? e.message : 'Import failed');
     } finally {
@@ -255,7 +263,11 @@ function StudentImportPanel({
 
           {result ? (
             <p className="mt-2 text-xs font-semibold text-emerald-700">
-              {result.created} invited · {result.skipped} skipped (already registered).
+              {result.created} invited
+              {result.attached > 0
+                ? ` · ${result.attached} existing account${result.attached === 1 ? '' : 's'} joined this college`
+                : ''}
+              {result.skipped > 0 ? ` · ${result.skipped} skipped` : ''}.
             </p>
           ) : null}
           {err ? <p className="mt-2 text-xs font-semibold text-red-600">{err}</p> : null}
@@ -289,6 +301,7 @@ function ReadOnlyRequest({ req }: { req: CollegeRequestDetail }) {
     ['Location', `${req.city}, ${req.state}`],
     ['TPO contact', `${req.contactName} · ${req.contactEmail}`],
     ['Plan', `${req.planName} · ${req.seatLimit} seats${req.durationMonths ? ` · ${req.durationMonths} mo` : ''}`],
+    ['Subscription', subscriptionLabel(req)],
     ['Students', String(req.studentCount)],
   ];
   return (
@@ -302,6 +315,18 @@ function ReadOnlyRequest({ req }: { req: CollegeRequestDetail }) {
             </div>
           ))}
         </dl>
+        {(req.subscriptionCompanies ?? []).length > 0 ? (
+          <ul className="mt-4 flex flex-wrap gap-2">
+            {(req.subscriptionCompanies ?? []).map((c) => (
+              <li
+                key={c.slug}
+                className="rounded-full bg-sky-50 px-2.5 py-0.5 text-[11px] font-semibold text-sky-700 ring-1 ring-sky-200"
+              >
+                {c.name}
+              </li>
+            ))}
+          </ul>
+        ) : null}
         {req.status === 'SUBMITTED' ? (
           <p className="mt-4 text-xs text-slate-600">Awaiting Super Admin review - you&apos;ll be able to edit again if it&apos;s sent back.</p>
         ) : null}
@@ -332,4 +357,14 @@ function ReadOnlyRequest({ req }: { req: CollegeRequestDetail }) {
       </section>
     </div>
   );
+}
+
+/** One-line summary of what the college is buying. */
+function subscriptionLabel(req: CollegeRequestDetail): string {
+  if (req.subscriptionKind === 'PLATFORM') return 'Full Platform - all companies + premium features';
+  if (req.subscriptionKind === 'COMPANY') {
+    const n = (req.subscriptionCompanySlugs ?? []).length;
+    return `Company Access - ${n} ${n === 1 ? 'company' : 'companies'}`;
+  }
+  return 'Not set - students will not inherit any access';
 }

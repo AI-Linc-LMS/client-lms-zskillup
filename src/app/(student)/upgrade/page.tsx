@@ -31,7 +31,7 @@ import { FeatureItem, IncludedGrid, PlanPill, StatBand, TrustBadges, ValueProps 
 import { PLAN_INCLUDED, PLAN_STATS, PLAN_VALUES } from '@/components/billing/plan-content';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { startCartPurchase } from '@/lib/payments/razorpay-checkout';
-import { BillingPeriod, EntitlementScope } from '@/shared/enums';
+import { BillingPeriod, EntitlementScope, EntitlementSubject } from '@/shared/enums';
 import type { CartItemDto, EntitlementDto, MySubscriptionDto, PriceBookEntryDto, PurchaseHistoryItemDto } from '@/shared/dto/payments.dto';
 import { cn } from '@/lib/utils';
 
@@ -90,7 +90,14 @@ export default function UpgradeRenewPage() {
   const hasPlatform = sub?.hasPlatform ?? false;
   const active = (sub?.entitlements ?? []).filter((e) => e.status === 'ACTIVE');
   const platformEnt = active.find((e) => e.scopeType === EntitlementScope.PLATFORM);
-  const granular = active.filter((e) => e.scopeType !== EntitlementScope.PLATFORM);
+  // College-granted lines are shown but never re-sold: the server already 400s a
+  // purchase for a scope the student's college covers, so offering "renew" on one
+  // would only produce a confusing error. Split by subject, not by source, so a
+  // college's own Razorpay B2B purchase is treated the same way.
+  const granular = active.filter(
+    (e) => e.scopeType !== EntitlementScope.PLATFORM && e.subjectType === EntitlementSubject.USER,
+  );
+  const collegeGranted = active.filter((e) => e.subjectType === EntitlementSubject.COLLEGE);
   const paidHistory = (sub?.history ?? []).filter((h) => h.status === 'PAID');
   const totalPaid = paidHistory.reduce((n, h) => n + h.amountCents, 0);
 
@@ -157,14 +164,16 @@ export default function UpgradeRenewPage() {
           history={sub?.history ?? []}
           readiness={readiness}
           period={paidHistory.find((h) => h.scopeType === EntitlementScope.PLATFORM)?.period ?? null}
+          viaCollege={platformEnt?.subjectType === EntitlementSubject.COLLEGE}
           onRenew={renew}
           busyKey={busyKey}
           showHistory={showHistory}
           setShowHistory={setShowHistory}
         />
-      ) : granular.length > 0 ? (
+      ) : granular.length > 0 || collegeGranted.length > 0 ? (
         <CustomPlanView
           granular={granular}
+          collegeGranted={collegeGranted}
           totalPaid={totalPaid}
           history={sub?.history ?? []}
           showHistory={showHistory}
@@ -186,6 +195,7 @@ function PremiumView({
   history,
   readiness,
   period,
+  viaCollege,
   onRenew,
   busyKey,
   showHistory,
@@ -195,6 +205,8 @@ function PremiumView({
   history: PurchaseHistoryItemDto[];
   readiness: Readiness | null;
   period: BillingPeriod | null;
+  /** Full Platform came from the student's college, not a purchase of their own. */
+  viaCollege: boolean;
   onRenew: (p: BillingPeriod) => void;
   busyKey: string | null;
   showHistory: boolean;
@@ -237,7 +249,12 @@ function PremiumView({
   };
 
   const quickActions = [
-    { icon: RefreshCw, label: 'Renew Plan', onClick: () => onRenew(BillingPeriod.ANNUAL) },
+    // Renewing college-provided access is not a purchase the student can make -
+    // the server rejects the order - so the action is dropped rather than shown
+    // as a CTA that always errors.
+    ...(viaCollege
+      ? []
+      : [{ icon: RefreshCw, label: 'Renew Plan', onClick: () => onRenew(BillingPeriod.ANNUAL) }]),
     { icon: Receipt, label: 'Payment History', onClick: openHistory },
     { icon: FileText, label: 'Download Invoice', onClick: () => toast.info('GST invoices are available on request - contact support.') },
     { icon: Gift, label: 'Gift Premium', onClick: () => toast.info('Gifting is coming soon.') },
@@ -378,6 +395,7 @@ function PremiumView({
 
 function CustomPlanView({
   granular,
+  collegeGranted,
   totalPaid,
   history,
   showHistory,
@@ -386,6 +404,7 @@ function CustomPlanView({
   renewingPlan,
 }: {
   granular: EntitlementDto[];
+  collegeGranted: EntitlementDto[];
   totalPaid: number;
   history: PurchaseHistoryItemDto[];
   showHistory: boolean;
@@ -393,10 +412,16 @@ function CustomPlanView({
   onRenewPlan: () => void;
   renewingPlan: boolean;
 }) {
-  const companies = granular.filter((e) => e.scopeType === EntitlementScope.COMPANY);
-  const sections = granular.filter((e) => e.scopeType === EntitlementScope.SECTION);
-  const topics = granular.filter((e) => e.scopeType === EntitlementScope.TOPIC);
-  const maxDays = granular.reduce((n, e) => Math.max(n, e.daysRemaining ?? 0), 0);
+  // Facets describe what the student can USE, so they count college-granted
+  // access too. A student whose college bought six hubs must not read "0
+  // Companies" directly above a panel listing those six hubs.
+  const all = [...granular, ...collegeGranted];
+  const companies = all.filter((e) => e.scopeType === EntitlementScope.COMPANY);
+  const sections = all.filter((e) => e.scopeType === EntitlementScope.SECTION);
+  const topics = all.filter((e) => e.scopeType === EntitlementScope.TOPIC);
+  const maxDays = all.reduce((n, e) => Math.max(n, e.daysRemaining ?? 0), 0);
+  /** Nothing was bought personally - there is nothing for this student to renew. */
+  const collegeOnly = granular.length === 0 && collegeGranted.length > 0;
 
   // Same as the premium view - reveal the history AND scroll to it (in an effect,
   // after the DOM commit, so the ref is guaranteed to exist).
@@ -426,23 +451,35 @@ function CustomPlanView({
             <span className="grid size-14 place-items-center rounded-2xl bg-white text-[#a16207] shadow-sm">
               <Puzzle className="size-7" />
             </span>
-            <p className="mt-3 text-base font-black text-navy">Custom Plan</p>
-            <p className="text-xs text-slate-600">Total Value</p>
-            <p className="text-xl font-black tabular-nums text-emerald-600">{formatPrice(totalPaid, 'INR')}</p>
+            <p className="mt-3 text-base font-black text-navy">
+              {collegeOnly ? 'College Plan' : 'Custom Plan'}
+            </p>
+            {collegeOnly ? (
+              <p className="text-xs text-slate-600">Provided by your institution</p>
+            ) : (
+              <>
+                <p className="text-xs text-slate-600">Total Value</p>
+                <p className="text-xl font-black tabular-nums text-emerald-600">{formatPrice(totalPaid, 'INR')}</p>
+              </>
+            )}
             <div className="mt-4 flex w-full flex-col gap-2">
-              <button
-                type="button"
-                onClick={onRenewPlan}
-                disabled={renewingPlan}
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2 text-xs font-bold text-white transition hover:bg-navy/90 disabled:opacity-60"
-              >
-                {renewingPlan ? (
-                  <Loader2 className="size-3.5 animate-spin" />
-                ) : (
-                  <RefreshCw className="size-3.5" />
-                )}
-                {renewingPlan ? 'Renewing…' : 'Renew My Plan'}
-              </button>
+              {/* Renewing is a personal-purchase action. With nothing bought, the
+                  server rejects the order, so the CTA is not offered at all. */}
+              {collegeOnly ? null : (
+                <button
+                  type="button"
+                  onClick={onRenewPlan}
+                  disabled={renewingPlan || granular.length === 0}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2 text-xs font-bold text-white transition hover:bg-navy/90 disabled:opacity-60"
+                >
+                  {renewingPlan ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <RefreshCw className="size-3.5" />
+                  )}
+                  {renewingPlan ? 'Renewing…' : 'Renew My Plan'}
+                </button>
+              )}
               <Link
                 href="/shop/build"
                 className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-navy transition hover:bg-slate-50"
@@ -459,12 +496,38 @@ function CustomPlanView({
             </div>
           </div>
 
+          <div className="space-y-4">
+          {collegeGranted.length > 0 ? (
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-700">
+                Included with your college
+              </p>
+              <p className="mt-1 text-sm text-slate-700">
+                Provided by your institution - nothing to buy, and it stays alongside anything you
+                purchased yourself.
+              </p>
+              <ul className="mt-3 flex flex-wrap gap-2">
+                {collegeGranted.map((e) => (
+                  <li
+                    key={e.id}
+                    className="rounded-full bg-white px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200"
+                  >
+                    {e.scopeType === EntitlementScope.PLATFORM
+                      ? 'Full Platform'
+                      : slugToLabel(e.scopeRef)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
           <div className="grid gap-3 sm:grid-cols-3">
             <PlanFacet icon={Building2} label="Companies" primary={`${companies.length} ${companies.length === 1 ? 'Company' : 'Companies'}`} sub={companies.map((e) => slugToLabel(e.scopeRef)).slice(0, 2).join(', ') || '-'} />
             <PlanFacet icon={Layers} label="Sections" primary={`${sections.length} Section${sections.length === 1 ? '' : 's'}`} sub={sections.map((e) => slugToLabel(e.scopeRef)).slice(0, 2).join(', ') || '-'} />
             <PlanFacet icon={Target} label="Sub-topics" primary={`${topics.length} Topic${topics.length === 1 ? '' : 's'}`} sub={topics.map((e) => slugToLabel(e.scopeRef)).slice(0, 2).join(', ') || '-'} />
-            <PlanFacet icon={Sparkles} label="Access" primary={`${granular.length} unlock${granular.length === 1 ? '' : 's'}`} sub="Practice + analytics" />
-            <PlanFacet icon={Clock} label="Validity" primary={maxDays > 0 ? `${maxDays} days left` : 'Active'} sub="Renew any time" />
+            <PlanFacet icon={Sparkles} label="Access" primary={`${all.length} unlock${all.length === 1 ? '' : 's'}`} sub="Practice + analytics" />
+            <PlanFacet icon={Clock} label="Validity" primary={maxDays > 0 ? `${maxDays} days left` : 'Active'} sub={collegeOnly ? 'Managed by your college' : 'Renew any time'} />
+          </div>
           </div>
         </div>
       </section>

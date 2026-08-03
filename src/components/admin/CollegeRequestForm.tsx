@@ -3,12 +3,23 @@
 import { useMemo, useRef, useState } from 'react';
 import { AlertCircle, Loader2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  isScopeComplete,
+  SubscriptionScopePicker,
+  type SubscriptionScopeValue,
+} from '@/components/admin/SubscriptionScopePicker';
+import { CollegeSubscriptionKind } from '@/shared/enums';
 
 /**
  * Shared create/edit form for a College Registration Request (Batch 2). Collects
- * college details, TPO contact, subscription plan, and the student list (CSV
- * upload or paste), then hands a normalized payload to the parent, which owns the
- * API calls. `mode` distinguishes "save draft" from "save + submit for review".
+ * college details, TPO contact, the subscription the college is buying, and the
+ * student list (CSV upload or paste), then hands a normalized payload to the
+ * parent, which owns the API calls. `mode` distinguishes "save draft" from
+ * "save + submit for review".
+ *
+ * The subscription choice is what every imported student's access is derived from,
+ * so it is required before submitting - a request without one reaches the Super
+ * Admin with nothing to approve and its students onboard as free users.
  */
 
 export interface CollegeRequestStudent {
@@ -28,6 +39,8 @@ export interface CollegeRequestFormValue {
   planName: string;
   seatLimit: number;
   durationMonths: number | '';
+  subscriptionKind: CollegeSubscriptionKind | '';
+  subscriptionCompanySlugs: string[];
   students: CollegeRequestStudent[];
 }
 
@@ -42,6 +55,8 @@ const EMPTY: CollegeRequestFormValue = {
   planName: '',
   seatLimit: 60,
   durationMonths: 12,
+  subscriptionKind: '',
+  subscriptionCompanySlugs: [],
   students: [],
 };
 
@@ -112,7 +127,16 @@ export function CollegeRequestForm({
   const [v, setV] = useState<CollegeRequestFormValue>({ ...EMPTY, ...initial });
   const [slugTouched, setSlugTouched] = useState<boolean>(Boolean(initial?.collegeSlug));
   const [parseErrors, setParseErrors] = useState<string[]>([]);
+  const [pasted, setPasted] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+  /**
+   * The roster that did NOT come from the paste box - the one the form opened
+   * with, or the last CSV upload. Emptying the paste box restores this rather
+   * than dropping to zero students.
+   */
+  const [baseStudents, setBaseStudents] = useState<CollegeRequestStudent[]>(
+    initial?.students ?? [],
+  );
 
   const set = <K extends keyof CollegeRequestFormValue>(k: K, val: CollegeRequestFormValue[K]) =>
     setV((prev) => ({ ...prev, [k]: val }));
@@ -129,11 +153,26 @@ export function CollegeRequestForm({
     const file = e.target.files?.[0];
     if (!file) return;
     const { rows, errors } = parseCsv(await file.text());
+    setBaseStudents(rows);
     set('students', rows);
     setParseErrors(errors);
+    // Reset the input so re-picking the SAME file fires another change event -
+    // otherwise recovering from a mistake means reloading and losing the form.
+    e.target.value = '';
   }
 
+  /**
+   * The paste box is controlled and only overwrites the roster while it has
+   * content. Clearing it restores whatever was uploaded/loaded before, instead of
+   * wiping a saved draft's student list the moment someone clicks into the box.
+   */
   function onPaste(raw: string) {
+    setPasted(raw);
+    if (raw.trim() === '') {
+      set('students', baseStudents);
+      setParseErrors([]);
+      return;
+    }
     const { rows, errors } = parseCsv(raw);
     set('students', rows);
     setParseErrors(errors);
@@ -148,6 +187,7 @@ export function CollegeRequestForm({
       v.contactName.trim().length >= 2 &&
       /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.contactEmail) &&
       v.planName.trim().length >= 2 &&
+      isScopeComplete({ kind: v.subscriptionKind, companySlugs: v.subscriptionCompanySlugs }) &&
       v.students.length >= 1,
     [v],
   );
@@ -200,8 +240,29 @@ export function CollegeRequestForm({
 
       {/* Subscription plan */}
       <section className="rounded-2xl border border-slate-200 bg-white p-6">
-        <h2 className="text-sm font-bold text-navy">Subscription plan</h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+        <h2 className="text-sm font-bold text-navy">Subscription</h2>
+        <p className="mt-1 text-xs text-slate-600">
+          What this college is purchasing. Every student imported into one of its cohorts inherits
+          this automatically - no separate purchase, and personal purchases they already own are
+          kept on top.
+        </p>
+        <div className="mt-4">
+          <SubscriptionScopePicker
+            value={{ kind: v.subscriptionKind, companySlugs: v.subscriptionCompanySlugs }}
+            onChange={(next: SubscriptionScopeValue) =>
+              setV((prev) => ({
+                ...prev,
+                subscriptionKind: next.kind,
+                subscriptionCompanySlugs: next.companySlugs,
+              }))
+            }
+          />
+        </div>
+
+        <h3 className="mt-6 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+          Commercials
+        </h3>
+        <div className="mt-3 grid gap-4 sm:grid-cols-3">
           <Field label="Plan name">
             <input className={inputCls} value={v.planName} onChange={(e) => set('planName', e.target.value)} placeholder="Campus Pro" />
           </Field>
@@ -243,6 +304,7 @@ export function CollegeRequestForm({
         <textarea
           className={`${inputCls} mt-3 h-28 font-mono text-xs`}
           placeholder={'student1@college.edu,Asha Rao,21CS001\nstudent2@college.edu,Vikram N,21CS002'}
+          value={pasted}
           onChange={(e) => onPaste(e.target.value)}
         />
         {parseErrors.length > 0 ? (
@@ -308,6 +370,18 @@ export function toCreateBody(v: CollegeRequestFormValue) {
     planName: v.planName.trim(),
     seatLimit: Number(v.seatLimit) || 0,
     durationMonths: v.durationMonths === '' ? undefined : Number(v.durationMonths),
+    // A half-made choice is not a choice: "Company Access" with nothing selected
+    // unlocks nothing and the server rejects it, so a draft saves with no kind
+    // rather than failing. Submitting still requires a complete selection.
+    ...(isScopeComplete({ kind: v.subscriptionKind, companySlugs: v.subscriptionCompanySlugs })
+      ? {
+          subscriptionKind: v.subscriptionKind as CollegeSubscriptionKind,
+          subscriptionCompanySlugs:
+            v.subscriptionKind === CollegeSubscriptionKind.COMPANY
+              ? v.subscriptionCompanySlugs
+              : [],
+        }
+      : { subscriptionKind: undefined, subscriptionCompanySlugs: [] }),
     students: v.students.map((s) => ({
       email: s.email,
       fullName: s.fullName,

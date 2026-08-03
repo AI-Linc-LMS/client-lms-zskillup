@@ -13,6 +13,7 @@ import {
   ArrayMinSize,
   IsArray,
   IsEmail,
+  IsEnum,
   IsInt,
   IsOptional,
   IsString,
@@ -23,11 +24,14 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
-import { CollegeRequestStatus } from '../enums';
+import { CollegeRequestStatus, CollegeSubscriptionKind } from '../enums';
 import { TpoInvitationRowDto } from './tpo.dto';
 
 const SLUG_REGEX = /^[a-z0-9-]+$/;
 const SLUG_RULE = { message: 'slug must be lowercase letters, digits, and dashes only' };
+const COMPANY_SLUG_RULE = {
+  message: 'company slug must be lowercase letters, digits, and dashes only',
+};
 
 const trimString = ({ value }: { value: unknown }): unknown =>
   typeof value === 'string' ? value.trim() : value;
@@ -64,6 +68,15 @@ export class CreateCollegeRequestDto {
 
   @IsOptional() @IsInt() @Min(1) @Max(120)
   durationMonths?: number;
+
+  /** What the college is buying - Full Platform OR a set of company hubs. */
+  @IsOptional() @IsEnum(CollegeSubscriptionKind)
+  subscriptionKind?: CollegeSubscriptionKind;
+
+  /** Company slugs, required (1..50) when subscriptionKind is COMPANY. */
+  @IsOptional() @IsArray() @ArrayMaxSize(50, { message: 'Up to 50 companies per college' })
+  @IsString({ each: true }) @Matches(SLUG_REGEX, { each: true, ...COMPANY_SLUG_RULE })
+  subscriptionCompanySlugs?: string[];
 
   @IsArray()
   @ArrayMinSize(1, { message: 'Add at least one student' })
@@ -105,6 +118,13 @@ export class UpdateCollegeRequestDto {
   @IsOptional() @IsInt() @Min(1) @Max(120)
   durationMonths?: number;
 
+  @IsOptional() @IsEnum(CollegeSubscriptionKind)
+  subscriptionKind?: CollegeSubscriptionKind;
+
+  @IsOptional() @IsArray() @ArrayMaxSize(50, { message: 'Up to 50 companies per college' })
+  @IsString({ each: true }) @Matches(SLUG_REGEX, { each: true, ...COMPANY_SLUG_RULE })
+  subscriptionCompanySlugs?: string[];
+
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(5000, { message: 'Up to 5000 students per request' })
@@ -131,6 +151,9 @@ export interface CollegeRequestSummaryDto {
   planName: string;
   seatLimit: number;
   durationMonths: number | null;
+  /** NULL on legacy requests drafted before the subscription picker existed. */
+  subscriptionKind: CollegeSubscriptionKind | null;
+  subscriptionCompanySlugs: string[];
   studentCount: number;
   status: CollegeRequestStatus;
   rejectionReason: string | null;
@@ -149,4 +172,11 @@ export interface CollegeRequestSummaryDto {
 /** Detail shape - summary plus the full pending student list. */
 export interface CollegeRequestDetailDto extends CollegeRequestSummaryDto {
   students: Array<{ email: string; fullName?: string | null; rollNumber?: string | null }>;
+  /**
+   * The selected companies resolved to display names, so the Super Admin's review
+   * pane can show exactly what it is about to grant without a second round-trip.
+   * A slug that no longer resolves (company archived/renamed) still appears, with
+   * the slug as its name - better a visible oddity than a silently dropped grant.
+   */
+  subscriptionCompanies: Array<{ slug: string; name: string }>;
 }
