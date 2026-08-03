@@ -88,12 +88,11 @@ export function CompaniesExplorer() {
           locked: false,
         });
         const liveBySlug = new Map(live.map((c) => [c.slug, c]));
-        // Show exactly the FEATURED set (HOMEPAGE_FEATURED_TRACKS), in its declared order,
-        // shared with the landing page. A featured slug present in the live catalog renders
-        // unlocked + enriched; the rest render locked ("coming soon"), using the featured
-        // config's own name/logo/tagline (so "LTIMindtree"/"HCLTech" show correctly even
-        // though the catalog rows are unpublished). Publishing a row auto-unlocks it.
-        const merged: ExplorerCompany[] = HOMEPAGE_FEATURED_TRACKS.map((f) => {
+        // The FEATURED set (HOMEPAGE_FEATURED_TRACKS) leads, in its declared order,
+        // shared with the landing page. A featured slug present in the live catalog
+        // renders unlocked + enriched; one that isn't published yet renders locked
+        // ("coming soon") using the featured config's own name/logo/tagline.
+        const featured: ExplorerCompany[] = HOMEPAGE_FEATURED_TRACKS.map((f) => {
           const l = liveBySlug.get(f.slug);
           if (l) return mapLive(l);
           return {
@@ -108,7 +107,14 @@ export function CompaniesExplorer() {
             locked: true,
           };
         });
-        setCompanies(merged);
+        // ...then every OTHER published company, so publishing a hub in the admin
+        // console actually puts it on this grid. Previously the grid rendered the
+        // featured list and nothing else, so a published company that nobody had
+        // remembered to add here (Wipro, IBM) was invisible to students no matter
+        // what the catalog said - the Publish toggle silently did nothing.
+        const featuredSlugs = new Set(HOMEPAGE_FEATURED_TRACKS.map((f) => f.slug));
+        const rest = live.filter((c) => !featuredSlugs.has(c.slug)).map(mapLive);
+        setCompanies([...featured, ...rest]);
       })
       .catch(() => {
         if (cancelled) return;
