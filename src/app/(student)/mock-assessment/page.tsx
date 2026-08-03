@@ -9,8 +9,11 @@ import { Reveal } from '@/components/motion/primitives';
 /**
  * Mock Assessment (Mode 3) - student-assembled, non-adaptive, PROCTORED practice
  * assessments. Pick sections/topics, set size + duration, and run under the same
- * proctored assessment UI as the real assessments. Free users get one complimentary
- * mock (enforced server-side); premium unlocks unlimited attempts.
+ * proctored assessment UI as the real assessments. This module is PAID-ONLY: only
+ * students with Full Platform or a Company subscription (careerToolsEntitled) may
+ * build and attempt a mock - there is no free mock. Non-entitled students see an
+ * up-front lock (in the hero chip + the builder), enforced server-side by a 403
+ * PAYWALL on start. The gate fails OPEN while the paywall is off.
  */
 export default function MockAssessmentPage() {
   return (

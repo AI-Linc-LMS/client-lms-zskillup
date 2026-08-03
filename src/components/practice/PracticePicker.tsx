@@ -105,10 +105,12 @@ export function PracticePicker({
   };
   // Under single-scope the whole-section drill is always locked (only one sub-topic is free).
   const sectionLocked = (slug: string) => singleScope && !sectionOwned(slug);
+  // Exactly one company is free (server-designated freeCompanySlug — the first company,
+  // and only for callers who own no company hub). Every other non-owned company locks,
+  // INCLUDING all of them for a company owner (freeCompanySlug is null → nothing matches).
   const companyLocked = (slug: string) => {
     if (!singleScope || companyOwned(slug)) return false;
-    const claimed = accessMap?.freeCompanySlug;
-    return !!claimed && claimed !== slug;
+    return accessMap?.freeCompanySlug !== slug;
   };
 
   // Coding topics come from the coding bank (Judge0 problems), a separate system

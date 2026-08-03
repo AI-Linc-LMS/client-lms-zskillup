@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, CalendarClock, Layers, Loader2, Search, Sparkles, TrendingUp } from 'lucide-react';
+import { ArrowRight, CalendarClock, Layers, Loader2, Lock, Search, ShoppingCart, Sparkles, TrendingUp } from 'lucide-react';
 import { getCompanyPrep, type ApiCompanyPrep } from '@/lib/api/catalog';
 import { getTopicAccuracy, type ApiTopicAccuracy } from '@/lib/api/practice';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 /**
@@ -36,11 +37,15 @@ export function CompanyPrepPanel({
   companySlug,
   companyName,
   gate,
+  locked = false,
 }: {
   companySlug: string;
   companyName: string;
   /** Company-hub free-tier gate: swallow PYQ/topic clicks into the upgrade modal. */
   gate?: (e: React.MouseEvent, what: string) => boolean;
+  /** Phase-8 single-scope lock: this company's practice needs a subscription. When
+   *  true the live PYQ/topic content is replaced by a locked state. Fails OPEN. */
+  locked?: boolean;
 }) {
   const [prep, setPrep] = useState<ApiCompanyPrep | null>(null);
   const [errored, setErrored] = useState(false);
@@ -115,6 +120,38 @@ export function CompanyPrepPanel({
       }
     });
   }, [prep, accBySlug, query, filter]);
+
+  // Locked (single-scope paywall): ownership was already resolved upstream, so this
+  // only fires for a company the student neither owns nor gets free. Replace the live
+  // PYQ/topic content entirely — no practice links leak through.
+  if (locked) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-violet-600 ring-1 ring-inset ring-violet-100">
+            <Sparkles className="size-3.5" /> Practice library
+          </span>
+          <h2 className="mt-3 text-lg font-extrabold tracking-tight text-navy sm:text-xl">
+            Practice {companyName}
+          </h2>
+        </div>
+        <div className="flex flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-slate-200 bg-white p-14 text-center">
+          <span className="grid size-14 place-items-center rounded-2xl bg-slate-100 text-slate-500">
+            <Lock className="size-6" />
+          </span>
+          <p className="text-sm font-bold text-navy">Practice for {companyName} needs a subscription</p>
+          <p className="max-w-sm text-xs leading-relaxed text-slate-600">
+            Unlock {companyName}&apos;s previous-year papers and topic-wise practice with a plan.
+          </p>
+          <Button asChild className="mt-1">
+            <Link href="/shop">
+              <ShoppingCart className="size-4" aria-hidden="true" /> Unlock practice
+            </Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (errored) {
     return <p className="text-sm text-slate-600">Couldn&apos;t load practice content. Please refresh.</p>;

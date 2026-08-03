@@ -23,7 +23,7 @@ import {
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { cn } from '@/lib/utils';
 import { getTopicAccuracy, type ApiTopicAccuracy } from '@/lib/api/practice';
-import { getPricing } from '@/lib/api/payments';
+import { getPricing, getPracticeAccessMap } from '@/lib/api/payments';
 import { onXpUpdated } from '@/lib/xp-events';
 import { InfoTip } from '@/components/ui/InfoTip';
 import { Disclaimer } from '@/components/legal/Disclaimer';
@@ -38,7 +38,7 @@ import { sectionLeaves, type SectionLeaf, type SectionRoot } from '@/lib/section
 import { buildPriceMap, retailPrice } from '@/lib/payments/pricing';
 import { formatPrice } from '@/lib/api/subscriptions';
 import { BillingPeriod, EntitlementScope } from '@/shared/enums';
-import type { PriceBookEntryDto } from '@/shared/dto/payments.dto';
+import type { PriceBookEntryDto, PracticeAccessMapDto } from '@/shared/dto/payments.dto';
 
 const SECTION_TABS = ['Overview', 'Syllabus', 'Study Material', 'Practice'] as const;
 type SectionTab = (typeof SECTION_TABS)[number];
@@ -105,13 +105,29 @@ export function SectionHub({ section }: { section: SectionRoot }) {
   const reduce = useReducedMotion();
 
   const upgrade = useUpgradeGate();
-  const { hasPlatform, active } = useMySubscription();
+  const { hasPlatform, active, paywallEnabled } = useMySubscription();
   const cart = useCartOptional();
   const [prices, setPrices] = useState<PriceBookEntryDto[]>([]);
   useEffect(() => {
     getPricing()
       .then(setPrices)
       .catch(() => setPrices([]));
+  }, []);
+
+  // Up-front visible practice locks under the single-scope free tier (Phase 8):
+  // one free sub-topic per section is served, every OTHER non-owned sub-topic is
+  // locked. Server-driven and fails OPEN - inert until FREEMIUM_SINGLE_SCOPE is on
+  // (accessMap null / paywall off / hasPlatform → nothing locked). Never locks a
+  // sub-topic the student owns or the section's designated free one.
+  const [accessMap, setAccessMap] = useState<PracticeAccessMapDto | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    getPracticeAccessMap()
+      .then((m) => !cancelled && setAccessMap(m))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const meta = sectionMetaFor(section.slug, section.order - 1);
@@ -152,6 +168,18 @@ export function SectionHub({ section }: { section: SectionRoot }) {
   const topicOwned = useCallback(
     (slug: string) => ownedSection || ownedTopics.has(scopeRefFor(slug)),
     [ownedSection, ownedTopics, scopeRefFor],
+  );
+
+  // Only surface locks when the paywall is enforced AND the aggressive single-scope
+  // model is on (falls open otherwise). Ownership is always checked first, so an
+  // owned sub-topic (or the section's free one) is never locked.
+  const singleScope = paywallEnabled && !hasPlatform && !!accessMap?.singleScopeEnabled;
+  const topicLocked = useCallback(
+    (slug: string) =>
+      singleScope &&
+      !topicOwned(slug) &&
+      accessMap?.freeSubtopicSlugBySection?.[section.slug] !== slug,
+    [singleScope, topicOwned, accessMap, section.slug],
   );
 
   const priceMap = useMemo(() => buildPriceMap(prices), [prices]);
@@ -302,6 +330,7 @@ export function SectionHub({ section }: { section: SectionRoot }) {
                 section={section}
                 accuracy={acc.bySlug}
                 topicOwned={topicOwned}
+                topicLocked={topicLocked}
                 topicPrice={topicPrice}
                 onAddTopic={addTopic}
                 practiceHref={practiceHref}
@@ -883,6 +912,7 @@ function PracticeTab({
   section,
   accuracy,
   topicOwned,
+  topicLocked,
   topicPrice,
   onAddTopic,
   practiceHref,
@@ -891,25 +921,77 @@ function PracticeTab({
   section: SectionRoot;
   accuracy: Map<string, ApiTopicAccuracy>;
   topicOwned: (slug: string) => boolean;
+  topicLocked: (slug: string) => boolean;
   topicPrice: string | null;
   onAddTopic: (leaf: SectionLeaf) => void;
   practiceHref: (slug: string) => string;
   cartHas: (slug: string) => boolean;
 }) {
+  // "Show only my content" — hide sub-topics the student hasn't unlocked (Phase-8).
+  const [onlyMine, setOnlyMine] = useState(false);
   const leaves = useMemo(() => sectionLeaves(section), [section]);
-  // Group leaves by their mid-level topic for readable sub-headers.
+
+  // Access controls surface when anything is locked, or the student owns some (but
+  // not all) sub-topics — mirrors StudyMaterialTab's banner+toggle.
+  const anyLocked = useMemo(() => leaves.some((l) => topicLocked(l.slug)), [leaves, topicLocked]);
+  const ownedCount = useMemo(() => leaves.filter((l) => topicOwned(l.slug)).length, [leaves, topicOwned]);
+  const showControls = anyLocked || (ownedCount > 0 && ownedCount < leaves.length);
+
+  // Group leaves by their mid-level topic for readable sub-headers; the toggle then
+  // drops sub-topics the student doesn't own (empty groups fall away).
   const groups = useMemo(() => {
     const map = new Map<string, SectionLeaf[]>();
     for (const l of leaves) {
+      if (onlyMine && !topicOwned(l.slug)) continue;
       const g = map.get(l.groupName);
       if (g) g.push(l);
       else map.set(l.groupName, [l]);
     }
     return [...map.entries()];
-  }, [leaves]);
+  }, [leaves, onlyMine, topicOwned]);
 
   return (
     <div className="space-y-5">
+      {showControls ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-orange/25 bg-gradient-to-r from-orange/5 to-amber-50/60 px-4 py-3">
+          <p className="flex items-center gap-2 text-xs font-semibold text-navy">
+            <Lock className="size-3.5 shrink-0 text-orange" />
+            {anyLocked
+              ? 'Some sub-topics need a subscription. Unlock them to practise the whole section.'
+              : 'You own part of this — use the toggle to focus on your content.'}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setOnlyMine((v) => !v)}
+              aria-pressed={onlyMine}
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-bold transition',
+                onlyMine
+                  ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+                  : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300',
+              )}
+            >
+              {onlyMine ? 'Showing my content' : 'Show only my content'}
+            </button>
+            {anyLocked ? (
+              <Link
+                href="/shop"
+                className="inline-flex items-center gap-1.5 rounded-full bg-navy px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-navy/90"
+              >
+                Unlock
+              </Link>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+
+      {onlyMine && groups.length === 0 ? (
+        <div className="rounded-3xl border border-dashed border-slate-200 bg-white p-10 text-center text-sm text-slate-600">
+          You don&apos;t own any sub-topics in this section yet.
+        </div>
+      ) : null}
+
       {groups.map(([groupName, groupLeaves]) => (
         <Reveal key={groupName}>
           <section className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_18px_50px_-30px_rgba(15,23,42,0.25)]">
@@ -922,6 +1004,7 @@ function PracticeTab({
             <ul className="divide-y divide-slate-100">
               {groupLeaves.map((leaf) => {
                 const owned = topicOwned(leaf.slug);
+                const locked = topicLocked(leaf.slug);
                 const acc = accuracy.get(leaf.slug);
                 const inCart = cartHas(leaf.slug);
                 return (
@@ -965,12 +1048,22 @@ function PracticeTab({
                       </button>
                     )}
 
-                    <Link
-                      href={practiceHref(leaf.slug)}
-                      className="inline-flex shrink-0 items-center gap-1 rounded-full bg-navy px-3 py-1.5 text-xs font-bold text-white transition hover:bg-navy/90"
-                    >
-                      Practise <ArrowRight className="size-3.5" />
-                    </Link>
+                    {locked ? (
+                      <Link
+                        href="/shop"
+                        title="Unlock with a subscription"
+                        className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-400 transition-colors hover:border-slate-300"
+                      >
+                        <Lock className="size-3.5 shrink-0" /> Practise
+                      </Link>
+                    ) : (
+                      <Link
+                        href={practiceHref(leaf.slug)}
+                        className="inline-flex shrink-0 items-center gap-1 rounded-full bg-navy px-3 py-1.5 text-xs font-bold text-white transition hover:bg-navy/90"
+                      >
+                        Practise <ArrowRight className="size-3.5" />
+                      </Link>
+                    )}
                   </li>
                 );
               })}

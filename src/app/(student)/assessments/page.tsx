@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Clock,
   Loader2,
+  Lock,
   ShieldCheck,
   Sparkles,
   Trophy,
@@ -26,6 +27,8 @@ import { Reveal, Stagger, StaggerItem } from '@/components/motion/primitives';
 import { cn } from '@/lib/utils';
 import { MockHistory } from '@/components/practice/MockHistory';
 import { MyRankingPanel } from '@/components/student/MyRankingPanel';
+import { StatusPill } from '@/components/student/StatusPill';
+import { Button } from '@/components/ui/button';
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -340,6 +343,64 @@ export default function AssessmentsPage() {
                 {upcoming.map((it) => {
                   const dimmed =
                     selectedDay !== null && dayKey(new Date(it.scheduledAt)) !== selectedDay;
+
+                  // Visible-locked drive: the student may SEE it exists but isn't entitled
+                  // to open/attempt it (unpaid / non-matching plan). Show a lock + upgrade
+                  // prompt, and NEVER link through to the detail/start route (no preview).
+                  if (it.locked) {
+                    return (
+                      <StaggerItem key={it.id}>
+                        <div
+                          className={cn(
+                            'relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 transition-all',
+                            dimmed ? 'opacity-40' : 'opacity-100',
+                          )}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <span className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-lg border border-slate-200 bg-white">
+                              {it.companyLogoUrl ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={it.companyLogoUrl}
+                                  alt=""
+                                  className="max-h-5 max-w-full object-contain"
+                                />
+                              ) : (
+                                <span className="text-[10px] font-bold text-slate-600">
+                                  {it.companyName.slice(0, 2).toUpperCase()}
+                                </span>
+                              )}
+                            </span>
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-bold text-navy">{it.companyName}</p>
+                              <p className="truncate text-xs text-slate-600">{it.title}</p>
+                            </div>
+                            <Lock className="ml-auto size-4 shrink-0 text-slate-400" aria-hidden />
+                          </div>
+                          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium text-slate-600">
+                            <span className="flex items-center gap-1">
+                              <CalendarDays className="size-3.5" /> {fmtDate(it.scheduledAt)}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="size-3.5" /> {fmtTime(it.scheduledAt)} · {it.durationMinutes}m
+                            </span>
+                            {it.proctored ? (
+                              <span className="flex items-center gap-1 text-violet-600">
+                                <Video className="size-3.5" /> Proctored
+                              </span>
+                            ) : null}
+                          </div>
+                          <div className="mt-3 flex items-center justify-between gap-2">
+                            <StatusPill tone="neutral" label="Subscription required" />
+                            <Button asChild size="sm">
+                              <Link href="/shop">Upgrade</Link>
+                            </Button>
+                          </div>
+                        </div>
+                      </StaggerItem>
+                    );
+                  }
+
                   const startMs = new Date(it.scheduledAt).getTime();
                   const endMs = startMs + it.durationMinutes * 60_000;
                   const live = Date.now() >= startMs && Date.now() <= endMs;

@@ -29,6 +29,7 @@ import { cn } from '@/lib/utils';
 import { HUB_TABS, type HubContent, type HubTab } from '@/lib/hub-data';
 import { hasRoleHint } from '@/lib/session-hints';
 import { getCompanyCommunity } from '@/lib/api/catalog';
+import { getPracticeAccessMap } from '@/lib/api/payments';
 import { getReadiness } from '@/lib/api/readiness';
 import { onXpUpdated } from '@/lib/xp-events';
 import { InfoTip } from '@/components/ui/InfoTip';
@@ -41,6 +42,7 @@ import { CodingProblemsList } from '@/components/coding/CodingProblemsList';
 import { useUpgradeGate } from '@/hooks/useUpgradeGate';
 import { useMySubscription } from '@/hooks/useMySubscription';
 import { EntitlementScope } from '@/shared/enums';
+import type { PracticeAccessMapDto } from '@/shared/dto/payments.dto';
 import { UpgradeModal } from '@/components/billing/UpgradeModal';
 
 const TAB_ICONS: Record<HubTab, typeof BookOpen> = {
@@ -173,6 +175,22 @@ export function CompanyHub({ content }: { content: HubContent }) {
     hasPlatform ||
     active.some((e) => e.scopeType === EntitlementScope.COMPANY && e.scopeRef === content.company.slug);
   const mockLocked = paywallEnabled && !ownsThisCompany;
+  // Practice Quiz lock (Phase 8, single-scope): this company's practice is locked
+  // unless the student owns it, it's the one free company, or the paywall/single-scope
+  // is off. Server-driven map, fetched best-effort — fails OPEN (null → nothing locked).
+  const [accessMap, setAccessMap] = useState<PracticeAccessMapDto | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    getPracticeAccessMap()
+      .then((m) => !cancelled && setAccessMap(m))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const singleScope = paywallEnabled && !hasPlatform && !!accessMap?.singleScopeEnabled;
+  const companyPracticeLocked =
+    singleScope && !ownsThisCompany && accessMap?.freeCompanySlug !== content.company.slug;
   const urlTab = searchParams.get('tab');
   const [tab, setTab] = useState<HubTab>(
     urlTab && (HUB_TABS as readonly string[]).includes(urlTab) ? (urlTab as HubTab) : 'Overview',
@@ -263,6 +281,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
                 companySlug={content.company.slug}
                 companyName={content.company.name}
                 gate={upgrade.guard}
+                locked={companyPracticeLocked}
               />
             )}
             {tab === 'Coding' && (

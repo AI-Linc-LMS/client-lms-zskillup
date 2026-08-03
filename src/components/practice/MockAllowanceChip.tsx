@@ -1,24 +1,37 @@
 'use client';
 
-import { Brain, Crown } from 'lucide-react';
+import Link from 'next/link';
+import { Brain, Lock } from 'lucide-react';
 import { useMySubscription } from '@/hooks/useMySubscription';
 
 /**
- * Honest, plan-aware "how many mocks you get" chip for the Mock Assessment hero.
- * Free users receive ONE complimentary mock then hit the upgrade modal (enforced
- * server-side by mockAssessmentAccess), so promising "unlimited attempts" to
- * everyone was misleading - premium keeps unlimited, free sees the real allowance.
+ * Plan-aware access chip for the Mock Assessment hero.
+ *
+ * Mock assessments are PAID-ONLY - there is no free mock. Access is gated on
+ * FULL-PLATFORM or COMPANY entitlement (careerToolsEntitled), NOT on owning any
+ * scope (a Topic/Section-only owner is NOT mock-eligible). When the paywall is on
+ * and the student is not entitled we show an up-front LOCK that links to /shop,
+ * rather than advertising an attempt they can't make. Fails OPEN: paywall off /
+ * still loading / entitled -> positive state.
  */
 export function MockAllowanceChip() {
-  // Mock access is gated on FULL-PLATFORM or COMPANY entitlement (careerToolsEntitled),
-  // NOT on owning any scope — a Topic/Section-only owner is still on the 1-free meter.
-  const { careerToolsEntitled } = useMySubscription(true);
-  const isPremium = careerToolsEntitled;
-  const Icon = isPremium ? Brain : Crown;
-  const text = isPremium ? 'Unlimited attempts' : '1 free mock, then upgrade';
+  const { careerToolsEntitled, paywallEnabled } = useMySubscription(true);
+  const locked = paywallEnabled && !careerToolsEntitled;
+
+  if (locked) {
+    return (
+      <Link
+        href="/shop"
+        className="inline-flex items-center gap-2 rounded-xl border border-orange/30 bg-orange/10 px-4 py-3 text-sm font-semibold text-white/80 transition-colors hover:bg-orange/15"
+      >
+        <Lock className="size-4 text-orange" /> Upgrade to attempt mocks
+      </Link>
+    );
+  }
+
   return (
     <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70">
-      <Icon className="size-4 text-white/40" /> {text}
+      <Brain className="size-4 text-white/40" /> Unlimited attempts
     </div>
   );
 }

@@ -23,6 +23,10 @@ export interface ApiScheduledAssessment {
   description?: string | null;
   /** Candidate-facing instructions shown on the pre-assessment screen. */
   instructions?: string | null;
+  /** True = visible-locked drive: the student may SEE it but isn't entitled to open
+   *  or attempt it (unpaid / non-matching plan). Render a lock + upgrade prompt, no
+   *  click-through. Absent/false ⇒ accessible. */
+  locked?: boolean;
 }
 
 export interface CreateScheduledAssessmentPayload {

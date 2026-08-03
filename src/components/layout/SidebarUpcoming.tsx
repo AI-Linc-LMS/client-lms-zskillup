@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { CalendarClock, ShieldCheck } from 'lucide-react';
+import { CalendarClock, Lock, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getMySchedule, type ApiScheduledAssessment } from '@/lib/api/scheduling';
 import { getMockHistory } from '@/lib/api/mocks';
@@ -67,6 +67,25 @@ export function SidebarUpcoming() {
       </div>
       <ul className="space-y-1.5">
         {items.map((a) => {
+          // Visible-locked drive: seen but not entitled (unpaid / non-matching plan).
+          // Show a lock indicator and render as a non-clickable row - never a
+          // click-through to the drive.
+          if (a.locked) {
+            return (
+              <li key={a.id}>
+                <div className="block rounded-xl border border-slate-200 bg-white p-2.5">
+                  <p className="flex items-center gap-1.5 truncate text-[12px] font-bold text-navy">
+                    <Lock className="size-3 shrink-0 text-slate-400" aria-hidden="true" />
+                    <span className="truncate">{a.title}</span>
+                  </p>
+                  <p className="mt-0.5 flex items-center justify-between gap-2 text-[10px] font-semibold">
+                    <span className="truncate text-slate-500">{a.companyName}</span>
+                    <span className="shrink-0 text-slate-500">Locked</span>
+                  </p>
+                </div>
+              </li>
+            );
+          }
           const startMs = new Date(a.scheduledAt).getTime();
           const live = Date.now() >= startMs && Date.now() <= startMs + a.durationMinutes * 60_000;
           const completed = !!a.mockTestId && done.has(a.mockTestId);

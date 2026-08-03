@@ -2,13 +2,16 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { toast } from 'sonner';
-import { AlertTriangle, Check, Clock, Code2, Layers, ListChecks, Loader2, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, Check, Clock, Code2, Crown, Layers, ListChecks, Loader2, Lock, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { listTopicsWithCounts, type ApiTopic } from '@/lib/api/catalog';
 import { createCustomMock, listCodingTopics, type CodingTopic } from '@/lib/api/mocks';
 import { ApiRequestError } from '@/lib/api/types';
 import { UpgradeModal } from '@/components/billing/UpgradeModal';
+import { useMySubscription } from '@/hooks/useMySubscription';
+import { Button } from '@/components/ui/button';
 import { HIDDEN_ROOT_SLUGS, sectionMetaFor } from './section-meta';
 
 /**
@@ -18,6 +21,13 @@ import { HIDDEN_ROOT_SLUGS, sectionMetaFor } from './section-meta';
  */
 export function CustomMockBuilder() {
   const router = useRouter();
+  // Mock assessments are PAID-ONLY (Full Platform or a Company plan -> careerToolsEntitled).
+  // Owning only a Section/Topic does NOT qualify, so we gate specifically on
+  // careerToolsEntitled, not planStatus. Fails OPEN: still loading / paywall off /
+  // entitled -> render the builder normally. A non-entitled start would just 403 PAYWALL,
+  // so we lock the build up front instead of letting them assemble a mock they can't run.
+  const { loading: subLoading, careerToolsEntitled, paywallEnabled } = useMySubscription();
+  const mockLocked = !subLoading && paywallEnabled && !careerToolsEntitled;
   const [topics, setTopics] = useState<ApiTopic[] | null>(null);
   const [codingTopicList, setCodingTopicList] = useState<CodingTopic[]>([]);
   const [sections, setSections] = useState<Set<string>>(new Set());
@@ -150,6 +160,10 @@ export function CustomMockBuilder() {
       setBusy(false);
     }
   };
+
+  // Up-front paywall: a non-entitled student can't run a mock (start returns 403 PAYWALL),
+  // so we lock the builder here rather than letting them pick topics and hit a wall on Start.
+  if (mockLocked) return <MockLockedCard />;
 
   return (
     <div className="space-y-6">
@@ -329,6 +343,38 @@ export function CustomMockBuilder() {
 // custom-mock builder, the mock runner's free-mock limit, and the recommendations hub -
 // and two of them were about to ship with different designs, different copy, and
 // different destinations (/upgrade vs /shop). One modal, one upgrade path.
+
+/**
+ * Up-front lock shown in place of the builder when the paywall is on and the student
+ * isn't mock-eligible (careerToolsEntitled). Leads with what they get, links to /shop.
+ * Zone A standard surface - no heavy shadows, shared <Button> for the CTAs.
+ */
+function MockLockedCard() {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm sm:p-8">
+      <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-orange/10 text-orange ring-1 ring-orange/20">
+        <Lock className="size-6" />
+      </span>
+      <h2 className="mt-4 text-lg font-bold text-navy">Mock assessments are a premium feature</h2>
+      <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-600">
+        Build unlimited proctored mocks with{' '}
+        <span className="font-semibold text-navy">Full Platform</span> access or any{' '}
+        <span className="font-semibold text-navy">Company</span> subscription. Upgrade to start
+        assembling your own exams.
+      </p>
+      <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+        <Button asChild size="lg">
+          <Link href="/shop">
+            <Crown className="size-4" /> Upgrade to attempt mocks
+          </Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link href="/shop/full">Get Full Platform</Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 function Stepper({
   label,
