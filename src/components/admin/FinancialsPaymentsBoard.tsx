@@ -13,7 +13,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { getFinancialsPayments } from '@/lib/api/financials';
-import { formatPrice } from '@/lib/api/subscriptions';
+import { formatMoney } from '@/lib/api/subscriptions';
 import type { FinancialsPaymentsDto } from '@/shared/dto/financials.dto';
 import { StatCard, Panel, ProgressRow } from '@/components/superadmin/dashboard-ui';
 
@@ -144,7 +144,7 @@ export function FinancialsPaymentsBoard() {
         <>
           {/* Range KPIs */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label="Revenue (period)" value={formatPrice(data.rangeRevenueCents, data.currency)} icon={<IndianRupee className="size-4" />} accent="#059669" />
+            <StatCard label="Revenue (period)" value={formatMoney(data.rangeRevenueCents, data.currency)} icon={<IndianRupee className="size-4" />} accent="#059669" />
             <StatCard label="Successful (period)" value={data.rangeSuccessfulPayments} icon={<CheckCircle2 className="size-4" />} accent="#f5b400" />
             <StatCard label="Failed (period)" value={data.rangeFailedPayments} icon={<XCircle className="size-4" />} accent="#dc2626" />
             <StatCard label="Pending (period)" value={data.rangePendingPayments} icon={<AlertTriangle className="size-4" />} accent="#f59e0b" />
@@ -152,9 +152,9 @@ export function FinancialsPaymentsBoard() {
 
           {/* Always-current KPIs */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            <StatCard label="This month" value={formatPrice(data.monthlyRevenueCents, data.currency)} icon={<IndianRupee className="size-4" />} accent="#f5b400" />
-            <StatCard label="This year" value={formatPrice(data.annualRevenueCents, data.currency)} icon={<TrendingUp className="size-4" />} accent="#f5b400" />
-            <StatCard label="Lifetime" value={formatPrice(data.lifetimeRevenueCents, data.currency)} icon={<IndianRupee className="size-4" />} accent="#1e3a8a" />
+            <StatCard label="This month" value={formatMoney(data.monthlyRevenueCents, data.currency)} icon={<IndianRupee className="size-4" />} accent="#f5b400" />
+            <StatCard label="This year" value={formatMoney(data.annualRevenueCents, data.currency)} icon={<TrendingUp className="size-4" />} accent="#f5b400" />
+            <StatCard label="Lifetime" value={formatMoney(data.lifetimeRevenueCents, data.currency)} icon={<IndianRupee className="size-4" />} accent="#1e3a8a" />
             <StatCard label="Active subscriptions" value={data.activeEntitlements} sub={`${data.activeSubscribers} subscribers`} icon={<Users className="size-4" />} accent="#f5b400" />
             <StatCard label="Expiring ≤ 7 days" value={data.expiringSoon} icon={<CalendarClock className="size-4" />} accent="#dc2626" />
           </div>
@@ -173,7 +173,7 @@ export function FinancialsPaymentsBoard() {
                       value={s.amountCents}
                       total={scopeMax}
                       color="#059669"
-                      hint={formatPrice(s.amountCents, data.currency)}
+                      hint={formatMoney(s.amountCents, data.currency)}
                       hintOnly
                     />
                   ))}
@@ -182,11 +182,8 @@ export function FinancialsPaymentsBoard() {
             </Panel>
 
             <Panel title="Revenue by college (B2B)">
-              <p className="mb-3 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[11px] font-medium text-amber-700">
-                Booked plan value - college checkout isn&apos;t live yet, so this is contracted, not collected.
-              </p>
               {data.revenueByCollege.length === 0 ? (
-                <p className="text-sm text-slate-500">No active college subscriptions.</p>
+                <p className="text-sm text-slate-500">No college payments captured yet.</p>
               ) : (
                 <div className="space-y-3">
                   {data.revenueByCollege.map((c) => (
@@ -196,7 +193,7 @@ export function FinancialsPaymentsBoard() {
                       value={c.amountCents}
                       total={collegeMax}
                       color="#1e3a8a"
-                      hint={formatPrice(c.amountCents, data.currency)}
+                      hint={formatMoney(c.amountCents, data.currency)}
                       hintOnly
                     />
                   ))}
