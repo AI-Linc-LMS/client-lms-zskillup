@@ -59,7 +59,11 @@ export default function SuperAdminCollegeRequestsPage() {
     try {
       const updated = await approveCollegeRequest(selected.id);
       setSelected(updated);
-      setNotice('Approved - the college was created.');
+      setNotice(
+        updated.subscriptionKind
+          ? 'Approved - college created and its subscription activated. Students imported into its cohorts now inherit this access.'
+          : 'Approved - college created. No subscription was set, so its students inherit nothing until one is set on the college profile.',
+      );
       load();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not approve');
@@ -165,6 +169,8 @@ export default function SuperAdminCollegeRequestsPage() {
                 {selected.collegeId ? <Info k="Created college" v={selected.collegeId} /> : null}
               </dl>
 
+              <SubscriptionReview req={selected} />
+
               {selected.rejectionReason ? (
                 <p className="rounded-lg bg-red-50 p-3 text-xs text-red-700 ring-1 ring-red-200">
                   <span className="font-bold">Rejection reason:</span> {selected.rejectionReason}
@@ -224,12 +230,24 @@ export default function SuperAdminCollegeRequestsPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex gap-2">
-                    <Button disabled={busy} onClick={onApprove}>
-                      {busy ? <Loader2 className="mr-1.5 size-4 animate-spin" /> : <CheckCircle2 className="mr-1.5 size-4" />}
-                      Approve & create college
-                    </Button>
-                    <Button variant="outline" disabled={busy} onClick={() => setRejecting(true)}>Reject…</Button>
+                  <div className="space-y-3">
+                    {!selected.subscriptionKind ? (
+                      <p className="flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-xs text-amber-800 ring-1 ring-amber-200">
+                        <AlertCircle className="mt-0.5 size-4 shrink-0" />
+                        <span>
+                          This request has no subscription. Approving it creates the college, but its
+                          students will inherit no access until an Admin sets one on the college
+                          profile. Send it back if that is not intended.
+                        </span>
+                      </p>
+                    ) : null}
+                    <div className="flex gap-2">
+                      <Button disabled={busy} onClick={onApprove}>
+                        {busy ? <Loader2 className="mr-1.5 size-4 animate-spin" /> : <CheckCircle2 className="mr-1.5 size-4" />}
+                        {selected.subscriptionKind ? 'Approve & create college' : 'Approve without subscription'}
+                      </Button>
+                      <Button variant="outline" disabled={busy} onClick={() => setRejecting(true)}>Reject…</Button>
+                    </div>
                   </div>
                 )
               ) : null}
@@ -247,5 +265,61 @@ function Info({ k, v }: { k: string; v: string }) {
       <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{k}</dt>
       <dd className="mt-0.5 break-words text-sm text-navy">{v}</dd>
     </div>
+  );
+}
+
+/**
+ * What approving this request will actually unlock. Spec point 2 requires the
+ * Super Admin to see the exact subscription - kind AND every company - before
+ * they click Approve, because approval is the moment the entitlements are minted.
+ */
+function SubscriptionReview({ req }: { req: CollegeRequestDetail }) {
+  if (!req.subscriptionKind) {
+    return (
+      <section className="rounded-xl border border-slate-200 bg-white p-4">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+          Subscription
+        </p>
+        <p className="mt-1 text-sm text-slate-500">Not set</p>
+      </section>
+    );
+  }
+  const platform = req.subscriptionKind === 'PLATFORM';
+  return (
+    <section className="rounded-xl border border-slate-200 bg-white p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+          Subscription
+        </p>
+        <span
+          className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+            platform
+              ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+              : 'bg-sky-50 text-sky-700 ring-1 ring-sky-200'
+          }`}
+        >
+          {platform ? 'Full Platform' : 'Company Access'}
+        </span>
+      </div>
+      <p className="mt-2 text-sm text-slate-600">
+        {platform
+          ? 'Every company hub and all premium features unlock for every student of this college.'
+          : `Only these ${(req.subscriptionCompanies ?? []).length} company ${
+              (req.subscriptionCompanies ?? []).length === 1 ? 'hub' : 'hubs'
+            } unlock. Everything else stays locked.`}
+      </p>
+      {!platform ? (
+        <ul className="mt-3 flex flex-wrap gap-2">
+          {(req.subscriptionCompanies ?? []).map((c) => (
+            <li
+              key={c.slug}
+              className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700"
+            >
+              {c.name}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </section>
   );
 }

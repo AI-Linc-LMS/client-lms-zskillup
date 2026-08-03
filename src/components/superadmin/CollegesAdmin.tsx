@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Loader2, Plus, Search } from 'lucide-react';
@@ -143,7 +144,14 @@ export function CollegesAdmin() {
             ) : (
               filtered.map((c) => (
                 <tr key={c.id} className="border-t border-slate-100">
-                  <td className="px-4 py-3 font-semibold text-navy">{c.name}</td>
+                  <td className="px-4 py-3">
+                    <Link
+                      href={`/superadmin/colleges/${c.id}`}
+                      className="font-semibold text-navy transition-colors hover:text-orange"
+                    >
+                      {c.name}
+                    </Link>
+                  </td>
                   <td className="px-4 py-3 font-mono text-xs text-slate-600">{c.slug}</td>
                   <td className="px-4 py-3 text-slate-600">{c.city}, {c.state}</td>
                   <td className="px-4 py-3">

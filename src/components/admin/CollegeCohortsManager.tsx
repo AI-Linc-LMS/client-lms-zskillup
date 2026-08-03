@@ -111,6 +111,9 @@ function parseInvitations(text: string): InviteRow[] {
 
 const ROW_TONE: Record<string, StatusTone> = {
   created: 'positive',
+  // An existing account joined the college - it keeps its history and inherits
+  // the college subscription, so it is a success, not a skip.
+  attached: 'positive',
   skipped: 'neutral',
   invalid: 'negative',
 };
@@ -426,7 +429,8 @@ export function CollegeCohortsManager({ collegeId, onChange }: { collegeId: stri
               <div className="space-y-2">
                 <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 ring-1 ring-emerald-200">
                   {inviteResult.created} invited
-                  {inviteResult.skipped ? ` · ${inviteResult.skipped} already registered` : ''}.
+                  {inviteResult.attached ? ` · ${inviteResult.attached} existing account${inviteResult.attached === 1 ? '' : 's'} joined` : ''}
+                  {inviteResult.skipped ? ` · ${inviteResult.skipped} skipped` : ''}.
                 </p>
                 <ul className="max-h-40 space-y-1 overflow-y-auto">
                   {inviteResult.rows.map((row, i) => (

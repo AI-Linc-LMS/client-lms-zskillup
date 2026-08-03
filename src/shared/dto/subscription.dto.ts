@@ -7,17 +7,22 @@
  * the frontend so the class-validator runtime never fires client-side.
  */
 import {
+  ArrayMaxSize,
   IsArray,
   IsBoolean,
+  IsEnum,
   IsInt,
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   Max,
   MaxLength,
   Min,
   MinLength,
 } from 'class-validator';
+import { CollegeSubscriptionKind } from '../enums';
+import type { EntitlementDto } from './payments.dto';
 
 // ─── Plan catalog ────────────────────────────────────────────────────────────
 
@@ -186,4 +191,69 @@ export interface CollegeSubscriptionDto {
   startsAt: string;
   expiresAt: string | null;
   createdAt: string;
+}
+
+// --- College subscription SCOPE (what students actually inherit) -------------
+
+/**
+ * Set/replace what a college's subscription unlocks. Exactly one kind; the server
+ * diffs this against the college's live COLLEGE_INHERITED entitlements - adding a
+ * company grants it to every student immediately, removing one revokes it. Personal
+ * purchases and B2B (Razorpay) college purchases are never touched.
+ */
+export class UpdateCollegeSubscriptionScopeDto {
+  @IsEnum(CollegeSubscriptionKind)
+  kind!: CollegeSubscriptionKind;
+
+  /** Required (1..50) when kind = COMPANY; must be empty/omitted for PLATFORM. */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(50, { message: 'Up to 50 companies per college' })
+  @IsString({ each: true })
+  @Matches(/^[a-z0-9-]+$/, {
+    each: true,
+    message: 'company slug must be lowercase letters, digits, and dashes only',
+  })
+  companySlugs?: string[];
+
+  /** New validity from now, in months. Omit to keep the current expiry untouched. */
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(120)
+  durationMonths?: number;
+
+  /** Omit to keep the current seat limit. 0 = unlimited. */
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(1_000_000)
+  seatLimit?: number;
+}
+
+/** What a college's subscription grants, plus the live entitlement rows behind it. */
+export interface CollegeSubscriptionScopeDto {
+  collegeId: string;
+  collegeName: string | null;
+  /** NULL when no scope has been set - nothing is minted in that state. */
+  kind: CollegeSubscriptionKind | null;
+  companySlugs: string[];
+  companies: Array<{ slug: string; name: string }>;
+  planName: string | null;
+  seatLimit: number;
+  seatsUsed: number;
+  /** Effective status of tenancy.subscriptions - ACTIVE | EXPIRED | CANCELLED. */
+  status: string | null;
+  startsAt: string | null;
+  /** null = perpetual. */
+  expiresAt: string | null;
+  /** Every COLLEGE-subject grant on this college, whatever its source. */
+  entitlements: EntitlementDto[];
+}
+
+/** What one scope change actually did - surfaced to the operator verbatim. */
+export interface CollegeEntitlementSyncResultDto {
+  granted: string[];
+  revoked: string[];
+  kept: string[];
 }

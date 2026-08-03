@@ -10,6 +10,7 @@ import {
   type AdminStudentReportRow,
 } from '@/lib/api/admin';
 import { CollegeCohortsManager } from '@/components/admin/CollegeCohortsManager';
+import { CollegeSubscriptionScopeCard } from '@/components/admin/CollegeSubscriptionScopeCard';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 
 /** Admin console - college detail: identity, enrolment + performance, roster. */
@@ -92,6 +93,9 @@ export default function AdminCollegeDetailPage({ params }: { params: Promise<{ i
               <Kpi label="Avg %" value={detail.avgScorePct ?? '-'} />
             </dl>
           </section>
+
+          {/* What this college bought - and what every one of its students inherits. */}
+          <CollegeSubscriptionScopeCard collegeId={id} />
 
           {/* Cohorts + student invitations - Platform Admin manages these (TPO is read-only). */}
           <CollegeCohortsManager collegeId={id} onChange={() => void reload()} />

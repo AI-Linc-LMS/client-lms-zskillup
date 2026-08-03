@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ArrowRight, Crown, Sparkles, Ticket } from 'lucide-react';
 import { getMySubscription } from '@/lib/api/payments';
 import type { MySubscriptionDto } from '@/shared/dto/payments.dto';
-import { EntitlementScope, EntitlementSource } from '@/shared/enums';
+import { EntitlementScope, EntitlementSource, EntitlementSubject } from '@/shared/enums';
 import { cn } from '@/lib/utils';
 
 /**
@@ -37,6 +37,14 @@ export function MySubscriptionCard() {
   // Admin-granted (complimentary) access - shown so the student's own account
   // reflects the "Complimentary / Admin Granted" status, not just the admin console.
   const isComplimentary = activeEnts.some((e) => e.source === EntitlementSource.ADMIN_GRANT);
+  // Provided by the student's college rather than bought - labelled so they know
+  // why they have it, and why there is nothing for them to renew. A student who
+  // ALSO bought something keeps the Premium badge: telling a paying customer
+  // their access is their institution's would be wrong, and misleading if the
+  // college later drops a company they personally own.
+  const viaCollege =
+    activeEnts.some((e) => e.subjectType === EntitlementSubject.COLLEGE) &&
+    !activeEnts.some((e) => e.subjectType === EntitlementSubject.USER);
 
   return (
     <div
@@ -47,7 +55,11 @@ export function MySubscriptionCard() {
     >
       <h2 className="flex items-center gap-1.5 text-sm font-bold text-navy">
         <Ticket className="size-4 text-[#f5b400]" /> My subscription
-        {isComplimentary ? (
+        {viaCollege ? (
+          <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-sky-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-sky-700 ring-1 ring-inset ring-sky-200">
+            <Crown className="size-2.5" strokeWidth={2.75} /> Via your college
+          </span>
+        ) : isComplimentary ? (
           <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-emerald-700 ring-1 ring-inset ring-emerald-200">
             <Crown className="size-2.5" strokeWidth={2.75} /> Complimentary
           </span>

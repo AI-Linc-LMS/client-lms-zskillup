@@ -51,6 +51,19 @@ export enum SubscriptionStatus {
   CANCELLED = 'CANCELLED',
 }
 
+/**
+ * What a college's subscription unlocks for its students. Exactly ONE kind per
+ * college (enforced by DTO + a DB CHECK):
+ *   PLATFORM - the whole platform; every company and premium surface.
+ *   COMPANY  - a chosen set of company hubs (1..50 slugs); everything else stays locked.
+ * Projected into `subject_type='COLLEGE'` rows in billing.entitlements, which every
+ * student of the college inherits at read time.
+ */
+export enum CollegeSubscriptionKind {
+  PLATFORM = 'PLATFORM',
+  COMPANY = 'COMPANY',
+}
+
 /** Student branch / stream (Implementation Plan §3.1). */
 export enum Branch {
   CSE = 'CSE',
