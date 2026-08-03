@@ -211,19 +211,18 @@ export async function listTopicsWithCounts(): Promise<ApiTopic[]> {
  * public company list is anonymous, and putting invite links there would let a
  * scraper harvest every community in one request. Null = none configured.
  *
- * The CLIENT posture is nonetheless 'public', because the company hub itself is
- * publicly browsable (middleware lets signed-out visitors in). With the default
- * posture a 401 here would trigger a refresh attempt and then tear the session
- * down and redirect to /login - throwing an anonymous visitor off a page they are
- * allowed to read. 'public' surfaces the 401 to the caller instead, which the CTA
- * swallows by simply not rendering.
+ * Uses the DEFAULT client posture deliberately. The 'public' posture skips the
+ * pre-flight silent refresh, and the access token lives in memory only - so on a
+ * fresh page load a signed-in student has no token yet, the request 401s, and the
+ * CTA never appears for anyone. The caller guards the anonymous case instead, by
+ * not issuing the request at all without a role hint, which is what keeps a
+ * signed-out visitor on the publicly-browsable hub from being bounced to /login.
  */
 export async function getCompanyCommunity(
   slug: string,
 ): Promise<{ whatsappCommunityUrl: string | null }> {
   const res = await apiClient.get<{ whatsappCommunityUrl: string | null }>(
     `/api/v1/companies/${encodeURIComponent(slug)}/community`,
-    { auth: 'public' },
   );
   return res.data;
 }

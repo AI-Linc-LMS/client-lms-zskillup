@@ -348,8 +348,10 @@ function WhatsappCommunityCard({
   const [url, setUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    // Signed-out visitors can browse the hub but the endpoint is authenticated,
-    // so skip the round trip entirely rather than firing a request that 401s.
+    // Signed-out visitors can browse this hub, but the endpoint is authenticated.
+    // Skipping the request for guests is what makes the DEFAULT auth posture safe
+    // here: a guest never triggers the 401 -> refresh -> /login teardown, while a
+    // signed-in student still gets the pre-flight refresh that yields a token.
     if (!hasRoleHint()) return;
     let alive = true;
     getCompanyCommunity(companySlug)
