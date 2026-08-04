@@ -23,6 +23,7 @@ import {
   type LucideIcon,
   MessagesSquare,
   Megaphone,
+  MessageCircle,
   MessageSquare,
   Newspaper,
   Quote,
@@ -184,6 +185,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
       { label: 'Financials', href: '/superadmin/financials', icon: IndianRupee },
       { label: 'Reports', href: '/superadmin/reports', icon: FileText },
       { label: 'Broadcasts', href: '/superadmin/broadcasts', icon: Megaphone },
+      { label: 'WhatsApp Community', href: '/superadmin/whatsapp-community', icon: MessageCircle },
       { label: 'Support', href: '/superadmin/support', icon: LifeBuoy },
       { label: 'Audit Log', href: '/superadmin/audit-logs', icon: ScrollText },
     ],
@@ -281,6 +283,7 @@ export const ADMIN_NAV: NavSection[] = [
     heading: 'ENGAGEMENT',
     items: [
       { label: 'Broadcasts', href: '/admin/broadcasts', icon: Megaphone },
+      { label: 'WhatsApp Community', href: '/admin/whatsapp-community', icon: MessageCircle },
       { label: 'Live Sessions', href: '/admin/live-sessions', icon: Video },
       { label: 'Support', href: '/admin/support', icon: LifeBuoy },
     ],
