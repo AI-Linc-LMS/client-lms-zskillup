@@ -81,6 +81,10 @@ export interface ApiMe {
   /** Effective admin capability flags (SUPER_ADMIN → all; ADMIN → per-account;
    *  others → all false). Present from Phase 2; optional for backward-safety. */
   capabilities?: AdminCapabilities;
+  /** True when the account has a real password set (can sign in with email+password and
+   *  therefore be shared). False for an invited placeholder or an OAuth-only account —
+   *  drives the college-admin "set a password" prompt. Optional for backward-safety. */
+  hasPassword?: boolean;
 }
 
 /** Module-scope dedup. Cleared on resolve/reject so the next mount re-fetches. */

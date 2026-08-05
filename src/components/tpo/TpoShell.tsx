@@ -5,6 +5,7 @@ import { Toaster } from 'sonner';
 import { TpoConsoleProvider } from './TpoConsole';
 import { TpoSidebar } from './TpoSidebar';
 import { TpoTopBar } from './TpoTopBar';
+import { SetPasswordPrompt } from './SetPasswordPrompt';
 import { SeoTitle } from '@/components/layout/SeoTitle';
 
 /**
@@ -22,7 +23,10 @@ export function TpoShell({ children }: { children: ReactNode }) {
         <TpoSidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <TpoTopBar />
-          <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+          <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
+            <SetPasswordPrompt />
+            {children}
+          </main>
         </div>
       </div>
       <Toaster
