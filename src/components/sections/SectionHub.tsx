@@ -150,11 +150,19 @@ export function SectionHub({ section }: { section: SectionRoot }) {
   const acc = useSectionAccuracy(leaves);
 
   // ── ownership + pricing ────────────────────────────────────────────────────
+  // Option 2 (owner decision 2026-08): holding ANY company grant unlocks the general
+  // Sectional Hub (this surface is company-agnostic) like a platform plan — a company
+  // buyer gets the full prep journey. Company-specific hubs stay gated per company.
+  const hasCompanyAccess = useMemo(
+    () => active.some((e) => e.scopeType === EntitlementScope.COMPANY && e.scopeRef),
+    [active],
+  );
   const ownedSection = useMemo(
     () =>
       hasPlatform ||
+      hasCompanyAccess ||
       active.some((e) => e.scopeType === EntitlementScope.SECTION && e.scopeRef === section.slug),
-    [hasPlatform, active, section.slug],
+    [hasPlatform, hasCompanyAccess, active, section.slug],
   );
   const ownedTopics = useMemo(
     () =>

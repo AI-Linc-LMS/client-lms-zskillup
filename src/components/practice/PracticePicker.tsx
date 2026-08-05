@@ -74,11 +74,16 @@ export function PracticePicker({
   );
   // Only surface locks when the paywall is actually enforced (falls open otherwise).
   const gating = paywallEnabled && !hasPlatform;
-  const sectionOwned = (slug: string) => hasPlatform || ownedSections.has(slug);
+  // Option 2 (owner decision 2026-08): holding ANY company grant unlocks the GENERAL
+  // practice surfaces (all sections, topics, coding) like a platform plan — a company
+  // buyer gets the full prep journey. Per-company hubs stay gated per company, so
+  // companyOwned() is deliberately NOT widened by this.
+  const hasCompanyAccess = ownedCompanies.size > 0;
+  const sectionOwned = (slug: string) => hasPlatform || hasCompanyAccess || ownedSections.has(slug);
   const topicOwned = (rootSlug: string, slug: string) =>
-    hasPlatform || ownedSections.has(rootSlug) || ownedTopics.has(slug);
+    hasPlatform || hasCompanyAccess || ownedSections.has(rootSlug) || ownedTopics.has(slug);
   const companyOwned = (slug: string) => hasPlatform || ownedCompanies.has(slug);
-  const codingOwned = hasPlatform || ownedSections.has('coding');
+  const codingOwned = hasPlatform || hasCompanyAccess || ownedSections.has('coding');
 
   // Up-front visible locks under the single-scope free tier (one free sub-topic per
   // section + one free company). Server-driven — inert until FREEMIUM_SINGLE_SCOPE is

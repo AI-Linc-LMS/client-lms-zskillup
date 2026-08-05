@@ -263,6 +263,12 @@ export interface PracticeAccessMapDto {
   singleScopeEnabled: boolean;
   /** Caller holds full-platform access (own or college) → never lock anything. */
   hasPlatform: boolean;
+  /** Caller holds ANY active COMPANY grant (own or college-inherited). Under the
+   *  Option-2 model (owner decision 2026-08) this unlocks the GENERAL practice
+   *  surfaces — Practice Hub by section/topic, the Sectional Hub, and Coding — like a
+   *  platform plan (per-company hubs stay gated per company). Kept separate from
+   *  hasPlatform so the company chips still lock companies the caller doesn't own. */
+  hasCompanyAccess: boolean;
   /** Root-section slug → the single free sub-topic slug in that section (empty = none claimed / no locks). */
   freeSubtopicSlugBySection: Record<string, string>;
   /** The single free company slug (null = none claimed / no locks). */

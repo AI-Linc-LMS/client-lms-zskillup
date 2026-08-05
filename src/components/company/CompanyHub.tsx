@@ -22,7 +22,6 @@ import {
   Users,
 } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
-import { Button } from '@/components/ui/button';
 import { CompanyRegisterCard } from '@/components/company/CompanyRegisterCard';
 import { HubVideoEmbed } from '@/components/media/HubVideoEmbed';
 import { cn } from '@/lib/utils';
@@ -319,11 +318,6 @@ export function CompanyHub({ content }: { content: HubContent }) {
               <Stat label="Open roles (est.)" value={content.quickStats.openRoles} />
             </div>
           </AuroraCard>
-
-          {/* Company WhatsApp community - only when a link is configured. Last in
-              the rail on purpose: it resolves asynchronously, so arriving late
-              extends the column instead of shoving Quick stats down the page. */}
-          <WhatsappCommunityCard companySlug={c.slug} companyName={c.name} />
         </aside>
       </div>
 
@@ -346,18 +340,19 @@ export function CompanyHub({ content }: { content: HubContent }) {
 /* ────────────────────────────────────────────────────────────────────────── */
 
 /**
- * "Join WhatsApp Community" CTA for this company's hub. Renders NOTHING until a
- * link resolves - the presence of a link is the whole on/off switch, so a company
- * without a community shows no empty card, no skeleton and no disabled button.
+ * "Join WhatsApp Community" CTA, rendered in the company hero's action row (moved here
+ * from the right rail per owner request — it sits beside Practice / Timed assessment as
+ * a third hero CTA). Renders NOTHING until a link resolves — the presence of a link is
+ * the whole on/off switch, so a company without a community shows no button at all.
  *
- * The link is fetched from an AUTHENTICATED endpoint rather than carried on the
- * public company payload: the company list is anonymous, so shipping invite links
- * there would let anyone harvest every community in a single request.
- *
- * The href is admin-set and host-validated server-side (only WhatsApp hosts are
- * storable). `rel="noopener noreferrer"` because it opens a third-party tab.
+ * The link is fetched from an AUTHENTICATED endpoint rather than carried on the public
+ * company payload: the company list is anonymous, so shipping invite links there would
+ * let anyone harvest every community in a single request. The href is admin-set and
+ * host-validated server-side (only WhatsApp hosts are storable). `rel="noopener
+ * noreferrer"` because it opens a third-party tab. Styled as a hero secondary CTA on the
+ * dark surface (emerald tint = community), matching the sibling "Timed assessment" pill.
  */
-function WhatsappCommunityCard({
+function HeroCommunityCta({
   companySlug,
   companyName,
 }: {
@@ -368,9 +363,9 @@ function WhatsappCommunityCard({
 
   useEffect(() => {
     // Signed-out visitors can browse this hub, but the endpoint is authenticated.
-    // Skipping the request for guests is what makes the DEFAULT auth posture safe
-    // here: a guest never triggers the 401 -> refresh -> /login teardown, while a
-    // signed-in student still gets the pre-flight refresh that yields a token.
+    // Skipping the request for guests keeps the DEFAULT auth posture safe: a guest never
+    // triggers the 401 -> refresh -> /login teardown, while a signed-in student still
+    // gets the pre-flight refresh that yields a token.
     if (!hasRoleHint()) return;
     let alive = true;
     getCompanyCommunity(companySlug)
@@ -388,36 +383,16 @@ function WhatsappCommunityCard({
 
   if (!url) return null;
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-start gap-3">
-        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
-          <MessageCircle className="size-5" />
-        </span>
-        <div className="min-w-0">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-            Community
-          </p>
-          <p className="text-base font-bold text-navy">{companyName} aspirants</p>
-          <p className="mt-1 text-sm leading-relaxed text-slate-600">
-            Compare prep notes, share interview experiences and get drive updates from others
-            targeting {companyName}.
-          </p>
-        </div>
-      </div>
-      {/* variant=outline, not the gold pill: the ONE primary action in this rail
-          is the assessment/upgrade CTA above. This is a supportive action. */}
-      <Button asChild variant="outline" className="mt-4 w-full">
-        <a
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={`Join the ${companyName} WhatsApp community (opens in a new tab)`}
-        >
-          <MessageCircle className="size-4" aria-hidden /> Join WhatsApp Community
-          <ExternalLink className="size-3.5 opacity-70" aria-hidden />
-        </a>
-      </Button>
-    </section>
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`Join the ${companyName} WhatsApp community (opens in a new tab)`}
+      className="inline-flex items-center gap-2 rounded-full border border-emerald-300/25 bg-emerald-400/[0.12] px-5 py-2.5 text-sm font-bold text-emerald-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur transition-colors hover:bg-emerald-400/20"
+    >
+      <MessageCircle className="size-4" aria-hidden /> Join WhatsApp Community
+      <ExternalLink className="size-3.5 opacity-70" aria-hidden />
+    </a>
   );
 }
 
@@ -559,6 +534,9 @@ function CompanyHero({ content, reduce }: { content: HubContent; reduce: boolean
             >
               <Trophy className="size-4" aria-hidden="true" /> Timed assessment
             </Link>
+            {/* Community CTA — resolves async from an authed endpoint; renders only
+                when this company has a configured WhatsApp link. */}
+            <HeroCommunityCta companySlug={c.slug} companyName={c.name} />
           </motion.div>
 
           {/* Disclaimer lives on the hero card itself, just below the CTAs - it applies to
