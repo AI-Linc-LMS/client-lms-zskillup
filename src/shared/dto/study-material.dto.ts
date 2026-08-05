@@ -136,6 +136,9 @@ export interface AdminStudyMaterialSectionDto {
   subtitle: string | null;
   orderIndex: number;
   isPublished: boolean;
+  /** Company Overview section — its videos render on the hub Overview tab (unlocked,
+   *  inline) and it is hidden from the Study-Material tab. Company scope only. */
+  isOverview: boolean;
   topics: AdminStudyMaterialTopicDto[];
 }
 export interface AdminStudyMaterialDto {

@@ -228,6 +228,19 @@ export function StudyMaterialAdmin() {
                   />
                   Published
                 </label>
+                {scope === 'company' && (
+                  <label
+                    className="flex items-center gap-1.5 text-xs font-semibold text-slate-600"
+                    title="Show this section's videos on the company hub's Overview tab (unlocked, inline) and hide the section from the Study Material tab."
+                  >
+                    <input
+                      type="checkbox"
+                      checked={s.isOverview}
+                      onChange={(e) => run(() => updateSection(s.id, { isOverview: e.target.checked }))}
+                    />
+                    Overview tab
+                  </label>
+                )}
                 <IconBtn label="Delete section" onClick={() => confirm(`Delete section "${s.title}" and everything in it?`) && run(() => deleteSection(s.id))}>
                   <Trash2 className="size-4" />
                 </IconBtn>

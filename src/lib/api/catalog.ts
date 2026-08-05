@@ -58,6 +58,14 @@ export interface ApiCompanyHubContent {
   interviews: { role: string; year: string; rounds: number; verdict: 'Selected' | 'Rejected'; excerpt: string }[];
 }
 
+/** A company Overview video — unlocked, inline, shown on the hub Overview tab. */
+export interface ApiOverviewVideo {
+  id: string;
+  title: string;
+  embedUrl: string | null;
+  durationLabel?: string | null;
+}
+
 export interface ApiCompanyHub extends ApiCompany {
   courses: Array<{
     id: string;
@@ -69,6 +77,7 @@ export interface ApiCompanyHub extends ApiCompany {
     estimatedHours: number;
   }>;
   hub: ApiCompanyHubContent | null;
+  overviewVideos?: ApiOverviewVideo[];
 }
 
 export interface ApiCourseSummary {

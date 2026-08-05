@@ -54,6 +54,8 @@ export interface HubContent {
   company: DemoCompany;
   /** Ready-to-embed intro-video player URL (server-derived). Null → show placeholder. */
   introEmbedUrl?: string | null;
+  /** Company Overview videos (unlocked, inline) — rendered as cards on the Overview tab. */
+  overviewVideos?: { id: string; title: string; embedUrl: string | null; durationLabel?: string | null }[];
   overview: {
     summary: string;
     process: { stage: string; detail: string }[];

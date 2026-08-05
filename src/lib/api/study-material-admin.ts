@@ -26,12 +26,19 @@ export async function createSection(body: {
   sectionSlug?: string;
   title: string;
   subtitle?: string;
+  isOverview?: boolean;
 }) {
   await apiClient.post('/api/v1/admin/study-material/sections', body);
 }
 export async function updateSection(
   id: string,
-  body: Partial<{ title: string; subtitle: string | null; isPublished: boolean; orderIndex: number }>,
+  body: Partial<{
+    title: string;
+    subtitle: string | null;
+    isPublished: boolean;
+    isOverview: boolean;
+    orderIndex: number;
+  }>,
 ) {
   await apiClient.patch(`/api/v1/admin/study-material/sections/${id}`, body);
 }

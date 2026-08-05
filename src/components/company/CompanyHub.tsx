@@ -15,6 +15,7 @@ import {
   ListChecks,
   MessageCircle,
   MonitorPlay,
+  PlayCircle,
   Sparkles,
   Star,
   Target,
@@ -711,16 +712,96 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
 /* Tabs                                                                         */
 /* ────────────────────────────────────────────────────────────────────────── */
 
+/**
+ * Company Overview videos — a small playlist: the active video plays inline (a plain
+ * player.vimeo iframe, byline/branding suppressed server-side) with the rest as a card
+ * list below. Unlocked for everyone (no seek/speed/completion lock, no paywall) — these
+ * are intro videos, and they never touch the study-material player. Renders nothing when
+ * the company has no playable Overview video.
+ */
+function OverviewVideos({
+  name,
+  videos,
+}: {
+  name: string;
+  videos: NonNullable<HubContent['overviewVideos']>;
+}) {
+  const playable = videos.filter((v) => !!v.embedUrl);
+  const [activeId, setActiveId] = useState<string | null>(playable[0]?.id ?? null);
+  if (playable.length === 0) return null;
+  const active = playable.find((v) => v.id === activeId) ?? playable[0];
+
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Company videos</p>
+      <h2 className="mt-1 text-lg font-bold text-navy">Get to know {name}</h2>
+
+      <div className="mt-4 aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-black">
+        <iframe
+          key={active.id}
+          src={active.embedUrl ?? ''}
+          className="size-full"
+          allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+          allowFullScreen
+          title={active.title}
+        />
+      </div>
+      <p className="mt-2.5 text-sm font-semibold text-navy">{active.title}</p>
+
+      {playable.length > 1 && (
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {playable.map((v) => {
+            const isActive = v.id === active.id;
+            return (
+              <button
+                key={v.id}
+                type="button"
+                onClick={() => setActiveId(v.id)}
+                aria-pressed={isActive}
+                className={cn(
+                  'flex items-center gap-3 rounded-xl border p-3 text-left transition-colors',
+                  isActive
+                    ? 'border-orange/40 bg-orange-50/50 ring-1 ring-orange/20'
+                    : 'border-slate-200 bg-white hover:border-slate-300',
+                )}
+              >
+                <span
+                  className={cn(
+                    'grid size-10 shrink-0 place-items-center rounded-lg',
+                    isActive ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-500',
+                  )}
+                >
+                  <PlayCircle className="size-5" />
+                </span>
+                <span className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-navy">{v.title}</p>
+                  {v.durationLabel ? <p className="text-xs text-slate-400">{v.durationLabel}</p> : null}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function OverviewTab({ content }: { content: HubContent }) {
+  const overviewVideos = content.overviewVideos ?? [];
+  const hasOverviewVideos = overviewVideos.some((v) => !!v.embedUrl);
   return (
     <div className="space-y-6">
       <Reveal>
-        <HubVideoEmbed
-          embedUrl={content.introEmbedUrl}
-          eyebrow="Company intro"
-          title={`Inside the ${content.company.name} assessment`}
-          subtitle="A short walkthrough of the hiring rounds, cut-offs and what to expect - video coming soon."
-        />
+        {hasOverviewVideos ? (
+          <OverviewVideos name={content.company.name} videos={overviewVideos} />
+        ) : (
+          <HubVideoEmbed
+            embedUrl={content.introEmbedUrl}
+            eyebrow="Company intro"
+            title={`Inside the ${content.company.name} assessment`}
+            subtitle="A short walkthrough of the hiring rounds, cut-offs and what to expect - video coming soon."
+          />
+        )}
       </Reveal>
       <Reveal>
         <AuroraCard glow="#7c3aed">
