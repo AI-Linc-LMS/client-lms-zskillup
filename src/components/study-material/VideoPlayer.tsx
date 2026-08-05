@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  ExternalLink,
   Gauge,
   Loader2,
   Lock,
@@ -471,14 +470,9 @@ function Player({
               <ChevronRight className="size-5" />
             </button>
           )}
-
-          <div className="absolute right-2 top-2 z-[4] flex items-center gap-1.5 opacity-0 transition group-hover:opacity-100">
-            {item.embedUrl && (
-              <a href={item.embedUrl.replace('/preview', '/view')} target="_blank" rel="noopener noreferrer" aria-label="Open in new tab" className="rounded-lg bg-black/50 p-1.5 text-white/90 transition hover:bg-black/70">
-                <ExternalLink className="size-4" />
-              </a>
-            )}
-          </div>
+          {/* No "open in new tab" affordance: videos must play inside the platform
+              only. Linking out navigated to the raw player.vimeo.com page, which
+              exposed the source account (author byline, share/branding). */}
         </div>
 
         {/* footer: playlist nav + (non-Vimeo) manual completion fallback */}

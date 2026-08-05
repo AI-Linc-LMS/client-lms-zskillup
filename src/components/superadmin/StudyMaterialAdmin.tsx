@@ -26,6 +26,7 @@ import {
   type ItemInput,
 } from '@/lib/api/study-material-admin';
 import { buildSections } from '@/lib/sections/section-catalog';
+import { ApiRequestError } from '@/lib/api/types';
 import type { StudyMaterialItemKind } from '@/shared/dto/study-material.dto';
 
 type Scope = 'company' | 'section';
@@ -48,6 +49,11 @@ export function StudyMaterialAdmin() {
   const [itemForm, setItemForm] = useState<{ topicId: string; item?: AdminStudyMaterialItemDto } | null>(null);
   const [busy, setBusy] = useState(false);
   const [generating, setGenerating] = useState(false);
+  // Surface failures instead of swallowing them: a silently-rejected createSection/save
+  // was indistinguishable from "the button does nothing" — the reported "can't create a
+  // section" symptom.
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     listAdminCompanies()
@@ -76,10 +82,14 @@ export function StudyMaterialAdmin() {
   const load = useCallback(() => {
     if (scope === 'company' ? !companyId : !sectionSlug) return;
     setLoading(true);
+    setLoadError(false);
     const p =
       scope === 'company' ? getAdminStudyMaterial(companyId) : getAdminSectionStudyMaterial(sectionSlug);
     p.then(setTree)
-      .catch(() => setTree(null))
+      .catch(() => {
+        setTree(null);
+        setLoadError(true);
+      })
       .finally(() => setLoading(false));
   }, [scope, companyId, sectionSlug]);
   useEffect(() => {
@@ -88,9 +98,14 @@ export function StudyMaterialAdmin() {
 
   const run = async (fn: () => Promise<unknown>) => {
     setBusy(true);
+    setActionError(null);
     try {
       await fn();
       load();
+    } catch (e) {
+      // Show WHY it failed (e.g. a 400 "section title required", a 403) instead of the
+      // silent no-op that made section creation look broken.
+      setActionError(e instanceof ApiRequestError ? e.message : 'That action failed — please try again.');
     } finally {
       setBusy(false);
     }
@@ -188,6 +203,12 @@ export function StudyMaterialAdmin() {
         </button>
       </div>
 
+      {actionError && (
+        <div role="alert" className="rounded-lg bg-red-50 px-4 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">
+          {actionError}
+        </div>
+      )}
+
       {/* Sections */}
       {tree && (
         <div className="space-y-3">
@@ -262,20 +283,38 @@ export function StudyMaterialAdmin() {
               </div>
             </div>
           ))}
+        </div>
+      )}
 
-          {/* Add section */}
-          <div className="flex items-center gap-2 rounded-2xl border border-dashed border-slate-300 bg-white p-3">
-            <input
-              value={newSection}
-              onChange={(e) => setNewSection(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && addSection()}
-              placeholder="New section title (e.g. Numerical Ability)"
-              className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
-            />
-            <button type="button" onClick={addSection} disabled={!newSection.trim()} className="inline-flex items-center gap-1.5 rounded-full bg-orange px-4 py-2 text-sm font-bold text-[#171717] disabled:opacity-50">
-              <Plus className="size-4" /> Add section
-            </button>
-          </div>
+      {/* Load error — surface it AND keep the create control usable below, so a transient
+          tree fetch failure doesn't hide the whole authoring surface. */}
+      {loadError && !loading && (
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <span>Couldn&apos;t load this {scope === 'company' ? "company's" : "section's"} study material.</span>
+          <button
+            type="button"
+            onClick={load}
+            className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-red-700 ring-1 ring-red-200 hover:bg-red-100"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {/* Add section — available whenever a target is selected, even before/without a
+          loaded tree, so the FIRST section can always be created. */}
+      {scopeReady && (
+        <div className="flex items-center gap-2 rounded-2xl border border-dashed border-slate-300 bg-white p-3">
+          <input
+            value={newSection}
+            onChange={(e) => setNewSection(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && addSection()}
+            placeholder="New section title (e.g. Technical)"
+            className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          />
+          <button type="button" onClick={addSection} disabled={!newSection.trim()} className="inline-flex items-center gap-1.5 rounded-full bg-orange px-4 py-2 text-sm font-bold text-[#171717] disabled:opacity-50">
+            <Plus className="size-4" /> Add section
+          </button>
         </div>
       )}
 

@@ -3,6 +3,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Loader2, Search, Video, X } from 'lucide-react';
 import { searchVimeoCatalog, type VimeoCatalogVideo } from '@/lib/api/vimeo';
+import { ApiRequestError } from '@/lib/api/types';
+
+// The backend serves browse/search from a cached full library, so asking for a large
+// slice returns the WHOLE catalog (not just the newest page) without extra Vimeo calls.
+const BROWSE_LIMIT = 500;
 
 function fmtDuration(s: number): string {
   if (!s || s < 0) return '';
@@ -41,14 +46,21 @@ export function VimeoPicker({
     let alive = true;
     setLoading(true);
     setError(null);
-    searchVimeoCatalog(debounced, 30)
+    searchVimeoCatalog(debounced, BROWSE_LIMIT)
       .then((res) => {
         if (!alive) return;
         setConfigured(res.configured);
         setVideos(res.videos);
       })
-      .catch(() => {
-        if (alive) setError('Could not load the Vimeo library. Try again, or paste a link instead.');
+      .catch((err) => {
+        if (!alive) return;
+        // Surface the backend's specific reason (e.g. "Vimeo is rate-limiting requests.
+        // Try again in a moment.") instead of one generic string for every failure.
+        setError(
+          err instanceof ApiRequestError && err.message
+            ? `${err.message} Or paste a link instead.`
+            : 'Could not load the Vimeo library. Try again, or paste a link instead.',
+        );
       })
       .finally(() => {
         if (alive) setLoading(false);
@@ -90,8 +102,14 @@ export function VimeoPicker({
       );
     }
     return (
-      <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3">
-        {videos.map((v) => (
+      <>
+        <p className="px-4 pt-3 text-[11px] font-medium text-slate-500">
+          {debounced
+            ? `${videos.length} ${videos.length === 1 ? 'match' : 'matches'} for “${debounced}”`
+            : `Browsing the full library · ${videos.length} video${videos.length === 1 ? '' : 's'}`}
+        </p>
+        <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3">
+          {videos.map((v) => (
           <button
             key={v.vimeoId}
             type="button"
@@ -104,7 +122,7 @@ export function VimeoPicker({
             <div className="relative aspect-video w-full bg-slate-100">
               {v.thumbnailUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={v.thumbnailUrl} alt="" className="absolute inset-0 size-full object-cover" />
+                <img src={v.thumbnailUrl} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
               ) : (
                 <div className="grid size-full place-items-center">
                   <Video className="size-6 text-slate-300" aria-hidden="true" />
@@ -122,9 +140,10 @@ export function VimeoPicker({
                 Use this video →
               </span>
             </div>
-          </button>
-        ))}
-      </div>
+            </button>
+          ))}
+        </div>
+      </>
     );
   }, [loading, configured, error, videos, debounced, onPick, onClose]);
 
