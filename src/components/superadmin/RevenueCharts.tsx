@@ -52,6 +52,7 @@ export function RevenueCharts() {
     .sort((a, b) => b.value - a.value);
   const statusSegments = [
     { label: 'Paying', color: '#059669', value: d.payingSubscriptions },
+    { label: 'Complimentary', color: '#a855f7', value: d.complimentary },
     { label: 'Trials', color: '#0284c7', value: d.trials },
     { label: 'Expired', color: '#f59e0b', value: d.expired },
     { label: 'Cancelled', color: '#dc2626', value: d.cancelled },

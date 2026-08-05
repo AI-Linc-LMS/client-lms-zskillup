@@ -22,6 +22,10 @@ export interface FinancialsOverviewDto {
   activeSubscriptions: number;
   /** Active, non-trial, priced subscriptions. */
   payingSubscriptions: number;
+  /** Active, non-trial subscriptions with no priced plan — complimentary/admin-granted
+   *  access (e.g. a college comp). Counted so paying + complimentary + trials +
+   *  expired + cancelled reconciles with the active total in the mix. */
+  complimentary: number;
   trials: number;
   expired: number;
   cancelled: number;
