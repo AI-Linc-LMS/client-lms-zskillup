@@ -492,7 +492,7 @@ export function StudyMaterialAdmin() {
       {bulkTopicId && (
         <VimeoPicker
           onClose={() => setBulkTopicId(null)}
-          onPickMany={(videos) => {
+          onPickMany={(videos, { includeDurations }) => {
             const topicId = bulkTopicId;
             void run(() =>
               createItemsBulk(
@@ -502,8 +502,10 @@ export function StudyMaterialAdmin() {
                   // ("S2_V320_network_types"). Still editable per-item afterwards.
                   title: cleanVideoTitle(v.title),
                   url: v.link,
+                  // Timestamps are opt-in — only attach the Vimeo duration when the admin
+                  // ticked "Include durations".
                   durationLabel:
-                    v.durationSeconds > 0
+                    includeDurations && v.durationSeconds > 0
                       ? `${Math.floor(v.durationSeconds / 60)}:${String(Math.floor(v.durationSeconds % 60)).padStart(2, '0')}`
                       : undefined,
                 })),

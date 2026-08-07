@@ -37,8 +37,10 @@ export function VimeoPicker({
   /** Single-pick mode (fills one URL field): picking closes the modal. */
   onPick?: (video: VimeoCatalogVideo) => void;
   /** Bulk mode: tick videos, then "Add N to platform" imports them all at once. When
-   *  provided, the picker renders in multi-select mode instead of single-pick. */
-  onPickMany?: (videos: VimeoCatalogVideo[]) => void;
+   *  provided, the picker renders in multi-select mode instead of single-pick.
+   *  `opts.includeDurations` = whether to attach each video's Vimeo duration (the
+   *  student-side timestamp) — off by default, opt-in via a footer checkbox. */
+  onPickMany?: (videos: VimeoCatalogVideo[], opts: { includeDurations: boolean }) => void;
   onClose: () => void;
 }) {
   const multiple = !!onPickMany;
@@ -52,6 +54,7 @@ export function VimeoPicker({
   const [folderId, setFolderId] = useState(''); // '' = whole library
   // Multi-select: keep the full video objects (keyed by id) so we can return them + toggle.
   const [selected, setSelected] = useState<Map<string, VimeoCatalogVideo>>(new Map());
+  const [includeDurations, setIncludeDurations] = useState(false); // opt-in to timestamps
 
   useEffect(() => {
     const t = setTimeout(() => setDebounced(query), 350);
@@ -265,15 +268,23 @@ export function VimeoPicker({
         </div>
         <div className="overflow-y-auto">{body}</div>
         {multiple ? (
-          <div className="flex items-center justify-between gap-3 border-t border-slate-100 px-4 py-3">
-            <span className="text-xs font-semibold text-slate-500">
-              {selected.size} selected
-            </span>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-semibold text-slate-500">{selected.size} selected</span>
+              <label className="flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-slate-600">
+                <input
+                  type="checkbox"
+                  checked={includeDurations}
+                  onChange={(e) => setIncludeDurations(e.target.checked)}
+                />
+                Include durations
+              </label>
+            </div>
             <button
               type="button"
               disabled={selected.size === 0}
               onClick={() => {
-                onPickMany?.([...selected.values()]);
+                onPickMany?.([...selected.values()], { includeDurations });
                 onClose();
               }}
               className="inline-flex items-center gap-1.5 rounded-full bg-orange px-4 py-2 text-sm font-bold text-[#171717] disabled:opacity-50"
