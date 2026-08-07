@@ -1,8 +1,13 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Loader2, Search, Video, X } from 'lucide-react';
-import { searchVimeoCatalog, type VimeoCatalogVideo } from '@/lib/api/vimeo';
+import { FolderOpen, Loader2, Search, Video, X } from 'lucide-react';
+import {
+  listVimeoFolders,
+  searchVimeoCatalog,
+  type VimeoCatalogVideo,
+  type VimeoFolder,
+} from '@/lib/api/vimeo';
 import { ApiRequestError } from '@/lib/api/types';
 
 // The backend serves browse/search from a cached full library, so asking for a large
@@ -36,17 +41,30 @@ export function VimeoPicker({
   const [configured, setConfigured] = useState(true);
   const [videos, setVideos] = useState<VimeoCatalogVideo[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [folders, setFolders] = useState<VimeoFolder[]>([]);
+  const [folderId, setFolderId] = useState(''); // '' = whole library
 
   useEffect(() => {
     const t = setTimeout(() => setDebounced(query), 350);
     return () => clearTimeout(t);
   }, [query]);
 
+  // Load the folder list once (best-effort — folder filter just doesn't appear if it fails).
+  useEffect(() => {
+    let alive = true;
+    listVimeoFolders()
+      .then((res) => alive && setFolders(res.folders))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   useEffect(() => {
     let alive = true;
     setLoading(true);
     setError(null);
-    searchVimeoCatalog(debounced, BROWSE_LIMIT)
+    searchVimeoCatalog(debounced, BROWSE_LIMIT, folderId || null)
       .then((res) => {
         if (!alive) return;
         setConfigured(res.configured);
@@ -68,7 +86,7 @@ export function VimeoPicker({
     return () => {
       alive = false;
     };
-  }, [debounced]);
+  }, [debounced, folderId]);
 
   const body = useMemo(() => {
     if (loading) {
@@ -162,6 +180,24 @@ export function VimeoPicker({
               className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-navy focus:border-[#ffc42d] focus:outline-none"
             />
           </div>
+          {folders.length > 0 && (
+            <div className="relative hidden sm:block">
+              <FolderOpen className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+              <select
+                value={folderId}
+                onChange={(e) => setFolderId(e.target.value)}
+                aria-label="Filter by folder"
+                className="h-10 max-w-[13rem] rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm font-semibold text-navy focus:border-[#ffc42d] focus:outline-none"
+              >
+                <option value="">All folders</option>
+                {folders.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.name} ({f.videoCount})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <button
             type="button"
             onClick={onClose}

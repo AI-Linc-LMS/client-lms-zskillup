@@ -17,6 +17,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { getCalibrationResults, type CalibrationResultsDto } from '@/lib/api/recommendations';
+import { invalidateRecommendations } from '@/hooks/useRecommendations';
 import type { ApiMockReport } from '@/lib/api/mocks';
 import type { GamificationSummary } from '@/lib/api/gamification-types';
 import { MockReportView } from '@/components/practice/MockRunner';
@@ -41,6 +42,10 @@ export function CalibrationResults({
 
   useEffect(() => {
     let alive = true;
+    // The test just completed → the student is now calibrated. Drop the shared
+    // recommendations cache so the dashboard card re-fetches and unlocks instead of
+    // reusing the stale pre-test `calibrated:false` snapshot.
+    invalidateRecommendations();
     getCalibrationResults()
       .then((d) => alive && setData(d))
       .catch(() => alive && setFailed(true));

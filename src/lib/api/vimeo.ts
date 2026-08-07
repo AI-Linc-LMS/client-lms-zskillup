@@ -13,17 +13,34 @@ export interface VimeoCatalogVideo {
   embedUrl: string | null;
 }
 
-/** Search the shared Vimeo library. `configured` is false when no token is set on
- *  the backend — the UI then falls back to paste-a-link. */
+/** A Vimeo folder ("project") for the picker's folder filter. */
+export interface VimeoFolder {
+  id: string;
+  name: string;
+  videoCount: number;
+}
+
+/** Search the shared Vimeo library — or a single folder when `folder` is set.
+ *  `configured` is false when no token is set on the backend (UI falls back to paste). */
 export async function searchVimeoCatalog(
   q: string,
   limit = 24,
+  folder?: string | null,
 ): Promise<{ configured: boolean; videos: VimeoCatalogVideo[] }> {
   const params = new URLSearchParams();
   if (q.trim()) params.set('q', q.trim());
   params.set('limit', String(limit));
+  if (folder) params.set('folder', folder);
   const res = await apiClient.get<{ configured: boolean; videos: VimeoCatalogVideo[] }>(
     `/api/v1/admin/vimeo/videos?${params.toString()}`,
+  );
+  return res.data;
+}
+
+/** List the shared Vimeo account's folders for the picker filter. */
+export async function listVimeoFolders(): Promise<{ configured: boolean; folders: VimeoFolder[] }> {
+  const res = await apiClient.get<{ configured: boolean; folders: VimeoFolder[] }>(
+    '/api/v1/admin/vimeo/folders',
   );
   return res.data;
 }

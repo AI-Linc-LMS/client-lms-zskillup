@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FileText, Film, Loader2, Plus, PlayCircle, ListChecks, Sparkles, Trash2, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, FileText, Film, Loader2, Plus, PlayCircle, ListChecks, Sparkles, Trash2, X } from 'lucide-react';
 import { VimeoPicker } from '@/components/media/VimeoPicker';
 import { cn } from '@/lib/utils';
 import { listAdminCompanies, type AdminCompanyRow } from '@/lib/api/admin';
@@ -18,6 +18,7 @@ import {
   generateStudyMaterialQuizzes,
   getAdminSectionStudyMaterial,
   getAdminStudyMaterial,
+  reorderStudyMaterial,
   updateItem,
   updateSection,
   updateTopic,
@@ -120,6 +121,18 @@ export function StudyMaterialAdmin() {
     );
   };
 
+  // Position-based reorder: swap a section with its neighbour and persist the full order
+  // (the server sets order_index = list position). Lets a new section be slotted anywhere
+  // without deleting/recreating anything.
+  const moveSection = (index: number, dir: -1 | 1) => {
+    if (!tree) return;
+    const j = index + dir;
+    if (j < 0 || j >= tree.sections.length) return;
+    const ids = tree.sections.map((s) => s.id);
+    [ids[index], ids[j]] = [ids[j], ids[index]];
+    void run(() => reorderStudyMaterial('section', ids));
+  };
+
   const runGenerate = async () => {
     if (!scopeReady) return;
     const label = scope === 'company' ? "this company's" : "this section's";
@@ -212,9 +225,30 @@ export function StudyMaterialAdmin() {
       {/* Sections */}
       {tree && (
         <div className="space-y-3">
-          {tree.sections.map((s) => (
+          {tree.sections.map((s, si) => (
             <div key={s.id} className="rounded-2xl border border-slate-200 bg-white p-4">
               <div className="flex flex-wrap items-center gap-2">
+                {/* Position controls — reorder a section without deleting/recreating it. */}
+                <div className="flex flex-col">
+                  <button
+                    type="button"
+                    onClick={() => moveSection(si, -1)}
+                    disabled={si === 0 || busy}
+                    aria-label="Move section up"
+                    className="grid size-5 place-items-center rounded text-slate-400 hover:bg-slate-100 hover:text-navy disabled:opacity-30"
+                  >
+                    <ArrowUp className="size-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => moveSection(si, 1)}
+                    disabled={si === tree.sections.length - 1 || busy}
+                    aria-label="Move section down"
+                    className="grid size-5 place-items-center rounded text-slate-400 hover:bg-slate-100 hover:text-navy disabled:opacity-30"
+                  >
+                    <ArrowDown className="size-3.5" />
+                  </button>
+                </div>
                 <InlineText
                   value={s.title}
                   onSave={(title) => run(() => updateSection(s.id, { title }))}

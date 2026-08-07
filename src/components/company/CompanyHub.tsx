@@ -25,6 +25,7 @@ import {
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { CompanyRegisterCard } from '@/components/company/CompanyRegisterCard';
 import { HubVideoEmbed } from '@/components/media/HubVideoEmbed';
+import { OverviewVimeoPlayer } from '@/components/company/OverviewVimeoPlayer';
 import { cn } from '@/lib/utils';
 import { HUB_TABS, type HubContent, type HubTab } from '@/lib/hub-data';
 import { hasRoleHint } from '@/lib/session-hints';
@@ -736,16 +737,22 @@ function OverviewVideos({
       <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Company videos</p>
       <h2 className="mt-1 text-lg font-bold text-navy">Get to know {name}</h2>
 
-      <div className="mt-4 aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-black">
-        <iframe
-          key={active.id}
-          src={active.embedUrl ?? ''}
-          className="size-full"
-          allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
-          allowFullScreen
-          title={active.title}
-        />
-      </div>
+      {/^https:\/\/player\.vimeo\.com\//.test(active.embedUrl ?? '') ? (
+        // SDK player with controls:false → no vimeo logo / share / details exposed.
+        <OverviewVimeoPlayer key={active.id} embedUrl={active.embedUrl as string} title={active.title} />
+      ) : (
+        // Non-Vimeo embeds (Drive/YouTube) don't expose the vimeo chrome — plain iframe is fine.
+        <div className="mt-4 aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-black">
+          <iframe
+            key={active.id}
+            src={active.embedUrl ?? ''}
+            className="size-full"
+            allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+            allowFullScreen
+            title={active.title}
+          />
+        </div>
+      )}
       <p className="mt-2.5 text-sm font-semibold text-navy">{active.title}</p>
 
       {playable.length > 1 && (
