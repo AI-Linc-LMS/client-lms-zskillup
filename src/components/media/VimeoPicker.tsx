@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { FolderOpen, Loader2, Search, Video, X } from 'lucide-react';
+import { Check, FolderOpen, ListChecks, Loader2, Plus, Search, Video, X } from 'lucide-react';
 import {
   listVimeoFolders,
   searchVimeoCatalog,
@@ -9,6 +9,7 @@ import {
   type VimeoFolder,
 } from '@/lib/api/vimeo';
 import { ApiRequestError } from '@/lib/api/types';
+import { cn } from '@/lib/utils';
 
 // The backend serves browse/search from a cached full library, so asking for a large
 // slice returns the WHOLE catalog (not just the newest page) without extra Vimeo calls.
@@ -30,11 +31,17 @@ function fmtDuration(s: number): string {
  */
 export function VimeoPicker({
   onPick,
+  onPickMany,
   onClose,
 }: {
-  onPick: (video: VimeoCatalogVideo) => void;
+  /** Single-pick mode (fills one URL field): picking closes the modal. */
+  onPick?: (video: VimeoCatalogVideo) => void;
+  /** Bulk mode: tick videos, then "Add N to platform" imports them all at once. When
+   *  provided, the picker renders in multi-select mode instead of single-pick. */
+  onPickMany?: (videos: VimeoCatalogVideo[]) => void;
   onClose: () => void;
 }) {
+  const multiple = !!onPickMany;
   const [query, setQuery] = useState('');
   const [debounced, setDebounced] = useState('');
   const [loading, setLoading] = useState(true);
@@ -43,6 +50,8 @@ export function VimeoPicker({
   const [error, setError] = useState<string | null>(null);
   const [folders, setFolders] = useState<VimeoFolder[]>([]);
   const [folderId, setFolderId] = useState(''); // '' = whole library
+  // Multi-select: keep the full video objects (keyed by id) so we can return them + toggle.
+  const [selected, setSelected] = useState<Map<string, VimeoCatalogVideo>>(new Map());
 
   useEffect(() => {
     const t = setTimeout(() => setDebounced(query), 350);
@@ -119,51 +128,98 @@ export function VimeoPicker({
         </div>
       );
     }
+    const allSelected = videos.length > 0 && videos.every((v) => selected.has(v.vimeoId));
     return (
       <>
-        <p className="px-4 pt-3 text-[11px] font-medium text-slate-500">
-          {debounced
-            ? `${videos.length} ${videos.length === 1 ? 'match' : 'matches'} for “${debounced}”`
-            : `Browsing the full library · ${videos.length} video${videos.length === 1 ? '' : 's'}`}
-        </p>
-        <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3">
-          {videos.map((v) => (
-          <button
-            key={v.vimeoId}
-            type="button"
-            onClick={() => {
-              onPick(v);
-              onClose();
-            }}
-            className="group overflow-hidden rounded-xl border border-slate-200 bg-white text-left transition-colors hover:border-[#ffc42d]"
-          >
-            <div className="relative aspect-video w-full bg-slate-100">
-              {v.thumbnailUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={v.thumbnailUrl} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
-              ) : (
-                <div className="grid size-full place-items-center">
-                  <Video className="size-6 text-slate-300" aria-hidden="true" />
-                </div>
-              )}
-              {v.durationSeconds > 0 ? (
-                <span className="absolute bottom-1.5 right-1.5 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-semibold text-white">
-                  {fmtDuration(v.durationSeconds)}
-                </span>
-              ) : null}
-            </div>
-            <div className="p-2.5">
-              <p className="line-clamp-2 text-xs font-semibold text-navy">{v.title}</p>
-              <span className="mt-1 inline-block text-[10px] font-medium text-[#f5b400] opacity-0 transition-opacity group-hover:opacity-100">
-                Use this video →
-              </span>
-            </div>
+        <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-3">
+          <p className="text-[11px] font-medium text-slate-500">
+            {debounced
+              ? `${videos.length} ${videos.length === 1 ? 'match' : 'matches'} for “${debounced}”`
+              : `Browsing the full library · ${videos.length} video${videos.length === 1 ? '' : 's'}`}
+          </p>
+          {/* Select-all is deliberately scoped to a chosen FOLDER — never the whole library. */}
+          {multiple && folderId ? (
+            <button
+              type="button"
+              onClick={() =>
+                setSelected((prev) => {
+                  if (allSelected) return new Map();
+                  const next = new Map(prev);
+                  for (const v of videos) next.set(v.vimeoId, v);
+                  return next;
+                })
+              }
+              className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-[11px] font-bold text-navy hover:bg-slate-200"
+            >
+              <ListChecks className="size-3.5" /> {allSelected ? 'Clear all' : 'Select all'}
             </button>
-          ))}
+          ) : null}
+        </div>
+        <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3">
+          {videos.map((v) => {
+            const isSel = selected.has(v.vimeoId);
+            return (
+              <button
+                key={v.vimeoId}
+                type="button"
+                onClick={() => {
+                  if (multiple) {
+                    setSelected((prev) => {
+                      const next = new Map(prev);
+                      if (next.has(v.vimeoId)) next.delete(v.vimeoId);
+                      else next.set(v.vimeoId, v);
+                      return next;
+                    });
+                  } else {
+                    onPick?.(v);
+                    onClose();
+                  }
+                }}
+                className={cn(
+                  'group overflow-hidden rounded-xl border bg-white text-left transition-colors',
+                  isSel ? 'border-[#f5b400] ring-2 ring-[#ffc42d]/60' : 'border-slate-200 hover:border-[#ffc42d]',
+                )}
+              >
+                <div className="relative aspect-video w-full bg-slate-100">
+                  {v.thumbnailUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={v.thumbnailUrl} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
+                  ) : (
+                    <div className="grid size-full place-items-center">
+                      <Video className="size-6 text-slate-300" aria-hidden="true" />
+                    </div>
+                  )}
+                  {multiple ? (
+                    <span
+                      className={cn(
+                        'absolute left-1.5 top-1.5 grid size-5 place-items-center rounded-full',
+                        isSel ? 'bg-[#f5b400] text-white' : 'bg-black/40',
+                      )}
+                    >
+                      {isSel ? <Check className="size-3.5" /> : <span className="size-3 rounded-full border border-white/70" />}
+                    </span>
+                  ) : null}
+                  {v.durationSeconds > 0 ? (
+                    <span className="absolute bottom-1.5 right-1.5 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                      {fmtDuration(v.durationSeconds)}
+                    </span>
+                  ) : null}
+                </div>
+                <div className="p-2.5">
+                  <p className="line-clamp-2 text-xs font-semibold text-navy">{v.title}</p>
+                  {!multiple ? (
+                    <span className="mt-1 inline-block text-[10px] font-medium text-[#f5b400] opacity-0 transition-opacity group-hover:opacity-100">
+                      Use this video →
+                    </span>
+                  ) : null}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </>
     );
-  }, [loading, configured, error, videos, debounced, onPick, onClose]);
+  }, [loading, configured, error, videos, debounced, onPick, onClose, multiple, folderId, selected]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -208,6 +264,24 @@ export function VimeoPicker({
           </button>
         </div>
         <div className="overflow-y-auto">{body}</div>
+        {multiple ? (
+          <div className="flex items-center justify-between gap-3 border-t border-slate-100 px-4 py-3">
+            <span className="text-xs font-semibold text-slate-500">
+              {selected.size} selected
+            </span>
+            <button
+              type="button"
+              disabled={selected.size === 0}
+              onClick={() => {
+                onPickMany?.([...selected.values()]);
+                onClose();
+              }}
+              className="inline-flex items-center gap-1.5 rounded-full bg-orange px-4 py-2 text-sm font-bold text-[#171717] disabled:opacity-50"
+            >
+              <Plus className="size-4" /> Add{selected.size ? ` ${selected.size}` : ''} to platform
+            </button>
+          </div>
+        ) : null}
       </div>
     </div>
   );

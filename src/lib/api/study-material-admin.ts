@@ -71,6 +71,13 @@ export interface ItemInput {
 export async function createItem(body: ItemInput & { topicId: string }) {
   await apiClient.post('/api/v1/admin/study-material/items', body);
 }
+/** Bulk-add VIDEO items to a topic (Vimeo folder "Select all → Add to platform"). */
+export async function createItemsBulk(
+  topicId: string,
+  videos: { title: string; url: string; durationLabel?: string }[],
+) {
+  await apiClient.post('/api/v1/admin/study-material/items/bulk', { topicId, videos });
+}
 export async function updateItem(id: string, body: Partial<ItemInput & { orderIndex: number }>) {
   await apiClient.patch(`/api/v1/admin/study-material/items/${id}`, body);
 }

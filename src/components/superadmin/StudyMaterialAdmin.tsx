@@ -9,6 +9,7 @@ import { listAdminCompanies, type AdminCompanyRow } from '@/lib/api/admin';
 import { listTopicsWithCounts, type ApiTopic } from '@/lib/api/catalog';
 import {
   createItem,
+  createItemsBulk,
   createSection,
   createTopic,
   deleteItem,
@@ -48,6 +49,7 @@ export function StudyMaterialAdmin() {
   const [topics, setTopics] = useState<ApiTopic[]>([]);
   const [newSection, setNewSection] = useState('');
   const [itemForm, setItemForm] = useState<{ topicId: string; item?: AdminStudyMaterialItemDto } | null>(null);
+  const [bulkTopicId, setBulkTopicId] = useState<string | null>(null); // topic receiving a bulk Vimeo import
   const [busy, setBusy] = useState(false);
   const [generating, setGenerating] = useState(false);
   // Surface failures instead of swallowing them: a silently-rejected createSection/save
@@ -131,6 +133,16 @@ export function StudyMaterialAdmin() {
     const ids = tree.sections.map((s) => s.id);
     [ids[index], ids[j]] = [ids[j], ids[index]];
     void run(() => reorderStudyMaterial('section', ids));
+  };
+
+  // Same position-based reorder, one level down: swap a topic with its neighbour WITHIN
+  // its section and persist the section's full topic order.
+  const moveTopic = (topics: { id: string }[], ti: number, dir: -1 | 1) => {
+    const j = ti + dir;
+    if (j < 0 || j >= topics.length) return;
+    const ids = topics.map((t) => t.id);
+    [ids[ti], ids[j]] = [ids[j], ids[ti]];
+    void run(() => reorderStudyMaterial('topic', ids));
   };
 
   const runGenerate = async () => {
@@ -282,9 +294,30 @@ export function StudyMaterialAdmin() {
 
               {/* Topics */}
               <div className="mt-3 space-y-2 border-l-2 border-slate-100 pl-3">
-                {s.topics.map((t) => (
+                {s.topics.map((t, ti) => (
                   <div key={t.id} className="rounded-xl bg-slate-50/60 p-3">
                     <div className="flex items-center gap-2">
+                      {/* Position controls — reorder a topic within its section. */}
+                      <div className="flex flex-col">
+                        <button
+                          type="button"
+                          onClick={() => moveTopic(s.topics, ti, -1)}
+                          disabled={ti === 0 || busy}
+                          aria-label="Move topic up"
+                          className="grid size-4 place-items-center rounded text-slate-400 hover:bg-slate-200 hover:text-navy disabled:opacity-30"
+                        >
+                          <ArrowUp className="size-3" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveTopic(s.topics, ti, 1)}
+                          disabled={ti === s.topics.length - 1 || busy}
+                          aria-label="Move topic down"
+                          className="grid size-4 place-items-center rounded text-slate-400 hover:bg-slate-200 hover:text-navy disabled:opacity-30"
+                        >
+                          <ArrowDown className="size-3" />
+                        </button>
+                      </div>
                       <InlineText value={t.title} onSave={(title) => run(() => updateTopic(t.id, { title }))} className="flex-1 text-sm font-bold text-navy" />
                       <button
                         type="button"
@@ -292,6 +325,14 @@ export function StudyMaterialAdmin() {
                         className="inline-flex items-center gap-1 rounded-full bg-navy px-2.5 py-1 text-[11px] font-bold text-white hover:bg-navy/90"
                       >
                         <Plus className="size-3" /> Item
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBulkTopicId(t.id)}
+                        title="Add multiple videos from a Vimeo folder at once"
+                        className="inline-flex items-center gap-1 rounded-full border border-navy/20 bg-white px-2.5 py-1 text-[11px] font-bold text-navy hover:bg-slate-50"
+                      >
+                        <Film className="size-3" /> Bulk add
                       </button>
                       <IconBtn label="Delete topic" onClick={() => confirm(`Delete topic "${t.title}"?`) && run(() => deleteTopic(t.id))}>
                         <Trash2 className="size-3.5" />
@@ -380,6 +421,30 @@ export function StudyMaterialAdmin() {
           />
         )}
       </AnimatePresence>
+
+      {/* Bulk video import: pick a Vimeo folder, "Select all", "Add N to platform" →
+          create one VIDEO item per selected video on this topic. */}
+      {bulkTopicId && (
+        <VimeoPicker
+          onClose={() => setBulkTopicId(null)}
+          onPickMany={(videos) => {
+            const topicId = bulkTopicId;
+            void run(() =>
+              createItemsBulk(
+                topicId,
+                videos.map((v) => ({
+                  title: v.title,
+                  url: v.link,
+                  durationLabel:
+                    v.durationSeconds > 0
+                      ? `${Math.floor(v.durationSeconds / 60)}:${String(Math.floor(v.durationSeconds % 60)).padStart(2, '0')}`
+                      : undefined,
+                })),
+              ),
+            );
+          }}
+        />
+      )}
     </div>
   );
 }
