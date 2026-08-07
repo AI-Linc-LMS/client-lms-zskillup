@@ -695,6 +695,19 @@ export function InterviewRunner({ id }: { id: string }) {
     }
   }, [audioConstraints, camOn, refreshAudioDevices, startRecording]);
 
+  // A NEW question is on screen → drop the PREVIOUS turn's leftover capture state. The
+  // recorded-audio buffer + the whisper "final answer" ref were only reset inside
+  // startRecording, so if the candidate advanced before the next recorder armed (during
+  // the TTS window), a stop→transcribe re-served the prior turn's audio as this question's
+  // answer — the reported "Q1 and Q2 have the identical answer" bleed. Keyed on question.id
+  // only, so it never fires mid-turn (busy/loading toggles don't clear a live recording).
+  useEffect(() => {
+    chunksRef.current = [];
+    srFinalRef.current = '';
+    answerRef.current = '';
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [question?.id]);
+
   // Speak each new question, then auto-arm recording when it finishes.
   useEffect(() => {
     if (!question || busy || loading) return;

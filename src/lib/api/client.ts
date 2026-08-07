@@ -114,6 +114,36 @@ async function refreshAccessToken(): Promise<RefreshOutcome> {
 }
 
 /**
+ * PROACTIVE token refresh — keeps long-lived pages alive. The access token TTL is 15m and
+ * refresh is otherwise ONLY reactive (on a 401). A 20–60m assessment therefore sits
+ * through 1–3 expiry boundaries, and the reactive refresh AT a boundary is the sole logout
+ * trigger — if that one refresh 401s (a rotation-family burn or a second login elsewhere),
+ * the session is torn down mid-test. Renewing a few minutes BEFORE expiry means a long,
+ * no-navigation page (mock / adaptive quiz) never reaches a reactive-401 boundary. Runs
+ * ONLY for a VISIBLE tab with a live session, so a background tab doesn't multiply
+ * cross-tab refresh-rotation races. Shares the single-flight refresh, so it never
+ * collides with a reactive refresh.
+ */
+const PROACTIVE_REFRESH_MS = 12 * 60 * 1000; // comfortably under the 15m access-token TTL
+let proactiveTimer: ReturnType<typeof setInterval> | null = null;
+
+function proactiveRefreshTick(): void {
+  if (sessionTerminated) return;
+  if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
+  if (!roleHint()) return; // no session hint → nothing to keep alive
+  void refreshAccessToken();
+}
+
+if (typeof window !== 'undefined') {
+  proactiveTimer = setInterval(proactiveRefreshTick, PROACTIVE_REFRESH_MS);
+  // Returning to a tab that was backgrounded past the token TTL: refresh immediately so
+  // the next call doesn't 401 at the boundary and tear the session down.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') proactiveRefreshTick();
+  });
+}
+
+/**
  * Tear the session down fully and bounce to /login. Clears the in-memory
  * access token AND the non-HttpOnly UX-hint cookies (`role`, `onboarded`).
  * Without clearing the hint cookies the Next.js middleware sees an
@@ -123,6 +153,10 @@ function endSessionAndRedirect(): void {
   if (typeof window === 'undefined') return;
   if (sessionTerminated) return; // single-shot
   sessionTerminated = true;
+  if (proactiveTimer) {
+    clearInterval(proactiveTimer);
+    proactiveTimer = null;
+  }
   authToken.clear();
   clearSessionHints();
   // The refresh cookie is HttpOnly - only the logout route handler can clear

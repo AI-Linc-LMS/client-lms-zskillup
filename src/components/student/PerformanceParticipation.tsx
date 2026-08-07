@@ -14,10 +14,10 @@ const INSET = 5; // % padding so points never clip the plot edges
 type ZoneKey = 'thriving' | 'coasting' | 'grinding' | 'start';
 
 const ZONES: Array<{ key: ZoneKey; label: string; bar: string; dot: string; tone: string }> = [
-  { key: 'thriving', label: 'Thriving', bar: 'bg-emerald-400', dot: 'bg-emerald-400', tone: 'text-emerald-600' },
-  { key: 'coasting', label: 'Coasting', bar: 'bg-sky-400', dot: 'bg-sky-400', tone: 'text-sky-600' },
-  { key: 'grinding', label: 'Grinding', bar: 'bg-amber-400', dot: 'bg-amber-400', tone: 'text-amber-600' },
-  { key: 'start', label: 'Start here', bar: 'bg-rose-300', dot: 'bg-rose-300', tone: 'text-rose-500' },
+  { key: 'thriving', label: 'Excelling', bar: 'bg-emerald-400', dot: 'bg-emerald-400', tone: 'text-emerald-600' },
+  { key: 'coasting', label: 'Potential', bar: 'bg-sky-400', dot: 'bg-sky-400', tone: 'text-sky-600' },
+  { key: 'grinding', label: 'Growing', bar: 'bg-amber-400', dot: 'bg-amber-400', tone: 'text-amber-600' },
+  { key: 'start', label: 'Starting', bar: 'bg-rose-300', dot: 'bg-rose-300', tone: 'text-rose-500' },
 ];
 
 function p95(values: number[]): number {
@@ -49,9 +49,9 @@ const zoneOf = (p: ScatterPoint): ZoneKey => {
 function verdict(perf: number, part: number): { label: string; tip: string; tone: string } {
   const hiP = perf >= PERF_HIGH;
   const hiE = part >= PART_HIGH;
-  if (hiP && hiE) return { label: 'Thriving', tip: 'Strong performance on real volume - keep the streak alive.', tone: 'text-emerald-600' };
-  if (hiP && !hiE) return { label: 'Coasting', tip: 'Sharp on light practice - a bit more volume locks it in.', tone: 'text-sky-600' };
-  if (!hiP && hiE) return { label: 'Grinding', tip: 'Great effort - target your weak topics to convert it into results.', tone: 'text-amber-600' };
+  if (hiP && hiE) return { label: 'Excelling', tip: 'Strong performance on real volume - keep the streak alive.', tone: 'text-emerald-600' };
+  if (hiP && !hiE) return { label: 'Potential', tip: 'Sharp on light practice - a bit more volume locks it in.', tone: 'text-sky-600' };
+  if (!hiP && hiE) return { label: 'Growing', tip: 'Great effort - target your weak topics to convert it into results.', tone: 'text-amber-600' };
   return { label: 'Getting started', tip: 'A little daily practice moves you up fast - start with one topic.', tone: 'text-rose-500' };
 }
 
@@ -62,9 +62,9 @@ function pathToTop(perf: number, part: number): string | null {
   const needAcc = Math.max(0, Math.ceil(PERF_HIGH - perf));
   const needAct = Math.max(0, Math.ceil(PART_HIGH - part));
   if (hiP && hiE) return null;
-  if (hiP && !hiE) return `${needAct} more activity to reach Thriving`;
-  if (!hiP && hiE) return `+${needAcc}% performance to reach Thriving`;
-  return `+${needAcc}% performance and ${needAct} more activity to reach Thriving`;
+  if (hiP && !hiE) return `${needAct} more activity to reach Excelling`;
+  if (!hiP && hiE) return `+${needAcc}% performance to reach Excelling`;
+  return `+${needAcc}% performance and ${needAct} more activity to reach Excelling`;
 }
 
 /**
@@ -291,10 +291,10 @@ export function PerformanceParticipation() {
               />
 
               {/* Quadrant captions */}
-              <span className="absolute left-2.5 top-2 text-[11px] font-bold text-sky-500/90">Coasting</span>
-              <span className="absolute right-2.5 top-2 text-[11px] font-bold text-emerald-600/90">Thriving</span>
-              <span className="absolute left-2.5 bottom-2 text-[11px] font-bold text-rose-400/90">Start here</span>
-              <span className="absolute right-2.5 bottom-2 text-[11px] font-bold text-amber-500/90">Grinding</span>
+              <span className="absolute left-2.5 top-2 text-[11px] font-bold text-sky-500/90">Potential</span>
+              <span className="absolute right-2.5 top-2 text-[11px] font-bold text-emerald-600/90">Excelling</span>
+              <span className="absolute left-2.5 bottom-2 text-[11px] font-bold text-rose-400/90">Starting</span>
+              <span className="absolute right-2.5 bottom-2 text-[11px] font-bold text-amber-500/90">Growing</span>
 
               {/* Peers - pop in on a stagger, lift + darken on hover */}
               {data.peers.map((p, i) => (

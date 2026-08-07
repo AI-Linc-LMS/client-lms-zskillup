@@ -127,10 +127,10 @@ export default function StudentAnalyticsPage() {
       >
         <QuadrantScatter students={data.students} partHigh={PART_HIGH} perfHigh={PERF_HIGH} onSelect={setSelectedId} />
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Quad label="High effort · High performance" value={data.quadrants.highPartHighPerf} tone="emerald" />
-          <Quad label="High effort · Needs support" value={data.quadrants.highPartLowPerf} tone="amber" />
-          <Quad label="Low effort · High performance" value={data.quadrants.lowPartHighPerf} tone="sky" />
-          <Quad label="Low effort · Low performance" value={data.quadrants.lowPartLowPerf} tone="red" />
+          <Quad label="Excelling" value={data.quadrants.highPartHighPerf} tone="emerald" />
+          <Quad label="Growing" value={data.quadrants.highPartLowPerf} tone="amber" />
+          <Quad label="Potential" value={data.quadrants.lowPartHighPerf} tone="sky" />
+          <Quad label="Starting" value={data.quadrants.lowPartLowPerf} tone="red" />
         </div>
       </BentoCard>
 
