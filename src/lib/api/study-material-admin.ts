@@ -78,6 +78,15 @@ export async function createItemsBulk(
 ) {
   await apiClient.post('/api/v1/admin/study-material/items/bulk', { topicId, videos });
 }
+/** One-click cleanup: rewrite every item title on a topic to its human form. */
+export async function normalizeTopicTitles(topicId: string): Promise<{ updated: number }> {
+  return (
+    await apiClient.post<{ updated: number }>(
+      `/api/v1/admin/study-material/topics/${topicId}/normalize-titles`,
+      {},
+    )
+  ).data;
+}
 export async function updateItem(id: string, body: Partial<ItemInput & { orderIndex: number }>) {
   await apiClient.patch(`/api/v1/admin/study-material/items/${id}`, body);
 }

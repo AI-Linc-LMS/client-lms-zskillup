@@ -19,6 +19,7 @@ import {
   generateStudyMaterialQuizzes,
   getAdminSectionStudyMaterial,
   getAdminStudyMaterial,
+  normalizeTopicTitles,
   reorderStudyMaterial,
   updateItem,
   updateSection,
@@ -28,6 +29,7 @@ import {
   type ItemInput,
 } from '@/lib/api/study-material-admin';
 import { buildSections } from '@/lib/sections/section-catalog';
+import { cleanVideoTitle } from '@/lib/video-title';
 import { ApiRequestError } from '@/lib/api/types';
 import type { StudyMaterialItemKind } from '@/shared/dto/study-material.dto';
 
@@ -52,6 +54,7 @@ export function StudyMaterialAdmin() {
   const [bulkTopicId, setBulkTopicId] = useState<string | null>(null); // topic receiving a bulk Vimeo import
   const [busy, setBusy] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [cleaning, setCleaning] = useState(false);
   // Surface failures instead of swallowing them: a silently-rejected createSection/save
   // was indistinguishable from "the button does nothing" — the reported "can't create a
   // section" symptom.
@@ -145,6 +148,37 @@ export function StudyMaterialAdmin() {
     void run(() => reorderStudyMaterial('topic', ids));
   };
 
+  // Reorder a VIDEO/quiz/article item within its topic — fixes a bulk import whose Vimeo
+  // order didn't match the intended sequence.
+  const moveItem = (items: { id: string }[], ii: number, dir: -1 | 1) => {
+    const j = ii + dir;
+    if (j < 0 || j >= items.length) return;
+    const ids = items.map((i) => i.id);
+    [ids[ii], ids[j]] = [ids[j], ids[ii]];
+    void run(() => reorderStudyMaterial('item', ids));
+  };
+
+  // One click → rewrite every item title in the tree to its human form
+  // ("S2_V320_network_types" → "Network Types"), for content bulk-imported before the
+  // auto-clean shipped. Titles stay editable afterwards.
+  const cleanAllTitles = async () => {
+    if (!tree) return;
+    const topicIds = tree.sections.flatMap((s) => s.topics.map((t) => t.id));
+    if (topicIds.length === 0) return;
+    setCleaning(true);
+    setActionError(null);
+    try {
+      let total = 0;
+      for (const id of topicIds) total += (await normalizeTopicTitles(id)).updated;
+      load();
+      alert(`Cleaned ${total} title${total === 1 ? '' : 's'}.`);
+    } catch (e) {
+      setActionError(e instanceof ApiRequestError ? e.message : 'Could not clean titles — please try again.');
+    } finally {
+      setCleaning(false);
+    }
+  };
+
   const runGenerate = async () => {
     if (!scopeReady) return;
     const label = scope === 'company' ? "this company's" : "this section's";
@@ -219,9 +253,19 @@ export function StudyMaterialAdmin() {
         {(loading || busy) && <Loader2 className="size-4 animate-spin text-slate-400" />}
         <button
           type="button"
+          onClick={() => void cleanAllTitles()}
+          disabled={!tree || cleaning || busy}
+          title="Rewrite every video title from its Vimeo filename (e.g. S2_V320_network_types) to a human title (Network Types). Titles stay editable."
+          className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3.5 py-2 text-xs font-bold text-navy transition hover:bg-slate-50 disabled:opacity-50"
+        >
+          {cleaning ? <Loader2 className="size-3.5 animate-spin" /> : <FileText className="size-3.5" />}
+          Clean up titles
+        </button>
+        <button
+          type="button"
           onClick={runGenerate}
           disabled={!scopeReady || generating}
-          className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[#1f2d4d] to-[#0a0a0c] px-3.5 py-2 text-xs font-bold text-white transition hover:opacity-90 disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[#1f2d4d] to-[#0a0a0c] px-3.5 py-2 text-xs font-bold text-white transition hover:opacity-90 disabled:opacity-50"
         >
           {generating ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5" />}
           Auto-generate quizzes
@@ -340,11 +384,32 @@ export function StudyMaterialAdmin() {
                     </div>
                     {/* Items */}
                     <ul className="mt-2 space-y-1.5">
-                      {t.items.map((it) => {
+                      {t.items.map((it, ii) => {
                         const m = KIND_META[it.kind];
                         const Icon = m.icon;
                         return (
                           <li key={it.id} className="flex items-center gap-2.5 rounded-lg bg-white px-3 py-2 ring-1 ring-slate-100">
+                            {/* Position controls — reorder a video within its topic (fixes bulk-import order). */}
+                            <div className="flex flex-col">
+                              <button
+                                type="button"
+                                onClick={() => moveItem(t.items, ii, -1)}
+                                disabled={ii === 0 || busy}
+                                aria-label="Move item up"
+                                className="grid size-4 place-items-center rounded text-slate-300 hover:bg-slate-100 hover:text-navy disabled:opacity-25"
+                              >
+                                <ArrowUp className="size-3" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => moveItem(t.items, ii, 1)}
+                                disabled={ii === t.items.length - 1 || busy}
+                                aria-label="Move item down"
+                                className="grid size-4 place-items-center rounded text-slate-300 hover:bg-slate-100 hover:text-navy disabled:opacity-25"
+                              >
+                                <ArrowDown className="size-3" />
+                              </button>
+                            </div>
                             <span className={cn('grid size-7 shrink-0 place-items-center rounded-lg', m.cls)}>
                               <Icon className="size-3.5" />
                             </span>
@@ -433,7 +498,9 @@ export function StudyMaterialAdmin() {
               createItemsBulk(
                 topicId,
                 videos.map((v) => ({
-                  title: v.title,
+                  // Store the human title ("Network Types"), not the raw Vimeo filename
+                  // ("S2_V320_network_types"). Still editable per-item afterwards.
+                  title: cleanVideoTitle(v.title),
                   url: v.link,
                   durationLabel:
                     v.durationSeconds > 0
@@ -550,6 +617,9 @@ function ItemForm({
                 <VimeoPicker
                   onPick={(v) => {
                     setUrl(v.link);
+                    // Auto-fill a HUMAN title from the Vimeo filename when the field is
+                    // empty ("S2_V320_network_types" → "Network Types"); still editable.
+                    if (!title.trim()) setTitle(cleanVideoTitle(v.title));
                     if (!durationLabel && v.durationSeconds > 0) {
                       const m = Math.floor(v.durationSeconds / 60);
                       const s = Math.floor(v.durationSeconds % 60);
