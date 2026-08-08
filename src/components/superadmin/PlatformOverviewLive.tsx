@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import {
   BookOpen,
   Brain,
@@ -17,36 +17,37 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react';
-import { apiClient } from '@/lib/api/client';
+import { fetchReadiness, type Readiness } from '@/lib/api/client';
 import {
   getAdminStats,
   type AdminPlatformStats,
 } from '@/lib/api/admin';
 import { AreaChart, Donut, MiniStat, Panel, ProgressRow, StatCard } from './dashboard-ui';
 
-type Ready = { database: string; migrations: string } | null;
-
 export function PlatformOverviewLive() {
   const [stats, setStats] = useState<AdminPlatformStats | null>(null);
-  const [ready, setReady] = useState<Ready>(null);
+  const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
     setRefreshing(true);
-    const results = await Promise.allSettled([
+    const [statsResult, readinessResult] = await Promise.allSettled([
       getAdminStats(),
-      apiClient.get<{ ready: boolean; checks: { database: string; migrations: string } }>('/ready', {
-        auth: 'public',
-      }),
+      fetchReadiness(),
     ]);
-    if (results[0].status === 'fulfilled') {
-      setStats(results[0].value);
+    if (statsResult.status === 'fulfilled') {
+      setStats(statsResult.value);
       setError(null);
     } else if (!stats) {
       setError('Could not load platform stats.');
     }
-    setReady(results[1].status === 'fulfilled' ? results[1].value.data.checks : null);
+    // fetchReadiness never rejects, but keep a defensive fallback.
+    setReadiness(
+      readinessResult.status === 'fulfilled'
+        ? readinessResult.value
+        : { reachable: false, ready: false, checks: null },
+    );
     setRefreshing(false);
   }, [stats]);
 
@@ -139,21 +140,35 @@ export function PlatformOverviewLive() {
     { label: 'Adaptive', value: adaptive, icon: <Brain className="size-4" />, color: '#db2777' },
   ];
 
-  const health = [
-    { label: 'API', detail: ready ? 'Healthy' : 'Unreachable', ok: !!ready, icon: <Server className="size-4" /> },
+  // A 503 from /ready means the API answered but a dependency is degraded — the
+  // API is still reachable. Show each check's real state (migrations: pending,
+  // etc.) instead of blanking everything to "Unreachable / Unknown".
+  const reachable = readiness?.reachable ?? false;
+  const checks = readiness?.checks ?? null;
+  const health: { label: string; detail: string; ok: boolean; icon: ReactNode }[] = [
+    { label: 'API', detail: reachable ? 'Healthy' : 'Unreachable', ok: reachable, icon: <Server className="size-4" /> },
     {
       label: 'Database',
-      detail: ready ? (ready.database === 'ok' ? 'Connected' : ready.database) : 'Unknown',
-      ok: ready?.database === 'ok',
+      detail: checks?.database ? (checks.database === 'ok' ? 'Connected' : checks.database) : 'Unknown',
+      ok: checks?.database === 'ok',
       icon: <Database className="size-4" />,
     },
     {
       label: 'Migrations',
-      detail: ready ? ready.migrations : 'Unknown',
-      ok: ready?.migrations === 'applied',
+      detail: checks?.migrations ?? 'Unknown',
+      ok: checks?.migrations === 'applied',
       icon: <ShieldCheck className="size-4" />,
     },
   ];
+  // The backend reports Redis too — surface it when present.
+  if (checks?.redis) {
+    health.push({
+      label: 'Cache',
+      detail: checks.redis === 'ok' ? 'Connected' : checks.redis,
+      ok: checks.redis === 'ok',
+      icon: <Layers className="size-4" />,
+    });
+  }
 
   return (
     <div className="space-y-6">

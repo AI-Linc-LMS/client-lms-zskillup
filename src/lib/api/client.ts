@@ -347,6 +347,36 @@ export const apiClient = {
     apiRequest<T>(path, { ...options, method: 'DELETE' }),
 };
 
+export type ReadinessChecks = { database?: string; migrations?: string; redis?: string };
+export type Readiness = { reachable: boolean; ready: boolean; checks: ReadinessChecks | null };
+
+/**
+ * Readiness probe for the admin Platform-Health widget. Unlike apiClient.get,
+ * this does NOT throw on the 503 that GET /ready returns when a dependency is
+ * degraded (ADR-008) — it reads the JSON envelope on BOTH 200 and 503 so the
+ * dashboard can show the true per-check state (e.g. migrations: pending) instead
+ * of collapsing everything to "API unreachable". Only a genuine transport
+ * failure yields reachable:false. Public probe: no token / refresh flow needed.
+ */
+export async function fetchReadiness(): Promise<Readiness> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/ready`, {
+      headers: { Accept: 'application/json' },
+      credentials: 'include',
+    });
+    try {
+      const body = (await res.json()) as { data?: { ready?: boolean; checks?: ReadinessChecks } };
+      return { reachable: true, ready: body.data?.ready ?? false, checks: body.data?.checks ?? null };
+    } catch {
+      // Reachable, but the body wasn't the expected JSON envelope.
+      return { reachable: true, ready: res.ok, checks: null };
+    }
+  } catch {
+    // Transport-level failure — the API is genuinely unreachable.
+    return { reachable: false, ready: false, checks: null };
+  }
+}
+
 /**
  * Test-only escape hatch. After a successful logout from the client, components
  * navigate (router.push('/')) and the page state is rebuilt - but the
