@@ -98,6 +98,24 @@ export async function reorderStudyMaterial(level: 'section' | 'topic' | 'item', 
   await apiClient.post('/api/v1/admin/study-material/reorder', { level, ids });
 }
 
+// ── copy structure ──────────────────────────────────────────────────────────
+export interface CopyStructureResult {
+  source: { id: string; name: string };
+  results: Array<{ companyId: string; companyName: string; sections: number; topics: number; items: number }>;
+}
+/**
+ * Deep-copy a company's Study-Material structure (sections → topics → videos) into
+ * one or more target companies as INDEPENDENT copies. Omit `sectionIds` to copy
+ * the whole tree, or pass a subset to copy only those sections.
+ */
+export async function copyStudyMaterialStructure(body: {
+  sourceCompanyId: string;
+  targetCompanyIds: string[];
+  sectionIds?: string[];
+}): Promise<CopyStructureResult> {
+  return (await apiClient.post<CopyStructureResult>('/api/v1/admin/study-material/copy-structure', body)).data;
+}
+
 /** (Re)generate this company's quiz sections from its real question bank. */
 export async function generateStudyMaterialQuizzes(
   companyId: string,

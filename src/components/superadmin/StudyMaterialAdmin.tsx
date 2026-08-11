@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowDown, ArrowUp, FileText, Film, Loader2, Plus, PlayCircle, ListChecks, Sparkles, Trash2, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, Copy, FileText, Film, Loader2, Plus, PlayCircle, ListChecks, Sparkles, Trash2, X } from 'lucide-react';
 import { VimeoPicker } from '@/components/media/VimeoPicker';
 import { cn } from '@/lib/utils';
 import { listAdminCompanies, type AdminCompanyRow } from '@/lib/api/admin';
@@ -19,6 +19,7 @@ import {
   generateStudyMaterialQuizzes,
   getAdminSectionStudyMaterial,
   getAdminStudyMaterial,
+  copyStudyMaterialStructure,
   normalizeTopicTitles,
   reorderStudyMaterial,
   updateItem,
@@ -26,6 +27,7 @@ import {
   updateTopic,
   type AdminStudyMaterialDto,
   type AdminStudyMaterialItemDto,
+  type CopyStructureResult,
   type ItemInput,
 } from '@/lib/api/study-material-admin';
 import { buildSections } from '@/lib/sections/section-catalog';
@@ -40,6 +42,16 @@ const KIND_META: Record<StudyMaterialItemKind, { icon: typeof PlayCircle; label:
   QUIZ: { icon: ListChecks, label: 'Quiz', cls: 'bg-amber-50 text-amber-600' },
   ARTICLE: { icon: FileText, label: 'Article', cls: 'bg-sky-50 text-sky-600' },
 };
+
+/** Add/remove an id in a Set-valued state atom (immutably). */
+function toggleInSet(setter: Dispatch<SetStateAction<Set<string>>>, id: string, on: boolean) {
+  setter((prev) => {
+    const next = new Set(prev);
+    if (on) next.add(id);
+    else next.delete(id);
+    return next;
+  });
+}
 
 export function StudyMaterialAdmin() {
   const [scope, setScope] = useState<Scope>('company');
@@ -60,6 +72,14 @@ export function StudyMaterialAdmin() {
   // section" symptom.
   const [actionError, setActionError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState(false);
+  // Copy-structure modal (company scope only): clone this company's sections/topics/
+  // videos into other companies as independent copies.
+  const [copyOpen, setCopyOpen] = useState(false);
+  const [copyTargets, setCopyTargets] = useState<Set<string>>(new Set());
+  const [copySections, setCopySections] = useState<Set<string>>(new Set());
+  const [copyBusy, setCopyBusy] = useState(false);
+  const [copyResult, setCopyResult] = useState<CopyStructureResult | null>(null);
+  const [copyError, setCopyError] = useState<string | null>(null);
 
   useEffect(() => {
     listAdminCompanies()
@@ -203,6 +223,37 @@ export function StudyMaterialAdmin() {
 
   const quizSlugs = useMemo(() => topics.filter((t) => t.parentId).map((t) => ({ slug: t.slug, name: t.name })), [topics]);
 
+  const sourceName = companies.find((c) => c.id === companyId)?.name ?? 'this company';
+  const allSectionsSelected = !!tree && tree.sections.length > 0 && copySections.size === tree.sections.length;
+
+  const openCopy = () => {
+    if (!tree || tree.sections.length === 0) return;
+    setCopySections(new Set(tree.sections.map((s) => s.id))); // default: copy everything
+    setCopyTargets(new Set());
+    setCopyResult(null);
+    setCopyError(null);
+    setCopyOpen(true);
+  };
+
+  const submitCopy = async () => {
+    if (copyTargets.size === 0 || copySections.size === 0) return;
+    setCopyBusy(true);
+    setCopyError(null);
+    try {
+      const res = await copyStudyMaterialStructure({
+        sourceCompanyId: companyId,
+        targetCompanyIds: [...copyTargets],
+        // All sections ticked → omit (copy the whole tree); a strict subset → send ids.
+        sectionIds: allSectionsSelected ? undefined : [...copySections],
+      });
+      setCopyResult(res);
+    } catch (e) {
+      setCopyError(e instanceof ApiRequestError ? e.message : 'Copy failed — please try again.');
+    } finally {
+      setCopyBusy(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Scope + target picker */}
@@ -261,6 +312,17 @@ export function StudyMaterialAdmin() {
           {cleaning ? <Loader2 className="size-3.5 animate-spin" /> : <FileText className="size-3.5" />}
           Clean up titles
         </button>
+        {scope === 'company' && (
+          <button
+            type="button"
+            onClick={openCopy}
+            disabled={!tree || tree.sections.length === 0 || busy}
+            title="Copy this company's sections, topics and videos into other companies as independent copies you can edit per-company."
+            className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3.5 py-2 text-xs font-bold text-navy transition hover:bg-slate-50 disabled:opacity-50"
+          >
+            <Copy className="size-3.5" /> Copy structure
+          </button>
+        )}
         <button
           type="button"
           onClick={runGenerate}
@@ -513,6 +575,111 @@ export function StudyMaterialAdmin() {
             );
           }}
         />
+      )}
+
+      {/* Copy structure: deep-clone this company's tree into other companies. */}
+      {copyOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button type="button" aria-label="Close" onClick={() => setCopyOpen(false)} className="absolute inset-0 bg-slate-900/50" />
+          <div className="relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
+            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Copy structure</p>
+                <h3 className="text-base font-bold text-navy">From {sourceName}</h3>
+              </div>
+              <button type="button" onClick={() => setCopyOpen(false)} aria-label="Close" className="grid size-8 place-items-center rounded-full text-slate-500 hover:bg-slate-100">
+                <X className="size-4" />
+              </button>
+            </div>
+
+            {copyResult ? (
+              <div className="space-y-3 overflow-y-auto p-5">
+                <p className="text-sm font-semibold text-emerald-700">Copied from {copyResult.source.name}:</p>
+                <ul className="space-y-1.5">
+                  {copyResult.results.map((r) => (
+                    <li key={r.companyId} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50/60 px-3 py-2 text-sm">
+                      <span className="truncate font-semibold text-navy">{r.companyName}</span>
+                      <span className="shrink-0 text-xs text-slate-500">{r.sections} sections · {r.topics} topics · {r.items} videos</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-xs text-slate-500">
+                  These are independent copies — edit or delete them in each company without affecting {copyResult.source.name}.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-5 overflow-y-auto p-5">
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Sections to copy</p>
+                    <button
+                      type="button"
+                      onClick={() => setCopySections(allSectionsSelected ? new Set() : new Set(tree?.sections.map((s) => s.id)))}
+                      className="text-xs font-bold text-orange hover:underline"
+                    >
+                      {allSectionsSelected ? 'Clear all' : 'Select all'}
+                    </button>
+                  </div>
+                  <div className="grid gap-1.5 sm:grid-cols-2">
+                    {tree?.sections.map((s) => (
+                      <label key={s.id} className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                        <input type="checkbox" checked={copySections.has(s.id)} onChange={(e) => toggleInSet(setCopySections, s.id, e.target.checked)} />
+                        <span className="truncate font-semibold text-navy">{s.title}</span>
+                        {s.isOverview && <span className="ml-auto shrink-0 rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-bold text-sky-600">Overview</span>}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Copy into these companies</p>
+                  <div className="grid gap-1.5 sm:grid-cols-2">
+                    {companies
+                      .filter((c) => c.id !== companyId)
+                      .map((c) => (
+                        <label key={c.id} className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                          <input type="checkbox" checked={copyTargets.has(c.id)} onChange={(e) => toggleInSet(setCopyTargets, c.id, e.target.checked)} />
+                          <span className="truncate font-semibold text-navy">{c.name}</span>
+                        </label>
+                      ))}
+                  </div>
+                </div>
+
+                <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700 ring-1 ring-amber-200">
+                  Copies are added as new sections. If a target already has content, you may get duplicates you can delete afterwards.
+                </p>
+                {copyError && (
+                  <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700 ring-1 ring-red-200">
+                    {copyError}
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-2 border-t border-slate-100 px-5 py-3.5">
+              {copyResult ? (
+                <button type="button" onClick={() => setCopyOpen(false)} className="rounded-full bg-navy px-4 py-2 text-sm font-bold text-white">
+                  Done
+                </button>
+              ) : (
+                <>
+                  <button type="button" onClick={() => setCopyOpen(false)} className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-navy hover:bg-slate-50">
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void submitCopy()}
+                    disabled={copyBusy || copyTargets.size === 0 || copySections.size === 0}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-orange px-4 py-2 text-sm font-bold text-[#171717] disabled:opacity-50"
+                  >
+                    {copyBusy ? <Loader2 className="size-4 animate-spin" /> : <Copy className="size-4" />}
+                    Copy to {copyTargets.size || ''} {copyTargets.size === 1 ? 'company' : 'companies'}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
