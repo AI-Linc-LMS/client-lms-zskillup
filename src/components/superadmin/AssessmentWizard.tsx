@@ -39,6 +39,17 @@ import {
 
 const STEPS = ['Details', 'Questions', 'Review'];
 
+/** Flatten the backend's { field: [msg,…] } validation `details` into one readable
+ *  line, so a rejected publish shows the actual reason (e.g. "sections must contain
+ *  no more than 50 elements") instead of the opaque "Request validation failed". */
+function validationDetail(details: unknown): string | null {
+  if (!details || typeof details !== 'object') return null;
+  const msgs = Object.values(details as Record<string, unknown>).flatMap((v) =>
+    Array.isArray(v) ? v.map(String) : [String(v)],
+  );
+  return msgs.length ? msgs.join('; ') : null;
+}
+
 /** Sentinel picker value → source N random problems across the whole coding bank. */
 const ALL_CODING = '__ALL_CODING__';
 
@@ -362,7 +373,12 @@ export function AssessmentWizard({
         setCreated(result);
       }
     } catch (e) {
-      setErr(e instanceof ApiRequestError ? e.message : 'Could not save the assessment.');
+      if (e instanceof ApiRequestError) {
+        const detail = validationDetail(e.details);
+        setErr(detail ? `${e.message}: ${detail}` : e.message);
+      } else {
+        setErr('Could not save the assessment.');
+      }
     } finally {
       setCreating(false);
     }
