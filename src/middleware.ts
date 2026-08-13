@@ -108,8 +108,18 @@ export function middleware(request: NextRequest) {
   const role = request.cookies.get(ROLE_COOKIE)?.value;
   const hasSession = role !== undefined;
 
+  // Next.js router (soft-nav + prefetch) requests carry an `RSC` header. NEVER issue a /login
+  // redirect for them: Next caches a redirected RSC/prefetch response and replays it on the real
+  // click even after the `role` cookie is present — so a soft navigation to a force-dynamic
+  // route (e.g. /practice) bounces to /login on the FIRST click, and a full refresh (which clears
+  // Next's router cache) makes it work (reported 2026-08-13, session valid throughout). The
+  // client holds the real session and gates soft navs itself; only a full-document load (no RSC
+  // header) is bounced here. UI-level routing only — Nest guards are the security boundary.
+  const isRscRequest = request.headers.get('rsc') === '1';
+
   // Unauthenticated → redirect to login, preserve deep-link target.
   if (isProtected(pathname) && !hasSession) {
+    if (isRscRequest) return NextResponse.next();
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
