@@ -10,8 +10,8 @@ import { ApiRequestError } from '@/lib/api/types';
 import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/ui/form-field';
 import { Logo } from '@/components/layout/Logo';
+import { API_BASE_URL } from '@/lib/api/base';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const IS_DEV = process.env.NODE_ENV !== 'production';
 const RESEND_COOLDOWN_S = 60;
 

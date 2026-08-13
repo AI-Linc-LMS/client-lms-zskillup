@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { API_BASE_URL } from './base';
 
 export interface SeoMetadata {
   key: string;
@@ -11,8 +12,6 @@ export interface SeoMetadata {
   keywords: string | null;
   ogImageUrl: string | null;
 }
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 /**
  * PUBLIC read of all SEO overrides — safe to call from server components

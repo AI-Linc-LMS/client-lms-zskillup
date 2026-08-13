@@ -1,6 +1,7 @@
 import { authToken } from '@/store/auth';
 import { clearSessionHints, hasPreviewHint, roleHint, writeRoleHint } from '@/lib/session-hints';
 import { ApiRequestError, type ApiResponse } from './types';
+import { API_BASE_URL } from './base';
 
 /**
  * The single channel to the backend (CLAUDE.md §5/§6). No component or page may
@@ -27,27 +28,8 @@ import { ApiRequestError, type ApiResponse } from './types';
  * by a forced /login bounce. This file is the single fix for all of them.
  */
 
-/**
- * API base URL. In a PRODUCTION browser we call the API **same-origin** (relative to the
- * page's own host) so the HttpOnly session cookie (`zskillup_refresh`) stays **first-party**.
- * Netlify proxies `/api/v1/*`, `/ready` and `/health` to the backend ALB (see netlify.toml),
- * so a relative path hits the backend on whatever host served the app (prephasz.com).
- *
- * This is deliberately INDEPENDENT of NEXT_PUBLIC_API_URL: pointing that at a different host
- * (e.g. the raw `zskilluplms.netlify.app` subdomain) makes the refresh cookie a THIRD-PARTY
- * cookie relative to prephasz.com, which Safari (ITP) and Chrome (3P-cookie phase-out / when
- * "block third-party cookies" is on / Incognito) drop — so `/auth/refresh` 401s and the client
- * force-logs-out on the first token refresh, bouncing every account to /login (RCA 2026-08-13).
- * Local dev keeps NEXT_PUBLIC_API_URL (localhost:3001 is the same *site* as :3000, so its cookie
- * is first-party); SSR (no `window`) also uses the env var, but auth/cookie calls only run in
- * the browser, so they always resolve same-origin here.
- */
-const API_BASE_URL =
-  typeof window !== 'undefined' &&
-  window.location.hostname !== 'localhost' &&
-  window.location.hostname !== '127.0.0.1'
-    ? '' // production browser → same-origin, first-party cookie
-    : (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001');
+// API base URL — same-origin in the prod browser so the HttpOnly session cookie stays
+// first-party (single source of truth in ./base; RCA 2026-08-13).
 
 export type AuthPosture = 'default' | 'login' | 'public';
 
