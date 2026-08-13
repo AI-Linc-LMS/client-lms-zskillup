@@ -18,7 +18,13 @@ const PROTECTED_PREFIXES = [
   '/mock-assessment',
   '/performance',
   '/topic-mastery',
-  '/practice',
+  // NOTE: '/practice' is deliberately NOT gated here. It is `force-dynamic`, so Next fetches its
+  // RSC from the server on prefetch/soft-nav; a middleware /login redirect for that request gets
+  // CACHED (Next router + Netlify Durable) and replayed on the real click even once the `role`
+  // cookie is present — the reported first-click bounce (session valid, cleared by a full refresh;
+  // regression RCA 2026-08-13). Keeping it out of the redirect path means /practice always resolves
+  // to the page (200), never a cacheable redirect. It stays gated client-side (AppShell + apiClient
+  // 401 handling) and the practice DATA endpoints require auth — Nest guards are the real boundary.
   '/practice-wish',
   '/upgrade',
   '/cart',
