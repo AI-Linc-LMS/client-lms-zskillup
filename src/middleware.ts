@@ -47,7 +47,19 @@ function isProtected(pathname: string): boolean {
   return PROTECTED_PREFIXES.some((p) => startsWithPrefix(pathname, p));
 }
 
+/**
+ * Onboarding lives under /signup but is the ONE auth-group route an
+ * AUTHENTICATED user must be able to reach: login sends an un-onboarded student
+ * straight here. Matching it as an auth route bounced them to their role home
+ * the moment the `role` cookie existed, so onboarding was unreachable after a
+ * fresh sign-in and any deep link they arrived with was dropped on the way.
+ */
+function isOnboardingRoute(pathname: string): boolean {
+  return startsWithPrefix(pathname, '/signup/onboarding');
+}
+
 function isAuthRoute(pathname: string): boolean {
+  if (isOnboardingRoute(pathname)) return false;
   return AUTH_ROUTES.some((p) => startsWithPrefix(pathname, p));
 }
 
