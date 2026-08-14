@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/ui/form-field';
-import { ApiRequestError } from '@/lib/api/types';
+import { ApiRequestError, describeApiError } from '@/lib/api/types';
 import { listTopics, listCompanies } from '@/lib/api/catalog';
 import {
   archiveAdminQuestion,
@@ -1082,7 +1082,7 @@ function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
       imageUrl: imageUrl || undefined,
       hint: hint.trim() || undefined,
       explanation: explanation.trim() || undefined,
-      topicSlug,
+      subtopicSlug: topicSlug,
       companySlug: companySlug || undefined,
       status,
       options: isChoice
@@ -1095,7 +1095,7 @@ function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
       await createAdminQuestion(dto);
       onCreated();
     } catch (err) {
-      setError(err instanceof ApiRequestError ? err.message : 'Could not create question.');
+      setError(describeApiError(err, 'Could not create question.'));
     } finally {
       setSubmitting(false);
     }

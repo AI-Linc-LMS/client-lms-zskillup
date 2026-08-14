@@ -23,3 +23,24 @@ export class ApiRequestError extends Error {
     this.requestId = body.requestId;
   }
 }
+
+/**
+ * A human-readable message for an API error, naming the offending FIELDS when the
+ * server sent them.
+ *
+ * The ValidationPipe returns `details` as { field: [messages] }, but only the
+ * generic "Request validation failed" was ever shown - so an operator staring at
+ * a filled-in form had no way to tell WHICH field the server objected to. This
+ * turns that into "Request validation failed - subtopicSlug: ...".
+ */
+export function describeApiError(err: unknown, fallback: string): string {
+  if (!(err instanceof ApiRequestError)) return fallback;
+  const details = err.details;
+  if (details && typeof details === 'object' && !Array.isArray(details)) {
+    const parts = Object.entries(details as Record<string, unknown>)
+      .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join('; ') : String(msgs)}`)
+      .filter(Boolean);
+    if (parts.length > 0) return `${err.message} - ${parts.join(' | ')}`;
+  }
+  return err.message || fallback;
+}

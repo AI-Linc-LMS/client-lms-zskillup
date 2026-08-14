@@ -4,6 +4,13 @@
  *
  * Sprint 3 - Superadmin question-bank CRUD.
  *
+ * NOTE: this mirror drifted badly from the backend (it still described the
+ * Sprint-3 shape while the API moved on), which is what broke manual question
+ * creation. AdminCreateQuestionDto is now back in line; the REST of this file is
+ * still behind the backend's 326-line original and should be re-synced wholesale
+ * once the missing enums (CompanyImportance, ContentUsageType, QuestionFrequency,
+ * QuestionSource) are mirrored into ../enums.
+ *
  * The service layer enforces shape rules that don't belong in field-level
  * validation: at least 2 options, at least 1 correct option for MCQ /
  * MULTI_SELECT types; NUMERIC + CODING types must have an empty options array.
@@ -20,6 +27,7 @@ import {
   IsOptional,
   IsString,
   Max,
+  Matches,
   MaxLength,
   Min,
   MinLength,
@@ -72,16 +80,35 @@ export class AdminCreateQuestionDto {
   @MaxLength(5000)
   explanation?: string;
 
+  /**
+   * Subtopic slug - the leaf level in Section -> Topic -> Subtopic. This is the
+   * field the API actually reads; it was mirrored here as `topicSlug`, which the
+   * server's whitelist rejected as an unknown property, so every manual question
+   * creation failed with "Request validation failed".
+   */
+  @IsOptional()
   @IsString()
   @MinLength(2)
   @MaxLength(120)
-  topicSlug!: string;
+  subtopicSlug?: string;
 
+  /** Tag the question to a company hub on creation. */
   @IsOptional()
   @IsString()
   @MinLength(2)
   @MaxLength(80)
   companySlug?: string;
+
+  /**
+   * e.g. NUM-PER-001. Optional: omit it and the server derives the next free code
+   * from the subtopic. Bulk ingest supplies its own.
+   */
+  @IsOptional()
+  @IsString()
+  @Matches(/^[A-Z]{2,6}-[A-Z]{2,6}-\d{3,5}$/, {
+    message: 'code must follow the format SECTION-TOPIC-NNN (e.g. NUM-PER-001)',
+  })
+  code?: string;
 
   @IsEnum(QuestionStatus)
   status: QuestionStatus = QuestionStatus.DRAFT;
