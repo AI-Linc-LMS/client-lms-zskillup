@@ -22,11 +22,13 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/layout/Logo';
 import { cn } from '@/lib/utils';
+import { takeRedirect } from '@/lib/post-login-redirect';
 
 /**
  * Onboarding wizard - steps 2 (college) & 3 (targets) (STUDENT_JOURNEY_SPEC §1).
  * Dependent dropdowns: state → city → college (college list fetched from the
- * API per state/city, with free-text fallback). On step-3 submit → /dashboard.
+ * API per state/city, with free-text fallback). On step-3 submit → wherever the
+ * visitor was originally headed (see post-login-redirect), else /dashboard.
  */
 const ROLE_OPTIONS = [
   'Software Engineer',
@@ -151,7 +153,9 @@ export default function OnboardingPage() {
     setSubmitting(true);
     try {
       await saveOnboardingTargets(selected);
-      router.push('/dashboard');
+      // End of the signup flow: send them to whatever they originally opened.
+      // This is the step that used to hardcode /dashboard and lose it.
+      router.push(takeRedirect() ?? '/dashboard');
     } catch (err) {
       setError(err instanceof ApiRequestError ? err.message : 'Could not save. Please try again.');
     } finally {

@@ -13,6 +13,7 @@ import { FormField } from '@/components/ui/form-field';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import type { LoginResult } from '@/lib/api/auth';
 import { AuthShell } from '@/components/auth/AuthShell';
+import { sanitizeRedirect, stashRedirect, takeRedirect } from '@/lib/post-login-redirect';
 
 function LoginForm() {
   const router = useRouter();
@@ -21,6 +22,18 @@ function LoginForm() {
   const [sessionWarning, setSessionWarning] = useState(false);
   const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
   const [redirecting, setRedirecting] = useState(false);
+  // Carry the destination onto /signup so a visitor who chooses "create an
+  // account" from a gated link still lands where they were going.
+  const redirectParam = sanitizeRedirect(searchParams.get('redirect'));
+  const signupHref = redirectParam
+    ? `/signup?redirect=${encodeURIComponent(redirectParam)}`
+    : '/signup';
+
+  // Stash on arrival, not just on submit: whichever way the visitor leaves this
+  // page (create an account, verify an email, Google), the destination survives.
+  useEffect(() => {
+    stashRedirect(redirectParam);
+  }, [redirectParam]);
 
   const {
     register,
@@ -56,10 +69,13 @@ function LoginForm() {
     setRedirecting(true);
     let target = '/dashboard';
     if (!result.user.isOnboarded) {
+      // Keep the destination for the end of onboarding — routing an un-onboarded
+      // user through the signup steps used to discard it just like a new signup.
+      stashRedirect(searchParams.get('redirect'));
       target = '/signup/onboarding';
     } else {
-      const redirect = searchParams.get('redirect');
-      if (redirect && redirect.startsWith('/')) target = redirect;
+      const redirect = sanitizeRedirect(searchParams.get('redirect')) ?? takeRedirect();
+      if (redirect) target = redirect;
       else if (result.user.role === 'SUPER_ADMIN') target = '/superadmin/dashboard';
       else if (result.user.role === 'ADMIN') target = '/admin/dashboard';
       else if (result.user.role === 'COLLEGE_ADMIN') target = '/tpo/dashboard';
@@ -77,8 +93,8 @@ function LoginForm() {
   // gated nav item), silently restore the session from the refresh cookie - which
   // re-stamps the durable `role` hint - and send them straight back.
   useEffect(() => {
-    const redirect = searchParams.get('redirect');
-    if (!redirect || !redirect.startsWith('/')) return;
+    const redirect = sanitizeRedirect(searchParams.get('redirect'));
+    if (!redirect) return;
     let cancelled = false;
     setRedirecting(true);
     restoreSessionFromRefreshCookie()
@@ -234,7 +250,7 @@ function LoginForm() {
 
         <p className="mt-5 text-center text-sm text-[var(--color-text-muted)]">
           New to ZSkillup?{' '}
-          <Link href="/signup" className="font-semibold text-[var(--color-brand)] hover:underline">
+          <Link href={signupHref} className="font-semibold text-[var(--color-brand)] hover:underline">
             Create a free account
           </Link>
         </p>

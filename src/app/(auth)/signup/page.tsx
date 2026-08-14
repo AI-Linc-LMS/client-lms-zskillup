@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { ArrowRight } from 'lucide-react';
 import type { AuthRegisterDto } from '@/shared';
@@ -11,6 +11,7 @@ import { ApiRequestError } from '@/lib/api/types';
 import { FormField } from '@/components/ui/form-field';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { AuthShell } from '@/components/auth/AuthShell';
+import { stashRedirect, takeRedirect } from '@/lib/post-login-redirect';
 import type { LoginResult } from '@/lib/api/auth';
 
 /**
@@ -20,9 +21,16 @@ import type { LoginResult } from '@/lib/api/auth';
  * mirror the shared class-validator DTO (`AuthRegisterDto`) - the server
  * re-validates on submit. On success → /signup/verify?email=… (Block 5).
  */
-export default function SignupPage() {
+function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [serverError, setServerError] = useState<string | null>(null);
+
+  // Remember where they were originally headed, before the three-step flow
+  // navigates away from this URL and the ?redirect= param is gone for good.
+  useEffect(() => {
+    stashRedirect(searchParams.get('redirect'));
+  }, [searchParams]);
 
   const {
     register,
@@ -34,7 +42,9 @@ export default function SignupPage() {
     if (!result.user.isOnboarded) {
       router.push('/signup/onboarding');
     } else {
-      router.push('/dashboard');
+      // Already onboarded (an existing account signing in through Google) —
+      // honour the destination now, since onboarding won't run to consume it.
+      router.push(takeRedirect() ?? '/dashboard');
     }
   }, [router]);
 
@@ -174,5 +184,14 @@ export default function SignupPage() {
         </div>
       </div>
     </AuthShell>
+  );
+}
+
+/** useSearchParams() requires a Suspense boundary to prerender (same as /login). */
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<AuthShell><div className="h-96 w-full max-w-md animate-pulse rounded-2xl bg-white" /></AuthShell>}>
+      <SignupForm />
+    </Suspense>
   );
 }
