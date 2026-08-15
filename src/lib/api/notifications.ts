@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { hasRoleHint } from '@/lib/session-hints';
 
 /** In-app notification (assessment lifecycle, Phase 3). */
 export interface ApiNotification {
@@ -17,7 +18,14 @@ export interface ApiNotificationFeed {
 }
 
 export async function getNotifications(): Promise<ApiNotificationFeed> {
-  const res = await apiClient.get<ApiNotificationFeed>('/api/v1/notifications', { auth: 'public' });
+  // NOT `auth: 'public'`. That posture skips the pre-flight refresh, so on the first
+  // paint after a sign-in the access token is not in memory yet: the call went out
+  // bare, 401'd, and never retried - every signed-in student saw an empty bell until
+  // something else happened to refresh. The default posture refreshes first and
+  // retries once on 401. Guests are short-circuited here rather than by the posture,
+  // so they never fire a pointless refresh. (Same trap, same fix, as me.ts.)
+  if (!hasRoleHint()) return { items: [], unreadCount: 0 };
+  const res = await apiClient.get<ApiNotificationFeed>('/api/v1/notifications');
   return res.data;
 }
 
