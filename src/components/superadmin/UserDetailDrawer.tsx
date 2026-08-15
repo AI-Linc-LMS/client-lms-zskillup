@@ -146,6 +146,10 @@ export function UserDetailDrawer({
     if (ok) setEditingName(false);
   };
 
+  // The linked tenant's status, resolved from the list the select already loads.
+  const linkedCollegeSuspended =
+    !!user?.collegeId && colleges.some((c) => c.id === user.collegeId && c.status === 'SUSPENDED');
+
   const changeCollege = async (collegeId: string) => {
     await run(
       'college',
@@ -315,6 +319,28 @@ export function UserDetailDrawer({
                   {user.role === 'COLLEGE_ADMIN' && !user.collegeId && (
                     <p className="mt-1 text-[11px] text-amber-600">
                       A TPO can&apos;t open the placement console until a college is linked.
+                    </p>
+                  )}
+                  {/* A suspended tenant keeps its students ON PURPOSE - detaching them
+                      would destroy the TPO's roster, placement records and readiness
+                      history. Without saying so, "(SUSPENDED)" here reads like a stale
+                      link that somebody forgot to clean up. Note the wording: grants are
+                      not deleted on suspend, they stop being inherited - and a suspended
+                      college whose subscription was ALSO cancelled has nothing left to
+                      come back to, so don't promise that reactivating restores access. */}
+                  {linkedCollegeSuspended && (
+                    <p
+                      role="note"
+                      className="mt-1.5 rounded-md bg-slate-50 p-2 text-[11px] leading-relaxed text-slate-600 ring-1 ring-slate-200"
+                    >
+                      A suspended college grants nothing, so{' '}
+                      {user.role === 'COLLEGE_ADMIN' ? 'its students inherit' : 'this student inherits'}{' '}
+                      no access from it for as long as the suspension lasts. The link is kept
+                      on purpose &mdash; the college&apos;s roster and history stay intact, and{' '}
+                      {user.role === 'COLLEGE_ADMIN' ? 'students' : 'this account'} can be moved
+                      to another college at any time. Reactivating the college resumes
+                      inheritance of whatever it still holds; if its subscription was cancelled
+                      too, assign a new one.
                     </p>
                   )}
                 </div>
