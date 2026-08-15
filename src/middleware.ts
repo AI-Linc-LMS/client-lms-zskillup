@@ -96,6 +96,26 @@ function roleHome(role: string | undefined): string {
 const CANONICAL_HOST = 'prephasz.com';
 const NETLIFY_HOST = 'zskilluplms.netlify.app';
 
+/**
+ * A redirect that must NEVER be cached.
+ *
+ * The middleware's session signal is a COOKIE, so any redirect it issues is
+ * valid only for the request that produced it. Next's router cache and
+ * Netlify's Durable cache both happily store a 307 that carries no
+ * Cache-Control and replay it once the cookie IS present - which is the
+ * "first click bounces to /login, a hard refresh fixes it" regression that has
+ * now been reported three times (/practice twice, then /dashboard/quiz on
+ * Start Assessment). Both previous fixes pulled ONE route out of the gate;
+ * this marks every session-dependent redirect uncacheable instead, so the next
+ * protected route added can't reintroduce it.
+ */
+function sessionRedirect(url: URL | string, status?: number): NextResponse {
+  const res = status ? NextResponse.redirect(url, status) : NextResponse.redirect(url);
+  res.headers.set('Cache-Control', 'private, no-cache, no-store, max-age=0, must-revalidate');
+  res.headers.set('Vary', 'Cookie, RSC');
+  return res;
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -140,7 +160,7 @@ export function middleware(request: NextRequest) {
     if (isRscRequest) return NextResponse.next();
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(loginUrl);
+    return sessionRedirect(loginUrl);
   }
 
   // Already authenticated → skip auth pages, go straight to workspace.
@@ -150,7 +170,7 @@ export function middleware(request: NextRequest) {
   // hint cookie IS clearable by the client on session teardown, so its
   // absence means "let the visitor reach the login form".
   if (isAuthRoute(pathname) && hasSession && role) {
-    return NextResponse.redirect(new URL(roleHome(role), request.url));
+    return sessionRedirect(new URL(roleHome(role), request.url));
   }
 
   // Role-group RBAC: send a role-mismatched visit to its own workspace.
@@ -165,7 +185,7 @@ export function middleware(request: NextRequest) {
       (isStudentArea(pathname) && role !== 'STUDENT' && !previewingStudent);
 
     if (mismatch) {
-      return NextResponse.redirect(new URL(roleHome(role), request.url));
+      return sessionRedirect(new URL(roleHome(role), request.url));
     }
   }
 
