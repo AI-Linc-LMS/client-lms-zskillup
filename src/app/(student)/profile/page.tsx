@@ -343,22 +343,15 @@ export default function ProfilePage() {
 
   // ONE save: profile fields first, then the résumé (only what actually changed).
   const save = async () => {
-    // Mandatory profile: every required field must be filled before we save.
-    const gpa = (resume?.education?.[0]?.gpa ?? '').trim();
-    const missing: string[] = [];
-    if (!v.avatarUrl) missing.push('Photograph');
-    if (!v.fullName.trim()) missing.push('Full name');
-    if (!v.phone.trim() || !isValidPhone(v.phone)) missing.push('Phone (10-digit)');
-    if (!v.course.trim()) missing.push('Course / degree');
-    if (!v.yearOfStudy) missing.push('Year of study');
-    if (!v.collegeId) missing.push('College');
-    if (!v.passoutYear) missing.push('Passout year');
-    if (!gpa) missing.push('GPA / CGPA');
-    if (v.skills.length === 0) missing.push('Skills');
-    if (missing.length) {
-      setErr(`Please complete required fields: ${missing.join(', ')}.`);
-      return;
-    }
+    // Saving is never blocked. This guard used to refuse the WHOLE save unless 11
+    // fields were present - three of which (Photograph, GPA, and a college *id*)
+    // no other definition of "complete" asks for. The checklist above and the
+    // feature gate both count 8 fields and accept a free-text college name, so a
+    // student who typed a college that isn't in the picker saw 100% here, hit
+    // Save, and was told "College" was missing. Nothing persisted - including the
+    // skills and target roles they had just entered - so the profile could never
+    // reach 100% and Assessments stayed locked forever. Partial progress is
+    // strictly better than none: the checklist already shows what is left.
     setSaving(true);
     setErr(null);
     setSaved(false);
