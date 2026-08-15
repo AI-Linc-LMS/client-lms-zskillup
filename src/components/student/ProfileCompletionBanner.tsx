@@ -3,15 +3,22 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getMe } from '@/lib/api/me';
+import { profileCompletion } from '@/lib/profile/completion';
 import { ArrowRight, UserRoundPen } from 'lucide-react';
 
 /**
- * Dashboard nudge for students whose profile isn't fully filled in. Mirrors the
- * 8-field completion score on the Profile page (name, phone, course, year,
- * college, passout year, skills, target roles). It is NOT dismissible - the
- * banner stays on every visit until the profile is actually complete (100%), at
- * which point it disappears on its own. A complete profile powers better
- * recommendations and auto-fills the resume builder.
+ * Dashboard nudge for students whose profile isn't fully filled in. Scores the
+ * same 8 fields as the Profile page (name, phone, course, year, college,
+ * passout year, skills, target roles). It is NOT dismissible - the banner stays
+ * on every visit until the profile is actually complete (100%), at which point
+ * it disappears on its own. A complete profile powers better recommendations and
+ * auto-fills the resume builder.
+ *
+ * This is now the PRIMARY prompt for that data: students are no longer routed
+ * through the 4-step onboarding wizard that used to collect it (2026-08-14
+ * product decision), so the banner has to stand on its own. It scores via the
+ * shared lib/profile/completion helper rather than its own copy of the field
+ * list, so it can never drift from the lock gate's view of the same profile.
  */
 export function ProfileCompletionBanner() {
   const [pct, setPct] = useState<number | null>(null);
@@ -23,29 +30,14 @@ export function ProfileCompletionBanner() {
       getMe()
         .then((me) => {
           if (cancelled) return;
-          if (me.role !== 'STUDENT') {
-            setPct(null);
-            return;
-          }
-          const p = me.studentProfile;
-          const fields: Array<[string, boolean]> = [
-            ['name', !!me.fullName?.trim()],
-            ['phone', !!p?.phone],
-            ['course', !!p?.course],
-            ['year of study', !!p?.yearOfStudy],
-            ['college', !!p?.collegeName],
-            ['passout year', !!p?.passoutYear],
-            ['skills', !!p?.skills?.length],
-            ['target roles', !!p?.rolesInterested?.length],
-          ];
-          const filled = fields.filter(([, ok]) => ok).length;
-          const percent = Math.round((filled / fields.length) * 100);
-          if (percent >= 100) {
+          // Non-students score as complete, so they never see the banner.
+          const { percent, missing, complete } = profileCompletion(me);
+          if (complete) {
             setPct(null); // 100% → hide (also fires when it's completed while mounted)
             return;
           }
           setPct(percent);
-          setMissing(fields.filter(([, ok]) => !ok).map(([label]) => label));
+          setMissing(missing);
         })
         .catch(() => {
           /* not signed in / transient - render nothing */

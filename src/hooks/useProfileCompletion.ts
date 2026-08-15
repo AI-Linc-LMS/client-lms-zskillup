@@ -22,6 +22,8 @@ export function useProfileCompletion(): ProfileCompletionState {
     percent: 0,
     complete: false,
     missing: [],
+    essentialsComplete: false,
+    essentialsMissing: [],
   });
 
   useEffect(() => {
@@ -33,7 +35,15 @@ export function useProfileCompletion(): ProfileCompletionState {
           setState({ loading: false, ...profileCompletion(me) });
         })
         .catch(() => {
-          if (!cancelled) setState({ loading: false, percent: 100, complete: true, missing: [] });
+          if (!cancelled)
+            setState({
+              loading: false,
+              percent: 100,
+              complete: true,
+              missing: [],
+              essentialsComplete: true,
+              essentialsMissing: [],
+            });
         });
     };
     check();
