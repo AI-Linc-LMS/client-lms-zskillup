@@ -3,15 +3,25 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Loader2, Lock } from 'lucide-react';
+import { PROFILE_GATE_ENABLED } from '@/lib/profile/completion';
 import { useProfileCompletion } from '@/hooks/useProfileCompletion';
 import { cn } from '@/lib/utils';
 
 /**
- * Gates a feature behind a 100%-complete profile. Until then the real section is
- * shown as a blurred teaser with a lock card + "Complete profile" CTA; at 100%
- * (and for non-students) the children render untouched. Re-checks on focus, so
- * finishing the profile in another tab unlocks this one on return. UI-level gate
+ * Gates a feature behind the profile ESSENTIALS (name, phone, college - see
+ * lib/profile/completion). Until they're on file the real section is shown as a
+ * blurred teaser with a lock card + "Complete profile" CTA; once they are (and
+ * for non-students) the children render untouched. Re-checks on focus, so
+ * filling the profile in another tab unlocks this one on return. UI-level gate
  * - the onboarding nudge, not a security boundary.
+ *
+ * Was "100% of all 8 fields" until 2026-08-14. The 4-step onboarding wizard was
+ * the only flow that filled 7 of those 8 in one pass, and students are no longer
+ * routed into it (they land on the dashboard instead), so an un-onboarded
+ * student is now the normal case - an 8/8 bar would have blurred out practice,
+ * mocks and assessments for essentially everyone. The full 8-field score is
+ * still shown here as the progress bar and still drives the dashboard banner;
+ * it just no longer decides the lock.
  */
 export function ProfileLockGate({
   feature,
@@ -24,7 +34,12 @@ export function ProfileLockGate({
   contentClassName?: string;
   children: ReactNode;
 }) {
-  const { loading, complete, percent, missing } = useProfileCompletion();
+  const { loading, essentialsComplete, percent, essentialsMissing } = useProfileCompletion();
+
+  // Disabled by default (see PROFILE_GATE_ENABLED). Returned BEFORE the loading
+  // branch on purpose: with no gate to decide, these pages must not sit behind a
+  // spinner waiting on /me.
+  if (!PROFILE_GATE_ENABLED) return <div className={contentClassName}>{children}</div>;
 
   if (loading) {
     return (
@@ -33,10 +48,11 @@ export function ProfileLockGate({
       </div>
     );
   }
-  if (complete) return <div className={contentClassName}>{children}</div>;
+  if (essentialsComplete) return <div className={contentClassName}>{children}</div>;
 
-  const missingText =
-    missing.length <= 3 ? missing.join(', ') : `${missing.slice(0, 3).join(', ')} +${missing.length - 3} more`;
+  // Name the fields that actually unlock this page, not every unfilled field -
+  // asking for 8 things when 3 open the door is what made this read as a wall.
+  const missingText = essentialsMissing.join(', ');
 
   // Contained lock: the card lives in a normal in-flow block that defines the
   // gate's height (~60vh), with the real section shown as a blurred teaser on an
@@ -75,8 +91,10 @@ export function ProfileLockGate({
                 style={{ width: `${percent}%` }}
               />
             </div>
-            {missing.length > 0 ? (
-              <p className="mt-2 text-[11px] text-slate-500">Still needed: {missingText}</p>
+            {essentialsMissing.length > 0 ? (
+              <p className="mt-2 text-[11px] text-slate-500">
+                To unlock, add your {missingText}.
+              </p>
             ) : null}
           </div>
 

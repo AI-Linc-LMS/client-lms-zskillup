@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/ui/form-field';
 import { Logo } from '@/components/layout/Logo';
 import { API_BASE_URL } from '@/lib/api/base';
+import { takeRedirect } from '@/lib/post-login-redirect';
 
 const IS_DEV = process.env.NODE_ENV !== 'production';
 const RESEND_COOLDOWN_S = 60;
@@ -104,7 +105,16 @@ function VerifyForm() {
     setServerError(null);
     try {
       await verifyEmail(values);
-      router.push('/signup/onboarding');
+      // verifyEmail establishes a real session, so this is a SIGNED-IN student
+      // from here on. Per the 2026-08-14 product decision the 4-step onboarding
+      // wizard is no longer part of the signup flow - a new account goes straight
+      // to the dashboard (or wherever they were originally headed) and fills in
+      // its profile at /profile whenever it suits them. This line used to push
+      // /signup/onboarding, which was also the ONLY consumer of the stashed
+      // deep link - hence takeRedirect() here, so a visitor who signed up from a
+      // gated link still lands on that link. Not an accidental regression: the
+      // wizard is intact and still reachable at /signup/onboarding.
+      router.push(takeRedirect() ?? '/dashboard');
     } catch (err) {
       setServerError(
         err instanceof ApiRequestError ? err.message : 'Something went wrong. Please try again.',

@@ -67,19 +67,24 @@ function LoginForm() {
     // Show a full-screen "signing you in" overlay immediately so the login page
     // never looks frozen during the navigation + first dashboard data load.
     setRedirecting(true);
+    // SIGNING IN NEVER ROUTES THROUGH THE ONBOARDING WIZARD (product decision,
+    // 2026-08-14). This used to branch on `result.user.isOnboarded` and push an
+    // un-onboarded student to /signup/onboarding. An un-onboarded student is the
+    // NORMAL case here, not the exception - 248 of 260 accounts have
+    // student_profiles.onboarding_completed_at NULL - and nothing server-side
+    // gates on that flag (it is a display projection only), so making everyone
+    // re-enter a 4-step wizard on every sign-in bought nothing and cost the
+    // deep link, which was only consumed at the END of the wizard.
+    // The wizard itself is intact and still reachable at /signup/onboarding
+    // (middleware.ts exempts it from the auth-route bounce); the profile fields
+    // it collected are also editable any time at /profile.
+    // This is a deliberate routing change - not an accidental regression.
     let target = '/dashboard';
-    if (!result.user.isOnboarded) {
-      // Keep the destination for the end of onboarding — routing an un-onboarded
-      // user through the signup steps used to discard it just like a new signup.
-      stashRedirect(searchParams.get('redirect'));
-      target = '/signup/onboarding';
-    } else {
-      const redirect = sanitizeRedirect(searchParams.get('redirect')) ?? takeRedirect();
-      if (redirect) target = redirect;
-      else if (result.user.role === 'SUPER_ADMIN') target = '/superadmin/dashboard';
-      else if (result.user.role === 'ADMIN') target = '/admin/dashboard';
-      else if (result.user.role === 'COLLEGE_ADMIN') target = '/tpo/dashboard';
-    }
+    const redirect = sanitizeRedirect(searchParams.get('redirect')) ?? takeRedirect();
+    if (redirect) target = redirect;
+    else if (result.user.role === 'SUPER_ADMIN') target = '/superadmin/dashboard';
+    else if (result.user.role === 'ADMIN') target = '/admin/dashboard';
+    else if (result.user.role === 'COLLEGE_ADMIN') target = '/tpo/dashboard';
     // replace() so Back doesn't return to the login page; the in-memory access
     // token is preserved (soft nav) so the destination loads its data fast.
     router.replace(target);

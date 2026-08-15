@@ -136,10 +136,16 @@ export const STUDENT_NAV: NavSection[] = [
  *  out via the live subscription status (falls open while the paywall is off). */
 export const PLAN_ONLY_HREFS = new Set<string>(['/upgrade']);
 
-/** Student features gated behind a 100%-complete profile - "Complete your
- *  profile" card in-page + a lock in the sidebar until the profile is finished.
- *  Kept to core practice/assessment surfaces so a new user isn't walled off. */
-export const PROFILE_GATED_HREFS = new Set<string>(['/practice', '/mock-assessment', '/assessments']);
+/** Student features gated behind the profile ESSENTIALS (name, phone, college -
+ *  lib/profile/completion) - "Complete your profile" card in-page + a lock in the
+ *  sidebar until those are on file. The bar was 100% of all 8 fields until
+ *  2026-08-14; students are no longer routed through the onboarding wizard that
+ *  filled 7 of them, so an 8/8 bar would have walled every student out of these
+ *  three surfaces. The other 5 fields are still nudged, never blocking. */
+// Empty: profile completeness never blocks a feature (see PROFILE_GATE_ENABLED
+// in lib/profile/completion). Kept as the one place to re-list hrefs if a gate
+// is ever reintroduced alongside an enrolment path that collects the fields.
+export const PROFILE_GATED_HREFS = new Set<string>();
 
 /** Student features gated behind a paid plan - a premium-upgrade card in-page +
  *  a lock in the sidebar until the student has an active plan. Non-adaptive practice,

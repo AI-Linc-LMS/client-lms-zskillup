@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Compass, HelpCircle, MousePointerClick } from 'lucide-react';
 import { useOptionalGuide } from '@/components/guide/GuideProvider';
+import { PROFILE_GATE_ENABLED } from '@/lib/profile/completion';
 import { useProfileCompletion } from '@/hooks/useProfileCompletion';
 import { useCalibrationStatus } from '@/hooks/useCalibrationStatus';
 import { useMySubscription } from '@/hooks/useMySubscription';
@@ -19,7 +20,12 @@ import { CALIBRATION_GATED_HREFS, PROFILE_GATED_HREFS, PREMIUM_GATED_HREFS } fro
 export function GuideLauncher() {
   const guide = useOptionalGuide();
   const pathname = usePathname();
-  const { complete: profileComplete } = useProfileCompletion();
+  // Essentials, not 100% - mirrors ProfileLockGate so a page tour is suppressed
+  // only while the page is genuinely blurred behind the lock card.
+  // Same switch the gate reads: with gating off nothing is ever locked, so the
+  // tour must not act as if it were (PROFILE_GATE_ENABLED).
+  const { essentialsComplete } = useProfileCompletion();
+  const profileComplete = !PROFILE_GATE_ENABLED || essentialsComplete;
   const { required: calibrationRequired } = useCalibrationStatus();
   const { planStatus } = useMySubscription(true);
   const [open, setOpen] = useState(false);

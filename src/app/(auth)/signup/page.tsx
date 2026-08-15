@@ -39,13 +39,28 @@ function SignupForm() {
   } = useForm<AuthRegisterDto>();
 
   const handleGoogleSuccess = useCallback((result: LoginResult) => {
-    if (!result.user.isOnboarded) {
-      router.push('/signup/onboarding');
-    } else {
-      // Already onboarded (an existing account signing in through Google) —
-      // honour the destination now, since onboarding won't run to consume it.
-      router.push(takeRedirect() ?? '/dashboard');
+    // Google on THIS page is both "create an account" and "sign in" - the API
+    // returns the same LoginResult either way, so the FE cannot tell them apart.
+    // It used to branch on `result.user.isOnboarded` and push the 4-step wizard;
+    // as of the 2026-08-14 product decision nobody is routed into the wizard, so
+    // both cases land on the workspace and the destination is honoured NOW
+    // (onboarding no longer runs to consume the stash). Same precedence as
+    // /login. The wizard still lives at /signup/onboarding for direct visits,
+    // and its fields are editable at /profile.
+    const redirect = takeRedirect();
+    if (redirect) {
+      router.push(redirect);
+      return;
     }
+    router.push(
+      result.user.role === 'SUPER_ADMIN'
+        ? '/superadmin/dashboard'
+        : result.user.role === 'ADMIN'
+          ? '/admin/dashboard'
+          : result.user.role === 'COLLEGE_ADMIN'
+            ? '/tpo/dashboard'
+            : '/dashboard',
+    );
   }, [router]);
 
   const onSubmit = handleSubmit(async (values) => {

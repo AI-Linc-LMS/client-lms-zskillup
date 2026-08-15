@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { InfoTip } from '@/components/ui/InfoTip';
+import { PROFILE_GATE_ENABLED } from '@/lib/profile/completion';
 import { useProfileCompletion } from '@/hooks/useProfileCompletion';
 import { useCalibrationStatus } from '@/hooks/useCalibrationStatus';
 import { useMySubscription } from '@/hooks/useMySubscription';
@@ -83,7 +84,13 @@ export function Sidebar() {
   const pathname = usePathname();
   const sections = navForPath(pathname);
   const reduce = useReducedMotion();
-  const { complete: profileComplete } = useProfileCompletion();
+  // Essentials, not 100% - must match ProfileLockGate exactly, or the sidebar
+  // would padlock a page that actually opens (students are no longer routed
+  // through the onboarding wizard, so most profiles sit well under 100%).
+  // Same switch the gate reads: with gating off nothing is ever locked, so the
+  // padlock must not act as if it were (PROFILE_GATE_ENABLED).
+  const { essentialsComplete } = useProfileCompletion();
+  const profileComplete = !PROFILE_GATE_ENABLED || essentialsComplete;
   const { required: calibrationRequired } = useCalibrationStatus();
   // "Upgrade & Renew" only makes sense once a plan exists; free users buy via
   // "Explore Plans". Skip the fetch outside the student zone (the endpoint is

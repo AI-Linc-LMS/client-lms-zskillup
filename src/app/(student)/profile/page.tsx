@@ -251,7 +251,13 @@ export default function ProfilePage() {
           phone: p?.phone ?? '',
           course: p?.course ?? '',
           yearOfStudy: p?.yearOfStudy ?? '',
-          collegeId: p?.collegeId ?? '',
+          // Fall back to the account-level college. A student enrolled by CSV (or a
+          // Google sign-up that inherited a sibling's college) can have
+          // auth.users.college_id set with NO student_profiles row at all - this form
+          // then loaded blank and a save sent collegeId:null, detaching them from the
+          // college that pays for their seat. Prefill from the FK the server already
+          // reports so the form can only ever confirm it, never silently drop it.
+          collegeId: p?.collegeId ?? m.collegeId ?? '',
           collegeName: p?.collegeName ?? '',
           passoutYear: p?.passoutYear ?? '',
           skills: p?.skills ?? [],
