@@ -1,5 +1,5 @@
 import * as faceLandmarks from '@tensorflow-models/face-landmarks-detection';
-import '@tensorflow/tfjs-backend-cpu';
+import { MODEL_BASE } from '@/lib/proctoring/model-source';
 import '@tensorflow/tfjs-backend-webgl';
 import '@tensorflow/tfjs-core';
 
@@ -52,6 +52,11 @@ async function loadDetector(): Promise<faceLandmarks.FaceLandmarksDetector> {
         runtime: 'tfjs',
         refineLandmarks: false,
         maxFaces: 1,
+        // Self-hosted, same reason as BlazeFace: the defaults resolve through
+        // tfhub.dev -> kaggle.com -> a signed, expiring GCS url. 2.5 MB from our
+        // own origin instead of a third-party chain during a graded assessment.
+        detectorModelUrl: `${MODEL_BASE}/face-detector/model.json`,
+        landmarkModelUrl: `${MODEL_BASE}/face-mesh/model.json`,
       })
       .catch((err) => {
         detectorPromise = null; // allow a retry

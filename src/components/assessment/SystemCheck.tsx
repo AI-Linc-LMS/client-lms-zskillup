@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { FaceProctor } from '@/lib/proctoring/face-detection';
 import {
   AlertTriangle,
   Camera,
@@ -95,6 +96,14 @@ export function SystemCheck({ proctored = false }: { proctored?: boolean }) {
         window.__assessmentStream = stream;
         setCam(stream.getVideoTracks().length > 0 ? 'ok' : 'warn');
         setMic(stream.getAudioTracks().length > 0 ? 'ok' : 'warn');
+        // Warm the proctoring models HERE, on the instructions screen, where the
+        // candidate is reading and the clock is not running. FaceProctor.preload() had
+        // no callers at all, so every model was fetched and compiled AFTER "Begin" -
+        // megabytes of weights landing while the candidate sat on question 1 with the
+        // graded timer already counting. Deliberately not awaited and never fatal: a
+        // slow or failed warm-up must not hold up the check, it just means the exam
+        // runs with less (or no) camera analysis.
+        void new FaceProctor().preload().catch(() => {});
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           videoRef.current.play().catch(() => {});
