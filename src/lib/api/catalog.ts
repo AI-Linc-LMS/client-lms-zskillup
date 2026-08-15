@@ -117,14 +117,32 @@ export interface ApiCourseDetail extends ApiCourseSummary {
  * catalog, homepage, and company hubs are all guest-accessible). This prevents
  * a logged-out visitor from triggering the silent-refresh + /login redirect
  * cycle on first page load - the bug surfaced in the QA audit on /prepare.
+ *
+ * They are also CACHED (`next.revalidate`). This taxonomy is identical for every
+ * visitor and changes only on an admin content edit, yet the force-dynamic Server
+ * Components that await it (/practice, /section, the company hubs) otherwise re-hit
+ * the backend on EVERY page view. A load test (2026-08-15) showed that under 2,500
+ * concurrent students that uncached server-side call is exactly what balloons a
+ * page's TTFB (/practice 1.1s → 3.3s). Opting these into Next's Data Cache serves
+ * ONE backend fetch per window to all requests, so the server render stays fast
+ * under load AND the backend does far less work during a drive. Two things to know:
+ *   - `next.revalidate` is a server-only hint; the browser ignores it, so the many
+ *     CLIENT callers of these same helpers are completely unaffected.
+ *   - `force-dynamic` uses `default-no-store`, so an explicit per-fetch revalidate
+ *     is still honored — only these PUBLIC reads are shared-cached; per-user
+ *     endpoints (PYQs, community) keep the default and are never cached.
+ * (Future: cache tags + `revalidateTag` on the admin mutation for instant
+ * propagation instead of a 5-min window.)
  */
+const PUBLIC_READ = { auth: 'public' as const, next: { revalidate: 300 } };
+
 export async function listCompanies(): Promise<ApiCompany[]> {
-  const res = await apiClient.get<ApiCompany[]>('/api/v1/companies', { auth: 'public' });
+  const res = await apiClient.get<ApiCompany[]>('/api/v1/companies', PUBLIC_READ);
   return res.data;
 }
 
 export async function getCompany(slug: string): Promise<ApiCompanyHub> {
-  const res = await apiClient.get<ApiCompanyHub>(`/api/v1/companies/${slug}`, { auth: 'public' });
+  const res = await apiClient.get<ApiCompanyHub>(`/api/v1/companies/${slug}`, PUBLIC_READ);
   return res.data;
 }
 
@@ -168,9 +186,7 @@ export async function getCompanyPyqs(slug: string, topicSlug?: string): Promise<
 }
 
 export async function getCompanyPrep(slug: string): Promise<ApiCompanyPrep> {
-  const res = await apiClient.get<ApiCompanyPrep>(`/api/v1/companies/${slug}/prep`, {
-    auth: 'public',
-  });
+  const res = await apiClient.get<ApiCompanyPrep>(`/api/v1/companies/${slug}/prep`, PUBLIC_READ);
   return res.data;
 }
 
@@ -184,14 +200,12 @@ export async function listCourses(filters: {
   if (filters.difficulty) qs.set('difficulty', filters.difficulty);
   if (filters.companyId) qs.set('companyId', filters.companyId);
   const suffix = qs.toString() ? `?${qs.toString()}` : '';
-  const res = await apiClient.get<ApiCourseSummary[]>(`/api/v1/courses${suffix}`, {
-    auth: 'public',
-  });
+  const res = await apiClient.get<ApiCourseSummary[]>(`/api/v1/courses${suffix}`, PUBLIC_READ);
   return res.data;
 }
 
 export async function getCourse(slug: string): Promise<ApiCourseDetail> {
-  const res = await apiClient.get<ApiCourseDetail>(`/api/v1/courses/${slug}`, { auth: 'public' });
+  const res = await apiClient.get<ApiCourseDetail>(`/api/v1/courses/${slug}`, PUBLIC_READ);
   return res.data;
 }
 
@@ -205,13 +219,13 @@ export interface ApiTopic {
 }
 
 export async function listTopics(): Promise<ApiTopic[]> {
-  const res = await apiClient.get<ApiTopic[]>('/api/v1/topics', { auth: 'public' });
+  const res = await apiClient.get<ApiTopic[]>('/api/v1/topics', PUBLIC_READ);
   return res.data;
 }
 
 /** Topics with their live question-bank counts (subtopics = direct, parents = rolled up). */
 export async function listTopicsWithCounts(): Promise<ApiTopic[]> {
-  const res = await apiClient.get<ApiTopic[]>('/api/v1/topics/with-counts', { auth: 'public' });
+  const res = await apiClient.get<ApiTopic[]>('/api/v1/topics/with-counts', PUBLIC_READ);
   return res.data;
 }
 
