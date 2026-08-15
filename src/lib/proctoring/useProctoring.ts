@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   FaceProctor,
   type FaceStatus,
@@ -70,6 +70,16 @@ export interface ProctoringController {
 }
 
 const SNAPSHOT_EVERY_MS = 15_000;
+/** A blur within this long after a detected stall is the browser's doing, not the
+ *  candidate's, and is not logged. */
+const STALL_GRACE_MS = 5000;
+/** One window_blur per this window, at most. */
+const BLUR_COOLDOWN_MS = 3000;
+/** Watchdog cadence; a gap materially longer than this means the thread was blocked. */
+const STALL_WATCHDOG_MS = 1000;
+/** Gap above which we call it a stall. */
+const STALL_THRESHOLD_MS = 3000;
+
 const MAX_EVENTS = 120;
 const MAX_PENDING_SNAPSHOTS = 20;
 /** Don't re-log/re-warn the same face-violation type more often than this. Tightened
@@ -110,6 +120,11 @@ export function useProctoring(
   const audioProctorRef = useRef<AudioProctor | null>(null);
   const audioTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioCooldownRef = useRef(0);
+  /** When the main thread last recovered from a stall (0 = never). */
+  const lastStallEndRef = useRef(0);
+  const lastBlurRef = useRef(0);
+  /** True once camera analysis has been reported as not running. */
+  const analysisOffRef = useRef(false);
   const onReportRef = useRef<UseProctoringOptions['onReport']>(options?.onReport);
   onReportRef.current = options?.onReport;
 
@@ -160,7 +175,15 @@ export function useProctoring(
 
   const onFullscreenChange = useCallback(() => {
     const fs = !!document.fullscreenElement;
+    // ALWAYS track the real state: this drives the "Return to fullscreen" enforcer, and
+    // suppressing it would leave the overlay claiming fullscreen while the candidate
+    // sits outside it. Only the VIOLATION is forgiven below.
     setInFullscreen(fs);
+    // Same forgiveness as window_blur: when the main thread stalls the BROWSER drops
+    // fullscreen - the candidate did nothing. Without this the freeze logs an exit
+    // against them, which is exactly what happened on 2026-08-15. The enforcer still
+    // appears, so the exam is still protected; it simply is not held against them.
+    if (Date.now() - lastStallEndRef.current < STALL_GRACE_MS) return;
     if (!fs) {
       setFullscreenExits((n) => n + 1);
       logEvent('fullscreen_exit');
@@ -184,14 +207,60 @@ export function useProctoring(
   // Losing window focus WITHOUT the tab going hidden = minimized / alt-tabbed to
   // another app (a tab switch fires visibilitychange, handled above). Defer a tick
   // and only count it when the tab is still visible, so the two never double-count.
+  // Main-thread stall watchdog. A timer that fires far later than scheduled means the
+  // thread was blocked - the condition that manufactured the 2026-08-15 violations.
+  // Recording when it ENDED lets the blur/fullscreen handlers forgive the aftermath.
+  useEffect(() => {
+    if (!enabled) return;
+    let last = Date.now();
+    const id = window.setInterval(() => {
+      const now = Date.now();
+      const drift = now - last - STALL_WATCHDOG_MS;
+      if (drift > STALL_THRESHOLD_MS) lastStallEndRef.current = now;
+      last = now;
+    }, STALL_WATCHDOG_MS);
+    return () => window.clearInterval(id);
+  }, [enabled]);
+
+  /**
+   * Camera analysis is not running (no WebGL, model failed, or this device was too
+   * slow and it stood down). NOT misconduct - but it must never pass for a clean,
+   * monitored sitting. Recorded once, server-stamped, and surfaced to the candidate.
+   */
+  const reportAnalysisOff = useCallback(
+    (reason: string) => {
+      if (analysisOffRef.current) return; // once per attempt
+      analysisOffRef.current = true;
+      setFaceStatus('OFF');
+      logEvent('camera_analysis_off');
+      queueReport({
+        type: 'camera_analysis_off',
+        severity: 'medium',
+        message: `Camera analysis not running: ${reason}`,
+        occurredAt: new Date().toISOString(),
+      });
+      warn('Camera analysis is not running on this device. Your assessment continues and this has been logged.');
+    },
+    [logEvent, queueReport, warn],
+  );
+
   const onWindowBlur = useCallback(() => {
     window.setTimeout(() => {
       if (document.visibilityState === 'hidden') return;
+      // A blur the PAGE did not cause is not misconduct. When the main thread stalls,
+      // the browser itself drops focus (and fullscreen), and on 2026-08-15 that got
+      // logged as "Left the assessment window" at HIGH severity against candidates who
+      // had done nothing. Two guards: ignore a blur that lands within the stall window
+      // just observed, and rate-limit the rest so one wobble is one event, not a burst.
+      const now = Date.now();
+      if (now - lastStallEndRef.current < STALL_GRACE_MS) return;
+      if (now - lastBlurRef.current < BLUR_COOLDOWN_MS) return;
+      lastBlurRef.current = now;
       setWindowBlurs((n) => n + 1);
       logEvent('window_blur');
       queueReport({
         type: 'window_blur',
-        severity: 'high',
+        severity: 'medium',
         message: 'Left the assessment window (minimized or switched app)',
         occurredAt: new Date().toISOString(),
       });
@@ -224,7 +293,15 @@ export function useProctoring(
     (result: { faceCount: number; violations: FaceViolation[]; status: FaceStatus }) => {
       setFaceCount(result.faceCount);
       setFaceStatus(result.status);
-      setLatestFaceViolation(result.violations[0] ?? null);
+      // Only swap the object when the violation actually CHANGES. v() allocates a
+      // fresh object every frame, so storing it unconditionally changed the
+      // controller's identity on every detection tick during any sustained
+      // violation - which is precisely what the memo above exists to prevent, and
+      // what kept rebuilding MockRunner's countdown interval.
+      const next = result.violations[0] ?? null;
+      setLatestFaceViolation((prev) =>
+        prev?.type === next?.type && prev?.message === next?.message ? prev : next,
+      );
 
       const now = Date.now();
       for (const violation of result.violations) {
@@ -403,7 +480,9 @@ export function useProctoring(
       setFaceStatus('NORMAL');
       const proctor = new FaceProctor();
       faceProctorRef.current = proctor;
-      void proctor.start(videoRef.current, { onFrame }).catch(() => setFaceStatus('OFF'));
+      void proctor
+        .start(videoRef.current, { onFrame, onDegraded: reportAnalysisOff })
+        .catch(() => reportAnalysisOff('Camera analysis could not start on this device (no WebGL / model unavailable).'));
     }
   });
 
@@ -417,7 +496,17 @@ export function useProctoring(
       // Total incidents across all channels. window-blur + clipboard are folded into
       // the count and the events[] log (NOT new top-level fields) so the whitelisted
       // ProctoringSummaryDto still accepts the payload.
-      violations: tabSwitches + fullscreenExits + faceViolations + windowBlurs + clipboardEvents,
+      // The analysis-off marker is COUNTED, not just logged. Otherwise an attempt the
+      // camera never watched scores violations=0 and renders as "Clean" - strictly
+      // more trustworthy-looking than one that was actually monitored. Disabling
+      // WebGL is a one-flag bypass; it must not also be an invisible one.
+      violations:
+        tabSwitches +
+        fullscreenExits +
+        faceViolations +
+        windowBlurs +
+        clipboardEvents +
+        (analysisOffRef.current ? 1 : 0),
       faceViolations,
       faceViolationsByType: { ...faceCountsRef.current },
       snapshotCount,
@@ -428,7 +517,12 @@ export function useProctoring(
     [tabSwitches, fullscreenExits, faceViolations, windowBlurs, clipboardEvents, snapshotCount, cameraGranted, micGranted],
   );
 
-  return {
+  // Memoised. This object is a dependency of MockRunner.finishAttempt, which is in turn
+  // a dependency of the 1-second countdown effect: returning a fresh literal on every
+  // render tore down and rebuilt the exam timer ~1.7 times a second (three setStates per
+  // detection frame), on the same main thread the models were saturating.
+  return useMemo(
+    () => ({
     videoRef,
     active,
     cameraGranted,
@@ -448,5 +542,11 @@ export function useProctoring(
     start,
     stop,
     summary,
-  };
+    }),
+    [
+      active, cameraGranted, micGranted, tabSwitches, fullscreenExits, inFullscreen,
+      enterFullscreen, windowBlurs, clipboardEvents, snapshotCount, faceStatus,
+      faceCount, faceViolations, latestFaceViolation, lastWarning, start, stop, summary,
+    ],
+  );
 }
