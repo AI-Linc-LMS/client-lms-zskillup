@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowRight, CircleCheck, Clock, ShieldCheck, Video } from 'lucide-react';
-import { getMySchedule, type ApiScheduledAssessment } from '@/lib/api/scheduling';
+import { assessmentWindowEndMs, getMySchedule, type ApiScheduledAssessment } from '@/lib/api/scheduling';
 import { getMockHistory } from '@/lib/api/mocks';
 
 /**
@@ -49,7 +49,9 @@ export function LiveAssessmentBanner() {
     .filter((a) => a.isActive && a.mockTestId)
     .filter((a) => {
       const start = new Date(a.scheduledAt).getTime();
-      return now >= start && now <= start + a.durationMinutes * 60_000;
+      // Available until the REAL window close (endsAt), NOT start+duration — the latter
+      // is the per-attempt limit and closed a live drive early (2026-08-16).
+      return now >= start && now <= assessmentWindowEndMs(a);
     })
     .sort((a, b) => +new Date(a.scheduledAt) - +new Date(b.scheduledAt));
 
@@ -59,7 +61,7 @@ export function LiveAssessmentBanner() {
   // the banner keeps nudging toward the actionable assessment.
   const a = live.find((x) => x.mockTestId && !attempts.has(x.mockTestId)) ?? live[0];
   const doneAttemptId = a.mockTestId ? attempts.get(a.mockTestId) : undefined;
-  const endMs = new Date(a.scheduledAt).getTime() + a.durationMinutes * 60_000;
+  const endMs = assessmentWindowEndMs(a);
   const minsLeft = Math.max(0, Math.round((endMs - now) / 60_000));
 
   return (

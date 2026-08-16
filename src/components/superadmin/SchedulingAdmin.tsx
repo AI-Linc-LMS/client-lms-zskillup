@@ -12,6 +12,7 @@ import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
 import { listAdminMocks, type AdminMockRow } from '@/lib/api/admin';
 import {
   createScheduledAssessment,
+  assessmentWindowEndMs,
   deleteScheduledAssessment,
   getAssessmentResults,
   listScheduledAssessments,
@@ -56,7 +57,7 @@ export function SchedulingAdmin() {
       if (fDuration === 'medium' && (r.durationMinutes <= 30 || r.durationMinutes > 90)) return false;
       if (fDuration === 'long' && r.durationMinutes <= 90) return false;
       const start = +new Date(r.scheduledAt);
-      const end = start + r.durationMinutes * 60_000;
+      const end = assessmentWindowEndMs(r);
       if (fStatus === 'inactive') return !r.isActive;
       if (fStatus === 'upcoming') return now < start;
       if (fStatus === 'live') return now >= start && now <= end;

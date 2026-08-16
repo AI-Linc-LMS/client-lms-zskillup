@@ -4,7 +4,11 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CalendarCheck, Crown, Loader2, PlayCircle } from 'lucide-react';
 import { hasRoleHint } from '@/lib/session-hints';
-import { getCompanyScheduledAssessments, type ApiScheduledAssessment } from '@/lib/api/scheduling';
+import {
+  assessmentWindowEndMs,
+  getCompanyScheduledAssessments,
+  type ApiScheduledAssessment,
+} from '@/lib/api/scheduling';
 import { useMySubscription } from '@/hooks/useMySubscription';
 import { EntitlementScope } from '@/shared/enums';
 import { AuroraBackground } from '@/components/motion/primitives';
@@ -41,7 +45,7 @@ export function CompanyRegisterCard({
       .then((rows) => {
         const upcoming = rows
           .filter((r) => r.isActive)
-          .filter((r) => new Date(r.scheduledAt).getTime() + r.durationMinutes * 60_000 >= Date.now())
+          .filter((r) => assessmentWindowEndMs(r) >= Date.now())
           .sort((a, b) => +new Date(a.scheduledAt) - +new Date(b.scheduledAt));
         setNext(upcoming[0] ?? null);
       })
@@ -54,7 +58,7 @@ export function CompanyRegisterCard({
   // Assessment window state (only meaningful once `next` is loaded).
   const now = Date.now();
   const startAt = next ? new Date(next.scheduledAt).getTime() : 0;
-  const endAt = next ? startAt + next.durationMinutes * 60_000 : 0;
+  const endAt = next ? assessmentWindowEndMs(next) : 0;
   const isLive = next ? now >= startAt && now <= endAt : false;
   const startHref =
     next && next.mockTestId

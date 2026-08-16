@@ -17,7 +17,9 @@ export interface ApiScheduledAssessment {
   registrationCloseAt: string | null;
   proctored: boolean;
   isActive: boolean;
-  /** When the assessment window closes (scheduledAt + duration). Backend-computed. */
+  /** Hard close of the availability window (admin-set), or null = open-ended.
+   *  This is the REAL close — use it (not scheduledAt+duration) to decide whether
+   *  a student can still start; see {@link assessmentWindowEndMs}. */
   endsAt: string | null;
   /** Free-form description shown on the pre-assessment instructions screen. */
   description?: string | null;
@@ -27,6 +29,28 @@ export interface ApiScheduledAssessment {
    *  or attempt it (unpaid / non-matching plan). Render a lock + upgrade prompt, no
    *  click-through. Absent/false ⇒ accessible. */
   locked?: boolean;
+}
+
+/**
+ * The instant a scheduled assessment stops being startable — the admin-set close
+ * (`endsAt`), or `scheduledAt + durationMinutes` only as a fallback when no explicit
+ * close was configured.
+ *
+ * `durationMinutes` is the per-ATTEMPT time limit (how long a student gets ONCE they
+ * begin), NOT the availability window. Conflating the two made a live drive vanish
+ * from the UI at start+duration (9:00 + 120m = 11:00) even though its window was open
+ * until 23:30 — the backend correctly allowed starts, but every FE entry point hid the
+ * Start button early (bug surfaced in the 2026-08-16 drive). Always gate availability
+ * on this, never on scheduledAt+duration.
+ */
+export function assessmentWindowEndMs(a: {
+  scheduledAt: string;
+  durationMinutes: number;
+  endsAt: string | null;
+}): number {
+  return a.endsAt
+    ? new Date(a.endsAt).getTime()
+    : new Date(a.scheduledAt).getTime() + a.durationMinutes * 60_000;
 }
 
 export interface CreateScheduledAssessmentPayload {

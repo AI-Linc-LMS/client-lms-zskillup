@@ -5,7 +5,12 @@ import Link from 'next/link';
 import { CalendarClock, CheckCircle2, Clock, Loader2, PlayCircle, ShieldCheck, Trophy } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ProfileLockGate } from '@/components/student/ProfileLockGate';
-import { getMySchedule, getScheduledAssessment, type ApiScheduledAssessment } from '@/lib/api/scheduling';
+import {
+  assessmentWindowEndMs,
+  getMySchedule,
+  getScheduledAssessment,
+  type ApiScheduledAssessment,
+} from '@/lib/api/scheduling';
 import { getMockHistory } from '@/lib/api/mocks';
 import { Button } from '@/components/ui/button';
 import { StatusPill } from '@/components/student/StatusPill';
@@ -67,7 +72,9 @@ export default function AssessmentDetailPage({ params }: { params: Promise<{ id:
   }, [id]);
 
   const startMs = assessment ? new Date(assessment.scheduledAt).getTime() : 0;
-  const endMs = assessment ? startMs + assessment.durationMinutes * 60_000 : 0;
+  // Window close = the REAL endsAt (not start+duration, which is the per-attempt limit
+  // and closed a live drive early — 2026-08-16).
+  const endMs = assessment ? assessmentWindowEndMs(assessment) : 0;
   const isLive = assessment ? now >= startMs && now <= endMs : false;
   const isEnded = assessment ? now > endMs : false;
   const startHref =

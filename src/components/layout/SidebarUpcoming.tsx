@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CalendarClock, Lock, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getMySchedule, type ApiScheduledAssessment } from '@/lib/api/scheduling';
+import { assessmentWindowEndMs, getMySchedule, type ApiScheduledAssessment } from '@/lib/api/scheduling';
 import { getMockHistory } from '@/lib/api/mocks';
 
 function dueLabel(iso: string): string {
@@ -41,7 +41,7 @@ export function SidebarUpcoming() {
             .filter(
               (a) =>
                 a.isActive &&
-                new Date(a.scheduledAt).getTime() + a.durationMinutes * 60_000 >= Date.now(),
+                assessmentWindowEndMs(a) >= Date.now(),
             )
             .sort((a, b) => +new Date(a.scheduledAt) - +new Date(b.scheduledAt))
             .slice(0, 4),
@@ -87,7 +87,7 @@ export function SidebarUpcoming() {
             );
           }
           const startMs = new Date(a.scheduledAt).getTime();
-          const live = Date.now() >= startMs && Date.now() <= startMs + a.durationMinutes * 60_000;
+          const live = Date.now() >= startMs && Date.now() <= assessmentWindowEndMs(a);
           const completed = !!a.mockTestId && done.has(a.mockTestId);
           const liveOpen = live && !completed;
           return (

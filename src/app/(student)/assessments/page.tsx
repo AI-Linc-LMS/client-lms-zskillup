@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import {
   getMySchedule,
+  assessmentWindowEndMs,
   type ApiScheduledAssessment,
 } from '@/lib/api/scheduling';
 import { getMockHistory } from '@/lib/api/mocks';
@@ -404,7 +405,8 @@ export default function AssessmentsPage() {
                   }
 
                   const startMs = new Date(it.scheduledAt).getTime();
-                  const endMs = startMs + it.durationMinutes * 60_000;
+                  // Real window close (endsAt), not start+duration (the per-attempt limit).
+                  const endMs = assessmentWindowEndMs(it);
                   const live = Date.now() >= startMs && Date.now() <= endMs;
                   // Leaderboard is only meaningful once the assessment window has
                   // fully closed and submissions are in - hiding it for upcoming/
