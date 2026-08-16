@@ -71,7 +71,7 @@ function findCol(header: string[], names: string[]): number {
 }
 
 /** Parse CSV text into invitation rows. Detects a header row (Name/Email/Roll/Branch,
- *  case-insensitive) and maps columns; otherwise falls back to positional order. Caps at 500. */
+ *  case-insensitive) and maps columns; else auto-detects the email column by '@'. Caps at 1000. */
 function parseInvitations(text: string): InviteRow[] {
   const rows = parseCsv(text);
   if (rows.length === 0) return [];
@@ -91,6 +91,17 @@ function parseInvitations(text: string): InviteRow[] {
     rollIdx = findCol(firstLower, ['rollnumber', 'roll number', 'roll no', 'rollno', 'roll']);
     branchIdx = findCol(firstLower, ['branch', 'department', 'dept']);
     dataRows = rows.slice(1);
+  } else {
+    // No recognizable 'email' header. Detect the email column as the one that actually
+    // contains an '@' (so a name-first CSV works) instead of assuming column 0 is the
+    // email — that sent student NAMES as emails and failed every row (2026-08-16). If the
+    // first row has no '@' but the next does, it's an unlabeled header row — skip it.
+    const firstIsData = first.some((c) => c.includes('@'));
+    dataRows = firstIsData ? rows : rows.slice(1);
+    const probe = firstIsData ? first : (rows[1] ?? []).map((c) => c.trim());
+    const atIdx = probe.findIndex((c) => c.includes('@'));
+    emailIdx = atIdx >= 0 ? atIdx : 0;
+    nameIdx = probe.findIndex((c, i) => i !== emailIdx && c.length > 0 && !c.includes('@'));
   }
 
   const out: InviteRow[] = [];
@@ -104,7 +115,7 @@ function parseInvitations(text: string): InviteRow[] {
       rollNumber: get(rollIdx) || undefined,
       branch: get(branchIdx) || undefined,
     });
-    if (out.length >= 500) break;
+    if (out.length >= 1000) break;
   }
   return out;
 }
@@ -394,7 +405,7 @@ export function CollegeCohortsManager({ collegeId, onChange }: { collegeId: stri
           <div className="mt-4 space-y-3">
             <p className="text-xs text-slate-500">
               Upload a CSV with columns <code className="rounded bg-slate-100 px-1">Email, Name, Roll, Branch</code>{' '}
-              (Name/Roll/Branch optional). Invited students receive a set-password email. Up to 500 rows.
+              (Name/Roll/Branch optional). Invited students receive a set-password email. Up to 1000 rows.
             </p>
             <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 px-4 py-6 text-sm font-semibold text-slate-600 hover:border-orange hover:text-navy">
               <Upload className="size-4" />
