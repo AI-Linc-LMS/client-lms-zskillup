@@ -8,6 +8,34 @@ import type { FinancialsOverviewDto } from '@/shared/dto/financials.dto';
 import { CreditCard, IndianRupee, Loader2, Lock, TrendingUp, Users } from 'lucide-react';
 
 /**
+ * Why the projection reads what it reads.
+ *
+ * "MRR ₹0" is frequently CORRECT and still reads like a broken panel - it was
+ * reported as "metrics not updating" when in fact every subscription on the
+ * platform was cancelled, expired, on a ₹0 trial, or carried no priced plan at
+ * all. A number nobody can explain gets escalated; a number that explains itself
+ * does not. So this states the reason in the same words the data supports, and
+ * only claims what the counts actually prove.
+ */
+function projectionReason(d: FinancialsOverviewDto): string {
+  if (d.payingSubscriptions > 0) {
+    return `From ${d.payingSubscriptions} paying subscription${d.payingSubscriptions === 1 ? '' : 's'} on a priced plan. Trials and complimentary access contribute nothing by design.`;
+  }
+  const why: string[] = [];
+  if (d.cancelled > 0) why.push(`${d.cancelled} cancelled`);
+  if (d.expired > 0) why.push(`${d.expired} expired`);
+  if (d.trials > 0) why.push(`${d.trials} on a free trial`);
+  if (d.complimentary > 0) why.push(`${d.complimentary} with no priced plan attached (complimentary)`);
+  const tail =
+    d.cancelled > 0
+      ? ' A cancelled subscription stops counting immediately, even when its paid period still has time left.'
+      : '';
+  return why.length
+    ? `₹0 because no subscription is currently active, non-trial AND on a priced plan - ${why.join(', ')}.${tail}`
+    : '₹0 because there are no subscriptions yet. This projects from college subscription plans; one-off student purchases appear under Collected (real).';
+}
+
+/**
  * Lightweight financial dashboard (Phase 7). MRR/ARR + plan mix derived from
  * subscriptions. Capability-gated (canViewFinancials via /me; SUPER_ADMIN implicit).
  */
@@ -95,6 +123,13 @@ export function FinancialsDashboard() {
         <MiniStat label="Cancelled" value={data.cancelled} />
       </div>
 
+      <p className="rounded-xl border border-slate-200 bg-white p-4 text-sm leading-relaxed text-slate-600">
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+          Why this number
+        </span>
+        <span className="mt-1 block">{projectionReason(data)}</span>
+      </p>
+
       <p className="text-sm text-slate-600">
         <span className="font-semibold text-navy">{data.newActivations30d}</span> paying activation
         {data.newActivations30d === 1 ? '' : 's'} in the last 30 days.
@@ -105,8 +140,13 @@ export function FinancialsDashboard() {
           <h2 className="text-sm font-bold text-navy">Revenue by plan</h2>
         </div>
         {data.byPlan.length === 0 ? (
-          <div className="py-10 text-center text-sm text-slate-500">
+          <div className="px-6 py-10 text-center text-sm text-slate-500">
             No paying subscriptions yet.
+            <span className="mt-1 block text-xs text-slate-400">
+              A subscription appears here once it is active, non-trial and linked to a plan with a
+              price. Access granted without a priced plan is counted as complimentary and earns
+              nothing.
+            </span>
           </div>
         ) : (
           <table className="w-full text-sm">
