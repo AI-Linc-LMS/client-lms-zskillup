@@ -138,8 +138,20 @@ export function AiBriefingHero() {
     bits.push(`${totalXp.toLocaleString()} XP`);
     return bits.join('  ·  ');
   }, [briefing?.headline, isReturning, firstName, level, streak, totalXp]);
-  const subline =
-    briefing?.subline ??
+  // The one-time Placement Readiness Test is the first step of the journey, so an
+  // un-calibrated student is steered straight to it - it replaces the mock CTA, the
+  // "try a mock" card, AND the sub-heading. Hoisted above `subline` deliberately:
+  // the AI briefing writes its own subline ("Take your first timed mock to see where
+  // you stand"), which pointed a brand-new student at a mock they should only reach
+  // AFTER the readiness test.
+  const showPlacementTest = calibration.required && !!calibration.mockTestId;
+  const placementHref = calibration.mockTestId
+    ? `/dashboard/quiz?mock=${calibration.mockTestId}`
+    : '/dashboard';
+
+  const subline = showPlacementTest
+    ? 'Start with the one-time Placement Readiness Test - it maps where you stand across every section and unlocks your personalised plan. Mocks come after it.'
+    : briefing?.subline ??
     (!isReturning
       ? `Kick off your first session today to start earning XP and build your skill profile.`
       : streak > 0
@@ -152,10 +164,6 @@ export function AiBriefingHero() {
   // The one-time Placement Readiness Test (the former "calibration") is the very
   // first step of the journey - so an un-calibrated student is steered straight
   // to it: it replaces both the "Try a mock" reco card and the mock CTA below.
-  const showPlacementTest = calibration.required && !!calibration.mockTestId;
-  const placementHref = calibration.mockTestId
-    ? `/dashboard/quiz?mock=${calibration.mockTestId}`
-    : '/dashboard';
 
   const cta = showPlacementTest
     ? { label: 'Take Placement Readiness Test', href: placementHref, kind: 'placement' as const }
