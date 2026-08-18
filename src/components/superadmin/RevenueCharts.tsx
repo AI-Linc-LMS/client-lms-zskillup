@@ -62,9 +62,20 @@ export function RevenueCharts() {
 
   return (
     <section className="space-y-5">
+      {/* Two different questions, both needed. COLLECTED is money actually banked
+          (captured payments, incl. every student purchase); MRR/ARR PROJECT what the
+          college-subscription catalogue would recur. A platform can hold zero live
+          subscriptions and still have taken money this month - reporting only the
+          projection is what made this panel read "no revenue" while payments were
+          landing. */}
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+        <Kpi icon={IndianRupee} label="Collected (all time)" value={inr(d.collectedLifetimeCents ?? 0)} tone="text-emerald-600" />
+        <Kpi icon={IndianRupee} label="Collected (this month)" value={inr(d.collectedMonthCents ?? 0)} tone="text-emerald-600" />
+        <Kpi icon={CreditCard} label="Payments" value={(d.collectedPayments ?? 0).toLocaleString('en-IN')} tone="text-violet-600" />
+      </div>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Kpi icon={IndianRupee} label="MRR" value={inr(d.mrrCents)} tone="text-[#f5b400]" />
-        <Kpi icon={TrendingUp} label="ARR" value={inr(d.arrCents)} tone="text-emerald-600" />
+        <Kpi icon={IndianRupee} label="MRR (projected)" value={inr(d.mrrCents)} tone="text-[#f5b400]" />
+        <Kpi icon={TrendingUp} label="ARR (projected)" value={inr(d.arrCents)} tone="text-[#f5b400]" />
         <Kpi icon={CreditCard} label="Paying subs" value={d.payingSubscriptions.toLocaleString('en-IN')} tone="text-violet-600" />
         <Kpi icon={Users} label="Active subs" value={d.activeSubscriptions.toLocaleString('en-IN')} tone="text-sky-600" />
       </div>
@@ -84,7 +95,9 @@ export function RevenueCharts() {
         </div>
       ) : (
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
-          No subscription revenue yet - charts appear once colleges or students are on paid plans.
+          {(d.collectedLifetimeCents ?? 0) > 0
+            ? `No RECURRING subscription live right now - the ${inr(d.collectedLifetimeCents ?? 0)} collected so far came from one-off purchases. These charts appear once a college or student is on a recurring plan.`
+            : 'No subscription revenue yet - charts appear once colleges or students are on paid plans.'}
         </div>
       )}
     </section>
