@@ -54,20 +54,53 @@ function derive(sub: MySubscriptionDto): Omit<MySubscriptionState, 'loading' | '
  * leaves `planStatus: 'none'` and `paywallEnabled: false`, so a transient blip
  * never walls a user out of a feature.
  */
+/**
+ * ONE shared subscription poll for the whole app.
+ *
+ * Two problems, one mechanism. (1) A cancellation performed by an admin left the
+ * "PREMIUM MEMBER" badge on screen until the student refreshed or signed out and in
+ * again - the hook re-checked on focus/visibility, which never fires for someone
+ * sitting on the dashboard. (2) Every mount fired its own request, so a single
+ * dashboard load hit /payments/my-subscription three times.
+ *
+ * A module-level store fixes both: subscribers share one in-flight request and one
+ * interval, so N components cost ONE poll, and a status change lands within a
+ * couple of minutes without anyone touching the page. The interval only ticks while
+ * the tab is visible - a backgrounded tab must not poll a paid API forever, and the
+ * existing visibility listener already re-checks the moment it comes back.
+ */
+const POLL_MS = 120_000;
+type Snapshot = { loading: boolean } & Omit<MySubscriptionState, 'loading' | 'refresh'>;
+let shared: Snapshot = { loading: true, ...EMPTY };
+let inFlight: Promise<void> | null = null;
+let timer: ReturnType<typeof setInterval> | null = null;
+const subscribers = new Set<(s: Snapshot) => void>();
+
+function publish(next: Snapshot): void {
+  shared = next;
+  for (const fn of subscribers) fn(next);
+}
+
+function fetchShared(): Promise<void> {
+  // Collapse concurrent callers onto one request (three mounts = one call).
+  if (inFlight) return inFlight;
+  inFlight = getMySubscription()
+    .then((sub) => publish({ loading: false, ...derive(sub) }))
+    .catch(() => publish({ loading: false, ...EMPTY }))
+    .finally(() => {
+      inFlight = null;
+    });
+  return inFlight;
+}
+
 export function useMySubscription(enabled = true): MySubscriptionState {
   const [state, setState] = useState<Omit<MySubscriptionState, 'refresh'>>({
     loading: enabled,
     ...EMPTY,
   });
 
-  const check = useCallback((signal?: { cancelled: boolean }) => {
-    getMySubscription()
-      .then((sub) => {
-        if (!signal?.cancelled) setState({ loading: false, ...derive(sub) });
-      })
-      .catch(() => {
-        if (!signal?.cancelled) setState({ loading: false, ...EMPTY });
-      });
+  const check = useCallback(() => {
+    void fetchShared();
   }, []);
 
   useEffect(() => {
@@ -75,16 +108,31 @@ export function useMySubscription(enabled = true): MySubscriptionState {
       setState({ loading: false, ...EMPTY });
       return;
     }
-    const signal = { cancelled: false };
-    check(signal);
+    const onShared = (next: Snapshot) => setState(next);
+    subscribers.add(onShared);
+    // Adopt whatever the store already knows, then refresh.
+    setState(shared);
+    void fetchShared();
+
     const onFocus = () => check();
     const onVis = () => document.visibilityState === 'visible' && check();
     window.addEventListener('focus', onFocus);
     document.addEventListener('visibilitychange', onVis);
+    if (!timer) {
+      timer = setInterval(() => {
+        if (document.visibilityState === 'visible') void fetchShared();
+      }, POLL_MS);
+    }
+
     return () => {
-      signal.cancelled = true;
+      subscribers.delete(onShared);
       window.removeEventListener('focus', onFocus);
       document.removeEventListener('visibilitychange', onVis);
+      // Last consumer leaves: stop polling rather than leak an interval per session.
+      if (subscribers.size === 0 && timer) {
+        clearInterval(timer);
+        timer = null;
+      }
     };
   }, [check, enabled]);
 
