@@ -19,7 +19,11 @@ import { CreditCard, IndianRupee, Loader2, Lock, TrendingUp, Users } from 'lucid
  */
 function projectionReason(d: FinancialsOverviewDto): string {
   if (d.payingSubscriptions > 0) {
-    return `From ${d.payingSubscriptions} paying subscription${d.payingSubscriptions === 1 ? '' : 's'} on a priced plan. Trials and complimentary access contribute nothing by design.`;
+    const nr = d.nonRenewing ?? 0;
+    const nonRenewingNote = nr
+      ? ` ${nr} of them ${nr === 1 ? 'is' : 'are'} cancelled but still inside the paid period - non-renewing, so ${nr === 1 ? 'it keeps' : 'they keep'} earning until that date and then drop${nr === 1 ? 's' : ''} off.`
+      : '';
+    return `From ${d.payingSubscriptions} paying subscription${d.payingSubscriptions === 1 ? '' : 's'} on a priced plan.${nonRenewingNote} Trials and complimentary access contribute nothing by design.`;
   }
   const why: string[] = [];
   if (d.cancelled > 0) why.push(`${d.cancelled} cancelled`);
@@ -28,7 +32,7 @@ function projectionReason(d: FinancialsOverviewDto): string {
   if (d.complimentary > 0) why.push(`${d.complimentary} with no priced plan attached (complimentary)`);
   const tail =
     d.cancelled > 0
-      ? ' A cancelled subscription stops counting immediately, even when its paid period still has time left.'
+      ? ' A cancelled subscription keeps earning until its paid period ends (non-renewing); these have all passed that date.'
       : '';
   return why.length
     ? `₹0 because no subscription is currently active, non-trial AND on a priced plan - ${why.join(', ')}.${tail}`

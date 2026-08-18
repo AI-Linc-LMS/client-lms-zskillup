@@ -27,6 +27,10 @@ export interface FinancialsOverviewDto {
    *  expired + cancelled reconciles with the active total in the mix. */
   complimentary: number;
   trials: number;
+  /** Cancelled but still inside the paid period: non-renewing, NOT churned. Counted in
+   *  `cancelled` for the status mix AND in payingSubscriptions/mrr, because the customer
+   *  paid through that date and is still being served - the standard SaaS treatment. */
+  nonRenewing: number;
   expired: number;
   cancelled: number;
   /** Monthly recurring revenue (dated plans normalised to 30 days). */
