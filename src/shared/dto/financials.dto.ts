@@ -37,6 +37,16 @@ export interface FinancialsOverviewDto {
   bookedValueCents: number;
   /** Paying subscriptions activated in the last 30 days. */
   newActivations30d: number;
+  /** REAL cash collected (captured payments), all time. Distinct from mrr/arr above,
+   *  which PROJECT from the college-subscription catalogue: a platform can hold zero
+   *  live subscriptions and still have collected money this week (student purchases
+   *  are payments, not subscriptions). Reporting only the projection made the console
+   *  read "no subscription revenue yet" on a day money had come in. */
+  collectedLifetimeCents: number;
+  /** Cash collected in the current calendar month. */
+  collectedMonthCents: number;
+  /** Number of captured payments, all time. */
+  collectedPayments: number;
   byPlan: FinancialsPlanBreakdown[];
 }
 
