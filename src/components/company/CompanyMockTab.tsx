@@ -45,13 +45,21 @@ export function CompanyMockTab({
           {name} mock assessments
         </h2>
         <p className="mt-1.5 text-sm leading-relaxed text-slate-600 sm:text-base">
-          Warm up with adaptive practice, then sit the real proctored assessments this company schedules.
+          Warm up with adaptive practice - no camera, no proctoring - then sit the assessments this
+          company schedules. Every assessment is proctored: camera on and full-screen.
         </p>
       </div>
 
       {/* Adaptive mock quiz - standout violet card (locked without this company's sub) */}
+      {/* Adaptive practice, NOT the proctored mock builder. This linked to
+          /mock-assessment, which its own page documents as "student-assembled,
+          NON-adaptive, PROCTORED" and advertises as "camera-proctored, full-screen":
+          a student clicking a card that promised non-proctored practice was dropped
+          into a camera-proctored assessment. /dashboard/quiz/adaptive is the adaptive,
+          unproctored run, company-scoped - the same destination the Practice hub and
+          the company prep pages already use. */}
       <Link
-        href={locked ? '/shop' : '/mock-assessment'}
+        href={locked ? '/shop' : `/dashboard/quiz/adaptive?company=${encodeURIComponent(slug)}`}
         onClick={(e) => !locked && gate?.(e, 'the Adaptive Mock Quiz')}
         className="group relative flex items-center justify-between gap-3 overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_-30px_rgba(124,58,237,0.22)] transition-shadow hover:shadow-[0_24px_60px_-28px_rgba(124,58,237,0.35)] sm:gap-4 sm:p-6"
       >
@@ -78,7 +86,7 @@ export function CompanyMockTab({
             <p className="mt-0.5 text-sm text-slate-600">
               {locked
                 ? `Unlock with a ${name} subscription or full platform access.`
-                : 'AI-evaluated, non-proctored practice that adapts to you.'}
+                : 'AI-evaluated practice that adapts to you. No camera, no proctoring.'}
             </p>
           </div>
         </div>
@@ -101,7 +109,7 @@ export function CompanyMockTab({
           <span className="grid size-8 place-items-center rounded-xl bg-violet-50 text-violet-600 ring-1 ring-inset ring-violet-100">
             <ShieldCheck className="size-4" />
           </span>
-          Proctored assessments - {name}
+          Assessments - {name}
         </h3>
         {scheduled === null ? (
           <p className="mt-3 text-xs text-slate-500">Loading…</p>
