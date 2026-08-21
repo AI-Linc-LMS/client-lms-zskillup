@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Briefcase, Clock, IndianRupee, MapPin } from 'lucide-react';
 import { getPublicJobs } from '@/lib/server/public-content';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
+import { safeHttpUrl } from '@/lib/utils';
 
 /**
  * The public job board. Deliberately readable WITHOUT an account: the brief is that
@@ -34,9 +35,9 @@ function JobCard({ job }: { job: JobPostingDto }) {
       className="group flex h-full flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-colors hover:border-slate-300"
     >
       <div className="flex items-start gap-3">
-        {job.companyLogoUrl ? (
+        {safeHttpUrl(job.companyLogoUrl) ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={job.companyLogoUrl} alt="" className="size-11 rounded-xl object-contain ring-1 ring-slate-100" />
+          <img src={safeHttpUrl(job.companyLogoUrl) as string} alt="" className="size-11 rounded-xl object-contain ring-1 ring-slate-100" />
         ) : (
           <span className="grid size-11 place-items-center rounded-xl bg-sky-50 text-sky-600 ring-1 ring-sky-100">
             <Briefcase className="size-5" />
