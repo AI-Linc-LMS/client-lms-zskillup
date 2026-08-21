@@ -1,4 +1,5 @@
 import type { BlogPostDto, TestimonialDto } from '@/shared/dto/content.dto';
+import type { JobPostingDto } from '@/shared/dto/jobs.dto';
 
 /**
  * Server-side fetch of public marketing content (Phase 5). Used by the public
@@ -31,4 +32,15 @@ export async function getPublicBlogs(): Promise<BlogPostDto[]> {
 
 export async function getPublicBlog(slug: string): Promise<BlogPostDto | null> {
   return getJson<BlogPostDto>(`/api/v1/content/blogs/${encodeURIComponent(slug)}`);
+}
+
+/** Published job openings, newest first. Public - a logged-out visitor arriving from a
+ *  shared link or a search result must be able to read the board. */
+export async function getPublicJobs(): Promise<JobPostingDto[]> {
+  return (await getJson<JobPostingDto[]>('/api/v1/jobs')) ?? [];
+}
+
+/** One job by its shareable slug. Null when it does not exist or is still a draft. */
+export async function getPublicJob(slug: string): Promise<JobPostingDto | null> {
+  return getJson<JobPostingDto>(`/api/v1/jobs/${encodeURIComponent(slug)}`);
 }
