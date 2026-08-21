@@ -31,6 +31,12 @@ export function labelFromRef(ref: string): string {
 const SCOPES = new Set<string>(Object.values(EntitlementScope));
 const PERIODS = new Set<string>(Object.values(BillingPeriod));
 
+/** What a product ref may look like. Mirrors the backend's own slug shape. */
+const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+/** Matches @ArrayMaxSize(50) on CartCheckoutDto. */
+const MAX_LINK_ITEMS = 50;
+
 /** One `add=` entry -> a cart line, or null if it is malformed. */
 export function parseCartEntry(raw: string): CartItem | null {
   const parts = raw.trim().split(':');
@@ -44,6 +50,12 @@ export function parseCartEntry(raw: string): CartItem | null {
   if (!PERIODS.has(period)) return null;
   // PLATFORM covers everything, so it has no ref; everything else needs one.
   if (isPlatform ? ref !== null && ref !== '' : !ref) return null;
+  // The ref must LOOK like a slug before we render a label derived from it. It was
+  // free text: `SECTION:free-lifetime-upgrade:MONTHLY` put the words "Free Lifetime
+  // Upgrade" in the cart beside a real price, which is the exact spoof this module's
+  // header claims to prevent. And an unknown ref is refused by the server at
+  // checkout, so accepting one only buys the student a cart they cannot pay for.
+  if (!isPlatform && !SLUG.test(ref as string)) return null;
 
   return {
     scope: scope as EntitlementScope,
@@ -66,7 +78,9 @@ export function parseCartLink(search: string | URLSearchParams): CartItem[] {
   const params = typeof search === 'string' ? new URLSearchParams(search) : search;
   const items: CartItem[] = [];
   const seen = new Set<string>();
-  for (const raw of params.getAll('add')) {
+  // The checkout DTO caps a cart at 50 lines. Parsing more here would build a cart the
+  // server refuses in full, with no indication which rows were the problem.
+  for (const raw of params.getAll('add').slice(0, MAX_LINK_ITEMS)) {
     const item = parseCartEntry(raw);
     if (!item) continue;
     const key = `${item.scope}:${item.scopeRef ?? ''}:${item.period}`;

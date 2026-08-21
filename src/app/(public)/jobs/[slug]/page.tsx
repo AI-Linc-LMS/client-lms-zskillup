@@ -5,6 +5,7 @@ import { getPublicJob, getPublicJobs } from '@/lib/server/public-content';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
 import { JobStatus } from '@/shared/enums';
 import { safeHttpUrl } from '@/lib/utils';
+import { ApplyButton } from '@/components/jobs/ApplyButton';
 
 /**
  * One job, at its own shareable URL: prephasz.com/jobs/software-engineer-google.
@@ -32,6 +33,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!job) return { title: 'Jobs · prephasz' };
   const title = `${job.title} at ${job.companyName} · prephasz`;
   const description = previewText(job);
+  const logo = safeHttpUrl(job.companyLogoUrl);
   return {
     title,
     description,
@@ -40,7 +42,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       title,
       description,
       type: 'article',
-      images: job.companyLogoUrl ? [{ url: job.companyLogoUrl }] : undefined,
+      // Launder it here too. og:image is fetched SERVER-SIDE by WhatsApp, Slack and
+      // LinkedIn unfurl bots, and @IsUrl({ require_tld: false }) on the DTO accepts
+      // ftp:// and hostless internal targets. The <img> below already goes through
+      // safeHttpUrl; leaving the meta tag raw is the inconsistency that regresses.
+      images: logo ? [{ url: logo }] : undefined,
     },
     twitter: { card: 'summary', title, description },
   };
@@ -175,18 +181,32 @@ export default async function JobPage({ params }: { params: Promise<{ slug: stri
         </section>
       ) : null}
 
-      {/* Phase 3b replaces this with the gated Apply action. Until then an external
-          apply link is honoured, and everything else points back to the board. */}
-      {!closed && applyHref ? (
-        <a
-          href={applyHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-9 inline-flex items-center gap-2 rounded-full bg-navy px-6 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-navy/90"
-        >
-          Apply on the company site
-        </a>
-      ) : null}
+      {/* Two kinds of role, and they must not look alike. When the employer collects
+          applications themselves we send the student out and record nothing - claiming
+          to have "received" an application we never see would be a lie. Otherwise the
+          gated in-house Apply action, which the server re-checks. */}
+      {closed ? (
+        <p className="mt-9 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+          This role is no longer accepting applications.
+        </p>
+      ) : applyHref ? (
+        <div className="mt-9">
+          <a
+            href={applyHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full bg-navy px-6 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-navy/90"
+          >
+            Apply on the company site
+          </a>
+          <p className="mt-2 text-xs text-slate-500">
+            {job.companyName} takes applications directly, so this one is not tracked in
+            your ZSkillup applications list.
+          </p>
+        </div>
+      ) : (
+        <ApplyButton slug={job.slug} jobTitle={job.title} />
+      )}
 
       {others.length > 0 ? (
         <section className="mt-12 border-t border-slate-200 pt-8">

@@ -1,0 +1,171 @@
+'use client';
+
+import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
+import { CheckCircle2, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { StatusPill } from '@/components/student/StatusPill';
+import { UpgradeModal } from '@/components/billing/UpgradeModal';
+import { useUpgradeGate } from '@/hooks/useUpgradeGate';
+import { roleHint } from '@/lib/session-hints';
+import { applyToJob, getMyApplication, type JobApplicationDto } from '@/lib/api/jobs';
+import { ApiRequestError } from '@/lib/api/types';
+import { buildCartLink } from '@/lib/payments/cart-link';
+import { APPLICATION_STATUS } from '@/lib/jobs/application-status';
+import { BillingPeriod, EntitlementScope } from '@/shared/enums';
+
+/**
+ * The Apply action on a public job page.
+ *
+ * The page itself is static (ISR), so everything that depends on WHO is looking has
+ * to happen here, after mount. Three states, in order of what we know:
+ *
+ *   1. Logged out - a link to sign in, carrying ?redirect back to this job.
+ *   2. Logged in, already applied - the status, with a sentence explaining it.
+ *   3. Logged in, not applied - the Apply button.
+ *
+ * The upgrade prompt is shown for free students as a courtesy, NOT as the gate. The
+ * server re-checks entitlement on every apply and answers 403 PAYWALL; that response
+ * opens the same modal. This matters because `useUpgradeGate` deliberately fails
+ * OPEN on a network error, so a student on a flaky connection sees the button - and
+ * then gets a truthful answer from the server rather than a silent no-op.
+ */
+export function ApplyButton({ slug, jobTitle }: { slug: string; jobTitle: string }) {
+  const [role, setRole] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
+  const [application, setApplication] = useState<JobApplicationDto | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { gated, feature, close } = useUpgradeGate();
+  const [paywalled, setPaywalled] = useState(false);
+
+  useEffect(() => {
+    const hint = roleHint();
+    setRole(hint);
+    if (!hint) {
+      setReady(true);
+      return;
+    }
+    let alive = true;
+    getMyApplication(slug)
+      .then((a) => {
+        if (alive) setApplication(a);
+      })
+      // Not knowing whether they applied is not a reason to hide the button: the
+      // server is idempotent, so a duplicate apply returns the original row.
+      .catch(() => undefined)
+      .finally(() => {
+        if (alive) setReady(true);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [slug]);
+
+  const onApply = useCallback(async () => {
+    if (gated) {
+      setPaywalled(true);
+      return;
+    }
+    setSubmitting(true);
+    setError(null);
+    try {
+      setApplication(await applyToJob(slug));
+    } catch (err) {
+      if (err instanceof ApiRequestError && err.code === 'PAYWALL') {
+        setPaywalled(true);
+      } else if (err instanceof ApiRequestError) {
+        // The server's own words - "this role has closed", "the deadline has passed"
+        // - are more useful than anything generic we could write here.
+        setError(err.message);
+      } else {
+        setError('Could not send your application. Check your connection and try again.');
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }, [gated, slug]);
+
+  // Server-rendered markup and first paint: a disabled placeholder of the same size,
+  // so the layout does not jump when the real state arrives.
+  if (!ready) {
+    return (
+      <div className="mt-9 h-11 w-40 animate-pulse rounded-full bg-slate-100" aria-hidden="true" />
+    );
+  }
+
+  if (!role) {
+    return (
+      <div className="mt-9">
+        <Button asChild size="lg">
+          <Link href={`/login?redirect=${encodeURIComponent(`/jobs/${slug}`)}`}>
+            Sign in to apply
+          </Link>
+        </Button>
+        <p className="mt-2 text-xs text-slate-500">
+          Applying takes one click once you are signed in - we send your ZSkillup profile.
+        </p>
+      </div>
+    );
+  }
+
+  if (application) {
+    const meta = APPLICATION_STATUS[application.status];
+    return (
+      <div className="mt-9 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex items-center gap-2.5">
+          <CheckCircle2 className="size-5 text-emerald-600" aria-hidden="true" />
+          <p className="text-base font-bold text-navy">You applied to this role</p>
+          <StatusPill tone={meta.tone} label={meta.label} />
+        </div>
+        <p className="mt-2 text-sm leading-relaxed text-slate-600">{meta.reason}</p>
+        <Link
+          href="/applications"
+          className="mt-3 inline-block text-sm font-semibold text-navy hover:underline"
+        >
+          All my applications →
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-9">
+      <Button size="lg" onClick={onApply} disabled={submitting}>
+        {submitting ? (
+          <>
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" /> Sending…
+          </>
+        ) : (
+          'Apply now'
+        )}
+      </Button>
+      <p className="mt-2 text-xs text-slate-500">
+        One click - we send your ZSkillup profile. You will get an email confirming it.
+      </p>
+      {error ? (
+        <p
+          role="alert"
+          className="mt-3 rounded-md bg-red-50 p-3 text-sm font-medium text-red-700 ring-1 ring-red-200"
+        >
+          {error}
+        </p>
+      ) : null}
+
+      <UpgradeModal
+        open={paywalled || feature !== null}
+        onClose={() => {
+          setPaywalled(false);
+          close();
+        }}
+        title="Applying needs an active plan"
+        message={`${jobTitle} is open to students on a paid plan. Any plan works - a company pack counts, not just Full Platform.`}
+        primaryHref={buildCartLink([
+          { scope: EntitlementScope.PLATFORM, scopeRef: null, period: BillingPeriod.MONTHLY },
+        ])}
+        primaryLabel="See plans"
+        exploreHref="/jobs"
+      />
+    </div>
+  );
+}

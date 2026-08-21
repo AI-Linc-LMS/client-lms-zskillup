@@ -47,7 +47,7 @@ const WILL_UNLOCK = [
 ];
 
 export default function CartPage() {
-  const { items, remove, clear, setPeriod, add, count, hydrated } = useCart();
+  const { items, remove, clear, setPeriod, add, applyCampaignLink, count, hydrated } = useCart();
 
   // Campaign pre-fill: /cart?add=PLATFORM:MONTHLY&add=COMPANY:accenture:ANNUAL
   //
@@ -62,13 +62,21 @@ export default function CartPage() {
     prefilled.current = true;
     const parsed = parseCartLink(window.location.search);
     if (!parsed.length) return;
-    for (const item of parsed) add(item);
+    // One batched pass with deterministic rules - never the conflict popup. Adding
+    // these one at a time evaluated every rule against a stale cart, and a declined
+    // popup silently consumed the link because the params are stripped either way.
+    applyCampaignLink(parsed);
+    if (items.length > 0) setPrefillNotice(true);
     // Drop the params so a refresh (or a back-navigation) does not re-add items the
     // student has since removed - the cart itself is now the source of truth.
     const url = new URL(window.location.href);
     url.searchParams.delete('add');
     window.history.replaceState({}, '', url.pathname + url.search + url.hash);
-  }, [hydrated, add]);
+    // `items` is read only to decide whether the cart was already non-empty at the
+    // moment the link landed; re-running on every cart change would re-apply the link.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, applyCampaignLink]);
+  const [prefillNotice, setPrefillNotice] = useState(false);
   const [prices, setPrices] = useState<PriceBookEntryDto[]>([]);
   const [prefill, setPrefill] = useState<{ name?: string | null; email?: string | null }>({});
   const [busy, setBusy] = useState(false);
@@ -168,6 +176,15 @@ export default function CartPage() {
             </div>
             <PlanPill tone="emerald">{hasPlatform ? 'Full Platform' : '100% Custom Plan'}</PlanPill>
           </div>
+
+          {/* The link changed a cart the student had already built. Saying so beats
+              them noticing a different plan at checkout and wondering why. */}
+          {prefillNotice ? (
+            <p className="mt-4 rounded-lg bg-sky-50 p-3 text-sm font-medium text-sky-800 ring-1 ring-sky-200">
+              We updated your cart from the link you opened. Everything below is
+              editable before you pay.
+            </p>
+          ) : null}
 
           <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_340px]">
             {/* Left - grouped items + footer */}

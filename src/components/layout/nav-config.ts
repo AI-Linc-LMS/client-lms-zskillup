@@ -5,6 +5,7 @@ import {
   Building2,
   CalendarClock,
   ClipboardCheck,
+  Briefcase,
   ClipboardList,
   Code2,
   Compass,
@@ -98,6 +99,8 @@ export const STUDENT_NAV: NavSection[] = [
   {
     heading: 'CAREER',
     items: [
+      { label: 'Job Board', href: '/jobs', icon: Briefcase, tip: 'Roles our hiring partners are recruiting for right now - apply in one click with the profile you built here.' },
+      { label: 'My Applications', href: '/applications', icon: ClipboardList, tip: 'Every role you applied to, and where each one stands.' },
       { label: 'Resume Builder', href: '/resume-builder', icon: FileText, tip: 'Build an ATS-ready resume with templates, AI tailoring to a target role, and PDF export.' },
       { label: 'Mock Interview', href: '/mock-interview', icon: MessageSquare, tip: 'Practice AI-driven, role-aware mock interviews with instant rubric feedback.' },
       { label: 'Certificates', href: '/certificates', icon: Award, tip: 'Earn and download shareable, verifiable certificates as you hit XP milestones.' },
@@ -291,6 +294,7 @@ export const ADMIN_NAV: NavSection[] = [
       { label: 'Broadcasts', href: '/admin/broadcasts', icon: Megaphone },
       { label: 'WhatsApp Community', href: '/admin/whatsapp-community', icon: MessageCircle },
       { label: 'Live Sessions', href: '/admin/live-sessions', icon: Video },
+      { label: 'Job Board', href: '/admin/jobs', icon: Briefcase },
       { label: 'Support', href: '/admin/support', icon: LifeBuoy },
     ],
   },

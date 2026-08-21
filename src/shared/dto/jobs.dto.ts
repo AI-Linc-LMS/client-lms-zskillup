@@ -12,13 +12,14 @@ import {
   IsInt,
   IsOptional,
   IsString,
-  IsUrl,
   IsUUID,
+  IsUrl,
+  Matches,
   MaxLength,
   Min,
   MinLength,
 } from 'class-validator';
-import { JobStatus, WorkMode } from '../enums';
+import { JobApplicationStatus, JobStatus, WorkMode } from '../enums';
 
 export class CreateJobPostingDto {
   @IsString()
@@ -31,10 +32,15 @@ export class CreateJobPostingDto {
   @MaxLength(160)
   companyName!: string;
 
-  /** Derived from title + company when omitted. */
+  /** Derived from title + company when omitted. Constrained to what a URL can carry:
+   *  anything else slugifies to '' or to something unrecognisable, and the result is
+   *  then held forever by the unique index. */
   @IsOptional()
   @IsString()
   @MaxLength(180)
+  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+    message: 'slug must be lowercase letters, numbers and single hyphens',
+  })
   slug?: string;
 
   @IsOptional()
@@ -151,4 +157,51 @@ export interface JobPostingDto {
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+/** A student's own view of an application they submitted. */
+export interface JobApplicationDto {
+  id: string;
+  jobId: string;
+  jobSlug: string;
+  jobTitle: string;
+  companyName: string;
+  status: JobApplicationStatus;
+  appliedAt: string;
+  statusChangedAt: string | null;
+}
+
+/** The admin's view of one applicant. */
+export interface JobApplicantDto extends JobApplicationDto {
+  userId: string;
+  fullName: string | null;
+  email: string;
+  phone: string | null;
+  note: string | null;
+}
+
+export class UpdateJobApplicationDto {
+  @IsOptional()
+  @IsEnum(JobApplicationStatus)
+  status?: JobApplicationStatus;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  note?: string | null;
+}
+
+/** Admin sending a one-off email to a single applicant, outside the automated
+ *  triggers. Deliberately plain text: an admin composing arbitrary HTML that lands in
+ *  a student's inbox is a phishing surface we do not need. */
+export class SendApplicantEmailDto {
+  @IsString()
+  @MinLength(3)
+  @MaxLength(160)
+  subject!: string;
+
+  @IsString()
+  @MinLength(1)
+  @MaxLength(4000)
+  body!: string;
 }
