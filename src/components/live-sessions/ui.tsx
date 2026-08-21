@@ -37,10 +37,9 @@ export function relWhen(iso: string): string {
 }
 
 /** http(s)-only guard for the meeting link (matches server-side validation). */
-export function safeHttpUrl(url: string | null | undefined): string | null {
-  const t = (url ?? '').trim();
-  return /^https?:\/\//i.test(t) ? t : null;
-}
+// Lives in lib/utils now - it is not live-session specific. Re-exported so existing
+// imports keep working.
+export { safeHttpUrl } from '@/lib/utils';
 
 export function StatusBadge({ status }: { status: LiveSessionStatus }) {
   const c = STATUS_CFG[status];

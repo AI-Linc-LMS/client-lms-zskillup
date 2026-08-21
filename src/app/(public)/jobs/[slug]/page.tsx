@@ -4,6 +4,7 @@ import { ArrowLeft, Briefcase, CalendarClock, IndianRupee, MapPin, Users } from 
 import { getPublicJob, getPublicJobs } from '@/lib/server/public-content';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
 import { JobStatus } from '@/shared/enums';
+import { safeHttpUrl } from '@/lib/utils';
 
 /**
  * One job, at its own shareable URL: prephasz.com/jobs/software-engineer-google.
@@ -65,6 +66,10 @@ export default async function JobPage({ params }: { params: Promise<{ slug: stri
     job.status === JobStatus.CLOSED ||
     (!!job.applicationDeadline && new Date(job.applicationDeadline).getTime() < Date.now());
   const others = (await getPublicJobs()).filter((j) => j.id !== job.id).slice(0, 3);
+  // Constrain admin-supplied URLs to http(s) before they become an href/src: a
+  // javascript: or data: URL in either place is a trivially avoidable footgun.
+  const applyHref = safeHttpUrl(job.applyUrl);
+  const logoSrc = safeHttpUrl(job.companyLogoUrl);
 
   // Search engines read this even though the page renders fine without it.
   const jsonLd = {
@@ -83,16 +88,24 @@ export default async function JobPage({ params }: { params: Promise<{ slug: stri
 
   return (
     <div className="mx-auto w-full max-w-4xl px-6 py-12">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      {/* JSON.stringify does NOT escape "</script>", so a job description containing
+          that sequence closes this block early and everything after it executes as
+          markup - stored XSS on a public page, from text an admin may well have PASTED
+          from an employer's email. Escaping "<" as \u003c is still valid JSON and
+          parsers decode it identically. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+      />
 
       <Link href="/jobs" className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-navy">
         <ArrowLeft className="size-4" /> All jobs
       </Link>
 
       <header className="mt-5 flex items-start gap-4">
-        {job.companyLogoUrl ? (
+        {logoSrc ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={job.companyLogoUrl} alt="" className="size-14 rounded-2xl object-contain ring-1 ring-slate-100" />
+          <img src={logoSrc} alt="" className="size-14 rounded-2xl object-contain ring-1 ring-slate-100" />
         ) : (
           <span className="grid size-14 place-items-center rounded-2xl bg-sky-50 text-sky-600 ring-1 ring-sky-100">
             <Briefcase className="size-6" />
@@ -164,9 +177,9 @@ export default async function JobPage({ params }: { params: Promise<{ slug: stri
 
       {/* Phase 3b replaces this with the gated Apply action. Until then an external
           apply link is honoured, and everything else points back to the board. */}
-      {!closed && job.applyUrl ? (
+      {!closed && applyHref ? (
         <a
-          href={job.applyUrl}
+          href={applyHref}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-9 inline-flex items-center gap-2 rounded-full bg-navy px-6 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-navy/90"
