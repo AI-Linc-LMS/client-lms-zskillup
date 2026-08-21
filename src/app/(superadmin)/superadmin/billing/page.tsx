@@ -18,6 +18,7 @@ import {
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { TransactionsLedger } from '@/components/admin/TransactionsLedger';
+import { PaymentLinkBuilder } from '@/components/admin/PaymentLinkBuilder';
 import { formatMoney } from '@/lib/api/subscriptions';
 import { getFinancialsPayments } from '@/lib/api/financials';
 import {
@@ -48,6 +49,9 @@ export default function SuperAdminBillingPage() {
       <PaymentsSection />
       <TransactionsLedger />
       <PricingSection />
+      {/* Campaign links live next to the price book on purpose: the price shown in the
+          builder comes from it, so an admin changing a price sees the effect here. */}
+      <PaymentLinkBuilder />
       <EntitlementsSection />
     </div>
   );
