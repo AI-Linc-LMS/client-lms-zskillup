@@ -17,7 +17,7 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
-import { LiveSessionAudience } from '../enums';
+import { LiveSessionAudience, LiveSessionSignupKind } from '../enums';
 
 // ── Requests ────────────────────────────────────────────────────────────────
 
@@ -170,7 +170,22 @@ export interface LiveSessionDto {
   id: string;
   title: string;
   description: string;
-  meetingUrl: string;
+  meetingUrl: string | null;
+  /** Separate from the join link on purpose: registration collects the lead, joining
+   *  runs the session. An admin may host registration anywhere; null falls back to the
+   *  in-app Register action. */
+  registrationUrl: string | null;
+  /** This student's own signal for this session, or null if they have not raised a
+   *  hand. Drives the Register / I'm Interested control. */
+  signupKind: LiveSessionSignupKind | null;
+  /** True when THIS student must register before the join link is released - i.e. they
+   *  hold no paid plan. Paying students are never required to register; they are only
+   *  invited to express interest, which never gates access. */
+  mustRegister: boolean;
+  /** Admin view only: how many free students registered, and how many paying students
+   *  said they were interested. */
+  registeredCount?: number;
+  interestedCount?: number;
   recordingUrl: string | null;
   coverImageUrl: string | null;
   speakerName: string | null;

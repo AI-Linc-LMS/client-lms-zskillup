@@ -1,22 +1,35 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { CalendarClock, Clock, Loader2, PlayCircle, Video } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { listMyLiveSessions, type LiveSessionDto, type LiveSessionListDto } from '@/lib/api/live-sessions';
+import {
+  listMyLiveSessions,
+  markLiveSessionInterest,
+  registerForLiveSession,
+  type LiveSessionDto,
+  type LiveSessionListDto,
+} from '@/lib/api/live-sessions';
 import { AudiencePill, fmtWhen, relWhen, safeHttpUrl, StatusBadge } from '@/components/live-sessions/ui';
 
 export default function StudentLiveSessionsPage() {
   const [data, setData] = useState<LiveSessionListDto | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  // Re-fetchable: registering releases the join link, so the card must refresh from the
+  // SERVER rather than optimistically revealing a URL it was never sent.
+  const load = useCallback(() => {
     listMyLiveSessions()
       .then(setData)
       .catch(() => setData({ upcoming: [], past: [] }))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   return (
     <div className="space-y-6">
@@ -42,7 +55,7 @@ export default function StudentLiveSessionsPage() {
             <section className="space-y-3" data-tour="live:upcoming">
               <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">Upcoming</h2>
               <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
-                {data.upcoming.map((s) => <StudentCard key={s.id} s={s} />)}
+                {data.upcoming.map((s) => <StudentCard key={s.id} s={s} onChanged={load} />)}
               </div>
             </section>
           )}
@@ -50,7 +63,7 @@ export default function StudentLiveSessionsPage() {
             <section className="space-y-3" data-tour="live:past">
               <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">Past</h2>
               <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
-                {data.past.map((s) => <StudentCard key={s.id} s={s} past />)}
+                {data.past.map((s) => <StudentCard key={s.id} s={s} past onChanged={load} />)}
               </div>
             </section>
           )}
@@ -60,7 +73,30 @@ export default function StudentLiveSessionsPage() {
   );
 }
 
-function StudentCard({ s, past }: { s: LiveSessionDto; past?: boolean }) {
+function StudentCard({ s, past, onChanged }: { s: LiveSessionDto; past?: boolean; onChanged?: () => void }) {
+  const [busy, setBusy] = useState(false);
+  // A FREE student must register before the join link is released; a PAYING student is
+  // only invited to say they're interested, which never gates them. The server decides
+  // which case this is (mustRegister) and simply withholds meetingUrl until satisfied -
+  // the button below never grants access on its own.
+  const registered = s.signupKind === 'REGISTERED';
+  const interested = s.signupKind === 'INTERESTED';
+  const needsRegistration = !past && s.mustRegister && !registered;
+
+  const signUp = async (kind: 'register' | 'interest') => {
+    setBusy(true);
+    try {
+      if (kind === 'register') await registerForLiveSession(s.id);
+      else await markLiveSessionInterest(s.id);
+      toast.success(kind === 'register' ? "You're registered - the join link is ready." : 'Noted - thanks for telling us.');
+      onChanged?.();
+    } catch {
+      toast.error('Could not save that. Please try again.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const link = safeHttpUrl(s.meetingUrl);
   const recording = safeHttpUrl(s.recordingUrl);
   const isLive = s.status === 'LIVE';
@@ -105,6 +141,48 @@ function StudentCard({ s, past }: { s: LiveSessionDto; past?: boolean }) {
             <span className="inline-flex items-center gap-1"><Clock className="size-3.5" /> {fmtWhen(s.scheduledAt)}</span>
             <span>{s.durationMinutes} min</span>
           </div>
+          {needsRegistration ? (
+            // Registration URL if the admin hosts it elsewhere, otherwise register in-app.
+            safeHttpUrl(s.registrationUrl) ? (
+              <a
+                href={safeHttpUrl(s.registrationUrl) as string}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-orange/90"
+              >
+                Register
+              </a>
+            ) : (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void signUp('register')}
+                className="inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-orange/90 disabled:opacity-60"
+              >
+                {busy ? <Loader2 className="size-4 animate-spin" /> : null} Register to join
+              </button>
+            )
+          ) : !past && link ? (
+            <span className="flex items-center gap-2">
+              {/* Paying students are never asked to register - this is demand signal
+                  only, and deliberately sits BESIDE Join rather than in front of it. */}
+              {!s.mustRegister ? (
+                <button
+                  type="button"
+                  disabled={busy || interested}
+                  onClick={() => void signUp('interest')}
+                  className={cn(
+                    'rounded-full px-3 py-2 text-xs font-bold transition-colors',
+                    interested
+                      ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
+                  )}
+                >
+                  {interested ? "You're interested" : "I'm interested"}
+                </button>
+              ) : null}
+            </span>
+          ) : null}
           {!past && link ? (
             <a
               href={link}

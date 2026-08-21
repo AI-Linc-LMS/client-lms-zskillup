@@ -124,7 +124,30 @@ function AdminRow({
           {s.description && <p className="mt-0.5 line-clamp-2 text-sm text-slate-600">{s.description}</p>}
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
             <span className="inline-flex items-center gap-1"><Clock className="size-3.5" /> {fmtWhen(s.scheduledAt)} · {s.durationMinutes}m</span>
-            {s.reachCount != null && <span className="inline-flex items-center gap-1"><Users className="size-3.5" /> {s.reachCount.toLocaleString()} students</span>}
+            {/* "Can reach" is the size of the audience this session is TARGETED at - it
+                was previously rendered as a bare "N students", which reads like
+                attendance and is not. The two numbers beside it are actual demand. */}
+            {s.reachCount != null && (
+              <span className="inline-flex items-center gap-1" title="Students this session is visible to">
+                <Users className="size-3.5" /> reaches {s.reachCount.toLocaleString()}
+              </span>
+            )}
+            {s.registeredCount != null && (
+              <span
+                className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 font-semibold text-orange"
+                title="Free students who registered"
+              >
+                {s.registeredCount.toLocaleString()} registered
+              </span>
+            )}
+            {s.interestedCount != null && (
+              <span
+                className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-2 py-0.5 font-semibold text-sky-700"
+                title="Paid students who said they're interested"
+              >
+                {s.interestedCount.toLocaleString()} interested
+              </span>
+            )}
             {recording && (
               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700">
                 <PlayCircle className="size-3" /> Recording

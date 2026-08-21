@@ -60,7 +60,7 @@ export function SessionComposer({
     if (editing) {
       setTitle(editing.title);
       setDescription(editing.description);
-      setMeetingUrl(editing.meetingUrl);
+      setMeetingUrl(editing.meetingUrl ?? '');
       setRecordingUrl(editing.recordingUrl ?? '');
       setWhen(toLocalInput(editing.scheduledAt));
       setDuration(editing.durationMinutes);
