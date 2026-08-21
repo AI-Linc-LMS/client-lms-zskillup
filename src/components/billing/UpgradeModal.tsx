@@ -30,6 +30,9 @@ export function UpgradeModal({
   message,
   secondaryHref,
   secondaryLabel = 'Practise a few free questions first',
+  primaryHref = '/shop/full',
+  primaryLabel = 'Get Full Access',
+  exploreHref = '/shop',
 }: {
   open: boolean;
   onClose: () => void;
@@ -44,6 +47,13 @@ export function UpgradeModal({
    *  straight into the runner, where the server meters the free allowance. */
   secondaryHref?: string;
   secondaryLabel?: string;
+  /** Primary CTA. Defaults to the Full Platform page; callers that want the student to
+   *  land on a CART already holding what they need (a job application needing Full
+   *  Platform, say) pass a /cart?add=... link built with buildCartLink(). */
+  primaryHref?: string;
+  primaryLabel?: string;
+  /** Secondary "browse everything" CTA. */
+  exploreHref?: string;
 }) {
   const id = useId();
   const [mounted, setMounted] = useState(false);
@@ -118,18 +128,18 @@ export function UpgradeModal({
 
           <div className="mt-5 grid gap-2.5 sm:grid-cols-2">
             <Link
-              href="/shop"
+              href={exploreHref}
               onClick={onClose}
               className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-navy transition hover:bg-slate-50"
             >
               Explore Plans
             </Link>
             <Link
-              href="/shop/full"
+              href={primaryHref}
               onClick={onClose}
               className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-navy/90"
             >
-              Get Full Access <ArrowRight className="size-3.5" />
+              {primaryLabel} <ArrowRight className="size-3.5" />
             </Link>
           </div>
 

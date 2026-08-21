@@ -159,7 +159,12 @@ export function middleware(request: NextRequest) {
   if (isProtected(pathname) && !hasSession) {
     if (isRscRequest) return NextResponse.next();
     const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('redirect', pathname);
+    // Keep the QUERY STRING, not just the path. A campaign link like
+    // /cart?add=PLATFORM:MONTHLY clicked while signed out used to arrive at the cart
+    // stripped of everything it was selling - the student landed on an empty cart and
+    // the campaign silently lost the sale. sanitizeRedirect() on the login side already
+    // restricts this to same-site paths.
+    loginUrl.searchParams.set('redirect', pathname + request.nextUrl.search);
     return sessionRedirect(loginUrl);
   }
 

@@ -66,6 +66,10 @@ function detectConflict(items: CartItem[], item: CartItem): CartConflict | null 
 interface CartContextValue {
   items: CartItem[];
   count: number;
+  /** True once this user's stored cart has been loaded. A pre-fill link MUST wait for
+   *  it: the storage load replaces `items` wholesale, so anything added before it
+   *  lands is silently discarded. */
+  hydrated: boolean;
   add: (item: CartItem) => void;
   remove: (key: string) => void;
   clear: () => void;
@@ -184,8 +188,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo<CartContextValue>(
-    () => ({ items, count: items.length, add, remove, clear, has, setPeriod }),
-    [items, add, remove, clear, has, setPeriod],
+    () => ({ items, count: items.length, hydrated, add, remove, clear, has, setPeriod }),
+    [items, hydrated, add, remove, clear, has, setPeriod],
   );
 
   return (

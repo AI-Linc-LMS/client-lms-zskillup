@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowRight,
@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { useCart, cartKey, type CartItem } from '@/components/billing/CartProvider';
+import { parseCartLink } from '@/lib/payments/cart-link';
 import { PlanPill } from '@/components/billing/plan-ui';
 import { getPricing } from '@/lib/api/payments';
 import { getMe } from '@/lib/api/me';
@@ -46,7 +47,28 @@ const WILL_UNLOCK = [
 ];
 
 export default function CartPage() {
-  const { items, remove, clear, setPeriod, add, count } = useCart();
+  const { items, remove, clear, setPeriod, add, count, hydrated } = useCart();
+
+  // Campaign pre-fill: /cart?add=PLATFORM:MONTHLY&add=COMPANY:accenture:ANNUAL
+  //
+  // Runs ONCE, and only after the stored cart has loaded - the storage load replaces
+  // `items` wholesale, so adding before it lands would be silently discarded.
+  // Reads window.location rather than useSearchParams() deliberately: this is a
+  // client-only concern, and useSearchParams() would drag the whole page behind a
+  // Suspense boundary for no benefit.
+  const prefilled = useRef(false);
+  useEffect(() => {
+    if (!hydrated || prefilled.current) return;
+    prefilled.current = true;
+    const parsed = parseCartLink(window.location.search);
+    if (!parsed.length) return;
+    for (const item of parsed) add(item);
+    // Drop the params so a refresh (or a back-navigation) does not re-add items the
+    // student has since removed - the cart itself is now the source of truth.
+    const url = new URL(window.location.href);
+    url.searchParams.delete('add');
+    window.history.replaceState({}, '', url.pathname + url.search + url.hash);
+  }, [hydrated, add]);
   const [prices, setPrices] = useState<PriceBookEntryDto[]>([]);
   const [prefill, setPrefill] = useState<{ name?: string | null; email?: string | null }>({});
   const [busy, setBusy] = useState(false);
