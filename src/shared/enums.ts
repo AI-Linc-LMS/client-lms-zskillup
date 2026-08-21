@@ -227,6 +227,14 @@ export enum CommunityPostType {
 }
 
 /** Who a live session is for. */
+/** How a student raised their hand for a live session. REGISTERED is the free-user
+ *  requirement before the join link is released; INTERESTED is a paying user's
+ *  optional signal that must never gate access. */
+export enum LiveSessionSignupKind {
+  REGISTERED = 'REGISTERED',
+  INTERESTED = 'INTERESTED',
+}
+
 export enum LiveSessionAudience {
   PLATFORM = 'PLATFORM',
   COMPANY = 'COMPANY',

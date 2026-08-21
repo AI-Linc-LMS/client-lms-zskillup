@@ -34,3 +34,13 @@ export async function deleteLiveSession(id: string): Promise<void> {
 export async function listMyLiveSessions(): Promise<LiveSessionListDto> {
   return (await apiClient.get<LiveSessionListDto>('/api/v1/live-sessions')).data;
 }
+
+/** Register for a session. Free students must do this before the join link appears. */
+export async function registerForLiveSession(id: string): Promise<{ signupKind: string }> {
+  return (await apiClient.post<{ signupKind: string }>(`/api/v1/live-sessions/${id}/register`, {})).data;
+}
+
+/** Mark interest. For paying students - a demand signal that never gates access. */
+export async function markLiveSessionInterest(id: string): Promise<{ signupKind: string }> {
+  return (await apiClient.post<{ signupKind: string }>(`/api/v1/live-sessions/${id}/interest`, {})).data;
+}
