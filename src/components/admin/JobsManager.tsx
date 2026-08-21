@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Check, Copy, Link2, Loader2, Plus, Trash2 } from 'lucide-react';
+import { Check, Copy, Link2, Loader2, Plus, Trash2, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { createJob, deleteJob, listAdminJobs, updateJob, type JobPostingDto } from '@/lib/api/jobs';
+import { JobApplicantsPanel } from './JobApplicantsPanel';
 import { describeError } from '@/lib/api/errors';
 import { JobStatus, WorkMode } from '@/shared/enums';
 import { cn } from '@/lib/utils';
@@ -46,6 +47,7 @@ export function JobsManager() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [viewingApplicants, setViewingApplicants] = useState<JobPostingDto | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -279,6 +281,9 @@ export function JobsManager() {
                   ) : (
                     <Button size="sm" variant="outline" onClick={() => void setStatus(j, JobStatus.CLOSED)}>Close</Button>
                   )}
+                  <Button size="sm" variant="outline" onClick={() => setViewingApplicants(j)}>
+                    <Users className="size-3.5" /> Applicants
+                  </Button>
                   <Button size="sm" variant="ghost" onClick={() => edit(j)}>Edit</Button>
                   <button
                     type="button"
@@ -298,6 +303,14 @@ export function JobsManager() {
           </ul>
         )}
       </section>
+
+      {viewingApplicants ? (
+        <JobApplicantsPanel
+          jobId={viewingApplicants.id}
+          jobTitle={viewingApplicants.title}
+          onClose={() => setViewingApplicants(null)}
+        />
+      ) : null}
     </div>
   );
 }

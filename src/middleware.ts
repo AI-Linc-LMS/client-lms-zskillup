@@ -34,6 +34,10 @@ const PROTECTED_PREFIXES = [
   '/coding',
   '/resume-builder',
   '/mock-interview',
+  '/live-sessions',
+  // '/jobs' is deliberately absent: the public board is the point. '/applications' is
+  // the student's own list and is not.
+  '/applications',
   '/tpo',
   '/admin',
   '/superadmin',
@@ -185,7 +189,11 @@ export function middleware(request: NextRequest) {
 
     const mismatch =
       (startsWithPrefix(pathname, '/superadmin') && role !== 'SUPER_ADMIN') ||
-      (startsWithPrefix(pathname, '/admin') && role !== 'ADMIN') ||
+      // SUPER_ADMIN outranks ADMIN, and the API agrees - every /admin controller is
+      // @Roles(ADMIN, SUPER_ADMIN). Bouncing a super-admin off the admin console made
+      // the frontend stricter than the contract it fronts, which is how the job board
+      // ended up unreachable for the one role that could definitely manage it.
+      (startsWithPrefix(pathname, '/admin') && role !== 'ADMIN' && role !== 'SUPER_ADMIN') ||
       (startsWithPrefix(pathname, '/tpo') && role !== 'COLLEGE_ADMIN') ||
       (isStudentArea(pathname) && role !== 'STUDENT' && !previewingStudent);
 

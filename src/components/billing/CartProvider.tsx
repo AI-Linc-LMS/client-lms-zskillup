@@ -66,6 +66,8 @@ function detectConflict(items: CartItem[], item: CartItem): CartConflict | null 
 interface CartContextValue {
   items: CartItem[];
   count: number;
+  /** Apply a campaign pre-fill link in one pass, without asking. See the impl. */
+  applyCampaignLink: (incoming: CartItem[]) => void;
   /** True once this user's stored cart has been loaded. A pre-fill link MUST wait for
    *  it: the storage load replaces `items` wholesale, so anything added before it
    *  lands is silently discarded. */
@@ -157,6 +159,62 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     },
     [items],
   );
+  /**
+   * Apply a campaign pre-fill link in ONE batched pass.
+   *
+   * Deliberately not `items.forEach(add)`. Two reasons, both of which bit us:
+   *
+   *  1. `add` closes over `items`, so a multi-item link evaluated every rule against
+   *     the cart as it was BEFORE the first item - the later items either vanished or
+   *     all raised conflicts against a stale cart.
+   *  2. `add` asks. A marketing link that greets a student with "replace everything?"
+   *     is a terrible first impression, and the caller strips the ?add= params either
+   *     way, so declining the popup silently SPENT the link - reloading did nothing.
+   *
+   * So the rules are applied deterministically here instead, against `prev`, and they
+   * never destroy anything the student chose themselves: Full Platform in the link
+   * becomes the whole cart (it covers everything), a product already in the cart has
+   * its period updated rather than gaining a second line, and granular items are
+   * dropped when the cart already holds Full Platform. Returns nothing - the caller
+   * tells the student their cart was updated.
+   */
+  const applyCampaignLink = useCallback((incoming: CartItem[]) => {
+    if (incoming.length === 0) return;
+    setItems((prev) => {
+      const platformLink = incoming.find((i) => i.scope === EntitlementScope.PLATFORM);
+      if (platformLink) return [platformLink];
+
+      let next = [...prev];
+      // Full Platform already carted covers every granular line in the link.
+      if (next.some((i) => i.scope === EntitlementScope.PLATFORM)) return next;
+
+      for (const item of incoming) {
+        const sameProduct = next.findIndex(
+          (p) => p.scope === item.scope && p.scopeRef === item.scopeRef,
+        );
+        if (sameProduct !== -1) {
+          // The SAME product at two billing periods is not something we sell. Without
+          // this the cart carried two lines and the buyer was charged for both.
+          next[sameProduct] = item;
+          continue;
+        }
+        if (item.scope === EntitlementScope.TOPIC && item.sectionRef) {
+          const covered = next.some(
+            (p) => p.scope === EntitlementScope.SECTION && p.scopeRef === item.sectionRef,
+          );
+          if (covered) continue;
+        }
+        if (item.scope === EntitlementScope.SECTION) {
+          next = next.filter(
+            (p) => !(p.scope === EntitlementScope.TOPIC && p.sectionRef === item.scopeRef),
+          );
+        }
+        next.push(item);
+      }
+      return next;
+    });
+  }, []);
+
   const remove = useCallback((key: string) => {
     setItems((prev) => prev.filter((p) => cartKey(p) !== key));
   }, []);
@@ -188,8 +246,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo<CartContextValue>(
-    () => ({ items, count: items.length, hydrated, add, remove, clear, has, setPeriod }),
-    [items, hydrated, add, remove, clear, has, setPeriod],
+    () => ({ items, count: items.length, hydrated, add, applyCampaignLink, remove, clear, has, setPeriod }),
+    [items, hydrated, add, applyCampaignLink, remove, clear, has, setPeriod],
   );
 
   return (

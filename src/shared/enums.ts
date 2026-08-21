@@ -331,6 +331,16 @@ export enum JobStatus {
   CLOSED = 'CLOSED',
 }
 
+/** Where a student's job application stands. Frozen at five values by the owner;
+ *  the admin moves an application through them and each move can email the student. */
+export enum JobApplicationStatus {
+  SUBMITTED = 'SUBMITTED',
+  UNDER_REVIEW = 'UNDER_REVIEW',
+  SHORTLISTED = 'SHORTLISTED',
+  HIRED = 'HIRED',
+  REJECTED = 'REJECTED',
+}
+
 /** Where the work happens. The one filter every job board needs and free-text
  *  `location` cannot serve. */
 export enum WorkMode {

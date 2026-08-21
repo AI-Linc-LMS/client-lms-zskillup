@@ -41,6 +41,13 @@ export class CreateLiveSessionDto {
   @MaxLength(1000)
   recordingUrl?: string | null;
 
+  /** Where a student signs up when registration is hosted elsewhere (a form, a landing
+   *  page). Optional: leave it empty and the in-app Register button handles it. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  registrationUrl?: string | null;
+
   /** Admin-uploaded cover image (S3 public URL from the presign upload). */
   @IsOptional()
   @IsString()
@@ -112,6 +119,11 @@ export class UpdateLiveSessionDto {
   @IsString()
   @MaxLength(1000)
   recordingUrl?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  registrationUrl?: string | null;
 
   @IsOptional()
   @IsString()

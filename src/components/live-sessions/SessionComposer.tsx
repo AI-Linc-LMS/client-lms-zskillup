@@ -37,6 +37,7 @@ export function SessionComposer({
   const [description, setDescription] = useState('');
   const [meetingUrl, setMeetingUrl] = useState('');
   const [recordingUrl, setRecordingUrl] = useState('');
+  const [registrationUrl, setRegistrationUrl] = useState('');
   const [when, setWhen] = useState(toLocalInput());
   const [duration, setDuration] = useState(60);
   const [audience, setAudience] = useState<LiveSessionAudience>(LiveSessionAudience.PLATFORM);
@@ -62,6 +63,7 @@ export function SessionComposer({
       setDescription(editing.description);
       setMeetingUrl(editing.meetingUrl ?? '');
       setRecordingUrl(editing.recordingUrl ?? '');
+      setRegistrationUrl(editing.registrationUrl ?? '');
       setWhen(toLocalInput(editing.scheduledAt));
       setDuration(editing.durationMinutes);
       setAudience(editing.audience);
@@ -77,6 +79,7 @@ export function SessionComposer({
       setDescription('');
       setMeetingUrl('');
       setRecordingUrl('');
+      setRegistrationUrl('');
       setWhen(toLocalInput());
       setDuration(60);
       setAudience(LiveSessionAudience.PLATFORM);
@@ -94,6 +97,8 @@ export function SessionComposer({
   const submit = async () => {
     if (title.trim().length < 3) return toast.error('Add a title (min 3 chars).');
     if (!/^https?:\/\//i.test(meetingUrl.trim())) return toast.error('Add a valid http(s) meeting link.');
+    if (registrationUrl.trim() && !/^https?:\/\//i.test(registrationUrl.trim()))
+      return toast.error('The registration link must start with http(s).');
     if (recordingUrl.trim() && !/^https?:\/\//i.test(recordingUrl.trim()))
       return toast.error('The recording link must be a valid http(s) URL.');
     if (audience === LiveSessionAudience.COMPANY && !companyId) return toast.error('Pick a company.');
@@ -104,6 +109,7 @@ export function SessionComposer({
         description: description.trim(),
         meetingUrl: meetingUrl.trim(),
         recordingUrl: recordingUrl.trim() || null,
+        registrationUrl: registrationUrl.trim() || null,
         coverImageUrl: coverImageUrl.trim() || null,
         speakerName: speakerName.trim() || null,
         speakerRole: speakerRole.trim() || null,
@@ -165,6 +171,9 @@ export function SessionComposer({
               <Field label="Recording link (optional - add after the session for playback)">
                 <input value={recordingUrl} onChange={(e) => setRecordingUrl(e.target.value)} maxLength={1000} placeholder="https://…/recording  (students can watch this back)" className={input} />
               </Field>
+              <Field label="External registration link (optional - leave empty to use the in-app Register button)">
+                <input value={registrationUrl} onChange={(e) => setRegistrationUrl(e.target.value)} maxLength={1000} placeholder="https://…/register  (a form or landing page you host)" className={input} />
+              </Field>
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Date & time">
                   <input type="datetime-local" value={when} onChange={(e) => setWhen(e.target.value)} className={input} />
@@ -190,13 +199,16 @@ export function SessionComposer({
                     className={cn('flex items-center gap-2 rounded-lg border p-3 text-left transition-colors', audience === LiveSessionAudience.COMPANY ? 'border-orange bg-orange/5 ring-1 ring-orange' : 'border-slate-200 hover:bg-slate-50')}
                   >
                     <Building2 className="size-4 text-violet-600" />
-                    <span className="text-sm font-semibold text-navy">Company</span>
+                    <span className="text-sm font-semibold text-navy">Drive registrants</span>
                   </button>
                 </div>
               </Field>
 
+              {/* Say what the audience ACTUALLY is. Registering for a drive is free and
+                  self-serve, so this is not a paying-customer boundary - an admin
+                  putting a real recruiter in front of it needs to know that first. */}
               {audience === LiveSessionAudience.COMPANY && (
-                <Field label="Company (only its registered students are notified)">
+                <Field label="Company - reaches everyone registered for this drive (free, self-serve - not a paid-plan audience)">
                   <select value={companyId} onChange={(e) => setCompanyId(e.target.value)} className={input}>
                     <option value="">Select a company…</option>
                     {companies.map((c) => (
