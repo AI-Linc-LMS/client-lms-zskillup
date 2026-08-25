@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/ui/form-field';
 import { Logo } from '@/components/layout/Logo';
 import { API_BASE_URL } from '@/lib/api/base';
-import { takeRedirect } from '@/lib/post-login-redirect';
+import { resolveRedirect } from '@/lib/post-login-redirect';
 
 const IS_DEV = process.env.NODE_ENV !== 'production';
 const RESEND_COOLDOWN_S = 60;
@@ -114,7 +114,8 @@ function VerifyForm() {
       // deep link - hence takeRedirect() here, so a visitor who signed up from a
       // gated link still lands on that link. Not an accidental regression: the
       // wizard is intact and still reachable at /signup/onboarding.
-      router.push(takeRedirect() ?? '/dashboard');
+      // URL first, stash second. Either way the visitor lands where they were going.
+      router.push(resolveRedirect(params.get('redirect')) ?? '/dashboard');
     } catch (err) {
       setServerError(
         err instanceof ApiRequestError ? err.message : 'Something went wrong. Please try again.',

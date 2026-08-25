@@ -152,6 +152,10 @@ export function ApplyButton({ slug, jobTitle }: { slug: string; jobTitle: string
         </p>
       ) : null}
 
+      {/* ONE way out, and it is the one that works. "Explore plans" led to the
+          Full-Platform-vs-Build-your-own chooser, where a student could assemble a
+          plan that still does not let them apply - a dead end wearing a CTA. The
+          single button lands them on a cart already holding what the gate wants. */}
       <UpgradeModal
         open={paywalled || feature !== null}
         onClose={() => {
@@ -159,12 +163,12 @@ export function ApplyButton({ slug, jobTitle }: { slug: string; jobTitle: string
           close();
         }}
         title="Applying needs an active plan"
-        message={`${jobTitle} is open to students on a paid plan. Any plan works - a company pack counts, not just Full Platform.`}
+        message={`Applying to ${jobTitle} needs Full Platform access. One month is enough - it is already in your cart.`}
         primaryHref={buildCartLink([
           { scope: EntitlementScope.PLATFORM, scopeRef: null, period: BillingPeriod.MONTHLY },
         ])}
-        primaryLabel="See plans"
-        exploreHref="/jobs"
+        primaryLabel="Continue to cart"
+        exploreHref={null}
       />
     </div>
   );

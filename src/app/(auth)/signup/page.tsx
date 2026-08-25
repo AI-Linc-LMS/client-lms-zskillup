@@ -11,7 +11,7 @@ import { ApiRequestError } from '@/lib/api/types';
 import { FormField } from '@/components/ui/form-field';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { AuthShell } from '@/components/auth/AuthShell';
-import { stashRedirect, takeRedirect } from '@/lib/post-login-redirect';
+import { stashRedirect, takeRedirect, withRedirect } from '@/lib/post-login-redirect';
 import type { LoginResult } from '@/lib/api/auth';
 
 /**
@@ -67,7 +67,16 @@ function SignupForm() {
     setServerError(null);
     try {
       await registerUser(values);
-      router.push(`/signup/verify?email=${encodeURIComponent(values.email)}`);
+      // Carry the destination in the URL, not just the sessionStorage stash. The stash
+      // is gone the moment the browser blocks site data or the visitor finishes
+      // verification in a different tab - and a campaign link that quietly lands them
+      // on an empty dashboard reads as the link being broken.
+      router.push(
+        withRedirect(
+          `/signup/verify?email=${encodeURIComponent(values.email)}`,
+          searchParams.get('redirect'),
+        ),
+      );
     } catch (err) {
       setServerError(
         err instanceof ApiRequestError ? err.message : 'Something went wrong. Please try again.',
