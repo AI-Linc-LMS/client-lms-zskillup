@@ -22,7 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/layout/Logo';
 import { cn } from '@/lib/utils';
-import { takeRedirect } from '@/lib/post-login-redirect';
+import { resolveRedirect } from '@/lib/post-login-redirect';
 
 /**
  * Onboarding wizard - steps 2 (college) & 3 (targets) (STUDENT_JOURNEY_SPEC §1).
@@ -155,7 +155,11 @@ export default function OnboardingPage() {
       await saveOnboardingTargets(selected);
       // End of the signup flow: send them to whatever they originally opened.
       // This is the step that used to hardcode /dashboard and lose it.
-      router.push(takeRedirect() ?? '/dashboard');
+      // Read the param off window rather than useSearchParams(): this page is a
+      // direct-visit wizard, and useSearchParams() would push the whole route behind a
+      // Suspense boundary for a value that is usually absent.
+      const fromUrl = new URLSearchParams(window.location.search).get('redirect');
+      router.push(resolveRedirect(fromUrl) ?? '/dashboard');
     } catch (err) {
       setError(err instanceof ApiRequestError ? err.message : 'Could not save. Please try again.');
     } finally {

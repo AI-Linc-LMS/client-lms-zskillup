@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { ArrowRight, Check, Crown, Lock, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const INCLUDED = [
   'Every recommended company, section and topic',
@@ -52,8 +53,11 @@ export function UpgradeModal({
    *  Platform, say) pass a /cart?add=... link built with buildCartLink(). */
   primaryHref?: string;
   primaryLabel?: string;
-  /** Secondary "browse everything" CTA. */
-  exploreHref?: string;
+  /** Secondary "browse everything" CTA. Pass null to render a SINGLE primary CTA:
+   *  some flows need one specific plan and nothing else. Applying to a job is one -
+   *  offering "build your own" there sends the student to a chooser that cannot
+   *  produce what the gate actually wants, which is a dead end wearing a CTA. */
+  exploreHref?: string | null;
 }) {
   const id = useId();
   const [mounted, setMounted] = useState(false);
@@ -126,14 +130,16 @@ export function UpgradeModal({
             ))}
           </ul>
 
-          <div className="mt-5 grid gap-2.5 sm:grid-cols-2">
-            <Link
-              href={exploreHref}
-              onClick={onClose}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-navy transition hover:bg-slate-50"
-            >
-              Explore Plans
-            </Link>
+          <div className={cn('mt-5 grid gap-2.5', exploreHref && 'sm:grid-cols-2')}>
+            {exploreHref ? (
+              <Link
+                href={exploreHref}
+                onClick={onClose}
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-navy transition hover:bg-slate-50"
+              >
+                Explore Plans
+              </Link>
+            ) : null}
             <Link
               href={primaryHref}
               onClick={onClose}

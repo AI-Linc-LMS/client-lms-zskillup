@@ -79,3 +79,33 @@ export function peekRedirect(): string | null {
     return null;
   }
 }
+
+/**
+ * Append the destination to a URL as ?redirect=, so the next step of a multi-step
+ * flow carries it in the ADDRESS BAR rather than only in sessionStorage.
+ *
+ * The stash alone was not enough. It is lost whenever the browser drops session
+ * storage, and that is not exotic: site data blocked by policy or extension throws
+ * SecurityError on the very first read, opening the verification step in a fresh tab
+ * starts an empty store, and signing up on a phone but verifying on a laptop never
+ * shares one at all. Each of those silently landed a paying visitor on /dashboard with
+ * an empty cart, which looks like the campaign link simply not working.
+ *
+ * Belt and braces: the URL is authoritative, the stash still covers a hop that cannot
+ * carry a param (the Google OAuth round trip).
+ */
+export function withRedirect(url: string, redirect: string | null | undefined): string {
+  const safe = sanitizeRedirect(redirect);
+  if (!safe) return url;
+  return `${url}${url.includes('?') ? '&' : '?'}redirect=${encodeURIComponent(safe)}`;
+}
+
+/**
+ * The destination for THIS step: the URL wins, the stash is the fallback.
+ *
+ * Reads without consuming when it comes from the URL - a param is naturally idempotent,
+ * and consuming it would break a refresh.
+ */
+export function resolveRedirect(fromUrl: string | null | undefined): string | null {
+  return sanitizeRedirect(fromUrl) ?? takeRedirect();
+}
