@@ -1,11 +1,8 @@
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { ArrowLeft, Briefcase, CalendarClock, IndianRupee, MapPin, Users } from 'lucide-react';
 import { getPublicJob, getPublicJobs } from '@/lib/server/public-content';
+import { JobDetail } from '@/components/jobs/JobDetail';
+import { TargetedJobFallback } from '@/components/jobs/TargetedJobFallback';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
-import { JobStatus } from '@/shared/enums';
 import { safeHttpUrl } from '@/lib/utils';
-import { ApplyButton } from '@/components/jobs/ApplyButton';
 
 /**
  * One job, at its own shareable URL: prephasz.com/jobs/software-engineer-google.
@@ -52,32 +49,23 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-function Fact({ icon: Icon, label, value }: { icon: typeof MapPin; label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
-      <p className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-navy">
-        <Icon className="size-4 text-slate-400" /> {value}
-      </p>
-    </div>
-  );
-}
-
 export default async function JobPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const job = await getPublicJob(slug);
-  if (!job) notFound();
 
-  const closed =
-    job.status === JobStatus.CLOSED ||
-    (!!job.applicationDeadline && new Date(job.applicationDeadline).getTime() < Date.now());
+  // The server has no access token - it lives in memory - so a posting TARGETED at one
+  // college legitimately 404s here even for a student who is in its audience. Public
+  // postings render on the server with their metadata and JSON-LD intact; the rest
+  // fall through to a client fetch that asks again as the signed-in student.
+  //
+  // A crawler therefore still gets nothing for a private role, which is the behaviour
+  // we want: a college-specific req should never be indexed.
+  if (!job) return <TargetedJobFallback slug={slug} />;
+
   const others = (await getPublicJobs()).filter((j) => j.id !== job.id).slice(0, 3);
-  // Constrain admin-supplied URLs to http(s) before they become an href/src: a
-  // javascript: or data: URL in either place is a trivially avoidable footgun.
-  const applyHref = safeHttpUrl(job.applyUrl);
-  const logoSrc = safeHttpUrl(job.companyLogoUrl);
 
-  // Search engines read this even though the page renders fine without it.
+  // Search engines read this even though the page renders fine without it. Only for
+  // publicly-visible roles - reaching this line means the anonymous fetch succeeded.
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'JobPosting',
@@ -93,7 +81,7 @@ export default async function JobPage({ params }: { params: Promise<{ slug: stri
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-6 py-12">
+    <>
       {/* JSON.stringify does NOT escape "</script>", so a job description containing
           that sequence closes this block early and everything after it executes as
           markup - stored XSS on a public page, from text an admin may well have PASTED
@@ -103,125 +91,7 @@ export default async function JobPage({ params }: { params: Promise<{ slug: stri
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
-
-      <Link href="/jobs" className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-navy">
-        <ArrowLeft className="size-4" /> All jobs
-      </Link>
-
-      <header className="mt-5 flex items-start gap-4">
-        {logoSrc ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={logoSrc} alt="" className="size-14 rounded-2xl object-contain ring-1 ring-slate-100" />
-        ) : (
-          <span className="grid size-14 place-items-center rounded-2xl bg-sky-50 text-sky-600 ring-1 ring-sky-100">
-            <Briefcase className="size-6" />
-          </span>
-        )}
-        <div className="min-w-0">
-          <h1 className="text-3xl font-extrabold tracking-tight text-navy">{job.title}</h1>
-          <p className="mt-1 text-base text-slate-600">{job.companyName}</p>
-        </div>
-      </header>
-
-      {closed ? (
-        <p className="mt-5 rounded-xl bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600 ring-1 ring-slate-200">
-          This role is closed. It stays here so shared links keep working - browse the board for live openings.
-        </p>
-      ) : null}
-
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {job.location ? (
-          <Fact icon={MapPin} label="Location" value={`${job.location}${job.workMode ? ` · ${job.workMode.toLowerCase()}` : ''}`} />
-        ) : null}
-        {job.experience ? <Fact icon={Briefcase} label="Experience" value={job.experience} /> : null}
-        {job.salary ? <Fact icon={IndianRupee} label="Compensation" value={job.salary} /> : null}
-        {job.openings ? <Fact icon={Users} label="Openings" value={String(job.openings)} /> : null}
-        {job.applicationDeadline ? (
-          <Fact
-            icon={CalendarClock}
-            label="Apply by"
-            value={new Date(job.applicationDeadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-          />
-        ) : null}
-      </div>
-
-      {job.skills.length > 0 ? (
-        <section className="mt-8">
-          <h2 className="text-lg font-bold text-navy">Skills</h2>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {job.skills.map((s) => (
-              <span key={s} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                {s}
-              </span>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {job.description ? (
-        <section className="mt-8">
-          <h2 className="text-lg font-bold text-navy">About the role</h2>
-          <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-slate-600">{job.description}</p>
-        </section>
-      ) : null}
-
-      {job.hiringProcess ? (
-        <section className="mt-8">
-          <h2 className="text-lg font-bold text-navy">Hiring process</h2>
-          <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-slate-600">{job.hiringProcess}</p>
-        </section>
-      ) : null}
-
-      {job.passoutYears.length > 0 ? (
-        <section className="mt-8">
-          <h2 className="text-lg font-bold text-navy">Who can apply</h2>
-          <p className="mt-2 text-sm text-slate-600">
-            Graduating in {job.passoutYears.join(', ')}.
-          </p>
-        </section>
-      ) : null}
-
-      {/* Two kinds of role, and they must not look alike. When the employer collects
-          applications themselves we send the student out and record nothing - claiming
-          to have "received" an application we never see would be a lie. Otherwise the
-          gated in-house Apply action, which the server re-checks. */}
-      {closed ? (
-        <p className="mt-9 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-          This role is no longer accepting applications.
-        </p>
-      ) : applyHref ? (
-        <div className="mt-9">
-          <a
-            href={applyHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full bg-navy px-6 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-navy/90"
-          >
-            Apply on the company site
-          </a>
-          <p className="mt-2 text-xs text-slate-500">
-            {job.companyName} takes applications directly, so this one is not tracked in
-            your ZSkillup applications list.
-          </p>
-        </div>
-      ) : (
-        <ApplyButton slug={job.slug} jobTitle={job.title} />
-      )}
-
-      {others.length > 0 ? (
-        <section className="mt-12 border-t border-slate-200 pt-8">
-          <h2 className="text-lg font-bold text-navy">Other openings</h2>
-          <ul className="mt-3 space-y-2">
-            {others.map((o) => (
-              <li key={o.id}>
-                <Link href={`/jobs/${o.slug}`} className="text-sm font-semibold text-navy hover:underline">
-                  {o.title} <span className="font-normal text-slate-500">· {o.companyName}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-    </div>
+      <JobDetail job={job} others={others} />
+    </>
   );
 }

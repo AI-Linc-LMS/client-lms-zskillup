@@ -6,6 +6,7 @@ import {
   CalendarClock,
   ClipboardCheck,
   Briefcase,
+  CalendarDays,
   ClipboardList,
   Code2,
   Compass,
@@ -80,6 +81,7 @@ export const STUDENT_NAV: NavSection[] = [
       { label: 'Leaderboard', href: '/leaderboard', icon: Trophy, tip: 'See how you rank against peers - nationally, by college, company or city.' },
       { label: 'Community', href: '/community', icon: MessagesSquare, tip: 'Ask doubts, share tips and connect with other students in discussion threads.' },
       { label: 'Live Sessions', href: '/live-sessions', icon: Video, tip: 'Scheduled live classes and webinars (Zoom/Meet) you can join.' },
+      { label: 'My Calendar', href: '/calendar', icon: CalendarDays, tip: 'Every live session, assessment and application deadline that applies to you.' },
     ],
   },
   {

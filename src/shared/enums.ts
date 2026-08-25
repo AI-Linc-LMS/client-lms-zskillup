@@ -323,20 +323,86 @@ export enum CommunityPostType {
   ANNOUNCEMENT = 'ANNOUNCEMENT',
 }
 
-/** Lifecycle of a job posting. CLOSED keeps the page reachable (shared links stay
- *  valid) while making clear no further applications are wanted. */
+/**
+ * Where a job posting is in its LIFE, which is a different question from whether it
+ * is published. `is_published` decides whether students can see it at all; this
+ * decides what it says and whether it takes applications.
+ *
+ * ON_HOLD is the only value that hides a published job outright, including from its
+ * own URL - a paused requisition must not leak through a link someone already shared.
+ * CLOSED and COMPLETED stay readable: a shared link should explain itself, not 404.
+ */
 export enum JobStatus {
-  DRAFT = 'DRAFT',
-  PUBLISHED = 'PUBLISHED',
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
   CLOSED = 'CLOSED',
+  COMPLETED = 'COMPLETED',
+  ON_HOLD = 'ON_HOLD',
 }
 
-/** Where a student's job application stands. Frozen at five values by the owner;
- *  the admin moves an application through them and each move can email the student. */
+/** Statuses a student is allowed to see the job in. ON_HOLD is deliberately absent. */
+export const STUDENT_VISIBLE_JOB_STATUSES: readonly JobStatus[] = [
+  JobStatus.ACTIVE,
+  JobStatus.INACTIVE,
+  JobStatus.CLOSED,
+  JobStatus.COMPLETED,
+] as const;
+
+/** A posting is either a job or an internship. Drives the compensation vocabulary
+ *  (salary vs stipend) and the one filter students most want. */
+export enum JobKind {
+  JOB = 'JOB',
+  INTERNSHIP = 'INTERNSHIP',
+}
+
+export enum EmploymentType {
+  FULL_TIME = 'FULL_TIME',
+  PART_TIME = 'PART_TIME',
+  INTERNSHIP = 'INTERNSHIP',
+  CONTRACT = 'CONTRACT',
+  TEMPORARY = 'TEMPORARY',
+}
+
+/** What the role pays, and in what shape. UNDISCLOSED is honest and common; UNPAID is
+ *  a real answer for some internships and must be sayable rather than left blank. */
+export enum CompensationKind {
+  SALARY = 'SALARY',
+  STIPEND = 'STIPEND',
+  UNPAID = 'UNPAID',
+  UNDISCLOSED = 'UNDISCLOSED',
+}
+
+/** Audiences a job can be aimed at. Rows are OR-ed: each one WIDENS reach, and a job
+ *  with no rows at all is public. */
+export enum JobTargetType {
+  COLLEGE = 'COLLEGE',
+  COHORT = 'COHORT',
+  USER = 'USER',
+  /** Students registered for a company's drive - the closest thing the platform has
+   *  to course enrolment, which does not exist. */
+  COMPANY = 'COMPANY',
+}
+
+/** How an application question renders and validates. */
+export enum JobQuestionKind {
+  TEXT = 'TEXT',
+  LONG_TEXT = 'LONG_TEXT',
+  NUMBER = 'NUMBER',
+  EMAIL = 'EMAIL',
+  PHONE = 'PHONE',
+  DATE = 'DATE',
+  SELECT = 'SELECT',
+  MULTI_SELECT = 'MULTI_SELECT',
+  URL = 'URL',
+}
+
+/** Where a student's job application stands. The admin moves an application through
+ *  these and each move can email the student. */
 export enum JobApplicationStatus {
   SUBMITTED = 'SUBMITTED',
   UNDER_REVIEW = 'UNDER_REVIEW',
   SHORTLISTED = 'SHORTLISTED',
+  INTERVIEW = 'INTERVIEW',
   HIRED = 'HIRED',
   REJECTED = 'REJECTED',
 }

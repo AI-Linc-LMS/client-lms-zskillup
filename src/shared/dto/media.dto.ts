@@ -18,10 +18,28 @@ export const ALLOWED_IMAGE_CONTENT_TYPES = [
 
 export type AllowedImageContentType = (typeof ALLOWED_IMAGE_CONTENT_TYPES)[number];
 
+/** Documents an admin may attach to a posting. PDF only: a Word file renders
+ *  differently on every machine and cannot be shown inline in a browser. */
+export const ALLOWED_DOC_CONTENT_TYPES = ['application/pdf'] as const;
+export type AllowedDocContentType = (typeof ALLOWED_DOC_CONTENT_TYPES)[number];
+
+export const ALLOWED_UPLOAD_CONTENT_TYPES = [
+  ...ALLOWED_IMAGE_CONTENT_TYPES,
+  ...ALLOWED_DOC_CONTENT_TYPES,
+] as const;
+
 /** What the uploaded image is for — drives the S3 key prefix. All land under the
  *  publicly-readable `live-sessions/` umbrella (the only prefix the bucket policy
  *  exposes for public read). */
-export const MEDIA_UPLOAD_PURPOSES = ['live-session-cover', 'blog-cover', 'speaker-photo'] as const;
+export const MEDIA_UPLOAD_PURPOSES = [
+  'live-session-cover',
+  'blog-cover',
+  'speaker-photo',
+  /** A job description PDF. Public by design - a JD is meant to be read by anyone
+   *  who opens the posting. Candidate resumes are deliberately NOT uploadable: this
+   *  prefix is world-readable, and a CV is not. */
+  'job-jd',
+] as const;
 export type MediaUploadPurpose = (typeof MEDIA_UPLOAD_PURPOSES)[number];
 
 // ── Request ─────────────────────────────────────────────────────────────────
@@ -29,8 +47,8 @@ export type MediaUploadPurpose = (typeof MEDIA_UPLOAD_PURPOSES)[number];
 export class PresignUploadDto {
   /** MIME type of the file about to be uploaded — must be an allowed image type. */
   @IsString()
-  @IsIn(ALLOWED_IMAGE_CONTENT_TYPES as unknown as string[])
-  contentType!: AllowedImageContentType;
+  @IsIn(ALLOWED_UPLOAD_CONTENT_TYPES as unknown as string[])
+  contentType!: AllowedImageContentType | AllowedDocContentType;
 
   /** Upload purpose (default: live-session-cover). Determines the object prefix. */
   @IsOptional()
