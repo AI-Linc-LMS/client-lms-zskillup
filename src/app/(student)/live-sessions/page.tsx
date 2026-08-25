@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
-import { CalendarClock, Clock, Loader2, PlayCircle, Video } from 'lucide-react';
+import { CalendarClock, Check, Clock, Loader2, PlayCircle, Video } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   listMyLiveSessions,
@@ -75,13 +75,15 @@ export default function StudentLiveSessionsPage() {
 
 function StudentCard({ s, past, onChanged }: { s: LiveSessionDto; past?: boolean; onChanged?: () => void }) {
   const [busy, setBusy] = useState(false);
-  // A FREE student must register before the join link is released; a PAYING student is
-  // only invited to say they're interested, which never gates them. The server decides
-  // which case this is (mustRegister) and simply withholds meetingUrl until satisfied -
-  // the button below never grants access on its own.
+  // EVERYONE raises a hand before the join link appears; only the word differs.
+  // A free student registers, a paying student marks interest - and the server decides
+  // which case this is (mustRegister) and withholds meetingUrl until satisfied. The
+  // button below never grants access on its own; it just asks the server again.
   const registered = s.signupKind === 'REGISTERED';
   const interested = s.signupKind === 'INTERESTED';
+  const signedUp = registered || interested;
   const needsRegistration = !past && s.mustRegister && !registered;
+  const needsInterest = !past && !s.mustRegister && !signedUp;
 
   const signUp = async (kind: 'register' | 'interest') => {
     setBusy(true);
@@ -162,25 +164,21 @@ function StudentCard({ s, past, onChanged }: { s: LiveSessionDto; past?: boolean
                 {busy ? <Loader2 className="size-4 animate-spin" /> : null} Register to join
               </button>
             )
-          ) : !past && link ? (
-            <span className="flex items-center gap-2">
-              {/* Paying students are never asked to register - this is demand signal
-                  only, and deliberately sits BESIDE Join rather than in front of it. */}
-              {!s.mustRegister ? (
-                <button
-                  type="button"
-                  disabled={busy || interested}
-                  onClick={() => void signUp('interest')}
-                  className={cn(
-                    'rounded-full px-3 py-2 text-xs font-bold transition-colors',
-                    interested
-                      ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
-                  )}
-                >
-                  {interested ? "You're interested" : "I'm interested"}
-                </button>
-              ) : null}
+          ) : needsInterest ? (
+            // A paying student is never asked to "register" for something their plan
+            // already covers - but they do tell us they are coming, which is what
+            // turns the admin's demand count into a real number.
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void signUp('interest')}
+              className="inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-orange/90 disabled:opacity-60"
+            >
+              {busy ? <Loader2 className="size-4 animate-spin" /> : null} I&apos;m interested
+            </button>
+          ) : !past && signedUp ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
+              <Check className="size-3" /> {registered ? "You're registered" : "You're interested"}
             </span>
           ) : null}
           {!past && link ? (
