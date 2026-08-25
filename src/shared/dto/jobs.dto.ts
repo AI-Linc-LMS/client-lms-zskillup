@@ -7,6 +7,7 @@
  */
 import {
   IsArray,
+  IsBoolean,
   IsDateString,
   IsEnum,
   IsInt,
@@ -15,11 +16,23 @@ import {
   IsUUID,
   IsUrl,
   Matches,
+  Max,
   MaxLength,
   Min,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
-import { JobApplicationStatus, JobStatus, WorkMode } from '../enums';
+import { Type } from 'class-transformer';
+import {
+  CompensationKind,
+  EmploymentType,
+  JobApplicationStatus,
+  JobKind,
+  JobQuestionKind,
+  JobStatus,
+  JobTargetType,
+  WorkMode,
+} from '../enums';
 
 export class CreateJobPostingDto {
   @IsString()
@@ -67,19 +80,104 @@ export class CreateJobPostingDto {
   location?: string | null;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(32)
-  employmentType?: string | null;
+  @IsEnum(EmploymentType)
+  employmentType?: EmploymentType | null;
+
+  @IsOptional()
+  @IsEnum(JobKind)
+  jobKind?: JobKind;
 
   @IsOptional()
   @IsString()
   @MaxLength(100)
   experience?: string | null;
 
+  /** @deprecated free-text compensation, kept so nothing already typed is lost.
+   *  New postings use compensationKind + the numeric fields below. */
   @IsOptional()
   @IsString()
   @MaxLength(160)
   salary?: string | null;
+
+  /* --- compensation. Whole rupees, in the unit the employer quotes: per YEAR for a
+   *     salary, per MONTH for a stipend. --- */
+
+  @IsOptional()
+  @IsEnum(CompensationKind)
+  compensationKind?: CompensationKind;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  salaryMin?: number | null;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  salaryMax?: number | null;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  stipendAmount?: number | null;
+
+  /* --- the rest of the posting --- */
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(5000)
+  aboutCompany?: string | null;
+
+  @IsOptional()
+  @IsUrl({ require_tld: false })
+  @MaxLength(1000)
+  jdFileUrl?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  jdFileName?: string | null;
+
+  /** Ordered selection stages. Free strings: every employer names these differently. */
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @MaxLength(120, { each: true })
+  hiringStages?: string[];
+
+  /* --- eligibility --- */
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  education?: string | null;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @MaxLength(120, { each: true })
+  departments?: string[];
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  ugRequirement?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  pgRequirement?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(4000)
+  otherRequirements?: string | null;
+
+  /** Visibility, separate from lifecycle `status`. */
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  isPublished?: boolean;
 
   @IsOptional()
   @IsString()
@@ -119,6 +217,15 @@ export class CreateJobPostingDto {
   status?: JobStatus;
 }
 
+/**
+ * The VALIDATION shape for a PATCH. Every field is @IsOptional, so the server accepts
+ * a partial body.
+ *
+ * TypeScript cannot express that on a subclass - a derived class may not widen a
+ * required property - so `title` and `companyName` stay required in the TYPE even
+ * though the validators do not require them. Callers should use `JobPostingPatch`
+ * below, which is the honest shape; this class exists to carry the decorators.
+ */
 export class UpdateJobPostingDto extends CreateJobPostingDto {
   @IsOptional()
   @IsString()
@@ -133,6 +240,15 @@ export class UpdateJobPostingDto extends CreateJobPostingDto {
   declare companyName: string;
 }
 
+/**
+ * What a caller may actually send to PATCH a posting: any subset.
+ *
+ * Flipping a status or publishing should not require re-sending a title the caller
+ * never touched - and re-sending it is not harmless, because two admins editing the
+ * same posting would then overwrite each other's fields with stale values.
+ */
+export type JobPostingPatch = Partial<CreateJobPostingDto>;
+
 export interface JobPostingDto {
   id: string;
   slug: string;
@@ -143,7 +259,7 @@ export interface JobPostingDto {
   companyId: string | null;
   companyLogoUrl: string | null;
   location: string | null;
-  employmentType: string | null;
+  employmentType: EmploymentType | null;
   experience: string | null;
   salary: string | null;
   description: string;
@@ -154,6 +270,28 @@ export interface JobPostingDto {
   applyUrl: string | null;
   applicationDeadline: string | null;
   status: JobStatus;
+  /** Visibility, separate from lifecycle `status`. */
+  isPublished: boolean;
+  jobKind: JobKind;
+
+  /* compensation - whole rupees, per YEAR for a salary and per MONTH for a stipend */
+  compensationKind: CompensationKind;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  stipendAmount: number | null;
+
+  aboutCompany: string | null;
+  jdFileUrl: string | null;
+  jdFileName: string | null;
+  hiringStages: string[];
+
+  /* eligibility */
+  education: string | null;
+  departments: string[];
+  ugRequirement: string | null;
+  pgRequirement: string | null;
+  otherRequirements: string | null;
+
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -177,7 +315,17 @@ export interface JobApplicantDto extends JobApplicationDto {
   fullName: string | null;
   email: string;
   phone: string | null;
+  /** The candidate's own cover note. */
   note: string | null;
+  /** The candidate's own words. Kept separate from `note`, which is staff-only, so an
+   *  admin's private assessment can never surface on a screen the candidate can see. */
+  coverNote: string | null;
+  /** Their ZSkillup resume, if they attached one. */
+  resumeId: string | null;
+  /** Or a resume they host themselves. */
+  resumeUrl: string | null;
+  /** Answers to this posting's questions, in the order they were asked. */
+  answers: Array<{ label: string; answer: string }>;
 }
 
 export class UpdateJobApplicationDto {
@@ -204,4 +352,193 @@ export class SendApplicantEmailDto {
   @MinLength(1)
   @MaxLength(4000)
   body!: string;
+}
+
+/* ---------------------------------------------------------------------------
+ * The board: filters, targeting, questions
+ * ------------------------------------------------------------------------- */
+
+/**
+ * What a student can narrow the board by. Every field is optional and they AND
+ * together - unlike targeting, where rows OR.
+ */
+export class JobBoardFilters {
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  search?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsEnum(WorkMode, { each: true })
+  workMode?: WorkMode[];
+
+  @IsOptional()
+  @IsArray()
+  @IsEnum(EmploymentType, { each: true })
+  employmentType?: EmploymentType[];
+
+  @IsOptional()
+  @IsEnum(JobKind)
+  jobKind?: JobKind;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  companyName?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1900)
+  @Max(2100)
+  passoutYear?: number;
+
+  /** Only roles still taking applications today. */
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  openOnly?: boolean;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  offset?: number;
+}
+
+/** One audience row on a posting. */
+export class JobTargetDto {
+  @IsEnum(JobTargetType)
+  targetType!: JobTargetType;
+
+  @IsUUID()
+  targetId!: string;
+}
+
+/** The full audience for a posting. Replace-in-full, never a diff: the composer holds
+ *  the whole set, and a diff API cannot tell "removed" from "not sent" - which would
+ *  leave a posting visible to a college the admin believes they just removed. */
+export class SetJobTargetsDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => JobTargetDto)
+  targets!: JobTargetDto[];
+}
+
+/** An audience row as the admin screen renders it - resolved to a human name. */
+export interface JobTargetViewDto {
+  targetType: JobTargetType;
+  targetId: string;
+  /** Null when the college/cohort/student it pointed at no longer exists. The row is
+   *  inert in that case (it can never match), and the UI says so rather than showing
+   *  a bare uuid. */
+  label: string | null;
+}
+
+/** A question in the reusable library. */
+export interface JobQuestionDto {
+  id: string;
+  label: string;
+  helpText: string | null;
+  kind: JobQuestionKind;
+  options: string[];
+  isBuiltin: boolean;
+}
+
+/** A question as it is attached to one posting. */
+export interface JobPostingQuestionDto extends JobQuestionDto {
+  isRequired: boolean;
+  sortOrder: number;
+}
+
+export class UpsertJobQuestionDto {
+  @IsString()
+  @MinLength(2)
+  @MaxLength(255)
+  label!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  helpText?: string | null;
+
+  @IsEnum(JobQuestionKind)
+  kind!: JobQuestionKind;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @MaxLength(120, { each: true })
+  options?: string[];
+}
+
+/** Which questions a posting asks, and whether each is mandatory. */
+export class SetJobQuestionsDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => JobPostingQuestionSelectionDto)
+  questions!: JobPostingQuestionSelectionDto[];
+}
+
+export class JobPostingQuestionSelectionDto {
+  @IsUUID()
+  questionId!: string;
+
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  isRequired?: boolean;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  sortOrder?: number;
+}
+
+/** One answer a student gives while applying. */
+export class JobAnswerDto {
+  @IsUUID()
+  questionId!: string;
+
+  @IsString()
+  @MaxLength(4000)
+  answer!: string;
+}
+
+/** The apply payload. Empty for a posting that asks nothing. */
+export class ApplyToJobDto {
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => JobAnswerDto)
+  answers?: JobAnswerDto[];
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  note?: string;
+
+  /** Their ZSkillup resume. A reference, not an upload - see migration 103. */
+  @IsOptional()
+  @IsUUID()
+  resumeId?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  resumeUrl?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  resumeName?: string | null;
 }

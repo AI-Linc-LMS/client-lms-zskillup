@@ -32,6 +32,12 @@ export const APPLICATION_STATUS: Record<
     reason:
       'You made the shortlist. Expect an interview invite by email - keep an eye on your inbox.',
   },
+  [JobApplicationStatus.INTERVIEW]: {
+    label: 'Interviewing',
+    tone: 'warning',
+    reason:
+      'You are through to interviews. Check your email for the invite and the round details.',
+  },
   [JobApplicationStatus.HIRED]: {
     label: 'Hired',
     tone: 'positive',
@@ -49,6 +55,7 @@ export const APPLICATION_STATUS_ORDER: JobApplicationStatus[] = [
   JobApplicationStatus.SUBMITTED,
   JobApplicationStatus.UNDER_REVIEW,
   JobApplicationStatus.SHORTLISTED,
+  JobApplicationStatus.INTERVIEW,
   JobApplicationStatus.HIRED,
   JobApplicationStatus.REJECTED,
 ];

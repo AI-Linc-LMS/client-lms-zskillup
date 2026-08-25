@@ -12,6 +12,7 @@ import { applyToJob, getMyApplication, type JobApplicationDto } from '@/lib/api/
 import { ApiRequestError } from '@/lib/api/types';
 import { buildCartLink } from '@/lib/payments/cart-link';
 import { APPLICATION_STATUS } from '@/lib/jobs/application-status';
+import { ApplyDialog } from './ApplyDialog';
 import { BillingPeriod, EntitlementScope } from '@/shared/enums';
 
 /**
@@ -30,7 +31,15 @@ import { BillingPeriod, EntitlementScope } from '@/shared/enums';
  * OPEN on a network error, so a student on a flaky connection sees the button - and
  * then gets a truthful answer from the server rather than a silent no-op.
  */
-export function ApplyButton({ slug, jobTitle }: { slug: string; jobTitle: string }) {
+export function ApplyButton({
+  slug,
+  jobId,
+  jobTitle,
+}: {
+  slug: string;
+  jobId: string;
+  jobTitle: string;
+}) {
   const [role, setRole] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [application, setApplication] = useState<JobApplicationDto | null>(null);
@@ -38,6 +47,7 @@ export function ApplyButton({ slug, jobTitle }: { slug: string; jobTitle: string
   const [error, setError] = useState<string | null>(null);
   const { gated, feature, close } = useUpgradeGate();
   const [paywalled, setPaywalled] = useState(false);
+  const [composing, setComposing] = useState(false);
 
   useEffect(() => {
     const hint = roleHint();
@@ -67,6 +77,8 @@ export function ApplyButton({ slug, jobTitle }: { slug: string; jobTitle: string
       setPaywalled(true);
       return;
     }
+    // Probe the gate BEFORE opening the form. Filling in five answers and only then
+    // being told you need a plan is the worst order to learn it in.
     setSubmitting(true);
     setError(null);
     try {
@@ -74,6 +86,10 @@ export function ApplyButton({ slug, jobTitle }: { slug: string; jobTitle: string
     } catch (err) {
       if (err instanceof ApiRequestError && err.code === 'PAYWALL') {
         setPaywalled(true);
+      } else if (err instanceof ApiRequestError && /answer/i.test(err.message)) {
+        // The posting asks questions. Open the form rather than surfacing a validation
+        // error for fields the student was never shown.
+        setComposing(true);
       } else if (err instanceof ApiRequestError) {
         // The server's own words - "this role has closed", "the deadline has passed"
         // - are more useful than anything generic we could write here.
@@ -156,6 +172,19 @@ export function ApplyButton({ slug, jobTitle }: { slug: string; jobTitle: string
           Full-Platform-vs-Build-your-own chooser, where a student could assemble a
           plan that still does not let them apply - a dead end wearing a CTA. The
           single button lands them on a cart already holding what the gate wants. */}
+      {composing ? (
+        <ApplyDialog
+          slug={slug}
+          jobId={jobId}
+          jobTitle={jobTitle}
+          onClose={() => setComposing(false)}
+          onApplied={(a) => {
+            setApplication(a);
+            setComposing(false);
+          }}
+        />
+      ) : null}
+
       <UpgradeModal
         open={paywalled || feature !== null}
         onClose={() => {

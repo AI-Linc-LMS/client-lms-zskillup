@@ -45,3 +45,33 @@ export async function uploadAdminImage(file: File, purpose: MediaUploadPurpose):
 export function uploadLiveSessionCover(file: File): Promise<string> {
   return uploadAdminImage(file, 'live-session-cover');
 }
+
+/**
+ * Upload a job description PDF.
+ *
+ * Same presign path as images, different content type. Deliberately NOT used for
+ * candidate resumes: the only prefix the task role can write is publicly readable, and
+ * a CV is not something to publish - applications reference the student's existing
+ * ZSkillup resume instead.
+ */
+export async function uploadJobDescription(file: File): Promise<{ url: string; name: string }> {
+  if (file.type !== 'application/pdf') {
+    throw new Error('Job descriptions must be a PDF.');
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    throw new Error('That file is over 10 MB. Please compress it first.');
+  }
+  const { uploadUrl, publicUrl } = (
+    await apiClient.post<PresignUploadResultDto>('/api/v1/admin/media/presign', {
+      contentType: 'application/pdf',
+      purpose: 'job-jd',
+    })
+  ).data;
+  const res = await fetch(uploadUrl, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/pdf' },
+    body: file,
+  });
+  if (!res.ok) throw new Error('Upload to storage failed. Please try again.');
+  return { url: publicUrl, name: file.name };
+}

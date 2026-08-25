@@ -1,25 +1,27 @@
 import { Briefcase } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
-import { JobsListing } from '@/components/admin/jobs/JobsListing';
+import { EditJobComposer } from '@/components/admin/jobs/EditJobComposer';
 
-export default function AdminJobsPage() {
+export default async function EditJobPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   return (
     <div className="space-y-6">
       <Breadcrumb
         items={[
           { label: 'Home', href: '/' },
           { label: 'Platform Admin', href: '/admin/dashboard' },
-          { label: 'Jobs' },
+          { label: 'Jobs', href: '/admin/jobs' },
+          { label: 'Edit' },
         ]}
       />
       <ConsoleHero
         icon={Briefcase}
-        eyebrow="Platform Admin"
-        title="Job board"
-        description="Post openings, choose who sees them, and track everyone who applies."
+        eyebrow="Job board"
+        title="Edit posting"
+        description="Changes save as you move between steps."
       />
-      <JobsListing />
+      <EditJobComposer jobId={id} />
     </div>
   );
 }
