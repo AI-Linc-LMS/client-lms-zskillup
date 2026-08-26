@@ -99,14 +99,13 @@ export const STUDENT_NAV: NavSection[] = [
     ],
   },
   {
-    // Its own section, not a line item under CAREER. The board is a destination
-    // students come back to on its own schedule, and burying it under a heading
-    // about resumes made it read as a sub-feature of one.
+    // One standalone top-level destination - the sibling of Company Hubs and Sectional
+    // Hubs, not a "JOBS" accordion wrapping a single "Jobs" child (which read as a
+    // redundant heading-above-its-own-link). Browsing, applied and saved are tabs on
+    // the same page, so one nav entry is the whole feature.
     heading: 'JOBS',
+    standalone: true,
     items: [
-      // One entry, not three. Browsing, applied and saved are tabs on the same page -
-      // a student checking "did I apply to this?" is mid-browse, and sending them to a
-      // different route to find out loses their filters and their place.
       { label: 'Jobs', href: '/jobs', icon: Briefcase, tip: 'Roles our hiring partners are recruiting for - browse, apply, and track every application in one place.' },
     ],
   },
