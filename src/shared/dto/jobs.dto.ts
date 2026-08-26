@@ -388,6 +388,27 @@ export class JobBoardFilters {
   companyName?: string;
 
   @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  location?: string;
+
+  /** Matched as a substring against the posting's free-text experience field. It is
+   *  free text on the posting ("0-2 years", "Fresher"), so this cannot be a range
+   *  comparison without parsing prose - and a wrong parse silently hides jobs. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(60)
+  experience?: string;
+
+  /** Match ANY of these skills, not all - a student who knows React should see a role
+   *  asking for React and Node, not only roles asking for exactly what they picked. */
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @MaxLength(80, { each: true })
+  skills?: string[];
+
+  @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1900)

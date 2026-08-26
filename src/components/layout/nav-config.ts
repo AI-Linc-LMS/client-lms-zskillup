@@ -104,8 +104,10 @@ export const STUDENT_NAV: NavSection[] = [
     // about resumes made it read as a sub-feature of one.
     heading: 'JOBS',
     items: [
-      { label: 'Job Board', href: '/jobs', icon: Briefcase, tip: 'Roles our hiring partners are recruiting for right now - apply in one click with the profile you built here.' },
-      { label: 'My Applications', href: '/applications', icon: ClipboardList, tip: 'Every role you applied to, and where each one stands.' },
+      // One entry, not three. Browsing, applied and saved are tabs on the same page -
+      // a student checking "did I apply to this?" is mid-browse, and sending them to a
+      // different route to find out loses their filters and their place.
+      { label: 'Jobs', href: '/jobs', icon: Briefcase, tip: 'Roles our hiring partners are recruiting for - browse, apply, and track every application in one place.' },
     ],
   },
   {
