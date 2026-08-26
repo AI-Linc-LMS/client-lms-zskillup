@@ -19,6 +19,7 @@ import { Modal } from '@/components/ui/Modal';
 import {
   applicantsExportUrl,
   emailJobApplicant,
+  getApplicantFacets,
   listApplicants,
   updateJobApplication,
   type JobApplicantDto,
@@ -50,6 +51,7 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
   const [composing, setComposing] = useState<JobApplicantDto | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
+  const [facets, setFacets] = useState<Record<JobApplicationStatus, number> | null>(null);
   const [noteDraft, setNoteDraft] = useState('');
   const [savingNote, setSavingNote] = useState(false);
 
@@ -81,6 +83,17 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
 
   useEffect(load, [load]);
 
+  // Chip totals key on the job + search ONLY - never the selected status (a chip must
+  // show its own full total while another is active) and never the page. Falls back to
+  // page-derived counts if the endpoint is unavailable.
+  const loadFacets = useCallback(() => {
+    getApplicantFacets(jobId, { search: debounced || undefined })
+      .then(setFacets)
+      .catch(() => setFacets(null));
+  }, [jobId, debounced]);
+
+  useEffect(loadFacets, [loadFacets]);
+
   const change = async (row: JobApplicantDto, next: JobApplicationStatus) => {
     if (next === row.status) return;
     setBusyId(row.id);
@@ -88,6 +101,7 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
       const updated = await updateJobApplication(row.id, { status: next });
       setRows((prev) => prev.map((r) => (r.id === row.id ? updated : r)));
       if (open?.id === row.id) setOpen(updated);
+      loadFacets(); // a status moved - the chip totals shifted
       toast.success(`${row.fullName ?? row.email} → ${APPLICATION_STATUS[next].label}. Email sent.`);
     } catch (err) {
       toast.error(describeError(err, 'Could not update the application.'));
@@ -152,19 +166,21 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
     } finally {
       setBulkBusy(false);
       load();
+      loadFacets();
     }
   };
 
   const pages = Math.ceil(total / PAGE);
 
-  const counts = useMemo(() => {
-    // Only the loaded page - the totals per status would need their own query, and a
-    // number that is right for 25 rows and wrong for 900 is worse than no number.
+  const pageCounts = useMemo(() => {
     return rows.reduce<Record<string, number>>((acc, r) => {
       acc[r.status] = (acc[r.status] ?? 0) + 1;
       return acc;
     }, {});
   }, [rows]);
+  // Prefer the true server totals; degrade gracefully to the loaded page's counts if
+  // the facets endpoint is unavailable (e.g. before it has deployed).
+  const counts: Record<string, number> = facets ?? pageCounts;
 
   return (
     <div className="space-y-5">

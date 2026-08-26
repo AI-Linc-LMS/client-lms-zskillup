@@ -177,6 +177,14 @@ export async function createQuestion(dto: UpsertJobQuestionDto): Promise<JobQues
   return (await apiClient.post<JobQuestionDto>('/api/v1/admin/jobs/questions', dto)).data;
 }
 
+export async function updateQuestion(
+  questionId: string,
+  dto: UpsertJobQuestionDto,
+): Promise<JobQuestionDto> {
+  return (await apiClient.patch<JobQuestionDto>(`/api/v1/admin/jobs/questions/${questionId}`, dto))
+    .data;
+}
+
 export async function deleteQuestion(questionId: string): Promise<void> {
   await apiClient.delete(`/api/v1/admin/jobs/questions/${questionId}`);
 }
@@ -211,6 +219,19 @@ export async function listApplicants(
 ): Promise<ApplicantPage> {
   const base = jobId ? `/api/v1/admin/jobs/${jobId}/applications` : '/api/v1/admin/jobs/applications';
   return (await apiClient.get<ApplicantPage>(`${base}${toQuery(opts as Record<string, unknown>)}`)).data;
+}
+
+/** True per-status applicant counts for one job (search-aware, ignores the status
+ *  filter — the chips ARE the status selector). Backs the filter-chip totals. */
+export async function getApplicantFacets(
+  jobId: string,
+  opts: { search?: string } = {},
+): Promise<Record<JobApplicationStatus, number>> {
+  return (
+    await apiClient.get<Record<JobApplicationStatus, number>>(
+      `/api/v1/admin/jobs/${jobId}/applications/facets${toQuery(opts as Record<string, unknown>)}`,
+    )
+  ).data;
 }
 
 /** The CSV download URL. Hit with a normal navigation so the browser saves the file
