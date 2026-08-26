@@ -239,6 +239,26 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
                   <input value={form.companyName} onChange={(e) => set('companyName', e.target.value)} className={input} placeholder="Google" />
                 </Field>
                 <Field>
+                  <span className={label}>Company logo URL</span>
+                  <div className="flex items-center gap-2">
+                    <input value={form.companyLogoUrl} onChange={(e) => set('companyLogoUrl', e.target.value)} className={input} placeholder="https://logo.clearbit.com/google.com" />
+                    {form.companyLogoUrl.trim() ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={form.companyLogoUrl}
+                        alt=""
+                        className="size-10 shrink-0 rounded-lg border border-slate-200 object-contain p-1"
+                        onError={(e) => {
+                          e.currentTarget.style.visibility = 'hidden';
+                        }}
+                        onLoad={(e) => {
+                          e.currentTarget.style.visibility = 'visible';
+                        }}
+                      />
+                    ) : null}
+                  </div>
+                </Field>
+                <Field>
                   <span className={label}>Kind</span>
                   <select value={form.jobKind} onChange={(e) => set('jobKind', e.target.value)} className={input}>
                     {Object.values(JobKind).map((k) => <option key={k} value={k}>{JOB_KIND_LABEL[k]}</option>)}

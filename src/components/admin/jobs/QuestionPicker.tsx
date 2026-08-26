@@ -44,6 +44,7 @@ export function QuestionPicker({ jobId }: { jobId: string }) {
   const [saving, setSaving] = useState(false);
   const [adding, setAdding] = useState(false);
   const [label, setLabel] = useState('');
+  const [helpText, setHelpText] = useState('');
   const [kind, setKind] = useState<JobQuestionKind>(JobQuestionKind.TEXT);
   const [options, setOptions] = useState('');
 
@@ -96,6 +97,7 @@ export function QuestionPicker({ jobId }: { jobId: string }) {
     try {
       const q = await createQuestion({
         label: label.trim(),
+        helpText: helpText.trim() || undefined,
         kind,
         options:
           kind === JobQuestionKind.SELECT || kind === JobQuestionKind.MULTI_SELECT
@@ -103,6 +105,7 @@ export function QuestionPicker({ jobId }: { jobId: string }) {
             : undefined,
       });
       setLabel('');
+      setHelpText('');
       setOptions('');
       setAdding(false);
       await reload();
@@ -196,6 +199,18 @@ export function QuestionPicker({ jobId }: { jobId: string }) {
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               placeholder="e.g. Notice period"
+              maxLength={255}
+              className="mt-1 h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus-visible:ring-2 focus-visible:ring-orange/30"
+            />
+          </label>
+          <label className="mt-3 block">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              Help text <span className="normal-case text-slate-300">· optional</span>
+            </span>
+            <input
+              value={helpText}
+              onChange={(e) => setHelpText(e.target.value)}
+              placeholder="Shown under the field - e.g. In days, from an offer"
               maxLength={255}
               className="mt-1 h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus-visible:ring-2 focus-visible:ring-orange/30"
             />
