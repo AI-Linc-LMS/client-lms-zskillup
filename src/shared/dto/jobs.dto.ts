@@ -328,6 +328,10 @@ export interface JobApplicantDto extends JobApplicationDto {
   answers: Array<{ label: string; answer: string }>;
 }
 
+/** How many applicants sit in each status for one job. Dense - every status present,
+ *  missing ones as 0 - so the filter chips can render a true total per status. */
+export type JobApplicantFacetsDto = Record<JobApplicationStatus, number>;
+
 export class UpdateJobApplicationDto {
   @IsOptional()
   @IsEnum(JobApplicationStatus)

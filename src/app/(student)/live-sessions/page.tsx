@@ -1,9 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
-import { CalendarClock, Check, Clock, Loader2, PlayCircle, Video } from 'lucide-react';
+import { CalendarClock, Check, Clock, Loader2, PlayCircle, Video, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   listMyLiveSessions,
@@ -17,6 +17,8 @@ import { AudiencePill, fmtWhen, relWhen, safeHttpUrl, StatusBadge } from '@/comp
 export default function StudentLiveSessionsPage() {
   const [data, setData] = useState<LiveSessionListDto | null>(null);
   const [loading, setLoading] = useState(true);
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
 
   // Re-fetchable: registering releases the join link, so the card must refresh from the
   // SERVER rather than optimistically revealing a URL it was never sent.
@@ -31,6 +33,33 @@ export default function StudentLiveSessionsPage() {
     load();
   }, [load]);
 
+  const hasAny = !!data && (data.upcoming.length > 0 || data.past.length > 0);
+  const rangeActive = Boolean(from || to);
+
+  // Purely client-side: the student endpoint returns the whole relevant list, so a date
+  // range is a filter over what we already have - no re-fetch, no new query param. Bounds
+  // are inclusive to the whole day picked.
+  const { upcoming, past } = useMemo(() => {
+    const fromMs = from ? new Date(`${from}T00:00:00`).getTime() : -Infinity;
+    const toMs = to ? new Date(`${to}T23:59:59.999`).getTime() : Infinity;
+    const inRange = (iso: string) => {
+      const t = new Date(iso).getTime();
+      return t >= fromMs && t <= toMs;
+    };
+    return {
+      upcoming: (data?.upcoming ?? []).filter((s) => inRange(s.scheduledAt)),
+      past: (data?.past ?? []).filter((s) => inRange(s.scheduledAt)),
+    };
+  }, [data, from, to]);
+
+  const clearRange = () => {
+    setFrom('');
+    setTo('');
+  };
+
+  const dateInput =
+    'h-9 rounded-lg border border-slate-200 bg-white px-2 text-xs text-navy focus:border-orange focus-visible:ring-2 focus-visible:ring-orange/30';
+
   return (
     <div className="space-y-6">
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Live Sessions' }]} />
@@ -42,28 +71,79 @@ export default function StudentLiveSessionsPage() {
         <p className="mt-0.5 text-sm text-slate-600">Masterclasses & webinars scheduled for you. Join right from here.</p>
       </header>
 
+      {hasAny ? (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            Date range
+          </span>
+          <label className="flex items-center gap-1.5 text-xs text-slate-500">
+            From
+            <input
+              type="date"
+              aria-label="From date"
+              value={from}
+              max={to || undefined}
+              onChange={(e) => setFrom(e.target.value)}
+              className={dateInput}
+            />
+          </label>
+          <label className="flex items-center gap-1.5 text-xs text-slate-500">
+            To
+            <input
+              type="date"
+              aria-label="To date"
+              value={to}
+              min={from || undefined}
+              onChange={(e) => setTo(e.target.value)}
+              className={dateInput}
+            />
+          </label>
+          {rangeActive ? (
+            <button
+              type="button"
+              onClick={clearRange}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-navy"
+            >
+              <X className="size-3" /> Clear
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+
       {loading ? (
         <div className="flex items-center justify-center py-24"><Loader2 className="size-7 animate-spin text-slate-500" /></div>
-      ) : !data || (data.upcoming.length === 0 && data.past.length === 0) ? (
+      ) : !hasAny ? (
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center">
           <CalendarClock className="mx-auto size-10 text-slate-400" />
           <p className="mt-3 text-sm text-slate-600">No live sessions scheduled yet. We&apos;ll notify you when one is set up.</p>
         </div>
+      ) : upcoming.length === 0 && past.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center">
+          <CalendarClock className="mx-auto size-10 text-slate-400" />
+          <p className="mt-3 text-sm text-slate-600">No sessions fall in that date range.</p>
+          <button
+            type="button"
+            onClick={clearRange}
+            className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-orange hover:underline"
+          >
+            Clear filter
+          </button>
+        </div>
       ) : (
         <>
-          {data.upcoming.length > 0 && (
+          {upcoming.length > 0 && (
             <section className="space-y-3" data-tour="live:upcoming">
               <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">Upcoming</h2>
               <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
-                {data.upcoming.map((s) => <StudentCard key={s.id} s={s} onChanged={load} />)}
+                {upcoming.map((s) => <StudentCard key={s.id} s={s} onChanged={load} />)}
               </div>
             </section>
           )}
-          {data.past.length > 0 && (
+          {past.length > 0 && (
             <section className="space-y-3" data-tour="live:past">
               <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">Past</h2>
               <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
-                {data.past.map((s) => <StudentCard key={s.id} s={s} past onChanged={load} />)}
+                {past.map((s) => <StudentCard key={s.id} s={s} past onChanged={load} />)}
               </div>
             </section>
           )}

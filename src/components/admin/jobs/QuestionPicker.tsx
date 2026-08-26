@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Loader2, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   createQuestion,
@@ -10,6 +10,7 @@ import {
   getJobQuestions,
   getQuestionLibrary,
   setJobQuestions,
+  updateQuestion,
 } from '@/lib/api/jobs';
 import type { JobPostingQuestionDto, JobQuestionDto } from '@/shared/dto/jobs.dto';
 import { JobQuestionKind } from '@/shared/enums';
@@ -43,6 +44,7 @@ export function QuestionPicker({ jobId }: { jobId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [label, setLabel] = useState('');
   const [helpText, setHelpText] = useState('');
   const [kind, setKind] = useState<JobQuestionKind>(JobQuestionKind.TEXT);
@@ -91,34 +93,72 @@ export function QuestionPicker({ jobId }: { jobId: string }) {
       selected.map((s) => ({ questionId: s.id, isRequired: s.id === id ? required : s.isRequired })),
     );
 
-  const addToLibrary = async () => {
+  const resetForm = () => {
+    setLabel('');
+    setHelpText('');
+    setOptions('');
+    setKind(JobQuestionKind.TEXT);
+    setAdding(false);
+    setEditingId(null);
+  };
+
+  const startEdit = (q: JobQuestionDto) => {
+    setEditingId(q.id);
+    setAdding(false);
+    setLabel(q.label);
+    setHelpText(q.helpText ?? '');
+    setKind(q.kind);
+    setOptions((q.options ?? []).join('\n'));
+  };
+
+  const saveQuestion = async () => {
     if (label.trim().length < 2) return;
+    const dto = {
+      label: label.trim(),
+      helpText: helpText.trim() || undefined,
+      kind,
+      options:
+        kind === JobQuestionKind.SELECT || kind === JobQuestionKind.MULTI_SELECT
+          ? options.split('\n').map((o) => o.trim()).filter(Boolean)
+          : undefined,
+    };
     setSaving(true);
     try {
-      const q = await createQuestion({
-        label: label.trim(),
-        helpText: helpText.trim() || undefined,
-        kind,
-        options:
-          kind === JobQuestionKind.SELECT || kind === JobQuestionKind.MULTI_SELECT
-            ? options.split('\n').map((o) => o.trim()).filter(Boolean)
-            : undefined,
-      });
-      setLabel('');
-      setHelpText('');
-      setOptions('');
-      setAdding(false);
-      await reload();
-      // A question an admin just wrote is one they want on THIS posting.
-      void commit([
-        ...selected.map((s) => ({ questionId: s.id, isRequired: s.isRequired })),
-        { questionId: q.id, isRequired: false },
-      ]);
+      if (editingId) {
+        // Editing an existing library question - persist the wording change and stop.
+        // Never re-tick or reorder: a fix to the question text is unrelated to which
+        // postings ask it or in what order.
+        await updateQuestion(editingId, dto);
+        resetForm();
+        await reload();
+      } else {
+        const q = await createQuestion(dto);
+        resetForm();
+        await reload();
+        // A question an admin just wrote is one they want on THIS posting.
+        void commit([
+          ...selected.map((s) => ({ questionId: s.id, isRequired: s.isRequired })),
+          { questionId: q.id, isRequired: false },
+        ]);
+      }
     } catch (err) {
-      toast.error(describeError(err, 'Could not add the question.'));
+      toast.error(
+        describeError(err, editingId ? 'Could not save the question.' : 'Could not add the question.'),
+      );
     } finally {
       setSaving(false);
     }
+  };
+
+  // Reorder the SELECTED questions - the order applicants see them. commit() re-stamps
+  // sortOrder by array index, so swapping two entries is the whole operation; no BE
+  // reorder route is needed.
+  const move = (index: number, dir: -1 | 1) => {
+    const next = [...selected];
+    const j = index + dir;
+    if (j < 0 || j >= next.length) return;
+    [next[index], next[j]] = [next[j]!, next[index]!];
+    void commit(next.map((s) => ({ questionId: s.id, isRequired: s.isRequired })));
   };
 
   if (loading) {
@@ -135,6 +175,46 @@ export function QuestionPicker({ jobId }: { jobId: string }) {
         Tick what applicants must fill in. A posting that asks nothing still collects the
         student&apos;s ZSkillup profile - these are the extras on top.
       </p>
+
+      {selected.length > 1 ? (
+        <div className="rounded-xl border border-slate-200 bg-white p-4">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            Order on the form
+          </p>
+          <ul className="mt-2 space-y-1.5">
+            {selected.map((s, i) => (
+              <li key={s.id} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
+                <span className="min-w-0 flex-1 truncate text-sm font-semibold text-navy">
+                  {i + 1}. {s.label}
+                </span>
+                {s.isRequired ? (
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-orange">
+                    Required
+                  </span>
+                ) : null}
+                <button
+                  type="button"
+                  aria-label={`Move ${s.label} up`}
+                  disabled={saving || i === 0}
+                  onClick={() => move(i, -1)}
+                  className="grid size-6 place-items-center rounded-md text-slate-400 hover:bg-slate-200 hover:text-navy disabled:opacity-30"
+                >
+                  <ChevronUp className="size-4" />
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Move ${s.label} down`}
+                  disabled={saving || i === selected.length - 1}
+                  onClick={() => move(i, 1)}
+                  className="grid size-6 place-items-center rounded-md text-slate-400 hover:bg-slate-200 hover:text-navy disabled:opacity-30"
+                >
+                  <ChevronDown className="size-4" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       <ul className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white">
         {library.map((q) => (
@@ -169,6 +249,17 @@ export function QuestionPicker({ jobId }: { jobId: string }) {
             {!q.isBuiltin ? (
               <button
                 type="button"
+                aria-label={`Edit ${q.label}`}
+                onClick={() => startEdit(q)}
+                className="text-slate-300 transition-colors hover:text-navy"
+              >
+                <Pencil className="size-4" />
+              </button>
+            ) : null}
+
+            {!q.isBuiltin ? (
+              <button
+                type="button"
                 aria-label={`Delete ${q.label} from the library`}
                 onClick={async () => {
                   if (!window.confirm(`Remove "${q.label}" from the library for every future job?`))
@@ -189,8 +280,11 @@ export function QuestionPicker({ jobId }: { jobId: string }) {
         ))}
       </ul>
 
-      {adding ? (
+      {adding || editingId ? (
         <div className="rounded-xl border border-slate-200 bg-white p-4">
+          <p className="mb-3 text-base font-bold text-navy">
+            {editingId ? 'Edit question' : 'New question'}
+          </p>
           <label className="block">
             <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
               Question
@@ -245,11 +339,11 @@ export function QuestionPicker({ jobId }: { jobId: string }) {
             </label>
           ) : null}
           <div className="mt-4 flex justify-end gap-3">
-            <Button variant="outline" onClick={() => setAdding(false)}>
+            <Button variant="outline" onClick={resetForm}>
               Cancel
             </Button>
-            <Button onClick={addToLibrary} disabled={saving || label.trim().length < 2}>
-              Add question
+            <Button onClick={saveQuestion} disabled={saving || label.trim().length < 2}>
+              {editingId ? 'Save changes' : 'Add question'}
             </Button>
           </div>
         </div>

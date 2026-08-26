@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
-import { Clock, ExternalLink, Loader2, Pencil, PlayCircle, PlusCircle, Trash2, Users, Video } from 'lucide-react';
+import { Clock, ExternalLink, Loader2, Megaphone, Pencil, PlayCircle, PlusCircle, Trash2, Users, Video } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   deleteLiveSession,
@@ -13,12 +13,14 @@ import {
 } from '@/lib/api/live-sessions';
 import { AudiencePill, fmtWhen, safeHttpUrl, StatusBadge } from '@/components/live-sessions/ui';
 import { SessionComposer } from '@/components/live-sessions/SessionComposer';
+import { NotifyStudentsDialog } from '@/components/live-sessions/NotifyStudentsDialog';
 
 export default function AdminLiveSessionsPage() {
   const [data, setData] = useState<LiveSessionListDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [composerOpen, setComposerOpen] = useState(false);
   const [editing, setEditing] = useState<LiveSessionDto | null>(null);
+  const [notifying, setNotifying] = useState<LiveSessionDto | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -71,7 +73,9 @@ export default function AdminLiveSessionsPage() {
         <>
           <Section title="Upcoming" count={data?.upcoming.length ?? 0}>
             {data && data.upcoming.length > 0 ? (
-              data.upcoming.map((s) => <AdminRow key={s.id} s={s} onEdit={openEdit} onDelete={remove} />)
+              data.upcoming.map((s) => (
+                <AdminRow key={s.id} s={s} onEdit={openEdit} onDelete={remove} onNotify={setNotifying} />
+              ))
             ) : (
               <EmptyState onNew={openNew} />
             )}
@@ -79,13 +83,20 @@ export default function AdminLiveSessionsPage() {
 
           {data && data.past.length > 0 && (
             <Section title="Past" count={data.past.length}>
-              {data.past.map((s) => <AdminRow key={s.id} s={s} onEdit={openEdit} onDelete={remove} />)}
+              {data.past.map((s) => (
+                <AdminRow key={s.id} s={s} onEdit={openEdit} onDelete={remove} onNotify={setNotifying} />
+              ))}
             </Section>
           )}
         </>
       )}
 
       <SessionComposer open={composerOpen} editing={editing} onClose={() => setComposerOpen(false)} onSaved={load} />
+      <NotifyStudentsDialog
+        session={notifying}
+        open={!!notifying}
+        onClose={() => setNotifying(null)}
+      />
     </div>
   );
 }
@@ -105,10 +116,12 @@ function AdminRow({
   s,
   onEdit,
   onDelete,
+  onNotify,
 }: {
   s: LiveSessionDto;
   onEdit: (s: LiveSessionDto) => void;
   onDelete: (s: LiveSessionDto) => void;
+  onNotify: (s: LiveSessionDto) => void;
 }) {
   const link = safeHttpUrl(s.meetingUrl);
   const recording = safeHttpUrl(s.recordingUrl);
@@ -162,7 +175,8 @@ function AdminRow({
               <ExternalLink className="size-3.5" />
             </a>
           )}
-          <button onClick={() => onEdit(s)} className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50"><Pencil className="size-3.5" /></button>
+          <button onClick={() => onNotify(s)} title="Notify students" aria-label={`Notify students about ${s.title}`} className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50"><Megaphone className="size-3.5" /></button>
+          <button onClick={() => onEdit(s)} title="Edit" aria-label={`Edit ${s.title}`} className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50"><Pencil className="size-3.5" /></button>
           <button onClick={() => onDelete(s)} className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-500 hover:border-red-200 hover:bg-red-50 hover:text-red-500"><Trash2 className="size-3.5" /></button>
         </div>
       </div>

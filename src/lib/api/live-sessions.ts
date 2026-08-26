@@ -5,6 +5,10 @@ import type {
   LiveSessionListDto,
   UpdateLiveSessionDto,
 } from '@/shared/dto/live-sessions.dto';
+import type {
+  EntityNotificationSendDto,
+  SendEntityNotificationDto,
+} from '@/shared/dto/entity-notify.dto';
 
 export type { LiveSessionDto, LiveSessionListDto, LiveSessionStatus } from '@/shared/dto/live-sessions.dto';
 export { LiveSessionAudience } from '@/shared/enums';
@@ -27,6 +31,23 @@ export async function updateLiveSession(id: string, body: UpdateLiveSessionDto):
 
 export async function deleteLiveSession(id: string): Promise<void> {
   await apiClient.delete(`/api/v1/admin/live-sessions/${id}`);
+}
+
+/** Notify students ABOUT a session, on the admin's schedule - never changes the session's
+ *  own schedule, and can be sent repeatedly. Needs the canBroadcast capability. */
+export async function notifyLiveSession(
+  id: string,
+  body: SendEntityNotificationDto,
+): Promise<{ recipients: number }> {
+  return (await apiClient.post<{ recipients: number }>(`/api/v1/admin/live-sessions/${id}/notify`, body))
+    .data;
+}
+
+/** What has already been sent about a session, newest first. */
+export async function listLiveSessionNotifications(id: string): Promise<EntityNotificationSendDto[]> {
+  return (
+    await apiClient.get<EntityNotificationSendDto[]>(`/api/v1/admin/live-sessions/${id}/notifications`)
+  ).data;
 }
 
 // ── Student ───────────────────────────────────────────────────────────────
