@@ -1,11 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Loader2, Send } from 'lucide-react';
+import Link from 'next/link';
+import { FileText, Loader2, Send } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/button';
 import { getPublicJobQuestions, applyToJobWith } from '@/lib/api/jobs';
+import { listResumes } from '@/lib/api/resumes';
 import type { JobApplicationDto, JobPostingQuestionDto } from '@/shared/dto/jobs.dto';
+import type { ResumeSummaryDto } from '@/shared/dto/resume.dto';
 import { JobQuestionKind } from '@/shared/enums';
 import { describeError } from '@/lib/api/errors';
 
@@ -38,6 +41,8 @@ export function ApplyDialog({
   const [questions, setQuestions] = useState<JobPostingQuestionDto[] | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [note, setNote] = useState('');
+  const [resumes, setResumes] = useState<ResumeSummaryDto[] | null>(null);
+  const [resumeId, setResumeId] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,6 +53,11 @@ export function ApplyDialog({
       // Not knowing the questions must not block applying: the server re-checks, so a
       // failed fetch means "ask nothing here" rather than "refuse to submit".
       .catch(() => alive && setQuestions([]));
+    // Resumes are optional at apply time - a student can apply with the profile they
+    // built here. A failed fetch means "offer no picker", never "block applying".
+    listResumes()
+      .then((r) => alive && setResumes(r))
+      .catch(() => alive && setResumes([]));
     return () => {
       alive = false;
     };
@@ -66,6 +76,7 @@ export function ApplyDialog({
           .filter(([, v]) => v.trim())
           .map(([questionId, answer]) => ({ questionId, answer })),
         note: note.trim() || undefined,
+        resumeId: resumeId || undefined,
       });
       onApplied(application);
     } catch (err) {
@@ -88,8 +99,44 @@ export function ApplyDialog({
         </div>
       ) : (
         <>
+          <div className="mt-4">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              Resume (optional)
+            </span>
+            {resumes === null ? (
+              <div className="mt-1 h-10 animate-pulse rounded-lg bg-slate-100" />
+            ) : resumes.length === 0 ? (
+              <p className="mt-1 text-sm leading-relaxed text-slate-600">
+                You haven&apos;t built a resume here yet - apply with your profile, or{' '}
+                <Link href="/resume-builder" className="font-semibold text-orange hover:underline">
+                  build one first
+                </Link>
+                .
+              </p>
+            ) : (
+              <select
+                value={resumeId}
+                onChange={(e) => setResumeId(e.target.value)}
+                aria-label="Resume to attach"
+                className={input}
+              >
+                <option value="">Apply with my profile (no resume file)</option>
+                {resumes.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.title}
+                  </option>
+                ))}
+              </select>
+            )}
+            {resumeId ? (
+              <span className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
+                <FileText className="size-3.5" /> This resume travels with your application.
+              </span>
+            ) : null}
+          </div>
+
           {questions.length === 0 ? (
-            <p className="mt-3 text-sm leading-relaxed text-slate-600">
+            <p className="mt-4 text-sm leading-relaxed text-slate-600">
               Nothing else to fill in - we send the profile you have already built here.
             </p>
           ) : (
@@ -121,6 +168,34 @@ export function ApplyDialog({
                         </option>
                       ))}
                     </select>
+                  ) : q.kind === JobQuestionKind.MULTI_SELECT ? (
+                    <div className="mt-1 space-y-1.5">
+                      {q.options.map((o) => {
+                        const chosen = (answers[q.id] ?? '')
+                          .split(',')
+                          .map((s) => s.trim())
+                          .filter(Boolean);
+                        return (
+                          <label key={o} className="flex items-center gap-2 text-sm text-navy">
+                            <input
+                              type="checkbox"
+                              checked={chosen.includes(o)}
+                              onChange={(e) =>
+                                set(
+                                  q.id,
+                                  (e.target.checked
+                                    ? [...chosen, o]
+                                    : chosen.filter((x) => x !== o)
+                                  ).join(', '),
+                                )
+                              }
+                              className="size-4 rounded border-slate-300 text-orange focus-visible:ring-2 focus-visible:ring-orange/30"
+                            />
+                            {o}
+                          </label>
+                        );
+                      })}
+                    </div>
                   ) : (
                     <input
                       type={
@@ -128,11 +203,13 @@ export function ApplyDialog({
                           ? 'number'
                           : q.kind === JobQuestionKind.EMAIL
                             ? 'email'
-                            : q.kind === JobQuestionKind.DATE
-                              ? 'date'
-                              : q.kind === JobQuestionKind.URL
-                                ? 'url'
-                                : 'text'
+                            : q.kind === JobQuestionKind.PHONE
+                              ? 'tel'
+                              : q.kind === JobQuestionKind.DATE
+                                ? 'date'
+                                : q.kind === JobQuestionKind.URL
+                                  ? 'url'
+                                  : 'text'
                       }
                       value={answers[q.id] ?? ''}
                       onChange={(e) => set(q.id, e.target.value)}
