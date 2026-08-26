@@ -35,6 +35,12 @@ export async function createJob(dto: CreateJobPostingDto): Promise<JobPostingDto
   return (await apiClient.post<JobPostingDto>('/api/v1/admin/jobs', dto)).data;
 }
 
+/** Duplicate a posting as a fresh unpublished draft (fields, questions and targets), so
+ *  an admin re-running a similar role doesn't retype it. Returns the new draft. */
+export async function cloneJob(id: string): Promise<JobPostingDto> {
+  return (await apiClient.post<JobPostingDto>(`/api/v1/admin/jobs/${id}/clone`, {})).data;
+}
+
 export async function updateJob(id: string, dto: JobPostingPatch): Promise<JobPostingDto> {
   return (await apiClient.patch<JobPostingDto>(`/api/v1/admin/jobs/${id}`, dto)).data;
 }
