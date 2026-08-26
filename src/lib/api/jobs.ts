@@ -128,6 +128,9 @@ export interface JobFacets {
   locations: string[];
   workModes: string[];
   employmentTypes: string[];
+  jobKinds: string[];
+  /** Ordered by how often they appear on real postings, not alphabetically. */
+  skills: string[];
   passoutYears: number[];
   total: number;
 }

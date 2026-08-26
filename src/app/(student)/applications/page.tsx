@@ -1,27 +1,12 @@
-import type { Metadata } from 'next';
-import { MyApplications } from '@/components/jobs/MyApplications';
+import { redirect } from 'next/navigation';
 
-export const metadata: Metadata = {
-  title: 'My applications',
-  description: 'Every role you have applied to through ZSkillup, and where each one stands.',
-};
-
-export default function ApplicationsPage() {
-  return (
-    <div className="space-y-6">
-      <div>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-          Placement
-        </p>
-        <h1 className="mt-1 text-[28px] font-extrabold tracking-tight text-navy">
-          My applications
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Every role you have applied to here, newest first. We email you whenever one of
-          them moves.
-        </p>
-      </div>
-      <MyApplications />
-    </div>
-  );
+/**
+ * Applications live as a TAB on the jobs page, not a page of their own.
+ *
+ * This route stays as a redirect rather than being deleted: it is linked from
+ * confirmation emails, from the apply confirmation on a job page, and from anywhere a
+ * student has already bookmarked it. Removing it would 404 all of those.
+ */
+export default function ApplicationsRedirect() {
+  redirect('/jobs?tab=applied');
 }
