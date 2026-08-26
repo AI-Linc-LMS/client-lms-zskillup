@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
   Check,
   Copy,
+  CopyPlus,
   Download,
   ExternalLink,
   Link2,
@@ -16,7 +18,7 @@ import {
   Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { deleteJob, listAdminJobs, updateJob, applicantsExportUrl } from '@/lib/api/jobs';
+import { cloneJob, deleteJob, listAdminJobs, updateJob, applicantsExportUrl } from '@/lib/api/jobs';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
 import { JobStatus } from '@/shared/enums';
 import { describeError } from '@/lib/api/errors';
@@ -43,13 +45,17 @@ const FILTERS: Array<{ key: Filter; label: string }> = [
  * me the drafts" and "show me what is on hold" are different questions, and a single
  * status dropdown could only answer one of them.
  */
+const PAGE_SIZE = 12;
+
 export function JobsListing() {
+  const router = useRouter();
   const [jobs, setJobs] = useState<JobPostingDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>('ALL');
   const [search, setSearch] = useState('');
   const [busyId, setBusyId] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -71,6 +77,15 @@ export function JobsListing() {
       return j.status === filter;
     });
   }, [jobs, filter, search]);
+
+  // The admin board is loaded whole (there is rarely a reason to page the server for
+  // an internal list this size), so paging is a slice over the filtered set. Reset to
+  // the first page whenever the filter or search changes the set under the pager.
+  useEffect(() => setPage(0), [filter, search]);
+
+  const pages = Math.max(1, Math.ceil(shown.length / PAGE_SIZE));
+  const clampedPage = Math.min(page, pages - 1);
+  const visible = shown.slice(clampedPage * PAGE_SIZE, (clampedPage + 1) * PAGE_SIZE);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { ALL: jobs.length };
@@ -100,6 +115,21 @@ export function JobsListing() {
       setTimeout(() => setCopied(null), 1800);
     } catch {
       toast.error('Could not copy the link.');
+    }
+  };
+
+  const clone = async (j: JobPostingDto) => {
+    setBusyId(j.id);
+    try {
+      const created = await cloneJob(j.id);
+      toast.success(`Cloned "${j.title}" as a draft.`);
+      // Land on the copy so the admin can tweak and publish it - a clone exists to be
+      // edited, not admired in the list.
+      router.push(`/admin/jobs/${created.id}`);
+    } catch (err) {
+      toast.error(describeError(err, 'Could not clone the posting.'));
+    } finally {
+      setBusyId(null);
     }
   };
 
@@ -163,7 +193,7 @@ export function JobsListing() {
           </p>
         ) : (
           <ul className="divide-y divide-slate-100">
-            {shown.map((j) => (
+            {visible.map((j) => (
               <li key={j.id} className="flex flex-wrap items-center justify-between gap-3 py-3.5">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
@@ -244,6 +274,17 @@ export function JobsListing() {
 
                   <button
                     type="button"
+                    aria-label={`Clone ${j.title}`}
+                    title="Duplicate as a draft"
+                    disabled={busyId === j.id}
+                    onClick={() => void clone(j)}
+                    className="text-slate-400 transition-colors hover:text-navy disabled:opacity-40"
+                  >
+                    <CopyPlus className="size-4" />
+                  </button>
+
+                  <button
+                    type="button"
                     aria-label={`Delete ${j.title}`}
                     onClick={async () => {
                       if (
@@ -269,6 +310,36 @@ export function JobsListing() {
             ))}
           </ul>
         )}
+
+        {!loading && pages > 1 ? (
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+            <p className="text-xs text-slate-500">
+              Showing {clampedPage * PAGE_SIZE + 1}–
+              {Math.min((clampedPage + 1) * PAGE_SIZE, shown.length)} of {shown.length}
+            </p>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={clampedPage === 0}
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+              >
+                Previous
+              </Button>
+              <span className="text-xs font-semibold text-slate-500">
+                Page {clampedPage + 1} of {pages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={clampedPage + 1 >= pages}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        ) : null}
       </section>
     </div>
   );
