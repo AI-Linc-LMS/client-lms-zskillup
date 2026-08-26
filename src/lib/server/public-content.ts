@@ -37,7 +37,14 @@ export async function getPublicBlog(slug: string): Promise<BlogPostDto | null> {
 /** Published job openings, newest first. Public - a logged-out visitor arriving from a
  *  shared link or a search result must be able to read the board. */
 export async function getPublicJobs(): Promise<JobPostingDto[]> {
-  return (await getJson<JobPostingDto[]>('/api/v1/jobs')) ?? [];
+  // GET /api/v1/jobs returns a paginated { items, total } envelope, NOT a bare array.
+  // Reaching for `.map` on the envelope threw `e.map is not a function` while
+  // prerendering /sitemap.xml — but ONLY on a build where the backend is reachable
+  // (Netlify), never locally (where the fetch fails and we fall back to []). That one
+  // shape mismatch froze every production FE deploy from 2026-08-25 to 08-26. Pull
+  // `items` (and tolerate any future shape drift) so the sitemap can never crash the build.
+  const page = await getJson<{ items?: JobPostingDto[] }>('/api/v1/jobs');
+  return Array.isArray(page?.items) ? page.items : [];
 }
 
 /** One job by its shareable slug. Null when it does not exist or is still a draft. */
