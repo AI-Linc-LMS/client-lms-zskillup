@@ -11,7 +11,7 @@ import { ApiRequestError } from '@/lib/api/types';
 import { FormField } from '@/components/ui/form-field';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { AuthShell } from '@/components/auth/AuthShell';
-import { stashRedirect, takeRedirect, withRedirect } from '@/lib/post-login-redirect';
+import { sanitizeRedirect, stashRedirect, takeRedirect, withRedirect } from '@/lib/post-login-redirect';
 import type { LoginResult } from '@/lib/api/auth';
 
 /**
@@ -47,7 +47,13 @@ function SignupForm() {
     // (onboarding no longer runs to consume the stash). Same precedence as
     // /login. The wizard still lives at /signup/onboarding for direct visits,
     // and its fields are editable at /profile.
-    const redirect = takeRedirect();
+    //
+    // Prefer the LIVE ?redirect= over the stash: Google here is a popup, so the
+    // page never navigated and the param is still on the URL. The stash is the
+    // fallback for when it isn't (e.g. arriving mid-flow). This is the precedence
+    // /login uses; reading only the stash meant a payment link that survived to
+    // signup was dropped the moment the student chose Google.
+    const redirect = sanitizeRedirect(searchParams.get('redirect')) ?? takeRedirect();
     if (redirect) {
       router.push(redirect);
       return;
@@ -61,7 +67,7 @@ function SignupForm() {
             ? '/tpo/dashboard'
             : '/dashboard',
     );
-  }, [router]);
+  }, [router, searchParams]);
 
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);

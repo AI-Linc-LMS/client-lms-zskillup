@@ -11,6 +11,7 @@ import {
   listAdminCollegeCohorts,
   listAdminColleges,
   listAdminCompanies,
+  listStudentReports,
 } from '@/lib/api/admin';
 import { describeError } from '@/lib/api/errors';
 import { cn } from '@/lib/utils';
@@ -54,6 +55,8 @@ export function TargetPicker({ jobId }: { jobId: string }) {
   const [cohorts, setCohorts] = useState<
     Array<{ id: string; name: string; year: number | null; studentCount: number }>
   >([]);
+  const [students, setStudents] = useState<Option[]>([]);
+  const [searchingStudents, setSearchingStudents] = useState(false);
 
   const refresh = async () => {
     const [t, r] = await Promise.all([getJobTargets(jobId), getJobReach(jobId)]);
@@ -105,10 +108,53 @@ export function TargetPicker({ jobId }: { jobId: string }) {
     };
   }, [type, cohortCollege]);
 
+  // Students are searched server-side - there can be hundreds of thousands, so unlike
+  // colleges/companies (preloaded once) they are fetched per query and never listed in
+  // bulk. Debounced, and only once a real query exists: "every student" is not a picker.
+  useEffect(() => {
+    if (type !== JobTargetType.USER) {
+      setStudents([]);
+      setSearchingStudents(false);
+      return;
+    }
+    const q = query.trim();
+    if (q.length < 2) {
+      setStudents([]);
+      setSearchingStudents(false);
+      return;
+    }
+    let alive = true;
+    setSearchingStudents(true);
+    const timer = setTimeout(() => {
+      listStudentReports({ search: q, limit: 8 })
+        .then(({ rows }) => {
+          if (!alive) return;
+          setStudents(
+            rows.map((r) => ({
+              id: r.id,
+              name: r.fullName ?? r.email,
+              type: JobTargetType.USER,
+              hint: r.collegeName ?? r.email,
+            })),
+          );
+        })
+        .catch(() => alive && setStudents([]))
+        .finally(() => alive && setSearchingStudents(false));
+    }, 300);
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+    };
+  }, [type, query]);
+
   const chosen = useMemo(() => new Set(targets.map((t) => `${t.targetType}:${t.targetId}`)), [targets]);
 
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
+    // Students arrive already searched + filtered server-side; just drop the chosen ones.
+    if (type === JobTargetType.USER) {
+      return students.filter((o) => !chosen.has(`${o.type}:${o.id}`)).slice(0, 8);
+    }
     const pool: Option[] =
       type === JobTargetType.COHORT
         ? cohorts.map((c) => ({
@@ -122,7 +168,7 @@ export function TargetPicker({ jobId }: { jobId: string }) {
       .filter((o) => !chosen.has(`${o.type}:${o.id}`))
       .filter((o) => (q ? o.name.toLowerCase().includes(q) : true))
       .slice(0, 8);
-  }, [options, cohorts, type, query, chosen]);
+  }, [options, cohorts, students, type, query, chosen]);
 
   const commit = async (next: JobTargetViewDto[]) => {
     setSaving(true);
@@ -212,9 +258,7 @@ export function TargetPicker({ jobId }: { jobId: string }) {
 
       <div className="rounded-xl border border-slate-200 bg-white p-4">
         <div className="flex flex-wrap gap-2">
-          {Object.values(JobTargetType)
-            .filter((t) => t !== JobTargetType.USER)
-            .map((t) => (
+          {Object.values(JobTargetType).map((t) => (
               <button
                 key={t}
                 type="button"
@@ -280,6 +324,14 @@ export function TargetPicker({ jobId }: { jobId: string }) {
               </li>
             ))}
           </ul>
+        ) : type === JobTargetType.USER && searchingStudents ? (
+          <p className="mt-3 flex items-center gap-2 text-sm text-slate-500">
+            <Loader2 className="size-3.5 animate-spin" /> Searching students…
+          </p>
+        ) : type === JobTargetType.USER && query.trim().length < 2 ? (
+          <p className="mt-3 text-sm text-slate-500">
+            Type a name or email to find a specific student.
+          </p>
         ) : query.trim() ? (
           <p className="mt-3 text-sm text-slate-500">Nothing matches that.</p>
         ) : null}

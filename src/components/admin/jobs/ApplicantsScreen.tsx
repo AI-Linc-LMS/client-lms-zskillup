@@ -3,7 +3,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { ArrowLeft, Download, FileText, Loader2, Mail, Search, Users } from 'lucide-react';
+import {
+  ArrowLeft,
+  Download,
+  FileText,
+  Loader2,
+  Mail,
+  Search,
+  StickyNote,
+  Users,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatusPill } from '@/components/student/StatusPill';
 import { Modal } from '@/components/ui/Modal';
@@ -39,6 +48,10 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [open, setOpen] = useState<JobApplicantDto | null>(null);
   const [composing, setComposing] = useState<JobApplicantDto | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [noteDraft, setNoteDraft] = useState('');
+  const [savingNote, setSavingNote] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setDebounced(search), 300);
@@ -58,6 +71,9 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
       .then((r) => {
         setRows(r.items);
         setTotal(r.total);
+        // A reload means a new set of rows - carrying a tick over to a different page
+        // would apply a bulk action to someone the admin can no longer see.
+        setSelected(new Set());
       })
       .catch((err) => toast.error(describeError(err, 'Could not load applicants.')))
       .finally(() => setLoading(false));
@@ -80,8 +96,66 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
     }
   };
 
+  // The private note is edited against whichever applicant is open; reset the draft
+  // each time a different one is opened so it never leaks the previous person's text.
+  useEffect(() => setNoteDraft(open?.note ?? ''), [open]);
+
+  const saveNote = async () => {
+    if (!open) return;
+    setSavingNote(true);
+    try {
+      // A note-only patch carries no status, so the backend sends no email - this is
+      // an internal jotting, not a candidate-facing action.
+      const updated = await updateJobApplication(open.id, { note: noteDraft.trim() || null });
+      setRows((prev) => prev.map((r) => (r.id === open.id ? updated : r)));
+      setOpen(updated);
+      toast.success('Private note saved.');
+    } catch (err) {
+      toast.error(describeError(err, 'Could not save the note.'));
+    } finally {
+      setSavingNote(false);
+    }
+  };
+
+  const toggle = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+
+  const allOnPageSelected = rows.length > 0 && rows.every((r) => selected.has(r.id));
+  const toggleAll = () =>
+    setSelected(allOnPageSelected ? new Set() : new Set(rows.map((r) => r.id)));
+
+  // Shortlist or reject everyone ticked, in one go. Each transition emails the
+  // candidate exactly as a single change does, so mass actions are gated behind an
+  // explicit confirm - an accidental "reject all" is a lot of emails to un-send.
+  const bulkChange = async (next: JobApplicationStatus) => {
+    const ids = rows.filter((r) => selected.has(r.id) && r.status !== next).map((r) => r.id);
+    if (!ids.length) return;
+    if (
+      !window.confirm(
+        `Move ${ids.length} ${ids.length === 1 ? 'applicant' : 'applicants'} to ${APPLICATION_STATUS[next].label}? Each one is emailed.`,
+      )
+    ) {
+      return;
+    }
+    setBulkBusy(true);
+    try {
+      await Promise.all(ids.map((id) => updateJobApplication(id, { status: next })));
+      toast.success(
+        `${ids.length} ${ids.length === 1 ? 'applicant' : 'applicants'} → ${APPLICATION_STATUS[next].label}. Emails sent.`,
+      );
+    } catch (err) {
+      toast.error(describeError(err, 'Could not update every applicant. Reloading.'));
+    } finally {
+      setBulkBusy(false);
+      load();
+    }
+  };
+
   const pages = Math.ceil(total / PAGE);
-  const jobTitle = rows[0]?.jobTitle ?? 'this role';
 
   const counts = useMemo(() => {
     // Only the loaded page - the totals per status would need their own query, and a
@@ -163,23 +237,70 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
             </p>
           </div>
         ) : (
-          <ul className="mt-3 divide-y divide-slate-100">
-            {rows.map((r) => (
-              <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
-                <button
-                  type="button"
-                  onClick={() => setOpen(r)}
-                  className="min-w-0 flex-1 text-left"
-                >
-                  <p className="truncate text-sm font-bold text-navy">
-                    {r.fullName ?? 'Unnamed student'}
-                  </p>
-                  <p className="truncate text-xs text-slate-500">
-                    {r.email}
-                    {r.phone ? ` · ${r.phone}` : ''}
-                    {r.answers.length ? ` · ${r.answers.length} answers` : ''}
-                  </p>
-                </button>
+          <>
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+              <label className="flex cursor-pointer items-center gap-2 text-xs font-semibold text-slate-500">
+                <input
+                  type="checkbox"
+                  checked={allOnPageSelected}
+                  onChange={toggleAll}
+                  aria-label="Select all applicants on this page"
+                  className="size-4 rounded border-slate-300 text-orange focus-visible:ring-2 focus-visible:ring-orange/30"
+                />
+                {selected.size > 0 ? `${selected.size} selected` : 'Select all on this page'}
+              </label>
+              {selected.size > 0 ? (
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={bulkBusy}
+                    onClick={() => void bulkChange(JobApplicationStatus.SHORTLISTED)}
+                  >
+                    {bulkBusy ? <Loader2 className="size-3.5 animate-spin" /> : null} Shortlist
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={bulkBusy}
+                    onClick={() => void bulkChange(JobApplicationStatus.REJECTED)}
+                    className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                  >
+                    Reject
+                  </Button>
+                </div>
+              ) : null}
+            </div>
+            <ul className="divide-y divide-slate-100">
+              {rows.map((r) => (
+                <li key={r.id} className="flex flex-wrap items-center gap-3 py-3">
+                  <input
+                    type="checkbox"
+                    checked={selected.has(r.id)}
+                    onChange={() => toggle(r.id)}
+                    aria-label={`Select ${r.fullName ?? r.email}`}
+                    className="size-4 shrink-0 rounded border-slate-300 text-orange focus-visible:ring-2 focus-visible:ring-orange/30"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setOpen(r)}
+                    className="min-w-0 flex-1 text-left"
+                  >
+                    <p className="flex items-center gap-1.5 truncate text-sm font-bold text-navy">
+                      {r.fullName ?? 'Unnamed student'}
+                      {r.note ? (
+                        <StickyNote
+                          className="size-3.5 shrink-0 text-amber-500"
+                          aria-label="Has a private note"
+                        />
+                      ) : null}
+                    </p>
+                    <p className="truncate text-xs text-slate-500">
+                      {r.email}
+                      {r.phone ? ` · ${r.phone}` : ''}
+                      {r.answers.length ? ` · ${r.answers.length} answers` : ''}
+                    </p>
+                  </button>
 
                 <div className="flex shrink-0 items-center gap-2">
                   <StatusPill
@@ -204,8 +325,9 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
                   </Button>
                 </div>
               </li>
-            ))}
-          </ul>
+              ))}
+            </ul>
+          </>
         )}
 
         {pages > 1 ? (
@@ -280,6 +402,30 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
               <FileText className="size-4 text-slate-400" /> Their resume
             </a>
           ) : null}
+
+          <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/60 p-4">
+            <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-amber-700">
+              <StickyNote className="size-3.5" /> Private note · your team only
+            </p>
+            <textarea
+              rows={3}
+              value={noteDraft}
+              onChange={(e) => setNoteDraft(e.target.value)}
+              maxLength={2000}
+              placeholder="Your assessment of this candidate - never shown to them."
+              className="mt-2 w-full rounded-lg border border-amber-200 bg-white p-3 text-sm text-navy focus:border-orange focus-visible:ring-2 focus-visible:ring-orange/30"
+            />
+            <div className="mt-2 flex justify-end">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={savingNote || noteDraft === (open.note ?? '')}
+                onClick={saveNote}
+              >
+                {savingNote ? <Loader2 className="size-3.5 animate-spin" /> : null} Save note
+              </Button>
+            </div>
+          </div>
 
           <div className="mt-5 flex justify-end gap-3">
             <Button variant="outline" onClick={() => setComposing(open)}>
