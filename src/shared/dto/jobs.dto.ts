@@ -322,8 +322,10 @@ export interface JobApplicantDto extends JobApplicationDto {
   coverNote: string | null;
   /** Their ZSkillup resume, if they attached one. */
   resumeId: string | null;
-  /** Or a resume they host themselves. */
+  /** Or a resume they uploaded / host themselves. */
   resumeUrl: string | null;
+  /** The uploaded resume's original filename, when they uploaded a PDF. */
+  resumeName: string | null;
   /** Answers to this posting's questions, in the order they were asked. */
   answers: Array<{ label: string; answer: string }>;
 }

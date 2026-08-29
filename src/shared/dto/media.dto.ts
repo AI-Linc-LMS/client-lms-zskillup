@@ -36,9 +36,16 @@ export const MEDIA_UPLOAD_PURPOSES = [
   'blog-cover',
   'speaker-photo',
   /** A job description PDF. Public by design - a JD is meant to be read by anyone
-   *  who opens the posting. Candidate resumes are deliberately NOT uploadable: this
-   *  prefix is world-readable, and a CV is not. */
+   *  who opens the posting. */
   'job-jd',
+  /** A company logo image on a job posting. Public - a logo is brand art. */
+  'job-logo',
+  /** A candidate's uploaded resume PDF, on a job application. Stored at an
+   *  unguessable-UUID key so the URL is not discoverable, but note this prefix is
+   *  world-READABLE if the URL leaks (the standard job-board tradeoff). Product
+   *  decision (2026-08) to allow resume upload; harden to a private prefix +
+   *  signed download if stronger confidentiality is required. */
+  'resume',
 ] as const;
 export type MediaUploadPurpose = (typeof MEDIA_UPLOAD_PURPOSES)[number];
 

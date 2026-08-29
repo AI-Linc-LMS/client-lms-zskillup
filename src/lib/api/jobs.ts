@@ -208,8 +208,31 @@ export async function setJobQuestions(
 
 /** The questions a STUDENT must answer. Served from the admin route because the
  *  posting's question set is not secret - only the applicant list is. */
-export async function getPublicJobQuestions(jobId: string): Promise<JobPostingQuestionDto[]> {
-  return getJobQuestions(jobId);
+/** The application questions for a job, for the STUDENT apply form. Hits the PUBLIC,
+ *  visibility-checked route by slug - NOT the admin route, which a student 403s (the bug
+ *  that left the apply form blank while the server still required the answers). */
+export async function getPublicJobQuestions(slug: string): Promise<JobPostingQuestionDto[]> {
+  return (
+    await apiClient.get<JobPostingQuestionDto[]>(
+      `/api/v1/jobs/${encodeURIComponent(slug)}/questions`,
+    )
+  ).data;
+}
+
+export interface BuiltResumeDto {
+  title: string;
+  template: string;
+  data: Record<string, unknown>;
+}
+
+/** The BUILT (Resume Builder) resume an applicant attached, for admin review. Null when
+ *  they uploaded a PDF or applied with just their profile. */
+export async function getApplicantResume(applicationId: string): Promise<BuiltResumeDto | null> {
+  return (
+    await apiClient.get<BuiltResumeDto | null>(
+      `/api/v1/admin/jobs/applications/${applicationId}/resume`,
+    )
+  ).data;
 }
 
 /* --- admin: applicants --- */

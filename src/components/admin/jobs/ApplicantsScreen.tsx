@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import {
@@ -29,6 +30,13 @@ import { APPLICATION_STATUS, APPLICATION_STATUS_ORDER } from '@/lib/jobs/applica
 import { describeError } from '@/lib/api/errors';
 import { cn, safeHttpUrl } from '@/lib/utils';
 
+// The built-resume preview pulls in the resume template engine; load it only when an
+// admin actually opens one so the applicants list stays light.
+const AdminResumePreviewModal = dynamic(
+  () => import('./AdminResumePreviewModal').then((m) => m.AdminResumePreviewModal),
+  { ssr: false },
+);
+
 const PAGE = 25;
 
 /**
@@ -54,6 +62,7 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
   const [facets, setFacets] = useState<Record<JobApplicationStatus, number> | null>(null);
   const [noteDraft, setNoteDraft] = useState('');
   const [savingNote, setSavingNote] = useState(false);
+  const [viewingResume, setViewingResume] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setDebounced(search), 300);
@@ -408,15 +417,29 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
             <p className="mt-4 text-sm text-slate-500">This posting asked no extra questions.</p>
           )}
 
-          {safeHttpUrl(open.resumeUrl) ? (
-            <a
-              href={safeHttpUrl(open.resumeUrl) as string}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50"
-            >
-              <FileText className="size-4 text-slate-400" /> Their resume
-            </a>
+          {open.resumeId || safeHttpUrl(open.resumeUrl) ? (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {open.resumeId ? (
+                <button
+                  type="button"
+                  onClick={() => setViewingResume({ id: open.id, name: open.fullName ?? open.email })}
+                  className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50"
+                >
+                  <FileText className="size-4 text-slate-400" /> View built resume
+                </button>
+              ) : null}
+              {safeHttpUrl(open.resumeUrl) ? (
+                <a
+                  href={safeHttpUrl(open.resumeUrl) as string}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50"
+                >
+                  <FileText className="size-4 text-slate-400" />{' '}
+                  <span className="max-w-[16rem] truncate">{open.resumeName ?? 'Uploaded resume'}</span>
+                </a>
+              ) : null}
+            </div>
           ) : null}
 
           <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/60 p-4">
@@ -454,6 +477,14 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
 
       {composing ? (
         <ComposeEmail applicant={composing} onClose={() => setComposing(null)} />
+      ) : null}
+
+      {viewingResume ? (
+        <AdminResumePreviewModal
+          applicationId={viewingResume.id}
+          applicantName={viewingResume.name}
+          onClose={() => setViewingResume(null)}
+        />
       ) : null}
     </div>
   );

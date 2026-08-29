@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { Check, ChevronLeft, ChevronRight, Loader2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { createJob, updateJob, type JobPostingDto } from '@/lib/api/jobs';
-import { uploadJobDescription } from '@/lib/api/media';
+import { uploadCompanyLogo, uploadJobDescription } from '@/lib/api/media';
 import { CompensationKind, EmploymentType, JobKind, JobStatus, WorkMode } from '@/shared/enums';
 import type { JobPostingPatch } from '@/shared/dto/jobs.dto';
 import { describeError } from '@/lib/api/errors';
@@ -35,6 +35,14 @@ function Field({ children }: { children: React.ReactNode }) {
   return <label className="block">{children}</label>;
 }
 
+/** UTC ISO from the server → the value a `datetime-local` input wants, in the admin's
+ *  LOCAL wall-clock. A bare `.slice(0,16)` of the UTC ISO would show the wrong hour. */
+function toLocalInput(iso: string | null | undefined): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+}
+
 /**
  * The posting composer.
  *
@@ -61,7 +69,7 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
     employmentType: existing?.employmentType ?? '',
     experience: existing?.experience ?? '',
     openings: existing?.openings?.toString() ?? '',
-    applicationDeadline: existing?.applicationDeadline?.slice(0, 10) ?? '',
+    applicationDeadline: toLocalInput(existing?.applicationDeadline),
     excerpt: existing?.excerpt ?? '',
     description: existing?.description ?? '',
     aboutCompany: existing?.aboutCompany ?? '',
@@ -103,7 +111,9 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
       employmentType: (form.employmentType || null) as EmploymentType | null,
       experience: form.experience.trim() || null,
       openings: num(form.openings),
-      applicationDeadline: form.applicationDeadline || null,
+      applicationDeadline: form.applicationDeadline
+        ? new Date(form.applicationDeadline).toISOString()
+        : null,
       excerpt: form.excerpt.trim() || null,
       description: form.description,
       aboutCompany: form.aboutCompany.trim() || null,
@@ -180,6 +190,20 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
     }
   };
 
+  const uploadLogo = async (file: File) => {
+    setSaving(true);
+    try {
+      const url = await uploadCompanyLogo(file);
+      setForm((f) => ({ ...f, companyLogoUrl: url }));
+      setDirty(true);
+      toast.success('Logo uploaded');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Could not upload that image.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const canPublish = basicsValid && !!job;
   const current = STEPS[step]!;
 
@@ -239,9 +263,22 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
                   <input value={form.companyName} onChange={(e) => set('companyName', e.target.value)} className={input} placeholder="Google" />
                 </Field>
                 <Field>
-                  <span className={label}>Company logo URL</span>
+                  <span className={label}>Company logo</span>
                   <div className="flex items-center gap-2">
-                    <input value={form.companyLogoUrl} onChange={(e) => set('companyLogoUrl', e.target.value)} className={input} placeholder="https://logo.clearbit.com/google.com" />
+                    <input value={form.companyLogoUrl} onChange={(e) => set('companyLogoUrl', e.target.value)} className={input} placeholder="Paste a URL or upload…" />
+                    <label className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-navy transition-colors hover:bg-slate-50">
+                      <Upload className="size-3.5" /> Upload
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        className="sr-only"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) void uploadLogo(f);
+                          e.target.value = '';
+                        }}
+                      />
+                    </label>
                     {form.companyLogoUrl.trim() ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -257,6 +294,7 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
                       />
                     ) : null}
                   </div>
+                  <span className="mt-1 block text-xs text-slate-400">Paste a URL or upload an image (PNG, JPG, WebP · max 5MB).</span>
                 </Field>
                 <Field>
                   <span className={label}>Kind</span>
@@ -292,7 +330,8 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
                 </Field>
                 <Field>
                   <span className={label}>Apply by</span>
-                  <input type="date" value={form.applicationDeadline} onChange={(e) => set('applicationDeadline', e.target.value)} className={input} />
+                  <input type="datetime-local" value={form.applicationDeadline} onChange={(e) => set('applicationDeadline', e.target.value)} className={input} />
+                  <span className="mt-1 block text-xs text-slate-400">Applications stop at this exact date &amp; time.</span>
                 </Field>
                 <Field>
                   <span className={label}>Passout years</span>
