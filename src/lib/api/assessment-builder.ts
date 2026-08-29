@@ -40,6 +40,8 @@ export interface CreateAssessmentPayload {
   durationMinutes?: number;
   proctored?: boolean;
   passingScore?: number;
+  subscriptionLockEnabled?: boolean;
+  profileLockEnabled?: boolean;
   sections: BuilderSection[];
 }
 
@@ -121,6 +123,8 @@ export interface EditableAssessment {
   durationMinutes: number;
   proctored: boolean;
   passingScore: number;
+  subscriptionLockEnabled: boolean;
+  profileLockEnabled: boolean;
   attempts: number;
   mcqCount: number;
   codingCount: number;
@@ -144,6 +148,8 @@ export interface EditAssessmentPayload {
   durationMinutes?: number;
   proctored?: boolean;
   passingScore?: number;
+  subscriptionLockEnabled?: boolean;
+  profileLockEnabled?: boolean;
   addSections?: BuilderSection[];
 }
 
