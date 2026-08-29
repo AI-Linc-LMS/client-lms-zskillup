@@ -135,7 +135,7 @@ export default function AssessmentsPage() {
     <div className="w-full">
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Assessments' }]} />
 
-      <PremiumLockGate feature="Assessments">
+      <PremiumLockGate feature="Assessments" module="mock">
       <ProfileLockGate feature="Assessments">
       {/* ── AI-Briefing black hero + golden mesh, with live stats ─────────── */}
       <Reveal>

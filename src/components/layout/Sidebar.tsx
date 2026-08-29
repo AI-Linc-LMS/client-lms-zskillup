@@ -21,13 +21,14 @@ import { InfoTip } from '@/components/ui/InfoTip';
 import { PROFILE_GATE_ENABLED } from '@/lib/profile/completion';
 import { useProfileCompletion } from '@/hooks/useProfileCompletion';
 import { useCalibrationStatus } from '@/hooks/useCalibrationStatus';
-import { useMySubscription } from '@/hooks/useMySubscription';
+import { moduleSubscriptionLocked, useMySubscription } from '@/hooks/useMySubscription';
 import { useOptionalGuide } from '@/components/guide/GuideProvider';
 import {
   navForPath,
   PROFILE_GATED_HREFS,
   CALIBRATION_GATED_HREFS,
   PREMIUM_GATED_HREFS,
+  PREMIUM_GATED_MODULE,
   PLAN_ONLY_HREFS,
   type NavItem,
 } from './nav-config';
@@ -96,7 +97,7 @@ export function Sidebar() {
   // "Explore Plans". Skip the fetch outside the student zone (the endpoint is
   // student-only) and hide plan-only items while there's no active plan.
   const isStudentZone = !/^\/(admin|tpo|superadmin)(\/|$)/.test(pathname);
-  const { planStatus } = useMySubscription(isStudentZone);
+  const { planStatus, sub } = useMySubscription(isStudentZone);
 
   const visibleSections = sections
     .map((s) => ({
@@ -111,7 +112,12 @@ export function Sidebar() {
   const isLocked = (href: string) =>
     (calibrationRequired && CALIBRATION_GATED_HREFS.has(href)) ||
     (!profileComplete && PROFILE_GATED_HREFS.has(href)) ||
-    (planStatus === 'none' && PREMIUM_GATED_HREFS.has(href));
+    // Premium padlock: only when the student has no plan AND the href's module is actually
+    // subscription-locked — so freeing a module (or the master paywall off) drops the padlock,
+    // matching the page gate instead of padlocking a page that now opens.
+    (planStatus === 'none' &&
+      PREMIUM_GATED_HREFS.has(href) &&
+      moduleSubscriptionLocked(sub, PREMIUM_GATED_MODULE[href]));
 
   // Collapsible accordion sidebar for EVERY role (student / admin / super-admin) -
   // sections expand on click, multi-open, with the active section open by default.
