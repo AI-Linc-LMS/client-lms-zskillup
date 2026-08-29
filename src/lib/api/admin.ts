@@ -446,6 +446,8 @@ export interface AdminMockRow {
   totalQuestions: number;
   passingScore: number;
   isActive: boolean;
+  subscriptionLockEnabled: boolean;
+  profileLockEnabled: boolean;
   createdAt: string;
 }
 
@@ -467,6 +469,8 @@ export interface AdminCreateMock {
   passingScore: number;
   questionIds: string[];
   isActive?: boolean;
+  subscriptionLockEnabled?: boolean;
+  profileLockEnabled?: boolean;
 }
 
 export type AdminUpdateMock = Partial<AdminCreateMock>;

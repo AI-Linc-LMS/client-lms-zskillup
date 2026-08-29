@@ -1,5 +1,6 @@
 import {
   Award,
+  SlidersHorizontal,
   BarChart3,
   Brain,
   Building2,
@@ -341,6 +342,7 @@ export const ADMIN_NAV: NavSection[] = [
       { label: 'Mock Tests', href: '/admin/mocks', icon: FileCheck2 },
       { label: 'Assessments', href: '/admin/scheduled-assessments', icon: CalendarClock },
       { label: 'Calibration', href: '/admin/calibration', icon: Target, tip: 'Toggle the Placement Readiness Test gate and pick which scheduled assessment is the calibration.' },
+      { label: 'Feature Locks', href: '/admin/settings', icon: SlidersHorizontal, tip: 'Turn the subscription paywall on or off platform-wide, without a developer change.' },
       { label: 'Courses', href: '/admin/courses', icon: GraduationCap },
       { label: 'Study Material', href: '/admin/study-material', icon: MonitorPlay },
     ],
