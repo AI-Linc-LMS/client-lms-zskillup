@@ -3,7 +3,25 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getMySubscription } from '@/lib/api/payments';
 import type { EntitlementDto, MySubscriptionDto } from '@/shared/dto/payments.dto';
+import type { FeatureLockModule } from '@/lib/api/feature-locks';
 import { EntitlementScope } from '@/shared/enums';
+
+/**
+ * Whether a given feature-lock module is EFFECTIVELY subscription-locked for this student,
+ * from the server-computed per-module map. Use this — not the bare `paywallEnabled` — for a
+ * module's up-front lock, so freeing one module (e.g. mocks) opens only that module's wall.
+ * Fails OPEN: null sub (loading/error) → not locked. Falls back to the master paywall when an
+ * older server omits the per-module map, preserving today's behaviour until the field lands.
+ */
+export function moduleSubscriptionLocked(
+  sub: MySubscriptionDto | null,
+  module: FeatureLockModule,
+): boolean {
+  if (!sub) return false;
+  const map = sub.subscriptionLocks;
+  if (map && typeof map[module] === 'boolean') return map[module];
+  return sub.paywallEnabled ?? false;
+}
 
 /** Which "tier" the student is in - drives the Upgrade & Renew module + nav. */
 export type PlanStatus = 'none' | 'custom' | 'platform';

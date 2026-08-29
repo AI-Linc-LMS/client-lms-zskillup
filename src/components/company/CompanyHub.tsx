@@ -41,7 +41,7 @@ import { CompanyMockTab as MockTab } from './CompanyMockTab';
 import { StudyMaterialTab } from '@/components/study-material/StudyMaterialTab';
 import { CodingProblemsList } from '@/components/coding/CodingProblemsList';
 import { useUpgradeGate } from '@/hooks/useUpgradeGate';
-import { useMySubscription } from '@/hooks/useMySubscription';
+import { moduleSubscriptionLocked, useMySubscription } from '@/hooks/useMySubscription';
 import { EntitlementScope } from '@/shared/enums';
 import type { PracticeAccessMapDto } from '@/shared/dto/payments.dto';
 import { UpgradeModal } from '@/components/billing/UpgradeModal';
@@ -171,11 +171,14 @@ export function CompanyHub({ content }: { content: HubContent }) {
   const upgrade = useUpgradeGate();
   // Full Mock is gated to THIS company's subscription (or full platform). Inert while
   // the paywall is off / for entitled users.
-  const { hasPlatform, active, paywallEnabled } = useMySubscription();
+  const { hasPlatform, active, sub } = useMySubscription();
   const ownsThisCompany =
     hasPlatform ||
     active.some((e) => e.scopeType === EntitlementScope.COMPANY && e.scopeRef === content.company.slug);
-  const mockLocked = paywallEnabled && !ownsThisCompany;
+  // Company-hub content follows the 'company' module lock (master paywall AND its admin
+  // toggle), so freeing company hubs opens them even while other modules stay paywalled.
+  const companyLocked = moduleSubscriptionLocked(sub, 'company');
+  const mockLocked = companyLocked && !ownsThisCompany;
   // Practice Quiz lock (Phase 8, single-scope): this company's practice is locked
   // unless the student owns it, it's the one free company, or the paywall/single-scope
   // is off. Server-driven map, fetched best-effort — fails OPEN (null → nothing locked).
@@ -189,7 +192,7 @@ export function CompanyHub({ content }: { content: HubContent }) {
       cancelled = true;
     };
   }, []);
-  const singleScope = paywallEnabled && !hasPlatform && !!accessMap?.singleScopeEnabled;
+  const singleScope = companyLocked && !hasPlatform && !!accessMap?.singleScopeEnabled;
   const companyPracticeLocked =
     singleScope && !ownsThisCompany && accessMap?.freeCompanySlug !== content.company.slug;
   const urlTab = searchParams.get('tab');

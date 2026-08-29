@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { getMySubscription } from '@/lib/api/payments';
 import { listInterviews } from '@/lib/api/mock-interviews';
 import { listResumes } from '@/lib/api/resumes';
+import { moduleSubscriptionLocked } from '@/hooks/useMySubscription';
 
 export type CareerTool = 'mock-interview' | 'resume';
 
@@ -47,7 +48,11 @@ export function useCareerAccess(tool: CareerTool): CareerAccessState {
       Promise.all([getMySubscription().catch(() => null), countFn().catch(() => [])]).then(
         ([sub, list]) => {
           if (cancelled) return;
-          const entitled = sub?.careerToolsEntitled ?? true; // fail open
+          // Entitled if bundled with a plan OR the admin has freed this tool's module
+          // (resume / mock_interview) — freeing the module opens the tool for everyone.
+          const toolModule = tool === 'resume' ? 'resume' : 'mock_interview';
+          const entitled =
+            (sub?.careerToolsEntitled ?? true) || !moduleSubscriptionLocked(sub, toolModule); // fail open
           const used = Array.isArray(list) ? list.length : 0;
           const limit = FREE_LIMIT[tool];
           setState({ loading: false, entitled, used, limit, locked: !entitled && used >= limit });

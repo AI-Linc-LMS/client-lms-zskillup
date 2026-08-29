@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ArrowRight, Building2, Check, Crown, Layers, ListTree, Lock, Search, SlidersHorizontal } from 'lucide-react';
 import type { ApiTopic } from '@/lib/api/catalog';
 import { listCodingTopics, type CodingTopic } from '@/lib/api/mocks';
-import { useMySubscription } from '@/hooks/useMySubscription';
+import { moduleSubscriptionLocked, useMySubscription } from '@/hooks/useMySubscription';
 import { getPracticeAccessMap } from '@/lib/api/payments';
 import type { PracticeAccessMapDto } from '@/shared/dto/payments.dto';
 import { EntitlementScope } from '@/shared/enums';
@@ -57,7 +57,7 @@ export function PracticePicker({
   const q = query.trim().toLowerCase();
 
   // ── access control: what the student owns, from live entitlements ──────────
-  const { hasPlatform, active, paywallEnabled } = useMySubscription();
+  const { hasPlatform, active, sub } = useMySubscription();
   const [onlyMine, setOnlyMine] = useState(false);
 
   const ownedSections = useMemo(
@@ -72,8 +72,9 @@ export function PracticePicker({
     () => new Set(active.filter((e) => e.scopeType === EntitlementScope.COMPANY && e.scopeRef).map((e) => e.scopeRef as string)),
     [active],
   );
-  // Only surface locks when the paywall is actually enforced (falls open otherwise).
-  const gating = paywallEnabled && !hasPlatform;
+  // Only surface locks when the 'practice' module is actually locked (master paywall AND
+  // its admin toggle) — falls open otherwise, and an admin freeing practice opens it.
+  const gating = moduleSubscriptionLocked(sub, 'practice') && !hasPlatform;
   // Option 2 (owner decision 2026-08): holding ANY company grant unlocks the GENERAL
   // practice surfaces (all sections, topics, coding) like a platform plan — a company
   // buyer gets the full prep journey. Per-company hubs stay gated per company, so

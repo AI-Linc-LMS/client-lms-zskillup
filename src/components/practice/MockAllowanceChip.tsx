@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Brain, Lock } from 'lucide-react';
-import { useMySubscription } from '@/hooks/useMySubscription';
+import { moduleSubscriptionLocked, useMySubscription } from '@/hooks/useMySubscription';
 
 /**
  * Plan-aware access chip for the Mock Assessment hero.
@@ -15,8 +15,8 @@ import { useMySubscription } from '@/hooks/useMySubscription';
  * still loading / entitled -> positive state.
  */
 export function MockAllowanceChip() {
-  const { careerToolsEntitled, paywallEnabled } = useMySubscription(true);
-  const locked = paywallEnabled && !careerToolsEntitled;
+  const { careerToolsEntitled, sub } = useMySubscription(true);
+  const locked = moduleSubscriptionLocked(sub, 'mock') && !careerToolsEntitled;
 
   if (locked) {
     return (
