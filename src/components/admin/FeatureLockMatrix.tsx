@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { StatusPill } from '@/components/student/StatusPill';
 import { AdminToggle } from './AdminToggle';
@@ -21,18 +21,32 @@ import { describeError } from '@/lib/api/errors';
 export function FeatureLockMatrix({
   settings,
   onChange,
+  externalBusy = false,
+  onBusyChange,
 }: {
   settings: FeatureLocksSettings;
   onChange: (next: FeatureLocksSettings) => void;
+  /** True while another flow on the page (the master paywall) is saving — blocks a
+   *  module save so the two can't overlap and clobber each other's optimistic state. */
+  externalBusy?: boolean;
+  /** Reports whether a per-module save is in flight, so the parent can block the master. */
+  onBusyChange?: (busy: boolean) => void;
 }) {
   const [savingModule, setSavingModule] = useState<FeatureLockModule | null>(null);
   const masterOff = !settings.masterPaywallEnabled;
+  // A save is in flight anywhere on the page (this matrix or the master toggle): disable
+  // every control so a second click is never silently dropped.
+  const anyBusy = savingModule !== null || externalBusy;
+
+  useEffect(() => {
+    onBusyChange?.(savingModule !== null);
+  }, [savingModule, onBusyChange]);
 
   const save = async (
     module: FeatureLockModule,
     patch: { subscription?: boolean; profile?: boolean },
   ) => {
-    if (savingModule) return;
+    if (anyBusy) return;
     const meta = MODULE_META.find((x) => x.module === module);
     if (patch.profile === true) {
       const ok = window.confirm(
@@ -79,7 +93,6 @@ export function FeatureLockMatrix({
           const lock = settings.modules.find((x) => x.module === meta.module);
           if (!lock) return null;
           const Icon = meta.icon;
-          const busy = savingModule === meta.module;
           return (
             <li
               key={meta.module}
@@ -103,7 +116,7 @@ export function FeatureLockMatrix({
                 </span>
                 <AdminToggle
                   checked={lock.subscription}
-                  disabled={busy}
+                  disabled={anyBusy}
                   onChange={(v) => void save(meta.module, { subscription: v })}
                   label={`${meta.label} subscription lock`}
                 />
@@ -118,7 +131,7 @@ export function FeatureLockMatrix({
                 </span>
                 <AdminToggle
                   checked={lock.profile}
-                  disabled={busy}
+                  disabled={anyBusy}
                   onChange={(v) => void save(meta.module, { profile: v })}
                   label={`${meta.label} profile completion lock`}
                 />

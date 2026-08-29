@@ -22,6 +22,10 @@ export default function AdminFeatureLocksPage() {
   const [data, setData] = useState<FeatureLocksSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [savingMaster, setSavingMaster] = useState(false);
+  // The matrix reports when a per-module PATCH is in flight, so the master save and a
+  // module save can never overlap — otherwise a failed save's rollback could clobber the
+  // other flow's optimistic change, leaving the UI disagreeing with the server.
+  const [matrixBusy, setMatrixBusy] = useState(false);
 
   useEffect(() => {
     getFeatureLocks()
@@ -34,9 +38,11 @@ export default function AdminFeatureLocksPage() {
   // FeatureLocksService reads it back as masterPaywallEnabled, so we toggle it through the
   // proven paywall endpoint and mirror the result into our local feature-locks state.
   const saveMaster = async (enabled: boolean) => {
-    if (!data || savingMaster) return;
-    const prev = data;
-    setData({ ...data, masterPaywallEnabled: enabled, masterPaywallSource: 'db' });
+    if (!data || savingMaster || matrixBusy) return;
+    const prevMaster = { enabled: data.masterPaywallEnabled, source: data.masterPaywallSource };
+    // Functional updates throughout so only the MASTER fields are ever touched — never a
+    // stale full-object snapshot that would revert a concurrent module change.
+    setData((d) => (d ? { ...d, masterPaywallEnabled: enabled, masterPaywallSource: 'db' } : d));
     setSavingMaster(true);
     try {
       const fresh = await updatePaywallSettings({ enabled });
@@ -45,7 +51,9 @@ export default function AdminFeatureLocksPage() {
       );
       toast.success(`Master subscription paywall turned ${enabled ? 'on' : 'off'}.`);
     } catch (err) {
-      setData(prev);
+      setData((d) =>
+        d ? { ...d, masterPaywallEnabled: prevMaster.enabled, masterPaywallSource: prevMaster.source } : d,
+      );
       toast.error(describeError(err, 'Could not save. Please try again.'));
     } finally {
       setSavingMaster(false);
@@ -108,7 +116,7 @@ export default function AdminFeatureLocksPage() {
               </div>
               <AdminToggle
                 checked={data.masterPaywallEnabled}
-                disabled={savingMaster}
+                disabled={savingMaster || matrixBusy}
                 onChange={(v) => void saveMaster(v)}
                 label="Master subscription paywall"
               />
@@ -137,7 +145,12 @@ export default function AdminFeatureLocksPage() {
                 independent of subscriptions. Set each module how you like.
               </p>
             </div>
-            <FeatureLockMatrix settings={data} onChange={setData} />
+            <FeatureLockMatrix
+              settings={data}
+              onChange={setData}
+              externalBusy={savingMaster}
+              onBusyChange={setMatrixBusy}
+            />
           </section>
         </div>
       )}
