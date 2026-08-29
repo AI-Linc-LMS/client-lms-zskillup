@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { FileText, Loader2, Send } from 'lucide-react';
+import { FileText, Loader2, Send, Upload, X } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/button';
 import { getPublicJobQuestions, applyToJobWith } from '@/lib/api/jobs';
+import { uploadResume } from '@/lib/api/media';
 import { listResumes } from '@/lib/api/resumes';
 import type { JobApplicationDto, JobPostingQuestionDto } from '@/shared/dto/jobs.dto';
 import type { ResumeSummaryDto } from '@/shared/dto/resume.dto';
@@ -43,12 +44,18 @@ export function ApplyDialog({
   const [note, setNote] = useState('');
   const [resumes, setResumes] = useState<ResumeSummaryDto[] | null>(null);
   const [resumeId, setResumeId] = useState('');
+  const [uploaded, setUploaded] = useState<{ url: string; name: string } | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
-    getPublicJobQuestions(jobId)
+    // Questions come from the PUBLIC route by slug. It used to hit the admin route by id,
+    // which a student 403s - so the form showed nothing while the server still required
+    // the answers and bounced the application.
+    getPublicJobQuestions(slug)
       .then((q) => alive && setQuestions(q))
       // Not knowing the questions must not block applying: the server re-checks, so a
       // failed fetch means "ask nothing here" rather than "refuse to submit".
@@ -61,7 +68,7 @@ export function ApplyDialog({
     return () => {
       alive = false;
     };
-  }, [jobId]);
+  }, [jobId, slug]);
 
   const missing = (questions ?? [])
     .filter((q) => q.isRequired && !(answers[q.id] ?? '').trim())
@@ -76,7 +83,11 @@ export function ApplyDialog({
           .filter(([, v]) => v.trim())
           .map(([questionId, answer]) => ({ questionId, answer })),
         note: note.trim() || undefined,
-        resumeId: resumeId || undefined,
+        // An uploaded PDF wins over a picked built resume - a student who did both meant
+        // the file. Only one resume travels with the application.
+        resumeId: uploaded ? undefined : resumeId || undefined,
+        resumeUrl: uploaded?.url,
+        resumeName: uploaded?.name,
       });
       onApplied(application);
     } catch (err) {
@@ -87,6 +98,21 @@ export function ApplyDialog({
   };
 
   const set = (id: string, v: string) => setAnswers((a) => ({ ...a, [id]: v }));
+
+  const onPickFile = async (file: File | undefined) => {
+    if (!file) return;
+    setUploadError(null);
+    setUploading(true);
+    try {
+      const r = await uploadResume(file);
+      setUploaded(r);
+      setResumeId(''); // one resume per application - the file replaces any picked one
+    } catch (err) {
+      setUploadError(describeError(err, 'Could not upload that file.'));
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <Modal open onClose={onClose} maxWidth="max-w-lg">
@@ -103,22 +129,16 @@ export function ApplyDialog({
             <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
               Resume (optional)
             </span>
+
             {resumes === null ? (
               <div className="mt-1 h-10 animate-pulse rounded-lg bg-slate-100" />
-            ) : resumes.length === 0 ? (
-              <p className="mt-1 text-sm leading-relaxed text-slate-600">
-                You haven&apos;t built a resume here yet - apply with your profile, or{' '}
-                <Link href="/resume-builder" className="font-semibold text-orange hover:underline">
-                  build one first
-                </Link>
-                .
-              </p>
-            ) : (
+            ) : resumes.length > 0 ? (
               <select
                 value={resumeId}
                 onChange={(e) => setResumeId(e.target.value)}
                 aria-label="Resume to attach"
-                className={input}
+                disabled={!!uploaded}
+                className={`${input} disabled:opacity-50`}
               >
                 <option value="">Apply with my profile (no resume file)</option>
                 {resumes.map((r) => (
@@ -127,8 +147,63 @@ export function ApplyDialog({
                   </option>
                 ))}
               </select>
-            )}
-            {resumeId ? (
+            ) : null}
+
+            <div className="mt-2">
+              {uploaded ? (
+                <div className="flex items-center justify-between gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm">
+                  <span className="flex min-w-0 items-center gap-1.5 text-emerald-800">
+                    <FileText className="size-4 shrink-0" />
+                    <span className="truncate">{uploaded.name}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setUploaded(null)}
+                    aria-label="Remove uploaded resume"
+                    className="shrink-0 text-emerald-700 hover:text-emerald-900"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+              ) : (
+                <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-navy transition-colors hover:bg-slate-50">
+                  {uploading ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Upload className="size-4" />
+                  )}
+                  {uploading ? 'Uploading…' : 'Upload a PDF resume'}
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    className="sr-only"
+                    disabled={uploading}
+                    onChange={(e) => {
+                      void onPickFile(e.target.files?.[0]);
+                      e.target.value = '';
+                    }}
+                  />
+                </label>
+              )}
+            </div>
+
+            {uploadError ? (
+              <p role="alert" className="mt-1 text-xs font-medium text-red-600">
+                {uploadError}
+              </p>
+            ) : null}
+
+            {resumes !== null && resumes.length === 0 && !uploaded ? (
+              <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                No built resume yet — upload a PDF above, apply with your profile, or{' '}
+                <Link href="/resume-builder" className="font-semibold text-orange hover:underline">
+                  build one
+                </Link>
+                .
+              </p>
+            ) : null}
+
+            {resumeId && !uploaded ? (
               <span className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
                 <FileText className="size-3.5" /> This resume travels with your application.
               </span>
@@ -252,7 +327,7 @@ export function ApplyDialog({
             <Button variant="outline" onClick={onClose} disabled={submitting}>
               Cancel
             </Button>
-            <Button onClick={submit} disabled={submitting || missing.length > 0}>
+            <Button onClick={submit} disabled={submitting || uploading || missing.length > 0}>
               {submitting ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
               Send application
             </Button>

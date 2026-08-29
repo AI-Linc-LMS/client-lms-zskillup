@@ -72,9 +72,12 @@ export function deadlineLabel(
 ): { text: string; tone: 'urgent' | 'soon' | 'normal' | 'closed' } | null {
   if (!iso) return null;
   const days = Math.ceil((new Date(iso).getTime() - Date.now()) / 86_400_000);
+  // The deadline is an exact instant, so when it is near, the time matters as much as
+  // the day - a student needs to know it closes at 5pm, not just "today".
+  const at = new Date(iso).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' });
   if (days < 0) return { text: 'Closed', tone: 'closed' };
-  if (days === 0) return { text: 'Closes today', tone: 'urgent' };
-  if (days === 1) return { text: 'Closes tomorrow', tone: 'urgent' };
+  if (days === 0) return { text: `Closes today, ${at}`, tone: 'urgent' };
+  if (days === 1) return { text: `Closes tomorrow, ${at}`, tone: 'urgent' };
   if (days <= 7) return { text: `${days} days left`, tone: 'soon' };
   return {
     text: `Apply by ${new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`,

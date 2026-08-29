@@ -1,72 +1,57 @@
 import Link from 'next/link';
 import {
   ArrowLeft,
+  ArrowRight,
   Briefcase,
-  Building2,
-  CalendarClock,
   FileText,
-  GraduationCap,
   IndianRupee,
-  ListChecks,
   MapPin,
-  Users,
 } from 'lucide-react';
 import { safeHttpUrl } from '@/lib/utils';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
 import { JobStatus } from '@/shared/enums';
 import { ApplyButton } from './ApplyButton';
+import { AuroraBackground, Reveal } from '@/components/motion/primitives';
+import { StatusPill, type StatusTone } from '@/components/student/StatusPill';
+import { Button } from '@/components/ui/button';
 import {
   compensationLabel,
   deadlineLabel,
-  EMPLOYMENT_LABEL,
   JOB_KIND_LABEL,
   WORK_MODE_LABEL,
 } from '@/lib/jobs/format';
 
-function Fact({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof MapPin;
-  label: string;
-  value: string;
-}) {
+const DEADLINE_TONE: Record<'urgent' | 'soon' | 'normal' | 'closed', StatusTone> = {
+  urgent: 'warning',
+  soon: 'warning',
+  normal: 'info',
+  closed: 'neutral',
+};
+
+/** §4.4(a) standard surface. */
+function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
-      <p className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-navy">
-        <Icon className="size-4 shrink-0 text-slate-400" /> {value}
-      </p>
+    <div className={`rounded-xl border border-slate-200 bg-white p-5 shadow-sm ${className}`}>
+      {children}
     </div>
   );
 }
 
-function Section({
-  title,
-  icon: Icon,
-  children,
-}: {
-  title: string;
-  icon: typeof MapPin;
-  children: React.ReactNode;
-}) {
+function Label({ children }: { children: React.ReactNode }) {
   return (
-    <section className="mt-8">
-      <h2 className="flex items-center gap-2 text-lg font-bold text-navy">
-        <Icon className="size-4.5 text-slate-400" aria-hidden="true" /> {title}
-      </h2>
-      <div className="mt-3">{children}</div>
-    </section>
+    <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{children}</p>
   );
 }
 
+type Fact = { icon: typeof MapPin; label: string; value: string };
+
 /**
- * One role, in full.
+ * One role, in full — the Prephasz Zone-C composition: a dark aurora hero over a
+ * two-column light body (content cards + a sticky apply / at-a-glance / eligibility
+ * rail), the same visual language as the board and the hubs.
  *
  * Shared between the server-rendered page and the client fallback for targeted roles,
- * so both render identically - the difference between them is only WHO could fetch the
- * data, never what it looks like once fetched.
+ * so both render identically — the difference is only WHO could fetch the data.
  */
 export function JobDetail({ job, others }: { job: JobPostingDto; others: JobPostingDto[] }) {
   const closes = deadlineLabel(job.applicationDeadline);
@@ -85,192 +70,278 @@ export function JobDetail({ job, others }: { job: JobPostingDto; others: JobPost
     job.otherRequirements ? { label: 'Other', value: job.otherRequirements } : null,
   ].filter((x): x is { label: string; value: string } => x !== null);
 
-  return (
-    <div className="mx-auto w-full max-w-4xl px-6 py-12">
-      <Link
-        href="/jobs"
-        className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-navy"
-      >
-        <ArrowLeft className="size-4" /> All jobs
-      </Link>
+  const headline: Fact[] = [
+    job.location
+      ? {
+          icon: MapPin,
+          label: 'Location',
+          value: `${job.location}${job.workMode ? ` · ${WORK_MODE_LABEL[job.workMode]}` : ''}`,
+        }
+      : null,
+    job.experience ? { icon: Briefcase, label: 'Experience', value: job.experience } : null,
+    pay ? { icon: IndianRupee, label: 'Compensation', value: pay } : null,
+  ].filter((x): x is Fact => x !== null);
 
-      <header className="mt-5 flex items-start gap-4">
-        {logoSrc ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={logoSrc}
-            alt=""
-            className="size-14 shrink-0 rounded-2xl object-contain ring-1 ring-slate-100"
+  const glance = [
+    pay ? { label: 'Compensation', value: pay } : null,
+    job.openings ? { label: 'Openings', value: String(job.openings) } : null,
+    job.workMode ? { label: 'Work mode', value: WORK_MODE_LABEL[job.workMode] } : null,
+  ].filter((x): x is { label: string; value: string } => x !== null);
+
+  const jdTile = jd ? (
+    <a
+      href={jd}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="mt-4 flex items-center gap-3 rounded-xl border border-slate-200 p-3 transition-colors hover:bg-slate-50"
+    >
+      <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-sky-50 text-sky-600 ring-1 ring-sky-100">
+        <FileText className="size-5" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-bold text-navy">
+          {job.jdFileName || 'Full job description'}
+        </span>
+        <span className="text-xs text-slate-500">PDF · opens in a new tab</span>
+      </span>
+      <span className="text-xs font-semibold text-slate-400">Open</span>
+    </a>
+  ) : null;
+
+  return (
+    <div className="mx-auto w-full max-w-6xl px-6 py-10">
+      {/* Dark aurora hero — the same one the board and hubs use. */}
+      <Reveal>
+        <section className="relative isolate overflow-hidden rounded-2xl p-6 text-white shadow-sm sm:p-8">
+          <AuroraBackground />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10"
           />
-        ) : (
-          <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-sky-50 text-sky-600 ring-1 ring-sky-100">
-            <Briefcase className="size-6" />
-          </span>
-        )}
-        <div className="min-w-0">
-          <h1 className="text-3xl font-extrabold tracking-tight text-navy">{job.title}</h1>
-          <p className="mt-1 text-base text-slate-600">{job.companyName}</p>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600">
-              {JOB_KIND_LABEL[job.jobKind]}
-            </span>
-            {job.employmentType ? (
-              <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600">
-                {EMPLOYMENT_LABEL[job.employmentType]}
-              </span>
-            ) : null}
-            {closes && closes.tone !== 'normal' ? (
-              <span
-                className={
-                  closes.tone === 'closed'
-                    ? 'rounded-full bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-500 ring-1 ring-slate-200'
-                    : 'rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-200'
-                }
-              >
-                {closes.text}
-              </span>
+          <div className="relative z-10">
+            <Link
+              href="/jobs"
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.08] px-3 py-1.5 text-xs font-semibold text-white/80 transition-colors hover:bg-white/15"
+            >
+              <ArrowLeft className="size-3.5" /> All jobs
+            </Link>
+
+            <div className="mt-6 flex items-start gap-4">
+              {logoSrc ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={logoSrc}
+                  alt=""
+                  className="size-14 shrink-0 rounded-2xl bg-white object-contain p-1.5 ring-1 ring-white/15"
+                />
+              ) : (
+                <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-white/10 text-white ring-1 ring-white/15">
+                  <Briefcase className="size-6" />
+                </span>
+              )}
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-white/45">
+                  {JOB_KIND_LABEL[job.jobKind]}
+                </p>
+                <h1 className="mt-1 bg-gradient-to-b from-white to-white/70 bg-clip-text text-3xl font-extrabold leading-[1.1] tracking-tight text-transparent sm:text-[40px]">
+                  {job.title}
+                </h1>
+                <p className="mt-1 text-white/65">{job.companyName}</p>
+              </div>
+            </div>
+
+            {headline.length > 0 ? (
+              <dl className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                {headline.map(({ icon: Icon, label, value }) => (
+                  <div
+                    key={label}
+                    className="rounded-xl border border-white/10 bg-white/5 px-3.5 py-3"
+                  >
+                    <dt className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/45">
+                      <Icon className="size-3.5 text-[#ffc42d]" /> {label}
+                    </dt>
+                    <dd className="mt-1 text-sm font-semibold text-white">{value}</dd>
+                  </div>
+                ))}
+              </dl>
             ) : null}
           </div>
+        </section>
+      </Reveal>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        {/* Main column */}
+        <div className="space-y-6">
+          {closed ? (
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm font-semibold text-slate-600">
+              This role is no longer accepting applications. It stays here so shared links keep
+              working — browse the board for live openings.
+            </div>
+          ) : null}
+
+          {job.description ? (
+            <Reveal>
+              <Card className="p-6">
+                <Label>About the role</Label>
+                <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-slate-600">
+                  {job.description}
+                </p>
+                {jdTile}
+              </Card>
+            </Reveal>
+          ) : jd ? (
+            <Reveal>
+              <Card className="p-6">
+                <Label>Job description</Label>
+                {jdTile}
+              </Card>
+            </Reveal>
+          ) : null}
+
+          {job.skills.length > 0 ? (
+            <Reveal>
+              <Card className="p-6">
+                <Label>Key skills</Label>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {job.skills.map((s) => (
+                    <span
+                      key={s}
+                      className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700"
+                    >
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </Card>
+            </Reveal>
+          ) : null}
+
+          {job.hiringStages.length > 0 ? (
+            <Reveal>
+              <Card className="p-6">
+                <Label>Hiring process</Label>
+                <ol className="mt-3 space-y-2.5">
+                  {job.hiringStages.map((stage, i) => (
+                    <li key={`${stage}-${i}`} className="flex items-start gap-3">
+                      <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-navy text-[11px] font-bold text-white">
+                        {i + 1}
+                      </span>
+                      <span className="text-sm leading-relaxed text-slate-700">{stage}</span>
+                    </li>
+                  ))}
+                </ol>
+              </Card>
+            </Reveal>
+          ) : job.hiringProcess ? (
+            <Reveal>
+              <Card className="p-6">
+                <Label>Hiring process</Label>
+                <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-slate-600">
+                  {job.hiringProcess}
+                </p>
+              </Card>
+            </Reveal>
+          ) : null}
+
+          {job.aboutCompany ? (
+            <Reveal>
+              <Card className="p-6">
+                <Label>About {job.companyName}</Label>
+                <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-slate-600">
+                  {job.aboutCompany}
+                </p>
+              </Card>
+            </Reveal>
+          ) : null}
         </div>
-      </header>
 
-      {closed ? (
-        <p className="mt-5 rounded-xl bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600 ring-1 ring-slate-200">
-          This role is no longer accepting applications. It stays here so shared links keep
-          working - browse the board for live openings.
-        </p>
-      ) : null}
+        {/* Sticky rail */}
+        <div className="space-y-5 lg:sticky lg:top-6 lg:self-start">
+          <Card>
+            <Label>Apply</Label>
+            {closed ? (
+              <p className="mt-3 text-sm text-slate-600">Applications are closed for this role.</p>
+            ) : applyHref ? (
+              <>
+                <Button asChild size="lg" className="mt-3 w-full">
+                  <a href={applyHref} target="_blank" rel="noopener noreferrer">
+                    Apply on the company site
+                  </a>
+                </Button>
+                <p className="mt-2 text-xs leading-relaxed text-slate-500">
+                  {job.companyName} takes applications directly, so this one isn&apos;t tracked in
+                  your ZSkillup applications.
+                </p>
+              </>
+            ) : (
+              <div className="mt-3">
+                <ApplyButton slug={job.slug} jobId={job.id} jobTitle={job.title} />
+              </div>
+            )}
+          </Card>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {job.location ? (
-          <Fact
-            icon={MapPin}
-            label="Location"
-            value={`${job.location}${job.workMode ? ` · ${WORK_MODE_LABEL[job.workMode]}` : ''}`}
-          />
-        ) : null}
-        {job.experience ? <Fact icon={Briefcase} label="Experience" value={job.experience} /> : null}
-        {pay ? <Fact icon={IndianRupee} label="Compensation" value={pay} /> : null}
-        {job.openings ? <Fact icon={Users} label="Openings" value={String(job.openings)} /> : null}
-        {closes ? <Fact icon={CalendarClock} label="Apply by" value={closes.text} /> : null}
+          {glance.length > 0 || closes ? (
+            <Card>
+              <Label>At a glance</Label>
+              <dl className="mt-3 space-y-2.5">
+                {glance.map((g) => (
+                  <div key={g.label} className="flex items-center justify-between gap-3">
+                    <dt className="text-xs text-slate-500">{g.label}</dt>
+                    <dd className="text-sm font-semibold text-navy">{g.value}</dd>
+                  </div>
+                ))}
+                {closes ? (
+                  <div className="flex items-center justify-between gap-3">
+                    <dt className="text-xs text-slate-500">Apply by</dt>
+                    <dd>
+                      <StatusPill tone={DEADLINE_TONE[closes.tone]} label={closes.text} />
+                    </dd>
+                  </div>
+                ) : null}
+              </dl>
+            </Card>
+          ) : null}
+
+          {eligibility.length > 0 ? (
+            <Card>
+              <Label>Who can apply</Label>
+              <dl className="mt-3 space-y-3">
+                {eligibility.map((e) => (
+                  <div key={e.label}>
+                    <dt className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                      {e.label}
+                    </dt>
+                    <dd className="mt-0.5 text-sm text-slate-700">{e.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </Card>
+          ) : null}
+        </div>
       </div>
 
-      {job.description ? (
-        <Section title="About the role" icon={FileText}>
-          <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-600">
-            {job.description}
-          </p>
-        </Section>
-      ) : null}
-
-      {jd ? (
-        <a
-          href={jd}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-4 inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-navy shadow-sm transition-colors hover:bg-slate-50"
-        >
-          <FileText className="size-4 text-slate-400" />
-          {job.jdFileName || 'Download the full job description (PDF)'}
-        </a>
-      ) : null}
-
-      {job.skills.length > 0 ? (
-        <Section title="Key skills" icon={ListChecks}>
-          <div className="flex flex-wrap gap-2">
-            {job.skills.map((s) => (
-              <span
-                key={s}
-                className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700"
+      {others.length > 0 ? (
+        <section className="mt-10">
+          <Label>More roles</Label>
+          <h2 className="mt-1 text-lg font-bold text-navy">Other openings</h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {others.map((o) => (
+              <Link
+                key={o.id}
+                href={`/jobs/${o.slug}`}
+                className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:bg-slate-50"
               >
-                {s}
-              </span>
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-sky-50 text-sky-600 ring-1 ring-sky-100">
+                  <Briefcase className="size-5" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-bold text-navy">{o.title}</span>
+                  <span className="block truncate text-xs text-slate-500">{o.companyName}</span>
+                </span>
+                <ArrowRight className="size-4 shrink-0 text-slate-300" />
+              </Link>
             ))}
           </div>
-        </Section>
-      ) : null}
-
-      {eligibility.length > 0 ? (
-        <Section title="Who can apply" icon={GraduationCap}>
-          <dl className="grid gap-3 sm:grid-cols-2">
-            {eligibility.map((e) => (
-              <div key={e.label} className="rounded-xl border border-slate-200 bg-white p-4">
-                <dt className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-                  {e.label}
-                </dt>
-                <dd className="mt-1 text-sm text-slate-700">{e.value}</dd>
-              </div>
-            ))}
-          </dl>
-        </Section>
-      ) : null}
-
-      {job.hiringStages.length > 0 ? (
-        <Section title="Hiring process" icon={ListChecks}>
-          <ol className="space-y-2">
-            {job.hiringStages.map((stage, i) => (
-              <li key={`${stage}-${i}`} className="flex items-start gap-3">
-                <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-navy text-[11px] font-bold text-white">
-                  {i + 1}
-                </span>
-                <span className="text-sm leading-relaxed text-slate-700">{stage}</span>
-              </li>
-            ))}
-          </ol>
-        </Section>
-      ) : job.hiringProcess ? (
-        <Section title="Hiring process" icon={ListChecks}>
-          <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-600">
-            {job.hiringProcess}
-          </p>
-        </Section>
-      ) : null}
-
-      {job.aboutCompany ? (
-        <Section title={`About ${job.companyName}`} icon={Building2}>
-          <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-600">
-            {job.aboutCompany}
-          </p>
-        </Section>
-      ) : null}
-
-      {/* Two kinds of role, and they must not look alike. When the employer collects
-          applications themselves we send the student out and record nothing - claiming
-          to have received an application we never see would be a lie. */}
-      {closed ? null : applyHref ? (
-        <div className="mt-9">
-          <a
-            href={applyHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full bg-navy px-6 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-navy/90"
-          >
-            Apply on the company site
-          </a>
-          <p className="mt-2 text-xs text-slate-500">
-            {job.companyName} takes applications directly, so this one is not tracked in your
-            ZSkillup applications list.
-          </p>
-        </div>
-      ) : (
-        <ApplyButton slug={job.slug} jobId={job.id} jobTitle={job.title} />
-      )}
-
-      {others.length > 0 ? (
-        <section className="mt-12 border-t border-slate-200 pt-8">
-          <h2 className="text-lg font-bold text-navy">Other openings</h2>
-          <ul className="mt-3 space-y-2">
-            {others.map((o) => (
-              <li key={o.id}>
-                <Link
-                  href={`/jobs/${o.slug}`}
-                  className="text-sm font-semibold text-navy hover:underline"
-                >
-                  {o.title} <span className="font-normal text-slate-500">· {o.companyName}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
         </section>
       ) : null}
     </div>

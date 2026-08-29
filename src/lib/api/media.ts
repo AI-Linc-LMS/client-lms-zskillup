@@ -46,6 +46,42 @@ export function uploadLiveSessionCover(file: File): Promise<string> {
   return uploadAdminImage(file, 'live-session-cover');
 }
 
+/** Company logo on a job posting (admin). Same image rules as a cover. */
+export function uploadCompanyLogo(file: File): Promise<string> {
+  return uploadAdminImage(file, 'job-logo');
+}
+
+/** Max resume PDF size. Resumes are a few pages — keep it modest. */
+export const MAX_RESUME_BYTES = 5 * 1024 * 1024; // 5 MB
+
+/**
+ * Upload a candidate resume PDF from the apply form. Unlike the admin uploaders this
+ * hits a STUDENT-callable presign (/me/media/resume-presign); the server fixes the
+ * purpose so the file can only land in the resume prefix. Returns the stored URL + the
+ * original filename to show the admin.
+ */
+export async function uploadResume(file: File): Promise<{ url: string; name: string }> {
+  if (file.type !== 'application/pdf') {
+    throw new Error('Please choose a PDF resume.');
+  }
+  if (file.size > MAX_RESUME_BYTES) {
+    throw new Error('That resume is too large (max 5 MB).');
+  }
+  const { uploadUrl, publicUrl } = (
+    await apiClient.post<PresignUploadResultDto>('/api/v1/me/media/resume-presign', {
+      contentType: 'application/pdf',
+      purpose: 'resume',
+    })
+  ).data;
+  const res = await fetch(uploadUrl, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/pdf' },
+    body: file,
+  });
+  if (!res.ok) throw new Error('Upload to storage failed. Please try again.');
+  return { url: publicUrl, name: file.name };
+}
+
 /**
  * Upload a job description PDF.
  *
