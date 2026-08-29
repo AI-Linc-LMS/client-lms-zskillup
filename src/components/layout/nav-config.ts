@@ -41,6 +41,7 @@ import {
   Video,
   Wallet,
 } from 'lucide-react';
+import type { FeatureLockModule } from '@/lib/api/feature-locks';
 
 /**
  * Sidebar navigation model (frontend/CLAUDE.md §4), now ROLE/ROUTE-AWARE.
@@ -173,6 +174,17 @@ export const PREMIUM_GATED_HREFS = new Set<string>([
   '/mock-assessment',
   '/assessments',
 ]);
+
+/** Which feature-lock module each premium-gated href belongs to, so the sidebar padlock
+ *  follows that module's effective subscription lock — freeing the module drops the padlock,
+ *  and it never shows while the module is unlocked (master paywall off or admin-freed). */
+export const PREMIUM_GATED_MODULE: Record<string, FeatureLockModule> = {
+  '/practice-wish': 'practice',
+  '/mock-interview': 'mock_interview',
+  '/resume-builder': 'resume',
+  '/mock-assessment': 'mock',
+  '/assessments': 'mock',
+};
 
 /** Student features GENERATED from the one-time Placement Readiness Test - locked
  *  until it's completed because they're derived from its result. Deliberately

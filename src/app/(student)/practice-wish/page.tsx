@@ -118,7 +118,7 @@ export default function PracticeWishPage() {
         ]}
       />
 
-      <PremiumLockGate feature="Non-Adaptive practice" contentClassName="space-y-8">
+      <PremiumLockGate feature="Non-Adaptive practice" module="practice" contentClassName="space-y-8">
       {/* hero */}
       <section data-tour="aswish:hero" className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] p-6 text-white shadow-sm sm:p-8">
         <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#ffc42d]/25 blur-3xl" />

@@ -4,6 +4,8 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Check, Crown } from 'lucide-react';
 import { useUpgradeGate } from '@/hooks/useUpgradeGate';
+import { moduleSubscriptionLocked, useMySubscription } from '@/hooks/useMySubscription';
+import type { FeatureLockModule } from '@/lib/api/feature-locks';
 import { cn } from '@/lib/utils';
 
 const INCLUDED = [
@@ -26,17 +28,29 @@ const INCLUDED = [
  */
 export function PremiumLockGate({
   feature,
+  module,
   contentClassName,
   children,
 }: {
   feature: string;
+  /** The feature-lock module this page belongs to. When given, the wall follows THAT
+   *  module's effective subscription lock — so an admin freeing the module opens the page —
+   *  instead of the bare master paywall. Omit for the generic "on a free plan" gate. */
+  module?: FeatureLockModule;
   contentClassName?: string;
   children: ReactNode;
 }) {
   // `gated` is false while the subscription is still loading (useUpgradeGate requires
   // !loading), so the page renders normally until we KNOW the student is on a free plan.
   // It can never flash a wall at someone who has paid.
-  const { gated } = useUpgradeGate();
+  const generic = useUpgradeGate();
+  const { loading, planStatus, sub } = useMySubscription();
+  // Module-aware: locked only when THIS module is subscription-locked and the student has no
+  // plan. Freeing the module (or any active plan) opens the page. Falls back to the generic
+  // master-paywall gate when no module is supplied.
+  const gated = module
+    ? !loading && moduleSubscriptionLocked(sub, module) && planStatus === 'none'
+    : generic.gated;
   if (!gated) return <div className={contentClassName}>{children}</div>;
 
   return (
