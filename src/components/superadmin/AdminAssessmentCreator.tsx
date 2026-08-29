@@ -43,6 +43,8 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
     codingCount: '0',
     difficulty: 'MIXED' as 'EASY' | 'MEDIUM' | 'HARD' | 'MIXED',
     proctored: true,
+    subscriptionLockEnabled: true,
+    profileLockEnabled: false,
     cohortId: '',
   });
   const [topicSel, setTopicSel] = useState<Set<string>>(new Set());
@@ -123,6 +125,8 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
         codingCount: coding || undefined,
         difficulty: form.difficulty,
         proctored: form.proctored,
+        subscriptionLockEnabled: form.subscriptionLockEnabled,
+        profileLockEnabled: form.profileLockEnabled,
         cohortId: form.cohortId || undefined,
         topicIds: topicSel.size > 0 ? [...topicSel] : undefined,
         codingTopics: codingSel.size > 0 ? [...codingSel] : undefined,
@@ -386,6 +390,24 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
             className="size-4 accent-[#f5b400]"
           />
           <span className="text-sm font-medium text-slate-600">Proctored</span>
+        </label>
+        <label className="flex items-center gap-2 pt-6">
+          <input
+            type="checkbox"
+            checked={form.subscriptionLockEnabled}
+            onChange={(e) => setForm((f) => ({ ...f, subscriptionLockEnabled: e.target.checked }))}
+            className="size-4 accent-[#f5b400]"
+          />
+          <span className="text-sm font-medium text-slate-600">Require subscription / upgrade (paywall)</span>
+        </label>
+        <label className="flex items-center gap-2 pt-6">
+          <input
+            type="checkbox"
+            checked={form.profileLockEnabled}
+            onChange={(e) => setForm((f) => ({ ...f, profileLockEnabled: e.target.checked }))}
+            className="size-4 accent-[#f5b400]"
+          />
+          <span className="text-sm font-medium text-slate-600">Require profile completion (Placement Readiness Test)</span>
         </label>
 
         {/* Availability */}

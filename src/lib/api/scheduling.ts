@@ -120,6 +120,8 @@ export interface BuildAssessmentPayload {
   codingCount?: number;
   difficulty?: 'EASY' | 'MEDIUM' | 'HARD' | 'MIXED';
   proctored?: boolean;
+  subscriptionLockEnabled?: boolean;
+  profileLockEnabled?: boolean;
   /** Target a single individual (non-college) cohort — members-only visibility. */
   cohortId?: string;
   topicIds?: string[];

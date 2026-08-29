@@ -136,6 +136,8 @@ export function AssessmentWizard({
   const [endAt, setEndAt] = useState('');
   const [durationMinutes, setDurationMinutes] = useState(60);
   const [proctored, setProctored] = useState(true);
+  const [subscriptionLock, setSubscriptionLock] = useState(true);
+  const [profileLock, setProfileLock] = useState(false);
   const [passingScore, setPassingScore] = useState(60);
 
   // pickers: MCQ taxonomy, coding tags, colleges + the selected college's cohorts
@@ -236,6 +238,8 @@ export function AssessmentWizard({
         if (e.endsAt) setEndAt(toLocal(e.endsAt));
         setDurationMinutes(e.durationMinutes);
         setProctored(e.proctored);
+        setSubscriptionLock(e.subscriptionLockEnabled);
+        setProfileLock(e.profileLockEnabled);
         setPassingScore(e.passingScore);
       })
       .catch(() => {});
@@ -346,6 +350,8 @@ export function AssessmentWizard({
           endsAt: new Date(endAt).toISOString(),
           durationMinutes,
           proctored,
+          subscriptionLockEnabled: subscriptionLock,
+          profileLockEnabled: profileLock,
           passingScore,
           addSections: payloadSections,
         });
@@ -367,6 +373,8 @@ export function AssessmentWizard({
           endsAt: new Date(endAt).toISOString(),
           durationMinutes,
           proctored,
+          subscriptionLockEnabled: subscriptionLock,
+          profileLockEnabled: profileLock,
           passingScore,
           sections: payloadSections,
         });
@@ -545,6 +553,14 @@ export function AssessmentWizard({
                 <label className="mt-5 flex items-center gap-2">
                   <input type="checkbox" checked={proctored} onChange={(e) => setProctored(e.target.checked)} className="size-4 accent-orange" />
                   <span className="text-sm font-medium text-slate-600">Proctored (camera + mic)</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" checked={subscriptionLock} onChange={(e) => setSubscriptionLock(e.target.checked)} className="size-4 accent-orange" />
+                  <span className="text-sm font-medium text-slate-600">Require subscription / upgrade (paywall)</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" checked={profileLock} onChange={(e) => setProfileLock(e.target.checked)} className="size-4 accent-orange" />
+                  <span className="text-sm font-medium text-slate-600">Require profile completion (Placement Readiness Test)</span>
                 </label>
               </div>
             </div>
