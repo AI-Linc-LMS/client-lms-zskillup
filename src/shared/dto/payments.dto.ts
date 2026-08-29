@@ -247,6 +247,12 @@ export interface MySubscriptionDto {
   /** Career tools (Mock Interview, Resume Builder) unlocked — bundled with a
    *  Company hub or the Full Platform plan (true while the paywall is off). */
   careerToolsEntitled: boolean;
+  /** Per-module EFFECTIVE subscription-lock state (master paywall AND the module's
+   *  admin toggle). `true` = locked for a non-entitled student; `false` = open. Lets the
+   *  FE mirror a single module being freed. Optional — older servers omit it, and the FE
+   *  falls back to `paywallEnabled`. Keys: mock, practice, coding, company, mock_interview,
+   *  resume, study_material. */
+  subscriptionLocks?: Record<string, boolean>;
 }
 
 /**

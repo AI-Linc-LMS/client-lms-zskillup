@@ -31,7 +31,7 @@ import { AnimatedNumber, AuroraBackground, Reveal, Stagger, StaggerItem } from '
 import { StudyMaterialTab } from '@/components/study-material/StudyMaterialTab';
 import { UpgradeModal } from '@/components/billing/UpgradeModal';
 import { useUpgradeGate } from '@/hooks/useUpgradeGate';
-import { useMySubscription } from '@/hooks/useMySubscription';
+import { moduleSubscriptionLocked, useMySubscription } from '@/hooks/useMySubscription';
 import { useCartOptional } from '@/components/billing/CartProvider';
 import { ACCENT_CLASS, sectionDescriptorFor, sectionMetaFor } from '@/components/practice/section-meta';
 import { sectionLeaves, type SectionLeaf, type SectionRoot } from '@/lib/sections/section-catalog';
@@ -105,7 +105,7 @@ export function SectionHub({ section }: { section: SectionRoot }) {
   const reduce = useReducedMotion();
 
   const upgrade = useUpgradeGate();
-  const { hasPlatform, active, paywallEnabled } = useMySubscription();
+  const { hasPlatform, active, sub } = useMySubscription();
   const cart = useCartOptional();
   const [prices, setPrices] = useState<PriceBookEntryDto[]>([]);
   useEffect(() => {
@@ -181,7 +181,8 @@ export function SectionHub({ section }: { section: SectionRoot }) {
   // Only surface locks when the paywall is enforced AND the aggressive single-scope
   // model is on (falls open otherwise). Ownership is always checked first, so an
   // owned sub-topic (or the section's free one) is never locked.
-  const singleScope = paywallEnabled && !hasPlatform && !!accessMap?.singleScopeEnabled;
+  const singleScope =
+    moduleSubscriptionLocked(sub, 'practice') && !hasPlatform && !!accessMap?.singleScopeEnabled;
   const topicLocked = useCallback(
     (slug: string) =>
       singleScope &&

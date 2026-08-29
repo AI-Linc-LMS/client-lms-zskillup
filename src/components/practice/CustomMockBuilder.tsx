@@ -10,7 +10,7 @@ import { listTopicsWithCounts, type ApiTopic } from '@/lib/api/catalog';
 import { createCustomMock, listCodingTopics, type CodingTopic } from '@/lib/api/mocks';
 import { ApiRequestError } from '@/lib/api/types';
 import { UpgradeModal } from '@/components/billing/UpgradeModal';
-import { useMySubscription } from '@/hooks/useMySubscription';
+import { moduleSubscriptionLocked, useMySubscription } from '@/hooks/useMySubscription';
 import { Button } from '@/components/ui/button';
 import { HIDDEN_ROOT_SLUGS, sectionMetaFor } from './section-meta';
 
@@ -26,8 +26,11 @@ export function CustomMockBuilder() {
   // careerToolsEntitled, not planStatus. Fails OPEN: still loading / paywall off /
   // entitled -> render the builder normally. A non-entitled start would just 403 PAYWALL,
   // so we lock the build up front instead of letting them assemble a mock they can't run.
-  const { loading: subLoading, careerToolsEntitled, paywallEnabled } = useMySubscription();
-  const mockLocked = !subLoading && paywallEnabled && !careerToolsEntitled;
+  // Gate on the 'mock' MODULE lock (master paywall AND the module's admin toggle), not the
+  // bare master paywall — so an admin freeing mocks opens this builder even while the paywall
+  // stays on for other modules.
+  const { loading: subLoading, careerToolsEntitled, sub } = useMySubscription();
+  const mockLocked = !subLoading && moduleSubscriptionLocked(sub, 'mock') && !careerToolsEntitled;
   const [topics, setTopics] = useState<ApiTopic[] | null>(null);
   const [codingTopicList, setCodingTopicList] = useState<CodingTopic[]>([]);
   const [sections, setSections] = useState<Set<string>>(new Set());
