@@ -33,9 +33,18 @@ interface FormState {
   durationMinutes: number;
   passingScore: number;
   isActive: boolean;
+  subscriptionLockEnabled: boolean;
+  profileLockEnabled: boolean;
 }
 
-const EMPTY_FORM: FormState = { title: '', durationMinutes: 30, passingScore: 60, isActive: true };
+const EMPTY_FORM: FormState = {
+  title: '',
+  durationMinutes: 30,
+  passingScore: 60,
+  isActive: true,
+  subscriptionLockEnabled: true,
+  profileLockEnabled: false,
+};
 
 export function MocksAdmin() {
   const [mocks, setMocks] = useState<AdminMockRow[] | null>(null);
@@ -102,6 +111,8 @@ export function MocksAdmin() {
         durationMinutes: detail.durationMinutes,
         passingScore: detail.passingScore,
         isActive: detail.isActive,
+        subscriptionLockEnabled: detail.subscriptionLockEnabled ?? true,
+        profileLockEnabled: detail.profileLockEnabled ?? false,
       });
       setSelected(detail.questions.map((q) => q.id));
       setEditingId(row.id);
@@ -135,6 +146,8 @@ export function MocksAdmin() {
         durationMinutes: form.durationMinutes,
         passingScore: form.passingScore,
         isActive: form.isActive,
+        subscriptionLockEnabled: form.subscriptionLockEnabled,
+        profileLockEnabled: form.profileLockEnabled,
         questionIds: selected,
       };
       if (mode === 'edit' && editingId) {
@@ -232,6 +245,26 @@ export function MocksAdmin() {
               className="rounded border-slate-300"
             />
             Active (visible to students)
+          </label>
+          <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-600 sm:col-span-2">
+            <input
+              type="checkbox"
+              checked={form.subscriptionLockEnabled}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, subscriptionLockEnabled: e.target.checked }))
+              }
+              className="rounded border-slate-300"
+            />
+            Require subscription / upgrade (paywall) to start
+          </label>
+          <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-600 sm:col-span-2">
+            <input
+              type="checkbox"
+              checked={form.profileLockEnabled}
+              onChange={(e) => setForm((f) => ({ ...f, profileLockEnabled: e.target.checked }))}
+              className="rounded border-slate-300"
+            />
+            Require profile completion (Placement Readiness Test) to start
           </label>
         </div>
 

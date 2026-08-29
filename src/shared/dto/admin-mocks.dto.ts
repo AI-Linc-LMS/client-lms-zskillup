@@ -47,6 +47,16 @@ export class AdminCreateMockDto {
   @IsBoolean()
   isActive?: boolean;
 
+  /** Per-assessment lock toggles. Omitted ⇒ the entity defaults (subscription ON,
+   *  profile OFF), so behaviour is unchanged unless an admin sets them. */
+  @IsOptional()
+  @IsBoolean()
+  subscriptionLockEnabled?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  profileLockEnabled?: boolean;
+
   @IsArray()
   @ArrayMinSize(1)
   @ArrayMaxSize(200)
@@ -81,6 +91,14 @@ export class AdminUpdateMockDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  subscriptionLockEnabled?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  profileLockEnabled?: boolean;
 
   @IsOptional()
   @IsArray()
