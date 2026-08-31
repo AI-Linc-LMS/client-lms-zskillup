@@ -5,7 +5,12 @@ import { toast } from 'sonner';
 import { Loader2, Megaphone } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/button';
-import { notifyLiveSession, type LiveSessionDto } from '@/lib/api/live-sessions';
+import {
+  listLiveSessionNotifications,
+  notifyLiveSession,
+  type LiveSessionDto,
+} from '@/lib/api/live-sessions';
+import type { EntityNotificationSendDto } from '@/shared/dto/entity-notify.dto';
 import {
   listAdminColleges,
   listAdminCollegeCohorts,
@@ -51,8 +56,10 @@ export function NotifyStudentsDialog({
   const [cohorts, setCohorts] = useState<AdminCohortRow[]>([]);
   const [cohortId, setCohortId] = useState('');
   const [sending, setSending] = useState(false);
+  const [history, setHistory] = useState<EntityNotificationSendDto[] | null>(null);
 
-  // Reset the form each time a different session is opened, prefilling a sensible title.
+  // Reset the form each time a different session is opened, prefilling a sensible title,
+  // and load what has already been sent (this session's notifications are repeatable).
   useEffect(() => {
     if (!session) return;
     setTitle(`Reminder: ${session.title}`);
@@ -60,6 +67,10 @@ export function NotifyStudentsDialog({
     setScope('PLATFORM');
     setCollegeId('');
     setCohortId('');
+    setHistory(null);
+    listLiveSessionNotifications(session.id)
+      .then(setHistory)
+      .catch(() => setHistory([]));
   }, [session]);
 
   // Colleges are needed the moment the audience narrows below the whole platform.
@@ -101,8 +112,12 @@ export function NotifyStudentsDialog({
         cohortId: scope === 'COHORT' ? cohortId : undefined,
       });
       toast.success(`Notified ${recipients} ${recipients === 1 ? 'student' : 'students'}.`);
+      setBody('');
       onSent?.();
-      onClose();
+      // Stay open and refresh the log — sending again (a later reminder) is the point.
+      listLiveSessionNotifications(session.id)
+        .then(setHistory)
+        .catch(() => undefined);
     } catch (err) {
       toast.error(describeError(err, 'Could not send the notification.'));
     } finally {
@@ -198,13 +213,35 @@ export function NotifyStudentsDialog({
         />
       </label>
 
+      {history && history.length > 0 ? (
+        <div className="mt-4 border-t border-slate-100 pt-3">
+          <span className={labelCls}>Sent so far</span>
+          <ul className="mt-2 space-y-1.5">
+            {history.map((h) => (
+              <li
+                key={h.id}
+                className="flex items-center justify-between gap-2 text-xs text-slate-500"
+              >
+                <span className="min-w-0 truncate">
+                  {h.title} · {SCOPES.find((s) => s.value === h.scope)?.label ?? h.scope}
+                </span>
+                <span className="shrink-0 tabular-nums">
+                  {h.recipients} ·{' '}
+                  {new Date(h.sentAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
       <div className="mt-5 flex items-center justify-end gap-3">
         <Button variant="outline" onClick={onClose} disabled={sending}>
-          Cancel
+          {history && history.length > 0 ? 'Done' : 'Cancel'}
         </Button>
         <Button onClick={send} disabled={sending || invalid}>
           {sending ? <Loader2 className="size-4 animate-spin" /> : <Megaphone className="size-4" />}
-          Send notification
+          {history && history.length > 0 ? 'Send another' : 'Send notification'}
         </Button>
       </div>
     </Modal>
