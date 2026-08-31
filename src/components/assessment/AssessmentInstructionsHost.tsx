@@ -62,12 +62,18 @@ export function AssessmentInstructionsHost({
             .then((list) => list.find((a) => a.id === scheduledId) ?? null)
             .catch(() => null),
         ),
-        getMockHistory('assessment').catch(() => [] as Array<{ mockTestId: string; attemptId: string }>),
+        getMockHistory('assessment').catch(
+          () => [] as Array<{ mockTestId: string; attemptId: string; scheduledAssessmentId?: string | null }>,
+        ),
       ]);
       if (!alive) return;
       setMock(m);
       setSched(s);
-      const done = hist.find((h) => h.mockTestId === mockId);
+      // Match THIS sitting, not merely the mock — a mock reused across sittings must not
+      // read a previous sitting's attempt as "you already completed this assessment".
+      const done = hist.find(
+        (h) => h.mockTestId === mockId && h.scheduledAssessmentId === scheduledId,
+      );
       setAttemptId(done?.attemptId ?? null);
       setLoading(false);
     })();
@@ -114,7 +120,7 @@ export function AssessmentInstructionsHost({
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
         <div className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6">
-          <MockRunner mockId={mockId} proctored={proctored} startImmediately />
+          <MockRunner mockId={mockId} scheduledId={scheduledId} proctored={proctored} startImmediately />
         </div>
       </div>
     );

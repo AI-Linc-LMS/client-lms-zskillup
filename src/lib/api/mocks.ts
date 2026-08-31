@@ -125,6 +125,8 @@ export interface ApiMockResult {
 export interface ApiMockAttemptHistory {
   attemptId: string;
   mockTestId: string;
+  /** The sitting this attempt belonged to (null for practice/catalog/custom). */
+  scheduledAssessmentId?: string | null;
   title: string;
   status: MockAttemptStatus;
   score: number;
@@ -240,8 +242,13 @@ export async function getMock(id: string): Promise<ApiMockSummary> {
   return res.data;
 }
 
-export async function startMock(id: string): Promise<ApiMockStart> {
-  const res = await apiClient.post<ApiMockStart>(`/api/v1/mocks/${id}/start`);
+/** Start (or resume) an attempt. For a scheduled drive, pass the sitting id so a mock
+ *  reused across sittings opens a clean attempt for THIS sitting (not the previous one). */
+export async function startMock(id: string, scheduledAssessmentId?: string): Promise<ApiMockStart> {
+  const qs = scheduledAssessmentId
+    ? `?assessment=${encodeURIComponent(scheduledAssessmentId)}`
+    : '';
+  const res = await apiClient.post<ApiMockStart>(`/api/v1/mocks/${id}/start${qs}`);
   return res.data;
 }
 
