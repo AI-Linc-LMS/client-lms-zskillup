@@ -544,6 +544,7 @@ export function QuestionsAdmin() {
           topicNames={topicNames}
           companyNames={companyNames}
           onClose={() => setDetailId(null)}
+          onChanged={() => void loadPage()}
         />
       ) : null}
     </div>
@@ -700,17 +701,21 @@ function QuestionDetailDrawer({
   topicNames,
   companyNames,
   onClose,
+  onChanged,
 }: {
   id: string;
   topicNames: Record<string, string>;
   companyNames: Record<string, string>;
   onClose: () => void;
+  /** Called after an in-place edit (difficulty) so the list row reflects it. */
+  onChanged?: () => void;
 }) {
   const [detail, setDetail] = useState<AdminQuestionDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   // Diagram editor (existing questions): local draft + explicit save.
   const [image, setImage] = useState('');
   const [imageBusy, setImageBusy] = useState(false);
+  const [savingDiff, setSavingDiff] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -742,6 +747,24 @@ function QuestionDetailDrawer({
       setError(e instanceof ApiRequestError ? e.message : 'Could not save the diagram.');
     } finally {
       setImageBusy(false);
+    }
+  };
+
+  // Reclassify difficulty in place (optimistic; the bank tag is shared everywhere).
+  const saveDifficulty = async (next: QuestionDifficulty) => {
+    if (!detail || next === detail.question.difficulty) return;
+    const prev = detail.question.difficulty;
+    setSavingDiff(true);
+    setError(null);
+    setDetail((d) => (d ? { ...d, question: { ...d.question, difficulty: next } } : d));
+    try {
+      await updateAdminQuestion(id, { difficulty: next });
+      onChanged?.();
+    } catch (e) {
+      setDetail((d) => (d ? { ...d, question: { ...d.question, difficulty: prev } } : d));
+      setError(e instanceof ApiRequestError ? e.message : 'Could not update the difficulty.');
+    } finally {
+      setSavingDiff(false);
     }
   };
 
@@ -792,6 +815,29 @@ function QuestionDetailDrawer({
                 <Pill>Unverified</Pill>
               )}
               <QStatusPill status={q.status} />
+            </div>
+
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                Difficulty
+              </p>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <select
+                  value={q.difficulty}
+                  onChange={(e) => void saveDifficulty(e.target.value as QuestionDifficulty)}
+                  disabled={savingDiff}
+                  aria-label="Question difficulty"
+                  className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm font-semibold text-navy focus:border-orange focus-visible:ring-2 focus-visible:ring-orange/30 disabled:opacity-50"
+                >
+                  <option value="EASY">Easy</option>
+                  <option value="MEDIUM">Medium</option>
+                  <option value="HARD">Hard</option>
+                </select>
+                {savingDiff ? <Loader2 className="size-4 animate-spin text-slate-400" /> : null}
+                <span className="text-xs text-slate-500">
+                  Retags this question in the bank everywhere it is used.
+                </span>
+              </div>
             </div>
 
             <div>
