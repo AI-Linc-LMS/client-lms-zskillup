@@ -21,6 +21,7 @@ import { ApiRequestError, describeApiError } from '@/lib/api/types';
 import { listTopics, listCompanies } from '@/lib/api/catalog';
 import {
   archiveAdminQuestion,
+  bulkSetQuestionDifficulty,
   createAdminQuestion,
   exportQuestions,
   getAdminQuestion,
@@ -109,6 +110,10 @@ export function QuestionsAdmin() {
   const [companies, setCompanies] = useState<Array<{ slug: string; name: string }>>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
+  // Page-scoped multi-select for bulk difficulty retagging.
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkDiff, setBulkDiff] = useState<QuestionDifficulty>(QuestionDifficulty.MEDIUM);
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   // Debounce the search box → server query.
   useEffect(() => {
@@ -133,6 +138,12 @@ export function QuestionsAdmin() {
     }),
     [companyFilter, topicFilter, roleFilter, difficultyFilter, sourceFilter, verifiedFilter, debouncedSearch],
   );
+
+  // Selection is per-page — clear it when the page or the filters change so the checkboxes
+  // never claim to hold ids that aren't on screen.
+  useEffect(() => {
+    setSelected(new Set());
+  }, [page, baseFilters]);
 
   const loadPage = useCallback(async () => {
     setLoadError(null);
@@ -198,6 +209,30 @@ export function QuestionsAdmin() {
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const visibleStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const visibleEnd = Math.min(page * PAGE_SIZE, total);
+
+  const toggleRow = useCallback((id: string) => {
+    setSelected((s) => {
+      const n = new Set(s);
+      if (n.has(id)) n.delete(id);
+      else n.add(id);
+      return n;
+    });
+  }, []);
+
+  const applyBulkDifficulty = useCallback(async () => {
+    const ids = [...selected];
+    if (ids.length === 0) return;
+    setBulkBusy(true);
+    try {
+      await bulkSetQuestionDifficulty(ids, bulkDiff);
+      setSelected(new Set());
+      await Promise.all([loadPage(), loadCounts()]);
+    } catch (err) {
+      window.alert(err instanceof ApiRequestError ? err.message : 'Could not update difficulty.');
+    } finally {
+      setBulkBusy(false);
+    }
+  }, [selected, bulkDiff, loadPage, loadCounts]);
 
   const mutateStatus = useCallback(
     async (row: AdminQuestionRow, next: QuestionStatus, confirmMsg?: string) => {
@@ -385,12 +420,60 @@ export function QuestionsAdmin() {
         </div>
       ) : null}
 
+      {selected.size > 0 ? (
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-orange/30 bg-orange/5 px-4 py-3">
+          <span className="text-sm font-semibold text-navy">{selected.size} selected</span>
+          <span className="text-xs text-slate-500">Set difficulty to</span>
+          <select
+            value={bulkDiff}
+            onChange={(e) => setBulkDiff(e.target.value as QuestionDifficulty)}
+            aria-label="Bulk difficulty"
+            className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm font-semibold text-navy focus:border-orange focus-visible:ring-2 focus-visible:ring-orange/30"
+          >
+            <option value="EASY">Easy</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HARD">Hard</option>
+          </select>
+          <button
+            type="button"
+            onClick={() => void applyBulkDifficulty()}
+            disabled={bulkBusy}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-orange px-3.5 py-2 text-xs font-bold text-[#171717] disabled:opacity-50"
+          >
+            {bulkBusy ? <Loader2 className="size-4 animate-spin" /> : null} Apply
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelected(new Set())}
+            className="text-xs font-semibold text-slate-500 transition-colors hover:text-navy"
+          >
+            Clear
+          </button>
+        </div>
+      ) : null}
+
       {/* Table */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] text-left text-sm">
             <thead className="bg-slate-50/90">
               <tr className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                <th className="px-4 py-4">
+                  <input
+                    type="checkbox"
+                    aria-label="Select all on this page"
+                    checked={rows !== null && rows.length > 0 && rows.every((r) => selected.has(r.id))}
+                    onChange={(e) => {
+                      const on = e.target.checked;
+                      setSelected((s) => {
+                        const n = new Set(s);
+                        rows?.forEach((r) => (on ? n.add(r.id) : n.delete(r.id)));
+                        return n;
+                      });
+                    }}
+                    className="size-4 rounded border-slate-300 text-orange focus-visible:ring-2 focus-visible:ring-orange/30"
+                  />
+                </th>
                 <th className="px-4 py-4">Question</th>
                 <th className="px-4 py-4">Type</th>
                 <th className="px-4 py-4">Difficulty</th>
@@ -404,13 +487,13 @@ export function QuestionsAdmin() {
             <tbody>
               {rows === null ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center">
+                  <td colSpan={9} className="px-4 py-12 text-center">
                     <Loader2 className="mx-auto size-5 animate-spin text-slate-500" aria-hidden="true" />
                   </td>
                 </tr>
               ) : rows.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-sm text-slate-600">
+                  <td colSpan={9} className="px-4 py-12 text-center text-sm text-slate-600">
                     No questions match this view.
                   </td>
                 </tr>
@@ -421,6 +504,15 @@ export function QuestionsAdmin() {
                     onClick={() => setDetailId(q.id)}
                     className="cursor-pointer border-t border-slate-100/80 align-top transition-colors hover:bg-orange/5"
                   >
+                    <td className="px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        aria-label="Select question"
+                        checked={selected.has(q.id)}
+                        onChange={() => toggleRow(q.id)}
+                        className="size-4 rounded border-slate-300 text-orange focus-visible:ring-2 focus-visible:ring-orange/30"
+                      />
+                    </td>
                     <td className="max-w-sm px-4 py-3.5 text-navy">
                       <span className="line-clamp-2">{q.stem}</span>
                     </td>
