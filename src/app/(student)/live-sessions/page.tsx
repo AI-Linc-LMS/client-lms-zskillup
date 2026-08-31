@@ -13,6 +13,7 @@ import {
   type LiveSessionListDto,
 } from '@/lib/api/live-sessions';
 import { AudiencePill, fmtWhen, relWhen, safeHttpUrl, StatusBadge } from '@/components/live-sessions/ui';
+import { AddToCalendarButton } from '@/components/calendar/AddToCalendarButton';
 
 export default function StudentLiveSessionsPage() {
   const [data, setData] = useState<LiveSessionListDto | null>(null);
@@ -286,6 +287,20 @@ function StudentCard({ s, past, onChanged }: { s: LiveSessionDto; past?: boolean
             <span className="text-xs font-semibold text-slate-500">Session ended</span>
           ) : null}
         </div>
+
+        {!past ? (
+          <div className="mt-3 border-t border-slate-100 pt-3">
+            <AddToCalendarButton
+              title={s.title}
+              startsAt={s.scheduledAt}
+              endsAt={new Date(
+                new Date(s.scheduledAt).getTime() + s.durationMinutes * 60_000,
+              ).toISOString()}
+              description={s.description ?? undefined}
+              location={link ?? undefined}
+            />
+          </div>
+        ) : null}
       </div>
     </div>
   );
