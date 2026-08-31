@@ -8,7 +8,12 @@ import { StatusPill } from '@/components/student/StatusPill';
 import { UpgradeModal } from '@/components/billing/UpgradeModal';
 import { useUpgradeGate } from '@/hooks/useUpgradeGate';
 import { roleHint } from '@/lib/session-hints';
-import { applyToJob, getMyApplication, type JobApplicationDto } from '@/lib/api/jobs';
+import {
+  applyToJob,
+  getMyApplication,
+  getPublicJobQuestions,
+  type JobApplicationDto,
+} from '@/lib/api/jobs';
 import { ApiRequestError } from '@/lib/api/types';
 import { buildCartLink } from '@/lib/payments/cart-link';
 import { APPLICATION_STATUS } from '@/lib/jobs/application-status';
@@ -48,6 +53,10 @@ export function ApplyButton({
   const { gated, feature, close } = useUpgradeGate();
   const [paywalled, setPaywalled] = useState(false);
   const [composing, setComposing] = useState(false);
+  // Whether the posting asks ANY question (required OR optional). Pre-fetched so a
+  // posting with only OPTIONAL questions still opens the form — otherwise the empty
+  // apply below would silently submit before the student ever saw the questions.
+  const [hasQuestions, setHasQuestions] = useState(false);
 
   useEffect(() => {
     const hint = roleHint();
@@ -67,6 +76,13 @@ export function ApplyButton({
       .finally(() => {
         if (alive) setReady(true);
       });
+    // A failed fetch leaves hasQuestions false, so we fall back to the empty-apply
+    // probe — which still opens the form for REQUIRED questions via the server bounce.
+    getPublicJobQuestions(slug)
+      .then((q) => {
+        if (alive) setHasQuestions(q.length > 0);
+      })
+      .catch(() => undefined);
     return () => {
       alive = false;
     };
@@ -75,6 +91,14 @@ export function ApplyButton({
   const onApply = useCallback(async () => {
     if (gated) {
       setPaywalled(true);
+      return;
+    }
+    // The posting asks something: open the form directly rather than firing an empty
+    // apply first. The empty apply would SUBMIT a posting whose questions are all
+    // optional (nothing required to bounce on), so the student would never see them.
+    // The server still re-checks entitlement on the real submit inside the dialog.
+    if (hasQuestions) {
+      setComposing(true);
       return;
     }
     // Probe the gate BEFORE opening the form. Filling in five answers and only then
@@ -100,7 +124,7 @@ export function ApplyButton({
     } finally {
       setSubmitting(false);
     }
-  }, [gated, slug]);
+  }, [gated, slug, hasQuestions]);
 
   // Server-rendered markup and first paint: a disabled placeholder of the same size,
   // so the layout does not jump when the real state arrives.

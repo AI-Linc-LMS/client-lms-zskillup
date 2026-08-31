@@ -28,6 +28,7 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { Reveal, Stagger, StaggerItem } from '@/components/motion/primitives';
 import { cn } from '@/lib/utils';
 import { MockHistory } from '@/components/practice/MockHistory';
+import { AddToCalendarButton } from '@/components/calendar/AddToCalendarButton';
 import { MyRankingPanel } from '@/components/student/MyRankingPanel';
 import { StatusPill } from '@/components/student/StatusPill';
 import { Button } from '@/components/ui/button';
@@ -507,6 +508,22 @@ export default function AssessmentsPage() {
                           >
                             <Trophy className="size-3.5 text-amber-500" /> Leaderboard
                           </Link>
+                        ) : null}
+                        {!live && !ended ? (
+                          <div className="mt-2 border-t border-slate-100 pt-2">
+                            <AddToCalendarButton
+                              title={`${it.companyName} · ${it.title}`}
+                              startsAt={it.scheduledAt}
+                              endsAt={new Date(
+                                new Date(it.scheduledAt).getTime() + it.durationMinutes * 60_000,
+                              ).toISOString()}
+                              description={
+                                it.proctored
+                                  ? 'Proctored assessment on prephasz.'
+                                  : 'Assessment on prephasz.'
+                              }
+                            />
+                          </div>
                         ) : null}
                       </div>
                     </StaggerItem>
