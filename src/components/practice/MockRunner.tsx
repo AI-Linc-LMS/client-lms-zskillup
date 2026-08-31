@@ -77,10 +77,14 @@ type Phase = 'intro' | 'running' | 'report';
 
 export function MockRunner({
   mockId,
+  scheduledId,
   proctored = false,
   startImmediately = false,
 }: {
   mockId: string;
+  /** The scheduled sitting id, for a drive. Passed to startMock so a mock reused across
+   *  sittings opens a clean attempt for THIS sitting. Omitted for catalog/custom mocks. */
+  scheduledId?: string;
   proctored?: boolean;
   /** Skip the intro screen and start the attempt on mount - used when a dedicated
    *  pre-start gate (AssessmentInstructionsHost) has already been shown, so "Begin"
@@ -153,7 +157,7 @@ export function MockRunner({
     setStarting(true);
     setError(null);
     try {
-      const s = await startMock(mockId);
+      const s = await startMock(mockId, scheduledId);
       attemptIdRef.current = s.attemptId;
       const hydrated: Record<string, string[]> = {};
       ackedRef.current = new Map();
@@ -184,7 +188,7 @@ export function MockRunner({
     } finally {
       setStarting(false);
     }
-  }, [mockId]);
+  }, [mockId, scheduledId]);
 
   const finishAttempt = useCallback(async () => {
     if (!start || submittedRef.current) return;
