@@ -131,7 +131,12 @@ function AdminRow({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge status={s.status} />
-            <AudiencePill audience={s.audience} companyName={s.companyName} />
+            <AudiencePill
+              audience={s.audience}
+              companyName={s.companyName}
+              collegeName={s.collegeName}
+              cohortName={s.cohortName}
+            />
           </div>
           <h3 className="mt-2 text-base font-black text-navy">{s.title}</h3>
           {s.description && <p className="mt-0.5 line-clamp-2 text-sm text-slate-600">{s.description}</p>}

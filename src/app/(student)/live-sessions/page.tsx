@@ -194,7 +194,12 @@ function StudentCard({ s, past, onChanged }: { s: LiveSessionDto; past?: boolean
       <div className="p-5">
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge status={s.status} />
-          <AudiencePill audience={s.audience} companyName={s.companyName} />
+          <AudiencePill
+            audience={s.audience}
+            companyName={s.companyName}
+            collegeName={s.collegeName}
+            cohortName={s.cohortName}
+          />
           {!past && <span className="text-xs font-semibold text-slate-500">· {relWhen(s.scheduledAt)}</span>}
         </div>
 

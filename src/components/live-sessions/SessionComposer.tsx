@@ -2,10 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Building2, Globe2, Loader2, UserRound, X } from 'lucide-react';
+import { Building2, GraduationCap, Globe2, Loader2, Users, UserRound, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { listAdminCompanies, type AdminCompanyRow } from '@/lib/api/admin';
+import {
+  listAdminCompanies,
+  listAdminColleges,
+  listAdminCollegeCohorts,
+  type AdminCompanyRow,
+  type AdminCohortRow,
+  type AdminCollegeRow,
+} from '@/lib/api/admin';
 import {
   createLiveSession,
   updateLiveSession,
@@ -43,6 +50,10 @@ export function SessionComposer({
   const [audience, setAudience] = useState<LiveSessionAudience>(LiveSessionAudience.PLATFORM);
   const [companyId, setCompanyId] = useState('');
   const [companies, setCompanies] = useState<AdminCompanyRow[]>([]);
+  const [collegeId, setCollegeId] = useState('');
+  const [cohortId, setCohortId] = useState('');
+  const [colleges, setColleges] = useState<AdminCollegeRow[]>([]);
+  const [cohorts, setCohorts] = useState<AdminCohortRow[]>([]);
   const [coverImageUrl, setCoverImageUrl] = useState('');
   const [speakerName, setSpeakerName] = useState('');
   const [speakerRole, setSpeakerRole] = useState('');
@@ -58,6 +69,29 @@ export function SessionComposer({
     listAdminCompanies().then(setCompanies).catch(() => {});
   }, []);
 
+  // Colleges load the moment the audience narrows to a college or cohort.
+  useEffect(() => {
+    if (
+      (audience === LiveSessionAudience.COLLEGE || audience === LiveSessionAudience.COHORT) &&
+      colleges.length === 0
+    ) {
+      listAdminColleges()
+        .then((c) => setColleges(c.filter((x) => x.status !== 'SUSPENDED')))
+        .catch(() => setColleges([]));
+    }
+  }, [audience, colleges.length]);
+
+  // Cohorts belong to a college, so they load once one is picked in COHORT mode.
+  useEffect(() => {
+    if (audience === LiveSessionAudience.COHORT && collegeId) {
+      listAdminCollegeCohorts(collegeId)
+        .then(setCohorts)
+        .catch(() => setCohorts([]));
+    } else {
+      setCohorts([]);
+    }
+  }, [audience, collegeId]);
+
   // Prefill on open (edit) or reset (create).
   useEffect(() => {
     if (!open) return;
@@ -71,6 +105,8 @@ export function SessionComposer({
       setDuration(editing.durationMinutes);
       setAudience(editing.audience);
       setCompanyId(editing.companyId ?? '');
+      setCollegeId(editing.collegeId ?? '');
+      setCohortId(editing.cohortId ?? '');
       setCoverImageUrl(editing.coverImageUrl ?? '');
       setSpeakerName(editing.speakerName ?? '');
       setSpeakerRole(editing.speakerRole ?? '');
@@ -87,6 +123,8 @@ export function SessionComposer({
       setDuration(60);
       setAudience(LiveSessionAudience.PLATFORM);
       setCompanyId('');
+      setCollegeId('');
+      setCohortId('');
       setCoverImageUrl('');
       setSpeakerName('');
       setSpeakerRole('');
@@ -106,6 +144,8 @@ export function SessionComposer({
     if (recordingUrl.trim() && !/^https?:\/\//i.test(recordingUrl.trim()))
       return toast.error('The recording link must be a valid http(s) URL.');
     if (audience === LiveSessionAudience.COMPANY && !companyId) return toast.error('Pick a company.');
+    if (audience === LiveSessionAudience.COLLEGE && !collegeId) return toast.error('Pick a college.');
+    if (audience === LiveSessionAudience.COHORT && !cohortId) return toast.error('Pick a cohort.');
     setSaving(true);
     try {
       const body = {
@@ -124,6 +164,8 @@ export function SessionComposer({
         durationMinutes: duration,
         audience,
         companyId: audience === LiveSessionAudience.COMPANY ? companyId : null,
+        collegeId: audience === LiveSessionAudience.COLLEGE ? collegeId : null,
+        cohortId: audience === LiveSessionAudience.COHORT ? cohortId : null,
       };
       if (editing) await updateLiveSession(editing.id, body);
       else await createLiveSession({ ...body, notifyOnCreate });
@@ -211,6 +253,22 @@ export function SessionComposer({
                     <Building2 className="size-4 text-violet-600" />
                     <span className="text-sm font-semibold text-navy">Drive registrants</span>
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setAudience(LiveSessionAudience.COLLEGE)}
+                    className={cn('flex items-center gap-2 rounded-lg border p-3 text-left transition-colors', audience === LiveSessionAudience.COLLEGE ? 'border-orange bg-orange/5 ring-1 ring-orange' : 'border-slate-200 hover:bg-slate-50')}
+                  >
+                    <GraduationCap className="size-4 text-sky-600" />
+                    <span className="text-sm font-semibold text-navy">One college</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAudience(LiveSessionAudience.COHORT)}
+                    className={cn('flex items-center gap-2 rounded-lg border p-3 text-left transition-colors', audience === LiveSessionAudience.COHORT ? 'border-orange bg-orange/5 ring-1 ring-orange' : 'border-slate-200 hover:bg-slate-50')}
+                  >
+                    <Users className="size-4 text-amber-600" />
+                    <span className="text-sm font-semibold text-navy">One cohort</span>
+                  </button>
                 </div>
               </Field>
 
@@ -226,6 +284,50 @@ export function SessionComposer({
                     ))}
                   </select>
                 </Field>
+              )}
+
+              {audience === LiveSessionAudience.COLLEGE && (
+                <Field label="College - reaches every active student at this college">
+                  <select value={collegeId} onChange={(e) => setCollegeId(e.target.value)} className={input}>
+                    <option value="">Select a college…</option>
+                    {colleges.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </Field>
+              )}
+
+              {audience === LiveSessionAudience.COHORT && (
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="College">
+                    <select
+                      value={collegeId}
+                      onChange={(e) => {
+                        setCollegeId(e.target.value);
+                        setCohortId('');
+                      }}
+                      className={input}
+                    >
+                      <option value="">Select a college…</option>
+                      {colleges.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="Cohort - reaches this cohort's members">
+                    <select
+                      value={cohortId}
+                      onChange={(e) => setCohortId(e.target.value)}
+                      disabled={!collegeId}
+                      className={cn(input, 'disabled:opacity-50')}
+                    >
+                      <option value="">{collegeId ? 'Select a cohort…' : 'Pick a college first'}</option>
+                      {cohorts.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                  </Field>
+                </div>
               )}
 
               <div className="space-y-4 rounded-xl border border-slate-200 p-4">

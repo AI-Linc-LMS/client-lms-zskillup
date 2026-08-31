@@ -1,6 +1,6 @@
 'use client';
 
-import { Building2, Globe2 } from 'lucide-react';
+import { Building2, Globe2, GraduationCap, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { LiveSessionAudience, type LiveSessionStatus } from '@/lib/api/live-sessions';
 
@@ -54,14 +54,32 @@ export function StatusBadge({ status }: { status: LiveSessionStatus }) {
 export function AudiencePill({
   audience,
   companyName,
+  collegeName,
+  cohortName,
 }: {
   audience: LiveSessionAudience;
   companyName: string | null;
+  collegeName?: string | null;
+  cohortName?: string | null;
 }) {
   if (audience === LiveSessionAudience.COMPANY) {
     return (
       <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-semibold text-violet-700">
         <Building2 className="size-3" /> {companyName ?? 'Company'}
+      </span>
+    );
+  }
+  if (audience === LiveSessionAudience.COLLEGE) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-semibold text-sky-700">
+        <GraduationCap className="size-3" /> {collegeName ?? 'College'}
+      </span>
+    );
+  }
+  if (audience === LiveSessionAudience.COHORT) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+        <Users className="size-3" /> {cohortName ?? 'Cohort'}
       </span>
     );
   }
