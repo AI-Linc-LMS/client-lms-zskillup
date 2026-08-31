@@ -49,6 +49,9 @@ export function SessionComposer({
   const [speakerCompany, setSpeakerCompany] = useState('');
   const [speakerBio, setSpeakerBio] = useState('');
   const [speakerAvatarUrl, setSpeakerAvatarUrl] = useState('');
+  // Scheduling and notifying are independent — off by default. When on, creating the
+  // session also fires one in-app notification; either way the admin can Notify later.
+  const [notifyOnCreate, setNotifyOnCreate] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -90,6 +93,7 @@ export function SessionComposer({
       setSpeakerCompany('');
       setSpeakerBio('');
       setSpeakerAvatarUrl('');
+      setNotifyOnCreate(false);
     }
   }, [open, editing]);
 
@@ -122,8 +126,14 @@ export function SessionComposer({
         companyId: audience === LiveSessionAudience.COMPANY ? companyId : null,
       };
       if (editing) await updateLiveSession(editing.id, body);
-      else await createLiveSession(body);
-      toast.success(editing ? 'Session updated.' : 'Session scheduled - students notified.');
+      else await createLiveSession({ ...body, notifyOnCreate });
+      toast.success(
+        editing
+          ? 'Session updated.'
+          : notifyOnCreate
+            ? 'Session scheduled - students notified.'
+            : 'Session scheduled. Use Notify to tell students when you’re ready.',
+      );
       onSaved();
       onClose();
     } catch (err) {
@@ -250,11 +260,26 @@ export function SessionComposer({
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 border-t border-slate-100 px-5 py-4">
-              <button onClick={onClose} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancel</button>
-              <button onClick={submit} disabled={saving} className="inline-flex items-center gap-2 rounded-lg bg-orange px-4 py-2 text-sm font-bold text-[#171717] shadow-sm hover:bg-orange/90 disabled:opacity-50">
-                {saving ? <Loader2 className="size-4 animate-spin" /> : null} {editing ? 'Save changes' : 'Schedule & notify'}
-              </button>
+            <div className="flex items-center justify-between gap-3 border-t border-slate-100 px-5 py-4">
+              {!editing ? (
+                <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
+                  <input
+                    type="checkbox"
+                    checked={notifyOnCreate}
+                    onChange={(e) => setNotifyOnCreate(e.target.checked)}
+                    className="size-4 rounded border-slate-300 text-orange focus-visible:ring-2 focus-visible:ring-orange/30"
+                  />
+                  Notify students now
+                </label>
+              ) : (
+                <span />
+              )}
+              <div className="flex items-center gap-2">
+                <button onClick={onClose} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancel</button>
+                <button onClick={submit} disabled={saving} className="inline-flex items-center gap-2 rounded-lg bg-orange px-4 py-2 text-sm font-bold text-[#171717] shadow-sm hover:bg-orange/90 disabled:opacity-50">
+                  {saving ? <Loader2 className="size-4 animate-spin" /> : null} {editing ? 'Save changes' : 'Schedule session'}
+                </button>
+              </div>
             </div>
           </motion.div>
         </div>

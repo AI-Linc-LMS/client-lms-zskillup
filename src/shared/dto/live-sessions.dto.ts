@@ -7,6 +7,7 @@
  * the request classes with `import type` and the response interfaces for typing.
  */
 import {
+  IsBoolean,
   IsDateString,
   IsEnum,
   IsInt,
@@ -97,6 +98,13 @@ export class CreateLiveSessionDto {
   @IsOptional()
   @IsUUID()
   companyId?: string | null;
+
+  /** Scheduling and notifying are INDEPENDENT: creating a session no longer notifies
+   *  anyone by default. Set true to also fan out one in-app notification now; either way
+   *  the admin can send (repeatable, scoped) notifications later via the Notify action. */
+  @IsOptional()
+  @IsBoolean()
+  notifyOnCreate?: boolean;
 }
 
 export class UpdateLiveSessionDto {
