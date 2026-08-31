@@ -372,6 +372,18 @@ export async function updateAdminQuestion(
   return res.data;
 }
 
+/** Retag many questions' difficulty at once. Returns how many rows were updated. */
+export async function bulkSetQuestionDifficulty(
+  ids: string[],
+  difficulty: string,
+): Promise<{ updated: number }> {
+  const res = await apiClient.patch<{ updated: number }>('/api/v1/admin/questions/bulk-difficulty', {
+    ids,
+    difficulty,
+  });
+  return res.data;
+}
+
 export async function archiveAdminQuestion(id: string): Promise<void> {
   await apiClient.delete(`/api/v1/admin/questions/${id}`);
 }
