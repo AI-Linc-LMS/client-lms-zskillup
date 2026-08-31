@@ -427,4 +427,8 @@ export enum LiveSessionSignupKind {
 export enum LiveSessionAudience {
   PLATFORM = 'PLATFORM',
   COMPANY = 'COMPANY',
+  /** One college's students (college_id). */
+  COLLEGE = 'COLLEGE',
+  /** One cohort's members (cohort_id) — a college cohort or an individual cohort. */
+  COHORT = 'COHORT',
 }

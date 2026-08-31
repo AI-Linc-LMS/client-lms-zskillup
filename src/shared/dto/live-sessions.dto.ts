@@ -99,6 +99,16 @@ export class CreateLiveSessionDto {
   @IsUUID()
   companyId?: string | null;
 
+  /** Required when audience = COLLEGE; ignored otherwise. */
+  @IsOptional()
+  @IsUUID()
+  collegeId?: string | null;
+
+  /** Required when audience = COHORT; ignored otherwise. */
+  @IsOptional()
+  @IsUUID()
+  cohortId?: string | null;
+
   /** Scheduling and notifying are INDEPENDENT: creating a session no longer notifies
    *  anyone by default. Set true to also fan out one in-app notification now; either way
    *  the admin can send (repeatable, scoped) notifications later via the Notify action. */
@@ -180,6 +190,14 @@ export class UpdateLiveSessionDto {
   @IsOptional()
   @IsUUID()
   companyId?: string | null;
+
+  @IsOptional()
+  @IsUUID()
+  collegeId?: string | null;
+
+  @IsOptional()
+  @IsUUID()
+  cohortId?: string | null;
 }
 
 // ── Responses ───────────────────────────────────────────────────────────────
@@ -218,6 +236,10 @@ export interface LiveSessionDto {
   audience: LiveSessionAudience;
   companyId: string | null;
   companyName: string | null;
+  collegeId: string | null;
+  collegeName: string | null;
+  cohortId: string | null;
+  cohortName: string | null;
   hostName: string;
   status: LiveSessionStatus;
   /** Registered-student count reached (admin view only; 0 for students). */
