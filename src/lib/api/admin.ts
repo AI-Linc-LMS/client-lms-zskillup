@@ -384,6 +384,25 @@ export async function bulkSetQuestionDifficulty(
   return res.data;
 }
 
+/** Full detail (with the correct answer) for a set of question ids — for the assessment
+ *  "review the selected questions before publishing" step. */
+export interface AdminQuestionPreview {
+  id: string;
+  code: string;
+  type: string;
+  difficulty: string;
+  stem: string;
+  answer: string | null;
+  options: Array<{ text: string; isCorrect: boolean }>;
+}
+export async function previewQuestions(ids: string[]): Promise<AdminQuestionPreview[]> {
+  if (ids.length === 0) return [];
+  const res = await apiClient.post<AdminQuestionPreview[]>('/api/v1/admin/questions/preview', {
+    ids,
+  });
+  return res.data;
+}
+
 export async function archiveAdminQuestion(id: string): Promise<void> {
   await apiClient.delete(`/api/v1/admin/questions/${id}`);
 }

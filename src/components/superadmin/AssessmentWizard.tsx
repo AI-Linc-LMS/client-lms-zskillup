@@ -19,7 +19,12 @@ import {
 import { cn } from '@/lib/utils';
 import { ApiRequestError } from '@/lib/api/types';
 import { listCompanies, listTopicsWithCounts, type ApiCompany, type ApiTopic } from '@/lib/api/catalog';
-import { listAdminColleges, type AdminCollegeRow } from '@/lib/api/admin';
+import {
+  listAdminColleges,
+  previewQuestions,
+  type AdminCollegeRow,
+  type AdminQuestionPreview,
+} from '@/lib/api/admin';
 import { getCollegeCohorts } from '@/lib/api/admin-cohorts';
 import { listIndividualCohorts, type IndividualCohort } from '@/lib/api/individual-cohorts';
 import { HIDDEN_ROOT_SLUGS } from '@/components/practice/section-meta';
@@ -38,6 +43,12 @@ import {
 } from '@/lib/api/assessment-builder';
 
 const STEPS = ['Details', 'Questions', 'Review'];
+
+const DIFF_TONE: Record<string, string> = {
+  EASY: 'bg-emerald-50 text-emerald-700',
+  MEDIUM: 'bg-amber-50 text-amber-700',
+  HARD: 'bg-rose-50 text-rose-700',
+};
 
 /** Flatten the backend's { field: [msg,…] } validation `details` into one readable
  *  line, so a rejected publish shows the actual reason (e.g. "sections must contain
@@ -150,6 +161,10 @@ export function AssessmentWizard({
   // sections
   const [sections, setSections] = useState<Section[]>([{ name: 'Section 1', items: [] }]);
   const [gen, setGen] = useState<GenState | null>(null);
+
+  // Review step: full previews (with the correct answer) for the selected MCQ ids.
+  const [preview, setPreview] = useState<Record<string, AdminQuestionPreview>>({});
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   const [creating, setCreating] = useState(false);
   const [created, setCreated] = useState<CreatedAssessment | null>(null);
@@ -325,6 +340,62 @@ export function AssessmentWizard({
     setSections((prev) =>
       prev.map((s, i) => (i === si ? { ...s, items: s.items.filter((it) => it.key !== key) } : s)),
     );
+
+  // Drop ONE question from a section item (Review step). Empties the item away if it was
+  // the last question in it, so the review never shows a zero-question group.
+  const removeQuestion = (si: number, itemKey: string, qid: string) =>
+    setSections((prev) =>
+      prev.map((s, i) => {
+        if (i !== si) return s;
+        return {
+          ...s,
+          items: s.items
+            .map((it) => {
+              if (it.key !== itemKey) return it;
+              const ids = it.ids.filter((x) => x !== qid);
+              return { ...it, ids, count: ids.length };
+            })
+            .filter((it) => it.ids.length > 0),
+        };
+      }),
+    );
+
+  // Pull the full previews (stem + options + correct answer) for the selected MCQ ids when
+  // the Review step opens. Only fetches ids not already cached, so it converges.
+  useEffect(() => {
+    if (step !== 2) return;
+    const ids = sections.flatMap((s) =>
+      s.items.filter((it) => it.type === 'MCQ').flatMap((it) => it.ids),
+    );
+    const missing = [...new Set(ids)].filter((id) => !preview[id]);
+    if (missing.length === 0) return;
+    setPreviewLoading(true);
+    previewQuestions(missing)
+      .then((qs) =>
+        setPreview((p) => ({ ...p, ...Object.fromEntries(qs.map((q) => [q.id, q])) })),
+      )
+      .catch(() => undefined)
+      .finally(() => setPreviewLoading(false));
+    // `preview` intentionally omitted: the merge fills `missing`, which re-runs this and
+    // finds nothing left to fetch — including it would just add one no-op render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, sections]);
+
+  // Flag repeated questions: a stem appearing under more than one selected id is a dup.
+  const dupStems = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const s of sections)
+      for (const it of s.items)
+        if (it.type === 'MCQ')
+          for (const id of it.ids) {
+            const q = preview[id];
+            if (q) {
+              const k = q.stem.trim().toLowerCase();
+              counts.set(k, (counts.get(k) ?? 0) + 1);
+            }
+          }
+    return counts;
+  }, [sections, preview]);
 
   const create = async () => {
     setCreating(true);
@@ -646,16 +717,121 @@ export function AssessmentWizard({
                   <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Coding problems</p>
                 </div>
               </div>
-              {sections.filter((s) => s.items.length).map((s, i) => (
-                <div key={i} className="rounded-xl border border-slate-100 p-3">
-                  <p className="text-sm font-bold text-navy">{s.name}</p>
-                  <ul className="mt-1 space-y-0.5 text-xs text-slate-600">
-                    {s.items.map((it) => (
-                      <li key={it.key}>· {it.topicName} - {it.ids.length} {it.type === 'MCQ' ? 'MCQ' : 'coding'} ({it.fromBank} bank + {it.generated} AI)</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                  Question review
+                </p>
+                {previewLoading ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs text-slate-500">
+                    <Loader2 className="size-3.5 animate-spin" /> Loading previews…
+                  </span>
+                ) : null}
+              </div>
+              {[...dupStems.values()].some((n) => n > 1) ? (
+                <p className="rounded-lg bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 ring-1 ring-rose-200">
+                  Duplicate questions detected — remove the repeats before publishing.
+                </p>
+              ) : null}
+              {sections.map((s, si) =>
+                s.items.length === 0 ? null : (
+                  <div key={si} className="rounded-xl border border-slate-100 p-3">
+                    <p className="text-sm font-bold text-navy">{s.name}</p>
+                    <div className="mt-2 space-y-3">
+                      {s.items.map((it) =>
+                        it.type === 'CODING' ? (
+                          <div
+                            key={it.key}
+                            className="rounded-lg border border-slate-100 bg-slate-50/60 px-3 py-2 text-xs text-slate-600"
+                          >
+                            <Code2 className="mr-1 inline size-3.5 text-emerald-600" />
+                            {it.topicName} — {it.ids.length}{' '}
+                            {it.ids.length === 1 ? 'coding problem' : 'coding problems'} · {it.marks}m
+                          </div>
+                        ) : (
+                          <div key={it.key}>
+                            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                              {it.topicName} · {it.marks}m each
+                            </p>
+                            <ol className="mt-1 space-y-2">
+                              {it.ids.map((qid, qi) => {
+                                const q = preview[qid];
+                                const dup =
+                                  !!q && (dupStems.get(q.stem.trim().toLowerCase()) ?? 0) > 1;
+                                return (
+                                  <li
+                                    key={qid}
+                                    className="rounded-lg border border-slate-200 bg-white p-3"
+                                  >
+                                    <div className="flex items-start justify-between gap-2">
+                                      <span className="text-xs font-semibold text-slate-400">
+                                        Q{qi + 1}
+                                      </span>
+                                      <div className="flex items-center gap-1.5">
+                                        {q ? (
+                                          <span
+                                            className={cn(
+                                              'rounded-full px-2 py-0.5 text-[10px] font-bold',
+                                              DIFF_TONE[q.difficulty] ?? 'bg-slate-100 text-slate-600',
+                                            )}
+                                          >
+                                            {q.difficulty}
+                                          </span>
+                                        ) : null}
+                                        {dup ? (
+                                          <span className="rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-600 ring-1 ring-rose-200">
+                                            Duplicate
+                                          </span>
+                                        ) : null}
+                                        <button
+                                          type="button"
+                                          onClick={() => removeQuestion(si, it.key, qid)}
+                                          className="text-slate-400 transition-colors hover:text-rose-500"
+                                          aria-label="Remove question"
+                                        >
+                                          <X className="size-3.5" />
+                                        </button>
+                                      </div>
+                                    </div>
+                                    {q ? (
+                                      <>
+                                        <p className="mt-1 whitespace-pre-wrap text-sm font-medium text-navy">
+                                          {q.stem}
+                                        </p>
+                                        <ul className="mt-2 space-y-1">
+                                          {q.options.map((o, oi) => (
+                                            <li
+                                              key={oi}
+                                              className={cn(
+                                                'flex items-start gap-1.5 rounded px-2 py-1 text-xs',
+                                                o.isCorrect
+                                                  ? 'bg-emerald-50 font-semibold text-emerald-800 ring-1 ring-emerald-200'
+                                                  : 'text-slate-600',
+                                              )}
+                                            >
+                                              {o.isCorrect ? (
+                                                <Check className="mt-0.5 size-3.5 shrink-0 text-emerald-600" />
+                                              ) : (
+                                                <span className="mt-0.5 size-3.5 shrink-0" />
+                                              )}
+                                              <span className="whitespace-pre-wrap">{o.text}</span>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </>
+                                    ) : (
+                                      <p className="mt-1 text-xs text-slate-400">Loading…</p>
+                                    )}
+                                  </li>
+                                );
+                              })}
+                            </ol>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                ),
+              )}
               {err ? <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">{err}</p> : null}
             </div>
           )}
