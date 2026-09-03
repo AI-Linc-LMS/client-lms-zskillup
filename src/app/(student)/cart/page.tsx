@@ -13,20 +13,23 @@ import {
   ShieldCheck,
   ShoppingCart,
   Sparkles,
+  Tag,
   Target,
   Trash2,
+  X,
 } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { useCart, cartKey, type CartItem } from '@/components/billing/CartProvider';
 import { parseCartLink } from '@/lib/payments/cart-link';
 import { PlanPill } from '@/components/billing/plan-ui';
-import { getPricing } from '@/lib/api/payments';
+import { getPricing, previewCoupon } from '@/lib/api/payments';
 import { getMe } from '@/lib/api/me';
 import { buildPriceMap, PERIODS, retailPrice } from '@/lib/payments/pricing';
 import { formatPrice } from '@/lib/api/subscriptions';
 import { startCartPurchase } from '@/lib/payments/razorpay-checkout';
 import { BillingPeriod, EntitlementScope } from '@/shared/enums';
 import type { PriceBookEntryDto } from '@/shared/dto/payments.dto';
+import type { CouponPreviewResultDto } from '@/shared/dto/coupons.dto';
 
 const GROUPS: { scope: EntitlementScope; title: string; icon: typeof Building2; tint: string }[] = [
   { scope: EntitlementScope.PLATFORM, title: 'Full Platform Access', icon: Crown, tint: 'bg-indigo-50 text-indigo-600' },
@@ -82,6 +85,10 @@ export default function CartPage() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
   const [done, setDone] = useState(false);
+  const [couponInput, setCouponInput] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<CouponPreviewResultDto | null>(null);
+  const [couponBusy, setCouponBusy] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
 
   useEffect(() => {
     void getPricing().then(setPrices).catch(() => setPrices([]));
@@ -94,6 +101,59 @@ export default function CartPage() {
   const priceOf = (i: CartItem) => retailPrice(priceMap, i.scope, i.period)?.amountCents ?? null;
   const total = useMemo(() => items.reduce((sum, i) => sum + (priceOf(i) ?? 0), 0), [items, priceMap]);
   const byScope = (scope: EntitlementScope) => items.filter((i) => i.scope === scope);
+
+  // A coupon's discount depends on the cart's exact contents, so a change invalidates
+  // any previewed coupon — clear it and let the student re-apply.
+  const cartSig = useMemo(
+    () => items.map((i) => `${i.scope}:${i.scopeRef ?? ''}:${i.period}`).join('|'),
+    [items],
+  );
+  useEffect(() => {
+    setAppliedCoupon(null);
+    setCouponError(null);
+  }, [cartSig]);
+
+  const discountCents = appliedCoupon?.valid ? appliedCoupon.discountCents : 0;
+  // When a coupon is applied the server returns the AUTHORITATIVE resolved cart total
+  // (after dedupe / platform-collapse / already-owned drops), so the shown total is
+  // exactly what will be charged. Without a coupon we fall back to the client subtotal.
+  const authoritativeSubtotal = appliedCoupon?.valid ? appliedCoupon.cartTotalCents : total;
+  const rawPayable = Math.max(0, authoritativeSubtotal - discountCents);
+  // A coupon that clears the charge below the ₹1 gateway minimum is fulfilled FREE
+  // server-side (no widget), so present it as ₹0 rather than a payable sub-₹1 residue.
+  const willBeFree = !!appliedCoupon?.valid && rawPayable < 100;
+  const payable = willBeFree ? 0 : rawPayable;
+
+  async function applyCoupon() {
+    const code = couponInput.trim();
+    if (!code || items.length === 0) return;
+    setCouponBusy(true);
+    setCouponError(null);
+    try {
+      const res = await previewCoupon({
+        code,
+        items: items.map((i) => ({ scope: i.scope, scopeRef: i.scopeRef ?? undefined, period: i.period })),
+      });
+      if (res.valid) {
+        setAppliedCoupon(res);
+        setCouponError(null);
+      } else {
+        setAppliedCoupon(null);
+        setCouponError(res.reason ?? 'This coupon can’t be applied.');
+      }
+    } catch {
+      setAppliedCoupon(null);
+      setCouponError('Could not check that coupon right now. Please try again.');
+    } finally {
+      setCouponBusy(false);
+    }
+  }
+
+  function removeCoupon() {
+    setAppliedCoupon(null);
+    setCouponInput('');
+    setCouponError(null);
+  }
 
   // Upgrade nudge - the gap to Full Platform (annual), unless it's already carted.
   const hasPlatform = items.some((i) => i.scope === EntitlementScope.PLATFORM);
@@ -113,6 +173,7 @@ export default function CartPage() {
     const res = await startCartPurchase(
       items.map((i) => ({ scope: i.scope, scopeRef: i.scopeRef ?? undefined, period: i.period })),
       prefill,
+      appliedCoupon?.valid ? appliedCoupon.code : undefined,
     );
     setBusy(false);
     if (res.ok) {
@@ -304,16 +365,83 @@ export default function CartPage() {
                 <div className="mt-4 space-y-2 border-t border-slate-100 pt-4 text-sm">
                   <div className="flex justify-between">
                     <span className="text-slate-600">Subtotal</span>
-                    <span className="font-bold tabular-nums text-navy">{formatPrice(total, 'INR')}</span>
+                    <span className="font-bold tabular-nums text-navy">
+                      {formatPrice(authoritativeSubtotal, 'INR')}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-600">GST (Included)</span>
                     <span className="font-bold tabular-nums text-navy">₹0</span>
                   </div>
                 </div>
+
+                {/* Coupon */}
+                <div className="mt-4 border-t border-slate-100 pt-4">
+                  {appliedCoupon?.valid ? (
+                    <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5">
+                      <span className="flex items-center gap-2 text-sm">
+                        <Tag className="size-4 text-emerald-600" />
+                        <span className="font-bold text-emerald-800">{appliedCoupon.code}</span>
+                        {appliedCoupon.label ? (
+                          <span className="text-emerald-700">{appliedCoupon.label}</span>
+                        ) : null}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={removeCoupon}
+                        className="rounded-lg p-1.5 text-emerald-700 transition hover:bg-emerald-100"
+                        aria-label="Remove coupon"
+                      >
+                        <X className="size-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <input
+                        value={couponInput}
+                        onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            void applyCoupon();
+                          }
+                        }}
+                        placeholder="Have a coupon code?"
+                        aria-label="Coupon code"
+                        maxLength={40}
+                        className="h-10 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold uppercase tracking-wide text-navy placeholder:font-normal placeholder:normal-case placeholder:tracking-normal placeholder:text-slate-400 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => void applyCoupon()}
+                        disabled={couponBusy || !couponInput.trim()}
+                        className="inline-flex h-10 items-center justify-center rounded-lg bg-navy px-4 text-sm font-bold text-white transition hover:brightness-110 disabled:opacity-50"
+                      >
+                        {couponBusy ? <Loader2 className="size-4 animate-spin" /> : 'Apply'}
+                      </button>
+                    </div>
+                  )}
+                  {couponError ? (
+                    <p className="mt-2 text-xs font-medium text-rose-600">{couponError}</p>
+                  ) : null}
+                </div>
+
+                {discountCents > 0 ? (
+                  <div className="mt-3 flex justify-between text-sm">
+                    <span className="text-emerald-700">
+                      Discount{appliedCoupon?.code ? ` (${appliedCoupon.code})` : ''}
+                    </span>
+                    <span className="font-bold tabular-nums text-emerald-700">
+                      -{formatPrice(discountCents, 'INR')}
+                    </span>
+                  </div>
+                ) : null}
+
                 <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
                   <span className="font-black text-navy">Total</span>
-                  <span className="text-2xl font-black tabular-nums text-indigo-600">{formatPrice(total, 'INR')}</span>
+                  <span className="text-2xl font-black tabular-nums text-indigo-600">
+                    {willBeFree ? 'FREE' : formatPrice(payable, 'INR')}
+                  </span>
                 </div>
                 <div className="mt-4 flex items-start gap-2.5 rounded-2xl bg-emerald-50 p-3">
                   <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-600" />
