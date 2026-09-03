@@ -47,6 +47,13 @@ export class CreateOrderDto {
 
   @IsEnum(BillingPeriod)
   period!: BillingPeriod;
+
+  /** Optional coupon code. Validated + applied entirely server-side (the discount is
+   *  never sent by the client); an invalid/ineligible code fails with a clear reason. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  couponCode?: string;
 }
 
 /** Confirm a checkout from the Razorpay handler callback. The server re-verifies
@@ -89,6 +96,13 @@ export class CartCheckoutDto {
   @ValidateNested({ each: true })
   @Type(() => CartItemDto)
   items!: CartItemDto[];
+
+  /** Optional coupon code applied to the whole cart. The discount is computed
+   *  server-side over the eligible lines only; the client never sends an amount. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  couponCode?: string;
 }
 
 // ─── Admin: entitlement grant + price-book edit ──────────────────────────────
@@ -165,7 +179,8 @@ export interface PriceBookEntryDto {
   isActive: boolean;
 }
 
-/** Returned by create-order — everything the Razorpay Checkout widget needs. */
+/** Returned by create-order — everything the Razorpay Checkout widget needs.
+ *  `amountCents` is the CHARGED amount (already net of any coupon discount). */
 export interface CreateOrderResultDto {
   orderId: string;
   razorpayOrderId: string;
@@ -176,6 +191,13 @@ export interface CreateOrderResultDto {
   scopeRef: string | null;
   tier: PriceTier;
   period: BillingPeriod;
+  /** Coupon discount applied (minor units); 0 when no coupon. */
+  discountCents: number;
+  /** The coupon code that produced the discount, or null. */
+  couponCode: string | null;
+  /** A coupon reduced the charge to ₹0 — access was granted server-side and there
+   *  is NO Razorpay order to open. The client shows success without the widget. */
+  free: boolean;
 }
 
 export interface EntitlementDto {
@@ -210,7 +232,8 @@ export interface CartLineDto {
   durationDays: number;
 }
 
-/** Returned by cart-checkout — one order for the whole cart + its priced lines. */
+/** Returned by cart-checkout — one order for the whole cart + its priced lines.
+ *  `amountCents` is the CHARGED total (already net of any coupon discount). */
 export interface CartOrderResultDto {
   orderId: string;
   razorpayOrderId: string;
@@ -220,6 +243,13 @@ export interface CartOrderResultDto {
   lines: CartLineDto[];
   /** Lines dropped because the buyer already owns them (nothing charged for these). */
   skipped: CartLineDto[];
+  /** Coupon discount applied to the eligible lines (minor units); 0 when no coupon. */
+  discountCents: number;
+  /** The coupon code that produced the discount, or null. */
+  couponCode: string | null;
+  /** A coupon reduced the charge to ₹0 — access was granted server-side and there
+   *  is NO Razorpay order to open. The client shows success without the widget. */
+  free: boolean;
 }
 
 /** One line of the student's purchase history. scopeType/period are null for a
@@ -230,11 +260,16 @@ export interface PurchaseHistoryItemDto {
   scopeRef: string | null;
   period: BillingPeriod | null;
   tier: PriceTier;
+  /** The charged amount (net of any coupon discount). */
   amountCents: number;
   currency: string;
   status: string;
   createdAt: string;
   items?: CartLineDto[];
+  /** Coupon code used on this order, or null. */
+  couponCode: string | null;
+  /** Discount applied by the coupon (minor units); 0 when none. */
+  discountCents: number;
 }
 
 /** The "My Subscription" surface for a student. */
@@ -317,6 +352,10 @@ export interface AdminTransactionDto {
   capturedAt: string | null;
   /** Access validity granted by this order (entitlement expiry ISO; null = perpetual/none). */
   validUntil: string | null;
+  /** Coupon code applied to this order, or null. */
+  couponCode: string | null;
+  /** Discount applied by the coupon (minor units); 0 when none. */
+  discountCents: number;
 }
 
 export interface AdminTransactionsPageDto {

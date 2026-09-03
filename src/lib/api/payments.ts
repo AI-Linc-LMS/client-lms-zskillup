@@ -10,6 +10,7 @@ import type {
   PriceBookEntryDto,
   VerifyPaymentDto,
 } from '@/shared/dto/payments.dto';
+import type { CouponPreviewRequestDto, CouponPreviewResultDto } from '@/shared/dto/coupons.dto';
 
 /**
  * Student payments API client (billing program). Purchase a topic / section /
@@ -58,5 +59,13 @@ export async function verifyPayment(
     '/api/v1/payments/verify',
     dto,
   );
+  return res.data;
+}
+
+/** Preview a coupon against a cart before checkout. Server prices the lines + computes
+ *  the discount; the returned number is exactly what will be charged. Never throws for
+ *  an invalid code — it returns { valid:false, reason }. */
+export async function previewCoupon(dto: CouponPreviewRequestDto): Promise<CouponPreviewResultDto> {
+  const res = await apiClient.post<CouponPreviewResultDto>('/api/v1/payments/coupons/preview', dto);
   return res.data;
 }

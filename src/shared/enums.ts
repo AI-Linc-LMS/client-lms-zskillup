@@ -315,6 +315,49 @@ export enum PaymentStatus {
   REFUNDED = 'REFUNDED',
 }
 
+// ─── Coupons & campaigns (Razorpay program) ──────────────────────────────────
+
+/**
+ * How a coupon reduces the price.
+ * - PERCENT: a percentage off (1–100), optionally capped by maxDiscountCents.
+ * - FLAT:    a fixed amount off in minor units (paise), never exceeding the eligible total.
+ */
+export enum CouponDiscountType {
+  PERCENT = 'PERCENT',
+  FLAT = 'FLAT',
+}
+
+/**
+ * Who a coupon is valid for, evaluated at checkout against the buyer.
+ * - ALL:            anyone.
+ * - NEW_USERS:      the buyer has NO prior paid order (first purchase).
+ * - EXISTING_USERS: the buyer has at least one prior paid order.
+ * - USER:           an explicit allow-list of user ids (targetUserIds).
+ * College / cohort / segment targeting is deferred; the enum leaves room to add it
+ * without a breaking change (the admin API only accepts the four values above today).
+ */
+export enum CouponAudience {
+  ALL = 'ALL',
+  NEW_USERS = 'NEW_USERS',
+  EXISTING_USERS = 'EXISTING_USERS',
+  USER = 'USER',
+}
+
+/**
+ * The marketing channel a coupon campaign is run through. A REPORTING TAG only —
+ * automated bulk sending (email / WhatsApp) is deferred; coupons are distributed via
+ * shareable /cart links today, and the channel groups them for campaign performance.
+ */
+export enum CouponCampaignChannel {
+  EMAIL = 'EMAIL',
+  WHATSAPP = 'WHATSAPP',
+  STUDENT = 'STUDENT',
+  COLLEGE = 'COLLEGE',
+  LAUNCH = 'LAUNCH',
+  SPECIAL_OFFER = 'SPECIAL_OFFER',
+  GENERAL = 'GENERAL',
+}
+
 /** Kinds of community post (smaller subset of the AI-LINC forum). */
 export enum CommunityPostType {
   DISCUSSION = 'DISCUSSION',

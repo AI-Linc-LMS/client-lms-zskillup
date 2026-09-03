@@ -31,6 +31,7 @@ import {
   Newspaper,
   Quote,
   School,
+  Ticket,
   ScrollText,
   Search,
   Sparkles,
@@ -215,6 +216,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
     items: [
       { label: 'Subscriptions', href: '/superadmin/subscriptions', icon: CreditCard },
       { label: 'Billing & Revenue', href: '/superadmin/billing', icon: Wallet },
+      { label: 'Coupons', href: '/admin/coupons', icon: Ticket },
       { label: 'Financials', href: '/superadmin/financials', icon: IndianRupee },
       { label: 'Reports', href: '/superadmin/reports', icon: FileText },
       { label: 'Broadcasts', href: '/superadmin/broadcasts', icon: Megaphone },
@@ -343,6 +345,7 @@ export const ADMIN_NAV: NavSection[] = [
       { label: 'Blog', href: '/admin/blogs', icon: Newspaper },
       { label: 'Testimonials', href: '/admin/testimonials', icon: Quote },
       { label: 'SEO', href: '/admin/seo', icon: Search },
+      { label: 'Coupons', href: '/admin/coupons', icon: Ticket },
     ],
   },
   {

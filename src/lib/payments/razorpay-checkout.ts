@@ -78,6 +78,8 @@ export interface StartPurchaseParams {
   prefill?: { name?: string | null; email?: string | null };
   /** College B2B purchase (cohort-wide) instead of an individual student buy. */
   forCollege?: boolean;
+  /** Optional coupon code — validated + applied server-side. */
+  couponCode?: string;
 }
 
 export interface PurchaseResult {
@@ -102,10 +104,17 @@ export async function startPurchase(params: StartPurchaseParams): Promise<Purcha
       scope: params.scope,
       scopeRef: params.scopeRef ?? undefined,
       period: params.period,
+      couponCode: params.couponCode,
     };
     order = params.forCollege ? await createCollegeOrder(dto) : await createOrder(dto);
   } catch (err) {
     return { ok: false, error: messageOf(err, 'Could not start the payment. Please try again.') };
+  }
+
+  // A coupon cleared the whole charge — access was granted server-side and there is
+  // no Razorpay order to open. Report success straight away.
+  if (order.free) {
+    return { ok: true, entitlement: null };
   }
 
   const Ctor = window.Razorpay;
@@ -174,6 +183,7 @@ export interface CartPurchaseResult {
 export async function startCartPurchase(
   items: CartItemDto[],
   prefill?: { name?: string | null; email?: string | null },
+  couponCode?: string,
 ): Promise<CartPurchaseResult> {
   const loaded = await loadScript();
   if (!loaded) {
@@ -182,16 +192,22 @@ export async function startCartPurchase(
 
   let order;
   try {
-    order = await createCartOrder({ items });
+    order = await createCartOrder({ items, couponCode });
   } catch (err) {
     return { ok: false, error: messageOf(err, 'Could not start the payment. Please try again.') };
+  }
+
+  const skipped = order.skipped?.length ?? 0;
+
+  // A coupon cleared the whole charge — access was granted server-side, no widget.
+  if (order.free) {
+    return { ok: true, skipped };
   }
 
   const Ctor = window.Razorpay;
   if (!Ctor) {
     return { ok: false, error: 'The payment window is unavailable right now. Please try again.' };
   }
-  const skipped = order.skipped?.length ?? 0;
 
   return new Promise<CartPurchaseResult>((resolve) => {
     let settled = false;
