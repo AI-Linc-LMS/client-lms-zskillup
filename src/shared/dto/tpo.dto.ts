@@ -16,6 +16,7 @@ import {
   IsArray,
   IsBoolean,
   IsDateString,
+  IsEmail,
   IsIn,
   IsNumber,
   IsOptional,
@@ -248,4 +249,29 @@ export class PreviewTpoAssessmentDto {
 export interface TpoAssessmentAvailability {
   mcqAvailable: number;
   codingAvailable: number;
+}
+
+// ── College performance report (TPO Panel View — email to college) ─────────────
+
+/** Email a college's performance report (HTML KPI summary + CSV roster) to its
+ *  TPO(s). Admin/Super-Admin only. Optionally scope to a cohort or override the
+ *  recipients (e.g. a placement-cell address that isn't a TPO account). */
+export class SendCollegeReportDto {
+  @IsOptional()
+  @IsUUID()
+  cohortId?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(20)
+  @IsEmail({}, { each: true })
+  @MaxLength(320, { each: true })
+  recipients?: string[];
+}
+
+export interface SendCollegeReportResult {
+  /** How many recipients the report was actually handed to the transport for. */
+  sent: number;
+  recipients: string[];
+  collegeName: string;
 }
