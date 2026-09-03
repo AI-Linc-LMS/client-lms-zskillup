@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { CollegeSubscriptionScopeCard } from '@/components/admin/CollegeSubscriptionScopeCard';
+import { CollegePerformancePanel } from '@/components/admin/CollegePerformancePanel';
 import { getAdminCollegeDetail, type AdminCollegeDetail } from '@/lib/api/admin';
 
 /**
@@ -88,6 +89,10 @@ export default function SuperadminCollegeDetailPage({
               <Kpi label="Cohorts" value={detail.cohortCount} />
             </dl>
           </section>
+
+          {/* TPO Panel View — the same college performance & participation analytics a
+              TPO sees, + email the report to the college. */}
+          <CollegePerformancePanel collegeId={id} studentHrefBase="/superadmin/students" />
 
           <CollegeSubscriptionScopeCard collegeId={id} />
         </>

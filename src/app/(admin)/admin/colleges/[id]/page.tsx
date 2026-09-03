@@ -3,32 +3,22 @@
 import { use, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
-import {
-  getAdminCollegeDetail,
-  listStudentReports,
-  type AdminCollegeDetail,
-  type AdminStudentReportRow,
-} from '@/lib/api/admin';
+import { getAdminCollegeDetail, type AdminCollegeDetail } from '@/lib/api/admin';
 import { CollegeCohortsManager } from '@/components/admin/CollegeCohortsManager';
 import { CollegeSubscriptionScopeCard } from '@/components/admin/CollegeSubscriptionScopeCard';
+import { CollegePerformancePanel } from '@/components/admin/CollegePerformancePanel';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 
 /** Admin console - college detail: identity, enrolment + performance, roster. */
 export default function AdminCollegeDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [detail, setDetail] = useState<AdminCollegeDetail | null>(null);
-  const [students, setStudents] = useState<AdminStudentReportRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
     try {
-      const [d, roster] = await Promise.all([
-        getAdminCollegeDetail(id),
-        listStudentReports({ collegeId: id, limit: 100 }),
-      ]);
-      setDetail(d);
-      setStudents(roster.rows);
+      setDetail(await getAdminCollegeDetail(id));
     } catch {
       setError('Failed to load this college.');
     }
@@ -94,70 +84,15 @@ export default function AdminCollegeDetailPage({ params }: { params: Promise<{ i
             </dl>
           </section>
 
+          {/* TPO Panel View — the same college performance & participation analytics a
+              TPO sees, + email the report to the college. */}
+          <CollegePerformancePanel collegeId={id} />
+
           {/* What this college bought - and what every one of its students inherits. */}
           <CollegeSubscriptionScopeCard collegeId={id} />
 
           {/* Cohorts + student invitations - Platform Admin manages these (TPO is read-only). */}
           <CollegeCohortsManager collegeId={id} onChange={() => void reload()} />
-
-          <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-            <div className="border-b border-slate-100 px-4 py-3">
-              <h2 className="text-sm font-bold text-navy">
-                Students {students.length > 0 && `(${students.length})`}
-              </h2>
-            </div>
-            {students.length === 0 ? (
-              <div className="py-12 text-center text-sm text-slate-500">
-                No students enrolled at this college yet.
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px] text-sm">
-                  <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500">
-                    <tr>
-                      <th className="px-4 py-3">Student</th>
-                      <th className="px-4 py-3 text-right">Attempts</th>
-                      <th className="px-4 py-3 text-right">Avg %</th>
-                      <th className="px-4 py-3 text-right">Best %</th>
-                      <th className="px-4 py-3">Last attempt</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {students.map((s) => (
-                      <tr key={s.id} className="hover:bg-slate-50">
-                        <td className="px-4 py-3">
-                          <Link href={`/admin/students/${s.id}`} className="group">
-                            <p className="font-semibold text-navy group-hover:text-[#1a1a1a]">
-                              {s.fullName ?? '-'}
-                            </p>
-                            <p className="text-xs text-slate-500">{s.email}</p>
-                          </Link>
-                        </td>
-                        <td className="px-4 py-3 text-right tabular-nums text-slate-700">
-                          {s.attempts}
-                        </td>
-                        <td className="px-4 py-3 text-right tabular-nums text-slate-700">
-                          {s.avgScorePct ?? '-'}
-                        </td>
-                        <td className="px-4 py-3 text-right tabular-nums text-slate-700">
-                          {s.bestScorePct ?? '-'}
-                        </td>
-                        <td className="px-4 py-3 text-xs text-slate-500">
-                          {s.lastAttemptAt
-                            ? new Date(s.lastAttemptAt).toLocaleDateString('en-IN', {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric',
-                              })
-                            : '-'}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </section>
         </>
       )}
     </div>
