@@ -274,7 +274,7 @@ function CouponsTab({ campaigns }: { campaigns: CouponCampaignDto[] }) {
                         className="inline-flex items-center gap-1.5 font-bold text-navy"
                         title="Copy code"
                       >
-                        <Tag className="size-3.5 text-orange" /> {c.code}
+                        <Tag className="size-3.5 text-slate-400" /> {c.code}
                         <Copy className="size-3 text-slate-400" />
                       </button>
                       {c.campaignName ? (
@@ -672,7 +672,7 @@ function CouponForm({
         <button
           type="submit"
           disabled={saving}
-          className="inline-flex items-center gap-2 rounded-lg bg-orange px-5 py-2 text-sm font-bold text-[#171717] transition hover:brightness-105 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-lg btn-brand px-4 py-2 text-sm font-semibold disabled:opacity-50"
         >
           {saving && <Loader2 className="size-4 animate-spin" />}
           {editing ? 'Save changes' : 'Create coupon'}
@@ -778,7 +778,7 @@ function CampaignsTab({ onChanged }: { onChanged: () => void }) {
             <button
               type="submit"
               disabled={saving || !name.trim()}
-              className="inline-flex items-center gap-2 rounded-lg bg-orange px-4 py-2 text-sm font-bold text-[#171717] disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-lg btn-brand px-4 py-2 text-sm font-semibold disabled:opacity-50"
             >
               {saving && <Loader2 className="size-4 animate-spin" />} Create campaign
             </button>
