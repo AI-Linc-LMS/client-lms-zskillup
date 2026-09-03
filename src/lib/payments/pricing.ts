@@ -71,6 +71,25 @@ export function periodSavingsPct(
   return pct > 0 ? pct : null;
 }
 
+/**
+ * Savings vs the MRP strikethrough (the admin-set "original price", `mrp_cents`).
+ * The SINGLE source for the "Save X%" badge AND the "You save ₹Y (X%)" summary, so
+ * they can never contradict the struck-through price. Returns the saved amount +
+ * percent, or `null` when there's no MRP above the charged price.
+ *
+ * (This replaces the old `periodSavingsPct` "vs paying monthly" basis on the buy
+ * pages, which produced a "You save ₹7,589" larger than the ₹3,999 shown as struck
+ * through — a saving can never exceed the original price it's quoted against.)
+ */
+export function mrpSavings(
+  entry: PriceBookEntryDto | undefined,
+): { amountCents: number; pct: number } | null {
+  if (!entry || entry.mrpCents == null || entry.mrpCents <= entry.amountCents) return null;
+  const amountCents = entry.mrpCents - entry.amountCents;
+  const pct = Math.round((amountCents / entry.mrpCents) * 100);
+  return pct > 0 ? { amountCents, pct } : null;
+}
+
 /** Per-month equivalent price (paise) for a period - for "Just ₹X/month" copy. */
 export function perMonthCents(entry: PriceBookEntryDto | undefined, period: BillingPeriod): number | null {
   if (!entry) return null;
