@@ -319,13 +319,37 @@ export default function CartPage() {
                 <Sparkles className="size-4" /> You can remove any item or change its access plan duration.
               </p>
 
-              {/* Footer - subtotal + pay */}
+              {/* Footer - subtotal + pay. The big number is the amount actually
+                  payable, so it always matches the coupon-discounted total the
+                  Razorpay widget opens with (never the pre-discount subtotal). */}
               <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                {discountCents > 0 && (
+                  <div className="mb-3 space-y-1.5 border-b border-slate-100 pb-3 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500">
+                        Subtotal ({count} item{count === 1 ? '' : 's'})
+                      </span>
+                      <span className="tabular-nums text-slate-500">
+                        {formatPrice(authoritativeSubtotal, 'INR')}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-emerald-700">
+                        Discount{appliedCoupon?.code ? ` (${appliedCoupon.code})` : ''}
+                      </span>
+                      <span className="tabular-nums font-semibold text-emerald-700">
+                        -{formatPrice(discountCents, 'INR')}
+                      </span>
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-slate-600">
-                    Subtotal ({count} item{count === 1 ? '' : 's'})
+                    {discountCents > 0 ? 'Total payable' : `Subtotal (${count} item${count === 1 ? '' : 's'})`}
                   </span>
-                  <span className="text-2xl font-black tabular-nums text-navy">{formatPrice(total, 'INR')}</span>
+                  <span className="text-2xl font-black tabular-nums text-navy">
+                    {willBeFree ? 'FREE' : formatPrice(payable, 'INR')}
+                  </span>
                 </div>
                 {msg && (
                   <p className={`mt-3 text-sm font-semibold ${msg.kind === 'ok' ? 'text-emerald-700' : 'text-rose-600'}`}>
