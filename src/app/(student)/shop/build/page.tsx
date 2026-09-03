@@ -32,7 +32,7 @@ import { listCompanies, listTopicsWithCounts, type ApiCompany, type ApiTopic } f
 import { listCodingTopics } from '@/lib/api/mocks';
 import { CODING_SECTION_SLUG } from '@/lib/sections/section-catalog';
 import { HIDDEN_ROOT_SLUGS } from '@/components/practice/section-meta';
-import { buildPriceMap, PERIODS, periodSavingsPct, retailPrice } from '@/lib/payments/pricing';
+import { buildPriceMap, mrpSavings, PERIODS, retailPrice } from '@/lib/payments/pricing';
 import { BillingPeriod, EntitlementScope } from '@/shared/enums';
 import type { PriceBookEntryDto } from '@/shared/dto/payments.dto';
 
@@ -268,7 +268,9 @@ export default function BuildYourOwnPage() {
       <div className="grid gap-2.5 sm:grid-cols-3">
         {PERIODS.map((p) => {
           const entry = retailPrice(priceMap, scope, p.period);
-          const pct = periodSavingsPct(priceMap, scope, p.period);
+          // Badge % is quoted against this entry's MRP, so it always matches the
+          // struck-through price shown right below it (never a vs-monthly figure).
+          const pct = mrpSavings(entry)?.pct ?? null;
           const active = current === p.period;
           return (
             <button
@@ -709,17 +711,14 @@ function SubTable({
         <thead>
           <tr className="border-b border-slate-100 text-left">
             <th className="py-2 pr-3 text-xs font-bold uppercase tracking-widest text-slate-500">Sub-sections</th>
-            {PERIODS.map((p) => {
-              const pct = periodSavingsPct(priceMap, EntitlementScope.TOPIC, p.period);
-              return (
-                <th key={p.period} className="px-2 py-2 text-center text-xs font-bold text-slate-600">
-                  <span className="flex flex-col items-center">
-                    {p.months}
-                    {pct ? <span className="text-[10px] font-bold text-emerald-600">Save {pct}%</span> : null}
-                  </span>
-                </th>
-              );
-            })}
+            {PERIODS.map((p) => (
+              // Per-period savings live on each row's own price cell below (as an MRP
+              // strikethrough); a single column-header % has no one price to quote
+              // against, so it's intentionally omitted rather than shown vs-monthly.
+              <th key={p.period} className="px-2 py-2 text-center text-xs font-bold text-slate-600">
+                <span className="flex flex-col items-center">{p.months}</span>
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>

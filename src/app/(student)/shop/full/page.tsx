@@ -26,10 +26,10 @@ import { getPricing } from '@/lib/api/payments';
 import { formatPrice } from '@/lib/api/subscriptions';
 import {
   buildPriceMap,
+  mrpSavings,
   PERIODS,
   perMonthCents,
   periodMonths,
-  periodSavingsPct,
   retailPrice,
 } from '@/lib/payments/pricing';
 import { BillingPeriod, EntitlementScope } from '@/shared/enums';
@@ -76,13 +76,11 @@ export default function FullPlatformPage() {
   );
   const inCart = !!platformItem;
 
-  const savePct = periodSavingsPct(priceMap, EntitlementScope.PLATFORM, period);
-  const monthly = entryFor(BillingPeriod.MONTHLY);
-  const saveAmt =
-    selected && monthly
-      ? monthly.amountCents * (PERIODS.find((p) => p.period === period)?.multiple ?? 1) -
-        selected.amountCents
-      : 0;
+  // Savings quoted against the MRP shown as struck-through (the admin-set original
+  // price), so the "You save" line can never exceed that price.
+  const savings = mrpSavings(selected);
+  const savePct = savings?.pct ?? null;
+  const saveAmt = savings?.amountCents ?? 0;
 
   const proceed = () => {
     if (hasPlatform) {
@@ -164,7 +162,7 @@ export default function FullPlatformPage() {
                 {PERIODS.map((p) => {
                   const entry = entryFor(p.period);
                   const active = period === p.period;
-                  const pct = periodSavingsPct(priceMap, EntitlementScope.PLATFORM, p.period);
+                  const pct = mrpSavings(entry)?.pct ?? null;
                   const perMo = perMonthCents(entry, p.period);
                   const popular = p.period === BillingPeriod.QUARTERLY;
                   return (
