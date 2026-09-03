@@ -28,6 +28,7 @@ import {
 import { formatPrice } from '@/lib/api/subscriptions';
 import { describeError } from '@/lib/api/errors';
 import {
+  BillingPeriod,
   CouponAudience,
   CouponCampaignChannel,
   CouponDiscountType,
@@ -62,6 +63,20 @@ const SCOPE_ORDER: EntitlementScope[] = [
   EntitlementScope.COMPANY,
   EntitlementScope.SECTION,
   EntitlementScope.TOPIC,
+];
+
+// The only purchasable plan durations. There is deliberately no 6-month plan — the
+// billing engine sells 1 / 3 / 12 months only, so a coupon can't target one.
+const PERIOD_LABEL: Record<BillingPeriod, string> = {
+  [BillingPeriod.MONTHLY]: '1 Month',
+  [BillingPeriod.QUARTERLY]: '3 Months',
+  [BillingPeriod.ANNUAL]: '12 Months',
+};
+
+const PERIOD_ORDER: BillingPeriod[] = [
+  BillingPeriod.MONTHLY,
+  BillingPeriod.QUARTERLY,
+  BillingPeriod.ANNUAL,
 ];
 
 const CHANNEL_LABEL: Record<CouponCampaignChannel, string> = {
@@ -282,7 +297,12 @@ function CouponsTab({ campaigns }: { campaigns: CouponCampaignDto[] }) {
                       ) : null}
                     </td>
                     <td className="px-4 py-3 font-semibold text-navy">{discountText(c)}</td>
-                    <td className="px-4 py-3 text-slate-600">{appliesToText(c)}</td>
+                    <td className="px-4 py-3 text-slate-600">
+                      {appliesToText(c)}
+                      {c.applicablePeriods.length > 0 ? (
+                        <p className="text-xs text-slate-400">{durationText(c)}</p>
+                      ) : null}
+                    </td>
                     <td className="px-4 py-3 text-slate-600">{AUDIENCE_LABEL[c.audience]}</td>
                     <td className="px-4 py-3 text-right tabular-nums text-slate-700">
                       {c.redemptions}
@@ -369,6 +389,10 @@ function CouponForm({
   const [scopes, setScopes] = useState<Set<EntitlementScope>>(
     new Set(editing?.applicability.map((a) => a.scopeType) ?? []),
   );
+  // Empty set = "Any duration" (works for every plan length).
+  const [periods, setPeriods] = useState<Set<BillingPeriod>>(
+    new Set(editing?.applicablePeriods ?? []),
+  );
   const [audience, setAudience] = useState<CouponAudience>(editing?.audience ?? CouponAudience.ALL);
   const [targetUsers, setTargetUsers] = useState(editing?.targetUserIds.join('\n') ?? '');
   const [maxRedemptions, setMaxRedemptions] = useState<string>(
@@ -385,6 +409,15 @@ function CouponForm({
       const next = new Set(prev);
       if (next.has(s)) next.delete(s);
       else next.add(s);
+      return next;
+    });
+  };
+
+  const togglePeriod = (p: BillingPeriod) => {
+    setPeriods((prev) => {
+      const next = new Set(prev);
+      if (next.has(p)) next.delete(p);
+      else next.add(p);
       return next;
     });
   };
@@ -426,6 +459,7 @@ function CouponForm({
       applicability: appliesToAll
         ? []
         : [...scopes].map((s) => ({ scopeType: s, scopeRef: null })),
+      applicablePeriods: [...periods],
       audience,
       targetUserIds: audience === CouponAudience.USER ? parsedTargetUsers : [],
       maxRedemptions: maxRedemptions.trim() !== '' ? Math.round(Number(maxRedemptions)) : null,
@@ -583,6 +617,39 @@ function CouponForm({
               </p>
             </div>
           )}
+        </div>
+
+        {/* Plan duration */}
+        <div className="sm:col-span-2">
+          <span className="mb-2 block text-xs font-medium text-slate-600">
+            Applicable plan duration
+          </span>
+          <div className="grid grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-slate-50/60 p-3 sm:grid-cols-4">
+            {PERIOD_ORDER.map((p) => (
+              <label key={p} className="flex items-center gap-2 text-sm text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={periods.has(p)}
+                  onChange={() => togglePeriod(p)}
+                  className="size-4 rounded border-slate-300 text-orange focus:ring-orange/30"
+                />
+                {PERIOD_LABEL[p]}
+              </label>
+            ))}
+            <label className="flex items-center gap-2 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                checked={periods.size === 0}
+                onChange={() => setPeriods(new Set())}
+                className="size-4 rounded border-slate-300 text-orange focus:ring-orange/30"
+              />
+              Any duration
+            </label>
+            <p className="col-span-2 text-xs text-slate-500 sm:col-span-4">
+              Select one or more durations — the coupon only applies to those plan lengths.
+              Leave as “Any duration” to allow every plan.
+            </p>
+          </div>
         </div>
 
         <Field label="Audience">
@@ -998,6 +1065,15 @@ function appliesToText(c: CouponDto): string {
   if (c.applicability.length === 0) return '—';
   return c.applicability
     .map((a) => (a.scopeRef ? `${SCOPE_LABEL[a.scopeType]}: ${a.scopeRef}` : SCOPE_LABEL[a.scopeType]))
+    .join(', ');
+}
+
+/** The plan-duration restriction as a short label; '' when unrestricted (any). */
+function durationText(c: CouponDto): string {
+  if (c.applicablePeriods.length === 0) return '';
+  return c.applicablePeriods
+    .map((p) => PERIOD_LABEL[p])
+    .filter(Boolean)
     .join(', ');
 }
 

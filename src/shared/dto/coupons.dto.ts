@@ -31,6 +31,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import {
+  BillingPeriod,
   CouponAudience,
   CouponCampaignChannel,
   CouponDiscountType,
@@ -107,6 +108,14 @@ export class CreateCouponDto {
   @ValidateNested({ each: true })
   @Type(() => CouponApplicabilityEntryDto)
   applicability?: CouponApplicabilityEntryDto[];
+
+  /** Plan durations (billing periods) the coupon works for. Empty/omitted = any
+   *  duration. Only MONTHLY (1mo) / QUARTERLY (3mo) / ANNUAL (12mo) are real plans. */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(10)
+  @IsEnum(BillingPeriod, { each: true })
+  applicablePeriods?: BillingPeriod[];
 
   @IsOptional()
   @IsEnum(CouponAudience)
@@ -201,6 +210,13 @@ export class UpdateCouponDto {
   @ValidateNested({ each: true })
   @Type(() => CouponApplicabilityEntryDto)
   applicability?: CouponApplicabilityEntryDto[];
+
+  /** Plan durations (billing periods) the coupon works for. Empty = any duration. */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(10)
+  @IsEnum(BillingPeriod, { each: true })
+  applicablePeriods?: BillingPeriod[];
 
   @IsOptional()
   @IsEnum(CouponAudience)
@@ -327,6 +343,8 @@ export interface CouponDto {
   currency: string;
   appliesToAll: boolean;
   applicability: CouponApplicabilityDto[];
+  /** Plan durations the coupon is limited to; empty = any duration. */
+  applicablePeriods: BillingPeriod[];
   audience: CouponAudience;
   targetUserIds: string[];
   maxRedemptions: number | null;
