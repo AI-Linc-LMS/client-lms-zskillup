@@ -4,6 +4,7 @@ import type {
   SendCollegeReportResult,
   TpoCollegeSummary,
   TpoDashboard,
+  TpoParticipation,
 } from '@/shared';
 
 /**
@@ -24,6 +25,15 @@ export async function getAdminCollegeAnalytics(
 
 export async function getAdminCollegeSummary(collegeId: string): Promise<TpoCollegeSummary> {
   return (await apiClient.get<TpoCollegeSummary>(`${base(collegeId)}/college-summary`)).data;
+}
+
+/** Extra participation & engagement roll-ups (gamification, drives, live sessions). */
+export async function getAdminCollegeParticipation(
+  collegeId: string,
+  cohortId?: string,
+): Promise<TpoParticipation> {
+  const qs = cohortId ? `?cohortId=${encodeURIComponent(cohortId)}` : '';
+  return (await apiClient.get<TpoParticipation>(`${base(collegeId)}/participation${qs}`)).data;
 }
 
 /** Cohorts for the batch filter (served by AdminCohortsController). */

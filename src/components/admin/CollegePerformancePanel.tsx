@@ -8,12 +8,19 @@ import {
   emailCollegeReport,
   getAdminCollegeAnalytics,
   getAdminCollegeCohorts,
+  getAdminCollegeParticipation,
 } from '@/lib/api/admin-college-analytics';
 import { describeError } from '@/lib/api/errors';
 import { Button } from '@/components/ui/button';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { StatusPill, type StatusTone } from '@/components/student/StatusPill';
-import type { CohortDto, ReadinessBand, TpoDashboard, TpoStudentRow } from '@/shared';
+import type {
+  CohortDto,
+  ReadinessBand,
+  TpoDashboard,
+  TpoParticipation,
+  TpoStudentRow,
+} from '@/shared';
 import { cn } from '@/lib/utils';
 
 const BAND: Record<ReadinessBand, { tone: StatusTone; label: string }> = {
@@ -38,6 +45,7 @@ export function CollegePerformancePanel({
   const [cohorts, setCohorts] = useState<CohortDto[]>([]);
   const [cohortId, setCohortId] = useState<string>('');
   const [data, setData] = useState<TpoDashboard | null>(null);
+  const [participation, setParticipation] = useState<TpoParticipation | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -52,7 +60,12 @@ export function CollegePerformancePanel({
     setLoading(true);
     setError(null);
     try {
-      setData(await getAdminCollegeAnalytics(collegeId, cohortId || undefined));
+      const [d, p] = await Promise.all([
+        getAdminCollegeAnalytics(collegeId, cohortId || undefined),
+        getAdminCollegeParticipation(collegeId, cohortId || undefined),
+      ]);
+      setData(d);
+      setParticipation(p);
     } catch (err) {
       setError(describeError(err, 'Failed to load performance analytics.'));
     } finally {
@@ -175,6 +188,19 @@ export function CollegePerformancePanel({
             </Card>
           </div>
 
+          {participation ? (
+            <Card title="Engagement & participation">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+                <Stat label="On a streak" value={participation.activeStreaks} />
+                <Stat label="Avg XP" value={participation.avgXp} />
+                <Stat label="Badges" value={participation.totalBadges} />
+                <Stat label="Quests done" value={participation.questsCompleted} />
+                <Stat label="Drive regs" value={participation.driveRegistrations} />
+                <Stat label="Live sign-ups" value={participation.liveSessionSignups} />
+              </div>
+            </Card>
+          ) : null}
+
           <RosterTable students={data.students} truncated={data.truncated} studentHrefBase={studentHrefBase} />
         </>
       )}
@@ -266,6 +292,15 @@ function Kpi({
         {value}
         {suffix ? <span className="text-sm font-semibold text-slate-400">{suffix}</span> : null}
       </p>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white p-3 text-center">
+      <p className="text-lg font-extrabold tabular-nums text-navy">{value}</p>
+      <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
     </div>
   );
 }
