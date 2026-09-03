@@ -22,6 +22,7 @@ export * from './dto/tpo.dto';
 export * from './dto/college-request.dto';
 export * from './dto/cohort.dto';
 export * from './dto/tpo-analytics.dto';
+export * from './dto/admin-access.dto';
 export * from './dto/admin-users.dto';
 export * from './dto/broadcast.dto';
 export * from './dto/subscription.dto';

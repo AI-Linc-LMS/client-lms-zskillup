@@ -68,6 +68,26 @@ export interface TpoDashboard {
   truncated: boolean;
 }
 
+/** Extra participation & engagement roll-ups (Phase 4) — signals beyond the core
+ *  dashboard: gamification engagement, company-drive registrations, live-session
+ *  sign-ups. Each figure degrades to 0 if its source table isn't present. */
+export interface TpoParticipation {
+  /** Students with a current daily streak. */
+  activeStreaks: number;
+  /** Mean total XP across the cohort. */
+  avgXp: number;
+  /** Badges earned across the cohort. */
+  totalBadges: number;
+  /** Daily quests completed (all time). */
+  questsCompleted: number;
+  /** Company-drive registrations (registered or completed). */
+  driveRegistrations: number;
+  /** Company-drive registrations marked completed. */
+  driveCompletions: number;
+  /** Live-session sign-ups by these students. */
+  liveSessionSignups: number;
+}
+
 /** College identity + headline counts for the TPO console chrome (brand lockup,
  *  batch selector). Cheap identity read - heavy analytics stay on the dashboard. */
 export interface TpoCollegeSummary {
