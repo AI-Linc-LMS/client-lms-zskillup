@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { getMySubscription } from '@/lib/api/payments';
+import { roleHint } from '@/lib/session-hints';
 import type { EntitlementDto, MySubscriptionDto } from '@/shared/dto/payments.dto';
 import type { FeatureLockModule } from '@/lib/api/feature-locks';
 import { EntitlementScope } from '@/shared/enums';
@@ -122,7 +123,12 @@ export function useMySubscription(enabled = true): MySubscriptionState {
   }, []);
 
   useEffect(() => {
-    if (!enabled) {
+    // Skip entirely for a logged-OUT visitor: they have no subscription, and the
+    // authed /payments/my-subscription call would 401 → refresh 401 → apiClient bounces
+    // to /login. That bounce broke every PUBLIC page that renders an upgrade-gated
+    // control (e.g. the job board's ApplyButton). The gate already fails open, so an
+    // anonymous visitor simply gets paywallEnabled=false here.
+    if (!enabled || !roleHint()) {
       setState({ loading: false, ...EMPTY });
       return;
     }
@@ -154,5 +160,5 @@ export function useMySubscription(enabled = true): MySubscriptionState {
     };
   }, [check, enabled]);
 
-  return { ...state, refresh: () => (enabled ? check() : undefined) };
+  return { ...state, refresh: () => (enabled && roleHint() ? check() : undefined) };
 }
