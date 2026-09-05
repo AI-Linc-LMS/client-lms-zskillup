@@ -15,6 +15,7 @@ export interface JobFilterState {
   passoutYear: string;
   openOnly: boolean;
   skills: string[];
+  source: '' | 'prephasz' | 'other';
 }
 
 export const EMPTY_FILTERS: JobFilterState = {
@@ -25,6 +26,7 @@ export const EMPTY_FILTERS: JobFilterState = {
   passoutYear: '',
   openOnly: false,
   skills: [],
+  source: '',
 };
 
 export const activeFilterCount = (f: JobFilterState): number =>
@@ -34,6 +36,7 @@ export const activeFilterCount = (f: JobFilterState): number =>
   (f.companyName ? 1 : 0) +
   (f.passoutYear ? 1 : 0) +
   (f.openOnly ? 1 : 0) +
+  (f.source ? 1 : 0) +
   f.skills.length;
 
 /** A collapsible group. Open by default - a rail whose sections are all shut is a rail
@@ -154,6 +157,25 @@ export function JobFilterRail({
           className="size-4 rounded border-slate-300 text-orange focus-visible:ring-2 focus-visible:ring-orange/30"
         />
       </label>
+
+      <Group title="Posted by" count={value.source ? 1 : 0}>
+        <div className="flex flex-wrap gap-2">
+          <Chip
+            active={value.source === 'prephasz'}
+            onClick={() =>
+              onChange({ ...value, source: value.source === 'prephasz' ? '' : 'prephasz' })
+            }
+          >
+            Prephasz Opportunities
+          </Chip>
+          <Chip
+            active={value.source === 'other'}
+            onClick={() => onChange({ ...value, source: value.source === 'other' ? '' : 'other' })}
+          >
+            Other Opportunities
+          </Chip>
+        </div>
+      </Group>
 
       <Group title="Job type" count={value.jobKind ? 1 : 0}>
         <div className="flex flex-wrap gap-2">

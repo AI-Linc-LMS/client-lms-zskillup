@@ -140,8 +140,24 @@ function BlogRow({ b }: { b: BlogPostDto }) {
   );
 }
 
-/** One testimonial card — reused in the right panel and the mobile/tablet section. */
+/** One testimonial — an uploaded full-width graphic + title when an image is set,
+ *  otherwise the classic quote card. Reused in the right panel and the mobile section. */
 function TestimonialCard({ t }: { t: TestimonialDto }) {
+  const image = safeHttpUrl(t.imageUrl);
+  if (image) {
+    return (
+      <figure className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={image} alt={t.authorName} className="block w-full" />
+        {t.authorName || t.authorTitle ? (
+          <figcaption className="px-4 py-3">
+            {t.authorName ? <p className="text-sm font-bold text-navy">{t.authorName}</p> : null}
+            {t.authorTitle ? <p className="mt-0.5 text-xs text-slate-500">{t.authorTitle}</p> : null}
+          </figcaption>
+        ) : null}
+      </figure>
+    );
+  }
   return (
     <Card className="p-5">
       <QuoteIcon className="size-5 text-orange/70" aria-hidden="true" />
@@ -174,6 +190,22 @@ function TestimonialCard({ t }: { t: TestimonialDto }) {
         ) : null}
       </div>
     </Card>
+  );
+}
+
+/** "Related posts" — a vertical thumbnail + title list (the upGrad-style sidebar block). */
+function RelatedPosts({ blogs }: { blogs: BlogPostDto[] }) {
+  return (
+    <div>
+      <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Related posts</p>
+      <div className="mt-2 divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white px-2 py-1 shadow-sm">
+        {blogs.map((b) => (
+          <div key={b.id} className="py-1">
+            <BlogRow b={b} />
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -298,7 +330,7 @@ export function JobDetail({
     ...placements.map((p) => <PlacementCard key={`p-${p.id}`} p={p} />),
     ...testimonials.map((t) => <TestimonialCard key={`t-${t.id}`} t={t} />),
   ];
-  const hasRightPanel = rightItems.length > 0;
+  const hasRightPanel = rightItems.length > 0 || blogs.length > 0;
   const gridClass = hasRightPanel
     ? 'mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_300px_340px]'
     : 'mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]';
@@ -583,26 +615,26 @@ export function JobDetail({
           ) : null}
         </div>
 
-        {/* Right column (xl+): placement stories & highlights as a sponsored-style rail.
+        {/* Right column (xl+): Related posts + placement stories, a sponsored-style rail.
             Below xl this is hidden and the same content renders full-width further down. */}
         {hasRightPanel ? (
-          <aside className="hidden xl:col-start-3 xl:row-start-1 xl:block">
-            <div className="xl:sticky xl:top-6">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
-                Placement stories
-              </p>
-              <h2 className="mb-3 mt-1 text-base font-bold text-navy">Where our students landed</h2>
-              {rightItems.length > 4 ? (
-                <Marquee
-                  direction="y"
-                  durationSec={44}
-                  items={rightItems}
-                  className="h-[calc(100vh-9rem)]"
-                />
-              ) : (
-                <div className="space-y-4">{rightItems}</div>
-              )}
-            </div>
+          <aside className="hidden space-y-6 xl:col-start-3 xl:row-start-1 xl:block">
+            {blogs.length > 0 ? <RelatedPosts blogs={blogs} /> : null}
+            {rightItems.length > 0 ? (
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                  Placement stories
+                </p>
+                <h2 className="mb-3 mt-1 text-base font-bold text-navy">
+                  Where our students landed
+                </h2>
+                {rightItems.length > 4 ? (
+                  <Marquee direction="y" durationSec={44} items={rightItems} className="h-[36rem]" />
+                ) : (
+                  <div className="space-y-4">{rightItems}</div>
+                )}
+              </div>
+            ) : null}
           </aside>
         ) : null}
       </div>
@@ -638,7 +670,7 @@ export function JobDetail({
         <section className="mt-10 xl:hidden">
           <Label>What students say</Label>
           <h2 className="mt-1 text-lg font-bold text-navy">Placement stories</h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div className="mx-auto mt-4 max-w-2xl space-y-4">
             {testimonials.map((t, i) => (
               <RevealX key={t.id} from={i % 2 === 0 ? 'left' : 'right'} delay={(i % 2) * 0.05}>
                 <TestimonialCard t={t} />
@@ -649,30 +681,8 @@ export function JobDetail({
       ) : null}
 
       {blogs.length > 0 ? (
-        <section className="mt-10">
-          <Label>Related reading</Label>
-          <h2 className="mt-1 text-lg font-bold text-navy">From the blog</h2>
-          {blogs.length > 3 ? (
-            <Marquee
-              durationSec={48}
-              className="mt-4"
-              items={blogs.map((b) => (
-                <div key={b.id} className="w-[320px]">
-                  <Card>
-                    <BlogRow b={b} />
-                  </Card>
-                </div>
-              ))}
-            />
-          ) : (
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {blogs.map((b) => (
-                <Card key={b.id}>
-                  <BlogRow b={b} />
-                </Card>
-              ))}
-            </div>
-          )}
+        <section className="mx-auto mt-10 max-w-2xl xl:hidden">
+          <RelatedPosts blogs={blogs} />
         </section>
       ) : null}
 
