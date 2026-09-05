@@ -415,6 +415,12 @@ export enum CompensationKind {
   UNDISCLOSED = 'UNDISCLOSED',
 }
 
+/** How a stipend / CTC is structured — shown next to internship compensation. */
+export enum CompensationStructure {
+  FIXED = 'FIXED',
+  FIXED_PLUS_VARIABLE = 'FIXED_PLUS_VARIABLE',
+}
+
 /** Audiences a job can be aimed at. Rows are OR-ed: each one WIDENS reach, and a job
  *  with no rows at all is public. */
 export enum JobTargetType {
