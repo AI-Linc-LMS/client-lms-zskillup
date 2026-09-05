@@ -70,7 +70,8 @@ export default async function JobPage({ params }: { params: Promise<{ slug: stri
 
   const [allJobs, related] = await Promise.all([getPublicJobs(), getPublicJobRelated(job.slug)]);
   const { testimonials, blogs, placements } = related;
-  const others = allJobs.filter((j) => j.id !== job.id).slice(0, 3);
+  // Enough to fill a horizontal marquee; JobDetail shows a static grid when there are few.
+  const others = allJobs.filter((j) => j.id !== job.id).slice(0, 12);
 
   // Search engines read this even though the page renders fine without it. Only for
   // publicly-visible roles - reaching this line means the anonymous fetch succeeded.

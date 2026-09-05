@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useEffect, useState } from 'react';
+import { type CSSProperties, type ReactNode, useEffect, useState } from 'react';
 import { animate, motion, useReducedMotion, type Variants } from 'framer-motion';
 
 /**
@@ -64,6 +64,85 @@ export function RevealX({
     >
       {children}
     </motion.div>
+  );
+}
+
+/**
+ * A slow, seamless marquee — horizontal or vertical. The track is the item list
+ * rendered TWICE and translated -50% by a CSS keyframe (marquee-x / marquee-y in
+ * globals.css), so the loop is seamless. Pauses on hover; under prefers-reduced-motion
+ * (or with a single item) it degrades to a plain scroll container with no animation.
+ * Vertical needs a fixed height via `className` (e.g. "h-[22rem]") so it can clip + loop.
+ */
+export function Marquee({
+  items,
+  direction = 'x',
+  durationSec,
+  fadeColor = 'hsl(var(--background))',
+  className,
+}: {
+  items: ReactNode[];
+  direction?: 'x' | 'y';
+  durationSec?: number;
+  /** Color the edges fade to — the surface behind the marquee (white in a card, page bg otherwise). */
+  fadeColor?: string;
+  className?: string;
+}) {
+  const reduce = useReducedMotion();
+  const horizontal = direction === 'x';
+  const dur = durationSec ?? (horizontal ? 40 : 32);
+
+  if (reduce || items.length <= 1) {
+    const base = horizontal ? 'flex gap-4 overflow-x-auto pb-1' : 'flex flex-col gap-3 overflow-y-auto';
+    return (
+      <div className={className ? `${base} ${className}` : base}>
+        {items.map((n, i) => (
+          <div key={i} className={horizontal ? 'shrink-0' : ''}>
+            {n}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  const track = horizontal ? 'marquee-x flex w-max gap-4' : 'marquee-y flex w-full flex-col gap-3';
+  return (
+    <div className={`marquee-hover-pause relative overflow-hidden${className ? ` ${className}` : ''}`}>
+      <div className={track} style={{ '--marquee-dur': `${dur}s` } as CSSProperties}>
+        {[...items, ...items].map((n, i) => (
+          <div key={i} aria-hidden={i >= items.length} className={horizontal ? 'shrink-0' : ''}>
+            {n}
+          </div>
+        ))}
+      </div>
+      {horizontal ? (
+        <>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 left-0 w-10"
+            style={{ background: `linear-gradient(to right, ${fadeColor}, transparent)` }}
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 right-0 w-10"
+            style={{ background: `linear-gradient(to left, ${fadeColor}, transparent)` }}
+          />
+        </>
+      ) : (
+        <>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 top-0 h-8"
+            style={{ background: `linear-gradient(to bottom, ${fadeColor}, transparent)` }}
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-8"
+            style={{ background: `linear-gradient(to top, ${fadeColor}, transparent)` }}
+          />
+        </>
+      )}
+    </div>
   );
 }
 
