@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Building2, Check, Loader2, Newspaper, Plus, Quote, Star, TrendingUp, X } from 'lucide-react';
+import { Building2, Check, Loader2, Newspaper, Plus, Quote, Star, TrendingUp, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { uploadAdminImage } from '@/lib/api/media';
+import type { MediaUploadPurpose } from '@/shared/dto/media.dto';
 import {
   createBlog,
   createPlacement,
@@ -22,6 +24,66 @@ const input =
 const area =
   'mt-1 w-full rounded-lg border border-slate-200 bg-white p-3 text-sm text-navy focus:border-orange focus-visible:ring-2 focus-visible:ring-orange/30';
 const label = 'text-[10px] font-semibold uppercase tracking-widest text-slate-400';
+
+/** An image field that accepts either a pasted URL or a direct upload (presigned S3). */
+function ImageUpload({
+  labelText,
+  value,
+  onChange,
+  purpose,
+}: {
+  labelText: string;
+  value: string;
+  onChange: (url: string) => void;
+  purpose: MediaUploadPurpose;
+}) {
+  const [busy, setBusy] = useState(false);
+  const onFile = async (file: File) => {
+    setBusy(true);
+    try {
+      onChange(await uploadAdminImage(file, purpose));
+      toast.success('Image uploaded');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <label className="block">
+      <span className={label}>{labelText}</span>
+      <div className="mt-1 flex items-center gap-2">
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-10 w-full min-w-0 rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus-visible:ring-2 focus-visible:ring-orange/30"
+          placeholder="Paste a URL or upload…"
+        />
+        <label className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-navy transition-colors hover:bg-slate-50">
+          {busy ? <Loader2 className="size-3.5 animate-spin" /> : <Upload className="size-3.5" />} Upload
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="sr-only"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) void onFile(f);
+              e.target.value = '';
+            }}
+          />
+        </label>
+        {safeHttpUrl(value) ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={safeHttpUrl(value) ?? undefined}
+            alt=""
+            className="size-10 shrink-0 rounded-lg border border-slate-200 object-cover"
+          />
+        ) : null}
+      </div>
+    </label>
+  );
+}
 
 /** Selected-state check dot, shared by both grids. */
 function Dot({ on }: { on: boolean }) {
@@ -286,14 +348,18 @@ export function RelatedContentPicker({
                 <span className={label}>Package</span>
                 <input value={pForm.packageLabel} onChange={(e) => setPForm((f) => ({ ...f, packageLabel: e.target.value }))} className={input} placeholder="₹18 LPA" />
               </label>
-              <label className="block">
-                <span className={label}>Student photo URL</span>
-                <input value={pForm.avatarUrl} onChange={(e) => setPForm((f) => ({ ...f, avatarUrl: e.target.value }))} className={input} placeholder="https://…" />
-              </label>
-              <label className="block">
-                <span className={label}>Company logo URL</span>
-                <input value={pForm.companyLogoUrl} onChange={(e) => setPForm((f) => ({ ...f, companyLogoUrl: e.target.value }))} className={input} placeholder="https://…" />
-              </label>
+              <ImageUpload
+                labelText="Student photo"
+                value={pForm.avatarUrl}
+                onChange={(v) => setPForm((f) => ({ ...f, avatarUrl: v }))}
+                purpose="speaker-photo"
+              />
+              <ImageUpload
+                labelText="Company logo"
+                value={pForm.companyLogoUrl}
+                onChange={(v) => setPForm((f) => ({ ...f, companyLogoUrl: v }))}
+                purpose="job-logo"
+              />
             </div>
             <div className="mt-3 flex justify-end">
               <Button size="sm" onClick={submitPlacement} disabled={saving}>
@@ -372,10 +438,12 @@ export function RelatedContentPicker({
                 <span className={label}>Role / company / batch</span>
                 <input value={tForm.authorTitle} onChange={(e) => setTForm((f) => ({ ...f, authorTitle: e.target.value }))} className={input} placeholder="Placed at Acme · CSE 2025" />
               </label>
-              <label className="block">
-                <span className={label}>Photo URL</span>
-                <input value={tForm.avatarUrl} onChange={(e) => setTForm((f) => ({ ...f, avatarUrl: e.target.value }))} className={input} placeholder="https://…" />
-              </label>
+              <ImageUpload
+                labelText="Student photo"
+                value={tForm.avatarUrl}
+                onChange={(v) => setTForm((f) => ({ ...f, avatarUrl: v }))}
+                purpose="speaker-photo"
+              />
               <label className="block">
                 <span className={label}>Rating</span>
                 <select value={tForm.rating} onChange={(e) => setTForm((f) => ({ ...f, rating: e.target.value }))} className={input}>
@@ -466,10 +534,12 @@ export function RelatedContentPicker({
                 <span className={label}>Title *</span>
                 <input value={bForm.title} onChange={(e) => setBForm((f) => ({ ...f, title: e.target.value }))} className={input} placeholder="How to crack your first tech interview" />
               </label>
-              <label className="block">
-                <span className={label}>Cover image URL</span>
-                <input value={bForm.coverUrl} onChange={(e) => setBForm((f) => ({ ...f, coverUrl: e.target.value }))} className={input} placeholder="https://…" />
-              </label>
+              <ImageUpload
+                labelText="Cover image"
+                value={bForm.coverUrl}
+                onChange={(v) => setBForm((f) => ({ ...f, coverUrl: v }))}
+                purpose="blog-cover"
+              />
               <label className="block">
                 <span className={label}>One-line summary</span>
                 <input value={bForm.excerpt} onChange={(e) => setBForm((f) => ({ ...f, excerpt: e.target.value }))} className={input} placeholder="A practical, week-by-week plan." />
