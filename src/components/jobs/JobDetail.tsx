@@ -22,7 +22,7 @@ const STRUCTURE_LABEL: Record<CompensationStructure, string> = {
   [CompensationStructure.FIXED_PLUS_VARIABLE]: 'Fixed + Variable',
 };
 import { ApplyButton } from './ApplyButton';
-import { AuroraBackground, Reveal, RevealX } from '@/components/motion/primitives';
+import { AuroraBackground, Marquee, Reveal, RevealX } from '@/components/motion/primitives';
 import { StatusPill, type StatusTone } from '@/components/student/StatusPill';
 import { Button } from '@/components/ui/button';
 import {
@@ -55,6 +55,109 @@ function Label({ children }: { children: React.ReactNode }) {
 }
 
 type Fact = { icon: typeof MapPin; label: string; value: string };
+
+/** One placement success card — reused in the grid and the horizontal marquee. */
+function PlacementCard({ p }: { p: PlacementRecordDto }) {
+  const logo = safeHttpUrl(p.companyLogoUrl);
+  const avatar = safeHttpUrl(p.avatarUrl);
+  return (
+    <Card className="flex h-full flex-col">
+      <div className="flex items-center gap-3">
+        {avatar ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={avatar}
+            alt=""
+            className="size-12 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
+          />
+        ) : (
+          <span className="grid size-12 shrink-0 place-items-center rounded-full bg-slate-100 text-sm font-bold text-slate-500">
+            {p.studentName.slice(0, 1).toUpperCase()}
+          </span>
+        )}
+        <div className="min-w-0">
+          <p className="truncate text-sm font-bold text-navy">{p.studentName}</p>
+          {p.role || p.batch ? (
+            <p className="truncate text-xs text-slate-500">
+              {[p.role, p.batch].filter(Boolean).join(' · ')}
+            </p>
+          ) : null}
+        </div>
+      </div>
+      <div className="mt-4 flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
+        <span className="flex min-w-0 items-center gap-2">
+          {logo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={logo}
+              alt=""
+              className="size-6 shrink-0 rounded-md bg-white object-contain ring-1 ring-slate-200"
+            />
+          ) : (
+            <span className="grid size-6 shrink-0 place-items-center rounded-md bg-sky-50 text-sky-600 ring-1 ring-sky-100">
+              <Building2 className="size-3.5" />
+            </span>
+          )}
+          <span className="truncate text-xs font-semibold text-slate-600">{p.company}</span>
+        </span>
+        {p.packageLabel ? (
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-200">
+            <TrendingUp className="size-3.5" />
+            {p.packageLabel}
+          </span>
+        ) : null}
+      </div>
+    </Card>
+  );
+}
+
+/** A compact blog row for the rail — reused in the vertical "Related reading" marquee. */
+function BlogRow({ b }: { b: BlogPostDto }) {
+  return (
+    <Link
+      href={`/blog/${b.slug}`}
+      className="flex items-start gap-3 rounded-lg p-1.5 transition-colors hover:bg-slate-50"
+    >
+      {safeHttpUrl(b.coverUrl) ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={safeHttpUrl(b.coverUrl) ?? undefined}
+          alt=""
+          className="size-12 shrink-0 rounded-lg object-cover ring-1 ring-slate-200"
+        />
+      ) : (
+        <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-sky-50 text-sky-600 ring-1 ring-sky-100">
+          <Newspaper className="size-5" />
+        </span>
+      )}
+      <span className="min-w-0 flex-1">
+        <span className="line-clamp-2 text-sm font-semibold text-navy">{b.title}</span>
+        {b.excerpt ? (
+          <span className="mt-0.5 line-clamp-1 block text-xs text-slate-500">{b.excerpt}</span>
+        ) : null}
+      </span>
+    </Link>
+  );
+}
+
+/** One "other opening" card — reused in the grid and the horizontal marquee. */
+function OtherRoleCard({ o }: { o: JobPostingDto }) {
+  return (
+    <Link
+      href={`/jobs/${o.slug}`}
+      className="flex h-full items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:bg-slate-50"
+    >
+      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-sky-50 text-sky-600 ring-1 ring-sky-100">
+        <Briefcase className="size-5" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-bold text-navy">{o.title}</span>
+        <span className="block truncate text-xs text-slate-500">{o.companyName}</span>
+      </span>
+      <ArrowRight className="size-4 shrink-0 text-slate-300" />
+    </Link>
+  );
+}
 
 /**
  * One role, in full — the Prephasz Zone-C composition: a dark aurora hero over a
@@ -433,36 +536,24 @@ export function JobDetail({
           {blogs.length > 0 ? (
             <Card>
               <Label>Related reading</Label>
-              <div className="mt-3 space-y-3">
-                {blogs.map((b) => (
-                  <Link
-                    key={b.id}
-                    href={`/blog/${b.slug}`}
-                    className="flex items-start gap-3 rounded-lg p-1.5 transition-colors hover:bg-slate-50"
-                  >
-                    {safeHttpUrl(b.coverUrl) ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={safeHttpUrl(b.coverUrl) ?? undefined}
-                        alt=""
-                        className="size-12 shrink-0 rounded-lg object-cover ring-1 ring-slate-200"
-                      />
-                    ) : (
-                      <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-sky-50 text-sky-600 ring-1 ring-sky-100">
-                        <Newspaper className="size-5" />
-                      </span>
-                    )}
-                    <span className="min-w-0 flex-1">
-                      <span className="line-clamp-2 text-sm font-semibold text-navy">{b.title}</span>
-                      {b.excerpt ? (
-                        <span className="mt-0.5 line-clamp-1 block text-xs text-slate-500">
-                          {b.excerpt}
-                        </span>
-                      ) : null}
-                    </span>
-                  </Link>
-                ))}
-              </div>
+              {/* Many articles used to make this rail tower over a short main column and
+                  leave a big void. Bound it: a slow vertical marquee (pauses on hover,
+                  static under reduced-motion) that keeps the rail compact. */}
+              {blogs.length > 4 ? (
+                <Marquee
+                  direction="y"
+                  durationSec={34}
+                  fadeColor="rgb(255 255 255)"
+                  items={blogs.map((b) => <BlogRow key={b.id} b={b} />)}
+                  className="mt-2 h-[22rem]"
+                />
+              ) : (
+                <div className="mt-3 space-y-3">
+                  {blogs.map((b) => (
+                    <BlogRow key={b.id} b={b} />
+                  ))}
+                </div>
+              )}
             </Card>
           ) : null}
         </div>
@@ -472,65 +563,25 @@ export function JobDetail({
         <section className="mt-10">
           <Label>Where our students landed</Label>
           <h2 className="mt-1 text-lg font-bold text-navy">Placement highlights</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {placements.map((p, i) => {
-              const logo = safeHttpUrl(p.companyLogoUrl);
-              const avatar = safeHttpUrl(p.avatarUrl);
-              return (
+          {placements.length > 3 ? (
+            <Marquee
+              durationSec={46}
+              className="mt-4"
+              items={placements.map((p) => (
+                <div key={p.id} className="w-[300px]">
+                  <PlacementCard p={p} />
+                </div>
+              ))}
+            />
+          ) : (
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {placements.map((p, i) => (
                 <RevealX key={p.id} from={i % 2 === 0 ? 'left' : 'right'} delay={(i % 3) * 0.04}>
-                  <Card className="flex h-full flex-col">
-                    <div className="flex items-center gap-3">
-                      {avatar ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={avatar}
-                          alt=""
-                          className="size-12 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
-                        />
-                      ) : (
-                        <span className="grid size-12 shrink-0 place-items-center rounded-full bg-slate-100 text-sm font-bold text-slate-500">
-                          {p.studentName.slice(0, 1).toUpperCase()}
-                        </span>
-                      )}
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-bold text-navy">{p.studentName}</p>
-                        {p.role || p.batch ? (
-                          <p className="truncate text-xs text-slate-500">
-                            {[p.role, p.batch].filter(Boolean).join(' · ')}
-                          </p>
-                        ) : null}
-                      </div>
-                    </div>
-                    <div className="mt-4 flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
-                      <span className="flex min-w-0 items-center gap-2">
-                        {logo ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={logo}
-                            alt=""
-                            className="size-6 shrink-0 rounded-md bg-white object-contain ring-1 ring-slate-200"
-                          />
-                        ) : (
-                          <span className="grid size-6 shrink-0 place-items-center rounded-md bg-sky-50 text-sky-600 ring-1 ring-sky-100">
-                            <Building2 className="size-3.5" />
-                          </span>
-                        )}
-                        <span className="truncate text-xs font-semibold text-slate-600">
-                          {p.company}
-                        </span>
-                      </span>
-                      {p.packageLabel ? (
-                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-200">
-                          <TrendingUp className="size-3.5" />
-                          {p.packageLabel}
-                        </span>
-                      ) : null}
-                    </div>
-                  </Card>
+                  <PlacementCard p={p} />
                 </RevealX>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
       ) : null}
 
@@ -586,25 +637,25 @@ export function JobDetail({
         <section className="mt-10">
           <Label>More roles</Label>
           <h2 className="mt-1 text-lg font-bold text-navy">Other openings</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {others.map((o, i) => (
-              <RevealX key={o.id} from={i % 2 === 0 ? 'left' : 'right'} delay={(i % 2) * 0.05}>
-                <Link
-                  href={`/jobs/${o.slug}`}
-                  className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:bg-slate-50"
-                >
-                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-sky-50 text-sky-600 ring-1 ring-sky-100">
-                    <Briefcase className="size-5" />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-bold text-navy">{o.title}</span>
-                    <span className="block truncate text-xs text-slate-500">{o.companyName}</span>
-                  </span>
-                  <ArrowRight className="size-4 shrink-0 text-slate-300" />
-                </Link>
-              </RevealX>
-            ))}
-          </div>
+          {others.length > 4 ? (
+            <Marquee
+              durationSec={52}
+              className="mt-4"
+              items={others.map((o) => (
+                <div key={o.id} className="w-[300px]">
+                  <OtherRoleCard o={o} />
+                </div>
+              ))}
+            />
+          ) : (
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {others.map((o, i) => (
+                <RevealX key={o.id} from={i % 2 === 0 ? 'left' : 'right'} delay={(i % 2) * 0.05}>
+                  <OtherRoleCard o={o} />
+                </RevealX>
+              ))}
+            </div>
+          )}
         </section>
       ) : null}
     </div>
