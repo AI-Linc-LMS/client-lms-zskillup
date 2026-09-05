@@ -6,9 +6,12 @@ import {
   FileText,
   IndianRupee,
   MapPin,
+  Quote as QuoteIcon,
+  Star,
 } from 'lucide-react';
 import { safeHttpUrl } from '@/lib/utils';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
+import type { TestimonialDto } from '@/shared/dto/content.dto';
 import { JobStatus } from '@/shared/enums';
 import { ApplyButton } from './ApplyButton';
 import { AuroraBackground, Reveal } from '@/components/motion/primitives';
@@ -53,7 +56,15 @@ type Fact = { icon: typeof MapPin; label: string; value: string };
  * Shared between the server-rendered page and the client fallback for targeted roles,
  * so both render identically — the difference is only WHO could fetch the data.
  */
-export function JobDetail({ job, others }: { job: JobPostingDto; others: JobPostingDto[] }) {
+export function JobDetail({
+  job,
+  others,
+  testimonials = [],
+}: {
+  job: JobPostingDto;
+  others: JobPostingDto[];
+  testimonials?: TestimonialDto[];
+}) {
   const closes = deadlineLabel(job.applicationDeadline);
   const closed = job.status !== JobStatus.ACTIVE || closes?.tone === 'closed';
   const applyHref = safeHttpUrl(job.applyUrl);
@@ -346,6 +357,50 @@ export function JobDetail({ job, others }: { job: JobPostingDto; others: JobPost
           ) : null}
         </div>
       </div>
+
+      {testimonials.length > 0 ? (
+        <section className="mt-10">
+          <Label>What students say</Label>
+          <h2 className="mt-1 text-lg font-bold text-navy">Placement stories</h2>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            {testimonials.map((t) => (
+              <Card key={t.id} className="p-5">
+                <QuoteIcon className="size-5 text-orange/70" aria-hidden="true" />
+                <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+                  {t.quote}
+                </p>
+                <div className="mt-4 flex items-center gap-3 border-t border-slate-100 pt-3">
+                  {safeHttpUrl(t.avatarUrl) ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={safeHttpUrl(t.avatarUrl) ?? undefined}
+                      alt=""
+                      className="size-9 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
+                    />
+                  ) : (
+                    <span className="grid size-9 shrink-0 place-items-center rounded-full bg-slate-100 text-xs font-bold text-slate-500">
+                      {t.authorName.slice(0, 1).toUpperCase()}
+                    </span>
+                  )}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-bold text-navy">{t.authorName}</span>
+                    {t.authorTitle ? (
+                      <span className="block truncate text-xs text-slate-500">{t.authorTitle}</span>
+                    ) : null}
+                  </span>
+                  {t.rating ? (
+                    <span className="flex items-center gap-0.5" aria-label={`${t.rating} out of 5`}>
+                      {Array.from({ length: t.rating }).map((_, i) => (
+                        <Star key={i} className="size-3.5 fill-amber-400 text-amber-400" />
+                      ))}
+                    </span>
+                  ) : null}
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {others.length > 0 ? (
         <section className="mt-10">

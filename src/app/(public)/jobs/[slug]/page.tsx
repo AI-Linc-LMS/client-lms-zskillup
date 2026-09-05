@@ -1,4 +1,4 @@
-import { getPublicJob, getPublicJobs } from '@/lib/server/public-content';
+import { getPublicJob, getPublicJobs, getPublicJobTestimonials } from '@/lib/server/public-content';
 import { JobDetail } from '@/components/jobs/JobDetail';
 import { TargetedJobFallback } from '@/components/jobs/TargetedJobFallback';
 import { JobsPublicShell } from '@/components/jobs/JobsPublicShell';
@@ -68,7 +68,11 @@ export default async function JobPage({ params }: { params: Promise<{ slug: stri
       </JobsPublicShell>
     );
 
-  const others = (await getPublicJobs()).filter((j) => j.id !== job.id).slice(0, 3);
+  const [allJobs, testimonials] = await Promise.all([
+    getPublicJobs(),
+    getPublicJobTestimonials(),
+  ]);
+  const others = allJobs.filter((j) => j.id !== job.id).slice(0, 3);
 
   // Search engines read this even though the page renders fine without it. Only for
   // publicly-visible roles - reaching this line means the anonymous fetch succeeded.
@@ -98,7 +102,7 @@ export default async function JobPage({ params }: { params: Promise<{ slug: stri
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
       <JobsPublicShell>
-        <JobDetail job={job} others={others} />
+        <JobDetail job={job} others={others} testimonials={testimonials} />
       </JobsPublicShell>
     </>
   );
