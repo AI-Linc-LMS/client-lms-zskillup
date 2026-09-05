@@ -11,6 +11,7 @@ import {
   IsBoolean,
   IsDateString,
   IsEnum,
+  IsIn,
   IsInt,
   IsOptional,
   IsString,
@@ -213,6 +214,11 @@ export class CreateJobPostingDto {
   @IsUUID('all', { each: true })
   placementIds?: string[];
 
+  /** Curated "Prephasz Opportunity" (true) vs aggregated "Other Opportunity" (false). */
+  @IsOptional()
+  @IsBoolean()
+  isPrephaszOpportunity?: boolean;
+
   /* --- eligibility --- */
 
   @IsOptional()
@@ -366,6 +372,7 @@ export interface JobPostingDto {
   testimonialIds: string[];
   blogIds: string[];
   placementIds: string[];
+  isPrephaszOpportunity: boolean;
 
   /* eligibility */
   education: string | null;
@@ -455,6 +462,11 @@ export class JobBoardFilters {
   @IsString()
   @MaxLength(120)
   search?: string;
+
+  /** Source of the posting: 'prephasz' (curated/partner) vs 'other' (aggregated). */
+  @IsOptional()
+  @IsIn(['prephasz', 'other'])
+  source?: 'prephasz' | 'other';
 
   @IsOptional()
   @IsArray()

@@ -155,10 +155,17 @@ export class CreateTestimonialDto {
   @MaxLength(1000)
   avatarUrl?: string | null;
 
+  /** Full designed graphic; rendered full-width in place of the quote card when set. */
+  @IsOptional()
   @IsString()
-  @MinLength(3)
+  @IsUrl(URL_OPTS)
+  @MaxLength(1000)
+  imageUrl?: string | null;
+
+  @IsOptional()
+  @IsString()
   @MaxLength(2000)
-  quote!: string;
+  quote?: string;
 
   @IsOptional()
   @IsInt()
@@ -200,7 +207,12 @@ export class UpdateTestimonialDto {
 
   @IsOptional()
   @IsString()
-  @MinLength(3)
+  @IsUrl(URL_OPTS)
+  @MaxLength(1000)
+  imageUrl?: string | null;
+
+  @IsOptional()
+  @IsString()
   @MaxLength(2000)
   quote?: string;
 
@@ -229,6 +241,7 @@ export interface TestimonialDto {
   authorName: string;
   authorTitle: string | null;
   avatarUrl: string | null;
+  imageUrl: string | null;
   quote: string;
   rating: number | null;
   isPublished: boolean;

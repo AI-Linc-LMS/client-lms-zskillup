@@ -109,13 +109,14 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
     otherRequirements: existing?.otherRequirements ?? '',
     passoutYears: (existing?.passoutYears ?? []).join(', '),
     status: existing?.status ?? JobStatus.ACTIVE,
+    isPrephaszOpportunity: existing?.isPrephaszOpportunity ?? true,
   });
 
-  const set = (k: Exclude<keyof typeof form, 'hasPpo'>, v: string) => {
+  const set = (k: Exclude<keyof typeof form, 'hasPpo' | 'isPrephaszOpportunity'>, v: string) => {
     setForm((f) => ({ ...f, [k]: v }));
     setDirty(true);
   };
-  const setBool = (k: 'hasPpo', v: boolean) => {
+  const setBool = (k: 'hasPpo' | 'isPrephaszOpportunity', v: boolean) => {
     setForm((f) => ({ ...f, [k]: v }));
     setDirty(true);
   };
@@ -169,6 +170,7 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
       otherRequirements: form.otherRequirements.trim() || null,
       passoutYears: list(form.passoutYears),
       status: form.status as JobStatus,
+      isPrephaszOpportunity: form.isPrephaszOpportunity,
     };
   }, [form]);
 
@@ -645,6 +647,22 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
                   Completed keep it readable so shared links do not dead-end.
                 </span>
               </Field>
+
+              <label className="flex items-start gap-3 rounded-xl border border-slate-200 p-4">
+                <input
+                  type="checkbox"
+                  checked={form.isPrephaszOpportunity}
+                  onChange={(e) => setBool('isPrephaszOpportunity', e.target.checked)}
+                  className="mt-0.5 size-4 rounded border-slate-300 text-orange focus:ring-orange/30"
+                />
+                <span>
+                  <span className="block text-sm font-semibold text-navy">Prephasz Opportunity</span>
+                  <span className="mt-0.5 block text-xs leading-relaxed text-slate-500">
+                    On = a curated/partner role, shown under &ldquo;Prephasz Opportunities&rdquo; on the
+                    board. Off = an aggregated &ldquo;Other Opportunity&rdquo;. Students can filter by this.
+                  </span>
+                </span>
+              </label>
 
               <div className="rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
                 <p className="font-bold text-navy">{job?.isPublished ? 'Published' : 'Not published yet'}</p>

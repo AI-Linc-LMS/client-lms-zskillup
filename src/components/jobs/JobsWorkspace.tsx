@@ -104,6 +104,7 @@ export function JobsWorkspace({ initialTab = 'browse' }: { initialTab?: Tab }) {
       companyName: filters.companyName || undefined,
       passoutYear: filters.passoutYear ? Number(filters.passoutYear) : undefined,
       openOnly: filters.openOnly || undefined,
+      source: filters.source || undefined,
       skills: filters.skills.length ? filters.skills : undefined,
       limit: perPage,
       offset: page * perPage,
@@ -307,6 +308,11 @@ export function JobsWorkspace({ initialTab = 'browse' }: { initialTab?: Tab }) {
                   ...(filters.companyName ? [filters.companyName] : []),
                   ...(filters.passoutYear ? [`Passout ${filters.passoutYear}`] : []),
                   ...(filters.openOnly ? ['Open roles only'] : []),
+                  ...(filters.source === 'prephasz'
+                    ? ['Prephasz Opportunities']
+                    : filters.source === 'other'
+                      ? ['Other Opportunities']
+                      : []),
                   ...filters.skills,
                 ].map((f) => (
                   <span

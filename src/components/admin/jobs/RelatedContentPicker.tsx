@@ -136,7 +136,14 @@ export function RelatedContentPicker({
   const [saving, setSaving] = useState(false);
 
   const [addT, setAddT] = useState(false);
-  const [tForm, setTForm] = useState({ authorName: '', authorTitle: '', avatarUrl: '', quote: '', rating: '5' });
+  const [tForm, setTForm] = useState({
+    authorName: '',
+    authorTitle: '',
+    avatarUrl: '',
+    imageUrl: '',
+    quote: '',
+    rating: '5',
+  });
   const [addB, setAddB] = useState(false);
   const [bForm, setBForm] = useState({ title: '', excerpt: '', coverUrl: '', body: '' });
   const [addP, setAddP] = useState(false);
@@ -199,8 +206,12 @@ export function RelatedContentPicker({
   };
 
   const submitTestimonial = async () => {
-    if (tForm.authorName.trim().length < 2 || tForm.quote.trim().length < 3) {
-      toast.error('A name and a quote are needed.');
+    if (tForm.authorName.trim().length < 2) {
+      toast.error('A name is needed.');
+      return;
+    }
+    if (!safeHttpUrl(tForm.imageUrl) && tForm.quote.trim().length < 3) {
+      toast.error('Add either an image or a quote.');
       return;
     }
     setSaving(true);
@@ -209,7 +220,8 @@ export function RelatedContentPicker({
         authorName: tForm.authorName.trim(),
         authorTitle: tForm.authorTitle.trim() || null,
         avatarUrl: safeHttpUrl(tForm.avatarUrl) ?? null,
-        quote: tForm.quote.trim(),
+        imageUrl: safeHttpUrl(tForm.imageUrl) ?? null,
+        quote: tForm.quote.trim() || undefined,
         rating: tForm.rating ? Number(tForm.rating) : null,
         isPublished: true,
       });
@@ -217,7 +229,7 @@ export function RelatedContentPicker({
       const next = [...selT, created.id];
       setSelT(next);
       await persist(next, selB, selP);
-      setTForm({ authorName: '', authorTitle: '', avatarUrl: '', quote: '', rating: '5' });
+      setTForm({ authorName: '', authorTitle: '', avatarUrl: '', imageUrl: '', quote: '', rating: '5' });
       setAddT(false);
       toast.success('Placement story added and attached.');
     } catch (err) {
@@ -453,8 +465,16 @@ export function RelatedContentPicker({
                   ))}
                 </select>
               </label>
+              <div className="sm:col-span-2">
+                <ImageUpload
+                  labelText="Placement image (full graphic — shown full-width, e.g. a 'Congratulations' card)"
+                  value={tForm.imageUrl}
+                  onChange={(v) => setTForm((f) => ({ ...f, imageUrl: v }))}
+                  purpose="blog-cover"
+                />
+              </div>
               <label className="block sm:col-span-2">
-                <span className={label}>Quote *</span>
+                <span className={label}>Quote (optional — used when no image is set)</span>
                 <textarea rows={3} value={tForm.quote} onChange={(e) => setTForm((f) => ({ ...f, quote: e.target.value }))} className={area} placeholder="The company-wise practice felt exactly like the real thing…" />
               </label>
             </div>
@@ -483,7 +503,9 @@ export function RelatedContentPicker({
                 <span className="min-w-0 flex-1">
                   <span className="flex items-start gap-1.5">
                     <Quote className="mt-0.5 size-3.5 shrink-0 text-orange/60" />
-                    <span className="line-clamp-2 text-sm leading-relaxed text-slate-700">{t.quote}</span>
+                    <span className="line-clamp-2 text-sm leading-relaxed text-slate-700">
+                      {t.quote || (t.imageUrl ? 'Image placement card' : '')}
+                    </span>
                   </span>
                   <span className="mt-2 flex items-center gap-2">
                     {safeHttpUrl(t.avatarUrl) ? (
