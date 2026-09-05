@@ -104,6 +104,10 @@ export function MockRunner({
   }, []);
   const proctor = useProctoring(proctored, { onReport: onProctorReport });
   const [phase, setPhase] = useState<Phase>('intro');
+  // On the post-submit 'submitted' screen: true = results are embargoed (college drive
+  // not released) → show the "placement team will release" copy; false = the report just
+  // couldn't load (transient) → the attempt is still saved, view it later.
+  const [reportEmbargoed, setReportEmbargoed] = useState(false);
   const [mock, setMock] = useState<ApiMockSummary | null>(null);
   const [start, setStart] = useState<ApiMockStart | null>(null);
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
@@ -233,12 +237,17 @@ export function MockRunner({
       const r = await getMockReport(start.attemptId);
       setReport(r);
       setPhase('report');
-    } catch {
+    } catch (err) {
+      // Only a college-drive embargo (results not released) gets the "placement team"
+      // copy; any other report-fetch failure still confirms the (successful) submission
+      // but says the report couldn't load, so a normal mock never shows drive wording.
+      const msg = err instanceof Error ? err.message : '';
+      setReportEmbargoed(!!scheduledId && /released|embargo/i.test(msg));
       setPhase('submitted');
     } finally {
       setSubmitting(false);
     }
-  }, [start, proctored, proctor]);
+  }, [start, proctored, proctor, scheduledId]);
 
   // When launched from the pre-start instructions gate, begin the attempt once on
   // mount (the gate already collected the ack + system check). Guarded so it never
@@ -360,6 +369,7 @@ export function MockRunner({
   }
 
   if (phase === 'submitted') {
+    const backHref = scheduledId ? '/assessments' : '/mock-assessment';
     return (
       <div className="grid min-h-screen place-items-center bg-background px-6">
         <div className="max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
@@ -368,11 +378,12 @@ export function MockRunner({
           </span>
           <p className="mt-4 text-base font-bold text-navy">Your responses are submitted</p>
           <p className="mt-2 text-sm leading-relaxed text-slate-600">
-            Your answers have been recorded. Results for this assessment will be available
-            once your placement team releases them — you can safely close this window.
+            {reportEmbargoed
+              ? 'Your answers have been recorded. Results for this assessment will be available once your placement team releases them — you can safely close this window.'
+              : 'Your answers have been recorded. Your scored report couldn’t be loaded just now — you can view it any time from your assessments.'}
           </p>
           <Button variant="outline" className="mt-5" asChild>
-            <Link href="/assessments">Back to assessments</Link>
+            <Link href={backHref}>Back to {scheduledId ? 'assessments' : 'mock tests'}</Link>
           </Button>
         </div>
       </div>
