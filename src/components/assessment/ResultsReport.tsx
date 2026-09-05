@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { FileSpreadsheet, FileText, Search, ShieldAlert } from 'lucide-react';
+import { CheckCircle2, FileSpreadsheet, FileText, Loader2, Search, Send, ShieldAlert } from 'lucide-react';
 import type { AssessmentResults } from '@/lib/api/scheduling';
 import { exportResultsCsv, exportResultsPdf, exportResultsXlsx } from '@/lib/results-export';
 import { cn } from '@/lib/utils';
@@ -22,10 +22,19 @@ const scoreTone = (v: number) =>
  * export to Excel / CSV / PDF. The row shows the key columns; the export carries
  * all ~28 fields (contact, section-wise scores, full proctoring breakdown, …).
  */
-export function ResultsReport({ data }: { data: AssessmentResults }) {
+export function ResultsReport({
+  data,
+  onPublishResults,
+}: {
+  data: AssessmentResults;
+  /** Admin-only: publish (release) results for a college drive. When omitted (e.g. the
+   *  TPO panel, which has its own release control) no publish button is shown. */
+  onPublishResults?: () => Promise<void> | void;
+}) {
   const [q, setQ] = useState('');
   const [sort, setSort] = useState<SortKey>('rank');
   const [pass, setPass] = useState<'all' | 'pass' | 'fail'>('all');
+  const [publishing, setPublishing] = useState(false);
 
   const view = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -110,6 +119,36 @@ export function ResultsReport({ data }: { data: AssessmentResults }) {
           ))}
         </div>
         <div className="flex items-center gap-1.5">
+          {/* Publish results — only for a college drive (those embargo the report until
+              released) and only when the caller can release (admin passes the handler). */}
+          {data.assessment.collegeId ? (
+            data.assessment.resultsReleased ? (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
+                <CheckCircle2 className="size-3.5" /> Results published
+              </span>
+            ) : onPublishResults ? (
+              <button
+                type="button"
+                onClick={async () => {
+                  setPublishing(true);
+                  try {
+                    await onPublishResults();
+                  } finally {
+                    setPublishing(false);
+                  }
+                }}
+                disabled={publishing}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-navy px-3 py-1.5 text-xs font-bold text-white transition hover:bg-navy/90 disabled:opacity-50"
+              >
+                {publishing ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Send className="size-3.5" />
+                )}
+                Publish results
+              </button>
+            ) : null
+          ) : null}
           <button type="button" onClick={() => exportResultsXlsx(data)} disabled={!data.rows.length} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-navy transition-colors hover:bg-slate-50 disabled:opacity-40">
             <FileSpreadsheet className="size-3.5 text-emerald-600" /> Excel
           </button>

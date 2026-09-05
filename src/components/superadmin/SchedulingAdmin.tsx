@@ -2,12 +2,14 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import { ArrowRight, BarChart3, Loader2, Pencil, Plus, Sparkles, Trash2, Users, Video, X } from 'lucide-react';
 import { AssessmentWizard } from '@/components/superadmin/AssessmentWizard';
 import { AdminAssessmentCreator } from '@/components/superadmin/AdminAssessmentCreator';
 import { ResultsReport } from '@/components/assessment/ResultsReport';
 import { cn } from '@/lib/utils';
 import { ApiRequestError } from '@/lib/api/types';
+import { describeError } from '@/lib/api/errors';
 import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
 import { listAdminMocks, type AdminMockRow } from '@/lib/api/admin';
 import {
@@ -16,6 +18,7 @@ import {
   deleteScheduledAssessment,
   getAssessmentResults,
   listScheduledAssessments,
+  releaseAssessmentResults,
   updateScheduledAssessment,
   type ApiScheduledAssessment,
   type AssessmentResults,
@@ -451,7 +454,19 @@ export function SchedulingAdmin() {
                   </button>
                 </div>
 
-                <ResultsReport data={results} />
+                <ResultsReport
+                  data={results}
+                  onPublishResults={async () => {
+                    const id = results.assessment.id;
+                    try {
+                      await releaseAssessmentResults(id);
+                      toast.success('Results published — students can now see their report.');
+                      await openResults(id); // refetch so the button reflects the released state
+                    } catch (e) {
+                      toast.error(describeError(e, 'Could not publish results.'));
+                    }
+                  }}
+                />
               </>
             )}
           </div>
