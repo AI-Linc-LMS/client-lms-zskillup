@@ -304,7 +304,7 @@ export function JobDetail({
     : 'mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]';
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-6 py-10">
+    <div className="mx-auto w-full max-w-[1680px] px-6 py-10">
       {/* Dark aurora hero — the same one the board and hubs use. */}
       <Reveal>
         <section className="relative isolate overflow-hidden rounded-2xl p-6 text-white shadow-sm sm:p-8">
