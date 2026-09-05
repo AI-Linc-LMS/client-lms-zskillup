@@ -161,6 +161,17 @@ export function ResultsReport({
         </div>
       </div>
 
+      {!data.assessment.proctored ? (
+        <div className="mx-6 mb-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800">
+          <ShieldAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <span>
+            Proctoring was <b>off</b> for this assessment — tab switches, fullscreen exits and
+            camera checks weren&rsquo;t monitored, so the Integrity column can&rsquo;t flag
+            misconduct. To monitor integrity, enable proctoring when scheduling the drive.
+          </span>
+        </div>
+      ) : null}
+
       <div className="min-h-0 flex-1 overflow-auto px-6 pb-6">
         {data.rows.length === 0 ? (
           <p className="py-8 text-center text-sm text-slate-600">No attempts yet.</p>
@@ -203,7 +214,12 @@ export function ResultsReport({
                   <td className="px-3 py-2.5 text-right text-[11px] tabular-nums text-slate-500">{fmtTime(r.timeTakenSec)}</td>
                   <td className="px-3 py-2.5 text-right">
                     {!r.proctored ? (
-                      <span className="text-[11px] text-slate-400">—</span>
+                      <span
+                        className="text-[11px] font-medium text-slate-400"
+                        title="No proctoring data for this attempt — integrity was not monitored, so tab switches / exits can't be flagged"
+                      >
+                        Not proctored
+                      </span>
                     ) : r.violations > 0 ? (
                       <span
                         className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700"
