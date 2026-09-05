@@ -140,6 +140,43 @@ function BlogRow({ b }: { b: BlogPostDto }) {
   );
 }
 
+/** One testimonial card — reused in the right panel and the mobile/tablet section. */
+function TestimonialCard({ t }: { t: TestimonialDto }) {
+  return (
+    <Card className="p-5">
+      <QuoteIcon className="size-5 text-orange/70" aria-hidden="true" />
+      <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{t.quote}</p>
+      <div className="mt-4 flex items-center gap-3 border-t border-slate-100 pt-3">
+        {safeHttpUrl(t.avatarUrl) ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={safeHttpUrl(t.avatarUrl) ?? undefined}
+            alt=""
+            className="size-9 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
+          />
+        ) : (
+          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-slate-100 text-xs font-bold text-slate-500">
+            {t.authorName.slice(0, 1).toUpperCase()}
+          </span>
+        )}
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-bold text-navy">{t.authorName}</span>
+          {t.authorTitle ? (
+            <span className="block truncate text-xs text-slate-500">{t.authorTitle}</span>
+          ) : null}
+        </span>
+        {t.rating ? (
+          <span className="flex items-center gap-0.5" aria-label={`${t.rating} out of 5`}>
+            {Array.from({ length: t.rating }).map((_, idx) => (
+              <Star key={idx} className="size-3.5 fill-amber-400 text-amber-400" />
+            ))}
+          </span>
+        ) : null}
+      </div>
+    </Card>
+  );
+}
+
 /** One "other opening" card — reused in the grid and the horizontal marquee. */
 function OtherRoleCard({ o }: { o: JobPostingDto }) {
   return (
@@ -254,8 +291,20 @@ export function JobDetail({
     </a>
   ) : null;
 
+  // Placement stories + highlights live in a third rightmost column on wide screens
+  // (xl+); below that they fall back to full-width sections. The grid only becomes
+  // three columns when there is something to show there.
+  const rightItems: React.ReactNode[] = [
+    ...placements.map((p) => <PlacementCard key={`p-${p.id}`} p={p} />),
+    ...testimonials.map((t) => <TestimonialCard key={`t-${t.id}`} t={t} />),
+  ];
+  const hasRightPanel = rightItems.length > 0;
+  const gridClass = hasRightPanel
+    ? 'mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_300px_340px]'
+    : 'mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]';
+
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 py-10">
+    <div className="mx-auto w-full max-w-7xl px-6 py-10">
       {/* Dark aurora hero — the same one the board and hubs use. */}
       <Reveal>
         <section className="relative isolate overflow-hidden rounded-2xl p-6 text-white shadow-sm sm:p-8">
@@ -315,7 +364,7 @@ export function JobDetail({
         </section>
       </Reveal>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className={gridClass}>
         {/* Main column */}
         <div className="space-y-6">
           {closed ? (
@@ -532,35 +581,35 @@ export function JobDetail({
               </dl>
             </Card>
           ) : null}
+        </div>
 
-          {blogs.length > 0 ? (
-            <Card>
-              <Label>Related reading</Label>
-              {/* Many articles used to make this rail tower over a short main column and
-                  leave a big void. Bound it: a slow vertical marquee (pauses on hover,
-                  static under reduced-motion) that keeps the rail compact. */}
-              {blogs.length > 4 ? (
+        {/* Right column (xl+): placement stories & highlights as a sponsored-style rail.
+            Below xl this is hidden and the same content renders full-width further down. */}
+        {hasRightPanel ? (
+          <aside className="hidden xl:col-start-3 xl:row-start-1 xl:block">
+            <div className="xl:sticky xl:top-6">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                Placement stories
+              </p>
+              <h2 className="mb-3 mt-1 text-base font-bold text-navy">Where our students landed</h2>
+              {rightItems.length > 4 ? (
                 <Marquee
                   direction="y"
-                  durationSec={34}
-                  fadeColor="rgb(255 255 255)"
-                  items={blogs.map((b) => <BlogRow key={b.id} b={b} />)}
-                  className="mt-2 h-[22rem]"
+                  durationSec={44}
+                  items={rightItems}
+                  className="h-[calc(100vh-9rem)]"
                 />
               ) : (
-                <div className="mt-3 space-y-3">
-                  {blogs.map((b) => (
-                    <BlogRow key={b.id} b={b} />
-                  ))}
-                </div>
+                <div className="space-y-4">{rightItems}</div>
               )}
-            </Card>
-          ) : null}
-        </div>
+            </div>
+          </aside>
+        ) : null}
       </div>
 
+      {/* Below xl the placement panel can't fit as a column, so it renders full-width here. */}
       {placements.length > 0 ? (
-        <section className="mt-10">
+        <section className="mt-10 xl:hidden">
           <Label>Where our students landed</Label>
           <h2 className="mt-1 text-lg font-bold text-navy">Placement highlights</h2>
           {placements.length > 3 ? (
@@ -586,50 +635,44 @@ export function JobDetail({
       ) : null}
 
       {testimonials.length > 0 ? (
-        <section className="mt-10">
+        <section className="mt-10 xl:hidden">
           <Label>What students say</Label>
           <h2 className="mt-1 text-lg font-bold text-navy">Placement stories</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             {testimonials.map((t, i) => (
               <RevealX key={t.id} from={i % 2 === 0 ? 'left' : 'right'} delay={(i % 2) * 0.05}>
-                <Card className="p-5">
-                  <QuoteIcon className="size-5 text-orange/70" aria-hidden="true" />
-                  <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
-                    {t.quote}
-                  </p>
-                  <div className="mt-4 flex items-center gap-3 border-t border-slate-100 pt-3">
-                    {safeHttpUrl(t.avatarUrl) ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={safeHttpUrl(t.avatarUrl) ?? undefined}
-                        alt=""
-                        className="size-9 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
-                      />
-                    ) : (
-                      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-slate-100 text-xs font-bold text-slate-500">
-                        {t.authorName.slice(0, 1).toUpperCase()}
-                      </span>
-                    )}
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-bold text-navy">
-                        {t.authorName}
-                      </span>
-                      {t.authorTitle ? (
-                        <span className="block truncate text-xs text-slate-500">{t.authorTitle}</span>
-                      ) : null}
-                    </span>
-                    {t.rating ? (
-                      <span className="flex items-center gap-0.5" aria-label={`${t.rating} out of 5`}>
-                        {Array.from({ length: t.rating }).map((_, idx) => (
-                          <Star key={idx} className="size-3.5 fill-amber-400 text-amber-400" />
-                        ))}
-                      </span>
-                    ) : null}
-                  </div>
-                </Card>
+                <TestimonialCard t={t} />
               </RevealX>
             ))}
           </div>
+        </section>
+      ) : null}
+
+      {blogs.length > 0 ? (
+        <section className="mt-10">
+          <Label>Related reading</Label>
+          <h2 className="mt-1 text-lg font-bold text-navy">From the blog</h2>
+          {blogs.length > 3 ? (
+            <Marquee
+              durationSec={48}
+              className="mt-4"
+              items={blogs.map((b) => (
+                <div key={b.id} className="w-[320px]">
+                  <Card>
+                    <BlogRow b={b} />
+                  </Card>
+                </div>
+              ))}
+            />
+          ) : (
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {blogs.map((b) => (
+                <Card key={b.id}>
+                  <BlogRow b={b} />
+                </Card>
+              ))}
+            </div>
+          )}
         </section>
       ) : null}
 
