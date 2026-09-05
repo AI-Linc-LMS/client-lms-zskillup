@@ -12,7 +12,12 @@ import {
 import { safeHttpUrl } from '@/lib/utils';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
 import type { TestimonialDto } from '@/shared/dto/content.dto';
-import { JobStatus } from '@/shared/enums';
+import { CompensationStructure, JobKind, JobStatus } from '@/shared/enums';
+
+const STRUCTURE_LABEL: Record<CompensationStructure, string> = {
+  [CompensationStructure.FIXED]: 'Fixed',
+  [CompensationStructure.FIXED_PLUS_VARIABLE]: 'Fixed + Variable',
+};
 import { ApplyButton } from './ApplyButton';
 import { AuroraBackground, Reveal } from '@/components/motion/primitives';
 import { StatusPill, type StatusTone } from '@/components/student/StatusPill';
@@ -42,7 +47,7 @@ function Card({ children, className = '' }: { children: React.ReactNode; classNa
 
 function Label({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{children}</p>
+    <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">{children}</p>
   );
 }
 
@@ -71,6 +76,15 @@ export function JobDetail({
   const logoSrc = safeHttpUrl(job.companyLogoUrl);
   const jd = safeHttpUrl(job.jdFileUrl);
   const pay = compensationLabel(job);
+  const isInternship = job.jobKind === JobKind.INTERNSHIP;
+  const hasInternshipDetails =
+    isInternship &&
+    Boolean(
+      job.internshipDuration ||
+        job.stipendRange ||
+        job.stipendRemarks ||
+        (job.hasPpo && (job.ppoCtc || job.ppoRemarks)),
+    );
   // A freshly-posted role can carry almost no copy; keep the main column from rendering
   // empty so the page never looks broken.
   const hasBody = Boolean(
@@ -79,7 +93,8 @@ export function JobDetail({
       job.skills.length ||
       job.hiringStages.length ||
       job.hiringProcess ||
-      job.aboutCompany,
+      job.aboutCompany ||
+      hasInternshipDetails,
   );
 
   const eligibility = [
@@ -198,6 +213,58 @@ export function JobDetail({
               This role is no longer accepting applications. It stays here so shared links keep
               working — browse the board for live openings.
             </div>
+          ) : null}
+
+          {hasInternshipDetails ? (
+            <Reveal>
+              <Card className="p-6">
+                <Label>Internship details</Label>
+                <dl className="mt-3 space-y-3 text-sm">
+                  {job.internshipDuration ? (
+                    <div className="flex items-center justify-between gap-3">
+                      <dt className="text-slate-500">Duration</dt>
+                      <dd className="font-semibold text-navy">{job.internshipDuration}</dd>
+                    </div>
+                  ) : null}
+                  {job.stipendRange || job.stipendRemarks ? (
+                    <div>
+                      <dt className="text-slate-500">Stipend</dt>
+                      <dd className="mt-0.5 font-semibold text-navy">
+                        {job.stipendRange}
+                        {job.stipendStructure ? (
+                          <span className="ml-2 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
+                            {STRUCTURE_LABEL[job.stipendStructure]}
+                          </span>
+                        ) : null}
+                      </dd>
+                      {job.stipendRemarks ? (
+                        <dd className="mt-1 text-xs leading-relaxed text-slate-500">
+                          {job.stipendRemarks}
+                        </dd>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  {job.hasPpo && (job.ppoCtc || job.ppoRemarks) ? (
+                    <div>
+                      <dt className="text-slate-500">Full-time CTC (PPO)</dt>
+                      <dd className="mt-0.5 font-semibold text-navy">
+                        {job.ppoCtc}
+                        {job.ppoStructure ? (
+                          <span className="ml-2 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
+                            {STRUCTURE_LABEL[job.ppoStructure]}
+                          </span>
+                        ) : null}
+                      </dd>
+                      {job.ppoRemarks ? (
+                        <dd className="mt-1 text-xs leading-relaxed text-slate-500">
+                          {job.ppoRemarks}
+                        </dd>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </dl>
+              </Card>
+            </Reveal>
           ) : null}
 
           {!hasBody ? (
@@ -346,7 +413,7 @@ export function JobDetail({
               <dl className="mt-3 space-y-3">
                 {eligibility.map((e) => (
                   <div key={e.label}>
-                    <dt className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                    <dt className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
                       {e.label}
                     </dt>
                     <dd className="mt-0.5 text-sm text-slate-700">{e.value}</dd>

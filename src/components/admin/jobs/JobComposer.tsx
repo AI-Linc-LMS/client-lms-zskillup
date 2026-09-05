@@ -1,13 +1,22 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Check, ChevronLeft, ChevronRight, Loader2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { createJob, updateJob, type JobPostingDto } from '@/lib/api/jobs';
 import { uploadCompanyLogo, uploadJobDescription } from '@/lib/api/media';
-import { CompensationKind, EmploymentType, JobKind, JobStatus, WorkMode } from '@/shared/enums';
+import {
+  CompensationKind,
+  CompensationStructure,
+  EmploymentType,
+  JobKind,
+  JobStatus,
+  WorkMode,
+} from '@/shared/enums';
+
+const DURATION_PRESETS = ['1 Month', '2 Months', '3 Months', '6 Months', '12 Months'];
 import type { JobPostingPatch } from '@/shared/dto/jobs.dto';
 import { describeError } from '@/lib/api/errors';
 import { cn } from '@/lib/utils';
@@ -83,6 +92,14 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
     salaryMin: existing?.salaryMin?.toString() ?? '',
     salaryMax: existing?.salaryMax?.toString() ?? '',
     stipendAmount: existing?.stipendAmount?.toString() ?? '',
+    internshipDuration: existing?.internshipDuration ?? '',
+    stipendRange: existing?.stipendRange ?? '',
+    stipendStructure: existing?.stipendStructure ?? '',
+    stipendRemarks: existing?.stipendRemarks ?? '',
+    hasPpo: existing?.hasPpo ?? false,
+    ppoCtc: existing?.ppoCtc ?? '',
+    ppoStructure: existing?.ppoStructure ?? '',
+    ppoRemarks: existing?.ppoRemarks ?? '',
     education: existing?.education ?? '',
     departments: (existing?.departments ?? []).join(', '),
     ugRequirement: existing?.ugRequirement ?? '',
@@ -92,10 +109,18 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
     status: existing?.status ?? JobStatus.ACTIVE,
   });
 
-  const set = (k: keyof typeof form, v: string) => {
+  const set = (k: Exclude<keyof typeof form, 'hasPpo'>, v: string) => {
     setForm((f) => ({ ...f, [k]: v }));
     setDirty(true);
   };
+  const setBool = (k: 'hasPpo', v: boolean) => {
+    setForm((f) => ({ ...f, [k]: v }));
+    setDirty(true);
+  };
+  // "Custom duration" is active when a non-preset value is set (or the admin picks it).
+  const [customDuration, setCustomDuration] = useState(
+    !!existing?.internshipDuration && !DURATION_PRESETS.includes(existing.internshipDuration),
+  );
 
   const basicsValid = form.title.trim().length >= 3 && form.companyName.trim().length >= 1;
 
@@ -127,6 +152,14 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
       salaryMin: num(form.salaryMin),
       salaryMax: num(form.salaryMax),
       stipendAmount: num(form.stipendAmount),
+      internshipDuration: form.internshipDuration.trim() || null,
+      stipendRange: form.stipendRange.trim() || null,
+      stipendStructure: (form.stipendStructure || null) as CompensationStructure | null,
+      stipendRemarks: form.stipendRemarks.trim() || null,
+      hasPpo: form.hasPpo,
+      ppoCtc: form.ppoCtc.trim() || null,
+      ppoStructure: (form.ppoStructure || null) as CompensationStructure | null,
+      ppoRemarks: form.ppoRemarks.trim() || null,
       education: form.education.trim() || null,
       departments: list(form.departments),
       ugRequirement: form.ugRequirement.trim() || null,
@@ -370,6 +403,133 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
                   ) : null}
                 </div>
               </div>
+
+              {form.jobKind === JobKind.INTERNSHIP ? (
+                <div className="rounded-xl bg-slate-50 p-4">
+                  <p className={label}>Internship details</p>
+                  <div className="mt-2 grid gap-4 sm:grid-cols-2">
+                    <Field>
+                      <span className={label}>Duration</span>
+                      <select
+                        value={customDuration ? '__custom__' : form.internshipDuration}
+                        onChange={(e) => {
+                          if (e.target.value === '__custom__') {
+                            setCustomDuration(true);
+                            set('internshipDuration', '');
+                          } else {
+                            setCustomDuration(false);
+                            set('internshipDuration', e.target.value);
+                          }
+                        }}
+                        className={input}
+                      >
+                        <option value="">Select…</option>
+                        {DURATION_PRESETS.map((d) => (
+                          <option key={d} value={d}>
+                            {d}
+                          </option>
+                        ))}
+                        <option value="__custom__">Custom…</option>
+                      </select>
+                    </Field>
+                    {customDuration ? (
+                      <Field>
+                        <span className={label}>Custom duration</span>
+                        <input
+                          value={form.internshipDuration}
+                          onChange={(e) => set('internshipDuration', e.target.value)}
+                          className={input}
+                          placeholder="e.g. 4 Months"
+                        />
+                      </Field>
+                    ) : (
+                      <div />
+                    )}
+
+                    <Field>
+                      <span className={label}>Stipend</span>
+                      <input
+                        value={form.stipendRange}
+                        onChange={(e) => set('stipendRange', e.target.value)}
+                        className={input}
+                        placeholder="₹20,000 – ₹25,000 / Month"
+                      />
+                    </Field>
+                    <Field>
+                      <span className={label}>Stipend structure</span>
+                      <select
+                        value={form.stipendStructure}
+                        onChange={(e) => set('stipendStructure', e.target.value)}
+                        className={input}
+                      >
+                        <option value="">Not specified</option>
+                        <option value={CompensationStructure.FIXED}>Fixed</option>
+                        <option value={CompensationStructure.FIXED_PLUS_VARIABLE}>Fixed + Variable</option>
+                      </select>
+                    </Field>
+                    <div className="sm:col-span-2">
+                      <Field>
+                        <span className={label}>Stipend remarks (optional)</span>
+                        <input
+                          value={form.stipendRemarks}
+                          onChange={(e) => set('stipendRemarks', e.target.value)}
+                          className={input}
+                          placeholder="e.g. Variable component based on performance"
+                        />
+                      </Field>
+                    </div>
+
+                    <label className="flex items-center gap-2 sm:col-span-2">
+                      <input
+                        type="checkbox"
+                        checked={form.hasPpo}
+                        onChange={(e) => setBool('hasPpo', e.target.checked)}
+                        className="size-4 rounded border-slate-300 text-orange focus:ring-orange/30"
+                      />
+                      <span className="text-sm text-slate-700">
+                        Full-time opportunity (PPO) after the internship
+                      </span>
+                    </label>
+
+                    {form.hasPpo ? (
+                      <>
+                        <Field>
+                          <span className={label}>Full-time CTC</span>
+                          <input
+                            value={form.ppoCtc}
+                            onChange={(e) => set('ppoCtc', e.target.value)}
+                            className={input}
+                            placeholder="₹8 LPA – ₹10 LPA"
+                          />
+                        </Field>
+                        <Field>
+                          <span className={label}>CTC structure</span>
+                          <select
+                            value={form.ppoStructure}
+                            onChange={(e) => set('ppoStructure', e.target.value)}
+                            className={input}
+                          >
+                            <option value="">Not specified</option>
+                            <option value={CompensationStructure.FIXED}>Fixed</option>
+                            <option value={CompensationStructure.FIXED_PLUS_VARIABLE}>Fixed + Variable</option>
+                          </select>
+                        </Field>
+                        <div className="sm:col-span-2">
+                          <Field>
+                            <span className={label}>Full-time CTC remarks (optional)</span>
+                            <input
+                              value={form.ppoRemarks}
+                              onChange={(e) => set('ppoRemarks', e.target.value)}
+                              className={input}
+                              placeholder="e.g. Full-time conversion based on internship performance"
+                            />
+                          </Field>
+                        </div>
+                      </>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
 
               <Field>
                 <span className={label}>External apply link - leave empty to collect applications here</span>

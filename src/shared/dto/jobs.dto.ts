@@ -20,11 +20,13 @@ import {
   MaxLength,
   Min,
   MinLength,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import {
   CompensationKind,
+  CompensationStructure,
   EmploymentType,
   JobApplicationStatus,
   JobKind,
@@ -120,6 +122,52 @@ export class CreateJobPostingDto {
   @IsInt()
   @Min(0)
   stipendAmount?: number | null;
+
+  /* --- internship-specific (jobKind = INTERNSHIP). Free-text ranges + remarks. --- */
+
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @IsString()
+  @MaxLength(60)
+  internshipDuration?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @IsString()
+  @MaxLength(120)
+  stipendRange?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @IsEnum(CompensationStructure)
+  stipendStructure?: CompensationStructure | null;
+
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @IsString()
+  @MaxLength(500)
+  stipendRemarks?: string | null;
+
+  @IsOptional()
+  @IsBoolean()
+  hasPpo?: boolean;
+
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @IsString()
+  @MaxLength(120)
+  ppoCtc?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @IsEnum(CompensationStructure)
+  ppoStructure?: CompensationStructure | null;
+
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @IsString()
+  @MaxLength(500)
+  ppoRemarks?: string | null;
 
   /* --- the rest of the posting --- */
 
@@ -279,6 +327,15 @@ export interface JobPostingDto {
   salaryMin: number | null;
   salaryMax: number | null;
   stipendAmount: number | null;
+  /* internship-specific (jobKind = INTERNSHIP) */
+  internshipDuration: string | null;
+  stipendRange: string | null;
+  stipendStructure: CompensationStructure | null;
+  stipendRemarks: string | null;
+  hasPpo: boolean;
+  ppoCtc: string | null;
+  ppoStructure: CompensationStructure | null;
+  ppoRemarks: string | null;
 
   aboutCompany: string | null;
   jdFileUrl: string | null;
