@@ -66,6 +66,11 @@ export class CreateBlogPostDto {
   @IsOptional()
   @IsIn(['DRAFT', 'PUBLISHED'])
   status?: BlogStatusValue;
+
+  /** Also show on the public job pages ("Related reading"; default off). */
+  @IsOptional()
+  @IsBoolean()
+  showOnJobs?: boolean;
 }
 
 export class UpdateBlogPostDto {
@@ -108,6 +113,11 @@ export class UpdateBlogPostDto {
   @IsOptional()
   @IsIn(['DRAFT', 'PUBLISHED'])
   status?: BlogStatusValue;
+
+  /** Also show on the public job pages ("Related reading"; default off). */
+  @IsOptional()
+  @IsBoolean()
+  showOnJobs?: boolean;
 }
 
 export interface BlogPostDto {
@@ -120,6 +130,7 @@ export interface BlogPostDto {
   author: string | null;
   tags: string[];
   status: BlogStatusValue;
+  showOnJobs: boolean;
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;

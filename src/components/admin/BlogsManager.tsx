@@ -27,6 +27,7 @@ const EMPTY = {
   author: '',
   tags: '',
   status: 'DRAFT' as 'DRAFT' | 'PUBLISHED',
+  showOnJobs: false,
 };
 
 /** Blog CMS manager (Phase 5). Create / edit / publish / delete posts. */
@@ -71,6 +72,7 @@ export function BlogsManager() {
       author: p.author ?? '',
       tags: (p.tags ?? []).join(', '),
       status: p.status,
+      showOnJobs: p.showOnJobs,
     });
     setEditing(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -91,6 +93,7 @@ export function BlogsManager() {
       excerpt: form.excerpt.trim() || null,
       body: form.body,
       coverUrl: form.coverUrl.trim() || null,
+      showOnJobs: form.showOnJobs,
       author: form.author.trim() || null,
       tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
       status: form.status,
@@ -207,6 +210,15 @@ export function BlogsManager() {
             <option value="DRAFT">Draft</option>
             <option value="PUBLISHED">Published</option>
           </select>
+        </label>
+        <label className="flex items-center gap-2 sm:pt-6">
+          <input
+            type="checkbox"
+            checked={form.showOnJobs}
+            onChange={(e) => setForm({ ...form, showOnJobs: e.target.checked })}
+            className="size-4 rounded border-slate-300 text-orange focus:ring-orange/30"
+          />
+          <span className="text-sm text-slate-600">Show on job pages (Related reading)</span>
         </label>
         <div className="sm:col-span-2 flex gap-2">
           <button type="submit" disabled={saving || !form.title.trim()} className="inline-flex items-center gap-2 rounded-lg btn-brand px-4 py-2 text-sm font-semibold disabled:opacity-50">

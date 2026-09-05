@@ -6,12 +6,13 @@ import {
   FileText,
   IndianRupee,
   MapPin,
+  Newspaper,
   Quote as QuoteIcon,
   Star,
 } from 'lucide-react';
 import { safeHttpUrl } from '@/lib/utils';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
-import type { TestimonialDto } from '@/shared/dto/content.dto';
+import type { BlogPostDto, TestimonialDto } from '@/shared/dto/content.dto';
 import { CompensationStructure, JobKind, JobStatus } from '@/shared/enums';
 
 const STRUCTURE_LABEL: Record<CompensationStructure, string> = {
@@ -65,10 +66,12 @@ export function JobDetail({
   job,
   others,
   testimonials = [],
+  blogs = [],
 }: {
   job: JobPostingDto;
   others: JobPostingDto[];
   testimonials?: TestimonialDto[];
+  blogs?: BlogPostDto[];
 }) {
   const closes = deadlineLabel(job.applicationDeadline);
   const closed = job.status !== JobStatus.ACTIVE || closes?.tone === 'closed';
@@ -420,6 +423,42 @@ export function JobDetail({
                   </div>
                 ))}
               </dl>
+            </Card>
+          ) : null}
+
+          {blogs.length > 0 ? (
+            <Card>
+              <Label>Related reading</Label>
+              <div className="mt-3 space-y-3">
+                {blogs.map((b) => (
+                  <Link
+                    key={b.id}
+                    href={`/blog/${b.slug}`}
+                    className="flex items-start gap-3 rounded-lg p-1.5 transition-colors hover:bg-slate-50"
+                  >
+                    {safeHttpUrl(b.coverUrl) ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={safeHttpUrl(b.coverUrl) ?? undefined}
+                        alt=""
+                        className="size-12 shrink-0 rounded-lg object-cover ring-1 ring-slate-200"
+                      />
+                    ) : (
+                      <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-sky-50 text-sky-600 ring-1 ring-sky-100">
+                        <Newspaper className="size-5" />
+                      </span>
+                    )}
+                    <span className="min-w-0 flex-1">
+                      <span className="line-clamp-2 text-sm font-semibold text-navy">{b.title}</span>
+                      {b.excerpt ? (
+                        <span className="mt-0.5 line-clamp-1 block text-xs text-slate-500">
+                          {b.excerpt}
+                        </span>
+                      ) : null}
+                    </span>
+                  </Link>
+                ))}
+              </div>
             </Card>
           ) : null}
         </div>
