@@ -225,8 +225,13 @@ export interface AssessmentResults {
   assessment: {
     id: string;
     title: string;
-    companyId: string;
+    companyId: string | null;
     companyName: string;
+    /** Set for a college (TPO/campus) drive — those embargo the report until released. */
+    collegeId: string | null;
+    /** Whether the scored report has been released to students (only meaningful for a
+     *  college drive; company/platform drives are never embargoed). */
+    resultsReleased: boolean;
     cohort: string | null;
     scheduledAt: string;
     proctored: boolean;
@@ -250,6 +255,12 @@ export async function getAssessmentResults(id: string): Promise<AssessmentResult
     `/api/v1/admin/scheduled-assessments/${id}/results`,
   );
   return res.data;
+}
+
+/** Release (or re-embargo) a drive's scored results so students can see their report.
+ *  Only a college drive embargoes results; on a company/platform drive this is a no-op. */
+export async function releaseAssessmentResults(id: string, released = true): Promise<void> {
+  await apiClient.post(`/api/v1/admin/scheduled-assessments/${id}/release`, { released });
 }
 
 export interface AssessmentLeaderboardEntry {

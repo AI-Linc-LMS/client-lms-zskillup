@@ -10,6 +10,7 @@ import {
   Brain,
   Calculator,
   Check,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Clock,
@@ -73,7 +74,7 @@ import { CalibrationResults } from '@/components/student/CalibrationResults';
  * the run auto-submits; the server finalizes it as EXPIRED if it is past time.
  */
 
-type Phase = 'intro' | 'running' | 'report';
+type Phase = 'intro' | 'running' | 'report' | 'submitted';
 
 export function MockRunner({
   mockId,
@@ -195,6 +196,9 @@ export function MockRunner({
     submittedRef.current = true;
     setSubmitting(true);
     setError(null);
+
+    // 1) Flush answers + submit. A failure HERE is a real submit failure — allow a
+    //    retry (the attempt was NOT recorded).
     try {
       // Let in-flight autosaves land, then flush only the answers the server
       // hasn't confirmed (failed saves, or selections racing the deadline).
@@ -212,15 +216,25 @@ export function MockRunner({
         start.attemptId,
         proctored ? proctor.summary() : undefined,
       );
-      if (proctored) proctor.stop();
       setReward(result.gamification ?? null);
+    } catch (err) {
+      submittedRef.current = false;
+      setError(err instanceof Error ? err.message : 'Could not submit the mock test.');
+      setSubmitting(false);
+      return;
+    }
+    if (proctored) proctor.stop();
+
+    // 2) Submit SUCCEEDED — the attempt is recorded server-side. Fetching the scored
+    //    report can still fail for a college drive whose results the placement team
+    //    hasn't RELEASED yet (embargo → 403). That is NOT a submit failure: show a
+    //    "submitted, results pending" confirmation instead of a false retry error.
+    try {
       const r = await getMockReport(start.attemptId);
       setReport(r);
       setPhase('report');
-    } catch (err) {
-      // Allow a retry if submit failed for a transient reason.
-      submittedRef.current = false;
-      setError(err instanceof Error ? err.message : 'Could not submit the mock test.');
+    } catch {
+      setPhase('submitted');
     } finally {
       setSubmitting(false);
     }
@@ -339,6 +353,26 @@ export function MockRunner({
           <p className="mt-4 text-sm font-semibold text-navy">{error}</p>
           <Button variant="outline" className="mt-5" asChild>
             <Link href="/mock-assessment">Back to mock tests</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (phase === 'submitted') {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background px-6">
+        <div className="max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+          <span className="mx-auto grid size-12 place-items-center rounded-full bg-emerald-50 text-emerald-600">
+            <CheckCircle2 className="size-6" aria-hidden="true" />
+          </span>
+          <p className="mt-4 text-base font-bold text-navy">Your responses are submitted</p>
+          <p className="mt-2 text-sm leading-relaxed text-slate-600">
+            Your answers have been recorded. Results for this assessment will be available
+            once your placement team releases them — you can safely close this window.
+          </p>
+          <Button variant="outline" className="mt-5" asChild>
+            <Link href="/assessments">Back to assessments</Link>
           </Button>
         </div>
       </div>
@@ -1373,6 +1407,7 @@ export function MockReportView({
 export function MockReportLoader({ attemptId }: { attemptId: string }) {
   const [report, setReport] = useState<ApiMockReport | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [embargoed, setEmbargoed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -1381,12 +1416,37 @@ export function MockReportLoader({ attemptId }: { attemptId: string }) {
         if (!cancelled) setReport(r);
       })
       .catch((err: Error) => {
-        if (!cancelled) setError(err.message || 'Could not load this report.');
+        if (cancelled) return;
+        // A college drive embargoes the scored report until results are released — that
+        // is not an error, so show a neutral "results pending" state, not a red alert.
+        const msg = err.message || '';
+        if (/released|embargo/i.test(msg)) setEmbargoed(true);
+        else setError(msg || 'Could not load this report.');
       });
     return () => {
       cancelled = true;
     };
   }, [attemptId]);
+
+  if (embargoed) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background px-6">
+        <div className="max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+          <span className="mx-auto grid size-12 place-items-center rounded-full bg-emerald-50 text-emerald-600">
+            <CheckCircle2 className="size-6" aria-hidden="true" />
+          </span>
+          <p className="mt-4 text-base font-bold text-navy">Results not released yet</p>
+          <p className="mt-2 text-sm leading-relaxed text-slate-600">
+            Your responses are submitted and recorded. Your scored report will appear here once
+            your placement team releases the results.
+          </p>
+          <Button variant="outline" className="mt-5" asChild>
+            <Link href="/assessments">Back to assessments</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (error) {
     return (
