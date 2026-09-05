@@ -22,6 +22,7 @@ import { describeError } from '@/lib/api/errors';
 import { cn } from '@/lib/utils';
 import { TargetPicker } from './TargetPicker';
 import { QuestionPicker } from './QuestionPicker';
+import { RelatedContentPicker } from './RelatedContentPicker';
 import { EMPLOYMENT_LABEL, JOB_KIND_LABEL, WORK_MODE_LABEL } from '@/lib/jobs/format';
 import { JOB_STATUS_LABEL } from './JobStatusPill';
 
@@ -37,6 +38,7 @@ const STEPS = [
   { key: 'eligibility', title: 'Eligibility', hint: 'Who can apply' },
   { key: 'audience', title: 'Audience', hint: 'Who sees it' },
   { key: 'questions', title: 'Questions', hint: 'What applicants are asked' },
+  { key: 'related', title: 'Related content', hint: 'Placement stories & articles' },
   { key: 'publish', title: 'Publish', hint: 'Status and go live' },
 ] as const;
 
@@ -619,8 +621,19 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
 
           {step === 3 ? job ? <TargetPicker jobId={job.id} /> : null : null}
           {step === 4 ? job ? <QuestionPicker jobId={job.id} /> : null : null}
-
           {step === 5 ? (
+            job ? (
+              <RelatedContentPicker
+                jobId={job.id}
+                initialTestimonialIds={job.testimonialIds ?? []}
+                initialBlogIds={job.blogIds ?? []}
+                initialPlacementIds={job.placementIds ?? []}
+                onSaved={setJob}
+              />
+            ) : null
+          ) : null}
+
+          {step === 6 ? (
             <div className="space-y-4">
               <Field>
                 <span className={label}>Status</span>

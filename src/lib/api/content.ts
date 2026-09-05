@@ -2,9 +2,12 @@ import { apiClient } from './client';
 import type {
   BlogPostDto,
   CreateBlogPostDto,
+  CreatePlacementRecordDto,
   CreateTestimonialDto,
+  PlacementRecordDto,
   TestimonialDto,
   UpdateBlogPostDto,
+  UpdatePlacementRecordDto,
   UpdateTestimonialDto,
 } from '@/shared/dto/content.dto';
 
@@ -42,6 +45,23 @@ export async function updateTestimonial(
 }
 export async function deleteTestimonial(id: string): Promise<void> {
   await apiClient.delete(`/api/v1/admin/testimonials/${id}`);
+}
+
+// ── Admin: placement records ─────────────────────────────────────────────────
+export async function listAdminPlacements(): Promise<PlacementRecordDto[]> {
+  return (await apiClient.get<PlacementRecordDto[]>('/api/v1/admin/placements')).data;
+}
+export async function createPlacement(dto: CreatePlacementRecordDto): Promise<PlacementRecordDto> {
+  return (await apiClient.post<PlacementRecordDto>('/api/v1/admin/placements', dto)).data;
+}
+export async function updatePlacement(
+  id: string,
+  dto: UpdatePlacementRecordDto,
+): Promise<PlacementRecordDto> {
+  return (await apiClient.patch<PlacementRecordDto>(`/api/v1/admin/placements/${id}`, dto)).data;
+}
+export async function deletePlacement(id: string): Promise<void> {
+  await apiClient.delete(`/api/v1/admin/placements/${id}`);
 }
 
 // ── Public reads (no auth) ───────────────────────────────────────────────────

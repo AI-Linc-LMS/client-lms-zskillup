@@ -1,9 +1,4 @@
-import {
-  getPublicJob,
-  getPublicJobs,
-  getPublicJobTestimonials,
-  getPublicJobBlogs,
-} from '@/lib/server/public-content';
+import { getPublicJob, getPublicJobs, getPublicJobRelated } from '@/lib/server/public-content';
 import { JobDetail } from '@/components/jobs/JobDetail';
 import { TargetedJobFallback } from '@/components/jobs/TargetedJobFallback';
 import { JobsPublicShell } from '@/components/jobs/JobsPublicShell';
@@ -73,11 +68,8 @@ export default async function JobPage({ params }: { params: Promise<{ slug: stri
       </JobsPublicShell>
     );
 
-  const [allJobs, testimonials, blogs] = await Promise.all([
-    getPublicJobs(),
-    getPublicJobTestimonials(),
-    getPublicJobBlogs(),
-  ]);
+  const [allJobs, related] = await Promise.all([getPublicJobs(), getPublicJobRelated(job.slug)]);
+  const { testimonials, blogs, placements } = related;
   const others = allJobs.filter((j) => j.id !== job.id).slice(0, 3);
 
   // Search engines read this even though the page renders fine without it. Only for
@@ -108,7 +100,13 @@ export default async function JobPage({ params }: { params: Promise<{ slug: stri
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
       <JobsPublicShell>
-        <JobDetail job={job} others={others} testimonials={testimonials} blogs={blogs} />
+        <JobDetail
+          job={job}
+          others={others}
+          testimonials={testimonials}
+          blogs={blogs}
+          placements={placements}
+        />
       </JobsPublicShell>
     </>
   );

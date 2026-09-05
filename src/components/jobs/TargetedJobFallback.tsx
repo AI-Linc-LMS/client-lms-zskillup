@@ -6,8 +6,15 @@ import { Briefcase, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { apiClient } from '@/lib/api/client';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
+import type { BlogPostDto, PlacementRecordDto, TestimonialDto } from '@/shared/dto/content.dto';
 import { JobDetail } from './JobDetail';
 import { roleHint } from '@/lib/session-hints';
+
+type Related = {
+  testimonials: TestimonialDto[];
+  blogs: BlogPostDto[];
+  placements: PlacementRecordDto[];
+};
 
 /**
  * The page the server could not render, tried again as the signed-in student.
@@ -23,6 +30,7 @@ import { roleHint } from '@/lib/session-hints';
  */
 export function TargetedJobFallback({ slug }: { slug: string }) {
   const [job, setJob] = useState<JobPostingDto | null>(null);
+  const [related, setRelated] = useState<Related>({ testimonials: [], blogs: [], placements: [] });
   const [state, setState] = useState<'loading' | 'found' | 'missing'>('loading');
 
   useEffect(() => {
@@ -38,6 +46,11 @@ export function TargetedJobFallback({ slug }: { slug: string }) {
         if (!alive) return;
         setJob(r.data);
         setState('found');
+        // Best-effort: a targeted role still shows its own selected related content.
+        apiClient
+          .get<Related>(`/api/v1/jobs/${slug}/related`)
+          .then((rel) => alive && setRelated(rel.data))
+          .catch(() => {});
       })
       .catch(() => alive && setState('missing'));
     return () => {
@@ -73,5 +86,13 @@ export function TargetedJobFallback({ slug }: { slug: string }) {
     );
   }
 
-  return <JobDetail job={job} others={[]} />;
+  return (
+    <JobDetail
+      job={job}
+      others={[]}
+      testimonials={related.testimonials}
+      blogs={related.blogs}
+      placements={related.placements}
+    />
+  );
 }
