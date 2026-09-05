@@ -33,7 +33,7 @@ export async function getPublicJobTestimonials(): Promise<TestimonialDto[]> {
 
 /** Published blog posts an admin opted in to the public job pages ("Related reading"). */
 export async function getPublicJobBlogs(): Promise<BlogPostDto[]> {
-  return (await getJson<BlogPostDto[]>('/api/v1/content/blogs/jobs')) ?? [];
+  return (await getJson<BlogPostDto[]>('/api/v1/content/job-blogs')) ?? [];
 }
 
 export async function getPublicBlogs(): Promise<BlogPostDto[]> {
