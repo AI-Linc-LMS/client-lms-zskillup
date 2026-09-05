@@ -10,7 +10,7 @@ import {
 import type { TestimonialDto } from '@/shared/dto/content.dto';
 import { describeError } from '@/lib/api/errors';
 import { BadgeCheck, Loader2, Plus, Star, Trash2, XCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 
 const inputCls =
   'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange';
@@ -23,6 +23,7 @@ const EMPTY = {
   quote: '',
   rating: 5 as number | '',
   isPublished: true,
+  showOnJobs: false,
   sortOrder: 0,
 };
 
@@ -66,6 +67,7 @@ export function TestimonialsManager() {
       quote: t.quote,
       rating: t.rating ?? '',
       isPublished: t.isPublished,
+      showOnJobs: t.showOnJobs,
       sortOrder: t.sortOrder,
     });
     setEditing(true);
@@ -88,6 +90,7 @@ export function TestimonialsManager() {
       quote: form.quote.trim(),
       rating: form.rating === '' ? null : Number(form.rating),
       isPublished: form.isPublished,
+      showOnJobs: form.showOnJobs,
       sortOrder: Number(form.sortOrder),
     };
     try {
@@ -149,8 +152,15 @@ export function TestimonialsManager() {
           <textarea required rows={3} value={form.quote} onChange={(e) => setForm({ ...form, quote: e.target.value })} className={inputCls} />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">Avatar URL</span>
-          <input value={form.avatarUrl} onChange={(e) => setForm({ ...form, avatarUrl: e.target.value })} className={inputCls} />
+          <span className="mb-1 block text-xs font-medium text-slate-600">Author photo</span>
+          <ImageUpload
+            value={form.avatarUrl}
+            onChange={(url) => setForm({ ...form, avatarUrl: url })}
+            purpose="speaker-photo"
+            allowUrl
+            previewClassName="size-12 rounded-full object-cover"
+            urlPlaceholder="Upload an image, or paste a URL"
+          />
         </label>
         <label className="block">
           <span className="mb-1 block text-xs font-medium text-slate-600">Rating (1–5)</span>
@@ -163,6 +173,10 @@ export function TestimonialsManager() {
         <label className="flex items-center gap-2 pt-6">
           <input type="checkbox" checked={form.isPublished} onChange={(e) => setForm({ ...form, isPublished: e.target.checked })} className="size-4 rounded border-slate-300" />
           <span className="text-sm text-slate-600">Published</span>
+        </label>
+        <label className="flex items-center gap-2 sm:pt-6">
+          <input type="checkbox" checked={form.showOnJobs} onChange={(e) => setForm({ ...form, showOnJobs: e.target.checked })} className="size-4 rounded border-slate-300" />
+          <span className="text-sm text-slate-600">Show on job pages</span>
         </label>
         <div className="sm:col-span-2 flex gap-2">
           <button type="submit" disabled={saving || !form.authorName.trim() || !form.quote.trim()} className="inline-flex items-center gap-2 rounded-lg bg-orange px-4 py-2 text-sm font-semibold text-[#171717] hover:bg-orange/90 disabled:opacity-50">
@@ -189,6 +203,7 @@ export function TestimonialsManager() {
                     <p className="font-semibold text-navy">{t.authorName}</p>
                     {t.authorTitle && <span className="text-xs text-slate-500">· {t.authorTitle}</span>}
                     {!t.isPublished && <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">HIDDEN</span>}
+                    {t.showOnJobs && <span className="rounded bg-sky-50 px-1.5 py-0.5 text-[10px] font-semibold text-sky-700">JOBS</span>}
                   </div>
                   <p className="mt-1 line-clamp-2 text-sm text-slate-600">“{t.quote}”</p>
                   {t.rating != null && (

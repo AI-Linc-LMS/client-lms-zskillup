@@ -159,6 +159,11 @@ export class CreateTestimonialDto {
   @IsBoolean()
   isPublished?: boolean;
 
+  /** Also show on the public job pages (default off - homepage only). */
+  @IsOptional()
+  @IsBoolean()
+  showOnJobs?: boolean;
+
   @IsOptional()
   @IsInt()
   sortOrder?: number;
@@ -198,6 +203,11 @@ export class UpdateTestimonialDto {
   @IsBoolean()
   isPublished?: boolean;
 
+  /** Also show on the public job pages (default off - homepage only). */
+  @IsOptional()
+  @IsBoolean()
+  showOnJobs?: boolean;
+
   @IsOptional()
   @IsInt()
   sortOrder?: number;
@@ -211,6 +221,7 @@ export interface TestimonialDto {
   quote: string;
   rating: number | null;
   isPublished: boolean;
+  showOnJobs: boolean;
   sortOrder: number;
   createdAt: string;
 }

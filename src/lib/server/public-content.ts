@@ -26,6 +26,11 @@ export async function getPublicTestimonials(): Promise<TestimonialDto[]> {
   return (await getJson<TestimonialDto[]>('/api/v1/content/testimonials')) ?? [];
 }
 
+/** Published testimonials an admin opted in to the public job pages. */
+export async function getPublicJobTestimonials(): Promise<TestimonialDto[]> {
+  return (await getJson<TestimonialDto[]>('/api/v1/content/testimonials/jobs')) ?? [];
+}
+
 export async function getPublicBlogs(): Promise<BlogPostDto[]> {
   return (await getJson<BlogPostDto[]>('/api/v1/content/blogs')) ?? [];
 }
