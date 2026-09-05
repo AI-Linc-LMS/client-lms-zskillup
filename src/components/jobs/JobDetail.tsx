@@ -3,16 +3,18 @@ import {
   ArrowLeft,
   ArrowRight,
   Briefcase,
+  Building2,
   FileText,
   IndianRupee,
   MapPin,
   Newspaper,
   Quote as QuoteIcon,
   Star,
+  TrendingUp,
 } from 'lucide-react';
 import { safeHttpUrl } from '@/lib/utils';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
-import type { BlogPostDto, TestimonialDto } from '@/shared/dto/content.dto';
+import type { BlogPostDto, PlacementRecordDto, TestimonialDto } from '@/shared/dto/content.dto';
 import { CompensationStructure, JobKind, JobStatus } from '@/shared/enums';
 
 const STRUCTURE_LABEL: Record<CompensationStructure, string> = {
@@ -20,7 +22,7 @@ const STRUCTURE_LABEL: Record<CompensationStructure, string> = {
   [CompensationStructure.FIXED_PLUS_VARIABLE]: 'Fixed + Variable',
 };
 import { ApplyButton } from './ApplyButton';
-import { AuroraBackground, Reveal } from '@/components/motion/primitives';
+import { AuroraBackground, Reveal, RevealX } from '@/components/motion/primitives';
 import { StatusPill, type StatusTone } from '@/components/student/StatusPill';
 import { Button } from '@/components/ui/button';
 import {
@@ -67,11 +69,13 @@ export function JobDetail({
   others,
   testimonials = [],
   blogs = [],
+  placements = [],
 }: {
   job: JobPostingDto;
   others: JobPostingDto[];
   testimonials?: TestimonialDto[];
   blogs?: BlogPostDto[];
+  placements?: PlacementRecordDto[];
 }) {
   const closes = deadlineLabel(job.applicationDeadline);
   const closed = job.status !== JobStatus.ACTIVE || closes?.tone === 'closed';
@@ -464,45 +468,115 @@ export function JobDetail({
         </div>
       </div>
 
+      {placements.length > 0 ? (
+        <section className="mt-10">
+          <Label>Where our students landed</Label>
+          <h2 className="mt-1 text-lg font-bold text-navy">Placement highlights</h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {placements.map((p, i) => {
+              const logo = safeHttpUrl(p.companyLogoUrl);
+              const avatar = safeHttpUrl(p.avatarUrl);
+              return (
+                <RevealX key={p.id} from={i % 2 === 0 ? 'left' : 'right'} delay={(i % 3) * 0.04}>
+                  <Card className="flex h-full flex-col">
+                    <div className="flex items-center gap-3">
+                      {avatar ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={avatar}
+                          alt=""
+                          className="size-12 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
+                        />
+                      ) : (
+                        <span className="grid size-12 shrink-0 place-items-center rounded-full bg-slate-100 text-sm font-bold text-slate-500">
+                          {p.studentName.slice(0, 1).toUpperCase()}
+                        </span>
+                      )}
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-bold text-navy">{p.studentName}</p>
+                        {p.role || p.batch ? (
+                          <p className="truncate text-xs text-slate-500">
+                            {[p.role, p.batch].filter(Boolean).join(' · ')}
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className="mt-4 flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
+                      <span className="flex min-w-0 items-center gap-2">
+                        {logo ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={logo}
+                            alt=""
+                            className="size-6 shrink-0 rounded-md bg-white object-contain ring-1 ring-slate-200"
+                          />
+                        ) : (
+                          <span className="grid size-6 shrink-0 place-items-center rounded-md bg-sky-50 text-sky-600 ring-1 ring-sky-100">
+                            <Building2 className="size-3.5" />
+                          </span>
+                        )}
+                        <span className="truncate text-xs font-semibold text-slate-600">
+                          {p.company}
+                        </span>
+                      </span>
+                      {p.packageLabel ? (
+                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-200">
+                          <TrendingUp className="size-3.5" />
+                          {p.packageLabel}
+                        </span>
+                      ) : null}
+                    </div>
+                  </Card>
+                </RevealX>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+
       {testimonials.length > 0 ? (
         <section className="mt-10">
           <Label>What students say</Label>
           <h2 className="mt-1 text-lg font-bold text-navy">Placement stories</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            {testimonials.map((t) => (
-              <Card key={t.id} className="p-5">
-                <QuoteIcon className="size-5 text-orange/70" aria-hidden="true" />
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
-                  {t.quote}
-                </p>
-                <div className="mt-4 flex items-center gap-3 border-t border-slate-100 pt-3">
-                  {safeHttpUrl(t.avatarUrl) ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={safeHttpUrl(t.avatarUrl) ?? undefined}
-                      alt=""
-                      className="size-9 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
-                    />
-                  ) : (
-                    <span className="grid size-9 shrink-0 place-items-center rounded-full bg-slate-100 text-xs font-bold text-slate-500">
-                      {t.authorName.slice(0, 1).toUpperCase()}
+            {testimonials.map((t, i) => (
+              <RevealX key={t.id} from={i % 2 === 0 ? 'left' : 'right'} delay={(i % 2) * 0.05}>
+                <Card className="p-5">
+                  <QuoteIcon className="size-5 text-orange/70" aria-hidden="true" />
+                  <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+                    {t.quote}
+                  </p>
+                  <div className="mt-4 flex items-center gap-3 border-t border-slate-100 pt-3">
+                    {safeHttpUrl(t.avatarUrl) ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={safeHttpUrl(t.avatarUrl) ?? undefined}
+                        alt=""
+                        className="size-9 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
+                      />
+                    ) : (
+                      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-slate-100 text-xs font-bold text-slate-500">
+                        {t.authorName.slice(0, 1).toUpperCase()}
+                      </span>
+                    )}
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-bold text-navy">
+                        {t.authorName}
+                      </span>
+                      {t.authorTitle ? (
+                        <span className="block truncate text-xs text-slate-500">{t.authorTitle}</span>
+                      ) : null}
                     </span>
-                  )}
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-bold text-navy">{t.authorName}</span>
-                    {t.authorTitle ? (
-                      <span className="block truncate text-xs text-slate-500">{t.authorTitle}</span>
+                    {t.rating ? (
+                      <span className="flex items-center gap-0.5" aria-label={`${t.rating} out of 5`}>
+                        {Array.from({ length: t.rating }).map((_, idx) => (
+                          <Star key={idx} className="size-3.5 fill-amber-400 text-amber-400" />
+                        ))}
+                      </span>
                     ) : null}
-                  </span>
-                  {t.rating ? (
-                    <span className="flex items-center gap-0.5" aria-label={`${t.rating} out of 5`}>
-                      {Array.from({ length: t.rating }).map((_, i) => (
-                        <Star key={i} className="size-3.5 fill-amber-400 text-amber-400" />
-                      ))}
-                    </span>
-                  ) : null}
-                </div>
-              </Card>
+                  </div>
+                </Card>
+              </RevealX>
             ))}
           </div>
         </section>
@@ -513,21 +587,22 @@ export function JobDetail({
           <Label>More roles</Label>
           <h2 className="mt-1 text-lg font-bold text-navy">Other openings</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {others.map((o) => (
-              <Link
-                key={o.id}
-                href={`/jobs/${o.slug}`}
-                className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:bg-slate-50"
-              >
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-sky-50 text-sky-600 ring-1 ring-sky-100">
-                  <Briefcase className="size-5" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-bold text-navy">{o.title}</span>
-                  <span className="block truncate text-xs text-slate-500">{o.companyName}</span>
-                </span>
-                <ArrowRight className="size-4 shrink-0 text-slate-300" />
-              </Link>
+            {others.map((o, i) => (
+              <RevealX key={o.id} from={i % 2 === 0 ? 'left' : 'right'} delay={(i % 2) * 0.05}>
+                <Link
+                  href={`/jobs/${o.slug}`}
+                  className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:bg-slate-50"
+                >
+                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-sky-50 text-sky-600 ring-1 ring-sky-100">
+                    <Briefcase className="size-5" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-bold text-navy">{o.title}</span>
+                    <span className="block truncate text-xs text-slate-500">{o.companyName}</span>
+                  </span>
+                  <ArrowRight className="size-4 shrink-0 text-slate-300" />
+                </Link>
+              </RevealX>
             ))}
           </div>
         </section>

@@ -236,3 +236,118 @@ export interface TestimonialDto {
   sortOrder: number;
   createdAt: string;
 }
+
+// --- Placement records ---------------------------------------------------------
+// "This student got placed at this company for this package." A structural sibling
+// of a testimonial - no quote; the package is the hero. Attached to a job posting.
+
+export class CreatePlacementRecordDto {
+  @IsString()
+  @MinLength(2)
+  @MaxLength(160)
+  studentName!: string;
+
+  @IsOptional()
+  @IsString()
+  @IsUrl(URL_OPTS)
+  @MaxLength(1000)
+  avatarUrl?: string | null;
+
+  @IsString()
+  @MinLength(1)
+  @MaxLength(160)
+  company!: string;
+
+  @IsOptional()
+  @IsString()
+  @IsUrl(URL_OPTS)
+  @MaxLength(1000)
+  companyLogoUrl?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  role?: string | null;
+
+  /** Display string, rendered verbatim: "₹12 LPA", "12.5 LPA". */
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  packageLabel?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  batch?: string | null;
+
+  @IsOptional()
+  @IsBoolean()
+  isPublished?: boolean;
+
+  @IsOptional()
+  @IsInt()
+  sortOrder?: number;
+}
+
+export class UpdatePlacementRecordDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  @MaxLength(160)
+  studentName?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsUrl(URL_OPTS)
+  @MaxLength(1000)
+  avatarUrl?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(160)
+  company?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsUrl(URL_OPTS)
+  @MaxLength(1000)
+  companyLogoUrl?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  role?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  packageLabel?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  batch?: string | null;
+
+  @IsOptional()
+  @IsBoolean()
+  isPublished?: boolean;
+
+  @IsOptional()
+  @IsInt()
+  sortOrder?: number;
+}
+
+export interface PlacementRecordDto {
+  id: string;
+  studentName: string;
+  avatarUrl: string | null;
+  company: string;
+  companyLogoUrl: string | null;
+  role: string | null;
+  packageLabel: string | null;
+  batch: string | null;
+  isPublished: boolean;
+  sortOrder: number;
+  createdAt: string;
+}

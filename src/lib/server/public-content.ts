@@ -1,4 +1,4 @@
-import type { BlogPostDto, TestimonialDto } from '@/shared/dto/content.dto';
+import type { BlogPostDto, PlacementRecordDto, TestimonialDto } from '@/shared/dto/content.dto';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
 
 /**
@@ -34,6 +34,28 @@ export async function getPublicJobTestimonials(): Promise<TestimonialDto[]> {
 /** Published blog posts an admin opted in to the public job pages ("Related reading"). */
 export async function getPublicJobBlogs(): Promise<BlogPostDto[]> {
   return (await getJson<BlogPostDto[]>('/api/v1/content/job-blogs')) ?? [];
+}
+
+/**
+ * The testimonials + blogs an admin attached to ONE specific posting (composer wizard).
+ * This is the per-job replacement for the global getPublicJobTestimonials/getPublicJobBlogs:
+ * a job's detail page shows only the related content chosen for it, not a global pool.
+ */
+export async function getPublicJobRelated(slug: string): Promise<{
+  testimonials: TestimonialDto[];
+  blogs: BlogPostDto[];
+  placements: PlacementRecordDto[];
+}> {
+  const res = await getJson<{
+    testimonials?: TestimonialDto[];
+    blogs?: BlogPostDto[];
+    placements?: PlacementRecordDto[];
+  }>(`/api/v1/jobs/${encodeURIComponent(slug)}/related`);
+  return {
+    testimonials: res?.testimonials ?? [],
+    blogs: res?.blogs ?? [],
+    placements: res?.placements ?? [],
+  };
 }
 
 export async function getPublicBlogs(): Promise<BlogPostDto[]> {

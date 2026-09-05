@@ -38,6 +38,35 @@ export function Reveal({
   );
 }
 
+/** Fade + slide in horizontally from one side as it scrolls on-screen (once). */
+export function RevealX({
+  children,
+  from = 'left',
+  delay = 0,
+  distance = 28,
+  className,
+}: {
+  children: ReactNode;
+  from?: 'left' | 'right';
+  delay?: number;
+  distance?: number;
+  className?: string;
+}) {
+  const reduce = useReducedMotion();
+  const x = from === 'left' ? -distance : distance;
+  return (
+    <motion.div
+      className={className}
+      initial={reduce ? false : { opacity: 0, x }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.6, ease: EASE, delay }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 const containerV: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },

@@ -6,6 +6,7 @@
  * everyone (including logged out); applying is gated separately.
  */
 import {
+  ArrayMaxSize,
   IsArray,
   IsBoolean,
   IsDateString,
@@ -193,6 +194,25 @@ export class CreateJobPostingDto {
   @MaxLength(120, { each: true })
   hiringStages?: string[];
 
+  /* --- per-job related content (composer wizard): specific testimonials + blogs --- */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(20)
+  @IsUUID('all', { each: true })
+  testimonialIds?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(20)
+  @IsUUID('all', { each: true })
+  blogIds?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(30)
+  @IsUUID('all', { each: true })
+  placementIds?: string[];
+
   /* --- eligibility --- */
 
   @IsOptional()
@@ -341,6 +361,11 @@ export interface JobPostingDto {
   jdFileUrl: string | null;
   jdFileName: string | null;
   hiringStages: string[];
+
+  /* per-job related content: specific testimonials + blogs + placements chosen in the composer */
+  testimonialIds: string[];
+  blogIds: string[];
+  placementIds: string[];
 
   /* eligibility */
   education: string | null;
