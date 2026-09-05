@@ -60,6 +60,16 @@ export function JobDetail({ job, others }: { job: JobPostingDto; others: JobPost
   const logoSrc = safeHttpUrl(job.companyLogoUrl);
   const jd = safeHttpUrl(job.jdFileUrl);
   const pay = compensationLabel(job);
+  // A freshly-posted role can carry almost no copy; keep the main column from rendering
+  // empty so the page never looks broken.
+  const hasBody = Boolean(
+    job.description ||
+      jd ||
+      job.skills.length ||
+      job.hiringStages.length ||
+      job.hiringProcess ||
+      job.aboutCompany,
+  );
 
   const eligibility = [
     job.education ? { label: 'Education', value: job.education } : null,
@@ -177,6 +187,23 @@ export function JobDetail({ job, others }: { job: JobPostingDto; others: JobPost
               This role is no longer accepting applications. It stays here so shared links keep
               working — browse the board for live openings.
             </div>
+          ) : null}
+
+          {!hasBody ? (
+            <Reveal>
+              <Card className="p-6">
+                <Label>About the role</Label>
+                <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                  {job.companyName} hasn&rsquo;t shared a detailed description for this{' '}
+                  {JOB_KIND_LABEL[job.jobKind].toLowerCase()} yet.{' '}
+                  {closed
+                    ? 'This role is no longer accepting applications.'
+                    : applyHref
+                      ? 'Apply on their site to see the full details and requirements.'
+                      : 'Apply in one click and we’ll share your ZSkillup profile with them.'}
+                </p>
+              </Card>
+            </Reveal>
           ) : null}
 
           {job.description ? (

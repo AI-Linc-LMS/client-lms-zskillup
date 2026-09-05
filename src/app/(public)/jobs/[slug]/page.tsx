@@ -1,6 +1,7 @@
 import { getPublicJob, getPublicJobs } from '@/lib/server/public-content';
 import { JobDetail } from '@/components/jobs/JobDetail';
 import { TargetedJobFallback } from '@/components/jobs/TargetedJobFallback';
+import { JobsPublicShell } from '@/components/jobs/JobsPublicShell';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
 import { safeHttpUrl } from '@/lib/utils';
 
@@ -60,7 +61,12 @@ export default async function JobPage({ params }: { params: Promise<{ slug: stri
   //
   // A crawler therefore still gets nothing for a private role, which is the behaviour
   // we want: a college-specific req should never be indexed.
-  if (!job) return <TargetedJobFallback slug={slug} />;
+  if (!job)
+    return (
+      <JobsPublicShell>
+        <TargetedJobFallback slug={slug} />
+      </JobsPublicShell>
+    );
 
   const others = (await getPublicJobs()).filter((j) => j.id !== job.id).slice(0, 3);
 
@@ -91,7 +97,9 @@ export default async function JobPage({ params }: { params: Promise<{ slug: stri
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
-      <JobDetail job={job} others={others} />
+      <JobsPublicShell>
+        <JobDetail job={job} others={others} />
+      </JobsPublicShell>
     </>
   );
 }
