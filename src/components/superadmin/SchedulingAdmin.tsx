@@ -39,6 +39,8 @@ export function SchedulingAdmin() {
   const [scheduledAt, setScheduledAt] = useState('');
   const [durationMinutes, setDurationMinutes] = useState(60);
   const [proctored, setProctored] = useState(true);
+  const [proctorAutoSubmit, setProctorAutoSubmit] = useState(false);
+  const [proctorMaxWarnings, setProctorMaxWarnings] = useState(3);
   const [creating, setCreating] = useState(false);
   const [results, setResults] = useState<AssessmentResults | null>(null);
   const [resultsLoading, setResultsLoading] = useState(false);
@@ -112,6 +114,8 @@ export function SchedulingAdmin() {
         scheduledAt: new Date(scheduledAt).toISOString(),
         durationMinutes,
         proctored,
+        proctorAutoSubmit: proctored && proctorAutoSubmit,
+        proctorMaxWarnings,
       });
       setTitle('');
       setScheduledAt('');
@@ -274,6 +278,27 @@ export function SchedulingAdmin() {
             />
             <span className="text-sm font-medium text-slate-600">Proctored</span>
           </label>
+          {proctored ? (
+            <div className="flex items-center gap-2 pt-6 text-sm text-slate-600">
+              <input
+                type="checkbox"
+                checked={proctorAutoSubmit}
+                onChange={(e) => setProctorAutoSubmit(e.target.checked)}
+                className="size-4 accent-[#f5b400]"
+              />
+              <span className="font-medium">Auto-submit after</span>
+              <input
+                type="number"
+                min={1}
+                max={10}
+                value={proctorMaxWarnings}
+                disabled={!proctorAutoSubmit}
+                onChange={(e) => setProctorMaxWarnings(Number(e.target.value) || 3)}
+                className="w-14 rounded-lg border border-slate-200 px-2 py-1 disabled:opacity-50"
+              />
+              <span>warnings</span>
+            </div>
+          ) : null}
         </div>
         {err ? (
           <p className="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">{err}</p>

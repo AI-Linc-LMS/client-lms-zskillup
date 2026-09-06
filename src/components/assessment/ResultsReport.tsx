@@ -236,6 +236,14 @@ export function ResultsReport({
                     <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-bold ring-1 ring-inset', r.passed ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-rose-50 text-rose-700 ring-rose-200')}>
                       {r.passed ? 'Pass' : 'Fail'}
                     </span>
+                    {r.autoSubmittedByProctor ? (
+                      <span
+                        className="ml-1 inline-flex items-center gap-0.5 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 ring-1 ring-inset ring-amber-200"
+                        title={`Auto-submitted after ${r.warningCount ?? ''} proctoring warning(s)`}
+                      >
+                        Auto
+                      </span>
+                    ) : null}
                   </td>
                 </tr>
               ))}

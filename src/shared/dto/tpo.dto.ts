@@ -18,6 +18,7 @@ import {
   IsDateString,
   IsEmail,
   IsIn,
+  IsInt,
   IsNumber,
   IsOptional,
   IsString,
@@ -193,6 +194,16 @@ export class CreateTpoAssessmentDto {
   @IsOptional()
   @IsBoolean()
   proctored?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  proctorAutoSubmit?: boolean;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(10)
+  proctorMaxWarnings?: number;
 
   @IsOptional()
   @IsUUID()

@@ -20,6 +20,7 @@ import {
   Flag,
   Layers,
   Loader2,
+  ShieldAlert,
   ShieldCheck,
   Sparkles,
   Star,
@@ -55,7 +56,11 @@ import { ApiRequestError } from '@/lib/api/types';
 import { UpgradeModal } from '@/components/billing/UpgradeModal';
 import { MockCodingPanel } from '@/components/practice/MockCodingPanel';
 import { PyqTag } from '@/components/practice/PyqTag';
-import { useProctoring, type ReportedViolation } from '@/lib/proctoring/useProctoring';
+import {
+  useProctoring,
+  type ProctoringController,
+  type ReportedViolation,
+} from '@/lib/proctoring/useProctoring';
 import { ProctorOverlay } from '@/components/proctoring/ProctorOverlay';
 import { CalibrationResults } from '@/components/student/CalibrationResults';
 
@@ -76,10 +81,42 @@ import { CalibrationResults } from '@/components/student/CalibrationResults';
 
 type Phase = 'intro' | 'running' | 'report' | 'submitted';
 
+/** Human label for a proctoring warning/violation type shown in the report. */
+function prettyViolation(type: string): string {
+  const map: Record<string, string> = {
+    tab_switch: 'Switched tab',
+    window_blur: 'Left the window',
+    fullscreen_exit: 'Exited fullscreen',
+    clipboard_copy: 'Copy',
+    clipboard_cut: 'Cut',
+    clipboard_paste: 'Paste',
+    screenshot_attempt: 'Screenshot attempt',
+    print_attempt: 'Print attempt',
+    camera_disabled: 'Camera disabled',
+    voice_detected: 'Voice detected',
+    'face:NO_FACE': 'Face not detected',
+    'face:MULTIPLE_FACES': 'Multiple faces',
+    'face:FACE_NOT_VISIBLE': 'Face obscured',
+    'face:LOOKING_AWAY': 'Looking away',
+    'face:FACE_TOO_CLOSE': 'Face too close',
+    'face:FACE_TOO_FAR': 'Face too far',
+    'face:SECOND_PERSON': 'Second person',
+    'face:IDENTITY_MISMATCH': 'Possible impersonation',
+  };
+  if (map[type]) return map[type];
+  return type
+    .replace(/^face:/, '')
+    .replace(/_/g, ' ')
+    .toLowerCase()
+    .replace(/^\w/, (c) => c.toUpperCase());
+}
+
 export function MockRunner({
   mockId,
   scheduledId,
   proctored = false,
+  proctorAutoSubmit = false,
+  proctorMaxWarnings = 3,
   startImmediately = false,
 }: {
   mockId: string;
@@ -87,6 +124,9 @@ export function MockRunner({
    *  sittings opens a clean attempt for THIS sitting. Omitted for catalog/custom mocks. */
   scheduledId?: string;
   proctored?: boolean;
+  /** When true, the runner auto-submits after `proctorMaxWarnings` proctoring warnings. */
+  proctorAutoSubmit?: boolean;
+  proctorMaxWarnings?: number;
   /** Skip the intro screen and start the attempt on mount - used when a dedicated
    *  pre-start gate (AssessmentInstructionsHost) has already been shown, so "Begin"
    *  there is what starts the server timer (beginAttempt is still the only caller
@@ -98,11 +138,36 @@ export function MockRunner({
   // closes over (keeps the callback stable). Failures are swallowed - proctoring
   // is advisory and must never break the exam.
   const attemptIdRef = useRef<string | null>(null);
+  const proctorRef = useRef<ProctoringController | null>(null);
+  const finishRef = useRef<() => void>(() => {});
+  const autoSubmitReasonRef = useRef<string | null>(null);
+  // Which part the candidate is in right now (A = MCQ/aptitude, B = coding), read live.
+  const partRef = useRef<() => 'A' | 'B'>(() => 'A');
   const onProctorReport = useCallback((batch: { violations: ReportedViolation[] }) => {
     const id = attemptIdRef.current;
-    if (id) void reportProctorBatch(id, batch).catch(() => {});
+    if (!id) return;
+    void reportProctorBatch(id, batch)
+      .then((ack) => {
+        // Reconcile the candidate counter up to the server's authoritative count, and
+        // honor a server-side backstop auto-submit (server recounts distinct warnings).
+        proctorRef.current?.syncServerWarnings(ack.currentWarnings);
+        if (ack.autoSubmitted) {
+          autoSubmitReasonRef.current = 'PROCTORING_WARNINGS';
+          finishRef.current();
+        }
+      })
+      .catch(() => {});
   }, []);
-  const proctor = useProctoring(proctored, { onReport: onProctorReport });
+  const proctor = useProctoring(proctored, {
+    onReport: onProctorReport,
+    config: { autoSubmitEnabled: proctored && proctorAutoSubmit, maxWarnings: proctorMaxWarnings },
+    getCurrentPart: () => partRef.current(),
+    onAutoSubmit: (reason) => {
+      autoSubmitReasonRef.current = reason;
+      finishRef.current();
+    },
+  });
+  proctorRef.current = proctor;
   const [phase, setPhase] = useState<Phase>('intro');
   // On the post-submit 'submitted' screen: true = results are embargoed (college drive
   // not released) → show the "placement team will release" copy; false = the report just
@@ -130,6 +195,9 @@ export function MockRunner({
   const submittedRef = useRef(false);
   const answersRef = useRef(answers);
   answersRef.current = answers;
+  // Part A = MCQ/aptitude, Part B = coding — derived from the active question, read live
+  // by the proctoring engine so each warning is stamped with the part it happened in.
+  partRef.current = () => (start?.questions?.[idx]?.type === 'CODING' ? 'B' : 'A');
   // Autosaves run through a single promise chain so they reach the server in
   // click order (concurrent POSTs raced and could finish out of order). `acked`
   // remembers the last selection the server confirmed per question; submit only
@@ -219,6 +287,7 @@ export function MockRunner({
       const result = await submitMock(
         start.attemptId,
         proctored ? proctor.summary() : undefined,
+        autoSubmitReasonRef.current,
       );
       setReward(result.gamification ?? null);
     } catch (err) {
@@ -248,6 +317,9 @@ export function MockRunner({
       setSubmitting(false);
     }
   }, [start, proctored, proctor, scheduledId]);
+  // Let the proctoring callbacks (onAutoSubmit / server-ack backstop) trigger the same
+  // single submit path the countdown uses, without threading finishAttempt through refs.
+  finishRef.current = finishAttempt;
 
   // When launched from the pre-start instructions gate, begin the attempt once on
   // mount (the gate already collected the ack + system check). Guarded so it never
@@ -370,17 +442,28 @@ export function MockRunner({
 
   if (phase === 'submitted') {
     const backHref = scheduledId ? '/assessments' : '/mock-assessment';
+    const autoSubmitted = autoSubmitReasonRef.current === 'PROCTORING_WARNINGS';
     return (
       <div className="grid min-h-screen place-items-center bg-background px-6">
         <div className="max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <span className="mx-auto grid size-12 place-items-center rounded-full bg-emerald-50 text-emerald-600">
-            <CheckCircle2 className="size-6" aria-hidden="true" />
+          <span
+            className={`mx-auto grid size-12 place-items-center rounded-full ${autoSubmitted ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'}`}
+          >
+            {autoSubmitted ? (
+              <ShieldAlert className="size-6" aria-hidden="true" />
+            ) : (
+              <CheckCircle2 className="size-6" aria-hidden="true" />
+            )}
           </span>
-          <p className="mt-4 text-base font-bold text-navy">Your responses are submitted</p>
+          <p className="mt-4 text-base font-bold text-navy">
+            {autoSubmitted ? 'Assessment auto-submitted' : 'Your responses are submitted'}
+          </p>
           <p className="mt-2 text-sm leading-relaxed text-slate-600">
-            {reportEmbargoed
-              ? 'Your answers have been recorded. Results for this assessment will be available once your placement team releases them — you can safely close this window.'
-              : 'Your answers have been recorded. Your scored report couldn’t be loaded just now — you can view it any time from your assessments.'}
+            {autoSubmitted
+              ? 'Your assessment was submitted automatically because the proctoring warning limit was reached. Your answers so far have been recorded and scored.'
+              : reportEmbargoed
+                ? 'Your answers have been recorded. Results for this assessment will be available once your placement team releases them — you can safely close this window.'
+                : 'Your answers have been recorded. Your scored report couldn’t be loaded just now — you can view it any time from your assessments.'}
           </p>
           <Button variant="outline" className="mt-5" asChild>
             <Link href={backHref}>Back to {scheduledId ? 'assessments' : 'mock tests'}</Link>
@@ -1273,6 +1356,42 @@ export function MockReportView({
                 ? 'No integrity flags - this attempt was clean.'
                 : `${report.proctoring.violations} integrity event(s) logged (lenient - not penalised).`}
             </p>
+            {report.proctoring.autoSubmittedByProctoring ? (
+              <div className="mt-4 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs font-medium text-amber-800">
+                <ShieldAlert className="mt-0.5 size-4 shrink-0" />
+                <span>
+                  This assessment was <b>auto-submitted</b> after reaching the proctoring warning
+                  limit
+                  {report.proctoring.maxWarnings ? ` (${report.proctoring.maxWarnings} warnings)` : ''}.
+                </span>
+              </div>
+            ) : null}
+            {report.proctoring.warnings && report.proctoring.warnings.length > 0 ? (
+              <div className="mt-4">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+                  Warnings ({report.proctoring.warningCount ?? report.proctoring.warnings.length}
+                  {report.proctoring.maxWarnings ? ` of ${report.proctoring.maxWarnings}` : ''})
+                </p>
+                <ol className="mt-2 space-y-1.5">
+                  {report.proctoring.warnings.map((w) => (
+                    <li key={w.number} className="flex items-center gap-2 text-xs text-slate-600">
+                      <span className="grid size-5 shrink-0 place-items-center rounded-full bg-slate-100 text-[10px] font-bold text-slate-500">
+                        {w.number}
+                      </span>
+                      <span className="font-medium text-navy">{prettyViolation(w.type)}</span>
+                      {w.part ? (
+                        <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
+                          Part {w.part}
+                        </span>
+                      ) : null}
+                      <span className="ml-auto text-[10px] tabular-nums text-slate-400">
+                        {new Date(w.occurredAt).toLocaleTimeString()}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ) : null}
           </section>
         ) : null}
 

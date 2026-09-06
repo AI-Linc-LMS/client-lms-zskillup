@@ -77,6 +77,8 @@ export default function AssessmentCenterPage() {
     codingCount: '0',
     difficulty: 'MIXED',
     proctored: true,
+    proctorAutoSubmit: false,
+    proctorMaxWarnings: '3',
     cohortId: '',
   });
   const [topicSel, setTopicSel] = useState<Set<string>>(new Set());
@@ -167,6 +169,8 @@ export default function AssessmentCenterPage() {
         codingCount: Number(form.codingCount) || undefined,
         difficulty: form.difficulty,
         proctored: form.proctored,
+        proctorAutoSubmit: form.proctored && form.proctorAutoSubmit,
+        proctorMaxWarnings: Number(form.proctorMaxWarnings) || 3,
         cohortId: form.cohortId || undefined,
         topicIds: topicSel.size > 0 ? [...topicSel] : undefined,
         codingTopics: codingSel.size > 0 ? [...codingSel] : undefined,
@@ -442,6 +446,26 @@ export default function AssessmentCenterPage() {
             <input type="checkbox" checked={form.proctored} onChange={(e) => setForm((f) => ({ ...f, proctored: e.target.checked }))} />
             Proctored
           </label>
+          {form.proctored && (
+            <div className="flex items-center gap-2 pt-5 text-xs font-semibold text-slate-600">
+              <input
+                type="checkbox"
+                checked={form.proctorAutoSubmit}
+                onChange={(e) => setForm((f) => ({ ...f, proctorAutoSubmit: e.target.checked }))}
+              />
+              Auto-submit after
+              <input
+                type="number"
+                min="1"
+                max="10"
+                value={form.proctorMaxWarnings}
+                disabled={!form.proctorAutoSubmit}
+                onChange={(e) => setForm((f) => ({ ...f, proctorMaxWarnings: e.target.value }))}
+                className={`w-14 ${inputCls} disabled:opacity-50`}
+              />
+              warnings
+            </div>
+          )}
           {avail && (
             <div
               className={`rounded-xl border px-3.5 py-2.5 text-xs sm:col-span-2 lg:col-span-3 ${

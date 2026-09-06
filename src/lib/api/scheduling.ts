@@ -16,6 +16,9 @@ export interface ApiScheduledAssessment {
   durationMinutes: number;
   registrationCloseAt: string | null;
   proctored: boolean;
+  /** When true, the runner auto-submits after `proctorMaxWarnings` proctoring warnings. */
+  proctorAutoSubmit?: boolean;
+  proctorMaxWarnings?: number;
   isActive: boolean;
   /** Hard close of the availability window (admin-set), or null = open-ended.
    *  This is the REAL close — use it (not scheduledAt+duration) to decide whether
@@ -61,6 +64,8 @@ export interface CreateScheduledAssessmentPayload {
   durationMinutes?: number;
   registrationCloseAt?: string;
   proctored?: boolean;
+  proctorAutoSubmit?: boolean;
+  proctorMaxWarnings?: number;
   isActive?: boolean;
 }
 
@@ -120,6 +125,8 @@ export interface BuildAssessmentPayload {
   codingCount?: number;
   difficulty?: 'EASY' | 'MEDIUM' | 'HARD' | 'MIXED';
   proctored?: boolean;
+  proctorAutoSubmit?: boolean;
+  proctorMaxWarnings?: number;
   subscriptionLockEnabled?: boolean;
   profileLockEnabled?: boolean;
   /** Target a single individual (non-college) cohort — members-only visibility. */
@@ -218,6 +225,10 @@ export interface AssessmentResultRow {
   /** Total logged violations. */
   violations: number;
   integrityScore: number | null;
+  /** True iff the N-warning engine auto-submitted this attempt. */
+  autoSubmittedByProctor?: boolean;
+  /** Distinct proctoring warnings raised (server-counted). */
+  warningCount?: number;
   sections: AssessmentResultSection[];
 }
 
@@ -235,6 +246,8 @@ export interface AssessmentResults {
     cohort: string | null;
     scheduledAt: string;
     proctored: boolean;
+    proctorAutoSubmit?: boolean;
+    proctorMaxWarnings?: number;
     passingScore: number;
     totalQuestions: number;
     maxMarks: number;
