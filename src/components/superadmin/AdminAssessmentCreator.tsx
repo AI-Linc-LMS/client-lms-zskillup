@@ -43,6 +43,8 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
     codingCount: '0',
     difficulty: 'MIXED' as 'EASY' | 'MEDIUM' | 'HARD' | 'MIXED',
     proctored: true,
+    proctorAutoSubmit: false,
+    proctorMaxWarnings: '3',
     subscriptionLockEnabled: true,
     profileLockEnabled: false,
     cohortId: '',
@@ -125,6 +127,8 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
         codingCount: coding || undefined,
         difficulty: form.difficulty,
         proctored: form.proctored,
+        proctorAutoSubmit: form.proctored && form.proctorAutoSubmit,
+        proctorMaxWarnings: Number(form.proctorMaxWarnings) || 3,
         subscriptionLockEnabled: form.subscriptionLockEnabled,
         profileLockEnabled: form.profileLockEnabled,
         cohortId: form.cohortId || undefined,
@@ -391,6 +395,29 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
           />
           <span className="text-sm font-medium text-slate-600">Proctored</span>
         </label>
+        {form.proctored ? (
+          <div className="flex flex-wrap items-center gap-3 pt-6">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={form.proctorAutoSubmit}
+                onChange={(e) => setForm((f) => ({ ...f, proctorAutoSubmit: e.target.checked }))}
+                className="size-4 accent-[#f5b400]"
+              />
+              <span className="text-sm font-medium text-slate-600">Auto-submit after</span>
+            </label>
+            <input
+              type="number"
+              min={1}
+              max={10}
+              value={form.proctorMaxWarnings}
+              disabled={!form.proctorAutoSubmit}
+              onChange={(e) => setForm((f) => ({ ...f, proctorMaxWarnings: e.target.value }))}
+              className={`${inputCls} w-16 disabled:opacity-50`}
+            />
+            <span className="text-sm text-slate-500">warnings</span>
+          </div>
+        ) : null}
         <label className="flex items-center gap-2 pt-6">
           <input
             type="checkbox"

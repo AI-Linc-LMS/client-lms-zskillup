@@ -147,6 +147,8 @@ export function AssessmentWizard({
   const [endAt, setEndAt] = useState('');
   const [durationMinutes, setDurationMinutes] = useState(60);
   const [proctored, setProctored] = useState(true);
+  const [proctorAutoSubmit, setProctorAutoSubmit] = useState(false);
+  const [proctorMaxWarnings, setProctorMaxWarnings] = useState(3);
   const [subscriptionLock, setSubscriptionLock] = useState(true);
   const [profileLock, setProfileLock] = useState(false);
   const [passingScore, setPassingScore] = useState(60);
@@ -253,6 +255,8 @@ export function AssessmentWizard({
         if (e.endsAt) setEndAt(toLocal(e.endsAt));
         setDurationMinutes(e.durationMinutes);
         setProctored(e.proctored);
+        setProctorAutoSubmit(e.proctorAutoSubmit ?? false);
+        setProctorMaxWarnings(e.proctorMaxWarnings ?? 3);
         setSubscriptionLock(e.subscriptionLockEnabled);
         setProfileLock(e.profileLockEnabled);
         setPassingScore(e.passingScore);
@@ -421,6 +425,8 @@ export function AssessmentWizard({
           endsAt: new Date(endAt).toISOString(),
           durationMinutes,
           proctored,
+          proctorAutoSubmit: proctored && proctorAutoSubmit,
+          proctorMaxWarnings,
           subscriptionLockEnabled: subscriptionLock,
           profileLockEnabled: profileLock,
           passingScore,
@@ -444,6 +450,8 @@ export function AssessmentWizard({
           endsAt: new Date(endAt).toISOString(),
           durationMinutes,
           proctored,
+          proctorAutoSubmit: proctored && proctorAutoSubmit,
+          proctorMaxWarnings,
           subscriptionLockEnabled: subscriptionLock,
           profileLockEnabled: profileLock,
           passingScore,
@@ -625,6 +633,24 @@ export function AssessmentWizard({
                   <input type="checkbox" checked={proctored} onChange={(e) => setProctored(e.target.checked)} className="size-4 accent-orange" />
                   <span className="text-sm font-medium text-slate-600">Proctored (camera + mic)</span>
                 </label>
+                {proctored ? (
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-600">
+                    <label className="flex items-center gap-2">
+                      <input type="checkbox" checked={proctorAutoSubmit} onChange={(e) => setProctorAutoSubmit(e.target.checked)} className="size-4 accent-orange" />
+                      <span className="font-medium">Auto-submit after</span>
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={10}
+                      value={proctorMaxWarnings}
+                      disabled={!proctorAutoSubmit}
+                      onChange={(e) => setProctorMaxWarnings(Number(e.target.value) || 3)}
+                      className="w-16 rounded-lg border border-slate-200 px-2 py-1 text-sm disabled:opacity-50"
+                    />
+                    <span>warnings</span>
+                  </div>
+                ) : null}
                 <label className="flex items-center gap-2">
                   <input type="checkbox" checked={subscriptionLock} onChange={(e) => setSubscriptionLock(e.target.checked)} className="size-4 accent-orange" />
                   <span className="text-sm font-medium text-slate-600">Require subscription / upgrade (paywall)</span>
@@ -703,6 +729,9 @@ export function AssessmentWizard({
                   <span>Start: <b className="text-navy">{startAt ? new Date(startAt).toLocaleString() : '-'}</b></span>
                   <span>End: <b className="text-navy">{endAt ? new Date(endAt).toLocaleString() : '-'}</b></span>
                   <span>Proctored: <b className="text-navy">{proctored ? 'Yes' : 'No'}</b></span>
+                  {proctored && proctorAutoSubmit ? (
+                    <span>Auto-submit: <b className="text-navy">after {proctorMaxWarnings} warnings</b></span>
+                  ) : null}
                 </div>
               </div>
               <div className="flex gap-3">

@@ -43,7 +43,14 @@ export function ProctorOverlay({ controller }: { controller: ProctoringControlle
     faceCount,
     faceViolations,
     lastWarning,
+    currentWarnings,
+    maxWarnings,
+    finalWarning,
   } = controller;
+
+  // The N-warning counter is only shown when auto-submit is enabled for this drive.
+  const autoSubmitOn = maxWarnings > 0;
+  const reachedLimit = autoSubmitOn && currentWarnings >= maxWarnings;
 
   // Only enforce return-to-fullscreen once we've actually BEEN in fullscreen, so a
   // browser that blocks/doesn't support it never strands the candidate.
@@ -82,6 +89,20 @@ export function ProctorOverlay({ controller }: { controller: ProctoringControlle
             LIVE
           </span>
           <span className="hidden text-[11px] font-semibold text-slate-600 sm:inline">You&apos;re being monitored</span>
+          {autoSubmitOn ? (
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-extrabold ring-1 ${
+                reachedLimit
+                  ? 'bg-rose-50 text-rose-700 ring-rose-200'
+                  : finalWarning
+                    ? 'bg-amber-50 text-amber-700 ring-amber-200'
+                    : 'bg-slate-100 text-slate-600 ring-slate-200'
+              }`}
+              title="Proctoring warnings — the assessment auto-submits at the limit"
+            >
+              <AlertTriangle className="size-3" /> Warning {Math.min(currentWarnings, maxWarnings)} / {maxWarnings}
+            </span>
+          ) : null}
           <span aria-hidden className="h-4 w-px bg-slate-200" />
           <span className="flex items-center gap-1.5">
             <span className={cameraGranted ? 'text-emerald-500' : 'text-rose-500'}>
@@ -125,6 +146,23 @@ export function ProctorOverlay({ controller }: { controller: ProctoringControlle
             >
               <Maximize2 className="size-4" /> Return to fullscreen
             </button>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Auto-submit in progress: block the assessment the instant the warning limit is
+          reached, while the runner finalizes the attempt. */}
+      {reachedLimit ? (
+        <div className="fixed inset-0 z-[96] grid place-items-center bg-slate-900/85 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-3xl border border-slate-200 bg-white p-7 text-center shadow-lg">
+            <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-rose-100 text-rose-600">
+              <AlertTriangle className="size-7" />
+            </span>
+            <h2 className="mt-4 text-lg font-black text-navy">Assessment auto-submitted</h2>
+            <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
+              You reached the proctoring warning limit ({maxWarnings} warnings), so your assessment is
+              being submitted automatically. Your answers so far are saved.
+            </p>
           </div>
         </div>
       ) : null}

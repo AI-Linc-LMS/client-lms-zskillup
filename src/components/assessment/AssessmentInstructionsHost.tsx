@@ -120,7 +120,14 @@ export function AssessmentInstructionsHost({
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
         <div className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6">
-          <MockRunner mockId={mockId} scheduledId={scheduledId} proctored={proctored} startImmediately />
+          <MockRunner
+            mockId={mockId}
+            scheduledId={scheduledId}
+            proctored={proctored}
+            proctorAutoSubmit={sched?.proctorAutoSubmit ?? false}
+            proctorMaxWarnings={sched?.proctorMaxWarnings ?? 3}
+            startImmediately
+          />
         </div>
       </div>
     );

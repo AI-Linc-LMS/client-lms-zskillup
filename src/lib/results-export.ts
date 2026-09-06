@@ -32,6 +32,8 @@ function flatRows(data: AssessmentResults): Record<string, string | number>[] {
     'Multiple Face Detections': r.multipleFaceDetections,
     'Total Violations': r.violations,
     'Integrity Score': r.integrityScore ?? '',
+    'Proctoring Warnings': r.warningCount ?? 0,
+    'Auto-submitted (Proctoring)': r.autoSubmittedByProctor ? 'Yes' : 'No',
     'Section-wise Scores': r.sections.map((s) => `${s.name}: ${s.correct}/${s.total}`).join('; '),
     'Pass/Fail': r.passed ? 'Pass' : 'Fail',
   }));
@@ -115,7 +117,11 @@ export function exportResultsPdf(data: AssessmentResults): void {
     { h: 'Acc%', w: 34, get: (r) => String(r.accuracy) },
     { h: 'Violations', w: 54, get: (r) => String(r.violations) },
     { h: 'Integrity', w: 48, get: (r) => (r.integrityScore != null ? String(r.integrityScore) : '-') },
-    { h: 'Result', w: 44, get: (r) => (r.passed ? 'Pass' : 'Fail') },
+    {
+      h: 'Result',
+      w: 56,
+      get: (r) => (r.passed ? 'Pass' : 'Fail') + (r.autoSubmittedByProctor ? ' (auto)' : ''),
+    },
   ];
 
   const drawHeader = () => {

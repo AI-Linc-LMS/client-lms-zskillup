@@ -120,6 +120,8 @@ export interface ApiMockResult {
   avgSecPerQuestion: number;
   /** XP/streak/level deltas from this submission (present on the submit response). */
   gamification?: GamificationSummary | null;
+  /** True when the attempt was auto-submitted by the proctoring warning engine. */
+  autoSubmittedByProctoring?: boolean;
 }
 
 export interface ApiMockAttemptHistory {
@@ -164,6 +166,13 @@ export interface ApiMockTopicBreakdown {
   total: number;
 }
 
+export interface ApiMockProctorWarning {
+  number: number;
+  type: string;
+  occurredAt: string;
+  part?: string | null;
+}
+
 export interface ApiMockProctoring {
   proctored: boolean;
   tabSwitches: number;
@@ -172,6 +181,11 @@ export interface ApiMockProctoring {
   snapshotCount: number;
   cameraGranted: boolean;
   micGranted: boolean;
+  /** N-warning engine (v3). */
+  autoSubmittedByProctoring?: boolean;
+  warningCount?: number;
+  maxWarnings?: number;
+  warnings?: ApiMockProctorWarning[];
 }
 
 export interface ApiMockReport extends ApiMockResult {
@@ -269,14 +283,26 @@ export interface ProctorViolationReport {
   occurredAt?: string;
   /** Base64 JPEG data URL - high-severity events only. */
   snapshot?: string;
+  /** N-th distinct warning (absent = not a counted warning) + the part it happened in. */
+  warningNumber?: number;
+  part?: string;
+}
+
+/** Server ack for the live heartbeat — drives the candidate's warning counter + backstop. */
+export interface ProctorAck {
+  ok: boolean;
+  currentWarnings: number;
+  maxWarnings: number;
+  finalWarning: boolean;
+  autoSubmitted: boolean;
 }
 
 /** Live proctoring heartbeat + violation batch (fired ~10s while an attempt is open). */
 export async function reportProctorBatch(
   attemptId: string,
   batch: { violations: ProctorViolationReport[] },
-): Promise<{ ok: boolean }> {
-  const res = await apiClient.post<{ ok: boolean }>(
+): Promise<ProctorAck> {
+  const res = await apiClient.post<ProctorAck>(
     `/api/v1/mocks/attempts/${attemptId}/proctor`,
     batch,
   );
@@ -298,11 +324,12 @@ export async function submitMockCode(
 export async function submitMock(
   attemptId: string,
   proctoring?: import('@/lib/proctoring/useProctoring').ProctoringSummary,
+  autoSubmitReason?: string | null,
 ): Promise<ApiMockResult> {
-  const res = await apiClient.post<ApiMockResult>(
-    `/api/v1/mocks/attempts/${attemptId}/submit`,
-    proctoring ? { proctoring } : {},
-  );
+  const res = await apiClient.post<ApiMockResult>(`/api/v1/mocks/attempts/${attemptId}/submit`, {
+    ...(proctoring ? { proctoring } : {}),
+    ...(autoSubmitReason ? { autoSubmitReason } : {}),
+  });
   return res.data;
 }
 

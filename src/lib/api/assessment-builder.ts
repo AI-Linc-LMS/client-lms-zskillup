@@ -39,6 +39,8 @@ export interface CreateAssessmentPayload {
   endsAt?: string;
   durationMinutes?: number;
   proctored?: boolean;
+  proctorAutoSubmit?: boolean;
+  proctorMaxWarnings?: number;
   passingScore?: number;
   subscriptionLockEnabled?: boolean;
   profileLockEnabled?: boolean;
@@ -122,6 +124,8 @@ export interface EditableAssessment {
   endsAt: string | null;
   durationMinutes: number;
   proctored: boolean;
+  proctorAutoSubmit?: boolean;
+  proctorMaxWarnings?: number;
   passingScore: number;
   subscriptionLockEnabled: boolean;
   profileLockEnabled: boolean;
@@ -147,6 +151,8 @@ export interface EditAssessmentPayload {
   endsAt?: string;
   durationMinutes?: number;
   proctored?: boolean;
+  proctorAutoSubmit?: boolean;
+  proctorMaxWarnings?: number;
   passingScore?: number;
   subscriptionLockEnabled?: boolean;
   profileLockEnabled?: boolean;
