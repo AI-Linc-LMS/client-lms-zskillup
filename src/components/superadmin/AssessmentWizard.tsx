@@ -261,7 +261,10 @@ export function AssessmentWizard({
         setProfileLock(e.profileLockEnabled);
         setPassingScore(e.passingScore);
       })
-      .catch(() => {});
+      .catch((e: unknown) => {
+        // Never leave a blank edit form silently — surface why the prefill failed.
+        setErr(e instanceof Error ? `Could not load this assessment: ${e.message}` : 'Could not load this assessment.');
+      });
   }, [editId]);
 
   const totals = useMemo(() => {
