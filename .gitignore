@@ -33,3 +33,8 @@ CLAUDE.md
 # gstack browser tooling artifacts (local only)
 .gstack/
 PORTFOLIO_ZSKILLUP.md
+
+# Local Netlify folder
+.netlify
+# Netlify edge-functions lockfile (generated locally by the Netlify CLI)
+deno.lock
