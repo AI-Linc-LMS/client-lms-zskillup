@@ -68,6 +68,7 @@ export function HomeBlogSection({ posts }: { posts: BlogPostDto[] }) {
                         day: 'numeric',
                         month: 'short',
                         year: 'numeric',
+                        timeZone: 'Asia/Kolkata',
                       })
                     : 'New'}
                   {p.author ? <span>· {p.author}</span> : null}
