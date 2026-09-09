@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronDown, Loader2, MessageSquare, Mic, Search, Smile, Users, X } from 'lucide-react';
+import { ChevronDown, Info, Loader2, MessageSquare, Mic, Search, Smile, Users, X } from 'lucide-react';
 import {
   Area,
   AreaChart,
@@ -42,13 +42,50 @@ function ScoreTile({
   value,
   source,
   suffix = '%',
+  info,
 }: {
   icon: typeof Mic;
   label: string;
   value: number | null;
   source: string;
   suffix?: string;
+  /** When present, an ⓘ next to the label reveals these calculation parameters. */
+  info?: string[];
 }) {
+  const [showInfo, setShowInfo] = useState(false);
+  const labelRow = (
+    <p className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+      {label}
+      {info ? (
+        <span className="relative inline-flex">
+          <button
+            type="button"
+            onClick={() => setShowInfo((v) => !v)}
+            onBlur={() => setShowInfo(false)}
+            aria-label={`How ${label} is calculated`}
+            className="grid size-4 place-items-center rounded-full text-slate-400 transition-colors hover:text-navy"
+          >
+            <Info className="size-3.5" />
+          </button>
+          {showInfo ? (
+            <span className="absolute left-0 top-5 z-20 w-60 rounded-lg border border-slate-200 bg-white p-3 text-left shadow-md">
+              <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                Calculated from
+              </span>
+              <ul className="space-y-1 text-[11px] font-medium normal-case tracking-normal text-slate-600">
+                {info.map((p) => (
+                  <li key={p} className="flex gap-1.5">
+                    <span className="text-[#f5b400]">•</span>
+                    {p}
+                  </li>
+                ))}
+              </ul>
+            </span>
+          ) : null}
+        </span>
+      ) : null}
+    </p>
+  );
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4">
       <span className="grid size-9 place-items-center rounded-xl bg-[#fff5ea] text-[#f5b400]">
@@ -60,12 +97,12 @@ function ScoreTile({
             {value}
             {suffix}
           </p>
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
+          {labelRow}
         </>
       ) : (
         <>
           <p className="mt-3 text-sm font-bold text-slate-500">Needs data</p>
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
+          {labelRow}
           <p className="mt-1 text-[10px] text-slate-500">Populates as interviews are graded</p>
         </>
       )}
@@ -554,7 +591,19 @@ export default function InterviewAnalyticsPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <ScoreTile icon={MessageSquare} label="Interview Readiness" value={data.interviewReadiness} source="Mock-interview overall %" />
+        <ScoreTile
+          icon={MessageSquare}
+          label="Interview Readiness"
+          value={data.interviewReadiness}
+          source="Mock-interview overall %"
+          info={[
+            'Subject / Technical Knowledge',
+            'Communication Skills',
+            'Confidence',
+            'Answer Quality / Relevance',
+            'Overall Interview Performance',
+          ]}
+        />
         <ScoreTile icon={Mic} label="Communication" value={data.communicationScore} source="AI transcript scoring" />
         <ScoreTile icon={Smile} label="Confidence" value={data.confidenceScore} source="AI transcript scoring" />
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -604,12 +653,14 @@ export default function InterviewAnalyticsPage() {
               {data.commonWeaknesses.map((w) => {
                 const max = data.commonWeaknesses[0].count || 1;
                 return (
-                  <div key={w.area} className="flex items-center gap-3">
-                    <span className="w-52 shrink-0 truncate text-sm text-navy" title={w.area}>{w.area}</span>
-                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
+                  <div key={w.area} className="flex items-start gap-3">
+                    <span className="w-56 shrink-0 break-words text-sm leading-snug text-navy" title={w.area}>
+                      {w.area}
+                    </span>
+                    <div className="mt-1.5 h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
                       <div className="h-full rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400]" style={{ width: `${(w.count / max) * 100}%` }} />
                     </div>
-                    <span className="w-8 text-right text-xs font-semibold tabular-nums text-slate-600">{w.count}</span>
+                    <span className="mt-0.5 w-8 shrink-0 text-right text-xs font-semibold tabular-nums text-slate-600">{w.count}</span>
                   </div>
                 );
               })}
