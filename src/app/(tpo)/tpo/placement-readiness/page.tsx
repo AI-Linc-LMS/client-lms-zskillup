@@ -26,15 +26,14 @@ export default function PlacementReadinessPage() {
   const [trend, setTrend] = useState<TpoReadinessTrend | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Readiness-trend date range (#4). Empty = backend default (last 5 days, dynamic).
+  const [range, setRange] = useState<{ from: string; to: string }>({ from: '', to: '' });
 
   const load = useCallback(() => {
     setLoading(true);
     setError(null);
-    Promise.all([getTpoAnalytics(cohortId || undefined), getTpoReadinessTrend(cohortId || undefined)])
-      .then(([d, t]) => {
-        setData(d);
-        setTrend(t);
-      })
+    getTpoAnalytics(cohortId || undefined)
+      .then(setData)
       .catch((e) => setError(e instanceof Error ? e.message : 'Failed to load placement readiness'))
       .finally(() => setLoading(false));
   }, [cohortId]);
@@ -42,6 +41,21 @@ export default function PlacementReadinessPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  // The trend refetches on its own when the cohort or the date range changes, so
+  // adjusting dates never reloads the whole page.
+  useEffect(() => {
+    let alive = true;
+    getTpoReadinessTrend(cohortId || undefined, {
+      from: range.from || undefined,
+      to: range.to || undefined,
+    })
+      .then((t) => alive && setTrend(t))
+      .catch(() => alive && setTrend({ points: [], collecting: true }));
+    return () => {
+      alive = false;
+    };
+  }, [cohortId, range.from, range.to]);
 
   const donutSegments = useMemo(() => {
     const students = data?.students ?? [];
@@ -94,7 +108,44 @@ export default function PlacementReadinessPage() {
           </div>
         </BentoCard>
 
-        <BentoCard title="Readiness Trend" subtitle="Average readiness over time (weekly snapshots)." source="Weekly readiness snapshots">
+        <BentoCard
+          title="Readiness Trend"
+          subtitle="Average readiness over the selected range — defaults to the last 5 days."
+          source="Daily readiness snapshots"
+        >
+          <div className="mb-3 flex flex-wrap items-end gap-2">
+            <label className="flex flex-col gap-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+              From
+              <input
+                type="date"
+                value={range.from}
+                max={range.to || undefined}
+                onChange={(e) => setRange((r) => ({ ...r, from: e.target.value }))}
+                className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-navy focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+              />
+            </label>
+            <label className="flex flex-col gap-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+              To
+              <input
+                type="date"
+                value={range.to}
+                min={range.from || undefined}
+                onChange={(e) => setRange((r) => ({ ...r, to: e.target.value }))}
+                className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-navy focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+              />
+            </label>
+            {range.from || range.to ? (
+              <button
+                type="button"
+                onClick={() => setRange({ from: '', to: '' })}
+                className="h-9 rounded-lg px-2.5 text-xs font-semibold text-slate-500 transition-colors hover:bg-slate-100 hover:text-navy"
+              >
+                Reset to last 5 days
+              </button>
+            ) : (
+              <span className="pb-2 text-xs text-slate-400">Showing the last 5 days</span>
+            )}
+          </div>
           {trend && trend.points.length >= 2 ? (
             <AreaChart
               id="readiness-trend"
@@ -103,12 +154,12 @@ export default function PlacementReadinessPage() {
               data={trend.points.map((p) => ({ date: p.date, count: p.avgReadiness }))}
             />
           ) : (
-            <div className="flex h-full min-h-[180px] flex-col items-center justify-center gap-2 text-center">
+            <div className="flex min-h-[160px] flex-col items-center justify-center gap-2 text-center">
               <TrendingUp className="size-8 text-slate-400" />
-              <p className="text-sm font-semibold text-navy">Collecting history</p>
+              <p className="text-sm font-semibold text-navy">Not enough data in this range</p>
               <p className="max-w-xs text-xs text-slate-600">
-                A snapshot of campus readiness is recorded each week. The trend line appears once a
-                couple of weeks of data accrue.
+                A readiness snapshot is recorded once a day. Widen the date range (or check back
+                after a few days) for a trend line.
               </p>
             </div>
           )}
