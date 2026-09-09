@@ -74,13 +74,21 @@ export function deadlineLabel(
   const days = Math.ceil((new Date(iso).getTime() - Date.now()) / 86_400_000);
   // The deadline is an exact instant, so when it is near, the time matters as much as
   // the day - a student needs to know it closes at 5pm, not just "today".
-  const at = new Date(iso).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' });
+  // Pin to IST: without an explicit timeZone this formats in the runtime's zone, so the
+  // client card rendered 11:00 am (browser IST) while the SSR detail page rendered the
+  // same deadline as 5:30 am (Node UTC). The deadline is an IST business time everywhere.
+  const IST = 'Asia/Kolkata';
+  const at = new Date(iso).toLocaleTimeString('en-IN', {
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: IST,
+  });
   if (days < 0) return { text: 'Closed', tone: 'closed' };
   if (days === 0) return { text: `Closes today, ${at}`, tone: 'urgent' };
   if (days === 1) return { text: `Closes tomorrow, ${at}`, tone: 'urgent' };
   if (days <= 7) return { text: `${days} days left`, tone: 'soon' };
   return {
-    text: `Apply by ${new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`,
+    text: `Apply by ${new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: IST })}`,
     tone: 'normal',
   };
 }
