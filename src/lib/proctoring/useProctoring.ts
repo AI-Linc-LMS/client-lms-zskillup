@@ -91,6 +91,9 @@ export interface ProctoringController {
   syncServerWarnings: (n: number) => void;
   start: () => Promise<void>;
   stop: () => void;
+  /** Flush any pending violation batch to the server and await it — call before
+   *  finalizing an attempt so late warnings are logged while it is still open. */
+  flush: () => Promise<void>;
   summary: () => ProctoringSummary;
 }
 
@@ -177,6 +180,10 @@ export function useProctoring(
     if (drained.length) return onReportRef.current?.({ violations: drained });
     return undefined;
   }, []);
+
+  /** Awaitable flush — used before finalizing so pending violations land while the
+   *  attempt is still open (and are not dropped by the not-IN_PROGRESS guard). */
+  const flush = useCallback(() => Promise.resolve(flushNow()).then(() => undefined), [flushNow]);
 
   const [active, setActive] = useState(false);
   const [cameraGranted, setCameraGranted] = useState(false);
@@ -714,13 +721,14 @@ export function useProctoring(
     syncServerWarnings,
     start,
     stop,
+    flush,
     summary,
     }),
     [
       active, cameraGranted, micGranted, tabSwitches, fullscreenExits, inFullscreen,
       enterFullscreen, windowBlurs, clipboardEvents, snapshotCount, faceStatus,
       faceCount, faceViolations, latestFaceViolation, lastWarning,
-      currentWarnings, maxWarnings, finalWarning, syncServerWarnings, start, stop, summary,
+      currentWarnings, maxWarnings, finalWarning, syncServerWarnings, start, stop, flush, summary,
     ],
   );
 }

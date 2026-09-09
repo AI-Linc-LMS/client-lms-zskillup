@@ -287,6 +287,10 @@ export function MockRunner({
           answerMock(start.attemptId, { questionId, selectedOptionIds }),
         ),
       );
+      // Flush pending proctoring violations BEFORE we finalize, so a warning raised in
+      // the last moment is logged while the attempt is still open rather than arriving
+      // after submit. Never block submission on it.
+      if (proctored) await proctor.flush().catch(() => {});
       const result = await submitMock(
         start.attemptId,
         proctored ? proctor.summary() : undefined,

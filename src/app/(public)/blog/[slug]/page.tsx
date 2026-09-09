@@ -22,7 +22,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 function fmtDate(iso: string | null) {
   if (!iso) return null;
-  return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  return new Date(iso).toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'Asia/Kolkata',
+  });
 }
 
 function RelatedCard({ post }: { post: BlogPostDto }) {

@@ -22,7 +22,12 @@ const HERO_TOPICS = ['DSA', 'aptitude', 'TCS NQT', 'interviews', 'resumes', 'com
 
 function fmtDate(iso: string | null) {
   if (!iso) return null;
-  return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  return new Date(iso).toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'Asia/Kolkata',
+  });
 }
 
 function Meta({ post }: { post: BlogPostDto }) {
