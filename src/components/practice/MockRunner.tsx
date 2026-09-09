@@ -146,7 +146,10 @@ export function MockRunner({
   const onProctorReport = useCallback((batch: { violations: ReportedViolation[] }) => {
     const id = attemptIdRef.current;
     if (!id) return;
-    void reportProctorBatch(id, batch)
+    // Return the POST promise so useProctoring can await the FINAL warning's flush
+    // before it auto-submits (otherwise the submit races this write and the Nth
+    // warning is lost).
+    return reportProctorBatch(id, batch)
       .then((ack) => {
         // Reconcile the candidate counter up to the server's authoritative count, and
         // honor a server-side backstop auto-submit (server recounts distinct warnings).
