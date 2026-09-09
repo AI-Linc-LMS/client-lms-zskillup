@@ -51,8 +51,10 @@ export interface ReportedViolation {
 
 export interface UseProctoringOptions {
   /** Called every REPORT_EVERY_MS with violations since the last flush (heartbeat
-   *  even when empty). The consumer POSTs these to the server-stamped log. */
-  onReport?: (batch: { violations: ReportedViolation[] }) => void;
+   *  even when empty). The consumer POSTs these to the server-stamped log. Returns
+   *  the POST promise so the final auto-submit warning can be awaited before the
+   *  attempt is finalized (see raiseWarning). */
+  onReport?: (batch: { violations: ReportedViolation[] }) => void | Promise<unknown>;
   /** N-warning auto-submit config. When autoSubmitEnabled and the count reaches
    *  maxWarnings, onAutoSubmit fires. Off (default) = warn-only. */
   config?: { autoSubmitEnabled: boolean; maxWarnings: number };
@@ -172,7 +174,8 @@ export function useProctoring(
    *  the server backstop sees it without waiting for the 10s heartbeat). */
   const flushNow = useCallback(() => {
     const drained = pendingReportRef.current.splice(0, MAX_BATCH);
-    if (drained.length) onReportRef.current?.({ violations: drained });
+    if (drained.length) return onReportRef.current?.({ violations: drained });
+    return undefined;
   }, []);
 
   const [active, setActive] = useState(false);
@@ -224,8 +227,15 @@ export function useProctoring(
       if (max > 0 && num >= max) {
         autoSubmittedRef.current = true;
         warn('Too many proctoring warnings — your assessment is being submitted automatically.');
-        flushNow();
-        onAutoSubmitRef.current?.('PROCTORING_WARNINGS');
+        // Persist the FINAL warning BEFORE onAutoSubmit finalizes + navigates. If we
+        // fire the submit first, it races this fire-and-forget POST: when the submit
+        // wins, the attempt is finalized and warning N never lands, so the report
+        // under-counts warnings by one and the server backstop can't see it. Awaiting
+        // the flush guarantees warning N is saved (and lets the server backstop fire);
+        // onAutoSubmit still runs on failure so a dropped POST never blocks submission.
+        void Promise.resolve(flushNow()).finally(() =>
+          onAutoSubmitRef.current?.('PROCTORING_WARNINGS'),
+        );
         return;
       }
       if (max > 0 && num === max - 1) {
