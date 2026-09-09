@@ -99,8 +99,15 @@ export async function getTpoBilling(): Promise<TpoBillingDto> {
 }
 
 /** Placement-readiness trend over time (weekly snapshots). */
-export async function getTpoReadinessTrend(cohortId?: string): Promise<TpoReadinessTrend> {
-  const qs = cohortId ? `?cohortId=${encodeURIComponent(cohortId)}` : '';
+export async function getTpoReadinessTrend(
+  cohortId?: string,
+  range?: { from?: string; to?: string },
+): Promise<TpoReadinessTrend> {
+  const params = new URLSearchParams();
+  if (cohortId) params.set('cohortId', cohortId);
+  if (range?.from) params.set('from', range.from);
+  if (range?.to) params.set('to', range.to);
+  const qs = params.toString() ? `?${params.toString()}` : '';
   const res = await apiClient.get<TpoReadinessTrend>(`/api/v1/tpo/readiness/trend${qs}`);
   return res.data;
 }
