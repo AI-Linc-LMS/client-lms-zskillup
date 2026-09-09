@@ -197,6 +197,40 @@ export interface TpoCodingAnalytics {
   companies: TpoCodingCompany[];
 }
 
+/** One student's coding roll-up for the per-student breakdown (#5). easy/medium/hard
+ *  are DISTINCT problems SOLVED at each difficulty; codingReadiness is a
+ *  difficulty-weighted solve rate, distinct from raw accuracy (solved / attempted). */
+export interface TpoCodingStudentRow {
+  id: string;
+  name: string | null;
+  branch: string | null;
+  easy: number;
+  medium: number;
+  hard: number;
+  solved: number;
+  attempted: number;
+  accuracy: number;
+  codingReadiness: number;
+  lastActive: string | null;
+}
+export interface TpoCodingStudentCompany {
+  slug: string;
+  name: string;
+  attempted: number;
+  solved: number;
+  accuracy: number;
+  readiness: number;
+}
+export interface TpoCodingStudentDetail {
+  id: string;
+  name: string | null;
+  topicsPracticed: string[];
+  codingReadiness: number;
+  accuracy: number;
+  difficulty: { easy: TpoCodingBucket; medium: TpoCodingBucket; hard: TpoCodingBucket };
+  companies: TpoCodingStudentCompany[];
+}
+
 // ── Placement Readiness trend (lazy weekly snapshots) ───────────────────────────
 
 export interface TpoReadinessTrendPoint {

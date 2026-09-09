@@ -19,6 +19,8 @@ import type {
   TpoPlacement,
   TpoPlacementSummary,
   TpoReadinessTrend,
+  TpoCodingStudentDetail,
+  TpoCodingStudentRow,
   TpoRecommendations,
   TpoStudentDetail,
   TpoStudentInterviews,
@@ -69,6 +71,21 @@ export async function getTpoCompanyHeatmap(cohortId?: string): Promise<TpoCompan
 export async function getTpoCodingAnalytics(cohortId?: string): Promise<TpoCodingAnalytics> {
   const qs = cohortId ? `?cohortId=${encodeURIComponent(cohortId)}` : '';
   const res = await apiClient.get<TpoCodingAnalytics>(`/api/v1/tpo/coding-analytics${qs}`);
+  return res.data;
+}
+
+/** Per-student coding breakdown (easy/medium/hard, accuracy, coding readiness). */
+export async function getTpoCodingStudents(cohortId?: string): Promise<TpoCodingStudentRow[]> {
+  const qs = cohortId ? `?cohortId=${encodeURIComponent(cohortId)}` : '';
+  const res = await apiClient.get<TpoCodingStudentRow[]>(`/api/v1/tpo/coding-analytics/students${qs}`);
+  return res.data;
+}
+
+/** One student's coding drill-down: topics, difficulty split, company-wise. */
+export async function getTpoCodingStudentDetail(studentId: string): Promise<TpoCodingStudentDetail> {
+  const res = await apiClient.get<TpoCodingStudentDetail>(
+    `/api/v1/tpo/coding-analytics/students/${studentId}`,
+  );
   return res.data;
 }
 
