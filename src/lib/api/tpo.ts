@@ -21,6 +21,7 @@ import type {
   TpoReadinessTrend,
   TpoCodingStudentDetail,
   TpoCodingStudentRow,
+  TpoCompanyReadinessReport,
   TpoRecommendations,
   TpoStudentDetail,
   TpoStudentInterviews,
@@ -85,6 +86,19 @@ export async function getTpoCodingStudents(cohortId?: string): Promise<TpoCoding
 export async function getTpoCodingStudentDetail(studentId: string): Promise<TpoCodingStudentDetail> {
   const res = await apiClient.get<TpoCodingStudentDetail>(
     `/api/v1/tpo/coding-analytics/students/${studentId}`,
+  );
+  return res.data;
+}
+
+/** Student-level readiness for one selected company (#7). */
+export async function getTpoCompanyReadinessStudents(
+  company: string,
+  cohortId?: string,
+): Promise<TpoCompanyReadinessReport> {
+  const params = new URLSearchParams({ company });
+  if (cohortId) params.set('cohortId', cohortId);
+  const res = await apiClient.get<TpoCompanyReadinessReport>(
+    `/api/v1/tpo/company-readiness/students?${params.toString()}`,
   );
   return res.data;
 }

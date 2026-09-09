@@ -233,6 +233,25 @@ export interface TpoCodingStudentDetail {
   companies: TpoCodingStudentCompany[];
 }
 
+/** One student's readiness for a SELECTED company (#7). */
+export interface TpoCompanyReadinessStudent {
+  id: string;
+  name: string | null;
+  email: string;
+  readiness: number;
+  accuracy: number;
+  attempted: number;
+  easy: number;
+  medium: number;
+  hard: number;
+  topicsPracticed: string[];
+  lastActiveAt: string | null;
+}
+export interface TpoCompanyReadinessReport {
+  company: { slug: string; name: string };
+  students: TpoCompanyReadinessStudent[];
+}
+
 // ── Placement Readiness trend (lazy weekly snapshots) ───────────────────────────
 
 export interface TpoReadinessTrendPoint {
