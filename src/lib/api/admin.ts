@@ -148,7 +148,10 @@ import type {
   LessonKind,
 } from '@/shared';
 import type {
+  AdminBulkUploadRequest,
+  AdminBulkUploadResult,
   AdminCreateQuestionDto,
+  AdminTopicNode,
   AdminUpdateQuestionDto,
 } from '@/shared/dto/admin-questions.dto';
 
@@ -547,6 +550,24 @@ export interface AdminImportResult {
 
 export async function importAdminQuestions(csv: string): Promise<AdminImportResult> {
   const res = await apiClient.post<AdminImportResult>('/api/v1/admin/questions/import', { csv });
+  return res.data;
+}
+
+/** General bulk upload — dryRun:true validates (per-row errors, no writes),
+ *  dryRun:false imports + creates any new Section/Topic/Subtopic. */
+export async function bulkUploadQuestions(
+  payload: AdminBulkUploadRequest,
+): Promise<AdminBulkUploadResult> {
+  const res = await apiClient.post<AdminBulkUploadResult>(
+    '/api/v1/admin/questions/bulk-upload',
+    payload,
+  );
+  return res.data;
+}
+
+/** Section → Topic → Subtopic taxonomy tree for the bulk-upload mapping pickers. */
+export async function getQuestionTopicsTree(): Promise<AdminTopicNode[]> {
+  const res = await apiClient.get<AdminTopicNode[]>('/api/v1/admin/questions/topics/tree');
   return res.data;
 }
 

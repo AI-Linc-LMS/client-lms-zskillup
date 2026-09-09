@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Download,
   ExternalLink,
+  FileUp,
   History,
   Loader2,
   Plus,
@@ -16,6 +17,7 @@ import {
   X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { BulkUploadWizard } from '@/components/superadmin/BulkUploadWizard';
 import { FormField } from '@/components/ui/form-field';
 import { ApiRequestError, describeApiError } from '@/lib/api/types';
 import { listTopics, listCompanies } from '@/lib/api/catalog';
@@ -105,6 +107,7 @@ export function QuestionsAdmin() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
   const [showForm, setShowForm] = useState(false);
+  const [showBulk, setShowBulk] = useState(false);
   const [topicNames, setTopicNames] = useState<Record<string, string>>({});
   const [companyNames, setCompanyNames] = useState<Record<string, string>>({});
   const [companies, setCompanies] = useState<Array<{ slug: string; name: string }>>([]);
@@ -369,7 +372,14 @@ export function QuestionsAdmin() {
               <option value="false">Unverified</option>
             </FilterSelect>
 
-            <Button onClick={() => setShowForm((v) => !v)} size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => { setShowBulk((v) => !v); setShowForm(false); }}
+            >
+              <FileUp className="size-4" /> {showBulk ? 'Close' : 'Bulk upload'}
+            </Button>
+            <Button onClick={() => { setShowForm((v) => !v); setShowBulk(false); }} size="sm">
               <Plus className="size-4" /> {showForm ? 'Close' : 'Add'}
             </Button>
           </div>
@@ -408,6 +418,16 @@ export function QuestionsAdmin() {
         <AddQuestionForm
           onCreated={() => {
             setShowForm(false);
+            void loadPage();
+            void loadCounts();
+          }}
+        />
+      ) : null}
+
+      {showBulk ? (
+        <BulkUploadWizard
+          onDone={() => {
+            setShowBulk(false);
             void loadPage();
             void loadCounts();
           }}

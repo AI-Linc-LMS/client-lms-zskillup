@@ -199,3 +199,63 @@ export class AdminImportQuestionsDto {
   @MaxLength(500_000)
   csv!: string;
 }
+
+/**
+ * General bulk upload (POST /admin/questions/bulk-upload) — mirrors the backend
+ * contract (ADR-011). The wizard parses a CSV/XLSX client-side into rows, POSTs
+ * with dryRun:true to VALIDATE (per-row field errors, no writes), lets the admin
+ * fix them, then POSTs dryRun:false to import + create any new Section/Topic/Subtopic.
+ */
+export interface AdminBulkUploadItem {
+  code?: string;
+  type?: string;
+  difficulty?: string;
+  stem?: string;
+  imageUrl?: string;
+  answer?: string;
+  hint?: string;
+  explanation?: string;
+  solution?: string;
+  subtopicSlug?: string;
+  options?: Array<{ text?: string; isCorrect?: boolean }>;
+}
+export interface AdminBulkEnsureTopic {
+  slug: string;
+  name: string;
+  parentSlug?: string;
+}
+export interface AdminBulkUploadRequest {
+  dryRun?: boolean;
+  companySlug?: string;
+  ensureTopics?: AdminBulkEnsureTopic[];
+  items: AdminBulkUploadItem[];
+}
+export interface AdminBulkUploadFieldError {
+  field: string;
+  message: string;
+}
+export interface AdminBulkUploadRowResult {
+  index: number;
+  code: string | null;
+  status: 'valid' | 'invalid' | 'created' | 'skipped';
+  errors: AdminBulkUploadFieldError[];
+}
+export interface AdminBulkUploadResult {
+  dryRun: boolean;
+  summary: {
+    total: number;
+    valid: number;
+    invalid: number;
+    created: number;
+    skipped: number;
+    topicsCreated: number;
+  };
+  rows: AdminBulkUploadRowResult[];
+}
+/** A node in the Section → Topic → Subtopic taxonomy tree (GET /admin/questions/topics/tree). */
+export interface AdminTopicNode {
+  id: string;
+  slug: string;
+  name: string;
+  children: AdminTopicNode[];
+}
