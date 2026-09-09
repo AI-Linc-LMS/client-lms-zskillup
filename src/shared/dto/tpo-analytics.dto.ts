@@ -289,6 +289,38 @@ export interface TpoInterviewAnalytics {
   trend: TpoInterviewTrendPoint[];
 }
 
+/** One question->answer turn of a graded interview transcript, for the TPO drill-down. */
+export interface TpoStudentInterviewTurn {
+  question: string;
+  answer: string;
+  answeredAt: string | null;
+  /** Per-question score (0-100) if the evaluation graded it. */
+  score: number | null;
+}
+/** One of a student's mock interviews with its transcript + scores. */
+export interface TpoStudentInterview {
+  id: string;
+  topic: string;
+  interviewType: string;
+  difficulty: string;
+  status: string;
+  createdAt: string;
+  submittedAt: string | null;
+  overallPercentage: number | null;
+  communicationScore: number | null;
+  confidenceScore: number | null;
+  strengths: string[];
+  areasForImprovement: string[];
+  overallFeedback: string | null;
+  transcript: TpoStudentInterviewTurn[];
+}
+/** A student's full interview history (latest->oldest) for the TPO drill-down. */
+export interface TpoStudentInterviews {
+  studentId: string;
+  studentName: string | null;
+  interviews: TpoStudentInterview[];
+}
+
 // ── Assessment Center ───────────────────────────────────────────────────────────
 
 export type TpoAssessmentStatus = 'DRAFT' | 'SCHEDULED' | 'LIVE' | 'COMPLETED';
