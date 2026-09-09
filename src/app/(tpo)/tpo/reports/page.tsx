@@ -5,9 +5,17 @@ import { Building2, Download, FileText, GraduationCap, Loader2, Printer, School 
 import {
   getTpoAnalytics,
   getTpoCodingAnalytics,
+  getTpoCodingStudents,
+  getTpoInterviewAnalytics,
   getTpoPlacementSummary,
 } from '@/lib/api/tpo';
-import type { TpoCodingAnalytics, TpoDashboard, TpoPlacementSummary } from '@/shared';
+import type {
+  TpoCodingAnalytics,
+  TpoCodingStudentRow,
+  TpoDashboard,
+  TpoInterviewAnalytics,
+  TpoPlacementSummary,
+} from '@/shared';
 import { useTpoConsole } from '@/components/tpo/TpoConsole';
 import { BentoCard } from '@/components/tpo/ui';
 import { Button } from '@/components/ui/button';
@@ -38,6 +46,9 @@ export default function ReportsPage() {
   const [data, setData] = useState<TpoDashboard | null>(null);
   const [coding, setCoding] = useState<TpoCodingAnalytics | null>(null);
   const [placements, setPlacements] = useState<TpoPlacementSummary | null>(null);
+  // For the student report's Interview / Coding readiness columns (#6).
+  const [interview, setInterview] = useState<TpoInterviewAnalytics | null>(null);
+  const [codingStudents, setCodingStudents] = useState<TpoCodingStudentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,11 +59,15 @@ export default function ReportsPage() {
       getTpoAnalytics(cohortId || undefined),
       getTpoCodingAnalytics(cohortId || undefined),
       getTpoPlacementSummary(cohortId || undefined),
+      getTpoInterviewAnalytics(cohortId || undefined),
+      getTpoCodingStudents(cohortId || undefined),
     ])
-      .then(([d, c, p]) => {
+      .then(([d, c, p, iv, cs]) => {
         setData(d);
         setCoding(c);
         setPlacements(p);
+        setInterview(iv);
+        setCodingStudents(cs);
       })
       .catch((e) => setError(e instanceof Error ? e.message : 'Failed to load reports'))
       .finally(() => setLoading(false));
@@ -68,21 +83,51 @@ export default function ReportsPage() {
 
   const exportStudents = () => {
     if (!data) return;
+    // Per-student interview + coding readiness, joined by id.
+    const interviewById = new Map((interview?.students ?? []).map((s) => [s.id, s.readiness]));
+    const codingById = new Map(codingStudents.map((s) => [s.id, s.codingReadiness]));
+    // Text-formatted date/time (IST) so Excel never renders a numeric date as ########.
+    const fmtDate = (iso: string) =>
+      new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' });
+    const fmtTime = (iso: string) =>
+      new Date(iso).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata' });
     const rows = [...data.students]
       .sort((a, b) => b.readiness - a.readiness)
-      .map((s) => [
-        s.name ?? '',
-        s.email,
-        s.rollNumber ?? '',
-        s.branch ?? '',
-        s.readiness,
-        s.participation,
-        BAND_LABEL[s.band] ?? s.band,
-        s.lastActiveDate ? new Date(s.lastActiveDate).toLocaleDateString('en-IN') : 'Never',
-      ]);
+      .map((s) => {
+        const lastDate = s.lastActiveAt ? fmtDate(s.lastActiveAt) : s.lastActiveDate ? fmtDate(s.lastActiveDate) : 'Never';
+        const lastTime = s.lastActiveAt ? fmtTime(s.lastActiveAt) : '';
+        return [
+          s.name ?? '',
+          s.email,
+          s.rollNumber ?? '',
+          s.branch ?? '',
+          s.readiness,
+          interviewById.get(s.id) ?? '',
+          codingById.get(s.id) ?? '',
+          s.participation,
+          BAND_LABEL[s.band] ?? s.band,
+          lastDate,
+          lastTime,
+        ];
+      });
     download(
       `student-report-${scope}.csv`,
-      toCsv(['Name', 'Email', 'Roll No', 'Branch', 'Readiness %', 'Participation', 'Status', 'Last Active'], rows),
+      toCsv(
+        [
+          'Name',
+          'Email',
+          'Roll No',
+          'Branch',
+          'Placement Readiness',
+          'Interview Readiness',
+          'Coding Readiness',
+          'Participation',
+          'Status',
+          'Last Active Date',
+          'Last Active Time',
+        ],
+        rows,
+      ),
     );
   };
 

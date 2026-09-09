@@ -56,6 +56,8 @@ export interface TpoStudentRow {
   participation: number;
   band: ReadinessBand;
   lastActiveDate: string | null;
+  /** Real last-active TIMESTAMP (max of any practice/mock/coding activity); null if none. */
+  lastActiveAt: string | null;
 }
 
 export interface TpoDashboard {
