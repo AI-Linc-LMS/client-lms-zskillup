@@ -208,6 +208,18 @@ export function MockRunner({
   // would hammer the rate limit for no reason).
   const saveQueueRef = useRef<Promise<void>>(Promise.resolve());
   const ackedRef = useRef<Map<string, string>>(new Map());
+  // A Judge0-graded coding submission still in flight when the attempt finalizes
+  // would land after submit, be rejected by the not-IN_PROGRESS guard, and be lost
+  // from grading. Chain each one here so finishAttempt can await it before submit.
+  const codingInFlightRef = useRef<Promise<void>>(Promise.resolve());
+  const registerCodingInFlight = useCallback((p: Promise<unknown>) => {
+    codingInFlightRef.current = codingInFlightRef.current.then(() =>
+      p.then(
+        () => undefined,
+        () => undefined,
+      ),
+    );
+  }, []);
 
   // ── Load mock metadata for the intro screen ───────────────────────────────
   useEffect(() => {
@@ -287,6 +299,10 @@ export function MockRunner({
           answerMock(start.attemptId, { questionId, selectedOptionIds }),
         ),
       );
+      // Let any in-flight coding submission land (recorded + graded server-side) BEFORE
+      // we finalize — otherwise it arrives after submit, is rejected as "attempt no
+      // longer open", and the student's last solution is lost from grading.
+      await codingInFlightRef.current.catch(() => {});
       // Flush pending proctoring violations BEFORE we finalize, so a warning raised in
       // the last moment is logged while the attempt is still open rather than arriving
       // after submit. Never block submission on it.
@@ -501,6 +517,7 @@ export function MockRunner({
           onSelect={selectOption}
           onClear={clearResponse}
           onCodeSubmitted={onCodeSubmitted}
+          registerCodingInFlight={registerCodingInFlight}
           onSubmit={finishAttempt}
         />
         {proctored ? <ProctorOverlay controller={proctor} /> : null}
@@ -759,6 +776,7 @@ function MockRunningView({
   onSelect,
   onClear,
   onCodeSubmitted,
+  registerCodingInFlight,
   onSubmit,
 }: {
   start: ApiMockStart;
@@ -776,6 +794,7 @@ function MockRunningView({
     problemId: string,
     r: { verdict: string; passed: number; total: number; isCorrect: boolean },
   ) => void;
+  registerCodingInFlight: (p: Promise<unknown>) => void;
   onSubmit: () => void;
 }) {
   const [confirming, setConfirming] = useState(false);
@@ -1018,6 +1037,7 @@ function MockRunningView({
                 codeDraftsRef.current[question.id] = d;
               }}
               onSubmitted={(r) => onCodeSubmitted(question.id, r)}
+              registerInFlight={registerCodingInFlight}
             />
           ) : (
             <div className="mt-5 space-y-2.5">

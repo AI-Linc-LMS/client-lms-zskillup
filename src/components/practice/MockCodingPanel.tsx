@@ -19,6 +19,7 @@ export function MockCodingPanel({
   draft,
   onDraftChange,
   onSubmitted,
+  registerInFlight,
 }: {
   attemptId: string;
   question: ApiMockQuestion;
@@ -27,6 +28,9 @@ export function MockCodingPanel({
   draft?: { source: string; language: string };
   onDraftChange?: (d: { source: string; language: string }) => void;
   onSubmitted: (r: { verdict: string; passed: number; total: number; isCorrect: boolean }) => void;
+  /** Register the in-flight submit so the runner can await it before finalizing the
+   *  attempt (a submit racing the deadline would otherwise be rejected + lost). */
+  registerInFlight?: (p: Promise<unknown>) => void;
 }) {
   const coding = question.coding!;
   const [languages, setLanguages] = useState<CodingLanguage[]>([]);
@@ -84,8 +88,11 @@ export function MockCodingPanel({
   const submit = async () => {
     setSubmitting(true);
     setError(null);
+    // Register BEFORE awaiting so a finalize racing this submit waits for it to land.
+    const pending = submitMockCode(attemptId, { problemId: question.id, language, source });
+    registerInFlight?.(pending);
     try {
-      const r = await submitMockCode(attemptId, { problemId: question.id, language, source });
+      const r = await pending;
       setResult(r);
       setVerdict(r.verdict);
       onSubmitted({ verdict: r.verdict, passed: r.passed, total: r.total, isCorrect: r.verdict === 'ACCEPTED' });
