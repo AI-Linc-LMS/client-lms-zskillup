@@ -21,6 +21,7 @@ import type {
   TpoReadinessTrend,
   TpoRecommendations,
   TpoStudentDetail,
+  TpoStudentInterviews,
 } from '@/shared';
 import type { AssessmentResults } from './scheduling';
 
@@ -39,6 +40,14 @@ export async function getTpoCollegeSummary(): Promise<TpoCollegeSummary> {
 /** Full per-student drill-down for the Student Analytics drawer. */
 export async function getTpoStudentDetail(id: string): Promise<TpoStudentDetail> {
   const res = await apiClient.get<TpoStudentDetail>(`/api/v1/tpo/students/${id}`);
+  return res.data;
+}
+
+/** A student's full mock-interview history (latest->oldest) with transcripts. */
+export async function getTpoStudentInterviews(studentId: string): Promise<TpoStudentInterviews> {
+  const res = await apiClient.get<TpoStudentInterviews>(
+    `/api/v1/tpo/students/${studentId}/interviews`,
+  );
   return res.data;
 }
 

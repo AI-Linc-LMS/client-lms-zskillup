@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Loader2, MessageSquare, Mic, Search, Smile, Users } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { ChevronDown, Loader2, MessageSquare, Mic, Search, Smile, Users, X } from 'lucide-react';
 import {
   Area,
   AreaChart,
@@ -14,8 +15,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { getTpoInterviewAnalytics } from '@/lib/api/tpo';
-import type { TpoInterviewAnalytics, TpoInterviewStudentRow } from '@/shared';
+import { getTpoInterviewAnalytics, getTpoStudentInterviews } from '@/lib/api/tpo';
+import type { TpoInterviewAnalytics, TpoInterviewStudentRow, TpoStudentInterviews } from '@/shared';
 import { useTpoConsole } from '@/components/tpo/TpoConsole';
 import { BentoCard, ProvenanceChip } from '@/components/tpo/ui';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
@@ -188,6 +189,7 @@ type SortKey = 'readiness' | 'communication' | 'confidence' | 'interviews';
 function StudentTable({ rows }: { rows: TpoInterviewStudentRow[] }) {
   const [q, setQ] = useState('');
   const [sort, setSort] = useState<SortKey>('readiness');
+  const [selected, setSelected] = useState<{ id: string; name: string | null } | null>(null);
 
   const view = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -234,9 +236,16 @@ function StudentTable({ rows }: { rows: TpoInterviewStudentRow[] }) {
           </thead>
           <tbody>
             {view.map((r) => (
-              <tr key={r.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/60">
+              <tr
+                key={r.id}
+                onClick={() => setSelected({ id: r.id, name: r.name })}
+                className="cursor-pointer border-b border-slate-100 last:border-0 hover:bg-sky-50/60"
+                title="View interview history & transcripts"
+              >
                 <td className="px-3 py-2.5">
-                  <p className="font-semibold text-navy">{r.name ?? 'Unnamed student'}</p>
+                  <p className="font-semibold text-navy underline-offset-2 hover:underline">
+                    {r.name ?? 'Unnamed student'}
+                  </p>
                   <p className="text-[11px] text-slate-500">{r.branch ?? 'Dept. unspecified'}</p>
                 </td>
                 <td className="px-3 py-2.5 text-right tabular-nums text-slate-600">{r.interviews}</td>
@@ -256,6 +265,209 @@ function StudentTable({ rows }: { rows: TpoInterviewStudentRow[] }) {
           </tbody>
         </table>
       </div>
+      {selected ? (
+        <InterviewHistoryDrawer student={selected} onClose={() => setSelected(null)} />
+      ) : null}
+    </div>
+  );
+}
+
+/** Right-side drawer: a student's mock-interview history (latest→oldest), each
+ *  expandable to its Q→A transcript, scores, strengths and improvement areas. */
+function InterviewHistoryDrawer({
+  student,
+  onClose,
+}: {
+  student: { id: string; name: string | null };
+  onClose: () => void;
+}) {
+  const [data, setData] = useState<TpoStudentInterviews | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [onClose]);
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    setError(null);
+    getTpoStudentInterviews(student.id)
+      .then((d) => {
+        if (!alive) return;
+        setData(d);
+        setOpenId(d.interviews[0]?.id ?? null);
+      })
+      .catch(() => alive && setError('Could not load this student’s interviews.'))
+      .finally(() => alive && setLoading(false));
+    return () => {
+      alive = false;
+    };
+  }, [student.id]);
+
+  if (!mounted) return null;
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex justify-end">
+      <div aria-hidden onClick={onClose} className="absolute inset-0 bg-slate-900/40" />
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="relative flex h-full w-full max-w-2xl flex-col bg-background shadow-lg"
+      >
+        <div className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              Interview history
+            </p>
+            <h3 className="text-base font-bold text-navy">{student.name ?? 'Student'}</h3>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="grid size-8 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-navy"
+            aria-label="Close"
+          >
+            <X className="size-5" />
+          </button>
+        </div>
+        <div className="flex-1 space-y-3 overflow-y-auto p-5">
+          {loading ? (
+            <div className="flex items-center justify-center py-16 text-slate-400">
+              <Loader2 className="size-6 animate-spin" />
+            </div>
+          ) : error ? (
+            <p className="rounded-lg bg-red-50 p-3 text-sm font-medium text-red-700 ring-1 ring-red-200">
+              {error}
+            </p>
+          ) : !data || data.interviews.length === 0 ? (
+            <p className="py-12 text-center text-sm text-slate-500">
+              This student hasn’t taken any AI mock interviews yet.
+            </p>
+          ) : (
+            data.interviews.map((iv) => (
+              <InterviewCard
+                key={iv.id}
+                iv={iv}
+                open={openId === iv.id}
+                onToggle={() => setOpenId((cur) => (cur === iv.id ? null : iv.id))}
+              />
+            ))
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+function InterviewCard({
+  iv,
+  open,
+  onToggle,
+}: {
+  iv: TpoStudentInterviews['interviews'][number];
+  open: boolean;
+  onToggle: () => void;
+}) {
+  const when = iv.submittedAt ?? iv.createdAt;
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+      >
+        <div className="min-w-0">
+          <p className="truncate text-sm font-bold text-navy">{iv.topic || 'Mock interview'}</p>
+          <p className="text-[11px] text-slate-500">
+            {new Date(when).toLocaleString('en-IN', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit',
+              timeZone: 'Asia/Kolkata',
+            })}
+            {' · '}
+            {iv.interviewType} · {iv.difficulty}
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <ScorePill value={iv.overallPercentage} />
+          <ChevronDown className={cn('size-4 text-slate-400 transition-transform', open && 'rotate-180')} />
+        </div>
+      </button>
+      {open ? (
+        <div className="space-y-4 border-t border-slate-100 px-4 py-4">
+          <div className="flex flex-wrap gap-4 text-xs">
+            <Metric label="Overall" value={iv.overallPercentage} />
+            <Metric label="Communication" value={iv.communicationScore} />
+            <Metric label="Confidence" value={iv.confidenceScore} />
+          </div>
+          {iv.overallFeedback ? (
+            <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">{iv.overallFeedback}</p>
+          ) : null}
+          {iv.strengths.length > 0 || iv.areasForImprovement.length > 0 ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {iv.strengths.length > 0 ? (
+                <div>
+                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-emerald-600">Strengths</p>
+                  <ul className="space-y-0.5 text-xs text-slate-600">
+                    {iv.strengths.map((s, i) => <li key={i}>• {s}</li>)}
+                  </ul>
+                </div>
+              ) : null}
+              {iv.areasForImprovement.length > 0 ? (
+                <div>
+                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-amber-600">To improve</p>
+                  <ul className="space-y-0.5 text-xs text-slate-600">
+                    {iv.areasForImprovement.map((s, i) => <li key={i}>• {s}</li>)}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+          <div>
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Transcript</p>
+            {iv.transcript.length === 0 ? (
+              <p className="text-xs text-slate-500">No transcript recorded for this interview.</p>
+            ) : (
+              <ol className="space-y-3">
+                {iv.transcript.map((t, i) => (
+                  <li key={i} className="rounded-lg border border-slate-200 p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="text-sm font-semibold text-navy">Q{i + 1}. {t.question}</p>
+                      {t.score != null ? <ScorePill value={t.score} /> : null}
+                    </div>
+                    <p className="mt-1.5 whitespace-pre-wrap text-sm text-slate-600">
+                      {t.answer?.trim() ? t.answer : <span className="italic text-slate-400">No answer given.</span>}
+                    </p>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: number | null }) {
+  return (
+    <div>
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
+      <p className="text-lg font-extrabold leading-none text-navy">{value != null ? `${value}%` : '—'}</p>
     </div>
   );
 }
