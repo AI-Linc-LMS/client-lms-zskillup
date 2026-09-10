@@ -571,7 +571,13 @@ export function JobDetail({
               </>
             ) : (
               <div className="mt-3">
-                <ApplyButton slug={job.slug} jobId={job.id} jobTitle={job.title} />
+                <ApplyButton
+                  slug={job.slug}
+                  jobId={job.id}
+                  jobTitle={job.title}
+                  applicationDeadline={job.applicationDeadline}
+                  statusClosed={job.status !== JobStatus.ACTIVE}
+                />
               </div>
             )}
           </Card>

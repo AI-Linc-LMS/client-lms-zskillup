@@ -71,24 +71,29 @@ export function deadlineLabel(
   iso: string | null,
 ): { text: string; tone: 'urgent' | 'soon' | 'normal' | 'closed' } | null {
   if (!iso) return null;
-  const days = Math.ceil((new Date(iso).getTime() - Date.now()) / 86_400_000);
-  // The deadline is an exact instant, so when it is near, the time matters as much as
-  // the day - a student needs to know it closes at 5pm, not just "today".
   // Pin to IST: without an explicit timeZone this formats in the runtime's zone, so the
   // client card rendered 11:00 am (browser IST) while the SSR detail page rendered the
   // same deadline as 5:30 am (Node UTC). The deadline is an IST business time everywhere.
   const IST = 'Asia/Kolkata';
-  const at = new Date(iso).toLocaleTimeString('en-IN', {
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZone: IST,
-  });
-  if (days < 0) return { text: 'Closed', tone: 'closed' };
-  if (days === 0) return { text: `Closes today, ${at}`, tone: 'urgent' };
-  if (days === 1) return { text: `Closes tomorrow, ${at}`, tone: 'urgent' };
-  if (days <= 7) return { text: `${days} days left`, tone: 'soon' };
+  const deadline = new Date(iso);
+  // Closed is an EXACT-INSTANT decision (matches the server's applyBlockedReason), not a
+  // day count — a deadline earlier TODAY (11:00 am when it is now 2:00 pm) is closed, and
+  // must read "Closed", not "Closes today". Day-granularity here was letting the apply CTA
+  // stay live past the cut-off.
+  if (deadline.getTime() <= Date.now()) return { text: 'Closed', tone: 'closed' };
+
+  // The deadline is an exact instant, so when it is near, the time matters as much as
+  // the day - a student needs to know it closes at 5pm, not just "today".
+  const at = deadline.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', timeZone: IST });
+  // today / tomorrow are IST CALENDAR days (not a rolling 24h window), so a deadline
+  // this evening reads "today" and one tomorrow morning reads "tomorrow".
+  const istDay = (d: Date) => d.toLocaleDateString('en-CA', { timeZone: IST }); // YYYY-MM-DD
+  const dayDiff = Math.round((Date.parse(istDay(deadline)) - Date.parse(istDay(new Date()))) / 86_400_000);
+  if (dayDiff === 0) return { text: `Closes today, ${at}`, tone: 'urgent' };
+  if (dayDiff === 1) return { text: `Closes tomorrow, ${at}`, tone: 'urgent' };
+  if (dayDiff <= 7) return { text: `${dayDiff} days left`, tone: 'soon' };
   return {
-    text: `Apply by ${new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: IST })}`,
+    text: `Apply by ${deadline.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: IST })}`,
     tone: 'normal',
   };
 }

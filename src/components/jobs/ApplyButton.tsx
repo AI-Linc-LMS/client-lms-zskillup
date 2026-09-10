@@ -40,10 +40,18 @@ export function ApplyButton({
   slug,
   jobId,
   jobTitle,
+  applicationDeadline = null,
+  statusClosed = false,
 }: {
   slug: string;
   jobId: string;
   jobTitle: string;
+  /** The posting's deadline (ISO). Compared to the LIVE client clock at mount so the
+   *  CTA reflects the real cut-off even though the page is ISR — a server-computed flag
+   *  would freeze at build time and keep inviting applies past the deadline. */
+  applicationDeadline?: string | null;
+  /** Job status is not ACTIVE (closed/paused/filled) at the ISR snapshot. */
+  statusClosed?: boolean;
 }) {
   const [role, setRole] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
@@ -126,6 +134,13 @@ export function ApplyButton({
     }
   }, [gated, slug, hasQuestions]);
 
+  // Live cut-off check: status from the ISR snapshot OR the deadline instant vs the
+  // client clock. Mirrors the server's applyBlockedReason; evaluated on the client so an
+  // ISR page built before the deadline does not keep showing a live Apply CTA after it.
+  const closed =
+    statusClosed ||
+    (!!applicationDeadline && new Date(applicationDeadline).getTime() <= Date.now());
+
   // Server-rendered markup and first paint: a disabled placeholder of the same size,
   // so the layout does not jump when the real state arrives.
   if (!ready) {
@@ -134,21 +149,8 @@ export function ApplyButton({
     );
   }
 
-  if (!role) {
-    return (
-      <div className="mt-9">
-        <Button asChild size="lg">
-          <Link href={`/login?redirect=${encodeURIComponent(`/jobs/${slug}`)}`}>
-            Sign in to apply
-          </Link>
-        </Button>
-        <p className="mt-2 text-xs text-slate-500">
-          Applying takes one click once you are signed in - we send your ZSkillup profile.
-        </p>
-      </div>
-    );
-  }
-
+  // Already applied wins even once the role closes — they got in before the deadline,
+  // so show their status, not "closed".
   if (application) {
     const meta = APPLICATION_STATUS[application.status];
     return (
@@ -165,6 +167,36 @@ export function ApplyButton({
         >
           All my applications →
         </Link>
+      </div>
+    );
+  }
+
+  // Deadline passed (or status not ACTIVE): no live CTA — a disabled control that reads
+  // "Applications closed", so nobody is invited into a click the server would only reject.
+  if (closed) {
+    return (
+      <div className="mt-9">
+        <Button size="lg" disabled>
+          Applications closed
+        </Button>
+        <p className="mt-2 text-xs text-slate-500">
+          The deadline for this role has passed — it is no longer accepting applications.
+        </p>
+      </div>
+    );
+  }
+
+  if (!role) {
+    return (
+      <div className="mt-9">
+        <Button asChild size="lg">
+          <Link href={`/login?redirect=${encodeURIComponent(`/jobs/${slug}`)}`}>
+            Sign in to apply
+          </Link>
+        </Button>
+        <p className="mt-2 text-xs text-slate-500">
+          Applying takes one click once you are signed in - we send your ZSkillup profile.
+        </p>
       </div>
     );
   }
