@@ -63,6 +63,8 @@ import {
 } from '@/lib/proctoring/useProctoring';
 import { ProctorOverlay } from '@/components/proctoring/ProctorOverlay';
 import { CalibrationResults } from '@/components/student/CalibrationResults';
+import { getMe, type ApiMe } from '@/lib/api/me';
+import { PreAssessmentDetails, needsAssessmentDetails } from '@/components/practice/PreAssessmentDetails';
 
 /**
  * Mock-test runner - the Sprint 4 timed assessment surface (Zone B → focused
@@ -189,6 +191,16 @@ export function MockRunner({
 
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
+  // One-time pre-assessment details gate — scheduled assessments only. If the report
+  // fields (name / college / email / phone) are missing we collect them before start;
+  // a fully-filled student never sees it. meLoaded starts true for self-serve mocks so
+  // they never wait on /me.
+  // An assessment (scheduled OR proctored) feeds the admin report; a self-serve mock
+  // does not, so only assessments get the details gate.
+  const isAssessment = !!scheduledId || proctored;
+  const [me, setMe] = useState<ApiMe | null>(null);
+  const [meLoaded, setMeLoaded] = useState(!isAssessment);
+  const [showDetails, setShowDetails] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   /** Server's 403 PAYWALL message when the free-mock allowance is spent. */
@@ -278,6 +290,35 @@ export function MockRunner({
     }
   }, [mockId, scheduledId]);
 
+  // Load the student's profile once (scheduled assessments only) to decide whether the
+  // report fields are already on file. A fetch failure fails OPEN (meLoaded true, me
+  // null) so a flaky /me never blocks the exam — the server report just shows blanks.
+  useEffect(() => {
+    if (!isAssessment) return;
+    let alive = true;
+    getMe()
+      .then((m) => {
+        if (alive) setMe(m);
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        if (alive) setMeLoaded(true);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [isAssessment]);
+
+  // Start = show the details gate first ONLY when it's an assessment with a missing
+  // field; otherwise begin straight away (self-serve mocks + already-complete students).
+  const handleStart = useCallback(() => {
+    if (isAssessment && me && needsAssessmentDetails(me)) {
+      setShowDetails(true);
+      return;
+    }
+    void beginAttempt();
+  }, [isAssessment, me, beginAttempt]);
+
   const finishAttempt = useCallback(async () => {
     if (!start || submittedRef.current) return;
     submittedRef.current = true;
@@ -350,11 +391,13 @@ export function MockRunner({
   // still starts exactly here (i.e. at "Begin Assessment"), not on page load.
   const autoStartedRef = useRef(false);
   useEffect(() => {
-    if (startImmediately && !autoStartedRef.current && phase === 'intro') {
+    // Wait for /me so the details gate can interpose before the auto-start (meLoaded is
+    // already true for self-serve mocks, so those still auto-start immediately).
+    if (startImmediately && !autoStartedRef.current && phase === 'intro' && meLoaded) {
       autoStartedRef.current = true;
-      void beginAttempt();
+      handleStart();
     }
-  }, [startImmediately, phase, beginAttempt]);
+  }, [startImmediately, phase, meLoaded, handleStart]);
 
   // ── Server-authoritative countdown ────────────────────────────────────────
   useEffect(() => {
@@ -630,8 +673,8 @@ export function MockRunner({
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <button
                 type="button"
-                onClick={beginAttempt}
-                disabled={starting}
+                onClick={handleStart}
+                disabled={starting || !meLoaded}
                 className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-b from-[#ffd24d] to-[#f5b400] px-7 py-3.5 text-[15px] font-extrabold text-[#171717] shadow-[0_18px_40px_-14px_rgba(245,180,0,0.9)] transition-transform hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-60"
               >
                 <span aria-hidden className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
@@ -651,6 +694,17 @@ export function MockRunner({
               Once started, the timer can&apos;t be paused. Final submit is one-way.
             </p>
             {error ? <p role="alert" className="mt-2 text-sm text-rose-300">{error}</p> : null}
+
+            {showDetails && me ? (
+              <PreAssessmentDetails
+                me={me}
+                onDone={() => {
+                  setShowDetails(false);
+                  void beginAttempt();
+                }}
+                onCancel={() => setShowDetails(false)}
+              />
+            ) : null}
 
             {isCalibration ? (
               <div className="mt-9">
