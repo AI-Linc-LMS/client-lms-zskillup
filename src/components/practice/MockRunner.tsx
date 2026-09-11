@@ -64,7 +64,17 @@ import {
 import { ProctorOverlay } from '@/components/proctoring/ProctorOverlay';
 import { CalibrationResults } from '@/components/student/CalibrationResults';
 import { getMe, type ApiMe } from '@/lib/api/me';
-import { PreAssessmentDetails, needsAssessmentDetails } from '@/components/practice/PreAssessmentDetails';
+import { PreAssessmentDetails } from '@/components/practice/PreAssessmentDetails';
+import {
+  isLiveAttemptMarker,
+  liveAttemptKey,
+  missingDetailsFromError,
+  needsAssessmentDetails,
+  type DetailKey,
+} from '@/shared/assessment-details';
+import { requestAssessmentFullscreen } from '@/lib/proctoring/fullscreen';
+import { authToken } from '@/store/auth';
+import { hasPreviewHint, roleHint } from '@/lib/session-hints';
 
 /**
  * Mock-test runner - the Sprint 4 timed assessment surface (Zone B → focused
@@ -113,6 +123,38 @@ function prettyViolation(type: string): string {
     .replace(/^\w/, (c) => c.toUpperCase());
 }
 
+/** Admin "view as student" preview: the details gate never shows - an admin can't (and
+ *  mustn't) fill a student's report details. */
+function isPreviewSession(): boolean {
+  return authToken.isPreview() || (hasPreviewHint() && roleHint() === 'SUPER_ADMIN');
+}
+
+/** Same-device marker for a live attempt (shared/assessment-details). Storage can be
+ *  unavailable (private mode, blocked site data), so every access is best-effort. */
+function readLiveAttempt(key: string): boolean {
+  try {
+    return isLiveAttemptMarker(window.localStorage.getItem(key), Date.now());
+  } catch {
+    return false;
+  }
+}
+
+function writeLiveAttempt(key: string, expiresAt: string): void {
+  try {
+    window.localStorage.setItem(key, expiresAt);
+  } catch {
+    /* ignore */
+  }
+}
+
+function clearLiveAttempt(key: string): void {
+  try {
+    window.localStorage.removeItem(key);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function MockRunner({
   mockId,
   scheduledId,
@@ -120,6 +162,7 @@ export function MockRunner({
   proctorAutoSubmit = false,
   proctorMaxWarnings = 3,
   startImmediately = false,
+  onExit,
 }: {
   mockId: string;
   /** The scheduled sitting id, for a drive. Passed to startMock so a mock reused across
@@ -134,6 +177,9 @@ export function MockRunner({
    *  there is what starts the server timer (beginAttempt is still the only caller
    *  of startMock, so the timer invariant holds). */
   startImmediately?: boolean;
+  /** Leave the runner before an attempt exists (Cancel in the details gate). The
+   *  scheduled host passes this to return to the drive's instructions screen. */
+  onExit?: () => void;
 }) {
   // Ship the live proctoring batch to the server-stamped log. The attempt id
   // isn't known until beginAttempt resolves, so read it from a ref the callback
@@ -191,9 +237,9 @@ export function MockRunner({
 
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
-  // One-time pre-assessment details gate — scheduled assessments only. If the report
-  // fields (name / college / email / phone) are missing we collect them before start;
-  // a fully-filled student never sees it. meLoaded starts true for self-serve mocks so
+  // One-time pre-assessment details gate. If a report field (name / college / department
+  // / email / phone) is missing or invalid we collect it before a NEW attempt starts; a
+  // fully-filled student never sees it. meLoaded starts true for self-serve mocks so
   // they never wait on /me.
   // An assessment (scheduled OR proctored) feeds the admin report; a self-serve mock
   // does not, so only assessments get the details gate.
@@ -201,6 +247,15 @@ export function MockRunner({
   const [me, setMe] = useState<ApiMe | null>(null);
   const [meLoaded, setMeLoaded] = useState(!isAssessment);
   const [showDetails, setShowDetails] = useState(false);
+  /** Fields the server named in PROFILE_DETAILS_REQUIRED - editable in the gate even
+   *  when they look fine locally. */
+  const [serverMissing, setServerMissing] = useState<DetailKey[]>([]);
+  const [detailsNotice, setDetailsNotice] = useState<string | null>(null);
+  /** /me couldn't be re-read after PROFILE_DETAILS_REQUIRED - offer a retry. */
+  const [meRetry, setMeRetry] = useState(false);
+  /** The server refused a drive mock opened without its sitting (SITTING_REQUIRED). */
+  const [sittingRequired, setSittingRequired] = useState(false);
+  const liveKey = liveAttemptKey(mockId, scheduledId);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   /** Server's 403 PAYWALL message when the free-mock allowance is spent. */
@@ -253,12 +308,43 @@ export function MockRunner({
     };
   }, [mockId]);
 
+  // The server refused a NEW attempt for missing/invalid details. Re-read /me (ours may be
+  // stale) and open the gate - never a dead end. If /me now looks complete the server
+  // still disagrees, so its named fields open editable with a note instead of looping
+  // straight back into start; if /me can't load, offer a retry.
+  const openDetailsFromServer = useCallback(async (missing: DetailKey[]) => {
+    if (isPreviewSession()) {
+      setError('This student’s profile is missing assessment details, so a preview can’t start this assessment.');
+      return;
+    }
+    setMeRetry(false);
+    setServerMissing(missing);
+    let fresh: ApiMe;
+    try {
+      fresh = await getMe();
+    } catch {
+      setMeRetry(true);
+      return;
+    }
+    setMe(fresh);
+    setMeLoaded(true);
+    const locallyComplete = !needsAssessmentDetails(fresh);
+    // Nothing named and nothing visibly wrong: let every editable field be re-entered.
+    if (locallyComplete && missing.length === 0) setServerMissing(['fullName', 'collegeName', 'branch', 'phone']);
+    setDetailsNotice(locallyComplete ? 'Please re-check your details below — we couldn’t verify them.' : null);
+    setShowDetails(true);
+  }, []);
+
   const beginAttempt = useCallback(async () => {
     setStarting(true);
     setError(null);
+    setSittingRequired(false);
+    setMeRetry(false);
     try {
       const s = await startMock(mockId, scheduledId);
       attemptIdRef.current = s.attemptId;
+      // Remember the live paper on this device, so a reload resumes it without the gate.
+      if (isAssessment) writeLiveAttempt(liveKey, s.expiresAt);
       const hydrated: Record<string, string[]> = {};
       ackedRef.current = new Map();
       for (const a of s.savedAnswers) {
@@ -282,13 +368,19 @@ export function MockRunner({
       // and "Could not start the mock test" tells the student nothing about why.
       if (err instanceof ApiRequestError && err.code === 'PAYWALL') {
         setUpgradeMsg(err.message);
+      } else if (err instanceof ApiRequestError && err.code === 'SITTING_REQUIRED') {
+        // A drive mock opened without its sitting (a stale or hand-built link). A retry
+        // can't help - point the student at the listing that carries the sitting.
+        setSittingRequired(true);
+      } else if (err instanceof ApiRequestError && err.code === 'PROFILE_DETAILS_REQUIRED') {
+        await openDetailsFromServer(missingDetailsFromError(err.details));
       } else {
         setError(err instanceof Error ? err.message : 'Could not start the mock test.');
       }
     } finally {
       setStarting(false);
     }
-  }, [mockId, scheduledId]);
+  }, [mockId, scheduledId, isAssessment, liveKey, openDetailsFromServer]);
 
   // Load the student's profile once (scheduled assessments only) to decide whether the
   // report fields are already on file. A fetch failure fails OPEN (meLoaded true, me
@@ -309,15 +401,45 @@ export function MockRunner({
     };
   }, [isAssessment]);
 
-  // Start = show the details gate first ONLY when it's an assessment with a missing
-  // field; otherwise begin straight away (self-serve mocks + already-complete students).
+  // Start = show the details gate first ONLY for a NEW assessment attempt with a missing
+  // or invalid field; otherwise begin straight away. Never gated: self-serve mocks,
+  // non-students (needsAssessmentDetails is STUDENT-only), an admin preview, and a paper
+  // already live on this device (a reload mid-exam resumes; it never re-asks).
+  // Once the backend enforces the gate itself - it then sends top-level `collegeName` on
+  // /me - a scheduled start goes to the server first: it refuses only a NEW attempt
+  // (PROFILE_DETAILS_REQUIRED, handled in beginAttempt) and always lets a resume through.
   const handleStart = useCallback(() => {
-    if (isAssessment && me && needsAssessmentDetails(me)) {
+    const serverEnforces = !!scheduledId && !!me && 'collegeName' in me;
+    if (
+      isAssessment &&
+      !serverEnforces &&
+      needsAssessmentDetails(me) &&
+      !isPreviewSession() &&
+      !readLiveAttempt(liveKey)
+    ) {
+      setServerMissing([]);
+      setDetailsNotice(null);
       setShowDetails(true);
       return;
     }
     void beginAttempt();
-  }, [isAssessment, me, beginAttempt]);
+  }, [isAssessment, scheduledId, me, liveKey, beginAttempt]);
+
+  // The Start click itself. Fullscreen has to be requested right here, synchronously -
+  // the attempt starts after a network round-trip, when the browser no longer allows it.
+  const onStartClick = useCallback(() => {
+    if (proctored) requestAssessmentFullscreen();
+    handleStart();
+  }, [proctored, handleStart]);
+
+  const retryDetails = useCallback(async () => {
+    setStarting(true);
+    try {
+      await openDetailsFromServer(serverMissing);
+    } finally {
+      setStarting(false);
+    }
+  }, [openDetailsFromServer, serverMissing]);
 
   const finishAttempt = useCallback(async () => {
     if (!start || submittedRef.current) return;
@@ -354,6 +476,7 @@ export function MockRunner({
         autoSubmitReasonRef.current,
       );
       setReward(result.gamification ?? null);
+      clearLiveAttempt(liveKey);
     } catch (err) {
       submittedRef.current = false;
       setError(err instanceof Error ? err.message : 'Could not submit the mock test.');
@@ -380,7 +503,7 @@ export function MockRunner({
     } finally {
       setSubmitting(false);
     }
-  }, [start, proctored, proctor, scheduledId]);
+  }, [start, proctored, proctor, scheduledId, liveKey]);
   // Let the proctoring callbacks (onAutoSubmit / server-ack backstop) trigger the same
   // single submit path the countdown uses, without threading finishAttempt through refs.
   finishRef.current = finishAttempt;
@@ -482,6 +605,9 @@ export function MockRunner({
 
   // ── Render ────────────────────────────────────────────────────────────────
 
+  // A scheduled drive lives on /assessments; everything else on /mock-assessment.
+  const exitHref = scheduledId ? '/assessments' : '/mock-assessment';
+
   if (loading) {
     return (
       <div className="grid min-h-screen place-items-center bg-background">
@@ -499,7 +625,7 @@ export function MockRunner({
           </span>
           <p className="mt-4 text-sm font-semibold text-navy">{error}</p>
           <Button variant="outline" className="mt-5" asChild>
-            <Link href="/mock-assessment">Back to mock tests</Link>
+            <Link href={exitHref}>Back to {scheduledId ? 'assessments' : 'mock tests'}</Link>
           </Button>
         </div>
       </div>
@@ -507,7 +633,6 @@ export function MockRunner({
   }
 
   if (phase === 'submitted') {
-    const backHref = scheduledId ? '/assessments' : '/mock-assessment';
     const autoSubmitted = autoSubmitReasonRef.current === 'PROCTORING_WARNINGS';
     return (
       <div className="grid min-h-screen place-items-center bg-background px-6">
@@ -532,7 +657,7 @@ export function MockRunner({
                 : 'Your answers have been recorded. Your scored report couldn’t be loaded just now — you can view it any time from your assessments.'}
           </p>
           <Button variant="outline" className="mt-5" asChild>
-            <Link href={backHref}>Back to {scheduledId ? 'assessments' : 'mock tests'}</Link>
+            <Link href={exitHref}>Back to {scheduledId ? 'assessments' : 'mock tests'}</Link>
           </Button>
         </div>
       </div>
@@ -620,7 +745,7 @@ export function MockRunner({
 
       <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 px-5 py-6 sm:px-10">
         <Link
-          href="/mock-assessment"
+          href={exitHref}
           className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-1.5 text-xs font-semibold text-white/85 backdrop-blur transition-colors hover:bg-white/[0.12]"
         >
           <ArrowLeft className="size-3.5" aria-hidden="true" /> Exit
@@ -673,8 +798,8 @@ export function MockRunner({
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <button
                 type="button"
-                onClick={handleStart}
-                disabled={starting || !meLoaded}
+                onClick={onStartClick}
+                disabled={starting || !meLoaded || sittingRequired}
                 className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-b from-[#ffd24d] to-[#f5b400] px-7 py-3.5 text-[15px] font-extrabold text-[#171717] shadow-[0_18px_40px_-14px_rgba(245,180,0,0.9)] transition-transform hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-60"
               >
                 <span aria-hidden className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
@@ -682,7 +807,7 @@ export function MockRunner({
                 {starting ? 'Starting…' : proctored ? 'Start assessment' : 'Start test'}
               </button>
               <Link
-                href="/mock-assessment"
+                href={exitHref}
                 className="inline-flex h-[52px] items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.06] px-6 text-[15px] font-bold text-white/85 backdrop-blur transition-colors hover:bg-white/[0.12]"
               >
                 Maybe later
@@ -694,15 +819,58 @@ export function MockRunner({
               Once started, the timer can&apos;t be paused. Final submit is one-way.
             </p>
             {error ? <p role="alert" className="mt-2 text-sm text-rose-300">{error}</p> : null}
+            {sittingRequired ? (
+              <div role="alert" className="mt-4 max-w-xl rounded-xl border border-white/10 bg-white/5 p-4">
+                <p className="text-sm font-bold text-white">Open this assessment from your Assessments page</p>
+                <p className="mt-1 text-[13px] leading-relaxed text-white/65">
+                  It belongs to a scheduled drive, so it can only be started from its listing there.
+                </p>
+                <Button variant="outline" size="sm" className="mt-3 rounded-full" asChild>
+                  <Link href="/assessments">Go to Assessments</Link>
+                </Button>
+              </div>
+            ) : null}
+            {meRetry ? (
+              <div role="alert" className="mt-4 max-w-xl rounded-xl border border-white/10 bg-white/5 p-4">
+                <p className="text-sm font-bold text-white">We couldn’t load your details</p>
+                <p className="mt-1 text-[13px] leading-relaxed text-white/65">
+                  Your assessment report needs a few profile details before you start. Check your
+                  connection and try again.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-3 rounded-full"
+                  onClick={() => void retryDetails()}
+                  disabled={starting}
+                >
+                  {starting ? <Loader2 className="animate-spin" aria-hidden="true" /> : null}
+                  Try again
+                </Button>
+              </div>
+            ) : null}
 
             {showDetails && me ? (
               <PreAssessmentDetails
                 me={me}
-                onDone={() => {
+                forceEditable={serverMissing}
+                notice={detailsNotice}
+                onSubmitGesture={proctored ? requestAssessmentFullscreen : undefined}
+                onDone={(updated) => {
+                  // Start from the saved profile, so a failed start never re-asks these.
+                  setMe(updated);
                   setShowDetails(false);
+                  setServerMissing([]);
+                  setDetailsNotice(null);
                   void beginAttempt();
                 }}
-                onCancel={() => setShowDetails(false)}
+                onCancel={() => {
+                  setShowDetails(false);
+                  setServerMissing([]);
+                  setDetailsNotice(null);
+                  // A drive returns to its own instructions screen (which releases the camera).
+                  if (scheduledId && onExit) onExit();
+                }}
               />
             ) : null}
 

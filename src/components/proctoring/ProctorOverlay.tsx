@@ -15,6 +15,7 @@ import {
   VideoOff,
 } from 'lucide-react';
 import type { ProctoringController } from '@/lib/proctoring/useProctoring';
+import { fullscreenSupported } from '@/lib/proctoring/fullscreen';
 
 const FACE_TONE: Record<string, string> = {
   NORMAL: 'text-emerald-500',
@@ -31,6 +32,7 @@ const FACE_TONE: Record<string, string> = {
 export function ProctorOverlay({ controller }: { controller: ProctoringController }) {
   const {
     videoRef,
+    active,
     cameraGranted,
     micGranted,
     tabSwitches,
@@ -58,6 +60,18 @@ export function ProctorOverlay({ controller }: { controller: ProctoringControlle
   useEffect(() => {
     if (inFullscreen) setEverFullscreen(true);
   }, [inFullscreen]);
+  // Never been fullscreen (the start-click request was refused, dismissed, or raced):
+  // offer it from a real click. A non-blocking nudge only - nothing is counted and the
+  // exam carries on either way.
+  const [canFullscreen] = useState(fullscreenSupported);
+  // Also read the live document state: start() flips `active` before it records that the
+  // Begin/Start click already went fullscreen, which would flash this for a frame.
+  const offerFullscreen =
+    active &&
+    canFullscreen &&
+    !everFullscreen &&
+    !inFullscreen &&
+    !(typeof document !== 'undefined' && document.fullscreenElement);
 
   // A tab switch and an app/window switch (blur) are both "left the assessment" -
   // show them as ONE number so repeated leaves are visibly counted (they were split
@@ -123,6 +137,15 @@ export function ProctorOverlay({ controller }: { controller: ProctoringControlle
             <span className="inline-flex items-center gap-0.5" title="Fullscreen exits"><Maximize2 className="size-3" /> {fullscreenExits}</span>
             <span className="inline-flex items-center gap-0.5" title="Copy / paste flags"><ClipboardX className="size-3" /> {clipboardEvents}</span>
           </span>
+          {offerFullscreen ? (
+            <button
+              type="button"
+              onClick={enterFullscreen}
+              className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-700 ring-1 ring-amber-200 transition-colors hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/40"
+            >
+              <Maximize2 className="size-3" aria-hidden="true" /> Enter fullscreen
+            </button>
+          ) : null}
         </div>
       </div>
 
