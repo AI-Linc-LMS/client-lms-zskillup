@@ -197,6 +197,8 @@ export interface AssessmentResultRow {
   email: string;
   phone: string | null;
   collegeName: string | null;
+  /** Department - student_profiles.branch (CSE/IT/ECE/EEE/MECH/CIVIL/OTHER). */
+  branch: string | null;
   cohort: string | null;
   score: number;
   /** Maximum marks. */

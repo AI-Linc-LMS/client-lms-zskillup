@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { CheckCircle2, FileSpreadsheet, FileText, Loader2, Search, Send, ShieldAlert } from 'lucide-react';
 import type { AssessmentResults } from '@/lib/api/scheduling';
 import { exportResultsCsv, exportResultsPdf, exportResultsXlsx } from '@/lib/results-export';
+import { branchLabel, branchShort } from '@/lib/branch';
 import { cn } from '@/lib/utils';
 
 type SortKey = 'rank' | 'scorePct' | 'accuracy' | 'violations' | 'integrityScore' | 'timeTakenSec';
@@ -20,7 +21,7 @@ const scoreTone = (v: number) =>
  * Cohort-wise mock-assessment results report (shared by the Admin + TPO panels).
  * Full per-student roster with search, pass/fail filter, sortable columns, and
  * export to Excel / CSV / PDF. The row shows the key columns; the export carries
- * all ~28 fields (contact, section-wise scores, full proctoring breakdown, …).
+ * every field (contact, department, section-wise scores, full proctoring breakdown, …).
  */
 export function ResultsReport({
   data,
@@ -45,6 +46,8 @@ export function ResultsReport({
           (r.fullName ?? '').toLowerCase().includes(needle) ||
           r.email.toLowerCase().includes(needle) ||
           (r.collegeName ?? '').toLowerCase().includes(needle) ||
+          branchShort(r.branch).toLowerCase().includes(needle) ||
+          branchLabel(r.branch).toLowerCase().includes(needle) ||
           (r.cohort ?? '').toLowerCase().includes(needle),
       );
     }
@@ -102,7 +105,7 @@ export function ResultsReport({
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search name, email, college, cohort…"
+            placeholder="Search name, email, college, department, cohort…"
             className="w-full bg-transparent text-sm text-navy outline-none placeholder:text-slate-400"
           />
         </div>
@@ -181,7 +184,7 @@ export function ResultsReport({
               <tr className="border-b border-slate-200">
                 <Th k="rank">#</Th>
                 <Th>Student</Th>
-                <Th>College · Cohort</Th>
+                <Th>College · Dept · Cohort</Th>
                 <Th k="scorePct" className="text-right">Score</Th>
                 <Th className="text-right">Correct</Th>
                 <Th k="accuracy" className="text-right">Acc.</Th>
@@ -200,6 +203,11 @@ export function ResultsReport({
                   </td>
                   <td className="px-3 py-2.5 text-[11px] text-slate-600">
                     {r.collegeName ?? '—'}
+                    {r.branch ? (
+                      <span className="block font-semibold text-slate-500" title={branchLabel(r.branch)}>
+                        {branchShort(r.branch)}
+                      </span>
+                    ) : null}
                     {r.cohort ? <span className="block text-slate-400">{r.cohort}</span> : null}
                   </td>
                   <td className="px-3 py-2.5 text-right">

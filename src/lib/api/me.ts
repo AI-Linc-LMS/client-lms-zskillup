@@ -63,6 +63,8 @@ export interface UpdateMePayload {
   passoutYear?: number | null;
   /** Profile photo - hosted URL or a small client-resized data URL. "" clears it. */
   avatarUrl?: string | null;
+  /** Department (student_branch enum). Set by the one-time pre-assessment details gate. */
+  branch?: ApiStudentProfile['branch'];
 }
 
 export interface ApiMe {

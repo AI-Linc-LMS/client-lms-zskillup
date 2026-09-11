@@ -3,6 +3,7 @@
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import type { AssessmentResults } from '@/lib/api/scheduling';
+import { branchShort } from '@/lib/branch';
 
 /** The report's full flat column set (order = report spec), one object per student. */
 function flatRows(data: AssessmentResults): Record<string, string | number>[] {
@@ -11,6 +12,7 @@ function flatRows(data: AssessmentResults): Record<string, string | number>[] {
     Email: r.email,
     Phone: r.phone ?? '',
     College: r.collegeName ?? '',
+    Department: branchShort(r.branch),
     Cohort: r.cohort ?? '',
     Assessment: data.assessment.title,
     'Started At': r.startedAt ? new Date(r.startedAt).toLocaleString() : '',
@@ -81,7 +83,7 @@ export function exportResultsXlsx(data: AssessmentResults): void {
   XLSX.writeFile(wb, `${fileBase(data)}.xlsx`);
 }
 
-/** A readable landscape PDF: header + summary + a KEY-column table (the full 28-col
+/** A readable landscape PDF: header + summary + a KEY-column table (the full column
  *  set lives in the CSV/XLSX; a PDF table that wide is unreadable). */
 export function exportResultsPdf(data: AssessmentResults): void {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
@@ -111,6 +113,7 @@ export function exportResultsPdf(data: AssessmentResults): void {
     { h: '#', w: 26, get: (r) => String(r.rank) },
     { h: 'Name', w: 110, get: (r) => r.fullName ?? '' },
     { h: 'College', w: 130, get: (r) => r.collegeName ?? '' },
+    { h: 'Department', w: 64, get: (r) => branchShort(r.branch) },
     { h: 'Score', w: 48, get: (r) => `${r.score}/${r.total}` },
     { h: '%', w: 30, get: (r) => String(r.scorePct) },
     { h: 'Correct', w: 50, get: (r) => `${r.correctAnswers}/${r.attemptedQuestions}` },
