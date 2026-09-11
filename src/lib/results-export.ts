@@ -4,6 +4,9 @@ import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import type { AssessmentResults } from '@/lib/api/scheduling';
 import { branchShort } from '@/lib/branch';
+import { CSV_BOM, toCsv } from '@/lib/csv';
+
+type ResultRow = AssessmentResults['rows'][number];
 
 /** The report's full flat column set (order = report spec), one object per student. */
 function flatRows(data: AssessmentResults): Record<string, string | number>[] {
@@ -57,43 +60,69 @@ function download(blob: Blob, filename: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-/** Escape one CSV cell (RFC-4180: wrap + double any quotes when needed). */
-function csvCell(v: string | number): string {
-  const s = String(v);
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+/** The CSV file body - BOM + CRLF, every cell quoted and formula-injection-safe (see
+ *  lib/csv) - or '' when nobody attempted. Kept apart from the download for tests. */
+export function buildResultsCsv(data: AssessmentResults): string {
+  const rows = flatRows(data);
+  if (rows.length === 0) return '';
+  const headers = Object.keys(rows[0]);
+  return CSV_BOM + toCsv(headers, rows.map((r) => headers.map((h) => r[h])));
 }
 
 export function exportResultsCsv(data: AssessmentResults): void {
-  const rows = flatRows(data);
-  if (rows.length === 0) return;
-  const headers = Object.keys(rows[0]);
-  const lines = [
-    headers.map(csvCell).join(','),
-    ...rows.map((r) => headers.map((h) => csvCell(r[h])).join(',')),
-  ];
-  download(new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }), `${fileBase(data)}.csv`);
+  const csv = buildResultsCsv(data);
+  if (!csv) return;
+  download(new Blob([csv], { type: 'text/csv;charset=utf-8' }), `${fileBase(data)}.csv`);
 }
 
 export function exportResultsXlsx(data: AssessmentResults): void {
   const rows = flatRows(data);
   if (rows.length === 0) return;
+  // No formula neutralising needed (unlike the CSV): json_to_sheet stores every string
+  // as a text cell and the writer only emits a formula for a cell's `f`, which is never
+  // set - so "=HYPERLINK(...)" typed as a name opens as literal text.
   const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Results');
   XLSX.writeFile(wb, `${fileBase(data)}.xlsx`);
 }
 
+const PDF_FONT = 8.5; // table body
+const PDF_SUB_FONT = 7; // the smaller "email · phone" line under a name
+const PDF_LINE = 10; // advance per body line
+const PDF_SUB_LINE = 8.5; // advance per sub line
+const PDF_PAD = 4; // cell top padding
+const PDF_MIN_ROW = 16;
+
+/** Wrap `text` to `width` at the doc's CURRENT font size, keeping at most `maxLines`.
+ *  A longer value ends in "..." so the cut is visible, never silently clipped. */
+function wrapText(doc: jsPDF, text: string, width: number, maxLines: number): string[] {
+  if (!text) return [];
+  const lines: string[] = doc.splitTextToSize(text, width);
+  if (lines.length <= maxLines) return lines;
+  const kept = lines.slice(0, maxLines);
+  let last = kept[maxLines - 1];
+  while (last && doc.getTextWidth(`${last}...`) > width) last = last.slice(0, -1);
+  kept[maxLines - 1] = `${last.trimEnd()}...`;
+  return kept;
+}
+
 /** A readable landscape PDF: header + summary + a KEY-column table (the full column
- *  set lives in the CSV/XLSX; a PDF table that wide is unreadable). */
-export function exportResultsPdf(data: AssessmentResults): void {
+ *  set lives in the CSV/XLSX; a PDF table that wide is unreadable). Each name carries
+ *  a smaller "email · phone" line, a row is as tall as its wrapped cells, and the
+ *  column header repeats on every page. */
+export function buildResultsPdf(data: AssessmentResults): jsPDF {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
   const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
   let y = 40;
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(15);
-  doc.text(data.assessment.title, 40, y);
-  y += 18;
+  for (const line of wrapText(doc, data.assessment.title, W - 80, 2)) {
+    doc.text(line, 40, y);
+    y += 18;
+  }
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(100);
@@ -105,14 +134,32 @@ export function exportResultsPdf(data: AssessmentResults): void {
   ]
     .filter(Boolean)
     .join('   ·   ');
-  doc.text(meta, 40, y);
-  y += 20;
+  for (const line of wrapText(doc, meta, W - 80, 3)) {
+    doc.text(line, 40, y);
+    y += 12;
+  }
+  y += 8;
   doc.setTextColor(0);
 
-  const cols: Array<{ h: string; w: number; get: (r: AssessmentResults['rows'][number]) => string }> = [
+  const cols: Array<{
+    h: string;
+    w: number;
+    get: (r: ResultRow) => string;
+    /** Wrap to this many lines (default 1 - ellipsized). */
+    maxLines?: number;
+    /** A smaller grey line under the cell. */
+    sub?: (r: ResultRow) => string;
+  }> = [
     { h: '#', w: 26, get: (r) => String(r.rank) },
-    { h: 'Name', w: 110, get: (r) => r.fullName ?? '' },
-    { h: 'College', w: 130, get: (r) => r.collegeName ?? '' },
+    {
+      h: 'Name',
+      w: 190,
+      get: (r) => r.fullName || '-',
+      maxLines: 3,
+      sub: (r) => [r.email, r.phone].filter(Boolean).join(' · '),
+    },
+    // Legal college names run long ("... (Autonomous), <city>, <state>") - allow a 4th line.
+    { h: 'College', w: 146, get: (r) => r.collegeName ?? '', maxLines: 4 },
     { h: 'Department', w: 64, get: (r) => branchShort(r.branch) },
     { h: 'Score', w: 48, get: (r) => `${r.score}/${r.total}` },
     { h: '%', w: 30, get: (r) => String(r.scorePct) },
@@ -145,21 +192,43 @@ export function exportResultsPdf(data: AssessmentResults): void {
   drawHeader();
 
   for (const r of data.rows) {
-    if (y > doc.internal.pageSize.getHeight() - 30) {
+    // Measure first: the row is as tall as its tallest wrapped cell, and a row that
+    // won't fit starts the next page (under a repeated header) instead of overflowing.
+    doc.setFontSize(PDF_FONT);
+    const main = cols.map((c) => wrapText(doc, c.get(r), c.w - 4, c.maxLines ?? 1));
+    doc.setFontSize(PDF_SUB_FONT);
+    const sub = cols.map((c) => (c.sub ? wrapText(doc, c.sub(r), c.w - 4, 2) : []));
+    const rowH = Math.max(
+      PDF_MIN_ROW,
+      ...main.map((lines, i) => PDF_PAD + lines.length * PDF_LINE + sub[i].length * PDF_SUB_LINE + 2),
+    );
+    if (y + rowH > H - 30) {
       doc.addPage('a4', 'landscape');
       y = 40;
       drawHeader();
     }
+
     let x = 44;
-    for (const c of cols) {
-      const text = doc.splitTextToSize(c.get(r), c.w - 4)[0] ?? '';
-      doc.text(text, x, y + 11);
+    cols.forEach((c, i) => {
+      doc.setFontSize(PDF_FONT);
+      main[i].forEach((line, n) => doc.text(line, x, y + PDF_PAD + 7 + n * PDF_LINE));
+      if (sub[i].length) {
+        const top = y + PDF_PAD + main[i].length * PDF_LINE;
+        doc.setFontSize(PDF_SUB_FONT);
+        doc.setTextColor(100, 116, 139);
+        sub[i].forEach((line, n) => doc.text(line, x, top + 6 + n * PDF_SUB_LINE));
+        doc.setTextColor(0);
+      }
       x += c.w;
-    }
+    });
     doc.setDrawColor(226, 232, 240);
-    doc.line(40, y + 15, W - 40, y + 15);
-    y += 16;
+    doc.line(40, y + rowH - 1, W - 40, y + rowH - 1);
+    y += rowH;
   }
 
-  doc.save(`${fileBase(data)}.pdf`);
+  return doc;
+}
+
+export function exportResultsPdf(data: AssessmentResults): void {
+  buildResultsPdf(data).save(`${fileBase(data)}.pdf`);
 }
