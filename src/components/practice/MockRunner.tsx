@@ -72,7 +72,7 @@ import {
   needsAssessmentDetails,
   type DetailKey,
 } from '@/shared/assessment-details';
-import { requestAssessmentFullscreen } from '@/lib/proctoring/fullscreen';
+import { exitAssessmentFullscreen, requestAssessmentFullscreen } from '@/lib/proctoring/fullscreen';
 import { authToken } from '@/store/auth';
 import { hasPreviewHint, roleHint } from '@/lib/session-hints';
 
@@ -733,7 +733,11 @@ export function MockRunner({
           full-bleed runner backdrop can't clip or tint it. */}
       <UpgradeModal
         open={upgradeMsg !== null}
-        onClose={() => setUpgradeMsg(null)}
+        onClose={() => {
+          setUpgradeMsg(null);
+          // The start was refused, so no attempt exists - undo the Start click's fullscreen.
+          if (proctored && !attemptIdRef.current) exitAssessmentFullscreen();
+        }}
         title="Upgrade for unlimited mocks"
         message={upgradeMsg ?? undefined}
       />
@@ -868,8 +872,11 @@ export function MockRunner({
                   setShowDetails(false);
                   setServerMissing([]);
                   setDetailsNotice(null);
-                  // A drive returns to its own instructions screen (which releases the camera).
+                  // A drive returns to its own instructions screen (which releases the camera,
+                  // and the runner's unmount leaves fullscreen). Anywhere else we stay on this
+                  // intro, so undo the Start click's fullscreen - no attempt exists yet.
                   if (scheduledId && onExit) onExit();
+                  else exitAssessmentFullscreen();
                 }}
               />
             ) : null}

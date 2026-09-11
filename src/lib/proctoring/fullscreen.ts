@@ -24,3 +24,15 @@ export function requestAssessmentFullscreen(): void {
     /* ignore - the in-exam prompt offers it again from a real click */
   }
 }
+
+/** Undo a Start click's fullscreen when no attempt began (details gate cancelled, start
+ *  refused). Proctoring listeners attach only once an attempt starts, so this is never
+ *  counted as a violation. Never throws. */
+export function exitAssessmentFullscreen(): void {
+  if (typeof document === 'undefined' || !document.fullscreenElement) return;
+  try {
+    void document.exitFullscreen?.().catch(() => {});
+  } catch {
+    /* ignore */
+  }
+}
