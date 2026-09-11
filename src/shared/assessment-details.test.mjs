@@ -65,6 +65,10 @@ test('rule 2: text validity (>= 2 letters, <= 200 chars)', () => {
   assert.equal(isValidDetailText('a'.repeat(201)), false);
   // Length is measured AFTER cleaning.
   assert.equal(isValidDetailText(`  ${'a'.repeat(200)}  `), true);
+  // ...and in code points (like the backend and Postgres varchar), not UTF-16 units.
+  assert.equal(isValidDetailText(`${'\u{1F600}'.repeat(150)}ab`), true);
+  assert.equal(isValidDetailText('\u{20000}'.repeat(200)), true);
+  assert.equal(isValidDetailText('\u{20000}'.repeat(201)), false);
 });
 
 test('rule 3: department codes', () => {

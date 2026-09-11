@@ -2,6 +2,9 @@
  * SHARED CONTRACT - pre-assessment details rules (ADR-011 duplicated contract).
  * The backend implements the SAME rules for GET /me, POST /mocks/:id/start and
  * PATCH /me; change both sides together or the gate and the server disagree.
+ * Backend counterpart: src/shared/profile-details.ts (normalizePhone, cleanText,
+ * isValidText, isBranch, missingProfileDetails). Its validators take an already
+ * cleaned / normalized value; the ones here take the raw value and clean it first.
  *
  * Kept dependency-free (no `@/` imports, erasable TypeScript only) so it can be
  * mirrored as-is and exercised directly by `node --test`.
@@ -10,14 +13,14 @@
  *                       "+91", or "91" / "0" when that leaves 10 digits. Valid iff
  *                       the result is ^[6-9]\d{9}$. Persist the normalized 10 digits.
  *   Rule 2  Name/college NFKC, drop format chars (\p{Cf}), collapse whitespace, trim.
- *                       Valid iff >= 2 letters (\p{L}) and <= 200 characters.
+ *                       Valid iff >= 2 letters (\p{L}) and <= 200 code points.
  *   Rule 3  Department  one of CSE, IT, ECE, EEE, MECH, CIVIL, OTHER.
  *   Rule 5  Complete    STUDENT only: valid name AND non-blank email AND a resolved
  *                       college that is canonical or valid by rule 2 AND department
  *                       AND valid phone. Other roles are never gated.
  */
 
-/** Max characters for a name / college value (rule 2). */
+/** Max length of a cleaned name / college value, in code points (rule 2). */
 export const DETAIL_TEXT_MAX = 200;
 /** Input cap for a phone field - room for "+91 (987) 654-3210" style formatting. */
 export const PHONE_INPUT_MAX = 16;
@@ -57,7 +60,8 @@ export function cleanDetailText(raw: string | null | undefined): string {
 
 export function isValidDetailText(raw: string | null | undefined): boolean {
   const s = cleanDetailText(raw);
-  return s.length <= DETAIL_TEXT_MAX && (s.match(/\p{L}/gu)?.length ?? 0) >= 2;
+  // Code points, not UTF-16 units - the backend's measure, and how Postgres counts varchar(200).
+  return [...s].length <= DETAIL_TEXT_MAX && (s.match(/\p{L}/gu)?.length ?? 0) >= 2;
 }
 
 // ── Rule 3: department ───────────────────────────────────────────────────────
