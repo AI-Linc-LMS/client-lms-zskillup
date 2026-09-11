@@ -15,12 +15,9 @@ import {
 } from '@/lib/api/admin';
 import { getFinancialsPayments } from '@/lib/api/financials';
 import type { FinancialsPaymentsDto } from '@/shared/dto/financials.dto';
+import { toCsv } from '@/lib/csv';
 
 const BOM = String.fromCharCode(0xfeff);
-function toCsv(headers: string[], rows: (string | number)[][]): string {
-  const esc = (v: string | number) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  return [headers.map(esc).join(','), ...rows.map((r) => r.map(esc).join(','))].join('\r\n');
-}
 function download(name: string, csv: string) {
   const url = URL.createObjectURL(new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' }));
   const a = document.createElement('a');

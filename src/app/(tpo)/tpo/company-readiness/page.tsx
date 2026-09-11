@@ -15,12 +15,9 @@ import { CompanyHeatmap } from '@/components/tpo/CompanyHeatmap';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { toCsv } from '@/lib/csv';
 
 const BOM = String.fromCharCode(0xfeff);
-function toCsv(headers: string[], rows: (string | number | null)[][]): string {
-  const esc = (v: string | number | null) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  return [headers.map(esc).join(','), ...rows.map((r) => r.map(esc).join(','))].join('\r\n');
-}
 function download(filename: string, csv: string) {
   const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);

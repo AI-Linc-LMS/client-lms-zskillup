@@ -9,7 +9,7 @@ import { AdminAssessmentCreator } from '@/components/superadmin/AdminAssessmentC
 import { ResultsReport } from '@/components/assessment/ResultsReport';
 import { cn } from '@/lib/utils';
 import { ApiRequestError } from '@/lib/api/types';
-import { describeError } from '@/lib/api/errors';
+import { describeAccessError, describeError } from '@/lib/api/errors';
 import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
 import { listAdminMocks, type AdminMockRow } from '@/lib/api/admin';
 import {
@@ -30,6 +30,8 @@ export function SchedulingAdmin() {
   const [companies, setCompanies] = useState<ApiCompany[]>([]);
   const [mocks, setMocks] = useState<AdminMockRow[]>([]);
   const [err, setErr] = useState<string | null>(null);
+  /** The list itself failed to load - shown with the table, not in the collapsed form. */
+  const [loadErr, setLoadErr] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   // create form
@@ -76,8 +78,10 @@ export function SchedulingAdmin() {
     setResults(null);
     try {
       setResults(await getAssessmentResults(id));
-    } catch {
-      /* ignore */
+    } catch (e) {
+      // Was swallowed, so the modal just vanished. A college-limited admin gets 403 on
+      // another college's drive - say why.
+      toast.error(describeAccessError(e, `You can't view these results ${NOT_YOUR_COLLEGE}`, 'Could not load results.'));
     } finally {
       setResultsLoading(false);
     }
@@ -85,8 +89,11 @@ export function SchedulingAdmin() {
 
   const load = () =>
     listScheduledAssessments()
-      .then(setRows)
-      .catch((e) => setErr(e instanceof ApiRequestError ? e.message : 'Could not load.'));
+      .then((list) => {
+        setRows(list);
+        setLoadErr(null);
+      })
+      .catch((e) => setLoadErr(describeError(e, 'Could not load scheduled assessments.')));
 
   useEffect(() => {
     void load();
@@ -134,6 +141,8 @@ export function SchedulingAdmin() {
     try {
       await deleteScheduledAssessment(id);
       await load();
+    } catch (e) {
+      toast.error(describeAccessError(e, `You can't delete this assessment ${NOT_YOUR_COLLEGE}`, 'Could not delete the assessment.'));
     } finally {
       setBusyId(null);
     }
@@ -144,6 +153,8 @@ export function SchedulingAdmin() {
     try {
       await updateScheduledAssessment(r.id, { isActive: !r.isActive });
       await load();
+    } catch (e) {
+      toast.error(describeAccessError(e, `You can't change this assessment ${NOT_YOUR_COLLEGE}`, 'Could not update the assessment.'));
     } finally {
       setBusyId(null);
     }
@@ -343,6 +354,13 @@ export function SchedulingAdmin() {
         {rows ? <span className="ml-auto text-xs font-medium text-slate-500">{filtered.length} of {rows.length}</span> : null}
       </div>
 
+      {/* A failed REFRESH keeps the last list on screen; say it may be stale. */}
+      {rows && loadErr ? (
+        <p role="alert" className="rounded-md bg-red-50 p-3 text-sm font-medium text-red-700 ring-1 ring-red-200">
+          {loadErr}
+        </p>
+      ) : null}
+
       {/* List */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <div className="overflow-x-auto">
@@ -362,7 +380,13 @@ export function SchedulingAdmin() {
             {rows === null ? (
               <tr>
                 <td colSpan={7} className="px-4 py-12 text-center">
-                  <Loader2 className="mx-auto size-5 animate-spin text-slate-500" />
+                  {loadErr ? (
+                    <p role="alert" className="text-sm font-medium text-red-700">
+                      {loadErr}
+                    </p>
+                  ) : (
+                    <Loader2 className="mx-auto size-5 animate-spin text-slate-500" />
+                  )}
                 </td>
               </tr>
             ) : filtered.length === 0 ? (
@@ -488,7 +512,7 @@ export function SchedulingAdmin() {
                       toast.success('Results published — students can now see their report.');
                       await openResults(id); // refetch so the button reflects the released state
                     } catch (e) {
-                      toast.error(describeError(e, 'Could not publish results.'));
+                      toast.error(describeAccessError(e, `You can't publish these results ${NOT_YOUR_COLLEGE}`, 'Could not publish results.'));
                     }
                   }}
                 />
@@ -500,6 +524,10 @@ export function SchedulingAdmin() {
     </div>
   );
 }
+
+/** 403 copy tail. The backend scopes a college-limited admin to their assigned colleges'
+ *  drives (results / publish / update / delete); SUPER_ADMIN and unassigned admins see all. */
+const NOT_YOUR_COLLEGE = "— this assessment belongs to a college that isn't assigned to you.";
 
 const labelCls = 'text-[10px] font-bold uppercase tracking-widest text-slate-500';
 const inputCls =

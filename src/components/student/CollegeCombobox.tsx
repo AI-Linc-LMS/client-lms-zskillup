@@ -17,12 +17,15 @@ export function CollegeCombobox({
   collegeName,
   onSelect,
   className,
+  describedBy,
 }: {
   collegeId: string;
   collegeName: string;
   /** id is '' when the student entered a not-yet-listed college via "Other". */
   onSelect: (v: { id: string; name: string }) => void;
   className?: string;
+  /** id of a message describing the picker (e.g. a field error), for aria-describedby. */
+  describedBy?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -91,6 +94,7 @@ export function CollegeCombobox({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
+        aria-describedby={describedBy}
         className="flex w-full items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-sm transition focus:border-[#f5b400] focus:outline-none focus:ring-2 focus:ring-[#f5b400]/25"
       >
         <span className={cn('truncate', collegeId || collegeName ? 'text-navy' : 'text-slate-400')}>

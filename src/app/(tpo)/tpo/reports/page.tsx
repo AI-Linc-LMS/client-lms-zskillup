@@ -20,14 +20,9 @@ import { useTpoConsole } from '@/components/tpo/TpoConsole';
 import { BentoCard } from '@/components/tpo/ui';
 import { Button } from '@/components/ui/button';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
+import { toCsv } from '@/lib/csv';
 
 const BAND_LABEL: Record<string, string> = { READY: 'Ready', IN_TRAINING: 'In training', AT_RISK: 'At risk' };
-
-/** Minimal RFC-4180-ish CSV: quote every field, double internal quotes. */
-function toCsv(headers: string[], rows: (string | number | null)[][]): string {
-  const esc = (v: string | number | null) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  return [headers.map(esc).join(','), ...rows.map((r) => r.map(esc).join(','))].join('\r\n');
-}
 
 const BOM = String.fromCharCode(0xfeff); // Excel-friendly UTF-8 marker
 
