@@ -208,6 +208,20 @@ function profilePatch(v: Values, base: Values): UpdateMePayload {
   return patch;
 }
 
+/**
+ * After a save: take what the server stored (normalized phone, canonical college), except
+ * a field the student edited while the request was in flight - that newer edit stays, and
+ * shows as unsaved, instead of silently vanishing.
+ */
+function adoptSaved(latest: Values, sent: Values, saved: Values): Values {
+  const out: Values = { ...latest };
+  const take = <K extends keyof Values>(k: K) => {
+    if (JSON.stringify(latest[k]) === JSON.stringify(sent[k])) out[k] = saved[k];
+  };
+  (Object.keys(saved) as (keyof Values)[]).forEach(take);
+  return out;
+}
+
 /** Load an image File, center-crop to a square, downscale to `size`px, and return a
  *  compressed JPEG data URL. Keeps the stored avatar tiny (~15-30KB) so it fits the
  *  text column + leaderboard payload without any object-storage infra. */
@@ -485,10 +499,12 @@ export default function ProfilePage() {
         if (Object.keys(patch).length > 0) {
           const updated = await updateMe(patch);
           setMe(updated);
-          // Re-seed from what the server stored (normalized phone, canonical college).
-          current = valuesFromMe(updated);
-          setV(current);
-          setBase(current);
+          // Re-seed from what the server stored (normalized phone, canonical college),
+          // keeping anything typed while the save was in flight (adoptSaved).
+          const stored = valuesFromMe(updated);
+          current = stored;
+          setV((latest) => adoptSaved(latest, v, stored));
+          setBase(stored);
         }
         setBaseline(snap(current));
         // Flip the dashboard banner + feature lock gates (server-driven completion)
@@ -714,6 +730,7 @@ export default function ProfilePage() {
                 <CollegeCombobox
                   collegeId={v.collegeId}
                   collegeName={v.collegeName}
+                  describedBy={detailErr.college ? 'profile-college-error' : undefined}
                   onSelect={({ id, name }) => {
                     set('collegeId', id);
                     set('collegeName', name);
@@ -726,7 +743,9 @@ export default function ProfilePage() {
                   </p>
                 ) : null}
                 {detailErr.college ? (
-                  <p role="alert" className="mt-1 text-xs font-medium text-rose-500">{detailErr.college}</p>
+                  <p id="profile-college-error" role="alert" className="mt-1 text-xs font-medium text-rose-500">
+                    {detailErr.college}
+                  </p>
                 ) : null}
               </Field>
               <Field label="Department" required done={!!v.branch}>

@@ -274,7 +274,7 @@ export function PreAssessmentDetails({
         role="dialog"
         aria-modal="true"
         aria-labelledby="pad-title"
-        aria-describedby="pad-desc"
+        aria-describedby={emailMissing ? 'pad-desc pad-email-error' : 'pad-desc'}
         className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 shadow-lg"
       >
         <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Before you start</p>
@@ -368,7 +368,7 @@ export function PreAssessmentDetails({
             <div>
               <Locked label="Email" value={me.email?.trim() ? me.email : 'Not on file'} />
               {emailMissing ? (
-                <p className="mt-1 text-xs font-medium text-red-700">
+                <p id="pad-email-error" className="mt-1 text-xs font-medium text-red-700">
                   Your account has no email on file, so this can’t be completed here. Please
                   contact your placement team.
                 </p>
@@ -410,7 +410,12 @@ export function PreAssessmentDetails({
             <Button ref={cancelRef} type="button" variant="ghost" onClick={onCancel} disabled={busy}>
               Cancel
             </Button>
-            <Button ref={primaryRef} type="submit" disabled={busy || emailMissing}>
+            <Button
+              ref={primaryRef}
+              type="submit"
+              disabled={busy || emailMissing}
+              aria-describedby={emailMissing ? 'pad-email-error' : undefined}
+            >
               {busy ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
               Save &amp; start
             </Button>
