@@ -20,7 +20,7 @@ import {
   User,
   X,
 } from 'lucide-react';
-import { getMe, updateMe, type ApiMe } from '@/lib/api/me';
+import { getMe, updateMe, type ApiMe, type UpdateMePayload } from '@/lib/api/me';
 import { ResumeForm } from '@/components/resume/ResumeForm';
 import { getResume, listResumes, upsertPrimaryResume } from '@/lib/api/resumes';
 import {
@@ -38,7 +38,17 @@ import { SKILL_OPTIONS } from '@/lib/profile/skill-options';
 import { useMySubscription } from '@/hooks/useMySubscription';
 import { CollegeCombobox } from '@/components/student/CollegeCombobox';
 import { getMyRegistrations, type ApiRegistration } from '@/lib/api/registrations';
-import { ApiRequestError } from '@/lib/api/types';
+import { ApiRequestError, apiFieldErrors } from '@/lib/api/types';
+import { BRANCH_OPTIONS, type BranchCode } from '@/lib/branch';
+import {
+  DETAIL_TEXT_MAX,
+  PHONE_INPUT_MAX,
+  cleanDetailText,
+  isBranchCode,
+  isValidDetailText,
+  isValidPhone,
+  normalizePhone,
+} from '@/shared/assessment-details';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { MySubscriptionCard } from '@/components/billing/MySubscriptionCard';
 import { ActiveSubscriptions } from '@/components/billing/ActiveSubscriptions';
@@ -73,18 +83,130 @@ type Values = {
   roles: string[];
   /** Profile photo - hosted URL or a small client-resized JPEG data URL; '' = none. */
   avatarUrl: string;
+  /** Department (student_branch enum); '' = not set. */
+  branch: BranchCode | '';
 };
 
 const EMPTY: Values = {
-  fullName: '', phone: '', course: '', yearOfStudy: '', collegeId: '', collegeName: '', passoutYear: '', skills: [], roles: [], avatarUrl: '',
+  fullName: '', phone: '', course: '', yearOfStudy: '', collegeId: '', collegeName: '', passoutYear: '', skills: [], roles: [], avatarUrl: '', branch: '',
 };
 
 const COURSES = COURSE_OPTIONS;
 
-/** Keep only digits, capped at 10 — a bare 10-digit mobile number (no country code). */
-const sanitizePhone = (s: string) => s.replace(/\D/g, '').slice(0, 10);
-/** A valid phone is exactly 10 digits. */
-const isValidPhone = (s: string) => s.replace(/\D/g, '').length === 10;
+/** Phone input filter: digits plus the separators the phone rule normalizes away
+ *  (+ - . ( ) space). What gets saved is the normalized 10 digits. */
+const sanitizePhone = (s: string) => s.replace(/[^\d+\-.()\s]/g, '');
+
+/** The assessment-report details a student may correct but never clear. */
+type DetailField = 'fullName' | 'phone' | 'college' | 'branch';
+type DetailErrors = Partial<Record<DetailField, string>>;
+
+/** Server field names (PATCH /me errors) → the form field they belong to. */
+const DETAIL_FIELD_OF: Record<string, DetailField> = {
+  fullName: 'fullName',
+  phone: 'phone',
+  collegeName: 'college',
+  collegeId: 'college',
+  college: 'college',
+  branch: 'branch',
+};
+
+const sameList = (a: string[], b: string[]) => JSON.stringify([...a].sort()) === JSON.stringify([...b].sort());
+
+/** Form values from a /me payload - one mapping for load, save and discard. */
+function valuesFromMe(m: ApiMe): Values {
+  const p = m.studentProfile;
+  const branch = p?.branch;
+  return {
+    fullName: m.fullName ?? '',
+    phone: p?.phone ?? '',
+    course: p?.course ?? '',
+    yearOfStudy: p?.yearOfStudy ?? '',
+    // Fall back to the account-level college. A student enrolled by CSV (or a
+    // Google sign-up that inherited a sibling's college) can have
+    // auth.users.college_id set with NO student_profiles row at all - this form
+    // then loaded blank and a save sent collegeId:null, detaching them from the
+    // college that pays for their seat. Prefill from the FK the server already
+    // reports so the form can only ever confirm it, never silently drop it.
+    collegeId: p?.collegeId ?? m.collegeId ?? '',
+    collegeName: m.collegeName ?? p?.collegeName ?? '',
+    passoutYear: p?.passoutYear ?? '',
+    skills: p?.skills ?? [],
+    roles: p?.rolesInterested ?? [],
+    avatarUrl: m.avatarUrl ?? '',
+    branch: isBranchCode(branch) ? branch : '',
+  };
+}
+
+/**
+ * Inline errors for the report details. A student may CORRECT their name, college,
+ * department and phone but never clear one that is on file. Only a CHANGED field is
+ * judged, so an untouched legacy value (an old 7-digit phone, a one-letter name) never
+ * blocks saving the rest of the profile.
+ */
+function detailErrorsFor(v: Values, base: Values): DetailErrors {
+  const e: DetailErrors = {};
+  if (v.fullName !== base.fullName) {
+    if (!v.fullName.trim()) {
+      if (base.fullName.trim()) e.fullName = 'Your name is required — you can correct it, but not remove it.';
+    } else if (!isValidDetailText(v.fullName)) {
+      e.fullName = 'Enter your full name (at least 2 letters).';
+    }
+  }
+  if (v.phone !== base.phone) {
+    if (!v.phone.trim()) {
+      if (base.phone.trim()) e.phone = 'Your contact number is required — you can correct it, but not remove it.';
+    } else if (!isValidPhone(v.phone)) {
+      e.phone = 'Enter a valid 10-digit mobile number.';
+    }
+  }
+  if (v.collegeId !== base.collegeId || v.collegeName !== base.collegeName) {
+    if (!v.collegeId && !v.collegeName.trim()) {
+      if (base.collegeId || base.collegeName.trim()) e.college = 'Your college is required — pick the right one instead.';
+    } else if (!v.collegeId && !isValidDetailText(v.collegeName)) {
+      e.college = 'Enter your college name (at least 2 letters).';
+    }
+  }
+  if (v.branch !== base.branch && !v.branch && base.branch) {
+    e.branch = 'Your department is required — pick the right one instead.';
+  }
+  return e;
+}
+
+/**
+ * The PATCH /me body: ONLY keys that changed. Report details are never sent blank (a
+ * cleared filled one is blocked by detailErrorsFor; empty-to-empty is simply omitted)
+ * and go out normalized. Other optional fields are still cleared with an explicit null -
+ * undefined is dropped by JSON.stringify, which made the backend keep the old value.
+ */
+function profilePatch(v: Values, base: Values): UpdateMePayload {
+  const patch: UpdateMePayload = {};
+  if (v.fullName !== base.fullName && v.fullName.trim()) patch.fullName = cleanDetailText(v.fullName);
+  if (v.phone !== base.phone && v.phone.trim()) patch.phone = normalizePhone(v.phone);
+  if (v.branch !== base.branch && v.branch) patch.branch = v.branch;
+  if (v.collegeId !== base.collegeId || v.collegeName !== base.collegeName) {
+    // The canonical id is the source of truth - the server sets auth.users.college_id
+    // from it and denormalises the display name (it ignores our name when an id is set).
+    // The free-text name is what persists the "Add it / Other" flow, which has no id,
+    // so it is always sent alongside a switch away from a listed college.
+    if (v.collegeId) {
+      if (v.collegeId !== base.collegeId) patch.collegeId = v.collegeId;
+      if (v.collegeName.trim()) patch.collegeName = v.collegeName.trim();
+    } else if (v.collegeName.trim()) {
+      if (base.collegeId) patch.collegeId = null;
+      patch.collegeName = cleanDetailText(v.collegeName);
+    }
+  }
+  if (v.course.trim() !== base.course.trim()) patch.course = v.course.trim() || null;
+  if (v.yearOfStudy !== base.yearOfStudy) patch.yearOfStudy = v.yearOfStudy || null;
+  if (v.passoutYear !== base.passoutYear) patch.passoutYear = v.passoutYear ? Number(v.passoutYear) : null;
+  if (!sameList(v.skills, base.skills)) patch.skills = v.skills;
+  if (!sameList(v.roles, base.roles)) patch.rolesInterested = v.roles;
+  // Send the photo only when it actually changed - avoids re-uploading a ~45KB data
+  // URL on every unrelated save. '' clears it back to no photo.
+  if (v.avatarUrl !== base.avatarUrl) patch.avatarUrl = v.avatarUrl;
+  return patch;
+}
 
 /** Load an image File, center-crop to a square, downscale to `size`px, and return a
  *  compressed JPEG data URL. Keeps the stored avatar tiny (~15-30KB) so it fits the
@@ -193,7 +315,14 @@ export default function ProfilePage() {
 
   const [v, setV] = useState<Values>(EMPTY);
   const [baseline, setBaseline] = useState<string>(snap(EMPTY));
-  const set = <K extends keyof Values>(k: K, val: Values[K]) => setV((p) => ({ ...p, [k]: val }));
+  /** The last loaded/saved values - what "changed" and "on file" are judged against. */
+  const [base, setBase] = useState<Values>(EMPTY);
+  /** Field messages from the last failed save (FIELD_REQUIRED / validation); cleared on edit. */
+  const [serverFieldErrors, setServerFieldErrors] = useState<DetailErrors>({});
+  const set = <K extends keyof Values>(k: K, val: Values[K]) => {
+    setV((p) => ({ ...p, [k]: val }));
+    setServerFieldErrors((e) => (Object.keys(e).length ? {} : e));
+  };
   // Course "Other" escape hatch: when the student's degree isn't in the list they
   // pick "Other" and type it in a blank input. We NEVER store the literal word
   // "Other" — the custom input binds straight to `course`. A stored course that
@@ -245,26 +374,9 @@ export default function ProfilePage() {
         if (cancelled) return;
         setMe(m);
         setRegs(r);
-        const p = m.studentProfile;
-        const loaded: Values = {
-          fullName: m.fullName ?? '',
-          phone: p?.phone ?? '',
-          course: p?.course ?? '',
-          yearOfStudy: p?.yearOfStudy ?? '',
-          // Fall back to the account-level college. A student enrolled by CSV (or a
-          // Google sign-up that inherited a sibling's college) can have
-          // auth.users.college_id set with NO student_profiles row at all - this form
-          // then loaded blank and a save sent collegeId:null, detaching them from the
-          // college that pays for their seat. Prefill from the FK the server already
-          // reports so the form can only ever confirm it, never silently drop it.
-          collegeId: p?.collegeId ?? m.collegeId ?? '',
-          collegeName: p?.collegeName ?? '',
-          passoutYear: p?.passoutYear ?? '',
-          skills: p?.skills ?? [],
-          roles: p?.rolesInterested ?? [],
-          avatarUrl: m.avatarUrl ?? '',
-        };
+        const loaded = valuesFromMe(m);
         setV(loaded);
+        setBase(loaded);
         setBaseline(snap(loaded));
 
         // The profile edits the student's PRIMARY résumé - the first record the
@@ -294,7 +406,7 @@ export default function ProfilePage() {
   const checklist = useMemo(
     () => [
       { label: 'Full name', done: !!v.fullName.trim() },
-      { label: 'Phone', done: !!v.phone.trim() && isValidPhone(v.phone) },
+      { label: 'Phone', done: isValidPhone(v.phone) },
       { label: 'Course / degree', done: !!v.course.trim() },
       { label: 'Year of study', done: !!v.yearOfStudy },
       { label: 'College', done: !!v.collegeName.trim() },
@@ -308,8 +420,11 @@ export default function ProfilePage() {
   const profileDirty = snap(v) !== baseline;
   const resumeDirty = resume !== null && JSON.stringify(resume) !== JSON.stringify(resumeBase);
   const dirty = profileDirty || resumeDirty;
-  // Only flag an INVALID (non-empty) phone - empty is fine until they complete the profile.
-  const phoneInvalid = !!v.phone.trim() && !isValidPhone(v.phone);
+  // Report details are judged only when changed (detailErrorsFor), so legacy data never
+  // blocks saving other fields. A server field message shows until the next edit.
+  const detailErrors = useMemo(() => detailErrorsFor(v, base), [v, base]);
+  const detailErr: DetailErrors = { ...serverFieldErrors, ...detailErrors };
+  const detailBlocked = Object.keys(detailErrors).length > 0;
 
   const addSkill = (raw: string) => {
     const s = raw.trim();
@@ -361,33 +476,21 @@ export default function ProfilePage() {
     setSaving(true);
     setErr(null);
     setSaved(false);
+    setServerFieldErrors({});
     try {
+      let current = v;
       if (profileDirty) {
-        // Send an explicit null (not undefined) for empty fields so cleared values
-        // actually persist - undefined is dropped by JSON.stringify, which made the
-        // backend skip the field and keep the old value (profile "reverted" on refresh).
-        const updated = await updateMe({
-          fullName: v.fullName.trim() || null,
-          phone: v.phone.trim() || null,
-          course: v.course.trim() || null,
-          yearOfStudy: v.yearOfStudy || null,
-          // The canonical id is the source of truth - the server sets auth.users
-          // .college_id from it and denormalises the display name. We ALSO send the
-          // name: for the "Add it / Other" free-text flow there is no collegeId, and
-          // without the name the chosen college was never persisted, so the College
-          // field stayed incomplete forever. (When collegeId IS set the server
-          // ignores this and uses the canonical name.)
-          collegeId: v.collegeId || null,
-          collegeName: v.collegeName.trim() || null,
-          passoutYear: v.passoutYear ? Number(v.passoutYear) : null,
-          skills: v.skills,
-          rolesInterested: v.roles,
-          // Send the photo only when it actually changed - avoids re-uploading a
-          // ~45KB data URL on every unrelated save. '' clears it back to no photo.
-          ...(v.avatarUrl !== (me?.avatarUrl ?? '') ? { avatarUrl: v.avatarUrl } : {}),
-        });
-        setMe(updated);
-        setBaseline(snap(v));
+        // Only what changed goes out (profilePatch) - never a blank report detail.
+        const patch = profilePatch(v, base);
+        if (Object.keys(patch).length > 0) {
+          const updated = await updateMe(patch);
+          setMe(updated);
+          // Re-seed from what the server stored (normalized phone, canonical college).
+          current = valuesFromMe(updated);
+          setV(current);
+          setBase(current);
+        }
+        setBaseline(snap(current));
         // Flip the dashboard banner + feature lock gates (server-driven completion)
         // immediately, rather than leaving them stale until the next window focus.
         notifyProfileUpdated();
@@ -395,7 +498,7 @@ export default function ProfilePage() {
       // Silently keep the résumé in sync with the profile. Completing the profile
       // is FREE (the primary-résumé upsert is paywall-exempt), so this always runs.
       if (resume) {
-        const next = syncedResume(resume, v, me?.email ?? '');
+        const next = syncedResume(resume, current, me?.email ?? '');
         if (JSON.stringify(next) !== JSON.stringify(resumeBase)) {
           await persistResume(next);
           setResume(next);
@@ -404,7 +507,20 @@ export default function ProfilePage() {
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (e) {
-      setErr(e instanceof ApiRequestError ? e.message : 'Could not save. Please try again.');
+      // FIELD_REQUIRED / validation errors name a field - show it next to that input.
+      const byField: DetailErrors = {};
+      for (const [field, msg] of Object.entries(apiFieldErrors(e))) {
+        const key = DETAIL_FIELD_OF[field];
+        if (key) byField[key] = msg;
+      }
+      setServerFieldErrors(byField);
+      setErr(
+        Object.keys(byField).length > 0
+          ? 'Please fix the highlighted field.'
+          : e instanceof ApiRequestError
+            ? e.message
+            : 'Could not save. Please try again.',
+      );
     } finally {
       setSaving(false);
     }
@@ -413,19 +529,8 @@ export default function ProfilePage() {
   const discard = () => {
     if (!me) return;
     setErr(null);
-    const p = me.studentProfile;
-    setV({
-      fullName: me.fullName ?? '',
-      phone: p?.phone ?? '',
-      course: p?.course ?? '',
-      yearOfStudy: p?.yearOfStudy ?? '',
-      collegeId: p?.collegeId ?? '',
-      collegeName: p?.collegeName ?? '',
-      passoutYear: p?.passoutYear ?? '',
-      skills: p?.skills ?? [],
-      roles: p?.rolesInterested ?? [],
-      avatarUrl: me.avatarUrl ?? '',
-    });
+    setServerFieldErrors({});
+    setV(base);
     setResume(resumeBase);
   };
 
@@ -525,20 +630,35 @@ export default function ProfilePage() {
           <SectionCard data-tour="profile:personal" icon={User} title="Personal" subtitle="How we address you and reach out.">
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Full name" required done={!!v.fullName.trim()}>
-                <input value={v.fullName} onChange={(e) => set('fullName', e.target.value)} className={inputCls} placeholder="Your name" />
+                <input
+                  value={v.fullName}
+                  onChange={(e) => set('fullName', e.target.value)}
+                  maxLength={DETAIL_TEXT_MAX}
+                  className={cn(inputCls, detailErr.fullName && errInputCls)}
+                  placeholder="Your name"
+                  aria-label="Full name"
+                  aria-invalid={!!detailErr.fullName}
+                  aria-describedby={detailErr.fullName ? 'profile-fullName-error' : undefined}
+                />
+                {detailErr.fullName ? (
+                  <p id="profile-fullName-error" className="mt-1 text-xs font-medium text-rose-500">{detailErr.fullName}</p>
+                ) : null}
               </Field>
-              <Field label="Phone" required done={!!v.phone.trim() && isValidPhone(v.phone)}>
+              <Field label="Phone" required done={isValidPhone(v.phone)}>
                 <input
                   value={v.phone}
                   onChange={(e) => set('phone', sanitizePhone(e.target.value))}
-                  inputMode="numeric"
-                  maxLength={10}
-                  className={cn(inputCls, phoneInvalid && 'border-rose-300 focus:border-rose-400 focus:ring-rose-200')}
+                  inputMode="tel"
+                  autoComplete="tel"
+                  maxLength={PHONE_INPUT_MAX}
+                  className={cn(inputCls, detailErr.phone && errInputCls)}
                   placeholder="10-digit mobile number"
-                  aria-invalid={phoneInvalid}
+                  aria-label="Phone"
+                  aria-invalid={!!detailErr.phone}
+                  aria-describedby={detailErr.phone ? 'profile-phone-error' : undefined}
                 />
-                {phoneInvalid ? (
-                  <p className="mt-1 text-xs font-medium text-rose-500">Enter a valid 10-digit mobile number.</p>
+                {detailErr.phone ? (
+                  <p id="profile-phone-error" className="mt-1 text-xs font-medium text-rose-500">{detailErr.phone}</p>
                 ) : null}
               </Field>
             </div>
@@ -604,6 +724,28 @@ export default function ProfilePage() {
                     Currently saved as “{v.collegeName}”. Pick it from the list so your
                     college leaderboard works.
                   </p>
+                ) : null}
+                {detailErr.college ? (
+                  <p role="alert" className="mt-1 text-xs font-medium text-rose-500">{detailErr.college}</p>
+                ) : null}
+              </Field>
+              <Field label="Department" required done={!!v.branch}>
+                <select
+                  value={v.branch}
+                  onChange={(e) => set('branch', e.target.value as BranchCode | '')}
+                  className={cn(inputCls, detailErr.branch && errInputCls)}
+                  aria-label="Department"
+                  aria-invalid={!!detailErr.branch}
+                  aria-describedby={detailErr.branch ? 'profile-branch-error' : undefined}
+                >
+                  {/* Once a department is on file it can be changed, never cleared. */}
+                  <option value="" disabled={!!base.branch}>Select</option>
+                  {BRANCH_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+                {detailErr.branch ? (
+                  <p id="profile-branch-error" className="mt-1 text-xs font-medium text-rose-500">{detailErr.branch}</p>
                 ) : null}
               </Field>
               <Field label="Passout year" required done={!!v.passoutYear}>
@@ -801,7 +943,9 @@ export default function ProfilePage() {
                 <Check className="size-4" /> All changes saved
               </span>
             ) : (
-              <span className="text-sm font-semibold text-slate-600">You have unsaved changes</span>
+              <span className="text-sm font-semibold text-slate-600">
+                {detailBlocked ? 'Fix the highlighted field to save' : 'You have unsaved changes'}
+              </span>
             )}
             {(dirty || err) && (
               <>
@@ -810,7 +954,7 @@ export default function ProfilePage() {
                 </button>
                 <button
                   onClick={save}
-                  disabled={saving || phoneInvalid}
+                  disabled={saving || detailBlocked}
                   className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#ffd24d] via-[#ffc42d] to-[#f5b400] px-5 py-2 text-sm font-extrabold text-[#171717] shadow-[0_10px_24px_-10px_rgba(245,180,0,0.5)] disabled:opacity-60"
                 >
                   {saving ? <Loader2 className="size-4 animate-spin" /> : err ? 'Retry' : 'Save profile'}
@@ -826,6 +970,7 @@ export default function ProfilePage() {
 
 const inputCls =
   'flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors placeholder:text-slate-500 focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30';
+const errInputCls = 'border-rose-300 focus:border-rose-400 focus:ring-rose-200';
 
 function SectionCard({
   icon: Icon,
