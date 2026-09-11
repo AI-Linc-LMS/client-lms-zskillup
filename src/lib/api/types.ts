@@ -44,3 +44,31 @@ export function describeApiError(err: unknown, fallback: string): string {
   }
   return err.message || fallback;
 }
+
+/**
+ * Per-field messages from a profile save, keyed by the server's field name, so a form
+ * can put the message next to the input instead of in one generic banner:
+ *
+ *   FIELD_REQUIRED     details { field }            → { [field]: message }
+ *   VALIDATION_FAILED  details { field: [messages] } → { [field]: "msg; msg" }
+ *
+ * Anything else → {} (callers fall back to describeApiError).
+ */
+export function apiFieldErrors(err: unknown): Record<string, string> {
+  if (!(err instanceof ApiRequestError)) return {};
+  const details = err.details;
+  if (!details || typeof details !== 'object' || Array.isArray(details)) return {};
+  if (err.code === 'FIELD_REQUIRED') {
+    const field = (details as { field?: unknown }).field;
+    return typeof field === 'string'
+      ? { [field]: err.message || 'This field is required and can’t be removed.' }
+      : {};
+  }
+  if (err.code !== 'VALIDATION_FAILED') return {};
+  const out: Record<string, string> = {};
+  for (const [field, msgs] of Object.entries(details as Record<string, unknown>)) {
+    if (Array.isArray(msgs) && msgs.length > 0) out[field] = msgs.map(String).join('; ');
+    else if (typeof msgs === 'string' && msgs) out[field] = msgs;
+  }
+  return out;
+}

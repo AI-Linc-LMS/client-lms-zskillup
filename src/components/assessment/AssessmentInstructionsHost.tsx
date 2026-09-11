@@ -10,6 +10,7 @@ import {
   type ApiScheduledAssessment,
 } from '@/lib/api/scheduling';
 import { MockRunner } from '@/components/practice/MockRunner';
+import { requestAssessmentFullscreen } from '@/lib/proctoring/fullscreen';
 import { AssessmentInstructionsGate } from './AssessmentInstructionsGate';
 
 /**
@@ -82,6 +83,19 @@ export function AssessmentInstructionsHost({
     };
   }, [mockId, scheduledId]);
 
+  // Cancel in the details gate (before any attempt exists): back to THIS drive's
+  // instructions. Release the camera the system check opened - the runner's unmount
+  // stops it too, this just doesn't rely on that - and SystemCheck re-acquires it when
+  // the instructions mount again.
+  const exitToInstructions = () => {
+    const s = window.__assessmentStream;
+    if (s) {
+      s.getTracks().forEach((t) => t.stop());
+      window.__assessmentStream = null;
+    }
+    setBegan(false);
+  };
+
   if (loading) {
     return (
       <div className="grid min-h-screen place-items-center bg-navy text-white">
@@ -127,6 +141,7 @@ export function AssessmentInstructionsHost({
             proctorAutoSubmit={sched?.proctorAutoSubmit ?? false}
             proctorMaxWarnings={sched?.proctorMaxWarnings ?? 3}
             startImmediately
+            onExit={exitToInstructions}
           />
         </div>
       </div>
@@ -134,6 +149,16 @@ export function AssessmentInstructionsHost({
   }
 
   return (
-    <AssessmentInstructionsGate mock={mock} sched={sched} proctored={proctored} onBegin={() => setBegan(true)} />
+    <AssessmentInstructionsGate
+      mock={mock}
+      sched={sched}
+      proctored={proctored}
+      onBegin={() => {
+        // Inside the Begin click itself: the attempt starts after a network round-trip,
+        // by which point the browser no longer honours a fullscreen request.
+        if (proctored) requestAssessmentFullscreen();
+        setBegan(true);
+      }}
+    />
   );
 }

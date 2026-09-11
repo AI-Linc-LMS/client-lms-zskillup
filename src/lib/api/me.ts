@@ -75,6 +75,11 @@ export interface ApiMe {
   status: 'INVITED' | 'ACTIVE' | 'SUSPENDED';
   isEmailVerified: boolean;
   collegeId: string | null;
+  /** The college the assessment report shows (FK-resolved canonical name, else the
+   *  profile's free text; null when none / non-student). Additive - absent on backends
+   *  that predate it, so read it as `me.collegeName ?? me.studentProfile?.collegeName`.
+   *  Its presence also means POST /mocks/:id/start enforces PROFILE_DETAILS_REQUIRED. */
+  collegeName?: string | null;
   /** Managed cohort membership — the B2B signal (a B2C learner who self-selected a
    *  college at signup has a collegeId but null cohortId). */
   cohortId: string | null;
