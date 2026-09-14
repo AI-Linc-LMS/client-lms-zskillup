@@ -20,10 +20,10 @@ import {
   getQuestionTopicsTree,
 } from '@/lib/api/admin';
 import type {
-  AdminBulkEnsureTopic,
-  AdminBulkUploadItem,
-  AdminBulkUploadResult,
-  AdminTopicNode,
+  AdminBulkEnsureTopicDto,
+  AdminBulkUploadItemDto,
+  AdminBulkUploadResultDto,
+  AdminTopicNodeDto,
 } from '@/shared/dto/admin-questions.dto';
 
 /**
@@ -120,7 +120,7 @@ function rowsFromWorkbook(wb: XLSX.WorkBook): WizRow[] {
 
 /** Flatten the tree into name→node lookups per level so we can reuse existing
  *  Section/Topic/Subtopic by name instead of creating duplicates. */
-function childByName(nodes: AdminTopicNode[], name: string): AdminTopicNode | undefined {
+function childByName(nodes: AdminTopicNodeDto[], name: string): AdminTopicNodeDto | undefined {
   const n = name.trim().toLowerCase();
   return nodes.find((c) => c.name.trim().toLowerCase() === n);
 }
@@ -131,11 +131,11 @@ function childByName(nodes: AdminTopicNode[], name: string): AdminTopicNode | un
  * the required Section or Topic is missing (surfaced as a row error by the server).
  */
 function resolveTaxonomy(
-  tree: AdminTopicNode[],
+  tree: AdminTopicNodeDto[],
   section: string,
   topic: string,
   subtopic: string,
-  ensure: Map<string, AdminBulkEnsureTopic>,
+  ensure: Map<string, AdminBulkEnsureTopicDto>,
 ): string | null {
   if (!section.trim() || !topic.trim()) return null;
 
@@ -157,10 +157,10 @@ function resolveTaxonomy(
 
 function buildPayload(
   rows: WizRow[],
-  tree: AdminTopicNode[],
+  tree: AdminTopicNodeDto[],
   g: { section: string; topic: string; subtopic: string },
-): { ensureTopics: AdminBulkEnsureTopic[]; items: AdminBulkUploadItem[] } {
-  const ensure = new Map<string, AdminBulkEnsureTopic>();
+): { ensureTopics: AdminBulkEnsureTopicDto[]; items: AdminBulkUploadItemDto[] } {
+  const ensure = new Map<string, AdminBulkEnsureTopicDto>();
   const items = rows.map((r) => {
     const leaf = resolveTaxonomy(
       tree,
@@ -188,7 +188,7 @@ function buildPayload(
       explanation: r.explanation.trim() || undefined,
       subtopicSlug: leaf ?? undefined,
       options,
-    } satisfies AdminBulkUploadItem;
+    } satisfies AdminBulkUploadItemDto;
   });
   return { ensureTopics: [...ensure.values()], items };
 }
@@ -198,10 +198,10 @@ export function BulkUploadWizard({ onDone }: { onDone: () => void }) {
   const [rows, setRows] = useState<WizRow[]>([]);
   const [fileName, setFileName] = useState<string | null>(null);
   const [paste, setPaste] = useState('');
-  const [tree, setTree] = useState<AdminTopicNode[]>([]);
+  const [tree, setTree] = useState<AdminTopicNodeDto[]>([]);
   const [g, setG] = useState({ section: '', topic: '', subtopic: '' });
-  const [validation, setValidation] = useState<AdminBulkUploadResult | null>(null);
-  const [imported, setImported] = useState<AdminBulkUploadResult | null>(null);
+  const [validation, setValidation] = useState<AdminBulkUploadResultDto | null>(null);
+  const [imported, setImported] = useState<AdminBulkUploadResultDto | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -571,7 +571,7 @@ function TaxonomyAssigner({
   value,
   onChange,
 }: {
-  tree: AdminTopicNode[];
+  tree: AdminTopicNodeDto[];
   value: { section: string; topic: string; subtopic: string };
   onChange: (v: { section: string; topic: string; subtopic: string }) => void;
 }) {

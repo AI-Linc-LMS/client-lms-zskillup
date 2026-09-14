@@ -1,13 +1,13 @@
 /**
- * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011, amended 2026-06-03).
+ * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011, amended 2026-06-03).
  * Mirrored at frontend-repo/src/shared/dto/tpo.dto.ts.
  *
  * TPO endpoints (Implementation Plan §4). v1 ships the bulk-invite flow;
  * dashboard + at-risk + reports land in Sprint 7 once PPS is computable.
  *
- * Sprint 1 - TPO bulk-invite by CSV. The wire format is plain rows so the
+ * Sprint 1 — TPO bulk-invite by CSV. The wire format is plain rows so the
  * frontend can upload a CSV directly; we sanitize against CSV injection
- * server-side (SECURITY_STANDARDS §4 - leading `=`, `+`, `@`, `-` is escaped).
+ * server-side (SECURITY_STANDARDS §4 — leading `=`, `+`, `@`, `-` is escaped).
  */
 import { Transform, Type } from 'class-transformer';
 import {
@@ -39,7 +39,7 @@ const trimString = ({ value }: { value: unknown }): unknown =>
 export class TpoInvitationRowDto {
   // Email FORMAT is validated per-row inside TpoService (not via @IsEmail) so a
   // single malformed CSV row is reported as `invalid` rather than 400-ing the
-  // whole batch - bulk CSV uploads routinely contain a few bad rows.
+  // whole batch — bulk CSV uploads routinely contain a few bad rows.
   @Transform(normaliseEmail)
   @IsString()
   @MaxLength(254)
@@ -70,7 +70,7 @@ export class TpoInvitationRowDto {
 export class TpoBulkInviteDto {
   @IsArray()
   @ArrayMinSize(1, { message: 'Add at least one student' })
-  @ArrayMaxSize(500, { message: 'Upload up to 500 students per batch' })
+  @ArrayMaxSize(1000, { message: 'Upload up to 1000 students per batch' })
   @ValidateNested({ each: true })
   @Type(() => TpoInvitationRowDto)
   invitations!: TpoInvitationRowDto[];
@@ -87,7 +87,7 @@ export interface TpoBulkInviteResult {
   /**
    * Number of EXISTING student accounts attached to the college + cohort. They
    * keep their account, password and history, and inherit the college's
-   * subscription like any imported student - no second account, no re-onboarding.
+   * subscription like any imported student — no second account, no re-onboarding.
    */
   attached: number;
   /** Number skipped because the email is already registered (any role). */
@@ -191,6 +191,11 @@ export class CreateTpoAssessmentDto {
   @IsIn(['EASY', 'MEDIUM', 'HARD', 'MIXED'])
   difficulty?: string;
 
+  /** Restrict CODING sampling to one difficulty band. Omit (or 'MIXED') = all bands. */
+  @IsOptional()
+  @IsIn(['EASY', 'MEDIUM', 'HARD', 'MIXED'])
+  codingDifficulty?: string;
+
   @IsOptional()
   @IsBoolean()
   proctored?: boolean;
@@ -209,8 +214,8 @@ export class CreateTpoAssessmentDto {
   @IsUUID()
   cohortId?: string;
 
-  /** SECTIONAL mode: restrict MCQ sampling to these sections/topics (their whole
-   *  subtree is included). Empty = sample across every section. */
+  /** Restrict MCQ sampling to these sections/topics (their whole subtree is
+   *  included) — works with a company too. Empty = the whole selected scope. */
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(100)
@@ -254,6 +259,11 @@ export class PreviewTpoAssessmentDto {
   @IsOptional()
   @IsIn(['EASY', 'MEDIUM', 'HARD', 'MIXED'])
   difficulty?: string;
+
+  /** Restrict CODING availability to one difficulty band. Omit (or 'MIXED') = all bands. */
+  @IsOptional()
+  @IsIn(['EASY', 'MEDIUM', 'HARD', 'MIXED'])
+  codingDifficulty?: string;
 }
 
 /** How many questions the current selection actually has. */
