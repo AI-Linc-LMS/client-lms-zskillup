@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { BulkUploadWizard } from '@/components/superadmin/BulkUploadWizard';
 import { FormField } from '@/components/ui/form-field';
 import { ApiRequestError, describeApiError } from '@/lib/api/types';
+import { describeQuestionSetError } from '@/lib/api/question-selection-errors';
 import { listTopics, listCompanies } from '@/lib/api/catalog';
 import {
   archiveAdminQuestion,
@@ -246,7 +247,7 @@ export function QuestionsAdmin() {
         else await updateAdminQuestion(row.id, { status: next });
         await Promise.all([loadPage(), loadCounts()]);
       } catch (err) {
-        window.alert(err instanceof ApiRequestError ? err.message : 'Could not update question.');
+        window.alert(describeQuestionSetError(err, 'Could not update question.'));
       } finally {
         setBusyId(null);
       }
@@ -856,7 +857,7 @@ function QuestionDetailDrawer({
       await updateAdminQuestion(id, { imageUrl: image });
       setDetail((d) => (d ? { ...d, question: { ...d.question, imageUrl: image || null } } : d));
     } catch (e) {
-      setError(e instanceof ApiRequestError ? e.message : 'Could not save the diagram.');
+      setError(describeQuestionSetError(e, 'Could not save the diagram.'));
     } finally {
       setImageBusy(false);
     }
@@ -874,7 +875,7 @@ function QuestionDetailDrawer({
       onChanged?.();
     } catch (e) {
       setDetail((d) => (d ? { ...d, question: { ...d.question, difficulty: prev } } : d));
-      setError(e instanceof ApiRequestError ? e.message : 'Could not update the difficulty.');
+      setError(describeQuestionSetError(e, 'Could not update the difficulty.'));
     } finally {
       setSavingDiff(false);
     }

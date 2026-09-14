@@ -1,39 +1,38 @@
 /**
- * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011, amended 2026-06-03).
+ * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored at frontend-repo/src/shared/dto/admin-questions.dto.ts.
  *
- * Sprint 3 - Superadmin question-bank CRUD.
- *
- * NOTE: this mirror drifted badly from the backend (it still described the
- * Sprint-3 shape while the API moved on), which is what broke manual question
- * creation. AdminCreateQuestionDto is now back in line; the REST of this file is
- * still behind the backend's 326-line original and should be re-synced wholesale
- * once the missing enums (CompanyImportance, ContentUsageType, QuestionFrequency,
- * QuestionSource) are mirrored into ../enums.
- *
- * The service layer enforces shape rules that don't belong in field-level
- * validation: at least 2 options, at least 1 correct option for MCQ /
- * MULTI_SELECT types; NUMERIC + CODING types must have an empty options array.
- * (Those checks live in `AdminQuestionsService` and stay there - they need
- * access to the `type` discriminant across multiple fields.)
+ * Company mapping is intentionally NOT part of create/update — it is managed
+ * via dedicated endpoints (POST/DELETE /admin/questions/:id/companies) so that
+ * the store-once, map-many principle stays explicit (Framework §Company Mapping).
  */
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
+  ArrayNotEmpty,
   IsArray,
   IsBoolean,
   IsEnum,
   IsInt,
   IsOptional,
   IsString,
-  Max,
+  IsUUID,
   Matches,
+  Max,
   MaxLength,
   Min,
   MinLength,
   ValidateNested,
 } from 'class-validator';
-import { QuestionDifficulty, QuestionStatus, QuestionType } from '../enums';
+import {
+  CompanyImportance,
+  ContentUsageType,
+  QuestionDifficulty,
+  QuestionFrequency,
+  QuestionSource,
+  QuestionStatus,
+  QuestionType,
+} from '../enums';
 
 export class AdminQuestionOptionInputDto {
   @IsString()
@@ -52,6 +51,19 @@ export class AdminQuestionOptionInputDto {
 }
 
 export class AdminCreateQuestionDto {
+  /**
+   * e.g. NUM-PER-001. OPTIONAL: the console's "add a question" form has no code
+   * field, and asking an author to invent a unique one by hand is a trap - so
+   * when it is omitted the server derives the next free code from the question's
+   * subtopic. Bulk ingest still supplies its own.
+   */
+  @IsOptional()
+  @IsString()
+  @Matches(/^[A-Z]{2,6}-[A-Z]{2,6}-\d{3,5}$/, {
+    message: 'code must follow the format SECTION-TOPIC-NNN (e.g. NUM-PER-001)',
+  })
+  code?: string;
+
   @IsEnum(QuestionType)
   type!: QuestionType;
 
@@ -63,52 +75,81 @@ export class AdminCreateQuestionDto {
   @MaxLength(5000)
   stem!: string;
 
-  /** Optional diagram/figure shown with the stem - a URL or a compressed data-URL
+  /** Optional diagram/figure shown with the stem — a URL or a compressed data-URL
    *  (for Data-Interpretation charts / Venn diagrams). */
   @IsOptional()
   @IsString()
   @MaxLength(3_000_000)
   imageUrl?: string;
 
+  /** Correct answer text — required for NUMERIC/CODING, omit for MCQ. */
   @IsOptional()
   @IsString()
   @MaxLength(2000)
-  hint?: string;
+  answer?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(5000)
+  solution?: string;
 
   @IsOptional()
   @IsString()
   @MaxLength(5000)
   explanation?: string;
 
-  /**
-   * Subtopic slug - the leaf level in Section -> Topic -> Subtopic. This is the
-   * field the API actually reads; it was mirrored here as `topicSlug`, which the
-   * server's whitelist rejected as an unknown property, so every manual question
-   * creation failed with "Request validation failed".
-   */
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  hint?: string;
+
+  /** Subtopic slug — the leaf level in Section → Topic → Subtopic. */
   @IsOptional()
   @IsString()
   @MinLength(2)
   @MaxLength(120)
   subtopicSlug?: string;
 
-  /** Tag the question to a company hub on creation. */
+  @IsOptional()
+  @IsEnum(QuestionFrequency)
+  frequency?: QuestionFrequency;
+
+  @IsOptional()
+  @IsEnum(QuestionSource)
+  source?: QuestionSource;
+
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  @Min(2000, { each: true })
+  @Max(2100, { each: true })
+  yearTags?: number[];
+
+  /** Target roles this question is relevant for (free-form labels). */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(12)
+  @IsString({ each: true })
+  @MaxLength(80, { each: true })
+  roleTags?: string[];
+
+  /** Citation / source URL (for genuinely-sourced PYQ / memory-based questions). */
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  sourceRef?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  verified?: boolean;
+
+  /** Tag the question to a company hub on creation (same effect as the separate
+   *  company-tag endpoint). The console's form offers this, so create accepts it. */
   @IsOptional()
   @IsString()
   @MinLength(2)
   @MaxLength(80)
   companySlug?: string;
-
-  /**
-   * e.g. NUM-PER-001. Optional: omit it and the server derives the next free code
-   * from the subtopic. Bulk ingest supplies its own.
-   */
-  @IsOptional()
-  @IsString()
-  @Matches(/^[A-Z]{2,6}-[A-Z]{2,6}-\d{3,5}$/, {
-    message: 'code must follow the format SECTION-TOPIC-NNN (e.g. NUM-PER-001)',
-  })
-  code?: string;
 
   @IsEnum(QuestionStatus)
   status: QuestionStatus = QuestionStatus.DRAFT;
@@ -120,7 +161,6 @@ export class AdminCreateQuestionDto {
   options: AdminQuestionOptionInputDto[] = [];
 }
 
-/** Patch - all fields optional; supplying `options` replaces the whole set. */
 export class AdminUpdateQuestionDto {
   @IsOptional()
   @IsEnum(QuestionType)
@@ -145,7 +185,12 @@ export class AdminUpdateQuestionDto {
   @IsOptional()
   @IsString()
   @MaxLength(2000)
-  hint?: string | null;
+  answer?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(5000)
+  solution?: string | null;
 
   @IsOptional()
   @IsString()
@@ -154,15 +199,43 @@ export class AdminUpdateQuestionDto {
 
   @IsOptional()
   @IsString()
-  @MinLength(2)
-  @MaxLength(120)
-  topicSlug?: string;
+  @MaxLength(2000)
+  hint?: string | null;
 
   @IsOptional()
   @IsString()
   @MinLength(2)
-  @MaxLength(80)
-  companySlug?: string | null;
+  @MaxLength(120)
+  subtopicSlug?: string | null;
+
+  @IsOptional()
+  @IsEnum(QuestionFrequency)
+  frequency?: QuestionFrequency | null;
+
+  @IsOptional()
+  @IsEnum(QuestionSource)
+  source?: QuestionSource | null;
+
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  yearTags?: number[];
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(12)
+  @IsString({ each: true })
+  @MaxLength(80, { each: true })
+  roleTags?: string[];
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  sourceRef?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  verified?: boolean;
 
   @IsOptional()
   @IsEnum(QuestionStatus)
@@ -176,60 +249,139 @@ export class AdminUpdateQuestionDto {
   options?: AdminQuestionOptionInputDto[];
 }
 
-/**
- * Bulk question import (Sprint 3 - superadmin). The admin pastes / uploads a CSV
- * with a header row. Columns (case-insensitive, order-independent):
- *
- *   stem, type, difficulty, topic, company, hint, explanation,
- *   optionA, optionB, optionC, optionD, correct
- *
- *   - type        MCQ | MULTI_SELECT   (default MCQ)
- *   - difficulty  EASY | MEDIUM | HARD (default MEDIUM)
- *   - topic       topic slug           (required)
- *   - company     company slug         (optional)
- *   - optionA..D  option text          (≥2 for choice questions)
- *   - correct     correct letter(s)    e.g. "B" or "A,C"
- *
- * Imported questions are PUBLISHED so they are immediately usable in practice /
- * mocks. The server parses the CSV and reports a per-row outcome.
- */
-export class AdminImportQuestionsDto {
+/** Body for POST /admin/questions/:id/companies */
+export class AdminQuestionCompanyTagDto {
   @IsString()
-  @MinLength(1)
-  @MaxLength(500_000)
-  csv!: string;
+  @MinLength(2)
+  @MaxLength(80)
+  companySlug!: string;
+
+  @IsEnum(CompanyImportance)
+  importance!: CompanyImportance;
 }
 
-/**
- * General bulk upload (POST /admin/questions/bulk-upload) — mirrors the backend
- * contract (ADR-011). The wizard parses a CSV/XLSX client-side into rows, POSTs
- * with dryRun:true to VALIDATE (per-row field errors, no writes), lets the admin
- * fix them, then POSTs dryRun:false to import + create any new Section/Topic/Subtopic.
- */
-export interface AdminBulkUploadItem {
-  code?: string;
-  type?: string;
-  difficulty?: string;
-  stem?: string;
-  imageUrl?: string;
-  answer?: string;
-  hint?: string;
-  explanation?: string;
-  solution?: string;
-  subtopicSlug?: string;
-  options?: Array<{ text?: string; isCorrect?: boolean }>;
+/** Body for POST /admin/questions/:id/usage */
+export class AdminQuestionContentUsageDto {
+  @IsArray()
+  @IsEnum(ContentUsageType, { each: true })
+  usageTypes!: ContentUsageType[];
 }
-export interface AdminBulkEnsureTopic {
-  slug: string;
-  name: string;
-  parentSlug?: string;
+
+// ─── Bulk ingest (POST /admin/questions/bulk) ───────────────────────────────
+
+/** A topic the bulk payload needs to exist before its questions can FK to it. */
+export class AdminBulkEnsureTopicDto {
+  @IsString() @MaxLength(120) slug!: string;
+  @IsString() @MaxLength(160) name!: string;
+  /** Parent topic slug (Section → Topic → Subtopic). Omit for a root section. */
+  @IsOptional() @IsString() @MaxLength(120) parentSlug?: string;
 }
-export interface AdminBulkUploadRequest {
-  dryRun?: boolean;
-  companySlug?: string;
-  ensureTopics?: AdminBulkEnsureTopic[];
-  items: AdminBulkUploadItem[];
+
+/** One question in a bulk payload — same shape as create + optional per-item
+ *  company importance (else the payload default is used). */
+export class AdminBulkQuestionItemDto extends AdminCreateQuestionDto {
+  /**
+   * Bulk ingest is IDEMPOTENT BY CODE — re-running a batch skips codes that
+   * already exist — so a code is mandatory here even though single-question
+   * creation now derives one. Re-declared to override the optional base field.
+   */
+  @IsString()
+  @Matches(/^[A-Z]{2,6}-[A-Z]{2,6}-\d{3,5}$/, {
+    message: 'code must follow the format SECTION-TOPIC-NNN (e.g. NUM-PER-001)',
+  })
+  declare code: string;
+
+  @IsOptional()
+  @IsEnum(CompanyImportance)
+  importance?: CompanyImportance;
 }
+
+/** Bulk-ingest a batch of questions for ONE company. Idempotent by `code`
+ *  (existing codes are skipped, not overwritten). Topics in `ensureTopics` are
+ *  upserted first so each item's `subtopicSlug` resolves. */
+export class AdminBulkQuestionsDto {
+  @IsString() @MinLength(2) @MaxLength(80) companySlug!: string;
+
+  @IsOptional()
+  @IsEnum(CompanyImportance)
+  defaultImportance?: CompanyImportance;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(200)
+  @ValidateNested({ each: true })
+  @Type(() => AdminBulkEnsureTopicDto)
+  ensureTopics?: AdminBulkEnsureTopicDto[];
+
+  @IsArray()
+  @ArrayMaxSize(500)
+  @ValidateNested({ each: true })
+  @Type(() => AdminBulkQuestionItemDto)
+  items!: AdminBulkQuestionItemDto[];
+}
+
+export interface AdminBulkResultDto {
+  created: number;
+  skipped: number;
+  failed: Array<{ code: string; reason: string }>;
+  topicsEnsured: number;
+}
+
+// ─── General bulk upload (POST /admin/questions/bulk-upload) ─────────────────
+// The admin-UI upload flow: the client parses a CSV/XLSX into rows, calls this with
+// dryRun:true to VALIDATE (per-row field errors, no writes), lets the admin fix
+// them, then calls with dryRun:false to import. Unlike bulkIngest this is general
+// (company optional), auto-derives codes, and creates the Section→Topic→Subtopic
+// hierarchy in `ensureTopics` on import. Item fields are LOOSE on purpose — a
+// malformed row must return as a per-row error, never a 400 for the whole batch.
+
+export class AdminBulkUploadOptionDto {
+  @IsOptional() @IsString() @MaxLength(1000) text?: string;
+  @IsOptional() @IsBoolean() isCorrect?: boolean;
+}
+
+export class AdminBulkUploadItemDto {
+  @IsOptional() @IsString() @MaxLength(40) code?: string;
+  @IsOptional() @IsString() @MaxLength(20) type?: string;
+  @IsOptional() @IsString() @MaxLength(20) difficulty?: string;
+  @IsOptional() @IsString() @MaxLength(4000) stem?: string;
+  @IsOptional() @IsString() imageUrl?: string;
+  /** Correct answer text — required for NUMERIC / CODING. */
+  @IsOptional() @IsString() @MaxLength(2000) answer?: string;
+  @IsOptional() @IsString() @MaxLength(4000) hint?: string;
+  @IsOptional() @IsString() @MaxLength(8000) explanation?: string;
+  @IsOptional() @IsString() @MaxLength(8000) solution?: string;
+  /** The leaf topic (subtopic) slug this question maps to; chains up to Topic → Section. */
+  @IsOptional() @IsString() @MaxLength(120) subtopicSlug?: string;
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(10)
+  @ValidateNested({ each: true })
+  @Type(() => AdminBulkUploadOptionDto)
+  options?: AdminBulkUploadOptionDto[];
+}
+
+export class AdminBulkUploadDto {
+  /** true = validate only (per-row errors, no writes); false/omitted = import. */
+  @IsOptional() @IsBoolean() dryRun?: boolean;
+  /** Optional: also tag every imported question to this company. */
+  @IsOptional() @IsString() @MaxLength(80) companySlug?: string;
+  @IsOptional() @IsEnum(CompanyImportance) defaultImportance?: CompanyImportance;
+  /** Section → Topic → Subtopic nodes to create before import (the service orders
+   *  roots before children so `parentSlug` resolves). */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(500)
+  @ValidateNested({ each: true })
+  @Type(() => AdminBulkEnsureTopicDto)
+  ensureTopics?: AdminBulkEnsureTopicDto[];
+  @IsArray()
+  @ArrayMaxSize(1000)
+  @ValidateNested({ each: true })
+  @Type(() => AdminBulkUploadItemDto)
+  items!: AdminBulkUploadItemDto[];
+}
+
 export interface AdminBulkUploadFieldError {
   field: string;
   message: string;
@@ -240,7 +392,7 @@ export interface AdminBulkUploadRowResult {
   status: 'valid' | 'invalid' | 'created' | 'skipped';
   errors: AdminBulkUploadFieldError[];
 }
-export interface AdminBulkUploadResult {
+export interface AdminBulkUploadResultDto {
   dryRun: boolean;
   summary: {
     total: number;
@@ -252,10 +404,82 @@ export interface AdminBulkUploadResult {
   };
   rows: AdminBulkUploadRowResult[];
 }
-/** A node in the Section → Topic → Subtopic taxonomy tree (GET /admin/questions/topics/tree). */
-export interface AdminTopicNode {
+
+/** A node in the Section → Topic → Subtopic taxonomy tree
+ *  (GET /admin/questions/topics/tree) — powers the bulk-upload mapping pickers. */
+export interface AdminTopicNodeDto {
   id: string;
   slug: string;
   name: string;
-  children: AdminTopicNode[];
+  children: AdminTopicNodeDto[];
+}
+
+/** Retag many questions' difficulty at once (admin review/cleanup of mis-tagged items). */
+export class AdminBulkDifficultyDto {
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayMaxSize(2000)
+  @IsUUID('all', { each: true })
+  ids!: string[];
+
+  @IsEnum(QuestionDifficulty)
+  difficulty!: QuestionDifficulty;
+}
+
+export interface AdminBulkDifficultyResultDto {
+  updated: number;
+}
+
+/** Fetch full detail (WITH answers) for a set of question ids — powers the assessment
+ *  creation "review questions before publishing" step. */
+export class AdminPreviewQuestionsDto {
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayMaxSize(500)
+  @IsUUID('all', { each: true })
+  ids!: string[];
+}
+
+export interface AdminQuestionPreviewOptionDto {
+  text: string;
+  isCorrect: boolean;
+}
+export interface AdminQuestionPreviewDto {
+  id: string;
+  code: string;
+  type: QuestionType;
+  difficulty: QuestionDifficulty;
+  stem: string;
+  /** Free-text answer for NUMERIC/CODING (null for choice questions). */
+  answer: string | null;
+  options: AdminQuestionPreviewOptionDto[];
+}
+
+// ── Manual question selection (assessment builder) ───────────────────────────
+
+/**
+ * Most ids a selection browser may pass as the `excludeIds` QUERY param (already-selected
+ * items) on GET /admin/questions and GET /admin/coding/problems/search. Kept at 300 so the
+ * request line stays inside Node's 16 KB header limit: 300 uuids comma-separated and
+ * URL-encoded (%2C) are ~11.7 KB, leaving room for the other params and headers. Use the
+ * comma-separated form (a repeated `?excludeIds=` per id is ~40% longer). The POST
+ * /admin/assessment-builder/sample BODY is not bound by this and keeps a 500 cap.
+ */
+export const MAX_EXCLUDE_IDS = 300;
+
+/**
+ * Added to every GET /admin/questions row so a manual picker can show where a question
+ * lives and who it's tagged to. `topicName` = the question's own (sub)topic, `sectionName`
+ * = the root of that topic's tree (the topic itself when it is a root); both null when the
+ * question has no subtopic. `companies` = tagged company slugs, sorted ([] when untagged).
+ *
+ * GET /admin/questions also accepts (all optional; absent = unchanged behaviour):
+ *   type       — MCQ | MULTI_SELECT | NUMERIC | CODING
+ *   topicId    — uuid; the topic's WHOLE subtree (unknown id → 404)
+ *   excludeIds — ids to leave out, comma-separated or repeated, ≤ MAX_EXCLUDE_IDS
+ */
+export interface AdminQuestionListRowMeta {
+  topicName: string | null;
+  sectionName: string | null;
+  companies: string[];
 }

@@ -3,11 +3,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { ArrowRight, BarChart3, Loader2, Pencil, Plus, Sparkles, Trash2, Users, Video, X } from 'lucide-react';
+import { ArrowRight, BarChart3, ChevronDown, ClipboardList, Loader2, Pencil, Plus, Trash2, Users, Video, X } from 'lucide-react';
 import { AssessmentWizard } from '@/components/superadmin/AssessmentWizard';
 import { AdminAssessmentCreator } from '@/components/superadmin/AdminAssessmentCreator';
 import { ResultsReport } from '@/components/assessment/ResultsReport';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { ApiRequestError } from '@/lib/api/types';
 import { describeAccessError, describeError } from '@/lib/api/errors';
 import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
@@ -49,6 +50,7 @@ export function SchedulingAdmin() {
   const [wizardOpen, setWizardOpen] = useState(false);
   const [editWizardId, setEditWizardId] = useState<string | null>(null);
   const [showExistingMock, setShowExistingMock] = useState(false);
+  const [showQuickBuild, setShowQuickBuild] = useState(false);
 
   // filters
   const [fCompany, setFCompany] = useState('');
@@ -154,6 +156,7 @@ export function SchedulingAdmin() {
       await updateScheduledAssessment(r.id, { isActive: !r.isActive });
       await load();
     } catch (e) {
+      // An isActive-only PATCH never touches the question set, so no lock message applies here.
       toast.error(describeAccessError(e, `You can't change this assessment ${NOT_YOUR_COLLEGE}`, 'Could not update the assessment.'));
     } finally {
       setBusyId(null);
@@ -169,62 +172,83 @@ export function SchedulingAdmin() {
         <AssessmentWizard editId={editWizardId} onClose={() => setEditWizardId(null)} onCreated={load} />
       ) : null}
 
-      {/* Build assessment (auto from question bank) */}
-      <div className="flex items-center justify-between gap-4 rounded-2xl border border-[#ffc42d]/30 bg-gradient-to-br from-[#ffc42d]/[0.06] to-transparent p-5">
-        <div className="flex items-center gap-3">
-          <span className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-[#ffd24d] to-[#f5b400] text-[#171717]">
-            <Sparkles className="size-5" />
-          </span>
-          <div>
-            <p className="text-sm font-bold text-navy">Build an assessment from the question bank</p>
-            <p className="text-xs text-slate-600">
-              Pick a company, define sections by topic &amp; count - we auto-assemble it, preview, and schedule.
-            </p>
+      {/* Primary entry point: the assessment wizard (random + manual selection, review,
+          publish). One CTA on the page. */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex min-w-0 items-start gap-3">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-orange-50 text-orange-700 ring-1 ring-orange-100">
+              <ClipboardList className="size-5" aria-hidden />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Assessment builder</p>
+              <h2 className="text-lg font-bold text-navy">Create an assessment</h2>
+              <p className="text-sm text-slate-500">
+                Draw questions at random from the bank or pick them by hand, review every question and the total marks,
+                then publish.
+              </p>
+            </div>
           </div>
+          <Button type="button" onClick={() => setWizardOpen(true)}>
+            <Plus aria-hidden /> Create assessment
+          </Button>
         </div>
-        <button
-          type="button"
-          onClick={() => setWizardOpen(true)}
-          className="shrink-0 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-5 py-2.5 text-sm font-extrabold text-[#171717]"
-        >
-          Build assessment
-        </button>
       </div>
 
       {/* Cohort discoverability (#5): cohort CREATION (name, add students, import CSV)
           lives under Colleges, not here - the builder only PICKS an existing cohort. */}
       <Link
         href="/admin/colleges"
-        className="flex items-center justify-between gap-3 rounded-2xl border border-sky-200 bg-sky-50 px-5 py-3.5 text-sm text-sky-900 transition-colors hover:bg-sky-100"
+        className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600 shadow-sm transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/40"
       >
         <span className="flex items-start gap-3">
-          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-sky-100 text-sky-600">
-            <Users className="size-5" />
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-sky-50 text-sky-600 ring-1 ring-sky-100">
+            <Users className="size-5" aria-hidden />
           </span>
           <span>
-            <span className="font-bold">Create &amp; manage cohorts (batches)</span> — to assign an assessment to a group of
+            <span className="font-semibold text-navy">Create &amp; manage cohorts (batches)</span> — to assign an assessment to a group of
             students, first build a cohort (name, add students or import a CSV) under <span className="font-semibold">Colleges → open a college → Cohorts</span>, then pick it in the builder.
           </span>
         </span>
-        <span className="flex shrink-0 items-center gap-1 font-bold whitespace-nowrap">
-          Manage cohorts <ArrowRight className="size-4" />
+        <span className="flex shrink-0 items-center gap-1 font-semibold whitespace-nowrap text-navy">
+          Manage cohorts <ArrowRight className="size-4" aria-hidden />
         </span>
       </Link>
 
-      {/* Primary creator — TPO-style bank-sampling flow (mode → rounds → sections →
-          coding topics → counts). Matches the TPO Assessment Center. */}
-      <AdminAssessmentCreator onCreated={load} />
+      {/* Advanced: the one-shot bank-sampling build (mode → rounds → topics → counts), the
+          same flow as the TPO Assessment Center. Collapsed — the wizard is the main path. */}
+      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <button
+          type="button"
+          onClick={() => setShowQuickBuild((v) => !v)}
+          aria-expanded={showQuickBuild}
+          aria-controls="quick-random-build"
+          className="flex w-full items-center gap-2 rounded-lg text-left text-sm font-semibold text-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/40"
+        >
+          <ChevronDown className={cn('size-4 text-slate-400 transition-transform', showQuickBuild && 'rotate-180')} aria-hidden />
+          Advanced: quick random build
+          <span className="ml-auto text-xs font-normal text-slate-500">
+            Samples the bank at publish time — no question review
+          </span>
+        </button>
+        {showQuickBuild ? (
+          <div id="quick-random-build" className="mt-4 border-t border-slate-100 pt-4">
+            <AdminAssessmentCreator onCreated={load} />
+          </div>
+        ) : null}
+      </div>
 
       {/* Advanced: bind a pre-built mock (collapsed by default). */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-5">
+      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <button
           type="button"
           onClick={() => setShowExistingMock((v) => !v)}
-          className="flex w-full items-center gap-2 text-sm font-bold text-navy"
+          aria-expanded={showExistingMock}
+          className="flex w-full items-center gap-2 rounded-lg text-left text-sm font-semibold text-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/40"
         >
-          <Plus className={cn('size-4 text-[#f5b400] transition-transform', showExistingMock && 'rotate-45')} />
+          <ChevronDown className={cn('size-4 text-slate-400 transition-transform', showExistingMock && 'rotate-180')} aria-hidden />
           Advanced: bind a pre-built mock
-          <span className="ml-auto text-[11px] font-semibold text-slate-500">{showExistingMock ? 'Hide' : 'Show'}</span>
+          <span className="ml-auto text-xs font-normal text-slate-500">{showExistingMock ? 'Hide' : 'Show'}</span>
         </button>
         {showExistingMock && (
         <>
@@ -285,7 +309,7 @@ export function SchedulingAdmin() {
               type="checkbox"
               checked={proctored}
               onChange={(e) => setProctored(e.target.checked)}
-              className="size-4 accent-[#f5b400]"
+              className="size-4 accent-orange"
             />
             <span className="text-sm font-medium text-slate-600">Proctored</span>
           </label>
@@ -295,7 +319,7 @@ export function SchedulingAdmin() {
                 type="checkbox"
                 checked={proctorAutoSubmit}
                 onChange={(e) => setProctorAutoSubmit(e.target.checked)}
-                className="size-4 accent-[#f5b400]"
+                className="size-4 accent-orange"
               />
               <span className="font-medium">Auto-submit after</span>
               <input
@@ -314,14 +338,9 @@ export function SchedulingAdmin() {
         {err ? (
           <p className="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">{err}</p>
         ) : null}
-        <button
-          type="button"
-          onClick={create}
-          disabled={creating}
-          className="mt-4 flex items-center gap-2 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-5 py-2.5 text-sm font-extrabold text-[#171717] disabled:opacity-60"
-        >
-          {creating ? <Loader2 className="size-4 animate-spin" /> : 'Schedule'}
-        </button>
+        <Button type="button" variant="secondary" onClick={create} disabled={creating} className="mt-4">
+          {creating ? <Loader2 className="animate-spin" aria-hidden /> : null} Schedule
+        </Button>
         </>
         )}
       </div>
@@ -329,25 +348,25 @@ export function SchedulingAdmin() {
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Filter</span>
-        <select value={fCompany} onChange={(e) => setFCompany(e.target.value)} className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-navy focus:border-[#ffc42d] focus:outline-none">
+        <select value={fCompany} onChange={(e) => setFCompany(e.target.value)} className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30">
           <option value="">All companies</option>
           {companies.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
-        <select value={fStatus} onChange={(e) => setFStatus(e.target.value as typeof fStatus)} className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-navy focus:border-[#ffc42d] focus:outline-none">
+        <select value={fStatus} onChange={(e) => setFStatus(e.target.value as typeof fStatus)} className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30">
           <option value="all">Any status</option>
           <option value="upcoming">Upcoming</option>
           <option value="live">Live now</option>
           <option value="past">Past</option>
           <option value="inactive">Inactive</option>
         </select>
-        <select value={fDuration} onChange={(e) => setFDuration(e.target.value as typeof fDuration)} className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-navy focus:border-[#ffc42d] focus:outline-none">
+        <select value={fDuration} onChange={(e) => setFDuration(e.target.value as typeof fDuration)} className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30">
           <option value="all">Any duration</option>
           <option value="short">≤ 30 min</option>
           <option value="medium">31–90 min</option>
           <option value="long">&gt; 90 min</option>
         </select>
         {(fCompany || fStatus !== 'all' || fDuration !== 'all') ? (
-          <button type="button" onClick={() => { setFCompany(''); setFStatus('all'); setFDuration('all'); }} className="text-xs font-bold text-[#1a1a1a] hover:underline">
+          <button type="button" onClick={() => { setFCompany(''); setFStatus('all'); setFDuration('all'); }} className="rounded text-xs font-semibold text-navy underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/40">
             Clear
           </button>
         ) : null}
@@ -412,7 +431,7 @@ export function SchedulingAdmin() {
                   <td className="px-4 py-3.5 text-slate-600">{r.durationMinutes}m</td>
                   <td className="px-4 py-3.5">
                     {r.proctored ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#6d5ef8]">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-violet-700">
                         <Video className="size-3.5" /> Yes
                       </span>
                     ) : (
@@ -446,7 +465,7 @@ export function SchedulingAdmin() {
                       <button
                         type="button"
                         onClick={() => openResults(r.id)}
-                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold text-[#6d5ef8] hover:bg-[#6d5ef8]/10"
+                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold text-violet-700 hover:bg-violet-50"
                       >
                         <BarChart3 className="size-3.5" /> Results
                       </button>
@@ -475,9 +494,9 @@ export function SchedulingAdmin() {
             type="button"
             aria-label="Close"
             onClick={() => setResults(null)}
-            className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-900/50"
           />
-          <div className="relative flex max-h-[88vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
+          <div className="relative flex max-h-[88vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
             {resultsLoading || !results ? (
               <div className="grid h-64 place-items-center">
                 <Loader2 className="size-6 animate-spin text-slate-500" />
@@ -529,6 +548,6 @@ export function SchedulingAdmin() {
  *  drives (results / publish / update / delete); SUPER_ADMIN and unassigned admins see all. */
 const NOT_YOUR_COLLEGE = "— this assessment belongs to a college that isn't assigned to you.";
 
-const labelCls = 'text-[10px] font-bold uppercase tracking-widest text-slate-500';
+const labelCls = 'text-xs font-semibold text-slate-600';
 const inputCls =
-  'flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors focus:border-[#ffc42d] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ffc42d]/30';
+  'flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30';

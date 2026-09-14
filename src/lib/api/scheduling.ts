@@ -124,6 +124,8 @@ export interface BuildAssessmentPayload {
   mcqCount?: number;
   codingCount?: number;
   difficulty?: 'EASY' | 'MEDIUM' | 'HARD' | 'MIXED';
+  /** Coding-round band. Omit (or 'MIXED') = every band. */
+  codingDifficulty?: 'EASY' | 'MEDIUM' | 'HARD' | 'MIXED';
   proctored?: boolean;
   proctorAutoSubmit?: boolean;
   proctorMaxWarnings?: number;
@@ -154,6 +156,7 @@ export async function previewBuildAssessment(payload: {
   mode: 'SECTIONAL' | 'COMPANY';
   companySlug?: string;
   difficulty?: 'EASY' | 'MEDIUM' | 'HARD' | 'MIXED';
+  codingDifficulty?: 'EASY' | 'MEDIUM' | 'HARD' | 'MIXED';
   topicIds?: string[];
   codingTopics?: string[];
 }): Promise<BuildAvailability> {
@@ -174,6 +177,7 @@ export async function getAdminCodingTopics(
   return res.data;
 }
 
+/** 409 QUESTION_SET_LOCKED when `mockTestId` changes on a drive that already has attempts. */
 export async function updateScheduledAssessment(
   id: string,
   patch: Partial<CreateScheduledAssessmentPayload>,

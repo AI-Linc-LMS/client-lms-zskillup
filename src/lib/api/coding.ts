@@ -1,5 +1,10 @@
 import { apiClient } from './client';
 import type { GamificationSummary } from './gamification-types';
+import type {
+  AdminCodingPreviewResultDto,
+  AdminCodingSearchQueryDto,
+  AdminCodingSearchResultDto,
+} from '@/shared/dto/admin-coding-search.dto';
 
 /**
  * Coding API client. Code never executes in the browser - it is sent to the
@@ -166,6 +171,51 @@ export async function listAdminCodingProblems(): Promise<AdminCodingProblemSumma
 
 export async function setCodingProblemActive(id: string, isActive: boolean): Promise<void> {
   await apiClient.patch(`/api/v1/admin/coding/problems/${id}`, { isActive });
+}
+
+/**
+ * Most already-selected ids the frontend puts in the `excludeIds` QUERY param of the
+ * selection browsers (GET /admin/questions, GET /admin/coding/problems/search). The server
+ * accepts 300 (MAX_EXCLUDE_IDS), but every proxy hop in front of it adds its own URL /
+ * header limit, so the client stays at half that. Anything past the cap is still
+ * recognised client-side and shown as not selectable.
+ */
+export const MAX_BROWSE_EXCLUDE_IDS = 150;
+
+/**
+ * MANUAL selection: paginated coding-problem summaries (ADMIN, SUPER_ADMIN). Metadata
+ * only — never test cases or solutions. `active` defaults to true server-side.
+ */
+export async function searchAdminCodingProblems(
+  q: AdminCodingSearchQueryDto,
+  opts?: { signal?: AbortSignal },
+): Promise<AdminCodingSearchResultDto> {
+  const qs = new URLSearchParams();
+  if (q.topic) qs.set('topic', q.topic);
+  if (q.difficulty) qs.set('difficulty', q.difficulty);
+  if (q.company) qs.set('company', q.company);
+  if (q.verified !== undefined) qs.set('verified', String(q.verified));
+  if (q.active !== undefined) qs.set('active', String(q.active));
+  if (q.search) qs.set('search', q.search);
+  if (q.excludeIds?.length) qs.set('excludeIds', q.excludeIds.slice(0, MAX_BROWSE_EXCLUDE_IDS).join(','));
+  if (q.limit) qs.set('limit', String(q.limit));
+  if (q.offset !== undefined) qs.set('offset', String(q.offset));
+  const suffix = qs.toString() ? `?${qs.toString()}` : '';
+  const res = await apiClient.get<AdminCodingSearchResultDto>(
+    `/api/v1/admin/coding/problems/search${suffix}`,
+    { signal: opts?.signal },
+  );
+  return res.data;
+}
+
+/** Review picked coding problems: summary + statement + VISIBLE examples, in request order;
+ *  unknown ids come back in `missingIds`. At most 200 ids per call. */
+export async function previewAdminCodingProblems(ids: string[]): Promise<AdminCodingPreviewResultDto> {
+  if (ids.length === 0) return { items: [], missingIds: [] };
+  const res = await apiClient.post<AdminCodingPreviewResultDto>('/api/v1/admin/coding/problems/preview', {
+    ids,
+  });
+  return res.data;
 }
 
 /** Run arbitrary code with custom stdin (scratchpad / "Run" with custom input). */

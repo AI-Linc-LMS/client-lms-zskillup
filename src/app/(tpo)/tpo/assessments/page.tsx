@@ -13,7 +13,6 @@ import {
   Plus,
   Radio,
   Send,
-  Sparkles,
   Trash2,
   Users,
   Video,
@@ -239,7 +238,7 @@ export default function AssessmentCenterPage() {
               {data?.activeCount ?? 0}/{data?.activeCap ?? 10} active
             </span>
             <Button size="sm" variant="outline" onClick={() => setAiWizard(true)} disabled={capReached}>
-              <Sparkles className="size-4" /> Build with AI
+              <ListChecks className="size-4" /> Pick &amp; review questions
             </Button>
             <Button size="sm" onClick={() => setShowForm((v) => !v)} disabled={capReached}>
               <Plus className="size-4" /> Create Assessment

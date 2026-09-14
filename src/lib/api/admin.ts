@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { MAX_BROWSE_EXCLUDE_IDS } from './coding';
 import type { AdminCapabilities } from '@/shared/admin-capabilities';
 
 // ─── User management (super-admin) ──────────────────────────────────────────
@@ -213,10 +214,12 @@ import type {
   LessonKind,
 } from '@/shared';
 import type {
-  AdminBulkUploadRequest,
-  AdminBulkUploadResult,
+  AdminBulkUploadDto,
+  AdminBulkUploadResultDto,
   AdminCreateQuestionDto,
-  AdminTopicNode,
+  AdminQuestionListRowMeta,
+  AdminQuestionPreviewDto,
+  AdminTopicNodeDto,
   AdminUpdateQuestionDto,
 } from '@/shared/dto/admin-questions.dto';
 
@@ -375,7 +378,7 @@ export interface AdminQuestionRow {
   solution?: string | null;
   explanation?: string | null;
   hint?: string | null;
-  source?: 'PREVIOUS_YEAR_QUESTIONS' | 'MEMORY_BASED' | 'PATTERN_BASED' | 'MOCK_DERIVED' | null;
+  source?: 'PREVIOUS_YEAR_QUESTIONS' | 'MEMORY_BASED' | 'PATTERN_BASED' | 'MOCK_DERIVED' | 'AI_GENERATED' | null;
   frequency?: 'VERY_HIGH' | 'HIGH' | 'MEDIUM' | 'LOW' | null;
   yearTags?: number[];
   roleTags?: string[];
@@ -390,6 +393,10 @@ export interface AdminQuestionDetail {
   contentUsage: Array<{ usageType: string }>;
 }
 
+/** A GET /admin/questions row: the question plus where it lives (topic + section) and the
+ *  company slugs it's tagged to. */
+export type AdminQuestionListRow = AdminQuestionRow & AdminQuestionListRowMeta;
+
 export async function listAdminQuestions(
   params: {
     status?: string;
@@ -402,10 +409,20 @@ export async function listAdminQuestions(
     search?: string;
     limit?: number;
     offset?: number;
+    /** MCQ | MULTI_SELECT | NUMERIC | CODING. */
+    type?: AdminQuestionRow['type'];
+    /** Section/topic id — its whole subtree (unknown id → 404). */
+    topicId?: string;
+    /** Ids to leave out (already selected); only the first MAX_BROWSE_EXCLUDE_IDS are sent. */
+    excludeIds?: string[];
   } = {},
-): Promise<{ rows: AdminQuestionRow[]; total: number }> {
+  opts?: { signal?: AbortSignal },
+): Promise<{ rows: AdminQuestionListRow[]; total: number }> {
   const qs = new URLSearchParams();
   if (params.status) qs.set('status', params.status);
+  if (params.type) qs.set('type', params.type);
+  if (params.topicId) qs.set('topicId', params.topicId);
+  if (params.excludeIds?.length) qs.set('excludeIds', params.excludeIds.slice(0, MAX_BROWSE_EXCLUDE_IDS).join(','));
   if (params.topic) qs.set('topic', params.topic);
   if (params.role) qs.set('role', params.role);
   if (params.company) qs.set('company', params.company);
@@ -416,8 +433,9 @@ export async function listAdminQuestions(
   if (params.limit) qs.set('limit', String(params.limit));
   if (params.offset !== undefined) qs.set('offset', String(params.offset));
   const suffix = qs.toString() ? `?${qs.toString()}` : '';
-  const res = await apiClient.get<{ rows: AdminQuestionRow[]; total: number }>(
+  const res = await apiClient.get<{ rows: AdminQuestionListRow[]; total: number }>(
     `/api/v1/admin/questions${suffix}`,
+    { signal: opts?.signal },
   );
   return res.data;
 }
@@ -432,6 +450,9 @@ export async function createAdminQuestion(dto: AdminCreateQuestionDto): Promise<
   return res.data;
 }
 
+/** A structural `options` change (count changed, or a reorder that re-words 2+ options) on a
+ *  question inside an attempted mock → 409 QUESTION_IN_USE; same-count text / answer-key
+ *  edits are applied in place and allowed. */
 export async function updateAdminQuestion(
   id: string,
   dto: AdminUpdateQuestionDto,
@@ -454,15 +475,8 @@ export async function bulkSetQuestionDifficulty(
 
 /** Full detail (with the correct answer) for a set of question ids — for the assessment
  *  "review the selected questions before publishing" step. */
-export interface AdminQuestionPreview {
-  id: string;
-  code: string;
-  type: string;
-  difficulty: string;
-  stem: string;
-  answer: string | null;
-  options: Array<{ text: string; isCorrect: boolean }>;
-}
+export type AdminQuestionPreview = AdminQuestionPreviewDto;
+/** At most 500 ids per call (ADMIN, SUPER_ADMIN). */
 export async function previewQuestions(ids: string[]): Promise<AdminQuestionPreview[]> {
   if (ids.length === 0) return [];
   const res = await apiClient.post<AdminQuestionPreview[]>('/api/v1/admin/questions/preview', {
@@ -589,6 +603,7 @@ export async function createAdminMock(dto: AdminCreateMock): Promise<{ id: strin
   return res.data;
 }
 
+/** Changing `questionIds` of a drive's mock that already has attempts → 409 QUESTION_SET_LOCKED. */
 export async function updateAdminMock(id: string, dto: AdminUpdateMock): Promise<{ id: string }> {
   const res = await apiClient.patch<{ id: string }>(`/api/v1/admin/mocks/${id}`, dto);
   return res.data;
@@ -621,9 +636,9 @@ export async function importAdminQuestions(csv: string): Promise<AdminImportResu
 /** General bulk upload — dryRun:true validates (per-row errors, no writes),
  *  dryRun:false imports + creates any new Section/Topic/Subtopic. */
 export async function bulkUploadQuestions(
-  payload: AdminBulkUploadRequest,
-): Promise<AdminBulkUploadResult> {
-  const res = await apiClient.post<AdminBulkUploadResult>(
+  payload: AdminBulkUploadDto,
+): Promise<AdminBulkUploadResultDto> {
+  const res = await apiClient.post<AdminBulkUploadResultDto>(
     '/api/v1/admin/questions/bulk-upload',
     payload,
   );
@@ -631,8 +646,8 @@ export async function bulkUploadQuestions(
 }
 
 /** Section → Topic → Subtopic taxonomy tree for the bulk-upload mapping pickers. */
-export async function getQuestionTopicsTree(): Promise<AdminTopicNode[]> {
-  const res = await apiClient.get<AdminTopicNode[]>('/api/v1/admin/questions/topics/tree');
+export async function getQuestionTopicsTree(): Promise<AdminTopicNodeDto[]> {
+  const res = await apiClient.get<AdminTopicNodeDto[]>('/api/v1/admin/questions/topics/tree');
   return res.data;
 }
 

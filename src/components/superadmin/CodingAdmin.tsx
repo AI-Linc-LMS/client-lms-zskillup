@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { BadgeCheck, Code2, ExternalLink, Loader2, Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { DialogShell } from '@/components/superadmin/assessment-wizard/DialogShell';
 import { ApiRequestError } from '@/lib/api/types';
 import { listCompanies } from '@/lib/api/catalog';
 import {
@@ -273,32 +275,43 @@ function CodingDetailDrawer({
   companyName: Record<string, string>;
   onClose: () => void;
 }) {
-  if (!problem) return null;
-  const p = problem;
+  const titleId = useId();
+  // The shared dialog shell traps Tab focus, closes on Esc / backdrop and returns focus to
+  // the row that opened it.
+  return (
+    <DialogShell open={!!problem} onClose={onClose} labelledBy={titleId} variant="drawer" maxWidth="max-w-2xl">
+      {problem ? <CodingDetailBody p={problem} titleId={titleId} companyName={companyName} onClose={onClose} /> : null}
+    </DialogShell>
+  );
+}
+
+function CodingDetailBody({
+  p,
+  titleId,
+  companyName,
+  onClose,
+}: {
+  p: AdminCodingProblemSummary;
+  titleId: string;
+  companyName: Record<string, string>;
+  onClose: () => void;
+}) {
   const cases = p.testCases ?? [];
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
-      <button
-        type="button"
-        aria-label="Close"
-        onClick={onClose}
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
-      />
-      <aside className="relative flex h-full w-full max-w-2xl flex-col overflow-y-auto bg-white shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-slate-200 bg-white/95 px-6 py-4 backdrop-blur">
-          <div className="min-w-0">
-            <h2 className="truncate text-lg font-extrabold text-navy">{p.title}</h2>
-            <p className="text-[11px] text-slate-500">{p.slug}</p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="grid size-9 shrink-0 place-items-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-700"
-          >
-            <X className="size-5" />
-          </button>
+    <>
+      <div className="flex items-start justify-between gap-3 border-b border-slate-200 bg-white px-6 py-4">
+        <div className="min-w-0">
+          <h2 id={titleId} className="truncate text-lg font-extrabold text-navy">
+            {p.title}
+          </h2>
+          <p className="text-[11px] text-slate-500">{p.slug}</p>
         </div>
+        <Button type="button" variant="ghost" size="icon" onClick={onClose} aria-label="Close">
+          <X aria-hidden />
+        </Button>
+      </div>
 
+      <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="space-y-5 px-6 py-5">
           {/* badges */}
           <div className="flex flex-wrap items-center gap-1.5">
@@ -319,7 +332,7 @@ function CodingDetailDrawer({
             <Pill tone={p.isActive ? 'bg-sky-50 text-sky-700 ring-sky-200' : 'bg-slate-100 text-slate-600 ring-slate-200'}>
               {p.isActive ? 'Active' : 'Inactive'}
             </Pill>
-            {p.xpReward ? <Pill tone="bg-[#fff5ea] text-[#1a1a1a] ring-[#ffc42d]/30">{p.xpReward} XP</Pill> : null}
+            {p.xpReward ? <Pill tone="bg-amber-50 text-amber-700 ring-amber-200">{p.xpReward} XP</Pill> : null}
           </div>
 
           {/* source citation - the whole point */}
@@ -416,7 +429,7 @@ function CodingDetailDrawer({
           {/* reference solution */}
           {p.referenceSolution?.source ? (
             <Field label={`Reference solution (${p.referenceSolution.language})`}>
-              <pre className="max-h-80 overflow-auto rounded-xl bg-[#0a0a0c] p-3 text-[12px] leading-relaxed text-slate-100">
+              <pre className="max-h-80 overflow-auto rounded-xl bg-navy p-3 text-[12px] leading-relaxed text-slate-100">
                 <code>{p.referenceSolution.source}</code>
               </pre>
             </Field>
@@ -426,8 +439,8 @@ function CodingDetailDrawer({
             </p>
           )}
         </div>
-      </aside>
-    </div>
+      </div>
+    </>
   );
 }
 
