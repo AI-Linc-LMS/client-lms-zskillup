@@ -125,7 +125,7 @@ export function describeQuestionSetError(err: unknown, fallback: string): string
     case QUESTION_SELECTION_ERRORS.CODING_PROBLEM_IN_USE:
       return 'This coding problem is used in an assessment or mock, so it can’t be deleted. Deactivate it instead — it can no longer be added to new assessments, and existing attempts keep their results.';
     case QUESTION_SELECTION_ERRORS.QUESTION_IN_USE:
-      return 'Students have already attempted a mock with this question, so its options can’t be added or removed. You can still correct the option text or the answer key; for a structural change, archive it and create a corrected copy.';
+      return 'Students have already attempted a mock with this question, so its options can’t be restructured (added, removed, or reordered while re-wording several). You can still fix option text or the answer key with the same options; otherwise archive it and create a corrected copy.';
     case QUESTION_SELECTION_ERRORS.DUPLICATE_QUESTION_IDS:
     case QUESTION_SELECTION_ERRORS.INVALID_QUESTION_IDS:
       return err.message || fallback;

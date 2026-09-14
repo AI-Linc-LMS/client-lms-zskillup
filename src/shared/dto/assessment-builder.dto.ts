@@ -42,7 +42,9 @@ export const SAMPLE_DIFFICULTIES: SampleDifficulty[] = ['EASY', 'MEDIUM', 'HARD'
  *                                in the success response instead (see SelectionIdLists).
  *   QUESTION_SET_LOCKED    409 — the drive's mock already has attempts.
  *   CODING_PROBLEM_IN_USE  409 — a coding problem linked to a mock can't be deleted.
- *   QUESTION_IN_USE        409 — options of a question in an attempted mock can't be replaced.
+ *   QUESTION_IN_USE        409 — a question in an attempted mock can't have its options
+ *                                structurally changed (option count, or a reorder that can't
+ *                                be mapped); same-count text / correctness edits are in place.
  */
 export const QUESTION_SELECTION_ERRORS = {
   INVALID_QUESTION_IDS: 'INVALID_QUESTION_IDS',

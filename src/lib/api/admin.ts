@@ -384,8 +384,9 @@ export async function createAdminQuestion(dto: AdminCreateQuestionDto): Promise<
   return res.data;
 }
 
-/** A structural `options` change (count changed) on a question inside an attempted mock →
- *  409 QUESTION_IN_USE; text / answer-key edits with the same option count are allowed. */
+/** A structural `options` change (count changed, or a reorder that re-words 2+ options) on a
+ *  question inside an attempted mock → 409 QUESTION_IN_USE; same-count text / answer-key
+ *  edits are applied in place and allowed. */
 export async function updateAdminQuestion(
   id: string,
   dto: AdminUpdateQuestionDto,
