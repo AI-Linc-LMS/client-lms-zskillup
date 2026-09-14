@@ -7,8 +7,8 @@ const inputCls =
 
 /**
  * Reports date-range filter (§4.4(a) standard card). Emits `YYYY-MM-DD` values
- * (or null when cleared); the page normalises them to inclusive UTC bounds before
- * calling the API. Only date-scoped exports honour the range - snapshot totals stay
+ * (or null when cleared); the page turns them into inclusive IST day bounds
+ * (istDayRangeIso in lib/format) before calling the API. Only date-scoped exports honour the range - snapshot totals stay
  * point-in-time.
  */
 export function ReportDateRange({
@@ -22,7 +22,7 @@ export function ReportDateRange({
 }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Date range</p>
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Date range</p>
       <div className="mt-3 flex flex-wrap items-end gap-3">
         <label className="block">
           <span className="mb-1 block text-xs font-semibold text-slate-600">From</span>

@@ -7,7 +7,24 @@ import type { AdminCapabilities } from '@/shared/admin-capabilities';
 export type AdminRole = 'STUDENT' | 'COLLEGE_ADMIN' | 'ADMIN' | 'SUPER_ADMIN';
 export type AdminUserStatus = 'ACTIVE' | 'INVITED' | 'SUSPENDED';
 
-export interface AdminUserRow {
+// Paid / Unpaid is computed by the backend from the user's CURRENT live grants (one
+// shared rule: payments/paid-status.ts) - the console renders it, never derives it.
+
+/** STUDENT accounts only; null for every other role (not applicable) or when hidden. */
+export type PaidStatus = 'PAID' | 'UNPAID';
+
+/** Why an UNPAID student still has access (null = none / not applicable). */
+export type AccessLabel = 'COLLEGE_ACCESS' | 'COMPLIMENTARY';
+
+/** The three paid-status fields every admin user surface carries. */
+export interface AdminUserPaidFields {
+  paidStatus: PaidStatus | null;
+  accessLabel: AccessLabel | null;
+  /** Latest expiry of the live cash-paid grants (ISO); null = perpetual, or not PAID. */
+  paidUntil: string | null;
+}
+
+export interface AdminUserRow extends AdminUserPaidFields {
   id: string;
   email: string;
   fullName: string | null;
@@ -19,8 +36,34 @@ export interface AdminUserRow {
   createdAt: string;
 }
 
+export interface AdminUserList {
+  rows: AdminUserRow[];
+  total: number;
+  /**
+   * Whether this viewer may see paid status: SUPER_ADMIN, or an ADMIN holding
+   * canManageSubscriptions / canViewFinancials. false = every row's paid fields are
+   * null because they are HIDDEN - hide the Paid column and the Paid filter.
+   */
+  paidStatusVisible: boolean;
+}
+
+export type AdminUserListSort = 'createdAt' | 'lastLoginAt';
+
+/** One live grant behind a student's paid status (detail drawer summary). */
+export interface AdminActiveEntitlement {
+  /** USER = the student's own grant; COLLEGE = inherited from their non-suspended college. */
+  subject: 'USER' | 'COLLEGE';
+  scope: string;
+  scopeRef: string | null;
+  source: 'PURCHASE' | 'ADMIN_GRANT' | 'TRIAL' | 'COLLEGE_INHERITED';
+  /** Real money was collected for it (PURCHASE + PAID order above zero). */
+  cashPaid: boolean;
+  /** ISO; null = perpetual. */
+  expiresAt: string | null;
+}
+
 /** Richer projection returned by the single-user endpoints (detail drawer). */
-export interface AdminUserDetail {
+export interface AdminUserDetail extends AdminUserPaidFields {
   id: string;
   email: string;
   fullName: string | null;
@@ -33,33 +76,55 @@ export interface AdminUserDetail {
   lastLoginAt: string | null;
   createdAt: string;
   capabilities: AdminCapabilities;
+  /** The live grants behind the paid status; null for a non-student or when hidden. */
+  activeEntitlements: AdminActiveEntitlement[] | null;
+  /** Same meaning as on the list: false = paid fields are hidden from this viewer. */
+  paidStatusVisible: boolean;
 }
+
+/** How a sign-in happened. 'otp' = the emailed verification code. */
+export type LoginMethod = 'password' | 'google' | 'otp';
 
 export interface AdminLoginHistoryRow {
   id: string;
   at: string;
+  /** A {@link LoginMethod}; kept open (string) so an older audit row still renders. */
   method: string | null;
   ip: string | null;
   userAgent: string | null;
 }
 
-export async function listAdminUsers(params: {
-  role?: string;
-  status?: string;
-  search?: string;
-  limit?: number;
-  offset?: number;
-} = {}): Promise<{ rows: AdminUserRow[]; total: number }> {
+/**
+ * GET /admin/users. `paid` needs the paid-status capability (403 FORBIDDEN otherwise)
+ * and returns students only; `sort` defaults to createdAt, `order` to desc (last login
+ * sorts never-signed-in users last).
+ */
+export async function listAdminUsers(
+  params: {
+    role?: string;
+    status?: string;
+    search?: string;
+    limit?: number;
+    offset?: number;
+    paid?: PaidStatus;
+    sort?: AdminUserListSort;
+    order?: 'asc' | 'desc';
+  } = {},
+  options: { signal?: AbortSignal } = {},
+): Promise<AdminUserList> {
   const qs = new URLSearchParams();
   if (params.role) qs.set('role', params.role);
   if (params.status) qs.set('status', params.status);
   if (params.search) qs.set('search', params.search);
   if (params.limit) qs.set('limit', String(params.limit));
   if (params.offset) qs.set('offset', String(params.offset));
+  if (params.paid) qs.set('paid', params.paid);
+  if (params.sort) qs.set('sort', params.sort);
+  if (params.order) qs.set('order', params.order);
   const suffix = qs.toString() ? `?${qs.toString()}` : '';
-  const res = await apiClient.get<{ rows: AdminUserRow[]; total: number }>(
-    `/api/v1/admin/users${suffix}`,
-  );
+  const res = await apiClient.get<AdminUserList>(`/api/v1/admin/users${suffix}`, {
+    signal: options.signal,
+  });
   return res.data;
 }
 
@@ -775,28 +840,88 @@ export async function getStudentReport(id: string): Promise<AdminStudentFullRepo
 /** One row of the User Information export: every user with profile, last-login
  *  and effective-subscription columns. A plain ADMIN never sees ADMIN/SUPER_ADMIN
  *  rows (enforced server-side). */
-export interface AdminUserReportRow {
+export interface AdminUserReportRow extends AdminUserPaidFields {
   id: string;
   fullName: string | null;
   email: string;
   phone: string | null;
   role: AdminRole;
   status: AdminUserStatus;
+  /** Canonical college name, else the student's typed college. */
   collegeName: string | null;
+  cohortName: string | null;
   createdAt: string;
   lastLoginAt: string | null;
   subscriptionPlan: string;
   subscriptionStatus: string;
 }
 
-/** Fetch the full User Information report. Optional ISO date range filters by
- *  registration date (append `?from=&to=` like the financials endpoint). */
+/** Fetch the full User Information report. Optional ISO instants bound the
+ *  registration date (inclusive). Paid fields are null for every row when the viewer
+ *  lacks the paid-status capability. */
 export async function getUserReport(range?: { from?: string; to?: string }): Promise<AdminUserReportRow[]> {
   const qs = new URLSearchParams();
   if (range?.from) qs.set('from', range.from);
   if (range?.to) qs.set('to', range.to);
   const suffix = qs.toString() ? `?${qs.toString()}` : '';
   const res = await apiClient.get<AdminUserReportRow[]>(`/api/v1/admin/reports/users${suffix}`);
+  return res.data;
+}
+
+// ─── Live user sheet (super-admin) ──────────────────────────────────────────
+
+/** student_profiles.branch (see lib/branch). */
+export type UserSheetDepartment = 'CSE' | 'IT' | 'ECE' | 'EEE' | 'MECH' | 'CIVIL' | 'OTHER';
+
+/** One row of the live user sheet. Timestamps are ISO-8601 UTC. */
+export interface UserSheetRow extends AdminUserPaidFields {
+  id: string;
+  fullName: string | null;
+  email: string;
+  phone: string | null;
+  role: AdminRole;
+  status: AdminUserStatus;
+  isEmailVerified: boolean;
+  collegeName: string | null;
+  cohortName: string | null;
+  department: UserSheetDepartment | null;
+  createdAt: string;
+  lastLoginAt: string | null;
+  /** Latest change to the account or its student profile. */
+  updatedAt: string;
+}
+
+/**
+ * The sync protocol: 'full' = replace the sheet with `rows`; 'delta' = upsert `rows` by
+ * id (a row may repeat, and unchanged rows are re-sent inside the server's overlap
+ * window) and drop `removedIds`. Always keep `cursor` and send it back as `since`.
+ */
+export interface UserSheetResult {
+  mode: 'full' | 'delta';
+  rows: UserSheetRow[];
+  removedIds: string[];
+  /** Database clock of this read (ISO). */
+  serverTime: string;
+  cursor: string;
+}
+
+/**
+ * GET /admin/user-sheet (SUPER_ADMIN only). No `since` = full snapshot; `since` = the
+ * cursor from the previous response. `purpose: 'export'` records an audit row for a
+ * download. 400 VALIDATION_FAILED for a bad cursor; 429 RATE_LIMITED above 60 calls a
+ * minute per user.
+ */
+export async function getUserSheet(
+  params: { since?: string; purpose?: 'export' } = {},
+  options: { signal?: AbortSignal } = {},
+): Promise<UserSheetResult> {
+  const qs = new URLSearchParams();
+  if (params.since) qs.set('since', params.since);
+  if (params.purpose) qs.set('purpose', params.purpose);
+  const suffix = qs.toString() ? `?${qs.toString()}` : '';
+  const res = await apiClient.get<UserSheetResult>(`/api/v1/admin/user-sheet${suffix}`, {
+    signal: options.signal,
+  });
   return res.data;
 }
 

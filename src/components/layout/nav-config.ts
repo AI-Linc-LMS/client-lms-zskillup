@@ -34,6 +34,7 @@ import {
   Ticket,
   ScrollText,
   Search,
+  Sheet,
   ShieldCheck,
   Sparkles,
   Target,
@@ -208,6 +209,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
     items: [
       { label: 'Student Reports', href: '/superadmin/students', icon: BarChart3 },
       { label: 'Users', href: '/superadmin/users', icon: Users },
+      { label: 'User Sheet', href: '/superadmin/user-sheet', icon: Sheet },
       { label: 'Colleges', href: '/superadmin/colleges', icon: School },
       { label: 'College Access', href: '/superadmin/college-access', icon: ShieldCheck },
       { label: 'College Requests', href: '/superadmin/college-requests', icon: ClipboardCheck },
