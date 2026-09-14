@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { BadgeCheck, Code2, ExternalLink, Loader2, Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { DialogShell } from '@/components/superadmin/assessment-wizard/DialogShell';
 import { ApiRequestError } from '@/lib/api/types';
 import { listCompanies } from '@/lib/api/catalog';
 import {
@@ -273,66 +275,43 @@ function CodingDetailDrawer({
   companyName: Record<string, string>;
   onClose: () => void;
 }) {
-  if (!problem) return null;
-  return <CodingDetailPanel key={problem.id} problem={problem} companyName={companyName} onClose={onClose} />;
+  const titleId = useId();
+  // The shared dialog shell traps Tab focus, closes on Esc / backdrop and returns focus to
+  // the row that opened it.
+  return (
+    <DialogShell open={!!problem} onClose={onClose} labelledBy={titleId} variant="drawer" maxWidth="max-w-2xl">
+      {problem ? <CodingDetailBody p={problem} titleId={titleId} companyName={companyName} onClose={onClose} /> : null}
+    </DialogShell>
+  );
 }
 
-function CodingDetailPanel({
-  problem: p,
+function CodingDetailBody({
+  p,
+  titleId,
   companyName,
   onClose,
 }: {
-  problem: AdminCodingProblemSummary;
+  p: AdminCodingProblemSummary;
+  titleId: string;
   companyName: Record<string, string>;
   onClose: () => void;
 }) {
   const cases = p.testCases ?? [];
-  const closeRef = useRef<HTMLButtonElement>(null);
-  const onCloseRef = useRef(onClose);
-  useEffect(() => {
-    onCloseRef.current = onClose;
-  }, [onClose]);
-
-  // Keyboard users land inside the panel (once, on open) and can leave it with Esc.
-  useEffect(() => {
-    closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCloseRef.current();
-    };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, []);
-
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
-      <button
-        type="button"
-        aria-label="Close"
-        onClick={onClose}
-        className="absolute inset-0 bg-slate-900/40"
-      />
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label={p.title}
-        className="relative flex h-full w-full max-w-2xl flex-col overflow-y-auto border-l border-slate-200 bg-white shadow-lg"
-      >
-        <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-slate-200 bg-white px-6 py-4">
-          <div className="min-w-0">
-            <h2 className="truncate text-lg font-extrabold text-navy">{p.title}</h2>
-            <p className="text-[11px] text-slate-500">{p.slug}</p>
-          </div>
-          <button
-            ref={closeRef}
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="grid size-9 shrink-0 place-items-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/40"
-          >
-            <X className="size-5" />
-          </button>
+    <>
+      <div className="flex items-start justify-between gap-3 border-b border-slate-200 bg-white px-6 py-4">
+        <div className="min-w-0">
+          <h2 id={titleId} className="truncate text-lg font-extrabold text-navy">
+            {p.title}
+          </h2>
+          <p className="text-[11px] text-slate-500">{p.slug}</p>
         </div>
+        <Button type="button" variant="ghost" size="icon" onClick={onClose} aria-label="Close">
+          <X aria-hidden />
+        </Button>
+      </div>
 
+      <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="space-y-5 px-6 py-5">
           {/* badges */}
           <div className="flex flex-wrap items-center gap-1.5">
@@ -460,8 +439,8 @@ function CodingDetailPanel({
             </p>
           )}
         </div>
-      </aside>
-    </div>
+      </div>
+    </>
   );
 }
 
