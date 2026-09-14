@@ -4,6 +4,7 @@ import { useId } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DialogShell } from './DialogShell';
+import { QUESTION_ORDER_NOTE } from './ReviewStep';
 import type { SelectionTally } from './selection';
 import { eyebrowCls } from './ui';
 
@@ -72,10 +73,13 @@ export function ConfirmPublishDialog({
         </dl>
 
         {n > 0 ? (
-          <p className="text-sm leading-relaxed text-slate-600">
-            These exact questions are fixed — every student gets this set; nothing is re-drawn when it goes live.
-            {mode === 'create' ? ' Students in the audience are notified once it is published.' : ''}
-          </p>
+          <div className="space-y-1.5">
+            <p className="text-sm leading-relaxed text-slate-600">
+              These exact questions are fixed — every student gets this set; nothing is re-drawn when it goes live.
+              {mode === 'create' ? ' Students in the audience are notified once it is published.' : ''}
+            </p>
+            <p className="text-sm text-slate-500">{QUESTION_ORDER_NOTE}</p>
+          </div>
         ) : null}
 
         <div className="flex flex-wrap justify-end gap-2">

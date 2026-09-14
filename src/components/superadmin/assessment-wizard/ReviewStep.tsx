@@ -12,6 +12,9 @@ import { CodingMeta, McqPreviewBody } from './previews';
 import type { PickedItem, WizardSection } from './selection';
 import { DifficultyPill, ErrorAlert, FixedMarker, OriginBadge, eyebrowCls, shortId } from './ui';
 
+/** How the runner orders the published set (Part A MCQs, then Part B coding). */
+export const QUESTION_ORDER_NOTE = 'Students see MCQs first, then coding problems, in the order shown.';
+
 /**
  * Review before publishing: every MCQ with its answer key, every coding problem as a card
  * (statement excerpt + metadata), each marked Fixed. Items the server refused on the last
@@ -66,6 +69,7 @@ export function ReviewStep({
           </span>
         ) : null}
       </div>
+      <p className="text-sm text-slate-500">{QUESTION_ORDER_NOTE}</p>
       {!canPreview ? (
         <p className="text-sm text-slate-500">
           You’re reviewing question titles. Answer keys and full statements are visible to platform admins.
