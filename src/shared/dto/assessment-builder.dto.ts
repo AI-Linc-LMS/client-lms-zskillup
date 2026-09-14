@@ -37,6 +37,9 @@ export const SAMPLE_DIFFICULTIES: SampleDifficulty[] = ['EASY', 'MEDIUM', 'HARD'
  *   INVALID_QUESTION_IDS   400 — ids that don't exist / aren't usable; `details` lists
  *                                them by reason (flat string arrays, only non-empty keys).
  *   DUPLICATE_QUESTION_IDS 400 — the same id picked twice (or already in the assessment).
+ *                                Only when the request sets `strictDuplicates: true`;
+ *                                by default repeats are dropped / skipped and reported
+ *                                in the success response instead (see SelectionIdLists).
  *   QUESTION_SET_LOCKED    409 — the drive's mock already has attempts.
  *   CODING_PROBLEM_IN_USE  409 — a coding problem linked to a mock can't be deleted.
  *   QUESTION_IN_USE        409 — options of a question in an attempted mock can't be replaced.
@@ -63,13 +66,23 @@ export interface InvalidQuestionIdsDetails {
   codingInactive?: string[];
 }
 
-/** `details` of a 400 DUPLICATE_QUESTION_IDS. */
+/** `details` of a 400 DUPLICATE_QUESTION_IDS (strictDuplicates: true only). */
 export interface DuplicateQuestionIdsDetails {
   duplicateQuestionIds?: string[];
   duplicateCodingProblemIds?: string[];
   /** Append only: ids the assessment already contains. */
   questionIdsAlreadyInAssessment?: string[];
   codingProblemIdsAlreadyInAssessment?: string[];
+}
+
+/**
+ * Ids the server left out of a create / append instead of refusing it (the default,
+ * non-strict duplicate handling). Distinct ids, lower-cased, in the order first met;
+ * both arrays are always present (empty when nothing was left out).
+ */
+export interface SelectionIdLists {
+  questionIds: string[];
+  codingProblemIds: string[];
 }
 
 /** A built section: concrete question / coding-problem ids resolved by the wizard. */
@@ -141,6 +154,12 @@ export class CreateAssessmentDto {
   @IsOptional() @IsBoolean() subscriptionLockEnabled?: boolean;
   @IsOptional() @IsBoolean() profileLockEnabled?: boolean;
 
+  /** Duplicate handling. Omitted/false (default): an id repeated across the payload's
+   *  sections is kept once — its first occurrence, order preserved — and the repeats are
+   *  listed in the response's `droppedDuplicates`. true: any repeat is a 400
+   *  DUPLICATE_QUESTION_IDS and nothing is written. */
+  @IsOptional() @IsBoolean() strictDuplicates?: boolean;
+
   @IsArray()
   @ArrayMinSize(1)
   @ArrayMaxSize(50)
@@ -175,6 +194,21 @@ export class EditAssessmentDto {
   @ValidateNested({ each: true })
   @Type(() => BuilderSectionDto)
   addSections?: BuilderSectionDto[];
+  /** Duplicate handling for `addSections`. Omitted/false (default): ids the assessment
+   *  already holds are skipped (→ `skippedAlreadyPresent`) and ids repeated inside
+   *  addSections are kept once, first occurrence, order preserved (→ `droppedDuplicates`).
+   *  true: either case is a 400 DUPLICATE_QUESTION_IDS and nothing is written. */
+  @IsOptional() @IsBoolean() strictDuplicates?: boolean;
+}
+
+/** PATCH /admin/assessment-builder/:id response: the GET /:id/editable snapshot (after the
+ *  edit) plus what the append left out. Both lists are always present — empty when nothing
+ *  was left out, when nothing was appended, and always under strictDuplicates: true. */
+export interface EditedAssessmentOutcome {
+  /** Appended ids the assessment already contained, so they were not added again. */
+  skippedAlreadyPresent: SelectionIdLists;
+  /** Ids repeated inside `addSections`; each was appended once. */
+  droppedDuplicates: SelectionIdLists;
 }
 
 /** Resolve a topic + how many questions of a type are needed. Prefer `topicId`
@@ -262,7 +296,11 @@ export interface CreatedAssessmentResult {
   companyName: string;
   /** Sum of every linked item's marks. */
   totalMarks: number;
+  /** Per payload section, counting only what was persisted (after duplicates were dropped). */
   sections: CreatedAssessmentSection[];
+  /** Ids repeated across the payload; each was persisted once, at its first occurrence.
+   *  Always present — empty arrays when there were none (and always under strictDuplicates). */
+  droppedDuplicates: SelectionIdLists;
 }
 
 /** Generate ONE AI item for a resolved topic (called in a loop for the live modal). */

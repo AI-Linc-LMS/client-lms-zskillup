@@ -5,10 +5,12 @@ import type {
   CreateAssessmentDto,
   CreatedAssessmentResult,
   EditAssessmentDto,
+  EditedAssessmentOutcome,
   GenerateOneDto,
   SampleDifficulty,
   SampleQuestionsDto,
   SampleQuestionsResult,
+  SelectionIdLists,
   SourceTopicDto,
 } from '@/shared/dto/assessment-builder.dto';
 
@@ -18,11 +20,14 @@ import type {
  * src/shared/dto/assessment-builder.dto.ts); the aliases below keep the names the
  * wizard already used.
  */
-export type { AssessmentItemType, SampleDifficulty, SampleQuestionsResult };
+export type { AssessmentItemType, SampleDifficulty, SampleQuestionsResult, SelectionIdLists };
 export type BuilderSection = BuilderSectionDto;
 export type CreateAssessmentPayload = CreateAssessmentDto;
 export type EditAssessmentPayload = EditAssessmentDto;
-export type CreatedAssessment = CreatedAssessmentResult;
+/** POST /create response. `droppedDuplicates` is optional here so a response from a server
+ *  predating it still type-checks (it is always empty under `strictDuplicates: true`). */
+export type CreatedAssessment = Omit<CreatedAssessmentResult, 'droppedDuplicates'> &
+  Partial<Pick<CreatedAssessmentResult, 'droppedDuplicates'>>;
 
 /** A distinct coding category (tags[0]) with its live bank count. */
 export interface CodingTopic {
@@ -96,8 +101,10 @@ export async function generateOne(body: GenerateOneDto): Promise<GeneratedItem> 
   return res.data;
 }
 
-/** Create + publish. Every id is validated server-side: 400 INVALID_QUESTION_IDS /
- *  DUPLICATE_QUESTION_IDS carry the offending ids in `details` (see question-selection-errors). */
+/** Create + publish. Every id is validated server-side (400 INVALID_QUESTION_IDS). With
+ *  `strictDuplicates: true` a repeated id is a 400 DUPLICATE_QUESTION_IDS; without it the
+ *  server keeps the first occurrence and reports the rest in `droppedDuplicates`. Offending
+ *  ids come back in `details` (see question-selection-errors). */
 export async function createAssessment(payload: CreateAssessmentPayload): Promise<CreatedAssessment> {
   const res = await apiClient.post<CreatedAssessment>(
     '/api/v1/admin/assessment-builder/create',
@@ -146,10 +153,15 @@ export async function getEditableAssessment(id: string): Promise<EditableAssessm
   return res.data;
 }
 
+/** PATCH response: the editable snapshot plus what a non-strict append left out (optional
+ *  here; always empty under `strictDuplicates: true`). */
+export type EditedAssessment = EditableAssessment & Partial<EditedAssessmentOutcome>;
+
 /** Edit details and APPEND sections. 409 QUESTION_SET_LOCKED once the drive has attempts;
- *  400 DUPLICATE_QUESTION_IDS also names ids the assessment already holds. */
-export async function updateAssessment(id: string, payload: EditAssessmentPayload): Promise<EditableAssessment> {
-  const res = await apiClient.patch<EditableAssessment>(
+ *  with `strictDuplicates: true`, 400 DUPLICATE_QUESTION_IDS also names ids the assessment
+ *  already holds. */
+export async function updateAssessment(id: string, payload: EditAssessmentPayload): Promise<EditedAssessment> {
+  const res = await apiClient.patch<EditedAssessment>(
     `/api/v1/admin/assessment-builder/${id}`,
     payload,
   );

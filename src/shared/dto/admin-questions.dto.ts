@@ -457,8 +457,15 @@ export interface AdminQuestionPreviewDto {
 
 // ── Manual question selection (assessment builder) ───────────────────────────
 
-/** Most ids a selection browser may pass as `excludeIds` (already-selected items). */
-export const MAX_EXCLUDE_IDS = 500;
+/**
+ * Most ids a selection browser may pass as the `excludeIds` QUERY param (already-selected
+ * items) on GET /admin/questions and GET /admin/coding/problems/search. Kept at 300 so the
+ * request line stays inside Node's 16 KB header limit: 300 uuids comma-separated and
+ * URL-encoded (%2C) are ~11.7 KB, leaving room for the other params and headers. Use the
+ * comma-separated form (a repeated `?excludeIds=` per id is ~40% longer). The POST
+ * /admin/assessment-builder/sample BODY is not bound by this and keeps a 500 cap.
+ */
+export const MAX_EXCLUDE_IDS = 300;
 
 /**
  * Added to every GET /admin/questions row so a manual picker can show where a question

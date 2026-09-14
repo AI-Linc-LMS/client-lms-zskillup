@@ -312,7 +312,7 @@ export interface AdminQuestionRow {
   solution?: string | null;
   explanation?: string | null;
   hint?: string | null;
-  source?: 'PREVIOUS_YEAR_QUESTIONS' | 'MEMORY_BASED' | 'PATTERN_BASED' | 'MOCK_DERIVED' | null;
+  source?: 'PREVIOUS_YEAR_QUESTIONS' | 'MEMORY_BASED' | 'PATTERN_BASED' | 'MOCK_DERIVED' | 'AI_GENERATED' | null;
   frequency?: 'VERY_HIGH' | 'HIGH' | 'MEDIUM' | 'LOW' | null;
   yearTags?: number[];
   roleTags?: string[];
@@ -384,7 +384,8 @@ export async function createAdminQuestion(dto: AdminCreateQuestionDto): Promise<
   return res.data;
 }
 
-/** Replacing `options` on a question inside an attempted mock → 409 QUESTION_IN_USE. */
+/** A structural `options` change (count changed) on a question inside an attempted mock →
+ *  409 QUESTION_IN_USE; text / answer-key edits with the same option count are allowed. */
 export async function updateAdminQuestion(
   id: string,
   dto: AdminUpdateQuestionDto,

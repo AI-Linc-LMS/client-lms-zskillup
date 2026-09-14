@@ -26,6 +26,7 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
+import { MAX_EXCLUDE_IDS } from './admin-questions.dto';
 
 /** 'true' / 'false' query strings → booleans (anything else is left for @IsBoolean to
  *  reject). Reads the RAW value: implicit conversion would turn 'false' into true. */
@@ -57,11 +58,12 @@ export class AdminCodingSearchQueryDto {
   @IsOptional() @Transform(queryBool) @IsBoolean() active?: boolean;
   /** Case-insensitive title substring. */
   @IsOptional() @IsString() @MaxLength(200) search?: string;
-  /** Ids to leave out (already selected), comma-separated or repeated, ≤ 500. */
+  /** Ids to leave out (already selected), comma-separated (preferred) or repeated,
+   *  ≤ MAX_EXCLUDE_IDS (300) — see admin-questions.dto. */
   @IsOptional()
   @Transform(queryIdList)
   @IsArray()
-  @ArrayMaxSize(500)
+  @ArrayMaxSize(MAX_EXCLUDE_IDS, { message: `excludeIds accepts at most ${MAX_EXCLUDE_IDS} ids` })
   @IsUUID('all', { each: true })
   excludeIds?: string[];
   /** Page size, 1-100 (default 25). */
