@@ -131,7 +131,7 @@ export default function AdminUsersPage() {
             aria-busy={list.loading}
           >
             <table className="w-full min-w-[760px] text-sm">
-              <thead className="border-b border-slate-100 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              <thead className="border-b border-slate-100 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                 <tr>
                   <th scope="col" className={TH}>User</th>
                   <th scope="col" className={TH}>Status</th>

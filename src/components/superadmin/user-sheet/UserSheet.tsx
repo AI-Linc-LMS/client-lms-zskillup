@@ -53,7 +53,8 @@ const PAID_OPTIONS: { value: SheetPaidFilter; label: string }[] = [
   { value: 'NA', label: 'Not applicable (staff)' },
 ];
 
-const LABEL = 'text-[10px] font-semibold uppercase tracking-widest text-slate-400';
+/** Uppercase label (§4.3), in slate-500: slate-400 fails WCAG AA contrast at this size. */
+const LABEL = 'text-[10px] font-semibold uppercase tracking-widest text-slate-500';
 
 type SelectFilters = Omit<SheetFilters, 'search'>;
 

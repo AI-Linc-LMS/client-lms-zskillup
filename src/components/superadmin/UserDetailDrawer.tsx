@@ -50,8 +50,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-/** Uppercase section label (§4.3). */
-const LABEL = 'text-[10px] font-semibold uppercase tracking-widest text-slate-400';
+/** Uppercase section label (§4.3), in slate-500: slate-400 fails WCAG AA contrast at this size. */
+const LABEL = 'text-[11px] font-semibold uppercase tracking-widest text-slate-500';
 
 function titleCase(s: string): string {
   return s.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());

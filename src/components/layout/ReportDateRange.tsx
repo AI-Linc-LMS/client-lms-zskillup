@@ -22,7 +22,7 @@ export function ReportDateRange({
 }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Date range</p>
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Date range</p>
       <div className="mt-3 flex flex-wrap items-end gap-3">
         <label className="block">
           <span className="mb-1 block text-xs font-semibold text-slate-600">From</span>

@@ -27,7 +27,7 @@ const COLUMNS = [
 ] as const;
 
 const Dash = () => (
-  <span className="text-slate-400">
+  <span className="text-slate-500">
     <span aria-hidden>-</span>
     <span className="sr-only">Not set</span>
   </span>
@@ -98,7 +98,7 @@ const SheetRow = memo(function SheetRow({
             {formatDateIST(row.lastLoginAt)}
           </time>
         ) : (
-          <span className="text-slate-400">{NEVER_LABEL}</span>
+          <span className="text-slate-500">{NEVER_LABEL}</span>
         )}
       </td>
       <td className={cn(TD, 'whitespace-nowrap text-xs text-slate-500')}>
@@ -137,7 +137,7 @@ export function UserSheetTable({
         <caption className="sr-only">
           All users, newest registration first. Timestamps are India Standard Time.
         </caption>
-        <thead className="border-b border-slate-100 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+        <thead className="border-b border-slate-100 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-500">
           <tr>
             {COLUMNS.map((c) => (
               <th key={c} scope="col" className={TH}>

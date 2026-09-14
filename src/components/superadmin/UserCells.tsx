@@ -22,7 +22,7 @@ export function AccountStatusPill({ status }: { status: AdminUserStatus }) {
 
 /** Date over time, both IST, with the exact timestamp (seconds) as the tooltip. */
 export function DateTimeCell({ at, empty = NEVER_LABEL }: { at: string | null; empty?: string }) {
-  if (!at) return <span className="text-xs text-slate-400">{empty}</span>;
+  if (!at) return <span className="text-xs text-slate-500">{empty}</span>;
   return (
     <time dateTime={at} title={formatDateTimeSecondsIST(at)} className="block whitespace-nowrap">
       <span className="block text-xs font-medium text-slate-700">{formatDateIST(at)}</span>
@@ -52,7 +52,7 @@ export function PaidStatusCell(p: AdminUserPaidFields) {
   const description = paidStatusDescription(p);
   if (!p.paidStatus) {
     return (
-      <span className="text-xs text-slate-400" title={description}>
+      <span className="text-xs text-slate-500" title={description}>
         <span aria-hidden>-</span>
         <span className="sr-only">{description}</span>
       </span>
