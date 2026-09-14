@@ -312,7 +312,13 @@ export function AssessmentWizard({
 
   const requestClose = () => {
     if (creating) return;
-    if (!created && !saved && tally.total > 0 && !window.confirm('Discard this assessment? Your selected questions will be lost.')) return;
+    // After a publish / save, every way out (Done, X, Esc, backdrop) refreshes the caller's list.
+    if (created || saved) {
+      onCreated();
+      onClose();
+      return;
+    }
+    if (tally.total > 0 && !window.confirm('Discard this assessment? Your selected questions will be lost.')) return;
     onClose();
   };
 
@@ -442,21 +448,9 @@ export function AssessmentWizard({
       {/* body */}
       <div className="min-h-0 flex-1 overflow-y-auto bg-white px-6 py-5">
         {created ? (
-          <PublishedResult
-            created={created}
-            onDone={() => {
-              onCreated();
-              onClose();
-            }}
-          />
+          <PublishedResult created={created} onDone={requestClose} />
         ) : saved ? (
-          <SavedResult
-            saved={saved}
-            onDone={() => {
-              onCreated();
-              onClose();
-            }}
-          />
+          <SavedResult saved={saved} onDone={requestClose} />
         ) : step === 0 ? (
           <div className="mx-auto max-w-3xl space-y-4">
             {loadErr ? <ErrorAlert>{loadErr}</ErrorAlert> : null}
