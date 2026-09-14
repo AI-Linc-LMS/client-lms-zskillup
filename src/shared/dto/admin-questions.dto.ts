@@ -419,7 +419,7 @@ export class AdminBulkDifficultyDto {
   @IsArray()
   @ArrayNotEmpty()
   @ArrayMaxSize(2000)
-  @IsUUID('4', { each: true })
+  @IsUUID('all', { each: true })
   ids!: string[];
 
   @IsEnum(QuestionDifficulty)
@@ -436,7 +436,7 @@ export class AdminPreviewQuestionsDto {
   @IsArray()
   @ArrayNotEmpty()
   @ArrayMaxSize(500)
-  @IsUUID('4', { each: true })
+  @IsUUID('all', { each: true })
   ids!: string[];
 }
 
