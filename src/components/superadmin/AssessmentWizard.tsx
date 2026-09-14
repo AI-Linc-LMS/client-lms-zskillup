@@ -442,6 +442,8 @@ export function AssessmentWizard({
           mcqCount: e.mcqCount,
           codingCount: e.codingCount,
           companyName: isPlatform ? 'Platform-wide' : companies.find((c) => c.id === companyId)?.name ?? '',
+          totalMarks: e.totalMarks,
+          sections: [],
         });
       } else {
         const result = await createAssessment({

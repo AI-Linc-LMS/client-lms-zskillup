@@ -1,7 +1,28 @@
 import { apiClient } from './client';
+import type {
+  AssessmentItemType,
+  BuilderSectionDto,
+  CreateAssessmentDto,
+  CreatedAssessmentResult,
+  EditAssessmentDto,
+  GenerateOneDto,
+  SampleDifficulty,
+  SampleQuestionsDto,
+  SampleQuestionsResult,
+  SourceTopicDto,
+} from '@/shared/dto/assessment-builder.dto';
 
-/** AI-assisted assessment builder. Mirrors backend assessment-builder.dto.ts. */
-export type AssessmentItemType = 'MCQ' | 'CODING';
+/**
+ * Assessment builder (`/admin/assessment-builder/*`) — SUPER_ADMIN, ADMIN and COLLEGE_ADMIN.
+ * Request/response shapes come from the shared contract (ADR-011,
+ * src/shared/dto/assessment-builder.dto.ts); the aliases below keep the names the
+ * wizard already used.
+ */
+export type { AssessmentItemType, SampleDifficulty, SampleQuestionsResult };
+export type BuilderSection = BuilderSectionDto;
+export type CreateAssessmentPayload = CreateAssessmentDto;
+export type EditAssessmentPayload = EditAssessmentDto;
+export type CreatedAssessment = CreatedAssessmentResult;
 
 /** A distinct coding category (tags[0]) with its live bank count. */
 export interface CodingTopic {
@@ -17,43 +38,15 @@ export async function listBuilderCodingTopics(): Promise<CodingTopic[]> {
   return res.data;
 }
 
-export interface BuilderSection {
-  name: string;
-  questionIds?: string[];
-  codingProblemIds?: string[];
-  topicIds?: string[];
-  numQuestions?: number;
-  marksPerQuestion?: number;
-  durationMinutes?: number;
-}
-
-export interface CreateAssessmentPayload {
-  /** Omit for a platform-wide assessment (all students). */
-  companyId?: string;
-  /** Restrict to one college (all its cohorts) - cohort-wise scope. */
-  collegeId?: string;
-  /** Restrict to a single cohort/batch (implies its college). */
-  cohortId?: string;
-  title: string;
-  scheduledAt: string;
-  endsAt?: string;
-  durationMinutes?: number;
-  proctored?: boolean;
-  proctorAutoSubmit?: boolean;
-  proctorMaxWarnings?: number;
-  passingScore?: number;
-  subscriptionLockEnabled?: boolean;
-  profileLockEnabled?: boolean;
-  sections: BuilderSection[];
-}
-
-export interface CreatedAssessment {
-  mockTestId: string;
-  scheduledAssessmentId: string;
-  totalQuestions: number;
-  mcqCount: number;
-  codingCount: number;
-  companyName: string;
+/**
+ * RANDOM selection: sample `count` eligible bank items for the admin to review before they
+ * join a section. Persists nothing. MCQ scopes by `topicId` (whole subtree); CODING takes
+ * exactly one of `codingTopic` / `allCoding`. `excludeIds` = everything already selected,
+ * so a draw never returns a duplicate. `available` is the eligible pool after exclusions.
+ */
+export async function sampleQuestions(body: SampleQuestionsDto): Promise<SampleQuestionsResult> {
+  const res = await apiClient.post<SampleQuestionsResult>('/api/v1/admin/assessment-builder/sample', body);
+  return res.data;
 }
 
 /** Result of resolving a topic: bank items + how many to AI-generate. */
@@ -78,27 +71,24 @@ export async function sourceTopic(
   topic: string,
   type: AssessmentItemType,
   count: number,
-  opts?: { topicId?: string; difficulty?: 'EASY' | 'MEDIUM' | 'HARD'; allCoding?: boolean },
+  opts?: Pick<SourceTopicDto, 'topicId' | 'difficulty' | 'allCoding' | 'codingDifficulty'>,
 ): Promise<SourcedTopic> {
-  const res = await apiClient.post<SourcedTopic>('/api/v1/admin/assessment-builder/source', {
+  const body: SourceTopicDto = {
     topic,
     type,
     count,
     topicId: opts?.topicId,
     difficulty: opts?.difficulty,
     allCoding: opts?.allCoding,
-  });
+    codingDifficulty: opts?.codingDifficulty,
+  };
+  const res = await apiClient.post<SourcedTopic>('/api/v1/admin/assessment-builder/source', body);
   return res.data;
 }
 
-/** Generate ONE AI item for a resolved topic (call in a loop for the live modal). */
-export async function generateOne(body: {
-  topicId: string;
-  topicName: string;
-  type: AssessmentItemType;
-  difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
-  avoid?: string[];
-}): Promise<GeneratedItem> {
+/** Generate ONE AI item (call in a loop for live progress). `topicId` is required for MCQ
+ *  only — a coding topic is a tag, so CODING generation is keyed by `topicName`. */
+export async function generateOne(body: GenerateOneDto): Promise<GeneratedItem> {
   const res = await apiClient.post<GeneratedItem>(
     '/api/v1/admin/assessment-builder/generate-one',
     body,
@@ -106,12 +96,23 @@ export async function generateOne(body: {
   return res.data;
 }
 
+/** Create + publish. Every id is validated server-side: 400 INVALID_QUESTION_IDS /
+ *  DUPLICATE_QUESTION_IDS carry the offending ids in `details` (see question-selection-errors). */
 export async function createAssessment(payload: CreateAssessmentPayload): Promise<CreatedAssessment> {
   const res = await apiClient.post<CreatedAssessment>(
     '/api/v1/admin/assessment-builder/create',
     payload,
   );
   return res.data;
+}
+
+/** One question/coding problem already in an assessment. */
+export interface EditableAssessmentItem {
+  id: string;
+  type: AssessmentItemType;
+  label: string;
+  difficulty: string;
+  marks: number;
 }
 
 /** Editable snapshot of an assessment (locked once it has submissions). */
@@ -132,8 +133,10 @@ export interface EditableAssessment {
   attempts: number;
   mcqCount: number;
   codingCount: number;
+  /** Sum of every linked item's marks. */
+  totalMarks: number;
   editable: boolean;
-  items: Array<{ type: 'MCQ' | 'CODING'; label: string; difficulty: string; marks: number }>;
+  items: EditableAssessmentItem[];
 }
 
 export async function getEditableAssessment(id: string): Promise<EditableAssessment> {
@@ -143,22 +146,8 @@ export async function getEditableAssessment(id: string): Promise<EditableAssessm
   return res.data;
 }
 
-export interface EditAssessmentPayload {
-  title?: string;
-  companyId?: string;
-  platform?: boolean;
-  scheduledAt?: string;
-  endsAt?: string;
-  durationMinutes?: number;
-  proctored?: boolean;
-  proctorAutoSubmit?: boolean;
-  proctorMaxWarnings?: number;
-  passingScore?: number;
-  subscriptionLockEnabled?: boolean;
-  profileLockEnabled?: boolean;
-  addSections?: BuilderSection[];
-}
-
+/** Edit details and APPEND sections. 409 QUESTION_SET_LOCKED once the drive has attempts;
+ *  400 DUPLICATE_QUESTION_IDS also names ids the assessment already holds. */
 export async function updateAssessment(id: string, payload: EditAssessmentPayload): Promise<EditableAssessment> {
   const res = await apiClient.patch<EditableAssessment>(
     `/api/v1/admin/assessment-builder/${id}`,

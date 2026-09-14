@@ -151,6 +151,8 @@ import type {
   AdminBulkUploadDto,
   AdminBulkUploadResultDto,
   AdminCreateQuestionDto,
+  AdminQuestionListRowMeta,
+  AdminQuestionPreviewDto,
   AdminTopicNodeDto,
   AdminUpdateQuestionDto,
 } from '@/shared/dto/admin-questions.dto';
@@ -325,6 +327,10 @@ export interface AdminQuestionDetail {
   contentUsage: Array<{ usageType: string }>;
 }
 
+/** A GET /admin/questions row: the question plus where it lives (topic + section) and the
+ *  company slugs it's tagged to. */
+export type AdminQuestionListRow = AdminQuestionRow & AdminQuestionListRowMeta;
+
 export async function listAdminQuestions(
   params: {
     status?: string;
@@ -337,10 +343,20 @@ export async function listAdminQuestions(
     search?: string;
     limit?: number;
     offset?: number;
+    /** MCQ | MULTI_SELECT | NUMERIC | CODING. */
+    type?: AdminQuestionRow['type'];
+    /** Section/topic id — its whole subtree (unknown id → 404). */
+    topicId?: string;
+    /** Ids to leave out (already selected), at most MAX_EXCLUDE_IDS. */
+    excludeIds?: string[];
   } = {},
-): Promise<{ rows: AdminQuestionRow[]; total: number }> {
+  opts?: { signal?: AbortSignal },
+): Promise<{ rows: AdminQuestionListRow[]; total: number }> {
   const qs = new URLSearchParams();
   if (params.status) qs.set('status', params.status);
+  if (params.type) qs.set('type', params.type);
+  if (params.topicId) qs.set('topicId', params.topicId);
+  if (params.excludeIds?.length) qs.set('excludeIds', params.excludeIds.join(','));
   if (params.topic) qs.set('topic', params.topic);
   if (params.role) qs.set('role', params.role);
   if (params.company) qs.set('company', params.company);
@@ -351,8 +367,9 @@ export async function listAdminQuestions(
   if (params.limit) qs.set('limit', String(params.limit));
   if (params.offset !== undefined) qs.set('offset', String(params.offset));
   const suffix = qs.toString() ? `?${qs.toString()}` : '';
-  const res = await apiClient.get<{ rows: AdminQuestionRow[]; total: number }>(
+  const res = await apiClient.get<{ rows: AdminQuestionListRow[]; total: number }>(
     `/api/v1/admin/questions${suffix}`,
+    { signal: opts?.signal },
   );
   return res.data;
 }
@@ -367,6 +384,7 @@ export async function createAdminQuestion(dto: AdminCreateQuestionDto): Promise<
   return res.data;
 }
 
+/** Replacing `options` on a question inside an attempted mock → 409 QUESTION_IN_USE. */
 export async function updateAdminQuestion(
   id: string,
   dto: AdminUpdateQuestionDto,
@@ -389,15 +407,8 @@ export async function bulkSetQuestionDifficulty(
 
 /** Full detail (with the correct answer) for a set of question ids — for the assessment
  *  "review the selected questions before publishing" step. */
-export interface AdminQuestionPreview {
-  id: string;
-  code: string;
-  type: string;
-  difficulty: string;
-  stem: string;
-  answer: string | null;
-  options: Array<{ text: string; isCorrect: boolean }>;
-}
+export type AdminQuestionPreview = AdminQuestionPreviewDto;
+/** At most 500 ids per call (ADMIN, SUPER_ADMIN). */
 export async function previewQuestions(ids: string[]): Promise<AdminQuestionPreview[]> {
   if (ids.length === 0) return [];
   const res = await apiClient.post<AdminQuestionPreview[]>('/api/v1/admin/questions/preview', {
@@ -524,6 +535,7 @@ export async function createAdminMock(dto: AdminCreateMock): Promise<{ id: strin
   return res.data;
 }
 
+/** Changing `questionIds` of a drive's mock that already has attempts → 409 QUESTION_SET_LOCKED. */
 export async function updateAdminMock(id: string, dto: AdminUpdateMock): Promise<{ id: string }> {
   const res = await apiClient.patch<{ id: string }>(`/api/v1/admin/mocks/${id}`, dto);
   return res.data;

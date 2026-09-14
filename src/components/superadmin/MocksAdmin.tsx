@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/ui/form-field';
 import { StatusPill } from '@/components/student/StatusPill';
 import { ApiRequestError } from '@/lib/api/types';
+import { describeQuestionSetError } from '@/lib/api/question-selection-errors';
 import { listTopics } from '@/lib/api/catalog';
 import {
   createAdminMock,
@@ -158,7 +159,9 @@ export function MocksAdmin() {
       await refresh();
       setMode('list');
     } catch (err) {
-      setFormError(err instanceof ApiRequestError ? err.message : 'Could not save the mock test.');
+      // A mock behind a live drive with attempts refuses a question-set change
+      // (409 QUESTION_SET_LOCKED) — say why instead of a bare "Conflict".
+      setFormError(describeQuestionSetError(err, 'Could not save the mock test.'));
     } finally {
       setSaving(false);
     }

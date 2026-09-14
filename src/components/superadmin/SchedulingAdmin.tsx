@@ -10,6 +10,7 @@ import { ResultsReport } from '@/components/assessment/ResultsReport';
 import { cn } from '@/lib/utils';
 import { ApiRequestError } from '@/lib/api/types';
 import { describeAccessError, describeError } from '@/lib/api/errors';
+import { describeQuestionSetError } from '@/lib/api/question-selection-errors';
 import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
 import { listAdminMocks, type AdminMockRow } from '@/lib/api/admin';
 import {
@@ -154,7 +155,11 @@ export function SchedulingAdmin() {
       await updateScheduledAssessment(r.id, { isActive: !r.isActive });
       await load();
     } catch (e) {
-      toast.error(describeAccessError(e, `You can't change this assessment ${NOT_YOUR_COLLEGE}`, 'Could not update the assessment.'));
+      toast.error(
+        e instanceof ApiRequestError && e.status === 403
+          ? `You can't change this assessment ${NOT_YOUR_COLLEGE}`
+          : describeQuestionSetError(e, 'Could not update the assessment.'),
+      );
     } finally {
       setBusyId(null);
     }

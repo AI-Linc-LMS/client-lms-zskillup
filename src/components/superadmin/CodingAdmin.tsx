@@ -1,15 +1,18 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { BadgeCheck, Code2, ExternalLink, Loader2, Search, X } from 'lucide-react';
+import { BadgeCheck, Code2, ExternalLink, Loader2, Search, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { ApiRequestError } from '@/lib/api/types';
 import { listCompanies } from '@/lib/api/catalog';
 import {
+  deleteAdminCodingProblem,
   listAdminCodingProblems,
   setCodingProblemActive,
   type AdminCodingProblemSummary,
 } from '@/lib/api/coding';
+import { describeQuestionSetError, isQuestionSelectionCode } from '@/lib/api/question-selection-errors';
 
 const SOURCE_LABEL: Record<string, string> = {
   PREVIOUS_YEAR_QUESTIONS: 'PYQ',
@@ -259,6 +262,10 @@ export function CodingAdmin() {
         problem={selected}
         companyName={companyName}
         onClose={() => setSelected(null)}
+        onChanged={async (next) => {
+          await load();
+          setSelected(next);
+        }}
       />
     </div>
   );
@@ -268,24 +275,80 @@ function CodingDetailDrawer({
   problem,
   companyName,
   onClose,
+  onChanged,
 }: {
   problem: AdminCodingProblemSummary | null;
   companyName: Record<string, string>;
   onClose: () => void;
+  /** After a delete (null) or a deactivate (the updated row), so the list refreshes. */
+  onChanged: (next: AdminCodingProblemSummary | null) => Promise<void>;
 }) {
   if (!problem) return null;
-  const p = problem;
+  return <CodingDetailPanel key={problem.id} problem={problem} companyName={companyName} onClose={onClose} onChanged={onChanged} />;
+}
+
+function CodingDetailPanel({
+  problem: p,
+  companyName,
+  onClose,
+  onChanged,
+}: {
+  problem: AdminCodingProblemSummary;
+  companyName: Record<string, string>;
+  onClose: () => void;
+  onChanged: (next: AdminCodingProblemSummary | null) => Promise<void>;
+}) {
   const cases = p.testCases ?? [];
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [busy, setBusy] = useState<'delete' | 'deactivate' | null>(null);
+  const [actionErr, setActionErr] = useState<string | null>(null);
+  /** The server refused the delete because the problem is linked to a mock / answered. */
+  const [inUse, setInUse] = useState(false);
+
+  const remove = async () => {
+    setBusy('delete');
+    setActionErr(null);
+    try {
+      await deleteAdminCodingProblem(p.id);
+      await onChanged(null);
+    } catch (e) {
+      setInUse(isQuestionSelectionCode(e, 'CODING_PROBLEM_IN_USE'));
+      setActionErr(describeQuestionSetError(e, 'Could not delete this coding problem.'));
+      setConfirmDelete(false);
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const deactivate = async () => {
+    setBusy('deactivate');
+    setActionErr(null);
+    try {
+      await setCodingProblemActive(p.id, false);
+      setInUse(false);
+      await onChanged({ ...p, isActive: false });
+    } catch (e) {
+      setActionErr(e instanceof ApiRequestError ? e.message : 'Could not deactivate this coding problem.');
+    } finally {
+      setBusy(null);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <button
         type="button"
         aria-label="Close"
         onClick={onClose}
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-slate-900/40"
       />
-      <aside className="relative flex h-full w-full max-w-2xl flex-col overflow-y-auto bg-white shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-slate-200 bg-white/95 px-6 py-4 backdrop-blur">
+      <aside
+        role="dialog"
+        aria-modal="true"
+        aria-label={p.title}
+        className="relative flex h-full w-full max-w-2xl flex-col overflow-y-auto border-l border-slate-200 bg-white shadow-lg"
+      >
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-slate-200 bg-white px-6 py-4">
           <div className="min-w-0">
             <h2 className="truncate text-lg font-extrabold text-navy">{p.title}</h2>
             <p className="text-[11px] text-slate-500">{p.slug}</p>
@@ -293,7 +356,8 @@ function CodingDetailDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="grid size-9 shrink-0 place-items-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+            aria-label="Close"
+            className="grid size-9 shrink-0 place-items-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/40"
           >
             <X className="size-5" />
           </button>
@@ -319,7 +383,7 @@ function CodingDetailDrawer({
             <Pill tone={p.isActive ? 'bg-sky-50 text-sky-700 ring-sky-200' : 'bg-slate-100 text-slate-600 ring-slate-200'}>
               {p.isActive ? 'Active' : 'Inactive'}
             </Pill>
-            {p.xpReward ? <Pill tone="bg-[#fff5ea] text-[#1a1a1a] ring-[#ffc42d]/30">{p.xpReward} XP</Pill> : null}
+            {p.xpReward ? <Pill tone="bg-amber-50 text-amber-700 ring-amber-200">{p.xpReward} XP</Pill> : null}
           </div>
 
           {/* source citation - the whole point */}
@@ -416,7 +480,7 @@ function CodingDetailDrawer({
           {/* reference solution */}
           {p.referenceSolution?.source ? (
             <Field label={`Reference solution (${p.referenceSolution.language})`}>
-              <pre className="max-h-80 overflow-auto rounded-xl bg-[#0a0a0c] p-3 text-[12px] leading-relaxed text-slate-100">
+              <pre className="max-h-80 overflow-auto rounded-xl bg-navy p-3 text-[12px] leading-relaxed text-slate-100">
                 <code>{p.referenceSolution.source}</code>
               </pre>
             </Field>
@@ -425,6 +489,51 @@ function CodingDetailDrawer({
               <Code2 className="size-3.5" /> No reference solution stored yet.
             </p>
           )}
+
+          {/* Danger zone: a problem linked to any mock (or with recorded answers) can't be
+              deleted — the server answers 409 CODING_PROBLEM_IN_USE and we offer the safe
+              alternative (deactivate) right here. */}
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Remove from the bank</p>
+            {actionErr ? (
+              <div role="alert" className="mt-2 rounded-md bg-red-50 p-3 text-sm font-medium text-red-700 ring-1 ring-red-200">
+                {actionErr}
+                {inUse && p.isActive ? (
+                  <div className="mt-2">
+                    <Button type="button" size="sm" variant="outline" disabled={busy !== null} onClick={deactivate}>
+                      {busy === 'deactivate' ? <Loader2 className="animate-spin" /> : null} Deactivate instead
+                    </Button>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+            {confirmDelete ? (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <p className="text-sm text-slate-600">Delete “{p.title}” permanently?</p>
+                <Button type="button" size="sm" variant="destructive" disabled={busy !== null} onClick={remove}>
+                  {busy === 'delete' ? <Loader2 className="animate-spin" /> : null} Delete
+                </Button>
+                <Button type="button" size="sm" variant="ghost" disabled={busy !== null} onClick={() => setConfirmDelete(false)}>
+                  Cancel
+                </Button>
+              </div>
+            ) : (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setActionErr(null);
+                    setConfirmDelete(true);
+                  }}
+                >
+                  <Trash2 /> Delete problem
+                </Button>
+                <span className="text-xs text-slate-500">Only possible when no assessment or mock uses it.</span>
+              </div>
+            )}
+          </div>
         </div>
       </aside>
     </div>
