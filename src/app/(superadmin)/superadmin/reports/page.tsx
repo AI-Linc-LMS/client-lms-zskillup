@@ -118,7 +118,8 @@ export default function SuperadminReportsPage() {
     try {
       // The picked calendar days are IST days: 00:00 IST of From to 23:59:59.999 IST of To.
       const rows = await getUserReport(istDayRangeIso(from, to));
-      const table = userReportTable(rows);
+      // SUPER_ADMIN always sees paid status, so the paid columns are always present.
+      const table = userReportTable(rows, { paidAlwaysVisible: true });
       download(`user-information-report${from ? `-${from}` : ''}.csv`, toCsv(table.headers, table.rows));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to export users');

@@ -43,14 +43,20 @@ function paidCells(p: AdminUserPaidFields): [string, string, string] {
 const PAID_HEADERS = ['Paid Status', 'Access', 'Paid Until (IST)'];
 
 /**
- * The User Information report. The paid columns are written only when the server sent
- * paid status for at least one row: for a viewer without the paid-status capability
- * every row carries null, and a column of blanks would read as "unknown" rather than
- * "not shown to you". (A range holding only staff accounts has nothing to report there
- * either.) Role and status stay the raw enum values the report has always exported.
+ * The User Information report. The endpoint has no visibility flag: for a viewer who may
+ * not see paid status every row simply carries null paid fields. So the paid columns are
+ * written when the viewer is a Super Admin (always allowed - `paidAlwaysVisible`) or when
+ * at least one row carries a paid status; otherwise they are left out rather than
+ * exported as a column of blanks that reads as "unknown". Role and status stay the raw
+ * enum values the report has always exported.
  */
-export function userReportTable(rows: readonly AdminUserReportRow[]): ExportTable {
-  const withPaid = rows.some((r) => r.paidStatus !== null && r.paidStatus !== undefined);
+export function userReportTable(
+  rows: readonly AdminUserReportRow[],
+  opts: { paidAlwaysVisible: boolean },
+): ExportTable {
+  const withPaid =
+    opts.paidAlwaysVisible ||
+    rows.some((r) => r.paidStatus !== null && r.paidStatus !== undefined);
   const headers = [
     'User ID',
     'Full Name',
