@@ -906,10 +906,12 @@ export interface UserSheetResult {
 }
 
 /**
- * GET /admin/user-sheet (SUPER_ADMIN only). No `since` = full snapshot; `since` = the
- * cursor from the previous response. `purpose: 'export'` records an audit row for a
- * download. 400 VALIDATION_FAILED for a bad cursor; 429 RATE_LIMITED above 60 calls a
- * minute per user.
+ * GET /admin/user-sheet (SUPER_ADMIN only). No `since` = full snapshot (audited as
+ * `user_sheet.view`); `since` = the cursor from the previous response. `purpose: 'export'`
+ * is still accepted by the server - it audits `user_sheet.export` with the SNAPSHOT size -
+ * but the sheet no longer sends it: a download is recorded with the exact exported row
+ * count by {@link recordUserSheetExport} once the file exists. 400 VALIDATION_FAILED for a
+ * bad cursor; 429 RATE_LIMITED above 60 calls a minute per user.
  */
 export async function getUserSheet(
   params: { since?: string; purpose?: 'export' } = {},
@@ -922,6 +924,44 @@ export async function getUserSheet(
   const res = await apiClient.get<UserSheetResult>(`/api/v1/admin/user-sheet${suffix}`, {
     signal: options.signal,
   });
+  return res.data;
+}
+
+/** The sheet filters that were on screen for an export - only the ones that were set. */
+export interface UserSheetExportFilters {
+  /** At most 200 characters. */
+  search?: string;
+  /** At most 40 characters. */
+  role?: string;
+  /** At most 40 characters. */
+  status?: string;
+  /** At most 20 characters. */
+  paid?: string;
+  /** At most 200 characters. */
+  college?: string;
+}
+
+/** One downloaded user sheet file, as POST /admin/user-sheet/exports records it. */
+export interface UserSheetExportRecord {
+  format: 'csv' | 'xlsx';
+  /** Data rows in the file (the header row excluded); an integer 0..100000. */
+  rowCount: number;
+  /** Whether any filter was set. */
+  filtered: boolean;
+  filters?: UserSheetExportFilters;
+  /** `serverTime` (ISO-8601) of the snapshot the file was built from. */
+  snapshotServerTime?: string;
+}
+
+/**
+ * POST /admin/user-sheet/exports (SUPER_ADMIN only): writes one `user_sheet.export` audit
+ * row (actor, IP, user agent) for a file the browser has ALREADY generated, so the trail
+ * holds what was actually downloaded. 201 { recorded: true }; 400 VALIDATION_FAILED for a
+ * field outside the limits above or an unknown field. A backend that predates the endpoint
+ * answers 404.
+ */
+export async function recordUserSheetExport(entry: UserSheetExportRecord): Promise<{ recorded: true }> {
+  const res = await apiClient.post<{ recorded: true }>('/api/v1/admin/user-sheet/exports', entry);
   return res.data;
 }
 

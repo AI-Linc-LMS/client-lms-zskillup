@@ -39,17 +39,22 @@ function baseName(serverTime: string, filtered: boolean): string {
   return `user-sheet${filtered ? '-filtered' : ''}-${day}-${hhmm}-IST`;
 }
 
+/**
+ * Builds the file and hands it to the browser as a download. Resolves with the number of
+ * DATA rows in the file (the header row excluded) - the count an export audit records;
+ * rejects when the file could not be generated (e.g. the Excel writer failed to load).
+ */
 export async function saveUserSheet(
   rows: readonly UserSheetRow[],
   format: SheetFileFormat,
   meta: { serverTime: string; filtered: boolean },
-): Promise<void> {
+): Promise<number> {
   const table = userSheetTable(rows);
   const name = baseName(meta.serverTime, meta.filtered);
   if (format === 'csv') {
     const csv = CSV_BOM + toCsv(table.headers, table.rows);
     saveBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), `${name}.csv`);
-    return;
+    return table.rows.length;
   }
   const XLSX = await import('xlsx');
   const ws = XLSX.utils.aoa_to_sheet([
@@ -59,4 +64,5 @@ export async function saveUserSheet(
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Users');
   XLSX.writeFile(wb, `${name}.xlsx`);
+  return table.rows.length;
 }

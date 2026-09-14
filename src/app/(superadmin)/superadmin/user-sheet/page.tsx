@@ -8,8 +8,9 @@ import { UserSheet } from '@/components/superadmin/user-sheet/UserSheet';
  * registration, last login and paid status, kept current in near real time and
  * exportable as CSV or Excel.
  *
- * Endpoint (backend AdminUserSheetController, SUPER_ADMIN only):
- *   GET /api/v1/admin/user-sheet[?since=<cursor>][&purpose=export]
+ * Endpoints (backend AdminUserSheetController, SUPER_ADMIN only):
+ *   GET  /api/v1/admin/user-sheet[?since=<cursor>]   - full snapshot or delta
+ *   POST /api/v1/admin/user-sheet/exports            - audit of a downloaded file (exact rows)
  *
  * Server Component shell; the live table is a client leaf. Role gating is handled by the
  * (superadmin) route group's middleware and enforced by the endpoint.
