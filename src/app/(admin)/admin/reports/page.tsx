@@ -14,6 +14,8 @@ import {
   type AdminCompanyStat,
 } from '@/lib/api/admin';
 import { toCsv } from '@/lib/csv';
+import { istDayRangeIso } from '@/lib/format';
+import { userReportTable } from '@/lib/user-export';
 
 const BOM = String.fromCharCode(0xfeff);
 function download(name: string, csv: string) {
@@ -24,9 +26,6 @@ function download(name: string, csv: string) {
   a.click();
   URL.revokeObjectURL(url);
 }
-/** `<input type=date>` value → inclusive UTC bound. */
-const toIso = (d: string | null, end: boolean): string | undefined =>
-  d ? `${d}T${end ? '23:59:59.999' : '00:00:00.000'}Z` : undefined;
 
 /**
  * Reports (ADMIN). Platform + Company reports are ADMIN-accessible; the Financial
@@ -90,34 +89,11 @@ export default function AdminReportsPage() {
     setUsersBusy(true);
     setError(null);
     try {
-      const rows = await getUserReport({ from: toIso(from, false), to: toIso(to, true) });
-      const headers = [
-        'User ID',
-        'Full Name',
-        'Email',
-        'Phone',
-        'Role',
-        'College Name',
-        'Registration Date',
-        'Last Login',
-        'Account Status',
-        'Subscription Plan',
-        'Subscription Status',
-      ];
-      const csvRows: (string | number)[][] = rows.map((r) => [
-        r.id,
-        r.fullName ?? '',
-        r.email,
-        r.phone ?? '',
-        r.role,
-        r.collegeName ?? '',
-        new Date(r.createdAt).toLocaleString('en-IN'),
-        r.lastLoginAt ? new Date(r.lastLoginAt).toLocaleString('en-IN') : 'Never',
-        r.status,
-        r.subscriptionPlan,
-        r.subscriptionStatus,
-      ]);
-      download(`user-information-report${from ? `-${from}` : ''}.csv`, toCsv(headers, csvRows));
+      // The picked calendar days are IST days: 00:00 IST of From to 23:59:59.999 IST of To.
+      const rows = await getUserReport(istDayRangeIso(from, to));
+      // Paid columns only when this admin's capabilities let the server fill them.
+      const table = userReportTable(rows, { paidAlwaysVisible: false });
+      download(`user-information-report${from ? `-${from}` : ''}.csv`, toCsv(table.headers, table.rows));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to export users');
     } finally {
@@ -160,7 +136,7 @@ export default function AdminReportsPage() {
           <ReportCard
             icon={Users}
             title="User Information"
-            desc="Every user with profile, last login and subscription (respects date range)."
+            desc="Every user with profile, cohort, last login and subscription, plus paid status where your access allows (registration date range, IST)."
             meta="Full user export"
             onExport={() => void exportUsers()}
             busy={usersBusy}

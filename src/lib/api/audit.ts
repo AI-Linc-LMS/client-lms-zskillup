@@ -43,6 +43,8 @@ export const AUDIT_ACTIONS: { value: string; label: string }[] = [
   { value: 'student.delete', label: 'Student deleted' },
   { value: 'broadcast.send', label: 'Broadcast sent' },
   { value: 'impersonation.start', label: 'Impersonation' },
+  { value: 'user_sheet.view', label: 'User sheet viewed' },
+  { value: 'user_sheet.export', label: 'User sheet exported' },
 ];
 
 export async function listAuditLogs(

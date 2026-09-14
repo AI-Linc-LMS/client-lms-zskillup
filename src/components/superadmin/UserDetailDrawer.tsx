@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   activateAdminUser,
   deleteAdminStudent,
@@ -12,10 +12,19 @@ import {
   updateAdminUser,
   updateAdminUserCapabilities,
   verifyAdminUserEmail,
+  type AdminActiveEntitlement,
   type AdminCollegeRow,
   type AdminLoginHistoryRow,
   type AdminUserDetail,
 } from '@/lib/api/admin';
+import { AccountStatusPill, PaidStatusCell } from '@/components/superadmin/UserCells';
+import { formatDateIST, formatDateTimeIST, formatDateTimeSecondsIST } from '@/lib/format';
+import {
+  ACCESS_LABEL_TEXT,
+  ADMIN_ROLE_LABEL,
+  ENTITLEMENT_SOURCE_LABEL,
+  loginMethodLabel,
+} from '@/lib/ui-maps';
 import {
   ADMIN_CAPABILITY_KEYS,
   ADMIN_CAPABILITY_LABELS,
@@ -28,6 +37,7 @@ import {
   BadgeCheck,
   Ban,
   Check,
+  CreditCard,
   KeyRound,
   Loader2,
   LogIn,
@@ -40,28 +50,32 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const ROLE_LABELS: Record<AdminUserDetail['role'], string> = {
-  STUDENT: 'Student',
-  COLLEGE_ADMIN: 'College Admin',
-  ADMIN: 'Admin',
-  SUPER_ADMIN: 'Super Admin',
-};
+/** Uppercase section label (§4.3), in slate-500: slate-400 fails WCAG AA contrast at this size. */
+const LABEL = 'text-[11px] font-semibold uppercase tracking-widest text-slate-500';
 
-const STATUS_STYLE: Record<AdminUserDetail['status'], string> = {
-  ACTIVE: 'bg-green-100 text-green-700',
-  INVITED: 'bg-amber-100 text-amber-700',
-  SUSPENDED: 'bg-red-100 text-red-600',
-};
+/** Tab-reachable elements, for the dialog's focus trap. */
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-function fmt(iso: string | null): string {
-  if (!iso) return '-';
-  return new Date(iso).toLocaleString('en-IN', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+function titleCase(s: string): string {
+  return s.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/** What a live grant unlocks, e.g. "Full platform", "Company: Tech Mahindra". */
+function grantScopeLabel(e: AdminActiveEntitlement): string {
+  const ref = e.scopeRef ? titleCase(e.scopeRef.split(':').pop() ?? e.scopeRef) : '';
+  switch (e.scope) {
+    case 'PLATFORM':
+      return 'Full platform';
+    case 'COMPANY':
+      return ref ? `Company: ${ref}` : 'Company';
+    case 'SECTION':
+      return ref ? `Section: ${ref}` : 'Section';
+    case 'TOPIC':
+      return ref ? `Topic: ${ref}` : 'Topic';
+    default:
+      return ref ? `${titleCase(e.scope.toLowerCase())}: ${ref}` : titleCase(e.scope.toLowerCase());
+  }
 }
 
 /**
@@ -112,6 +126,67 @@ export function UserDetailDrawer({
   useEffect(() => {
     load();
   }, [load]);
+
+  // Dialog basics: focus lands inside once on open, Escape closes, Tab / Shift+Tab stay
+  // inside, and focus goes back to the opener (the row's Manage button) on close. onClose
+  // is read through a ref so a parent re-render (a new inline callback) never re-runs
+  // this and yanks focus back to the close button mid-edit.
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+  useEffect(() => {
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    closeRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      // A control that handles a key itself (the name editor's Escape) calls
+      // preventDefault. React dispatches from its root listener, which was registered on
+      // the document before this one, so the mark is already set here - whereas a
+      // synthetic stopPropagation cannot stop a native listener on that same node.
+      if (e.defaultPrevented) return;
+      if (e.key === 'Escape') {
+        onCloseRef.current();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const root = dialogRef.current;
+      if (!root) return;
+      const nodes = Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE));
+      if (nodes.length === 0) {
+        e.preventDefault();
+        return;
+      }
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      const active = document.activeElement;
+      // Also pulls focus back in when it fell to <body> (a focused control that was
+      // disabled or unmounted by the action it triggered).
+      const inside = active instanceof Node && root.contains(active);
+      if (e.shiftKey && (!inside || active === first)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (!inside || active === last)) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      if (opener?.isConnected) opener.focus();
+    };
+  }, []);
+
+  // Leaving the name editor (save, Cancel, Escape) unmounts the focused input; hand focus
+  // to the pencil button so it stays inside the dialog.
+  const editNameRef = useRef<HTMLButtonElement>(null);
+  const wasEditingName = useRef(false);
+  useEffect(() => {
+    if (wasEditingName.current && !editingName) editNameRef.current?.focus();
+    wasEditingName.current = editingName;
+  }, [editingName]);
 
   const flash = (msg: string) => {
     setSuccess(msg);
@@ -181,15 +256,20 @@ export function UserDetailDrawer({
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
+      <div className="absolute inset-0 bg-slate-900/40" onClick={onClose} aria-hidden />
       <div
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
-        onClick={onClose}
-        aria-hidden
-      />
-      <div className="relative flex h-full w-full max-w-md flex-col overflow-y-auto bg-white shadow-2xl">
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="user-detail-title"
+        className="relative flex h-full w-full max-w-md flex-col overflow-y-auto bg-white shadow-lg"
+      >
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-5 py-4">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">User detail</h2>
+          <h2 id="user-detail-title" className="text-sm font-bold uppercase tracking-widest text-slate-500">
+            User detail
+          </h2>
           <button
+            ref={closeRef}
             onClick={onClose}
             className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-600"
             aria-label="Close"
@@ -217,6 +297,14 @@ export function UserDetailDrawer({
                       <input
                         value={nameDraft}
                         onChange={(e) => setNameDraft(e.target.value)}
+                        onKeyDown={(e) => {
+                          // Escape cancels the edit, not the whole drawer: preventDefault
+                          // tells the drawer's document listener the key is handled.
+                          if (e.key === 'Escape') {
+                            e.preventDefault();
+                            setEditingName(false);
+                          }
+                        }}
                         className="w-full rounded-lg border border-slate-200 px-2 py-1 text-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
                         placeholder="Full name"
                         autoFocus
@@ -247,6 +335,7 @@ export function UserDetailDrawer({
                         {user.fullName ?? '-'}
                       </h3>
                       <button
+                        ref={editNameRef}
                         onClick={() => {
                           setNameDraft(user.fullName ?? '');
                           setEditingName(true);
@@ -263,16 +352,9 @@ export function UserDetailDrawer({
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700">
-                  {ROLE_LABELS[user.role]}
+                  {ADMIN_ROLE_LABEL[user.role]}
                 </span>
-                <span
-                  className={cn(
-                    'rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
-                    STATUS_STYLE[user.status],
-                  )}
-                >
-                  {user.status}
-                </span>
+                <AccountStatusPill status={user.status} />
                 <span
                   className={cn(
                     'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
@@ -294,7 +376,7 @@ export function UserDetailDrawer({
                   A TPO with no college can't open the placement console. */}
               {(user.role === 'STUDENT' || user.role === 'COLLEGE_ADMIN') && (
                 <div className="mt-4">
-                  <label className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
+                  <label className={cn('mb-1 flex items-center gap-1.5', LABEL)}>
                     <School className="size-3.5" /> College
                     {!user.collegeId && (
                       <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-amber-700">
@@ -349,14 +431,27 @@ export function UserDetailDrawer({
               <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
                 <div>
                   <dt className="text-slate-500">Joined</dt>
-                  <dd className="font-medium text-slate-700">{fmt(user.createdAt)}</dd>
+                  <dd className="font-medium text-slate-700" title={formatDateTimeSecondsIST(user.createdAt)}>
+                    {formatDateTimeIST(user.createdAt)}
+                  </dd>
                 </div>
                 <div>
                   <dt className="text-slate-500">Last login</dt>
-                  <dd className="font-medium text-slate-700">{fmt(user.lastLoginAt)}</dd>
+                  <dd
+                    className="font-medium text-slate-700"
+                    title={user.lastLoginAt ? formatDateTimeSecondsIST(user.lastLoginAt) : undefined}
+                  >
+                    {formatDateTimeIST(user.lastLoginAt)}
+                  </dd>
                 </div>
               </dl>
             </div>
+
+            {/* Paid status - students only, and only when the server shows it to this
+                viewer. Rendered exactly as computed server-side. */}
+            {user.paidStatusVisible && user.role === 'STUDENT' && (
+              <PaidStatusSection user={user} />
+            )}
 
             {/* Feedback */}
             {success && (
@@ -374,9 +469,7 @@ export function UserDetailDrawer({
 
             {/* Account actions */}
             <div>
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
-                Account actions
-              </p>
+              <p className={cn('mb-2', LABEL)}>Account actions</p>
               <div className="grid grid-cols-1 gap-2">
                 {!user.isEmailVerified && (
                   <ActionButton
@@ -440,7 +533,7 @@ export function UserDetailDrawer({
             {/* Capabilities (ADMIN only) */}
             {user.role === 'ADMIN' && (
               <div>
-                <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
+                <p className={cn('mb-2 flex items-center gap-1.5', LABEL)}>
                   <ShieldCheck className="size-3.5" /> Capabilities
                 </p>
                 <div className="space-y-1.5">
@@ -508,7 +601,7 @@ export function UserDetailDrawer({
 
             {/* Login history */}
             <div>
-              <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
+              <p className={cn('mb-2 flex items-center gap-1.5', LABEL)}>
                 <LogIn className="size-3.5" /> Recent sign-ins
               </p>
               {history.length === 0 ? (
@@ -522,11 +615,17 @@ export function UserDetailDrawer({
                       key={h.id}
                       className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 px-3 py-2 text-xs"
                     >
-                      <span className="font-medium text-slate-700">{fmt(h.at)}</span>
+                      <time
+                        dateTime={h.at}
+                        title={formatDateTimeSecondsIST(h.at)}
+                        className="font-medium text-slate-700"
+                      >
+                        {formatDateTimeIST(h.at)}
+                      </time>
                       <span className="flex items-center gap-2 text-slate-500">
                         {h.method && (
-                          <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                            {h.method}
+                          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                            {loginMethodLabel(h.method)}
                           </span>
                         )}
                         {h.ip && <span className="tabular-nums">{h.ip}</span>}
@@ -537,6 +636,69 @@ export function UserDetailDrawer({
               )}
             </div>
           </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** Paid / Unpaid, the access reason, paid-until, and the live grants behind it. */
+function PaidStatusSection({ user }: { user: AdminUserDetail }) {
+  const grants = user.activeEntitlements ?? [];
+  return (
+    <div>
+      <p className={cn('mb-2 flex items-center gap-1.5', LABEL)}>
+        <CreditCard className="size-3.5" /> Paid status
+      </p>
+      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <PaidStatusCell
+          paidStatus={user.paidStatus}
+          accessLabel={user.accessLabel}
+          paidUntil={user.paidUntil}
+        />
+        <dl className="mt-3 grid grid-cols-2 gap-3 text-xs">
+          {user.paidStatus === 'PAID' ? (
+            <div>
+              <dt className="text-slate-500">Paid until</dt>
+              <dd className="font-medium text-slate-700">
+                {user.paidUntil ? formatDateIST(user.paidUntil) : 'No expiry'}
+              </dd>
+            </div>
+          ) : (
+            <div>
+              <dt className="text-slate-500">Access</dt>
+              <dd className="font-medium text-slate-700">
+                {user.accessLabel ? ACCESS_LABEL_TEXT[user.accessLabel] : 'No active access'}
+              </dd>
+            </div>
+          )}
+        </dl>
+
+        <p className={cn('mb-1.5 mt-4', LABEL)}>Active grants</p>
+        {grants.length === 0 ? (
+          <p className="text-xs text-slate-500">No active grants.</p>
+        ) : (
+          <ul className="space-y-1.5">
+            {grants.map((g, i) => (
+              <li
+                key={`${g.subject}:${g.scope}:${g.scopeRef ?? ''}:${g.source}:${g.expiresAt ?? ''}:${i}`}
+                className="flex items-start justify-between gap-3 rounded-lg border border-slate-100 px-3 py-2 text-xs"
+              >
+                <span className="min-w-0">
+                  <span className="block font-semibold text-navy">{grantScopeLabel(g)}</span>
+                  <span className="block text-slate-500">
+                    {g.subject === 'COLLEGE'
+                      ? 'Via college'
+                      : ENTITLEMENT_SOURCE_LABEL[g.source] ?? g.source}
+                    {g.cashPaid ? ' · Paid' : ''}
+                  </span>
+                </span>
+                <span className="shrink-0 text-right text-slate-500">
+                  {g.expiresAt ? `Till ${formatDateIST(g.expiresAt)}` : 'No expiry'}
+                </span>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     </div>
