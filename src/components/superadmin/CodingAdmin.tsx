@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { BadgeCheck, Code2, ExternalLink, Loader2, Search, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -304,6 +304,21 @@ function CodingDetailPanel({
   const [actionErr, setActionErr] = useState<string | null>(null);
   /** The server refused the delete because the problem is linked to a mock / answered. */
   const [inUse, setInUse] = useState(false);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  // Keyboard users land inside the panel (once, on open) and can leave it with Esc.
+  useEffect(() => {
+    closeRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onCloseRef.current();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
 
   const remove = async () => {
     setBusy('delete');
@@ -354,6 +369,7 @@ function CodingDetailPanel({
             <p className="text-[11px] text-slate-500">{p.slug}</p>
           </div>
           <button
+            ref={closeRef}
             type="button"
             onClick={onClose}
             aria-label="Close"

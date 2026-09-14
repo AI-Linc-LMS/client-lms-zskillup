@@ -466,6 +466,7 @@ export function AssessmentWizard({
               </label>
               <input
                 id={`${titleId}-title`}
+                data-autofocus
                 value={title}
                 maxLength={200}
                 onChange={(e) => setTitle(e.target.value)}
