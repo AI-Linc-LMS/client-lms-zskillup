@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Code2, ListChecks, Loader2, Wand2 } from 'lucide-react';
+import { CheckCircle2, Code2, ListChecks, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { ApiRequestError } from '@/lib/api/types';
 import { listCompanies } from '@/lib/api/catalog';
 import { listIndividualCohorts, type IndividualCohort } from '@/lib/api/individual-cohorts';
@@ -14,9 +15,11 @@ import {
 } from '@/lib/api/scheduling';
 import { SectionTopicPicker } from '@/components/tpo/SectionTopicPicker';
 
-const labelCls = 'text-[10px] font-bold uppercase tracking-widest text-slate-500';
+const labelCls = 'text-xs font-semibold text-slate-600';
 const inputCls =
-  'flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors focus:border-[#ffc42d] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ffc42d]/30';
+  'flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy transition-colors focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30';
+
+type Band = 'EASY' | 'MEDIUM' | 'HARD' | 'MIXED';
 
 type CodingTopic = { topic: string; count: number };
 
@@ -25,7 +28,8 @@ type CodingTopic = { topic: string; count: number };
  * uses (mode → rounds → sections → coding topics → counts). Posts to the shared
  * admin build endpoint, which samples the bank and schedules the drive. An admin
  * drive can be company-wise, platform-wide, or targeted at a single individual
- * (non-college) cohort.
+ * (non-college) cohort. Rendered inside SchedulingAdmin's collapsed "Advanced: quick
+ * random build" disclosure — the assessment wizard is the primary creation path.
  */
 export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void }) {
   const [companies, setCompanies] = useState<{ slug: string; name: string }[]>([]);
@@ -41,7 +45,9 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
     durationMinutes: '60',
     mcqCount: '20',
     codingCount: '0',
-    difficulty: 'MIXED' as 'EASY' | 'MEDIUM' | 'HARD' | 'MIXED',
+    difficulty: 'MIXED' as Band,
+    /** Coding-round band; 'MIXED' = every band (the server default when omitted). */
+    codingDifficulty: 'MIXED' as Band,
     proctored: true,
     proctorAutoSubmit: false,
     proctorMaxWarnings: '3',
@@ -88,12 +94,13 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
         topicIds: topicSel.size > 0 ? [...topicSel] : undefined,
         codingTopics: codingSel.size > 0 ? [...codingSel] : undefined,
         difficulty: form.difficulty,
+        codingDifficulty: form.codingDifficulty,
       })
         .then(setAvail)
         .catch(() => setAvail(null));
     }, 400);
     return () => clearTimeout(t);
-  }, [form.mode, form.companySlug, form.difficulty, topicSel, codingSel]);
+  }, [form.mode, form.companySlug, form.difficulty, form.codingDifficulty, topicSel, codingSel]);
 
   const shortByMcq = !!avail && avail.mcqAvailable < (Number(form.mcqCount) || 0);
   const shortByCoding = !!avail && avail.codingAvailable < (Number(form.codingCount) || 0);
@@ -126,6 +133,7 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
         mcqCount: mcq,
         codingCount: coding || undefined,
         difficulty: form.difficulty,
+        codingDifficulty: coding ? form.codingDifficulty : undefined,
         proctored: form.proctored,
         proctorAutoSubmit: form.proctored && form.proctorAutoSubmit,
         proctorMaxWarnings: Number(form.proctorMaxWarnings) || 3,
@@ -149,14 +157,8 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
   const modeCompanies = useMemo(() => companies, [companies]);
 
   return (
-    <form onSubmit={submit} className="rounded-2xl border border-slate-200 bg-white p-5">
-      <h2 className="flex items-center gap-2 text-sm font-bold text-navy">
-        <Wand2 className="size-4 text-[#f5b400]" /> Create an assessment
-        <span className="ml-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
-          from the question bank
-        </span>
-      </h2>
-      <p className="mt-1 text-xs text-slate-600">
+    <form onSubmit={submit}>
+      <p className="text-sm text-slate-600">
         Choose a scope, turn on the MCQ and/or coding round, pick sections &amp; topics — we sample the bank,
         assemble the mock, and schedule it.
       </p>
@@ -203,7 +205,7 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
               className={cn(
                 'inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-semibold transition',
                 wantsMcq
-                  ? 'border-[#ffc42d] bg-[#fff5ea] text-[#1a1a1a]'
+                  ? 'border-orange bg-orange-50 text-navy'
                   : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300',
               )}
             >
@@ -217,7 +219,7 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
               className={cn(
                 'inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-semibold transition',
                 wantsCoding
-                  ? 'border-[#ffc42d] bg-[#fff5ea] text-[#1a1a1a]'
+                  ? 'border-orange bg-orange-50 text-navy'
                   : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300',
               )}
             >
@@ -258,7 +260,7 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
                   <button
                     type="button"
                     onClick={() => setCodingSel(new Set())}
-                    className="text-xs font-semibold text-[#1a1a1a] hover:underline"
+                    className="text-xs font-semibold text-navy underline-offset-4 hover:underline"
                   >
                     Clear
                   </button>
@@ -285,7 +287,7 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
                         className={cn(
                           'inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold transition',
                           on
-                            ? 'border-[#ffc42d] bg-[#fff5ea] text-[#1a1a1a]'
+                            ? 'border-orange bg-orange-50 text-navy'
                             : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300',
                         )}
                       >
@@ -363,7 +365,22 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
             <span className={labelCls}>MCQ difficulty</span>
             <select
               value={form.difficulty}
-              onChange={(e) => setForm((f) => ({ ...f, difficulty: e.target.value as typeof form.difficulty }))}
+              onChange={(e) => setForm((f) => ({ ...f, difficulty: e.target.value as Band }))}
+              className={inputCls}
+            >
+              <option value="MIXED">Mixed (all levels)</option>
+              <option value="EASY">Easy</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="HARD">Hard</option>
+            </select>
+          </label>
+        )}
+        {wantsCoding && (
+          <label className="space-y-1">
+            <span className={labelCls}>Coding difficulty</span>
+            <select
+              value={form.codingDifficulty}
+              onChange={(e) => setForm((f) => ({ ...f, codingDifficulty: e.target.value as Band }))}
               className={inputCls}
             >
               <option value="MIXED">Mixed (all levels)</option>
@@ -391,7 +408,7 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
             type="checkbox"
             checked={form.proctored}
             onChange={(e) => setForm((f) => ({ ...f, proctored: e.target.checked }))}
-            className="size-4 accent-[#f5b400]"
+            className="size-4 accent-orange"
           />
           <span className="text-sm font-medium text-slate-600">Proctored</span>
         </label>
@@ -402,7 +419,7 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
                 type="checkbox"
                 checked={form.proctorAutoSubmit}
                 onChange={(e) => setForm((f) => ({ ...f, proctorAutoSubmit: e.target.checked }))}
-                className="size-4 accent-[#f5b400]"
+                className="size-4 accent-orange"
               />
               <span className="text-sm font-medium text-slate-600">Auto-submit after</span>
             </label>
@@ -423,7 +440,7 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
             type="checkbox"
             checked={form.subscriptionLockEnabled}
             onChange={(e) => setForm((f) => ({ ...f, subscriptionLockEnabled: e.target.checked }))}
-            className="size-4 accent-[#f5b400]"
+            className="size-4 accent-orange"
           />
           <span className="text-sm font-medium text-slate-600">Require subscription / upgrade (paywall)</span>
         </label>
@@ -432,7 +449,7 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
             type="checkbox"
             checked={form.profileLockEnabled}
             onChange={(e) => setForm((f) => ({ ...f, profileLockEnabled: e.target.checked }))}
-            className="size-4 accent-[#f5b400]"
+            className="size-4 accent-orange"
           />
           <span className="text-sm font-medium text-slate-600">Require profile completion (Placement Readiness Test)</span>
         </label>
@@ -461,18 +478,14 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
       </div>
 
       {err ? (
-        <p className="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700" role="alert">
+        <p className="mt-3 rounded-md bg-red-50 p-3 text-sm font-medium text-red-700 ring-1 ring-red-200" role="alert">
           {err}
         </p>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={creating}
-        className="mt-4 flex items-center gap-2 rounded-full bg-gradient-to-r from-[#ffd24d] to-[#f5b400] px-5 py-2.5 text-sm font-extrabold text-[#171717] disabled:opacity-60"
-      >
-        {creating ? <Loader2 className="size-4 animate-spin" /> : 'Create & schedule'}
-      </button>
+      <Button type="submit" variant="secondary" disabled={creating} className="mt-4">
+        {creating ? <Loader2 className="animate-spin" aria-hidden /> : null} Create &amp; schedule
+      </Button>
     </form>
   );
 }
