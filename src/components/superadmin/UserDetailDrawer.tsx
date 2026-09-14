@@ -134,6 +134,11 @@ export function UserDetailDrawer({
   useEffect(() => {
     closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
+      // A control that handles a key itself (the name editor's Escape) calls
+      // preventDefault. React dispatches from its root listener, which was registered on
+      // the document before this one, so the mark is already set here - whereas a
+      // synthetic stopPropagation cannot stop a native listener on that same node.
+      if (e.defaultPrevented) return;
       if (e.key === 'Escape') onCloseRef.current();
     };
     document.addEventListener('keydown', onKey);
@@ -249,9 +254,10 @@ export function UserDetailDrawer({
                         value={nameDraft}
                         onChange={(e) => setNameDraft(e.target.value)}
                         onKeyDown={(e) => {
-                          // Escape cancels the edit, not the whole drawer.
+                          // Escape cancels the edit, not the whole drawer: preventDefault
+                          // tells the drawer's document listener the key is handled.
                           if (e.key === 'Escape') {
-                            e.stopPropagation();
+                            e.preventDefault();
                             setEditingName(false);
                           }
                         }}
