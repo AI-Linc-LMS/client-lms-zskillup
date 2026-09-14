@@ -53,6 +53,10 @@ import { cn } from '@/lib/utils';
 /** Uppercase section label (§4.3), in slate-500: slate-400 fails WCAG AA contrast at this size. */
 const LABEL = 'text-[11px] font-semibold uppercase tracking-widest text-slate-500';
 
+/** Tab-reachable elements, for the dialog's focus trap. */
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 function titleCase(s: string): string {
   return s.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
@@ -123,15 +127,18 @@ export function UserDetailDrawer({
     load();
   }, [load]);
 
-  // Dialog basics: focus lands inside once on open, Escape closes. onClose is read
-  // through a ref so a parent re-render (a new inline callback) never re-runs this and
-  // yanks focus back to the close button mid-edit.
+  // Dialog basics: focus lands inside once on open, Escape closes, Tab / Shift+Tab stay
+  // inside, and focus goes back to the opener (the row's Manage button) on close. onClose
+  // is read through a ref so a parent re-render (a new inline callback) never re-runs
+  // this and yanks focus back to the close button mid-edit.
+  const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const onCloseRef = useRef(onClose);
   useEffect(() => {
     onCloseRef.current = onClose;
   }, [onClose]);
   useEffect(() => {
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
       // A control that handles a key itself (the name editor's Escape) calls
@@ -139,11 +146,47 @@ export function UserDetailDrawer({
       // the document before this one, so the mark is already set here - whereas a
       // synthetic stopPropagation cannot stop a native listener on that same node.
       if (e.defaultPrevented) return;
-      if (e.key === 'Escape') onCloseRef.current();
+      if (e.key === 'Escape') {
+        onCloseRef.current();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const root = dialogRef.current;
+      if (!root) return;
+      const nodes = Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE));
+      if (nodes.length === 0) {
+        e.preventDefault();
+        return;
+      }
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      const active = document.activeElement;
+      // Also pulls focus back in when it fell to <body> (a focused control that was
+      // disabled or unmounted by the action it triggered).
+      const inside = active instanceof Node && root.contains(active);
+      if (e.shiftKey && (!inside || active === first)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (!inside || active === last)) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      if (opener?.isConnected) opener.focus();
+    };
   }, []);
+
+  // Leaving the name editor (save, Cancel, Escape) unmounts the focused input; hand focus
+  // to the pencil button so it stays inside the dialog.
+  const editNameRef = useRef<HTMLButtonElement>(null);
+  const wasEditingName = useRef(false);
+  useEffect(() => {
+    if (wasEditingName.current && !editingName) editNameRef.current?.focus();
+    wasEditingName.current = editingName;
+  }, [editingName]);
 
   const flash = (msg: string) => {
     setSuccess(msg);
@@ -215,6 +258,7 @@ export function UserDetailDrawer({
     <div className="fixed inset-0 z-50 flex justify-end">
       <div className="absolute inset-0 bg-slate-900/40" onClick={onClose} aria-hidden />
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="user-detail-title"
@@ -291,6 +335,7 @@ export function UserDetailDrawer({
                         {user.fullName ?? '-'}
                       </h3>
                       <button
+                        ref={editNameRef}
                         onClick={() => {
                           setNameDraft(user.fullName ?? '');
                           setEditingName(true);
