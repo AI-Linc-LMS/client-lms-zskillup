@@ -88,6 +88,69 @@ export function takenIds(
   return out;
 }
 
+/** Identity of a picked item: MCQ and coding ids come from different tables. */
+const itemKey = (type: AssessmentItemType, id: string) => `${type}:${normId(id)}`;
+
+/** Is this id (of this type) already somewhere else in the assessment? */
+export type IsTaken = (type: AssessmentItemType, id: string) => boolean;
+
+/** Builds a section's next state from its LATEST state. */
+export type SectionEdit = (section: WizardSection, isTaken: IsTaken) => WizardSection;
+
+/** What an edit did to the section's items. */
+export interface EditResult {
+  /** Items that joined the section. */
+  added: number;
+  /** Items the edit tried to add that the assessment already has (left out). */
+  skipped: number;
+}
+
+/** Updates one section; every add in the wizard goes through this. */
+export type SectionUpdater = (edit: SectionEdit) => EditResult;
+
+/**
+ * Apply `edit` to section `key` of the LATEST selection and enforce the one invariant the
+ * server relies on: an id appears at most once in the whole assessment (every new section +
+ * the edited assessment's existing items). Items the edit adds that are already elsewhere,
+ * or repeated within the section, are dropped and counted as `skipped` — so a draw, fill or
+ * AI item that lands after something else took the same id can never build a duplicate.
+ * Items already in the section before the edit are kept (only a repeated copy is dropped).
+ */
+export function applySectionEdit(
+  sections: WizardSection[],
+  existing: Array<{ id: string; type: AssessmentItemType }>,
+  key: string,
+  edit: SectionEdit,
+): { sections: WizardSection[]; result: EditResult } {
+  const target = sections.find((s) => s.key === key);
+  // The section was removed while a request was in flight: nothing to add it to.
+  if (!target) return { sections, result: { added: 0, skipped: 0 } };
+  const elsewhere = new Set<string>();
+  for (const s of sections) if (s.key !== key) for (const it of s.items) elsewhere.add(itemKey(it.type, it.id));
+  for (const e of existing) elsewhere.add(itemKey(e.type, e.id));
+  const before = new Set(target.items.map((it) => itemKey(it.type, it.id)));
+
+  const draft = edit(target, (type, id) => elsewhere.has(itemKey(type, id)));
+  const seen = new Set<string>();
+  let added = 0;
+  let skipped = 0;
+  const items = draft.items.filter((it) => {
+    const k = itemKey(it.type, it.id);
+    const isNew = !before.has(k);
+    if (seen.has(k) || (isNew && elsewhere.has(k))) {
+      skipped += 1;
+      return false;
+    }
+    seen.add(k);
+    if (isNew) added += 1;
+    return true;
+  });
+  const next = draft === target ? target : { ...draft, items };
+  return { sections: next === target ? sections : sections.map((s) => (s.key === key ? next : s)), result: { added, skipped } };
+}
+
+export const skippedNote = (n: number) => `${n} skipped (already selected).`;
+
 /** Which new section currently holds an id (for "In Section 2" hints). */
 export function sectionHolding(sections: WizardSection[], id: string): WizardSection | undefined {
   return sections.find((s) => s.items.some((it) => it.id === id));

@@ -10,7 +10,7 @@ import { MAX_BROWSE_EXCLUDE_IDS, searchAdminCodingProblems } from '@/lib/api/cod
 import { describeApiError } from '@/lib/api/types';
 import type { AssessmentItemType, CodingTopic } from '@/lib/api/assessment-builder';
 import type { ApiCompany } from '@/lib/api/catalog';
-import { LIMITS, normId, sectionHolding, type PickedItem, type WizardSection } from './selection';
+import { LIMITS, normId, sectionHolding, skippedNote, type PickedItem, type SectionUpdater, type WizardSection } from './selection';
 import { indentedLabel, type TopicOption } from './topic-tree';
 import { PreviewDrawer, type PreviewTarget } from './previews';
 import { DifficultyPill, ErrorAlert, NoticeBox, OriginBadge, checkboxCls, fieldLabelCls, inputCls } from './ui';
@@ -57,7 +57,7 @@ export function ManualSelection({
   driveCompanySlug: string;
   /** What the edited assessment already holds (can never be added again). */
   existingItems: Array<{ id: string; type: AssessmentItemType }>;
-  update: (fn: (s: WizardSection) => WizardSection) => void;
+  update: SectionUpdater;
 }) {
   const uid = useId();
   const [topicId, setTopicId] = useState('');
@@ -204,7 +204,8 @@ export function ManualSelection({
       return;
     }
     const item: PickedItem = { id: row.id, type, label: row.label, difficulty: row.difficulty, origin: 'MANUAL' };
-    update((s) => (s.items.some((i) => i.id === item.id) ? s : { ...s, items: [...s.items, item] }));
+    const { skipped } = update((s) => ({ ...s, items: [...s.items, item] }));
+    if (skipped) setLimitNote(skippedNote(skipped));
   };
 
   const selectable = (rows ?? []).filter((r) => !blockedReason(r.id));
@@ -225,16 +226,18 @@ export function ManualSelection({
     const toAdd = selectable.filter((r) => !inThisSection.has(r.id));
     const room = perSectionLimit - ofType;
     const accepted = toAdd.slice(0, Math.max(0, room));
-    if (accepted.length < toAdd.length) {
-      setLimitNote(`Only ${accepted.length} more fit in this section (limit ${perSectionLimit}).`);
-    }
-    update((s) => {
-      const have = new Set(s.items.map((i) => i.id));
-      const fresh = accepted
-        .filter((r) => !have.has(r.id))
-        .map<PickedItem>((r) => ({ id: r.id, type, label: r.label, difficulty: r.difficulty, origin: 'MANUAL' }));
-      return { ...s, items: [...s.items, ...fresh] };
-    });
+    const { skipped } = update((s) => ({
+      ...s,
+      items: [
+        ...s.items,
+        ...accepted.map<PickedItem>((r) => ({ id: r.id, type, label: r.label, difficulty: r.difficulty, origin: 'MANUAL' })),
+      ],
+    }));
+    const notes = [
+      accepted.length < toAdd.length ? `Only ${accepted.length} more fit in this section (limit ${perSectionLimit}).` : '',
+      skipped ? skippedNote(skipped) : '',
+    ].filter(Boolean);
+    if (notes.length) setLimitNote(notes.join(' '));
   };
 
   const resetPage = <T,>(set: (v: T) => void) => (v: T) => {

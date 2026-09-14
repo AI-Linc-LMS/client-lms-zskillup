@@ -8,7 +8,7 @@ import type { AssessmentItemType, CodingTopic } from '@/lib/api/assessment-build
 import type { ApiCompany } from '@/lib/api/catalog';
 import { ManualSelection } from './ManualSelection';
 import { RandomSelection } from './RandomSelection';
-import { LIMITS, type WizardSection } from './selection';
+import { LIMITS, type SectionUpdater, type WizardSection } from './selection';
 import type { TopicOption } from './topic-tree';
 import { ChipSwitch, DifficultyPill, OriginBadge, UnderlineTabs, fieldLabelCls, inputCls } from './ui';
 
@@ -35,6 +35,7 @@ export function SectionEditor({
   existingItems,
   takenIds,
   update,
+  trackWork,
   onRemoveSection,
 }: {
   section: WizardSection;
@@ -53,7 +54,10 @@ export function SectionEditor({
   driveCompanySlug: string;
   existingItems: Array<{ id: string; type: AssessmentItemType }>;
   takenIds: (type: AssessmentItemType) => Set<string>;
-  update: (fn: (s: WizardSection) => WizardSection) => void;
+  /** The wizard's guarded updater for this section (never builds a duplicate id). */
+  update: SectionUpdater;
+  /** Wraps a draw / AI request so the wizard holds Review and Publish until it lands. */
+  trackWork: (work: () => Promise<void>) => Promise<void>;
   onRemoveSection?: () => void;
 }) {
   const uid = useId();
@@ -124,7 +128,7 @@ export function SectionEditor({
       {section.items.length ? (
         <ul className="mt-4 max-h-72 divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-200" aria-label={`Questions in ${section.name}`}>
           {[...mcq, ...coding].map((it) => (
-            <li key={it.id} className="flex items-center gap-2 px-3 py-2">
+            <li key={`${it.type}-${it.id}`} className="flex items-center gap-2 px-3 py-2">
               {it.type === 'MCQ' ? (
                 <ListChecks className="size-4 shrink-0 text-slate-400" aria-hidden />
               ) : (
@@ -210,6 +214,7 @@ export function SectionEditor({
                 driveCompanySlug={driveCompanySlug}
                 takenIds={() => takenIds(itemType)}
                 update={update}
+                trackWork={trackWork}
               />
             ) : (
               <ManualSelection

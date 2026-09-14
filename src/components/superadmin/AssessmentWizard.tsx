@@ -38,6 +38,7 @@ import { SelectionSummary } from './assessment-wizard/SelectionSummary';
 import { buildTopicOptions } from './assessment-wizard/topic-tree';
 import {
   LIMITS,
+  applySectionEdit,
   newSection,
   normId,
   removeIds,
@@ -45,6 +46,8 @@ import {
   takenIds as collectTakenIds,
   tallySelection,
   toPayloadSections,
+  type SectionEdit,
+  type SectionUpdater,
   type WizardSection,
 } from './assessment-wizard/selection';
 import { ErrorAlert, NoticeBox, checkboxCls, eyebrowCls, fieldLabelCls, inputCls } from './assessment-wizard/ui';
@@ -121,6 +124,12 @@ export function AssessmentWizard({
 
   // questions
   const [sections, setSections] = useState<WizardSection[]>(() => [newSection(1)]);
+  /** The newest selection, ahead of React's render: draws, fills and AI items land after an
+   *  await, so they must be checked against what is selected NOW, not at click time. Every
+   *  write goes through `mutateSections` / `updateSection`, which keep this in step. */
+  const latestSections = useRef(sections);
+  /** Draws / fills / re-draws / AI runs still in flight — Review and Publish wait for them. */
+  const [inFlight, setInFlight] = useState(0);
   /** Which section's "Add questions" panel is open; undefined = the default (first section). */
   const [openPanel, setOpenPanel] = useState<string | null | undefined>(undefined);
   const [modes, setModes] = useState<Record<string, SelectionMode>>({});
@@ -199,6 +208,10 @@ export function AssessmentWizard({
   const companyName = useCallback((slug: string) => companyBySlug.get(slug) ?? slug, [companyBySlug]);
   const driveCompanySlug = companies.find((c) => c.id === companyId)?.slug ?? '';
   const existingItems = useMemo(() => existing?.items ?? [], [existing]);
+  const latestExisting = useRef(existingItems);
+  useEffect(() => {
+    latestExisting.current = existingItems;
+  }, [existingItems]);
   const locked = !!existing && !existing.editable;
 
   const tally = useMemo(() => tallySelection(sections), [sections]);
@@ -224,20 +237,48 @@ export function AssessmentWizard({
     return [base, college, cohort].filter(Boolean).join(' · ');
   })();
 
+  /** Replace the whole selection, computed from the latest state (removals, new sections). */
+  const mutateSections = useCallback((fn: (prev: WizardSection[]) => WizardSection[]) => {
+    const next = fn(latestSections.current);
+    if (next === latestSections.current) return;
+    latestSections.current = next;
+    setSections(next);
+  }, []);
+
+  /** The ONE way items join a section: the edit runs against the latest selection and
+   *  anything already in the assessment is left out and reported as skipped. */
   const updateSection = useCallback(
-    (key: string) => (fn: (s: WizardSection) => WizardSection) =>
-      setSections((prev) => prev.map((s) => (s.key === key ? fn(s) : s))),
+    (key: string): SectionUpdater =>
+      (edit: SectionEdit) => {
+        const { sections: next, result } = applySectionEdit(latestSections.current, latestExisting.current, key, edit);
+        if (next !== latestSections.current) {
+          latestSections.current = next;
+          setSections(next);
+        }
+        return result;
+      },
     [],
   );
 
+  /** Ids already selected, read at call time from the latest selection. */
   const takenIds = useCallback(
-    (type: AssessmentItemType) => collectTakenIds(sections, existingItems, type),
-    [sections, existingItems],
+    (type: AssessmentItemType) => collectTakenIds(latestSections.current, latestExisting.current, type),
+    [],
   );
 
+  /** Run a draw / AI request while holding Review and Publish. */
+  const trackWork = useCallback(async (work: () => Promise<void>) => {
+    setInFlight((n) => n + 1);
+    try {
+      await work();
+    } finally {
+      setInFlight((n) => n - 1);
+    }
+  }, []);
+
   const addSection = () => {
-    const s = newSection(sections.length + 1);
-    setSections((prev) => [...prev, s]);
+    const s = newSection(latestSections.current.length + 1);
+    mutateSections((prev) => [...prev, s]);
     setOpenPanel(s.key);
   };
 
@@ -384,7 +425,8 @@ export function AssessmentWizard({
     }
   };
 
-  const canReview = (editId ? true : tally.total > 0) && problems.length === 0;
+  const working = inFlight > 0;
+  const canReview = (editId ? true : tally.total > 0) && problems.length === 0 && !working;
   const canPublish = canReview && !locked && !activeSelErr;
   const publishLabel = editId
     ? tally.total
@@ -696,12 +738,13 @@ export function AssessmentWizard({
                         existingItems={existingItems}
                         takenIds={takenIds}
                         update={updateSection(sec.key)}
+                        trackWork={trackWork}
                         onRemoveSection={
                           sections.length > 1
                             ? () => {
                                 if (sec.items.length && !window.confirm(`Remove ${sec.name} and its ${plural(sec.items.length, 'question', 'questions')}?`))
                                   return;
-                                setSections((p) => p.filter((s) => s.key !== sec.key));
+                                mutateSections((p) => p.filter((s) => s.key !== sec.key));
                               }
                             : undefined
                         }
@@ -753,7 +796,7 @@ export function AssessmentWizard({
                 <SelectionErrorPanel
                   error={activeSelErr}
                   labelFor={labelFor}
-                  onRemoveGroup={(g, keepFirst) => setSections((prev) => removeIds(prev, g.ids, keepFirst))}
+                  onRemoveGroup={(g, keepFirst) => mutateSections((prev) => removeIds(prev, g.ids, keepFirst))}
                 />
               ) : null}
               {selErr && selErr.groups.length > 0 && !activeSelErr ? (
@@ -796,14 +839,23 @@ export function AssessmentWizard({
             <Button type="button" disabled={!detailsValid || (!!editId && !existing)} onClick={() => setStep(1)}>
               Next: questions <ArrowRight aria-hidden />
             </Button>
-          ) : step === 1 ? (
-            <Button type="button" disabled={!canReview} onClick={() => setStep(2)}>
-              {editId ? 'Review changes' : `Review ${plural(tally.total, 'question', 'questions')}`} <ArrowRight aria-hidden />
-            </Button>
           ) : (
-            <Button type="button" disabled={!canPublish || creating} onClick={() => setConfirmOpen(true)}>
-              {publishLabel}
-            </Button>
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              {working ? (
+                <span className="text-xs text-slate-500" aria-live="polite">
+                  Waiting for questions still being drawn…
+                </span>
+              ) : null}
+              {step === 1 ? (
+                <Button type="button" disabled={!canReview} onClick={() => setStep(2)}>
+                  {editId ? 'Review changes' : `Review ${plural(tally.total, 'question', 'questions')}`} <ArrowRight aria-hidden />
+                </Button>
+              ) : (
+                <Button type="button" disabled={!canPublish || creating} onClick={() => setConfirmOpen(true)}>
+                  {publishLabel}
+                </Button>
+              )}
+            </div>
           )}
         </div>
       ) : null}

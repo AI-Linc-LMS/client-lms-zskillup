@@ -18,8 +18,10 @@ import {
   LIMITS,
   nextKey,
   normId,
+  skippedNote,
   type PickedItem,
   type RandomDraw,
+  type SectionUpdater,
   type WizardSection,
 } from './selection';
 import { indentedLabel, type TopicOption } from './topic-tree';
@@ -49,6 +51,7 @@ export function RandomSelection({
   driveCompanySlug,
   takenIds,
   update,
+  trackWork,
 }: {
   section: WizardSection;
   type: AssessmentItemType;
@@ -59,7 +62,10 @@ export function RandomSelection({
   driveCompanySlug: string;
   /** Every id of this type already in the assessment (all sections + existing items). */
   takenIds: () => Set<string>;
-  update: (fn: (s: WizardSection) => WizardSection) => void;
+  /** The wizard's guarded updater: anything already selected is left out and counted. */
+  update: SectionUpdater;
+  /** Holds the wizard's Review / Publish while a request is in flight. */
+  trackWork: (work: () => Promise<void>) => Promise<void>;
 }) {
   const uid = useId();
   const [topicId, setTopicId] = useState('');
@@ -97,183 +103,204 @@ export function RandomSelection({
     return [...takenIds()].filter((id) => !replaced.has(id)).slice(0, LIMITS.excludeIds);
   };
 
-  const toItems = (drawId: string, items: Array<{ id: string; label: string; difficulty: string }>, keepOut: Set<string>): PickedItem[] =>
-    items
-      .map((i) => ({ ...i, id: normId(i.id) }))
-      // Defensive: if more than 500 ids are selected the server can't exclude them all.
-      .filter((i) => !keepOut.has(i.id))
-      .map((i) => ({ id: i.id, type, label: i.label, difficulty: i.difficulty, origin: 'RANDOM' as const, drawId }));
+  // Nothing is filtered here: `update` drops (and counts) anything already selected, against
+  // the selection as it is when the response lands — not when the button was clicked.
+  const toItems = (drawId: string, items: Array<{ id: string; label: string; difficulty: string }>): PickedItem[] =>
+    items.map((i) => ({ id: normId(i.id), type, label: i.label, difficulty: i.difficulty, origin: 'RANDOM' as const, drawId }));
 
-  const draw = async () => {
-    setErr(null);
-    setNotice(null);
-    if (type === 'CODING' && !codingSel) {
-      setErr('Pick a coding topic, or the whole coding bank.');
-      return;
-    }
-    const asked = Math.round(Number(count));
-    if (!Number.isFinite(asked) || asked < 1 || asked > LIMITS.sampleCount) {
-      setErr(`Draw between 1 and ${LIMITS.sampleCount} ${unit} at a time.`);
-      return;
-    }
-    if (room <= 0) {
-      setErr(`This section already has the maximum of ${perSectionLimit} ${unit}. Add another section.`);
-      return;
-    }
-    const want = Math.min(asked, room);
-    const topic = topicOptions.find((o) => o.id === topicId);
-    const allCoding = type === 'CODING' && codingSel === ALL_CODING;
-    const codingTopic = type === 'CODING' && !allCoding ? codingSel : undefined;
-    setBusy('draw');
-    try {
-      const exclude = excludeIds();
-      const res = await sampleQuestions({
-        type,
-        topicId: type === 'MCQ' && topicId ? topicId : undefined,
-        codingTopic,
-        allCoding: allCoding || undefined,
-        difficulty,
-        companySlug: companySlug || undefined,
-        count: want,
-        excludeIds: exclude.length ? exclude : undefined,
-      });
-      const row: RandomDraw = {
-        id: nextKey('draw'),
-        type,
-        scopeLabel:
-          type === 'MCQ' ? (topic?.path ?? 'Whole question bank') : allCoding ? 'Whole coding bank' : (codingTopic ?? ''),
-        topicId: type === 'MCQ' && topicId ? topicId : undefined,
-        topicName: type === 'MCQ' ? topic?.name : codingTopic,
-        codingTopic,
-        allCoding: allCoding || undefined,
-        difficulty,
-        companySlug: companySlug || undefined,
-        requested: want,
-        available: res.available,
-        bankShort: res.returned < want,
-      };
-      const items = toItems(row.id, res.items, takenIds());
-      const canUseAi = aiPossible(row);
-      if (items.length === 0 && !canUseAi) {
-        setNotice(`No eligible ${unit} match this scope. Try another topic, difficulty or company.`);
+  const draw = () =>
+    trackWork(async () => {
+      setErr(null);
+      setNotice(null);
+      if (type === 'CODING' && !codingSel) {
+        setErr('Pick a coding topic, or the whole coding bank.');
         return;
       }
-      update((s) => ({ ...s, draws: [...s.draws, row], items: [...s.items, ...items] }));
-      if (res.returned < want) {
-        setNotice(
-          `The bank has ${res.available} of the ${want} ${unit} you asked for${
-            canUseAi ? ' — you can generate the rest with AI below.' : '.'
-          }`,
-        );
-      } else if (asked > want) {
-        setNotice(`Drew ${want}: this section can hold ${perSectionLimit} ${unit}.`);
+      const asked = Math.round(Number(count));
+      if (!Number.isFinite(asked) || asked < 1 || asked > LIMITS.sampleCount) {
+        setErr(`Draw between 1 and ${LIMITS.sampleCount} ${unit} at a time.`);
+        return;
       }
-    } catch (e) {
-      setErr(parseSelectionError(e, `Could not draw ${unit}.`).message);
-    } finally {
-      setBusy(null);
-    }
-  };
+      if (room <= 0) {
+        setErr(`This section already has the maximum of ${perSectionLimit} ${unit}. Add another section.`);
+        return;
+      }
+      const want = Math.min(asked, room);
+      const topic = topicOptions.find((o) => o.id === topicId);
+      const allCoding = type === 'CODING' && codingSel === ALL_CODING;
+      const codingTopic = type === 'CODING' && !allCoding ? codingSel : undefined;
+      setBusy('draw');
+      try {
+        const exclude = excludeIds();
+        const res = await sampleQuestions({
+          type,
+          topicId: type === 'MCQ' && topicId ? topicId : undefined,
+          codingTopic,
+          allCoding: allCoding || undefined,
+          difficulty,
+          companySlug: companySlug || undefined,
+          count: want,
+          excludeIds: exclude.length ? exclude : undefined,
+        });
+        const row: RandomDraw = {
+          id: nextKey('draw'),
+          type,
+          scopeLabel:
+            type === 'MCQ' ? (topic?.path ?? 'Whole question bank') : allCoding ? 'Whole coding bank' : (codingTopic ?? ''),
+          topicId: type === 'MCQ' && topicId ? topicId : undefined,
+          topicName: type === 'MCQ' ? topic?.name : codingTopic,
+          codingTopic,
+          allCoding: allCoding || undefined,
+          difficulty,
+          companySlug: companySlug || undefined,
+          requested: want,
+          available: res.available,
+          bankShort: res.returned < want,
+        };
+        const items = toItems(row.id, res.items);
+        const canUseAi = aiPossible(row);
+        if (items.length === 0 && !canUseAi) {
+          setNotice(`No eligible ${unit} match this scope. Try another topic, difficulty or company.`);
+          return;
+        }
+        // Only record the draw if something of it can still join (or AI can top it up).
+        const outcome = { recorded: true };
+        const { skipped } = update((s, isTaken) => {
+          const inSection = new Set(s.items.filter((i) => i.type === type).map((i) => i.id));
+          outcome.recorded = canUseAi || items.some((i) => !isTaken(type, i.id) && !inSection.has(i.id));
+          return outcome.recorded ? { ...s, draws: [...s.draws, row], items: [...s.items, ...items] } : s;
+        });
+        if (!outcome.recorded) {
+          setNotice(`${skippedNote(items.length)} No other eligible ${unit} match this scope.`);
+          return;
+        }
+        const notes: string[] = [];
+        if (res.returned < want) {
+          notes.push(
+            `The bank has ${res.available} of the ${want} ${unit} you asked for${
+              canUseAi ? ' — you can generate the rest with AI below.' : '.'
+            }`,
+          );
+        } else if (asked > want) {
+          notes.push(`Drew ${want}: this section can hold ${perSectionLimit} ${unit}.`);
+        }
+        if (skipped) notes.push(skippedNote(skipped));
+        if (notes.length) setNotice(notes.join(' '));
+      } catch (e) {
+        setErr(parseSelectionError(e, `Could not draw ${unit}.`).message);
+      } finally {
+        setBusy(null);
+      }
+    });
 
   /** Replace a draw's random items with a fresh sample of the same size and scope. */
-  const redraw = async (d: RandomDraw) => {
-    setErr(null);
-    setNotice(null);
-    const aiCount = section.items.filter((i) => i.drawId === d.id && i.origin === 'AI').length;
-    const replacing = section.items.filter((i) => i.drawId === d.id && i.origin === 'RANDOM').length;
-    // Same size as the draw, but never past the section limit (items may have been added since).
-    const want = Math.min(Math.max(1, d.requested - aiCount), room + replacing, LIMITS.sampleCount);
-    if (want <= 0) return;
-    setBusy(d.id);
-    try {
-      const exclude = excludeIds(d);
-      const res = await sampleQuestions({ ...sampleScope(d), count: want, excludeIds: exclude.length ? exclude : undefined });
-      update((s) => {
-        const keep = s.items.filter((i) => !(i.drawId === d.id && i.origin === 'RANDOM'));
-        const keepOut = new Set(keep.filter((i) => i.type === type).map((i) => i.id));
-        return {
-          ...s,
-          items: [...keep, ...toItems(d.id, res.items, keepOut)],
-          draws: s.draws.map((x) => (x.id === d.id ? { ...x, available: res.available, bankShort: res.returned < want } : x)),
-        };
-      });
-      if (res.returned < want) setNotice(`The bank has ${res.available} of the ${want} ${unit} for this draw.`);
-    } catch (e) {
-      setErr(parseSelectionError(e, 'Could not re-draw.').message);
-    } finally {
-      setBusy(null);
-    }
-  };
+  const redraw = (d: RandomDraw) =>
+    trackWork(async () => {
+      setErr(null);
+      setNotice(null);
+      const aiCount = section.items.filter((i) => i.drawId === d.id && i.origin === 'AI').length;
+      const replacing = section.items.filter((i) => i.drawId === d.id && i.origin === 'RANDOM').length;
+      // Same size as the draw, but never past the section limit (items may have been added since).
+      const want = Math.min(Math.max(1, d.requested - aiCount), room + replacing, LIMITS.sampleCount);
+      if (want <= 0) return;
+      setBusy(d.id);
+      try {
+        const exclude = excludeIds(d);
+        const res = await sampleQuestions({ ...sampleScope(d), count: want, excludeIds: exclude.length ? exclude : undefined });
+        const { skipped } = update((s) => {
+          const keep = s.items.filter((i) => !(i.drawId === d.id && i.origin === 'RANDOM'));
+          return {
+            ...s,
+            items: [...keep, ...toItems(d.id, res.items)],
+            draws: s.draws.map((x) => (x.id === d.id ? { ...x, available: res.available, bankShort: res.returned < want } : x)),
+          };
+        });
+        const notes: string[] = [];
+        if (res.returned < want) notes.push(`The bank has ${res.available} of the ${want} ${unit} for this draw.`);
+        if (skipped) notes.push(skippedNote(skipped));
+        if (notes.length) setNotice(notes.join(' '));
+      } catch (e) {
+        setErr(parseSelectionError(e, 'Could not re-draw.').message);
+      } finally {
+        setBusy(null);
+      }
+    });
 
   /** Top a draw back up from the bank (after removals, or a short first draw). */
-  const fill = async (d: RandomDraw, missing: number) => {
-    setErr(null);
-    setNotice(null);
-    const want = Math.min(missing, room, LIMITS.sampleCount);
-    if (want <= 0) return;
-    setBusy(d.id);
-    try {
-      const exclude = excludeIds();
-      const res = await sampleQuestions({ ...sampleScope(d), count: want, excludeIds: exclude.length ? exclude : undefined });
-      const items = toItems(d.id, res.items, takenIds());
-      update((s) => ({
-        ...s,
-        items: [...s.items, ...items],
-        draws: s.draws.map((x) => (x.id === d.id ? { ...x, available: res.available, bankShort: res.returned < want } : x)),
-      }));
-      if (res.returned < want) {
-        setNotice(
-          res.returned === 0
-            ? `The bank has no more eligible ${unit} for this draw.`
-            : `Added ${res.returned}: that is all the bank has left for this draw.`,
-        );
+  const fill = (d: RandomDraw, missing: number) =>
+    trackWork(async () => {
+      setErr(null);
+      setNotice(null);
+      const want = Math.min(missing, room, LIMITS.sampleCount);
+      if (want <= 0) return;
+      setBusy(d.id);
+      try {
+        const exclude = excludeIds();
+        const res = await sampleQuestions({ ...sampleScope(d), count: want, excludeIds: exclude.length ? exclude : undefined });
+        const { added, skipped } = update((s) => ({
+          ...s,
+          items: [...s.items, ...toItems(d.id, res.items)],
+          draws: s.draws.map((x) => (x.id === d.id ? { ...x, available: res.available, bankShort: res.returned < want } : x)),
+        }));
+        const notes: string[] = [];
+        if (res.returned < want) {
+          notes.push(
+            res.returned === 0
+              ? `The bank has no more eligible ${unit} for this draw.`
+              : `Added ${added}: that is all the bank has left for this draw.`,
+          );
+        }
+        if (skipped) notes.push(skippedNote(skipped));
+        if (notes.length) setNotice(notes.join(' '));
+      } catch (e) {
+        setErr(parseSelectionError(e, 'Could not draw more.').message);
+      } finally {
+        setBusy(null);
       }
-    } catch (e) {
-      setErr(parseSelectionError(e, 'Could not draw more.').message);
-    } finally {
-      setBusy(null);
-    }
-  };
+    });
 
   /** Explicit AI top-up for a draw the bank couldn't fill. Items are badged AI. */
-  const generate = async (d: RandomDraw, missing: number) => {
-    setErr(null);
-    setNotice(null);
-    const total = Math.min(missing, room);
-    if (total <= 0) return;
-    stopGen.current = false;
-    setGen({ drawId: d.id, done: 0, total });
-    const avoid = section.items.filter((i) => i.type === type).map((i) => i.label);
-    const band = d.difficulty === 'MIXED' ? undefined : d.difficulty;
-    try {
-      for (let i = 0; i < total; i += 1) {
-        if (stopGen.current) break;
-        const g = await generateOne({
-          topicId: d.topicId ?? '',
-          topicName: d.topicName ?? '',
-          type,
-          difficulty: band,
-          avoid: avoid.slice(-60),
-        });
-        avoid.push(g.label);
-        const item: PickedItem = {
-          id: normId(g.id),
-          type,
-          label: g.label,
-          // The generator defaults an unspecified band to MEDIUM.
-          difficulty: band ?? 'MEDIUM',
-          origin: 'AI',
-          drawId: d.id,
-        };
-        update((s) => (s.items.some((x) => x.id === item.id) ? s : { ...s, items: [...s.items, item] }));
-        setGen((x) => (x ? { ...x, done: x.done + 1 } : x));
+  const generate = (d: RandomDraw, missing: number) =>
+    trackWork(async () => {
+      setErr(null);
+      setNotice(null);
+      const total = Math.min(missing, room);
+      if (total <= 0) return;
+      stopGen.current = false;
+      setGen({ drawId: d.id, done: 0, total });
+      const avoid = section.items.filter((i) => i.type === type).map((i) => i.label);
+      const band = d.difficulty === 'MIXED' ? undefined : d.difficulty;
+      let skipped = 0;
+      try {
+        for (let i = 0; i < total; i += 1) {
+          if (stopGen.current) break;
+          const g = await generateOne({
+            topicId: d.topicId ?? '',
+            topicName: d.topicName ?? '',
+            type,
+            difficulty: band,
+            avoid: avoid.slice(-60),
+          });
+          avoid.push(g.label);
+          const item: PickedItem = {
+            id: normId(g.id),
+            type,
+            label: g.label,
+            // The generator defaults an unspecified band to MEDIUM.
+            difficulty: band ?? 'MEDIUM',
+            origin: 'AI',
+            drawId: d.id,
+          };
+          skipped += update((s) => ({ ...s, items: [...s.items, item] })).skipped;
+          setGen((x) => (x ? { ...x, done: x.done + 1 } : x));
+        }
+        if (skipped) setNotice(skippedNote(skipped));
+      } catch (e) {
+        setErr(parseSelectionError(e, 'AI generation failed. The questions generated so far were kept.').message);
+      } finally {
+        setGen(null);
       }
-    } catch (e) {
-      setErr(parseSelectionError(e, 'AI generation failed. The questions generated so far were kept.').message);
-    } finally {
-      setGen(null);
-    }
-  };
+    });
 
   const removeDraw = (d: RandomDraw) =>
     update((s) => ({
