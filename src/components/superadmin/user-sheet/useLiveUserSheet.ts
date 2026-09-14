@@ -39,8 +39,10 @@ function summarise(o: ApplyOutcome): string {
  * The live Super Admin user sheet (GET /admin/user-sheet).
  *
  * Reads:
- *   - a FULL snapshot only on first load, on Sync now, and for an export
- *     (purpose=export - audited server-side). A snapshot is a couple of MB;
+ *   - a FULL snapshot only on first load, on Sync now, and for an export. Every full
+ *     snapshot is audited server-side as a view; a download is recorded separately,
+ *     with the exact exported row count, once its file exists (see sheet-export). A
+ *     snapshot is a couple of MB;
  *   - every background refresh is a DELTA: `since=<cursor>` every 20 s, only while the
  *     tab is visible, plus once on focus / returning to the tab (at most every 5 s).
  *     Rows are upserted by id and removedIds dropped (see sheet-model); a row is
@@ -112,9 +114,12 @@ export function useLiveUserSheet() {
     [flash],
   );
 
-  /** A full snapshot (first load, Sync now, export). Throws on failure. */
+  /**
+   * A full snapshot (first load, Sync now, export). Throws on failure. `forExport` leaves
+   * a failure after the first load to the export's own message instead of the Sync notice.
+   */
   const readFull = useCallback(
-    async (purpose?: 'export'): Promise<UserSheetResult | null> => {
+    async (forExport = false): Promise<UserSheetResult | null> => {
       const gen = ++generation.current;
       deltaAbort.current?.abort();
       fullAbort.current?.abort();
@@ -123,7 +128,7 @@ export function useLiveUserSheet() {
       setSyncing(true);
       lastReadAt.current = Date.now();
       try {
-        const res = await getUserSheet(purpose ? { purpose } : {}, { signal: controller.signal });
+        const res = await getUserSheet({}, { signal: controller.signal });
         if (!mounted.current || gen !== generation.current) return res;
         const first = !loadedRef.current;
         commit(applyFull(first ? null : rowsRef.current, res.rows), res, !first);
@@ -148,7 +153,7 @@ export function useLiveUserSheet() {
           if (!loadedRef.current) {
             setLoadError(message);
             setLiveState('stopped');
-          } else if (!purpose) {
+          } else if (!forExport) {
             setNotice(`Sync failed: ${message}`);
           }
         }
@@ -274,9 +279,12 @@ export function useLiveUserSheet() {
     await readFull().catch(() => {});
   }, [readFull]);
 
-  /** A fresh, audited snapshot for a download; also refreshes the sheet. Throws on failure. */
+  /**
+   * A fresh full snapshot for a download; also refreshes the sheet. Throws on failure.
+   * The export itself is recorded by the caller once the file is generated.
+   */
   const fetchForExport = useCallback(async (): Promise<UserSheetResult> => {
-    const res = await readFull('export');
+    const res = await readFull(true);
     if (!res) throw new Error('Export was cancelled.');
     return res;
   }, [readFull]);

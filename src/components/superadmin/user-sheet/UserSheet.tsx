@@ -10,6 +10,7 @@ import {
   FilterSelect,
   ListPagination,
 } from '@/components/superadmin/UserListControls';
+import { recordUserSheetExport } from '@/lib/api/admin';
 import { describeError } from '@/lib/api/errors';
 import { ApiRequestError } from '@/lib/api/types';
 import { formatDateTimeSecondsIST, formatTimeIST } from '@/lib/format';
@@ -22,6 +23,7 @@ import {
   type SheetFilters,
   type SheetPaidFilter,
 } from './sheet-model';
+import { runUserSheetExport } from './sheet-export';
 import { saveUserSheet, type SheetFileFormat } from './sheet-file';
 import { UserSheetTable } from './UserSheetTable';
 import { useLiveUserSheet, type LiveState } from './useLiveUserSheet';
@@ -61,8 +63,9 @@ type SelectFilters = Omit<SheetFilters, 'search'>;
 /**
  * Super Admin live user sheet: every user in one table, kept current by background
  * deltas (see useLiveUserSheet), with client-side search / filters / pagination over the
- * whole dataset and CSV / Excel export of the filtered rows from a fresh, audited
- * snapshot. All values are rendered as the server computed them.
+ * whole dataset and CSV / Excel export of the filtered rows from a fresh snapshot. Each
+ * download is recorded in the audit trail with the exact number of rows in the file
+ * (see sheet-export). All values are rendered as the server computed them.
  */
 export function UserSheet() {
   const sheet = useLiveUserSheet();
@@ -78,6 +81,8 @@ export function UserSheet() {
   const [page, setPage] = useState(0);
   const [exporting, setExporting] = useState<SheetFileFormat | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
+  /** Non-blocking export outcome: nothing matched, or the file saved but was not logged. */
+  const [exportNotice, setExportNotice] = useState<string | null>(null);
 
   const filters = useMemo<SheetFilters>(() => ({ ...selects, search }), [selects, search]);
   const filtered = useMemo(() => filterSheetRows(sheet.rows, filters), [sheet.rows, filters]);
@@ -115,20 +120,26 @@ export function UserSheet() {
   const onExport = async (format: SheetFileFormat) => {
     setExporting(format);
     setExportError(null);
+    setExportNotice(null);
     try {
-      // A fresh snapshot (purpose=export is audited), so the file is the latest data. The
-      // filters are the ones on screen, with the search box exactly as typed.
-      const res = await sheet.fetchForExport();
-      const current: SheetFilters = { ...selects, search: searchInput };
-      const rows = filterSheetRows(res.rows, current);
-      if (rows.length === 0) {
-        setExportError('No users match the current filters, so there is nothing to export.');
-        return;
+      // A fresh snapshot, so the file is the latest data. The filters are the ones on
+      // screen, with the search box exactly as typed. The export is recorded (exact row
+      // count, format, filters) only after the file was generated, and never holds it up.
+      const outcome = await runUserSheetExport(
+        format,
+        { ...selects, search: searchInput },
+        { fetchSnapshot: sheet.fetchForExport, saveFile: saveUserSheet, record: recordUserSheetExport },
+      );
+      if (outcome.status === 'empty') {
+        setExportNotice(
+          outcome.filtered
+            ? 'Nothing to export for these filters: no users match them.'
+            : 'Nothing to export: there are no users yet.',
+        );
+      } else if (outcome.logged === 'failed') {
+        setExportNotice('Export saved, but it couldn’t be logged.');
       }
-      await saveUserSheet(rows, format, {
-        serverTime: res.serverTime,
-        filtered: hasActiveFilters(current),
-      });
+      // logged 'unsupported' (404): the backend predates export logging - nothing to show.
     } catch (err) {
       setExportError(
         err instanceof ApiRequestError && (err.status === 429 || err.code === 'RATE_LIMITED')
@@ -262,6 +273,15 @@ export function UserSheet() {
           >
             <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
             <span>{sheet.notice}</span>
+          </p>
+        )}
+        {exportNotice && (
+          <p
+            role="status"
+            className="mt-4 flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-800 ring-1 ring-amber-200"
+          >
+            <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
+            <span>{exportNotice}</span>
           </p>
         )}
         {exportError && (
