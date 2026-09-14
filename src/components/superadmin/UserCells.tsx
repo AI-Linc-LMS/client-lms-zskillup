@@ -46,9 +46,14 @@ export function paidStatusDescription(p: AdminUserPaidFields): string {
 
 /**
  * Paid / Unpaid pill with the access reason (College access / Complimentary) under it and
- * "Paid till <date>" as the tooltip. A non-student (paidStatus null) shows a quiet dash.
+ * "Paid till <date>" as the tooltip. `showPaidUntil` also prints that date under a Paid
+ * pill ("till 14 Sep 2026", or "No expiry"), for surfaces with no separate paid-until
+ * field. A non-student (paidStatus null) shows a quiet dash.
  */
-export function PaidStatusCell(p: AdminUserPaidFields) {
+export function PaidStatusCell({
+  showPaidUntil = false,
+  ...p
+}: AdminUserPaidFields & { showPaidUntil?: boolean }) {
   const description = paidStatusDescription(p);
   if (!p.paidStatus) {
     return (
@@ -61,13 +66,18 @@ export function PaidStatusCell(p: AdminUserPaidFields) {
   const pill = PAID_STATUS_TONE[p.paidStatus];
   return (
     <span className="flex flex-col items-start gap-1" title={description}>
-      {/* Visible pill + reason are hidden from assistive tech; the sentence below says
-          the same thing in full, including the paid-until date the tooltip carries. */}
+      {/* Visible pill + reason / paid-until are hidden from assistive tech; the sentence
+          below says the same thing in full, including the paid-until date. */}
       <span aria-hidden className="contents">
         <StatusPill tone={pill.tone} label={pill.label} />
         {p.paidStatus === 'UNPAID' && p.accessLabel && (
           <span className="whitespace-nowrap text-[11px] text-slate-500">
             {ACCESS_LABEL_TEXT[p.accessLabel]}
+          </span>
+        )}
+        {p.paidStatus === 'PAID' && showPaidUntil && (
+          <span className="whitespace-nowrap text-[11px] text-slate-500">
+            {p.paidUntil ? `till ${formatDateIST(p.paidUntil)}` : 'No expiry'}
           </span>
         )}
       </span>

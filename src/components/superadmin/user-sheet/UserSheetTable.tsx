@@ -115,6 +115,7 @@ const SheetRow = memo(function SheetRow({
           paidStatus={row.paidStatus}
           accessLabel={row.accessLabel}
           paidUntil={row.paidUntil}
+          showPaidUntil
         />
       </td>
     </tr>
