@@ -77,9 +77,11 @@ export function RandomSelection({
   const [err, setErr] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [gen, setGen] = useState<{ drawId: string; done: number; total: number } | null>(null);
+  /** Stop was pressed: the run ends, and an item still being generated is thrown away. */
   const stopGen = useRef(false);
+  const [stopping, setStopping] = useState(false);
 
-  // Leaving the panel (tab switch, wizard closed) stops an AI run between items.
+  // Leaving the panel (tab switch, wizard closed) stops an AI run the same way.
   useEffect(
     () => () => {
       stopGen.current = true;
@@ -304,6 +306,7 @@ export function RandomSelection({
       const avoid = section.items.filter((i) => i.type === type).map((i) => i.label);
       const band = d.difficulty === 'MIXED' ? undefined : d.difficulty;
       let skipped = 0;
+      let discarded = false;
       try {
         for (let i = 0; i < total; i += 1) {
           if (stopGen.current) break;
@@ -314,6 +317,11 @@ export function RandomSelection({
             difficulty: band,
             avoid: avoid.slice(-60),
           });
+          // Stop was pressed while this one was generating: the admin asked for no more.
+          if (stopGen.current) {
+            discarded = true;
+            break;
+          }
           avoid.push(g.label);
           const item: PickedItem = {
             id: normId(g.id),
@@ -327,11 +335,17 @@ export function RandomSelection({
           skipped += update((s) => ({ ...s, items: [...s.items, item] })).skipped;
           setGen((x) => (x ? { ...x, done: x.done + 1 } : x));
         }
-        if (skipped) setNotice(skippedNote(skipped));
+        const notes: string[] = [];
+        if (discarded) notes.push(`Stopped. The ${noun(1)} still being generated was not added.`);
+        if (skipped) notes.push(skippedNote(skipped));
+        if (notes.length) setNotice(notes.join(' '));
       } catch (e) {
-        setErr(parseSelectionError(e, 'AI generation failed. The questions generated so far were kept.').message);
+        if (!stopGen.current) {
+          setErr(parseSelectionError(e, 'AI generation failed. The questions generated so far were kept.').message);
+        }
       } finally {
         setGen(null);
+        setStopping(false);
       }
     });
 
@@ -458,15 +472,30 @@ export function RandomSelection({
                 {running && gen ? (
                   <div className="mt-3 space-y-1.5" aria-live="polite">
                     <p className="text-xs text-slate-600">
-                      Generating with AI… {gen.done} of {gen.total}
+                      {stopping ? 'Stopping…' : `Generating with AI… ${gen.done} of ${gen.total}`}
                     </p>
                     <ProgressBar value={(gen.done / gen.total) * 100} className="h-1.5" label="AI generation progress" />
                   </div>
                 ) : null}
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   {running ? (
-                    <Button type="button" size="sm" variant="outline" onClick={() => (stopGen.current = true)}>
-                      Stop generating
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={stopping}
+                      onClick={() => {
+                        stopGen.current = true;
+                        setStopping(true);
+                      }}
+                    >
+                      {stopping ? (
+                        <>
+                          <Loader2 className="animate-spin" aria-hidden /> Stopping…
+                        </>
+                      ) : (
+                        'Stop generating'
+                      )}
                     </Button>
                   ) : (
                     <>
