@@ -44,8 +44,8 @@ function summarise(o: ApplyOutcome): string {
  *   - every background refresh is a DELTA: `since=<cursor>` every 20 s, only while the
  *     tab is visible, plus once on focus / returning to the tab (at most every 5 s).
  *     Rows are upserted by id and removedIds dropped (see sheet-model); a row is
- *     highlighted only when its data actually changed, not each time the server's
- *     look-back window re-sends it.
+ *     highlighted only when a value the table shows actually changed - not each time
+ *     the server's look-back window re-sends it, nor when only updatedAt moved.
  *
  * Failure handling never loops: a 429 or failed refresh doubles the interval (up to
  * 2 min) and shows a quiet notice; a 403 or a rejected cursor (400) stops background

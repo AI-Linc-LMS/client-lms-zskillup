@@ -10,6 +10,10 @@ import { branchShort } from '@/lib/branch';
  * look-back window), so without this a single change would re-render - and flash - its
  * row on every poll. With it, a memoised table row re-renders only when its data really
  * changed, and a poll that changed nothing returns the very same array.
+ *
+ * A row that differs only in fields the table does not show (NOT_DISPLAYED - updatedAt
+ * moves on every write) still replaces its object, so the rows stay current, but it is
+ * not reported as changed: nothing is highlighted or announced for it.
  */
 
 export interface ApplyOutcome {
@@ -33,6 +37,20 @@ export function sameRow(a: UserSheetRow, b: UserSheetRow): boolean {
   return true;
 }
 
+/** Row fields that are exported but not shown in the table. */
+const NOT_DISPLAYED: ReadonlySet<string> = new Set<keyof UserSheetRow>(['updatedAt', 'isEmailVerified']);
+
+/** Equality of the fields the table shows: every field except NOT_DISPLAYED. */
+export function sameDisplayedRow(a: UserSheetRow, b: UserSheetRow): boolean {
+  if (a === b) return true;
+  const ra = a as unknown as Record<string, unknown>;
+  const rb = b as unknown as Record<string, unknown>;
+  for (const k of new Set([...Object.keys(ra), ...Object.keys(rb)])) {
+    if (!NOT_DISPLAYED.has(k) && ra[k] !== rb[k]) return false;
+  }
+  return true;
+}
+
 /** The server's order: newest registration first, then id. */
 export function compareSheetRows(a: UserSheetRow, b: UserSheetRow): number {
   if (a.createdAt !== b.createdAt) return a.createdAt < b.createdAt ? 1 : -1;
@@ -41,7 +59,8 @@ export function compareSheetRows(a: UserSheetRow, b: UserSheetRow): number {
 
 /**
  * A full snapshot replaces the sheet. `prev` null = the first load (nothing is reported
- * as changed/added). Unchanged rows keep their previous object.
+ * as changed/added). Unchanged rows keep their previous object; a row whose only
+ * differences are not displayed is replaced but not reported as changed.
  */
 export function applyFull(prev: readonly UserSheetRow[] | null, incoming: readonly UserSheetRow[]): ApplyOutcome {
   const prevById = new Map((prev ?? []).map((r) => [r.id, r] as const));
@@ -57,8 +76,11 @@ export function applyFull(prev: readonly UserSheetRow[] | null, incoming: readon
       rows.push(old);
     } else {
       rows.push(r);
-      if (old) changed.push(r.id);
-      else if (prev) added.push(r.id);
+      if (old) {
+        if (!sameDisplayedRow(old, r)) changed.push(r.id);
+      } else if (prev) {
+        added.push(r.id);
+      }
     }
   }
   const removed = prev ? prev.filter((r) => !seen.has(r.id)).map((r) => r.id) : [];
@@ -68,7 +90,9 @@ export function applyFull(prev: readonly UserSheetRow[] | null, incoming: readon
 /**
  * A delta: upsert `rows` by id (the last copy of a repeated id wins) and drop
  * `removedIds`. A removed id that is also present in `rows` stays - the rows describe
- * the live state of the same read. Returns `prev` itself when nothing changed.
+ * the live state of the same read. Returns `prev` itself when no row was replaced,
+ * added or removed; a replaced row is reported as changed only when a displayed field
+ * differs.
  */
 export function applyDelta(prev: readonly UserSheetRow[], delta: Pick<UserSheetResult, 'rows' | 'removedIds'>): ApplyOutcome {
   const incoming = new Map<string, UserSheetRow>();
@@ -78,6 +102,7 @@ export function applyDelta(prev: readonly UserSheetRow[], delta: Pick<UserSheetR
   const rows: UserSheetRow[] = [];
   const changed: string[] = [];
   const removed: string[] = [];
+  let replaced = false;
   for (const old of prev) {
     const next = incoming.get(old.id);
     if (next) {
@@ -85,7 +110,8 @@ export function applyDelta(prev: readonly UserSheetRow[], delta: Pick<UserSheetR
       if (sameRow(old, next)) rows.push(old);
       else {
         rows.push(next);
-        changed.push(old.id);
+        replaced = true;
+        if (!sameDisplayedRow(old, next)) changed.push(old.id);
       }
     } else if (removedIds.has(old.id)) {
       removed.push(old.id);
@@ -95,7 +121,7 @@ export function applyDelta(prev: readonly UserSheetRow[], delta: Pick<UserSheetR
   }
 
   const added = [...incoming.keys()];
-  if (added.length === 0 && changed.length === 0 && removed.length === 0) {
+  if (!replaced && added.length === 0 && removed.length === 0) {
     return { rows: prev as UserSheetRow[], changed, added, removed };
   }
   if (added.length > 0) {
