@@ -93,15 +93,12 @@ export function RandomSelection({
   const perSectionLimit = type === 'MCQ' ? LIMITS.mcqPerSection : LIMITS.codingPerSection;
   const room = perSectionLimit - inSectionOfType;
   const unit = type === 'MCQ' ? 'questions' : 'coding problems';
+  const noun = (n: number) => (n !== 1 ? unit : type === 'MCQ' ? 'question' : 'coding problem');
 
-  /** Ids to keep out of a sample: everything of this type already selected, minus the
-   *  RANDOM items of a draw that is being re-drawn (they are about to be replaced). */
-  const excludeIds = (exceptDraw?: RandomDraw): string[] => {
-    const replaced = new Set(
-      exceptDraw ? section.items.filter((i) => i.drawId === exceptDraw.id && i.origin === 'RANDOM').map((i) => i.id) : [],
-    );
-    return [...takenIds()].filter((id) => !replaced.has(id)).slice(0, LIMITS.excludeIds);
-  };
+  /** Ids to keep out of a sample: everything of this type already selected. `first` go at
+   *  the front so they survive the server's cap (a re-draw's own items). */
+  const excludeIds = (first: string[] = []): string[] =>
+    [...new Set([...first, ...takenIds()])].slice(0, LIMITS.excludeIds);
 
   // Nothing is filtered here: `update` drops (and counts) anything already selected, against
   // the selection as it is when the response lands — not when the button was clicked.
@@ -193,30 +190,59 @@ export function RandomSelection({
       }
     });
 
-  /** Replace a draw's random items with a fresh sample of the same size and scope. */
+  /**
+   * Replace a draw's random items with a fresh sample of the same size and scope. Nothing
+   * already selected comes back — the draw's own current items included. When the bank has
+   * fewer new items than the draw needs, enough of the current ones stay to fill the gap.
+   */
   const redraw = (d: RandomDraw) =>
     trackWork(async () => {
       setErr(null);
       setNotice(null);
+      const current = section.items.filter((i) => i.drawId === d.id && i.origin === 'RANDOM');
       const aiCount = section.items.filter((i) => i.drawId === d.id && i.origin === 'AI').length;
-      const replacing = section.items.filter((i) => i.drawId === d.id && i.origin === 'RANDOM').length;
       // Same size as the draw, but never past the section limit (items may have been added since).
-      const want = Math.min(Math.max(1, d.requested - aiCount), room + replacing, LIMITS.sampleCount);
+      const want = Math.min(Math.max(1, d.requested - aiCount), room + current.length, LIMITS.sampleCount);
       if (want <= 0) return;
       setBusy(d.id);
       try {
-        const exclude = excludeIds(d);
+        const exclude = excludeIds(current.map((i) => i.id));
         const res = await sampleQuestions({ ...sampleScope(d), count: want, excludeIds: exclude.length ? exclude : undefined });
-        const { skipped } = update((s) => {
-          const keep = s.items.filter((i) => !(i.drawId === d.id && i.origin === 'RANDOM'));
+        const incoming = toItems(d.id, res.items);
+        const outcome = { fresh: 0, kept: 0 };
+        const { skipped } = update((s, isTaken) => {
+          const isCurrent = (i: PickedItem) => i.drawId === d.id && i.origin === 'RANDOM';
+          const old = s.items.filter(isCurrent);
+          const rest = s.items.filter((i) => !isCurrent(i));
+          const oldIds = new Set(old.map((i) => i.id));
+          const restIds = new Set(rest.filter((i) => i.type === type).map((i) => i.id));
+          // Past the exclude cap the server can hand back a current item: that isn't "new".
+          const candidates = incoming.filter((i) => !oldIds.has(i.id));
+          const isFresh = (i: PickedItem) => !isTaken(type, i.id) && !restIds.has(i.id);
+          const fresh = candidates.filter(isFresh).slice(0, want);
+          const keep = old.slice(0, Math.max(0, want - fresh.length));
+          outcome.fresh = fresh.length;
+          outcome.kept = keep.length;
           return {
             ...s,
-            items: [...keep, ...toItems(d.id, res.items)],
-            draws: s.draws.map((x) => (x.id === d.id ? { ...x, available: res.available, bankShort: res.returned < want } : x)),
+            // Stale candidates ride along only so the updater counts them as skipped.
+            items: [...rest, ...keep, ...fresh, ...candidates.filter((i) => !isFresh(i))],
+            draws: s.draws.map((x) =>
+              x.id === d.id
+                ? // The draw's own items were excluded from the sample but are part of its pool.
+                  { ...x, available: res.available + old.length, bankShort: fresh.length + keep.length < want }
+                : x,
+            ),
           };
         });
         const notes: string[] = [];
-        if (res.returned < want) notes.push(`The bank has ${res.available} of the ${want} ${unit} for this draw.`);
+        if (outcome.fresh < want) {
+          notes.push(
+            `Only ${outcome.fresh} new ${noun(outcome.fresh)} available${
+              outcome.kept ? ` — kept ${outcome.kept} from the previous draw` : ''
+            }.`,
+          );
+        }
         if (skipped) notes.push(skippedNote(skipped));
         if (notes.length) setNotice(notes.join(' '));
       } catch (e) {
