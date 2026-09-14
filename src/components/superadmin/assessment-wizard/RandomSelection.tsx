@@ -190,6 +190,10 @@ export function RandomSelection({
       }
     });
 
+  /** How many of a draw's slots come from the bank (the rest are its AI items). */
+  const bankSlots = (d: RandomDraw) =>
+    d.requested - section.items.filter((i) => i.drawId === d.id && i.origin === 'AI').length;
+
   /**
    * Replace a draw's random items with a fresh sample of the same size and scope. Nothing
    * already selected comes back — the draw's own current items included. When the bank has
@@ -200,10 +204,13 @@ export function RandomSelection({
       setErr(null);
       setNotice(null);
       const current = section.items.filter((i) => i.drawId === d.id && i.origin === 'RANDOM');
-      const aiCount = section.items.filter((i) => i.drawId === d.id && i.origin === 'AI').length;
-      // Same size as the draw, but never past the section limit (items may have been added since).
-      const want = Math.min(Math.max(1, d.requested - aiCount), room + current.length, LIMITS.sampleCount);
-      if (want <= 0) return;
+      // The bank's share of the draw: AI items stay, so a draw that is all AI has nothing to
+      // re-draw (and must not grow by one). Never past the section limit either.
+      const want = Math.min(bankSlots(d), room + current.length, LIMITS.sampleCount);
+      if (want <= 0) {
+        setNotice(`Every ${noun(1)} in this draw was generated with AI, so there is nothing to re-draw from the bank.`);
+        return;
+      }
       setBusy(d.id);
       try {
         const exclude = excludeIds(current.map((i) => i.id));
@@ -463,9 +470,11 @@ export function RandomSelection({
                     </Button>
                   ) : (
                     <>
-                      <Button type="button" size="sm" variant="outline" disabled={working} onClick={() => redraw(d)}>
-                        {busy === d.id ? <Loader2 className="animate-spin" aria-hidden /> : <RefreshCw aria-hidden />} Re-draw
-                      </Button>
+                      {bankSlots(d) > 0 ? (
+                        <Button type="button" size="sm" variant="outline" disabled={working} onClick={() => redraw(d)}>
+                          {busy === d.id ? <Loader2 className="animate-spin" aria-hidden /> : <RefreshCw aria-hidden />} Re-draw
+                        </Button>
+                      ) : null}
                       {missing > 0 && !d.bankShort ? (
                         <Button type="button" size="sm" variant="outline" disabled={working} onClick={() => fill(d, missing)}>
                           Draw {missing} more
