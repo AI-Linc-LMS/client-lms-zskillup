@@ -132,6 +132,8 @@ export function AssessmentWizard({
   const [missingIds, setMissingIds] = useState<Set<string>>(new Set());
   const [previewPending, setPreviewPending] = useState(0);
   const [previewError, setPreviewError] = useState<string | null>(null);
+  /** Bumped by "Retry" so the preview effect runs again for the ids that failed. */
+  const [previewAttempt, setPreviewAttempt] = useState(0);
   const requestedPreview = useRef(new Set<string>());
 
   // publish
@@ -274,13 +276,13 @@ export function AssessmentWizard({
     void Promise.allSettled(jobs).then((results) => {
       const failed = results.find((r): r is PromiseRejectedResult => r.status === 'rejected');
       if (failed) {
-        // Let the next visit to Review retry these ids.
+        // Let "Retry" (or the next visit to Review) fetch these ids again.
         for (const id of [...mcqIds, ...codingIds]) requestedPreview.current.delete(id);
         setPreviewError(describeApiError(failed.reason, 'Some question previews could not be loaded.'));
       }
       setPreviewPending((n) => n - 1);
     });
-  }, [step, canPreview, sections]);
+  }, [step, canPreview, sections, previewAttempt]);
 
   // Server-refused ids still in the selection (the banner clears as they're removed).
   const activeSelErr = useMemo<SelectionError | null>(() => {
@@ -769,6 +771,10 @@ export function AssessmentWizard({
                 missingIds={missingIds}
                 previewLoading={previewPending > 0}
                 previewError={previewError}
+                onRetryPreview={() => {
+                  setPreviewError(null);
+                  setPreviewAttempt((n) => n + 1);
+                }}
                 flagged={flagged}
                 onRemove={(key, id) => updateSection(key)((s) => ({ ...s, items: s.items.filter((i) => i.id !== id) }))}
               />

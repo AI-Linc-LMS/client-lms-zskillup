@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, type ReactNode } from 'react';
-import { Code2, ListChecks, Loader2, Trash2 } from 'lucide-react';
+import { Code2, ListChecks, Loader2, RefreshCw, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { StatusPill } from '@/components/student/StatusPill';
@@ -29,6 +29,7 @@ export function ReviewStep({
   missingIds,
   previewLoading,
   previewError,
+  onRetryPreview,
   flagged,
   onRemove,
 }: {
@@ -42,6 +43,8 @@ export function ReviewStep({
   missingIds: Set<string>;
   previewLoading: boolean;
   previewError: string | null;
+  /** Fetch the previews that failed again. */
+  onRetryPreview: () => void;
   /** id → why the server refused it on the last publish attempt. */
   flagged: Map<string, string>;
   onRemove: (sectionKey: string, id: string) => void;
@@ -75,7 +78,16 @@ export function ReviewStep({
           You’re reviewing question titles. Answer keys and full statements are visible to platform admins.
         </p>
       ) : null}
-      {previewError ? <ErrorAlert>{previewError}</ErrorAlert> : null}
+      {previewError ? (
+        <ErrorAlert>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span>{previewError}</span>
+            <Button type="button" size="sm" variant="outline" onClick={onRetryPreview} disabled={previewLoading}>
+              <RefreshCw aria-hidden /> Retry
+            </Button>
+          </div>
+        </ErrorAlert>
+      ) : null}
       {hasStemDupes ? (
         <ErrorAlert>The same question text appears more than once — check the items marked “Same text” and remove the repeats.</ErrorAlert>
       ) : null}
