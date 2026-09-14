@@ -114,8 +114,7 @@ function questionSetLockedMessage(details: unknown): string {
 
 /**
  * A message for the EXISTING admin flows that now hit the freeze guards (Mocks console,
- * scheduled-assessment edit, coding-problem delete, question drawer). Falls back to the
- * server's message for anything else.
+ * question drawer). Falls back to the server's message for anything else.
  */
 export function describeQuestionSetError(err: unknown, fallback: string): string {
   if (!(err instanceof ApiRequestError)) return fallback;
@@ -132,8 +131,4 @@ export function describeQuestionSetError(err: unknown, fallback: string): string
     default:
       return describeApiError(err, fallback);
   }
-}
-
-export function isQuestionSelectionCode(err: unknown, code: keyof typeof QUESTION_SELECTION_ERRORS): boolean {
-  return err instanceof ApiRequestError && err.code === QUESTION_SELECTION_ERRORS[code];
 }

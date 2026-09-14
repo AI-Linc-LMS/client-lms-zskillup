@@ -173,12 +173,6 @@ export async function setCodingProblemActive(id: string, isActive: boolean): Pro
   await apiClient.patch(`/api/v1/admin/coding/problems/${id}`, { isActive });
 }
 
-/** Hard-delete a coding problem. 409 CODING_PROBLEM_IN_USE when it is linked to any mock
- *  or has recorded answers — deactivate it instead. */
-export async function deleteAdminCodingProblem(id: string): Promise<void> {
-  await apiClient.delete(`/api/v1/admin/coding/problems/${id}`);
-}
-
 /**
  * MANUAL selection: paginated coding-problem summaries (ADMIN, SUPER_ADMIN). Metadata
  * only — never test cases or solutions. `active` defaults to true server-side.
