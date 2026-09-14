@@ -174,6 +174,15 @@ export async function setCodingProblemActive(id: string, isActive: boolean): Pro
 }
 
 /**
+ * Most already-selected ids the frontend puts in the `excludeIds` QUERY param of the
+ * selection browsers (GET /admin/questions, GET /admin/coding/problems/search). The server
+ * accepts 300 (MAX_EXCLUDE_IDS), but every proxy hop in front of it adds its own URL /
+ * header limit, so the client stays at half that. Anything past the cap is still
+ * recognised client-side and shown as not selectable.
+ */
+export const MAX_BROWSE_EXCLUDE_IDS = 150;
+
+/**
  * MANUAL selection: paginated coding-problem summaries (ADMIN, SUPER_ADMIN). Metadata
  * only — never test cases or solutions. `active` defaults to true server-side.
  */
@@ -188,7 +197,7 @@ export async function searchAdminCodingProblems(
   if (q.verified !== undefined) qs.set('verified', String(q.verified));
   if (q.active !== undefined) qs.set('active', String(q.active));
   if (q.search) qs.set('search', q.search);
-  if (q.excludeIds?.length) qs.set('excludeIds', q.excludeIds.join(','));
+  if (q.excludeIds?.length) qs.set('excludeIds', q.excludeIds.slice(0, MAX_BROWSE_EXCLUDE_IDS).join(','));
   if (q.limit) qs.set('limit', String(q.limit));
   if (q.offset !== undefined) qs.set('offset', String(q.offset));
   const suffix = qs.toString() ? `?${qs.toString()}` : '';

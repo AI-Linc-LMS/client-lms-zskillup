@@ -6,20 +6,16 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { StatusPill } from '@/components/student/StatusPill';
 import { listAdminQuestions } from '@/lib/api/admin';
-import { searchAdminCodingProblems } from '@/lib/api/coding';
+import { MAX_BROWSE_EXCLUDE_IDS, searchAdminCodingProblems } from '@/lib/api/coding';
 import { describeApiError } from '@/lib/api/types';
 import type { AssessmentItemType, CodingTopic } from '@/lib/api/assessment-builder';
 import type { ApiCompany } from '@/lib/api/catalog';
-import type { MAX_EXCLUDE_IDS } from '@/shared/dto/admin-questions.dto';
 import { LIMITS, normId, sectionHolding, type PickedItem, type WizardSection } from './selection';
 import { indentedLabel, type TopicOption } from './topic-tree';
 import { PreviewDrawer, type PreviewTarget } from './previews';
 import { DifficultyPill, ErrorAlert, NoticeBox, OriginBadge, checkboxCls, fieldLabelCls, inputCls } from './ui';
 
 const PAGE_SIZE = 20;
-/** Server cap for `excludeIds` on the browse GETs (a longer URL trips Node's header limit).
- *  Anything past it is still recognised client-side and shown as not selectable. */
-const MAX_URL_EXCLUDES: typeof MAX_EXCLUDE_IDS = 300;
 
 /** A browser row, normalised across the MCQ and coding sources. */
 interface BrowseRow {
@@ -36,8 +32,9 @@ interface BrowseRow {
  * MANUAL selection (Admin / Super Admin only): browse the bank by section/topic, difficulty,
  * company and text, and tick questions one by one. A tick adds the item to THIS section
  * immediately, so the choice survives paging and filter changes. Items already elsewhere in
- * the assessment are left out of the results (`excludeIds`); past the 300-id URL cap they
- * still show, but can't be ticked — the UI never builds a duplicate.
+ * the assessment are left out of the results (`excludeIds`); past the 150-id URL cap
+ * (MAX_BROWSE_EXCLUDE_IDS) they still show, but can't be ticked — the UI never builds a
+ * duplicate.
  */
 export function ManualSelection({
   section,
@@ -104,7 +101,7 @@ export function ManualSelection({
       for (const it of s.items) if (it.type === type) ids.push(it.id);
     }
     for (const e of existingItems) if (e.type === type) ids.push(normId(e.id));
-    return [...new Set(ids)].slice(0, MAX_URL_EXCLUDES).join(',');
+    return [...new Set(ids)].slice(0, MAX_BROWSE_EXCLUDE_IDS).join(',');
   }, [sections, section.key, existingItems, type]);
 
   useEffect(() => {

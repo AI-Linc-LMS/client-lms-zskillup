@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { MAX_BROWSE_EXCLUDE_IDS } from './coding';
 import type { AdminCapabilities } from '@/shared/admin-capabilities';
 
 // ─── User management (super-admin) ──────────────────────────────────────────
@@ -347,7 +348,7 @@ export async function listAdminQuestions(
     type?: AdminQuestionRow['type'];
     /** Section/topic id — its whole subtree (unknown id → 404). */
     topicId?: string;
-    /** Ids to leave out (already selected), at most MAX_EXCLUDE_IDS. */
+    /** Ids to leave out (already selected); only the first MAX_BROWSE_EXCLUDE_IDS are sent. */
     excludeIds?: string[];
   } = {},
   opts?: { signal?: AbortSignal },
@@ -356,7 +357,7 @@ export async function listAdminQuestions(
   if (params.status) qs.set('status', params.status);
   if (params.type) qs.set('type', params.type);
   if (params.topicId) qs.set('topicId', params.topicId);
-  if (params.excludeIds?.length) qs.set('excludeIds', params.excludeIds.join(','));
+  if (params.excludeIds?.length) qs.set('excludeIds', params.excludeIds.slice(0, MAX_BROWSE_EXCLUDE_IDS).join(','));
   if (params.topic) qs.set('topic', params.topic);
   if (params.role) qs.set('role', params.role);
   if (params.company) qs.set('company', params.company);
