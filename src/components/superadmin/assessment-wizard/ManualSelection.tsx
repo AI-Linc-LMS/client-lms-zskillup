@@ -397,7 +397,7 @@ export function ManualSelection({
                     checked={checked || !!blocked}
                     disabled={!!blocked}
                     onChange={() => toggle(r)}
-                    aria-label={`${checked ? 'Remove' : 'Add'}: ${r.label.slice(0, 80)}`}
+                    aria-label={blocked ? `${r.label.slice(0, 80)} (${blocked})` : `${checked ? 'Remove' : 'Add'}: ${r.label.slice(0, 80)}`}
                     className={cn(checkboxCls, 'mt-0.5')}
                   />
                   <div className="min-w-0 flex-1">

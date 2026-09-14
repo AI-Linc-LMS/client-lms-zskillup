@@ -362,7 +362,7 @@ export function RandomSelection({
       <div className="flex flex-wrap items-center gap-3">
         <Button type="button" variant="secondary" onClick={draw} disabled={working}>
           {busy === 'draw' ? <Loader2 className="animate-spin" aria-hidden /> : <Shuffle aria-hidden />}
-          Draw {Number.isFinite(count) && count > 0 ? Math.min(Math.round(count), LIMITS.sampleCount) : ''} at random
+          {Number.isFinite(count) && count > 0 ? `Draw ${Math.min(Math.round(count), LIMITS.sampleCount)} at random` : 'Draw at random'}
         </Button>
         <span className="text-xs text-slate-500">Never repeats anything already in this assessment.</span>
       </div>
