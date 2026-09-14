@@ -1,15 +1,27 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
-import { listAdminUsers, updateAdminUserRole, type AdminUserRow } from '@/lib/api/admin';
+import { Button } from '@/components/ui/button';
+import { updateAdminUserRole, type AdminUserRow } from '@/lib/api/admin';
 import { UserDetailDrawer } from '@/components/superadmin/UserDetailDrawer';
 import {
+  AccountStatusPill,
+  DateTimeCell,
+  PaidStatusCell,
+} from '@/components/superadmin/UserCells';
+import {
+  LastLoginSortHeader,
+  ListPagination,
+  UserListFilters,
+} from '@/components/superadmin/UserListControls';
+import { useAdminUserList } from '@/hooks/useAdminUserList';
+import { ADMIN_ROLE_LABEL } from '@/lib/ui-maps';
+import {
   BadgeCheck,
-  ChevronDown,
+  Info,
   Loader2,
-  Search,
   ShieldCheck,
   UserCheck,
   Users,
@@ -19,13 +31,6 @@ import { cn } from '@/lib/utils';
 
 type Role = AdminUserRow['role'];
 
-const ROLE_LABELS: Record<Role, string> = {
-  STUDENT: 'Student',
-  COLLEGE_ADMIN: 'College Admin',
-  ADMIN: 'Admin',
-  SUPER_ADMIN: 'Super Admin',
-};
-
 const ROLE_COLORS: Record<Role, string> = {
   STUDENT: 'bg-slate-100 text-slate-700',
   COLLEGE_ADMIN: 'bg-blue-100 text-blue-700',
@@ -33,51 +38,26 @@ const ROLE_COLORS: Record<Role, string> = {
   SUPER_ADMIN: 'bg-orange-100 text-orange-700',
 };
 
-const STATUS_COLORS: Record<AdminUserRow['status'], string> = {
-  ACTIVE: 'text-green-600',
-  INVITED: 'text-amber-600',
-  SUSPENDED: 'text-red-500',
-};
+const ROLE_OPTIONS = [
+  { value: '', label: 'All roles' },
+  { value: 'STUDENT', label: 'Student' },
+  { value: 'COLLEGE_ADMIN', label: 'College Admin' },
+  { value: 'ADMIN', label: 'Admin' },
+  { value: 'SUPER_ADMIN', label: 'Super Admin' },
+] as const;
 
 const PAGE_SIZE = 20;
 
-export default function AdminUsersPage() {
-  const [rows, setRows] = useState<AdminUserRow[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const TH = 'px-4 py-3';
 
-  const [search, setSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [page, setPage] = useState(0);
+export default function AdminUsersPage() {
+  const list = useAdminUserList(PAGE_SIZE);
+  const { rows, total, paidStatusVisible } = list;
 
   const [promoting, setPromoting] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-
-  const fetchUsers = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await listAdminUsers({
-        search: search || undefined,
-        role: roleFilter || undefined,
-        status: statusFilter || undefined,
-        limit: PAGE_SIZE,
-        offset: page * PAGE_SIZE,
-      });
-      setRows(data.rows);
-      setTotal(data.total);
-    } catch {
-      setError('Failed to load users. Please refresh.');
-    } finally {
-      setLoading(false);
-    }
-  }, [search, roleFilter, statusFilter, page]);
-
-  useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
   const handleRoleChange = async (userId: string, newRole: Role) => {
     setPromoting(userId);
@@ -85,10 +65,11 @@ export default function AdminUsersPage() {
     setActionSuccess(null);
     try {
       await updateAdminUserRole(userId, newRole);
-      setActionSuccess(`Role updated to ${ROLE_LABELS[newRole]}.`);
-      setRows((prev) =>
-        prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u)),
-      );
+      setActionSuccess(`Role updated to ${ADMIN_ROLE_LABEL[newRole]}.`);
+      // Paid status only applies to students - refetch so the row's paid fields follow
+      // the new role as the server computes them.
+      list.updateRow(userId, { role: newRole });
+      void list.refetch();
       setTimeout(() => setActionSuccess(null), 3000);
     } catch {
       setActionError('Failed to update role. Please try again.');
@@ -96,8 +77,6 @@ export default function AdminUsersPage() {
       setPromoting(null);
     }
   };
-
-  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
     <div className="space-y-6">
@@ -122,48 +101,29 @@ export default function AdminUsersPage() {
         }
       />
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
-          <input
-            type="search"
-            placeholder="Search by name or email…"
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(0); }}
-            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-4 text-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
-          />
-        </div>
-        <div className="relative">
-          <select
-            value={roleFilter}
-            onChange={(e) => { setRoleFilter(e.target.value); setPage(0); }}
-            className="appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-4 pr-8 text-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
-          >
-            <option value="">All roles</option>
-            <option value="STUDENT">Student</option>
-            <option value="COLLEGE_ADMIN">College Admin</option>
-            <option value="ADMIN">Admin</option>
-            <option value="SUPER_ADMIN">Super Admin</option>
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
-        </div>
-        <div className="relative">
-          <select
-            value={statusFilter}
-            onChange={(e) => { setStatusFilter(e.target.value); setPage(0); }}
-            className="appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-4 pr-8 text-sm focus:border-orange focus:outline-none focus:ring-1 focus:ring-orange"
-          >
-            <option value="">All statuses</option>
-            <option value="ACTIVE">Active</option>
-            <option value="INVITED">Invited</option>
-            <option value="SUSPENDED">Suspended</option>
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
-        </div>
-      </div>
+      <UserListFilters
+        searchInput={list.searchInput}
+        onSearch={list.setSearchInput}
+        role={list.role}
+        onRole={list.setRole}
+        roleOptions={ROLE_OPTIONS}
+        status={list.status}
+        onStatus={list.setStatus}
+        paid={list.paid}
+        onPaid={list.setPaid}
+        showPaid={paidStatusVisible}
+      />
 
       {/* Feedback */}
+      {list.notice && (
+        <div
+          role="status"
+          className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-600"
+        >
+          <Info className="size-4 shrink-0" />
+          {list.notice}
+        </div>
+      )}
       {actionSuccess && (
         <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">
           <BadgeCheck className="size-4 shrink-0" />
@@ -178,27 +138,39 @@ export default function AdminUsersPage() {
       )}
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-        {loading ? (
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        {!list.loaded && list.loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="size-6 animate-spin text-slate-500" />
+            <span className="sr-only">Loading users</span>
           </div>
-        ) : error ? (
-          <div className="py-16 text-center text-sm text-red-500">{error}</div>
+        ) : list.error ? (
+          <div role="alert" className="flex flex-col items-center gap-3 py-16 text-center text-sm text-red-700">
+            {list.error}
+            <Button variant="outline" size="sm" onClick={() => void list.refetch()}>
+              Retry
+            </Button>
+          </div>
         ) : rows.length === 0 ? (
           <div className="py-16 text-center text-sm text-slate-500">No users found.</div>
         ) : (
-          <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] text-sm">
-            <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500">
+          <div
+            className={cn('overflow-x-auto transition-opacity', list.loading && 'opacity-60')}
+            aria-busy={list.loading}
+          >
+          <table className="w-full min-w-[860px] text-sm">
+            <thead className="border-b border-slate-100 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-400">
               <tr>
-                <th className="px-4 py-3">User</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Role</th>
-                <th className="px-4 py-3">Verified</th>
-                <th className="px-4 py-3">Last login</th>
-                <th className="px-4 py-3">Change role</th>
-                <th className="px-4 py-3" />
+                <th scope="col" className={TH}>User</th>
+                <th scope="col" className={TH}>Status</th>
+                <th scope="col" className={TH}>Role</th>
+                <th scope="col" className={TH}>Verified</th>
+                <LastLoginSortHeader sort={list.sort} onToggle={list.cycleLastLoginSort} className={TH} />
+                {paidStatusVisible && <th scope="col" className={TH}>Paid</th>}
+                <th scope="col" className={TH}>Change role</th>
+                <th scope="col" className={TH}>
+                  <span className="sr-only">Actions</span>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -209,31 +181,32 @@ export default function AdminUsersPage() {
                     <p className="text-xs text-slate-500">{user.email}</p>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={cn('text-xs font-semibold', STATUS_COLORS[user.status])}>
-                      {user.status}
-                    </span>
+                    <AccountStatusPill status={user.status} />
                   </td>
                   <td className="px-4 py-3">
                     <span className={cn('rounded-full px-2.5 py-0.5 text-[11px] font-semibold', ROLE_COLORS[user.role])}>
-                      {ROLE_LABELS[user.role]}
+                      {ADMIN_ROLE_LABEL[user.role]}
                     </span>
                   </td>
                   <td className="px-4 py-3">
                     {user.isEmailVerified ? (
-                      <BadgeCheck className="size-4 text-green-500" />
+                      <BadgeCheck role="img" className="size-4 text-green-500" aria-label="Email verified" />
                     ) : (
-                      <XCircle className="size-4 text-slate-400" />
+                      <XCircle role="img" className="size-4 text-slate-400" aria-label="Email not verified" />
                     )}
                   </td>
-                  <td className="px-4 py-3 text-xs text-slate-500">
-                    {user.lastLoginAt
-                      ? new Date(user.lastLoginAt).toLocaleDateString('en-IN', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                        })
-                      : '-'}
+                  <td className="px-4 py-3">
+                    <DateTimeCell at={user.lastLoginAt} />
                   </td>
+                  {paidStatusVisible && (
+                    <td className="px-4 py-3">
+                      <PaidStatusCell
+                        paidStatus={user.paidStatus}
+                        accessLabel={user.accessLabel}
+                        paidUntil={user.paidUntil}
+                      />
+                    </td>
+                  )}
                   <td className="px-4 py-3">
                     <RoleChanger
                       userId={user.id}
@@ -243,12 +216,9 @@ export default function AdminUsersPage() {
                     />
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => setSelectedId(user.id)}
-                      className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50"
-                    >
+                    <Button variant="outline" size="sm" onClick={() => setSelectedId(user.id)}>
                       Manage
-                    </button>
+                    </Button>
                   </td>
                 </tr>
               ))}
@@ -257,29 +227,14 @@ export default function AdminUsersPage() {
           </div>
         )}
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3">
-            <p className="text-xs text-slate-500">
-              Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, total)} of {total}
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setPage((p) => Math.max(0, p - 1))}
-                disabled={page === 0}
-                className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40"
-              >
-                Previous
-              </button>
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                disabled={page >= totalPages - 1}
-                className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40"
-              >
-                Next
-              </button>
-            </div>
-          </div>
+        {!list.error && (
+          <ListPagination
+            page={list.page}
+            pageCount={list.pageCount}
+            pageSize={PAGE_SIZE}
+            total={total}
+            onPage={list.setPage}
+          />
         )}
       </div>
 
@@ -287,7 +242,7 @@ export default function AdminUsersPage() {
         <UserDetailDrawer
           userId={selectedId}
           onClose={() => setSelectedId(null)}
-          onChanged={fetchUsers}
+          onChanged={() => void list.refetch()}
         />
       )}
     </div>
@@ -334,7 +289,7 @@ function RoleChanger({
             ) : (
               <UserCheck className="size-3" />
             )}
-            Make {ROLE_LABELS[role]}
+            Make {ADMIN_ROLE_LABEL[role]}
           </button>
         ))
       )}
