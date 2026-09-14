@@ -155,7 +155,7 @@ export function UnderlineTabs<T extends string>({
               <span
                 className={cn(
                   'rounded-full px-1.5 py-px text-[10px] font-semibold',
-                  active ? 'bg-orange text-navy' : 'bg-slate-100 text-slate-500',
+                  active ? 'bg-orange text-white' : 'bg-slate-100 text-slate-500',
                 )}
               >
                 {t.count}

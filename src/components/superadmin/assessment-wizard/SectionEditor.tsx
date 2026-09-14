@@ -136,14 +136,16 @@ export function SectionEditor({
               </span>
               <DifficultyPill value={it.difficulty} />
               <OriginBadge origin={it.origin} />
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
+                className="shrink-0"
                 onClick={() => removeItem(it.id)}
                 aria-label={`Remove: ${it.label.slice(0, 60)}`}
-                className="grid size-8 shrink-0 place-items-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/40"
               >
-                <X className="size-4" aria-hidden />
-              </button>
+                <X aria-hidden />
+              </Button>
             </li>
           ))}
         </ul>
