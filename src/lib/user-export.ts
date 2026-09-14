@@ -15,9 +15,12 @@ import {
 
 /**
  * Spreadsheet rows for the user exports: the User Information report (admin + super
- * admin Reports pages) and the Super Admin live user sheet. Every timestamp is split
- * into an IST date column and an IST time column so a spreadsheet can sort and filter
- * on either; paid status is written exactly as the server computed it.
+ * admin Reports pages) and the Super Admin live user sheet. Every timestamp is written
+ * as an IST date column and an IST time column for reading. Those cells are display
+ * text ("14 Sep 2026", "12:04 pm IST") that a spreadsheet sorts alphabetically, not
+ * chronologically, so the User Information report also carries registration and last
+ * login as ISO-8601 UTC timestamps, which sort correctly even as plain text. Paid status
+ * is written exactly as the server computed it.
  */
 
 export interface ExportTable {
@@ -28,6 +31,13 @@ export interface ExportTable {
 /** [date, time] in IST; a missing timestamp is `[missing, '']`. */
 function istDateTimeCells(at: string | null, missing = ''): [string, string] {
   return at ? [formatDateIST(at), formatTimeIST(at)] : [missing, ''];
+}
+
+/** "2026-09-14T06:34:05.000Z" (one fixed width, so text order = time order); '' when missing. */
+function isoCell(at: string | null): string {
+  if (!at) return '';
+  const d = new Date(at);
+  return Number.isNaN(d.getTime()) ? '' : d.toISOString();
 }
 
 /** [Paid Status, Access, Paid Until]. A non-student (paidStatus null) is "N/A". */
@@ -67,8 +77,10 @@ export function userReportTable(
     'Cohort',
     'Registration Date (IST)',
     'Registration Time (IST)',
+    'Registration Timestamp (ISO, UTC)',
     'Last Login Date (IST)',
     'Last Login Time (IST)',
+    'Last Login Timestamp (ISO, UTC)',
     'Account Status',
     'Subscription Plan',
     'Subscription Status',
@@ -85,7 +97,9 @@ export function userReportTable(
       r.collegeName ?? '',
       r.cohortName ?? '',
       ...istDateTimeCells(r.createdAt),
+      isoCell(r.createdAt),
       ...istDateTimeCells(r.lastLoginAt, 'Never'),
+      isoCell(r.lastLoginAt),
       r.status,
       r.subscriptionPlan,
       r.subscriptionStatus,
