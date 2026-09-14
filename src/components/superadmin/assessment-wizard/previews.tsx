@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId, useState } from 'react';
-import { BadgeCheck, Check, Loader2, X } from 'lucide-react';
+import { Check, Loader2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { StatusPill } from '@/components/student/StatusPill';
@@ -61,13 +61,7 @@ export function CodingMeta({
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       <DifficultyPill value={p.difficulty} />
-      {p.verified ? (
-        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
-          <BadgeCheck className="size-3" aria-hidden /> Verified
-        </span>
-      ) : (
-        <StatusPill tone="neutral" label="Unverified" />
-      )}
+      {p.verified ? <StatusPill tone="positive" label="Verified" /> : <StatusPill tone="neutral" label="Unverified" />}
       {!p.isActive ? <StatusPill tone="negative" label="Deactivated" /> : null}
       {p.topic ? <span className="text-xs text-slate-500">{p.topic}</span> : null}
       {p.companies.length ? (
