@@ -11,7 +11,6 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ApiRequestError } from '@/lib/api/types';
 import { describeAccessError, describeError } from '@/lib/api/errors';
-import { describeQuestionSetError } from '@/lib/api/question-selection-errors';
 import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
 import { listAdminMocks, type AdminMockRow } from '@/lib/api/admin';
 import {
@@ -157,11 +156,8 @@ export function SchedulingAdmin() {
       await updateScheduledAssessment(r.id, { isActive: !r.isActive });
       await load();
     } catch (e) {
-      toast.error(
-        e instanceof ApiRequestError && e.status === 403
-          ? `You can't change this assessment ${NOT_YOUR_COLLEGE}`
-          : describeQuestionSetError(e, 'Could not update the assessment.'),
-      );
+      // An isActive-only PATCH never touches the question set, so no lock message applies here.
+      toast.error(describeAccessError(e, `You can't change this assessment ${NOT_YOUR_COLLEGE}`, 'Could not update the assessment.'));
     } finally {
       setBusyId(null);
     }
