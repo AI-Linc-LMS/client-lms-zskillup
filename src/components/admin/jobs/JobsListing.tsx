@@ -18,10 +18,11 @@ import {
   Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cloneJob, deleteJob, listAdminJobs, updateJob, applicantsExportUrl } from '@/lib/api/jobs';
+import { cloneJob, deleteJob, exportApplicantsCsv, listAdminJobs, updateJob } from '@/lib/api/jobs';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
 import { JobStatus } from '@/shared/enums';
 import { describeError } from '@/lib/api/errors';
+import { saveBlob } from '@/lib/download';
 import { cn } from '@/lib/utils';
 import { JOB_STATUS_LABEL, JobStatusPill, PublishPill } from './JobStatusPill';
 
@@ -56,6 +57,7 @@ export function JobsListing() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [page, setPage] = useState(0);
+  const [exporting, setExporting] = useState(false);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -94,6 +96,18 @@ export function JobsListing() {
     for (const s of Object.values(JobStatus)) c[s] = jobs.filter((j) => j.status === s).length;
     return c;
   }, [jobs]);
+
+  const exportAll = async () => {
+    setExporting(true);
+    try {
+      const file = await exportApplicantsCsv();
+      saveBlob(file.blob, file.filename ?? 'job-applicants.csv');
+    } catch (err) {
+      toast.error(describeError(err, 'Could not export applicants.'));
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const patch = async (job: JobPostingDto, dto: Parameters<typeof updateJob>[1], msg: string) => {
     setBusyId(job.id);
@@ -146,10 +160,13 @@ export function JobsListing() {
             className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-navy placeholder:text-slate-400 focus:border-orange focus-visible:ring-2 focus-visible:ring-orange/30"
           />
         </div>
-        <Button asChild variant="outline">
-          <a href={applicantsExportUrl()} download>
-            <Download className="size-4" /> Export all applicants
-          </a>
+        <Button variant="outline" onClick={exportAll} disabled={exporting}>
+          {exporting ? (
+            <Loader2 className="size-4 animate-spin" aria-hidden />
+          ) : (
+            <Download className="size-4" aria-hidden />
+          )}
+          {exporting ? 'Exporting…' : 'Export all applicants'}
         </Button>
         <Button asChild>
           <Link href="/admin/jobs/new">
