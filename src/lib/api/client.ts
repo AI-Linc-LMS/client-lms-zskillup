@@ -43,6 +43,10 @@ type RequestOptions = Omit<RequestInit, 'body'> & {
   /** 'file' hands back the raw body as a DownloadedFile (CSV exports and other
    *  attachments) instead of parsing a JSON envelope. Errors still parse as JSON. */
   responseType?: 'json' | 'file';
+  /** 401 error codes that are a verdict on something the request CARRIES (e.g. a Google
+   *  token the server rejected), not on the session: surfaced to the caller as-is - no
+   *  refresh, no retry, and never the session teardown a second 401 would otherwise cause. */
+  nonSession401Codes?: readonly string[];
 };
 
 /** A file the backend streamed as an attachment, fetched with the session token. */
@@ -245,8 +249,9 @@ async function parseError(res: Response): Promise<ApiRequestError> {
 }
 
 async function rawRequest<T>(path: string, options: RequestOptions): Promise<ApiResponse<T>> {
-  const { json, formData, headers, auth: _auth, responseType = 'json', ...rest } = options;
+  const { json, formData, headers, auth: _auth, responseType = 'json', nonSession401Codes: _codes, ...rest } = options;
   void _auth;
+  void _codes;
   const token = authToken.get();
 
   const res = await fetch(`${API_BASE_URL}${path}`, {
@@ -325,6 +330,9 @@ export async function apiRequest<T>(
 
     // 401 handling depends on posture.
     if (err.status === 401) {
+      // Not about the session (see nonSession401Codes) - the caller handles it.
+      if (options.nonSession401Codes?.includes(err.code)) throw err;
+
       // login/register/verify/forgot/reset: 401 == bad credentials. Surface.
       if (posture === 'login') throw err;
 
@@ -343,7 +351,11 @@ export async function apiRequest<T>(
         try {
           return await rawRequest<T>(path, options);
         } catch (retryErr) {
-          if (retryErr instanceof ApiRequestError && retryErr.status === 401) {
+          if (
+            retryErr instanceof ApiRequestError &&
+            retryErr.status === 401 &&
+            !options.nonSession401Codes?.includes(retryErr.code)
+          ) {
             endSessionAndRedirect();
           }
           throw retryErr;

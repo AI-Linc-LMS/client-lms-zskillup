@@ -1,6 +1,7 @@
 import { apiClient } from './client';
 import { hasRoleHint } from '@/lib/session-hints';
 import type { AdminCapabilities } from '@/shared/admin-capabilities';
+import { cleanGooglePhones } from '@/lib/profile/google-phone';
 
 /**
  * Identity API client (`GET /api/v1/me`). Returns the authenticated user with
@@ -92,6 +93,10 @@ export interface ApiMe {
    *  therefore be shared). False for an invited placeholder or an OAuth-only account —
    *  drives the college-admin "set a password" prompt. Optional for backward-safety. */
   hasPassword?: boolean;
+  /** Server switch for "Use my Google phone" (GOOGLE_PHONE_FETCH_ENABLED + a configured
+   *  OAuth client). Absent/false → none of that UI renders. Additive; optional for
+   *  backends that predate it. */
+  googlePhoneFetchEnabled?: boolean;
 }
 
 /** Module-scope dedup. Cleared on resolve/reject so the next mount re-fetches. */
@@ -117,4 +122,30 @@ export async function getMe(): Promise<ApiMe> {
 export async function updateMe(patch: UpdateMePayload): Promise<ApiMe> {
   const res = await apiClient.patch<ApiMe>('/api/v1/me', patch);
   return res.data;
+}
+
+/** A phone number read from the user's Google profile: normalised 10-digit Indian mobile. */
+export interface GooglePhoneCandidate {
+  phone: string;
+  primary: boolean;
+}
+
+/**
+ * Read the phone numbers on the user's Google profile (POST /me/phone/google). The server
+ * validates the Google access token and returns only valid mobiles, primary first; nothing
+ * is saved - the chosen number goes through PATCH /me like any other phone edit.
+ *
+ * GOOGLE_TOKEN_INVALID is a 401 about the GOOGLE token, not our session, so it must never
+ * trigger the refresh-and-logout path. Throws ApiRequestError (FEATURE_DISABLED 404,
+ * GOOGLE_TOKEN_INVALID 401, GOOGLE_UNAVAILABLE 502, 429 throttle).
+ */
+export async function fetchGooglePhones(accessToken: string): Promise<GooglePhoneCandidate[]> {
+  const res = await apiClient.post<{ phones?: GooglePhoneCandidate[] }>(
+    '/api/v1/me/phone/google',
+    { accessToken },
+    { nonSession401Codes: ['GOOGLE_TOKEN_INVALID'] },
+  );
+  // The server already filters; re-apply the shared rule so an invalid value can never
+  // reach the profile form or the checkout prefill.
+  return cleanGooglePhones(res.data?.phones ?? []);
 }

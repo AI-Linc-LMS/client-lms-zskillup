@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { AppShell } from '@/components/layout/AppShell';
 import { CartProvider } from '@/components/billing/CartProvider';
+import { CheckoutPhoneProvider } from '@/components/billing/CheckoutPhoneProvider';
 import { ChatWidget } from '@/components/assistant/ChatWidget';
 import { CalibrationPrompt } from '@/components/student/CalibrationPrompt';
 import { GuideProvider } from '@/components/guide/GuideProvider';
@@ -17,16 +18,19 @@ import { PlatformGuidePrompt } from '@/components/student/PlatformGuidePrompt';
  * wraps the AppShell so the top-bar "?" launcher can control it. First-login
  * ordering: the guide prompt comes first; the calibration prompt is gated on
  * `hasSeenGuide` (see CalibrationPrompt) so it only appears once the guide is done.
+ * CheckoutPhoneProvider settles the mobile number Razorpay Checkout opens with.
  */
 export default function StudentLayout({ children }: { children: ReactNode }) {
   return (
     <CartProvider>
-      <GuideProvider>
-        <AppShell>{children}</AppShell>
-        <ChatWidget />
-        <PlatformGuidePrompt />
-        <CalibrationPrompt />
-      </GuideProvider>
+      <CheckoutPhoneProvider>
+        <GuideProvider>
+          <AppShell>{children}</AppShell>
+          <ChatWidget />
+          <PlatformGuidePrompt />
+          <CalibrationPrompt />
+        </GuideProvider>
+      </CheckoutPhoneProvider>
     </CartProvider>
   );
 }

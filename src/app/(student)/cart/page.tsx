@@ -27,6 +27,8 @@ import { getMe } from '@/lib/api/me';
 import { buildPriceMap, PERIODS, retailPrice } from '@/lib/payments/pricing';
 import { formatPrice } from '@/lib/api/subscriptions';
 import { startCartPurchase } from '@/lib/payments/razorpay-checkout';
+import { checkoutPrefillFromMe, type CheckoutPrefill } from '@/lib/payments/checkout-contact';
+import { useCheckoutContact } from '@/components/billing/CheckoutPhoneProvider';
 import { BillingPeriod, EntitlementScope } from '@/shared/enums';
 import type { PriceBookEntryDto } from '@/shared/dto/payments.dto';
 import type { CouponPreviewResultDto } from '@/shared/dto/coupons.dto';
@@ -81,7 +83,8 @@ export default function CartPage() {
   }, [hydrated, applyCampaignLink]);
   const [prefillNotice, setPrefillNotice] = useState(false);
   const [prices, setPrices] = useState<PriceBookEntryDto[]>([]);
-  const [prefill, setPrefill] = useState<{ name?: string | null; email?: string | null }>({});
+  const [prefill, setPrefill] = useState<CheckoutPrefill>({});
+  const resolveContact = useCheckoutContact();
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
   const [done, setDone] = useState(false);
@@ -93,7 +96,7 @@ export default function CartPage() {
   useEffect(() => {
     void getPricing().then(setPrices).catch(() => setPrices([]));
     void getMe()
-      .then((m) => setPrefill({ name: m.fullName, email: m.email }))
+      .then((m) => setPrefill(checkoutPrefillFromMe(m)))
       .catch(() => {});
   }, []);
 
@@ -170,9 +173,16 @@ export default function CartPage() {
     if (items.length === 0) return;
     setBusy(true);
     setMsg(null);
+    // Settle the mobile the widget opens with (may briefly ask for one); closing that
+    // prompt cancels quietly - the cart is untouched.
+    const checkoutPrefill = await resolveContact(prefill);
+    if (!checkoutPrefill) {
+      setBusy(false);
+      return;
+    }
     const res = await startCartPurchase(
       items.map((i) => ({ scope: i.scope, scopeRef: i.scopeRef ?? undefined, period: i.period })),
-      prefill,
+      checkoutPrefill,
       appliedCoupon?.valid ? appliedCoupon.code : undefined,
     );
     setBusy(false);

@@ -3,6 +3,8 @@
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { startPurchase, type PurchaseResult } from '@/lib/payments/razorpay-checkout';
+import type { CheckoutPrefill } from '@/lib/payments/checkout-contact';
+import { useCheckoutContact } from './CheckoutPhoneProvider';
 import type { BillingPeriod, EntitlementScope } from '@/shared/enums';
 
 export interface BuyArgs {
@@ -13,7 +15,8 @@ export interface BuyArgs {
   period: BillingPeriod;
   /** What the user is unlocking, e.g. "Profit & Loss (monthly)". */
   label: string;
-  prefill?: { name?: string | null; email?: string | null };
+  /** Name, email and mobile for the widget - see checkoutPrefillFromMe. */
+  prefill?: CheckoutPrefill;
   /** College B2B purchase (cohort-wide) instead of an individual student buy. */
   forCollege?: boolean;
   onPurchased?: (result: PurchaseResult) => void;
@@ -26,17 +29,21 @@ export interface BuyArgs {
  */
 export function usePurchase() {
   const [busyKey, setBusyKey] = useState<string | null>(null);
+  const resolveContact = useCheckoutContact();
 
   const buy = useCallback(async (args: BuyArgs): Promise<PurchaseResult> => {
     if (busyKey) return { ok: false, dismissed: true };
     setBusyKey(args.key);
     try {
+      // Settle the mobile the widget opens with (may briefly ask the buyer for one).
+      const prefill = await resolveContact(args.prefill, { forCollege: args.forCollege });
+      if (!prefill) return { ok: false, dismissed: true };
       const res = await startPurchase({
         scope: args.scope,
         scopeRef: args.scopeRef,
         period: args.period,
         description: args.label,
-        prefill: args.prefill,
+        prefill,
         forCollege: args.forCollege,
       });
       if (res.ok) {
@@ -49,7 +56,7 @@ export function usePurchase() {
     } finally {
       setBusyKey(null);
     }
-  }, [busyKey]);
+  }, [busyKey, resolveContact]);
 
   return { buy, busyKey, isBusy: busyKey !== null };
 }

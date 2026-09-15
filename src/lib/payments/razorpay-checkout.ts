@@ -1,6 +1,7 @@
 import { createCartOrder, createCollegeOrder, createOrder, verifyPayment } from '@/lib/api/payments';
 import type { CartItemDto, EntitlementDto } from '@/shared/dto/payments.dto';
 import type { BillingPeriod, EntitlementScope } from '@/shared/enums';
+import { checkoutContact, type CheckoutPrefill } from './checkout-contact';
 
 /**
  * Razorpay Checkout integration. Loads the hosted checkout script on demand,
@@ -75,7 +76,8 @@ export interface StartPurchaseParams {
   period: BillingPeriod;
   /** Shown in the Razorpay widget (e.g. "Profit & Loss - monthly"). */
   description?: string;
-  prefill?: { name?: string | null; email?: string | null };
+  /** Name, email and mobile shown pre-filled in the widget (an invalid mobile is dropped). */
+  prefill?: CheckoutPrefill;
   /** College B2B purchase (cohort-wide) instead of an individual student buy. */
   forCollege?: boolean;
   /** Optional coupon code — validated + applied server-side. */
@@ -138,10 +140,7 @@ export async function startPurchase(params: StartPurchaseParams): Promise<Purcha
       currency: order.currency,
       name: 'prephasz',
       description: params.description ?? 'Unlock practice',
-      prefill: {
-        name: params.prefill?.name ?? undefined,
-        email: params.prefill?.email ?? undefined,
-      },
+      prefill: widgetPrefill(params.prefill),
       theme: { color: '#f5b400' },
       handler: (response: RazorpayHandlerResponse) => {
         void (async () => {
@@ -182,7 +181,7 @@ export interface CartPurchaseResult {
  *  drops anything already owned. Resolves once paid, dismissed, or errored. */
 export async function startCartPurchase(
   items: CartItemDto[],
-  prefill?: { name?: string | null; email?: string | null },
+  prefill?: CheckoutPrefill,
   couponCode?: string,
 ): Promise<CartPurchaseResult> {
   const loaded = await loadScript();
@@ -225,7 +224,7 @@ export async function startCartPurchase(
       currency: order.currency,
       name: 'prephasz',
       description: `${order.lines.length} item${order.lines.length === 1 ? '' : 's'}`,
-      prefill: { name: prefill?.name ?? undefined, email: prefill?.email ?? undefined },
+      prefill: widgetPrefill(prefill),
       theme: { color: '#f5b400' },
       handler: (response: RazorpayHandlerResponse) => {
         void (async () => {
@@ -252,6 +251,17 @@ export async function startCartPurchase(
     );
     rzp.open();
   });
+}
+
+/** The widget's `prefill`: blanks omitted, and `contact` only as a valid normalised mobile -
+ *  never an invalid value the buyer would have to notice and fix inside Razorpay. */
+function widgetPrefill(prefill?: CheckoutPrefill): RazorpayOptions['prefill'] {
+  const contact = checkoutContact(prefill?.contact);
+  return {
+    name: prefill?.name || undefined,
+    email: prefill?.email || undefined,
+    ...(contact ? { contact } : {}),
+  };
 }
 
 function messageOf(err: unknown, fallback: string): string {

@@ -37,6 +37,7 @@ import { COURSE_OPTIONS, PASSOUT_YEARS, YEAR_OF_STUDY_OPTIONS, yearOfStudyLabel 
 import { SKILL_OPTIONS } from '@/lib/profile/skill-options';
 import { useMySubscription } from '@/hooks/useMySubscription';
 import { CollegeCombobox } from '@/components/student/CollegeCombobox';
+import { GooglePhoneFill } from '@/components/student/GooglePhone';
 import { getMyRegistrations, type ApiRegistration } from '@/lib/api/registrations';
 import { ApiRequestError, apiFieldErrors } from '@/lib/api/types';
 import { BRANCH_OPTIONS, type BranchCode } from '@/lib/branch';
@@ -357,6 +358,7 @@ export default function ProfilePage() {
   // Profile-photo upload: resize client-side to a small JPEG data URL (no object
   // storage needed) then stage it in `v.avatarUrl`; it persists on Save.
   const fileRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
   const [avatarErr, setAvatarErr] = useState<string | null>(null);
   const onPickPhoto = async (file: File | null) => {
     if (!file) return;
@@ -662,6 +664,7 @@ export default function ProfilePage() {
               </Field>
               <Field label="Phone" required done={isValidPhone(v.phone)}>
                 <input
+                  ref={phoneRef}
                   value={v.phone}
                   onChange={(e) => set('phone', sanitizePhone(e.target.value))}
                   inputMode="tel"
@@ -675,6 +678,19 @@ export default function ProfilePage() {
                 />
                 {detailErr.phone ? (
                   <p id="profile-phone-error" className="mt-1 text-xs font-medium text-rose-500">{detailErr.phone}</p>
+                ) : null}
+                {/* Server switch (GET /me). Off → nothing new renders. Students only: PATCH /me
+                    takes a phone from no other role. */}
+                {me?.googlePhoneFetchEnabled && me.role === 'STUDENT' ? (
+                  <GooglePhoneFill
+                    loginHint={me.email}
+                    value={v.phone}
+                    savedValue={base.phone}
+                    onFill={(phone) => {
+                      set('phone', phone);
+                      phoneRef.current?.focus();
+                    }}
+                  />
                 ) : null}
               </Field>
             </div>

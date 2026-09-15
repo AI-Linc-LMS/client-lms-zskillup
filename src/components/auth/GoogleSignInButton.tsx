@@ -5,37 +5,8 @@ import Script from 'next/script';
 import { Loader2 } from 'lucide-react';
 import { loginWithGoogle, type LoginResult } from '@/lib/api/auth';
 import { ApiRequestError } from '@/lib/api/types';
-
-// GIS type shim - full types available via @types/google.accounts if needed
-declare global {
-  interface Window {
-    google?: {
-      accounts: {
-        id: {
-          initialize: (config: {
-            client_id: string;
-            callback: (response: { credential: string }) => void;
-            auto_select?: boolean;
-            cancel_on_tap_outside?: boolean;
-          }) => void;
-          renderButton: (
-            parent: HTMLElement,
-            options: {
-              theme?: 'outline' | 'filled_blue' | 'filled_black';
-              size?: 'large' | 'medium' | 'small';
-              shape?: 'rectangular' | 'pill' | 'circle' | 'square';
-              width?: number;
-              text?: 'signin_with' | 'signup_with' | 'continue_with' | 'signin';
-              logo_alignment?: 'left' | 'center';
-            },
-          ) => void;
-          prompt: () => void;
-          cancel: () => void;
-        };
-      };
-    };
-  }
-}
+// Also brings the shared `window.google` type shim into scope.
+import { GIS_SCRIPT_SRC } from '@/lib/google/identity';
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? '';
 
@@ -148,7 +119,7 @@ export function GoogleSignInButton({ onSuccess, onError, text = 'signin_with' }:
   return (
     <>
       <Script
-        src="https://accounts.google.com/gsi/client"
+        src={GIS_SCRIPT_SRC}
         strategy="afterInteractive"
         // onReady fires on every mount (incl. the cached script); onLoad on first load.
         onLoad={() => setReady(true)}
