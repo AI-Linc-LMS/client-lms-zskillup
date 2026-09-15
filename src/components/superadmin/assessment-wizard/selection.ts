@@ -1,5 +1,6 @@
 import type { AssessmentItemType, SampleDifficulty } from '@/lib/api/assessment-builder';
 import type { BuilderSectionDto } from '@/shared/dto/assessment-builder.dto';
+import { CODING_SECTION_LABEL } from '@/shared/question-taxonomy';
 
 /**
  * Selection model for the assessment wizard's Questions step. Every question the admin
@@ -64,6 +65,8 @@ export const LIMITS = {
   sampleCount: 50,
   excludeIds: 500,
   marks: 20,
+  /** BuilderSectionDto.name's @MaxLength. */
+  sectionName: 120,
 } as const;
 
 let seq = 0;
@@ -231,8 +234,12 @@ export function selectionProblems(sections: WizardSection[]): string[] {
   return [...new Set(out)];
 }
 
+const CODING_SUFFIX = ` · ${CODING_SECTION_LABEL}`;
+
 /** The create / append payload: one payload section per item type per wizard section, so
- *  MCQs and coding problems keep their own marks. Empty sections are left out. */
+ *  MCQs and coding problems keep their own marks. Empty sections are left out. The coding
+ *  half of a mixed section is named "<name> · Coding / Programming" (the name is shortened
+ *  only if the two together would exceed the server's length limit). */
 export function toPayloadSections(sections: WizardSection[]): BuilderSectionDto[] {
   const out: BuilderSectionDto[] = [];
   for (const s of sections) {
@@ -242,7 +249,9 @@ export function toPayloadSections(sections: WizardSection[]): BuilderSectionDto[
     if (mcq.length) out.push({ name, questionIds: mcq, codingProblemIds: [], marksPerQuestion: s.mcqMarks });
     if (coding.length)
       out.push({
-        name: mcq.length ? `${name} · Coding` : name,
+        name: mcq.length
+          ? `${name.slice(0, LIMITS.sectionName - CODING_SUFFIX.length).trimEnd()}${CODING_SUFFIX}`
+          : name,
         questionIds: [],
         codingProblemIds: coding,
         marksPerQuestion: s.codingMarks,

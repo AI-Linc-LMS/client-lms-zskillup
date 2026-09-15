@@ -15,7 +15,12 @@ export interface TopicOption {
   depth: number;
 }
 
-export function buildTopicOptions(topics: ApiTopic[]): TopicOption[] {
+export function buildTopicOptions(
+  topics: ApiTopic[],
+  /** `keepEmpty`: keep every branch, e.g. for a bank console that also lists drafts (the
+   *  counts cover PUBLISHED questions only, and plain listTopics() carries none). */
+  { keepEmpty = false }: { keepEmpty?: boolean } = {},
+): TopicOption[] {
   const children = new Map<string | null, ApiTopic[]>();
   for (const t of topics) {
     const list = children.get(t.parentId) ?? [];
@@ -40,7 +45,7 @@ export function buildTopicOptions(topics: ApiTopic[]): TopicOption[] {
 
   const out: TopicOption[] = [];
   const walk = (t: ApiTopic, depth: number, trail: string[], guard: Set<string>) => {
-    if (guard.has(t.id) || !hasQuestions(t, new Set())) return;
+    if (guard.has(t.id) || (!keepEmpty && !hasQuestions(t, new Set()))) return;
     guard.add(t.id);
     const path = [...trail, t.name];
     out.push({ id: t.id, name: t.name, path: path.join(' › '), depth });

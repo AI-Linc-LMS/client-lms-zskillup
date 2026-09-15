@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import { ArrowRight, Lock } from 'lucide-react';
 import type { CodingTopic } from '@/lib/api/mocks';
+import { CODING_SECTION_LABEL } from '@/shared/question-taxonomy';
 import { ACCENT_CLASS, CODING_META } from './section-meta';
 
 /**
- * The "Coding" section block - a chip per coding topic that deep-links to
+ * The "Coding / Programming" section block - a chip per coding topic that deep-links to
  * `/coding?topic=`, optionally preceded by a "Practice all coding" CTA.
  *
  * Shared by the Practice picker AND Practice-as-wish, so the CTA is a prop rather
@@ -36,7 +37,7 @@ export function CodingBlock({
             <Icon className="size-6" aria-hidden="true" />
           </span>
           <div>
-            <p className="text-base font-bold leading-snug text-navy">Coding</p>
+            <p className="text-base font-bold leading-snug text-navy">{CODING_SECTION_LABEL}</p>
             <p className="mt-0.5 text-xs text-slate-600">
               {topics.length
                 ? `${topics.length} topic${topics.length === 1 ? '' : 's'} · Judge0-evaluated DSA problems`

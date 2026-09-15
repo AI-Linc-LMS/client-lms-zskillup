@@ -77,6 +77,10 @@ export interface AdminCodingProblemSummaryDto {
   slug: string;
   title: string;
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
+  /** Always CODING_SECTION_LABEL ('Coding / Programming', shared/question-taxonomy). */
+  section: string;
+  /** Always 'CODING'. */
+  questionType: 'CODING';
   /** Primary coding topic (tags[0]); null when untagged. */
   topic: string | null;
   tags: string[];

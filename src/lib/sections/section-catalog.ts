@@ -1,4 +1,5 @@
 import type { ApiTopic } from '@/lib/api/catalog';
+import { CODING_SECTION_LABEL } from '@/shared/question-taxonomy';
 
 /**
  * Section-catalog derivation - the Sectional Hubs analog of the company catalog.
@@ -158,7 +159,7 @@ export function buildCodingSection(codingTopics: Array<{ topic: string; count: n
   }));
   return {
     slug: CODING_SECTION_SLUG,
-    name: 'Programming / Coding',
+    name: CODING_SECTION_LABEL,
     order: 5,
     kind: 'coding',
     questionCount: codingTopics.reduce((n, t) => n + t.count, 0),

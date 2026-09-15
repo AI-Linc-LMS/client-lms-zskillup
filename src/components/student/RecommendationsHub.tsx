@@ -17,12 +17,13 @@ import { getCalibrationResults, type CalibrationResultsDto, type RecommendationD
 import { useCalibrationStatus } from '@/hooks/useCalibrationStatus';
 import { useUpgradeGate } from '@/hooks/useUpgradeGate';
 import { UpgradeModal } from '@/components/billing/UpgradeModal';
+import { CODING_SECTION_LABEL } from '@/shared/question-taxonomy';
 
 /** Coarse grouping so products/companies/topics/sections read as distinct buckets. */
 function groupOf(product: string): { key: string; order: number } {
   const p = product.toLowerCase();
   if (p.includes('company') || p.includes('pyq')) return { key: 'Company courses', order: 1 };
-  if (p.includes('coding')) return { key: 'Coding', order: 4 };
+  if (p.includes('coding')) return { key: CODING_SECTION_LABEL, order: 4 };
   if (p.includes('section')) return { key: 'Section bundles', order: 2 };
   if (p.includes('topic')) return { key: 'Topics', order: 3 };
   if (p.includes('platform') || p.includes('foundation') || p.includes('renewal') || p.includes('subscription'))
