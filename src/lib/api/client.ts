@@ -40,7 +40,24 @@ type RequestOptions = Omit<RequestInit, 'body'> & {
   formData?: FormData;
   /** Auth posture - see file header. Defaults to 'default'. */
   auth?: AuthPosture;
+  /** 'file' hands back the raw body as a DownloadedFile (CSV exports and other
+   *  attachments) instead of parsing a JSON envelope. Errors still parse as JSON. */
+  responseType?: 'json' | 'file';
 };
+
+/** A file the backend streamed as an attachment, fetched with the session token. */
+export interface DownloadedFile {
+  blob: Blob;
+  /** From Content-Disposition, when the backend named the file. */
+  filename: string | null;
+}
+
+function attachmentFilename(disposition: string | null): string | null {
+  const match = disposition?.match(/filename="?([^";]+)"?/i);
+  // Keep only the base name: the browser picks the save location, never the server.
+  const name = match?.[1]?.split(/[\\/]/).pop()?.trim();
+  return name ? name : null;
+}
 
 /**
  * Refresh verdicts are three-way, not boolean: only `unauthorized` is an auth
@@ -228,14 +245,14 @@ async function parseError(res: Response): Promise<ApiRequestError> {
 }
 
 async function rawRequest<T>(path: string, options: RequestOptions): Promise<ApiResponse<T>> {
-  const { json, formData, headers, auth: _auth, ...rest } = options;
+  const { json, formData, headers, auth: _auth, responseType = 'json', ...rest } = options;
   void _auth;
   const token = authToken.get();
 
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...rest,
     headers: {
-      Accept: 'application/json',
+      Accept: responseType === 'file' ? '*/*' : 'application/json',
       // For multipart (formData) let the browser set Content-Type + boundary.
       ...(json !== undefined ? { 'Content-Type': 'application/json' } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -253,6 +270,13 @@ async function rawRequest<T>(path: string, options: RequestOptions): Promise<Api
 
   if (res.status === 204) {
     return { data: undefined as T };
+  }
+  if (responseType === 'file') {
+    const file: DownloadedFile = {
+      blob: await res.blob(),
+      filename: attachmentFilename(res.headers.get('content-disposition')),
+    };
+    return { data: file as T };
   }
   return (await res.json()) as ApiResponse<T>;
 }
@@ -338,6 +362,9 @@ export async function apiRequest<T>(
 export const apiClient = {
   get: <T>(path: string, options?: RequestOptions) =>
     apiRequest<T>(path, { ...options, method: 'GET' }),
+  /** GET an attachment (e.g. a CSV export) through the same token + refresh flow. */
+  getFile: (path: string, options?: RequestOptions) =>
+    apiRequest<DownloadedFile>(path, { ...options, method: 'GET', responseType: 'file' }),
   post: <T>(path: string, json?: unknown, options?: RequestOptions) =>
     apiRequest<T>(path, { ...options, method: 'POST', json }),
   put: <T>(path: string, json?: unknown, options?: RequestOptions) =>

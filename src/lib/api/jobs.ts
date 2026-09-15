@@ -1,4 +1,4 @@
-import { apiClient } from './client';
+import { apiClient, type DownloadedFile } from './client';
 import type {
   ApplyToJobDto,
   CreateJobPostingDto,
@@ -263,8 +263,15 @@ export async function getApplicantFacets(
   ).data;
 }
 
-/** The CSV download URL. Hit with a normal navigation so the browser saves the file
- *  rather than the fetch layer parsing it as JSON. */
-export function applicantsExportUrl(jobId?: string | null, status?: JobApplicationStatus[]): string {
-  return `/api/v1/admin/jobs/export/applications${toQuery({ jobId, status: status?.join(',') })}`;
+/**
+ * Applicants as CSV - one job, or every job when jobId is omitted. Fetched through the API
+ * client so the request carries the admin's in-memory access token; a plain link cannot,
+ * and always came back 401.
+ */
+export async function exportApplicantsCsv(
+  jobId?: string | null,
+  status?: JobApplicationStatus[],
+): Promise<DownloadedFile> {
+  const qs = toQuery({ jobId, status: status?.join(',') });
+  return (await apiClient.getFile(`/api/v1/admin/jobs/export/applications${qs}`)).data;
 }

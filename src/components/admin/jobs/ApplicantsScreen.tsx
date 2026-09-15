@@ -18,8 +18,8 @@ import { Button } from '@/components/ui/button';
 import { StatusPill } from '@/components/student/StatusPill';
 import { Modal } from '@/components/ui/Modal';
 import {
-  applicantsExportUrl,
   emailJobApplicant,
+  exportApplicantsCsv,
   getApplicantFacets,
   listApplicants,
   updateJobApplication,
@@ -28,6 +28,7 @@ import {
 import { JobApplicationStatus } from '@/shared/enums';
 import { APPLICATION_STATUS, APPLICATION_STATUS_ORDER } from '@/lib/jobs/application-status';
 import { describeError } from '@/lib/api/errors';
+import { saveBlob } from '@/lib/download';
 import { cn, safeHttpUrl } from '@/lib/utils';
 
 // The built-resume preview pulls in the resume template engine; load it only when an
@@ -59,6 +60,7 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
   const [composing, setComposing] = useState<JobApplicantDto | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [facets, setFacets] = useState<Record<JobApplicationStatus, number> | null>(null);
   const [noteDraft, setNoteDraft] = useState('');
   const [savingNote, setSavingNote] = useState(false);
@@ -102,6 +104,19 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
   }, [jobId, debounced]);
 
   useEffect(loadFacets, [loadFacets]);
+
+  // Exports what the admin is looking at: this job, narrowed to the selected statuses.
+  const exportCsv = async () => {
+    setExporting(true);
+    try {
+      const file = await exportApplicantsCsv(jobId, status.length ? status : undefined);
+      saveBlob(file.blob, file.filename ?? 'job-applicants.csv');
+    } catch (err) {
+      toast.error(describeError(err, 'Could not export applicants.'));
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const change = async (row: JobApplicantDto, next: JobApplicationStatus) => {
     if (next === row.status) return;
@@ -211,10 +226,13 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
             className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-navy focus:border-orange focus-visible:ring-2 focus-visible:ring-orange/30"
           />
         </div>
-        <Button asChild variant="outline">
-          <a href={applicantsExportUrl(jobId, status.length ? status : undefined)} download>
-            <Download className="size-4" /> Export CSV
-          </a>
+        <Button variant="outline" onClick={exportCsv} disabled={exporting}>
+          {exporting ? (
+            <Loader2 className="size-4 animate-spin" aria-hidden />
+          ) : (
+            <Download className="size-4" aria-hidden />
+          )}
+          {exporting ? 'Exporting…' : 'Export CSV'}
         </Button>
       </div>
 
