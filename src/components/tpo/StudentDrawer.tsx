@@ -6,6 +6,7 @@ import { Activity, Building2, Loader2, Mail, X } from 'lucide-react';
 import { getTpoStudentDetail } from '@/lib/api/tpo';
 import type { TpoStudentDetail } from '@/shared';
 import { ProvenanceChip, ReadinessBadge } from './ui';
+import { ACTIVITY_SCORE_LABEL, activityScoreBreakdown } from './activity-score';
 
 /**
  * Student drill-down drawer - slides in from the right when a student is selected
@@ -87,8 +88,11 @@ export function StudentDrawer({ studentId, onClose }: { studentId: string | null
                   <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
                     <ReadinessBadge band={detail.band} />
                     {detail.branch && <span className="rounded-full bg-slate-100 px-2 py-0.5 font-medium">{detail.branch}</span>}
-                    <span className="flex items-center gap-1">
-                      <Activity className="size-3" /> {detail.participation} participation
+                    <span
+                      className="flex items-center gap-1"
+                      title={activityScoreBreakdown(detail)}
+                    >
+                      <Activity className="size-3" /> {ACTIVITY_SCORE_LABEL} {detail.participation}
                     </span>
                   </div>
                   <div className="mt-3 flex items-end gap-3">
@@ -97,6 +101,9 @@ export function StudentDrawer({ studentId, onClose }: { studentId: string | null
                   </div>
                   <p className="mt-2 text-[11px] text-slate-500">
                     Last active {detail.lastActiveDate ? new Date(detail.lastActiveDate).toLocaleDateString('en-IN') : 'never'}
+                  </p>
+                  <p className="mt-1 text-[11px] text-slate-500">
+                    {ACTIVITY_SCORE_LABEL} {detail.participation} = {activityScoreBreakdown(detail)}
                   </p>
                 </div>
 

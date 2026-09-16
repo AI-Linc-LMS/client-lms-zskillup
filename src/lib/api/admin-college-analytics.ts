@@ -3,6 +3,7 @@ import type {
   CohortDto,
   SendCollegeReportResult,
   TpoCollegeSummary,
+  TpoCompanyReadinessReport,
   TpoDashboard,
   TpoParticipation,
 } from '@/shared';
@@ -34,6 +35,22 @@ export async function getAdminCollegeParticipation(
 ): Promise<TpoParticipation> {
   const qs = cohortId ? `?cohortId=${encodeURIComponent(cohortId)}` : '';
   return (await apiClient.get<TpoParticipation>(`${base(collegeId)}/participation${qs}`)).data;
+}
+
+/** Roster-wide student-level readiness for ONE company (the TPO report, for a college
+ *  chosen by id). Same endpoint shape as GET /tpo/company-readiness/students. */
+export async function getAdminCollegeCompanyReadinessStudents(
+  collegeId: string,
+  company: string,
+  cohortId?: string,
+): Promise<TpoCompanyReadinessReport> {
+  const params = new URLSearchParams({ company });
+  if (cohortId) params.set('cohortId', cohortId);
+  return (
+    await apiClient.get<TpoCompanyReadinessReport>(
+      `${base(collegeId)}/company-readiness/students?${params.toString()}`,
+    )
+  ).data;
 }
 
 /** Cohorts for the batch filter (served by AdminCohortsController). */

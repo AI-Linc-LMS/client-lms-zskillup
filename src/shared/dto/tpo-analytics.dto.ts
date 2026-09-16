@@ -23,7 +23,7 @@ export interface TpoOverview {
   atRisk: number;
 }
 
-/** Participation × performance quadrant counts. */
+/** Participation x performance quadrant counts. */
 export interface TpoQuadrants {
   highPartHighPerf: number;
   highPartLowPerf: number;
@@ -45,7 +45,30 @@ export interface TpoSkillGap {
   attempts: number;
 }
 
-export interface TpoStudentRow {
+/**
+ * ACTIVITY SCORE - the weighted engagement VOLUME behind every "Activity Score"
+ * label in the UI. The JSON field keeps its original name `participation` for
+ * contract stability (ADR-011); only the human-facing label changed, because the
+ * number never measured attendance:
+ *
+ *     participation = practiceAnswered + 3 x mocksCompleted + 2 x codingProblems
+ *
+ * Caveat worth knowing before acting on it: a mock test's MCQ answers are ALSO
+ * mirrored into `practice_attempts`, so a completed mock counts once through
+ * `practiceAnswered` (per question) and again through the x3 weight. The three
+ * components are exposed alongside it so a TPO can see exactly what drove the
+ * score instead of trusting one opaque number.
+ */
+export interface TpoActivityComponents {
+  /** Practice questions answered (count over practice_attempts; includes mock MCQs). */
+  practiceAnswered: number;
+  /** Mock attempts that are no longer IN_PROGRESS. */
+  mocksCompleted: number;
+  /** DISTINCT coding problems attempted. */
+  codingProblems: number;
+}
+
+export interface TpoStudentRow extends TpoActivityComponents {
   id: string;
   name: string | null;
   email: string;
@@ -53,6 +76,7 @@ export interface TpoStudentRow {
   branch: string | null;
   cohortId: string | null;
   readiness: number;
+  /** Activity Score - see {@link TpoActivityComponents}. */
   participation: number;
   band: ReadinessBand;
   lastActiveDate: string | null;
@@ -70,7 +94,7 @@ export interface TpoDashboard {
   truncated: boolean;
 }
 
-/** Extra participation & engagement roll-ups (Phase 4) — signals beyond the core
+/** Extra participation & engagement roll-ups (Phase 4) - signals beyond the core
  *  dashboard: gamification engagement, company-drive registrations, live-session
  *  sign-ups. Each figure degrades to 0 if its source table isn't present. */
 export interface TpoParticipation {
@@ -129,7 +153,7 @@ export interface TpoStudentTopicPerf {
 /** Full per-student profile for the drill-down drawer. Reuses the unified
  *  readiness composite (practice/mock/coding/coverage) + per-company + weak
  *  topics, plus college-scoped identity. */
-export interface TpoStudentDetail {
+export interface TpoStudentDetail extends TpoActivityComponents {
   id: string;
   name: string | null;
   email: string;
@@ -140,6 +164,7 @@ export interface TpoStudentDetail {
   readiness: number;
   level: string;
   band: ReadinessBand;
+  /** Activity Score - see {@link TpoActivityComponents}. */
   participation: number;
   components: TpoReadinessComponent[];
   companies: TpoStudentCompanyPerf[];
@@ -168,7 +193,7 @@ export interface TpoRecommendations {
 export interface TpoCompanyHeatmapRow {
   slug: string;
   name: string;
-  /** Student counts across accuracy bands: [<40, 40–59, 60–79, ≥80]. */
+  /** Student counts across accuracy bands: [<40, 40-59, 60-79, >=80]. */
   bands: number[];
   total: number;
 }
@@ -199,9 +224,10 @@ export interface TpoCodingAnalytics {
   companies: TpoCodingCompany[];
 }
 
-/** One student's coding roll-up for the per-student breakdown (#5). easy/medium/hard
- *  are DISTINCT problems SOLVED at each difficulty; codingReadiness is a
- *  difficulty-weighted solve rate, distinct from raw accuracy (solved / attempted). */
+/** One student's coding roll-up for the per-student breakdown (#5). `easy/medium/hard`
+ *  are DISTINCT problems SOLVED at each difficulty; `codingReadiness` is a
+ *  difficulty-weighted solve rate (easyx1, mediumx2, hardx3), distinct from raw
+ *  `accuracy` (solved / attempted). */
 export interface TpoCodingStudentRow {
   id: string;
   name: string | null;
@@ -215,6 +241,7 @@ export interface TpoCodingStudentRow {
   codingReadiness: number;
   lastActive: string | null;
 }
+/** Per-company coding performance for one student. */
 export interface TpoCodingStudentCompany {
   slug: string;
   name: string;
@@ -223,6 +250,7 @@ export interface TpoCodingStudentCompany {
   accuracy: number;
   readiness: number;
 }
+/** Drill-down for one student's coding practice. */
 export interface TpoCodingStudentDetail {
   id: string;
   name: string | null;
@@ -233,36 +261,88 @@ export interface TpoCodingStudentDetail {
   companies: TpoCodingStudentCompany[];
 }
 
-/** One student's readiness for a SELECTED company (#7). */
+/**
+ * One student's readiness for a SELECTED company (#7). ROSTER-WIDE: every student in
+ * the college/cohort appears, with zeroes when they have done nothing for that
+ * company (the report used to INNER JOIN coding submissions, so it listed only the
+ * handful of students who had submitted code and hid everyone doing MCQ practice).
+ *
+ * `readiness` is the SAME per-company blend the student sees on their own dashboard
+ * (ReadinessService.companyReadinessScore): 0.7 x MCQ accuracy + 0.3 x coding solve
+ * rate over the components that have data, scaled by min(1, sample / 20) so a couple
+ * of correct PYQs cannot read as "placement-ready".
+ */
 export interface TpoCompanyReadinessStudent {
   id: string;
   name: string | null;
   email: string;
+  /** 0-100 blended readiness for this company (identical to the student's own figure). */
   readiness: number;
+  /** MCQ correct / attempted on this company's tagged questions (0 when none). */
   accuracy: number;
-  attempted: number;
+  /** MCQ attempts on this company's tagged questions. */
+  questionsAttempted: number;
+  /** DISTINCT coding problems attempted among this company's tagged problems. */
+  codingAttempted: number;
+  /** DISTINCT coding problems solved among this company's tagged problems. */
+  codingSolved: number;
+  /** ATTEMPTED items at each difficulty - MCQs (question difficulty) + coding
+   *  problems (problem difficulty). easy + medium + hard = questionsAttempted +
+   *  codingAttempted, minus anything whose difficulty is unset. */
   easy: number;
   medium: number;
   hard: number;
+  /** Correct/solved counterparts of easy/medium/hard. */
+  easySolved: number;
+  mediumSolved: number;
+  hardSolved: number;
+  /** Distinct topic names from MCQ practice plus coding-problem tags. */
   topicsPracticed: string[];
+  /** greatest(max practice attempted_at, max coding created_at); null if never active. */
   lastActiveAt: string | null;
 }
+/** Student-level Company Readiness report for one company. */
 export interface TpoCompanyReadinessReport {
   company: { slug: string; name: string };
   students: TpoCompanyReadinessStudent[];
+  /** True if the roster was capped (very large college) - same convention as TpoDashboard. */
+  truncated: boolean;
 }
 
-// ── Placement Readiness trend (lazy weekly snapshots) ───────────────────────────
+// ── Placement Readiness trend (daily snapshots) ─────────────────────────────────
 
+/** ONE point per calendar date in the requested window. A date with no snapshot is
+ *  still returned, with every metric null - "no data recorded", never a zero or an
+ *  interpolated value. */
 export interface TpoReadinessTrendPoint {
+  /** YYYY-MM-DD. */
   date: string;
-  avgReadiness: number;
-  placementReady: number;
-  total: number;
+  /** Mean readiness of the scope on that date; null when no snapshot exists. */
+  avgReadiness: number | null;
+  /** Students at readiness >= 70 on that date; null when no snapshot exists. */
+  placementReady: number | null;
+  /** Roster size on that date; null when no snapshot exists. */
+  total: number | null;
 }
 export interface TpoReadinessTrend {
+  /** Dense scaffold: one entry for EVERY date from `from` to `to`, inclusive. */
   points: TpoReadinessTrendPoint[];
-  /** True until ≥2 snapshots exist (not enough to draw a line yet). */
+  /** Resolved window (YYYY-MM-DD), echoed even when the request omitted from/to. */
+  from: string;
+  to: string;
+  /** points.length - dates in the resolved window. */
+  daysInRange: number;
+  /** Dates that have a snapshot. */
+  daysWithData: number;
+  /** daysInRange minus daysWithData. */
+  daysMissing: number;
+  /** Mean of `avgReadiness` over the days WITH data; null when none has data. */
+  avgReadiness: number | null;
+  /** The most recent day with data in this window; null when none has data. */
+  latest: TpoReadinessTrendPoint | null;
+  /** latest.avgReadiness minus the first data day's avgReadiness; null with <2 data days. */
+  change: number | null;
+  /** True until >=2 dates in the window have a snapshot (not enough to draw a line). */
   collecting: boolean;
 }
 
@@ -313,7 +393,7 @@ export interface TpoInterviewBranchRow {
   interviews: number;
   readiness: number | null;
 }
-/** Readiness-score distribution bucket (0-20 … 80-100). */
+/** Readiness-score distribution bucket (0-20 ... 80-100). */
 export interface TpoInterviewBucket {
   bucket: string;
   count: number;

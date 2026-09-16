@@ -167,7 +167,7 @@ export function KpiCard({
   );
 }
 
-// ── Participation × performance quadrant tile ───────────────────────────────────
+// ── Activity Score × performance quadrant tile ──────────────────────────────────
 
 export function Quad({
   label,

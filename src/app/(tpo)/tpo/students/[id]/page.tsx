@@ -7,6 +7,7 @@ import { Activity, ArrowLeft, Building2, GraduationCap, Loader2, Mail } from 'lu
 import { getTpoStudentDetail } from '@/lib/api/tpo';
 import type { TpoStudentDetail } from '@/shared';
 import { ProvenanceChip, ReadinessBadge } from '@/components/tpo/ui';
+import { ACTIVITY_SCORE_LABEL, activityScoreBreakdown } from '@/components/tpo/activity-score';
 
 export default function StudentProfilePage() {
   const params = useParams<{ id: string }>();
@@ -59,8 +60,8 @@ export default function StudentProfilePage() {
                       <GraduationCap className="size-3" /> {detail.branch}
                     </span>
                   )}
-                  <span className="flex items-center gap-1">
-                    <Activity className="size-3" /> {detail.participation} participation
+                  <span className="flex items-center gap-1" title={activityScoreBreakdown(detail)}>
+                    <Activity className="size-3" /> {ACTIVITY_SCORE_LABEL} {detail.participation}
                   </span>
                 </div>
               </div>
@@ -69,6 +70,9 @@ export default function StudentProfilePage() {
                 <p className="mt-1 text-xs font-semibold text-slate-600">{detail.level} readiness</p>
                 <p className="mt-1 text-[11px] text-slate-500">
                   Last active {detail.lastActiveDate ? new Date(detail.lastActiveDate).toLocaleDateString('en-IN') : 'never'}
+                </p>
+                <p className="mt-1 text-[11px] text-slate-500">
+                  {ACTIVITY_SCORE_LABEL} {detail.participation} = {activityScoreBreakdown(detail)}
                 </p>
               </div>
             </div>

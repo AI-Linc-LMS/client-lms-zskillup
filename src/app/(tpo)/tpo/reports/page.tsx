@@ -1,14 +1,16 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Building2, Download, FileText, GraduationCap, Loader2, Printer, School } from 'lucide-react';
+import { Building2, Download, FileText, GraduationCap, Loader2, Printer, School, Target } from 'lucide-react';
 import {
   getTpoAnalytics,
   getTpoCodingAnalytics,
   getTpoCodingStudents,
+  getTpoCompanyReadinessStudents,
   getTpoInterviewAnalytics,
   getTpoPlacementSummary,
 } from '@/lib/api/tpo';
+import { listCompanies } from '@/lib/api/catalog';
 import type {
   TpoCodingAnalytics,
   TpoCodingStudentRow,
@@ -18,23 +20,16 @@ import type {
 } from '@/shared';
 import { useTpoConsole } from '@/components/tpo/TpoConsole';
 import { BentoCard } from '@/components/tpo/ui';
+import {
+  ACTIVITY_SCORE_CAPTION,
+  ACTIVITY_SCORE_CSV_HEADER,
+} from '@/components/tpo/activity-score';
+import { companyReadinessCsv } from '@/components/tpo/CompanyReadinessTable';
 import { Button } from '@/components/ui/button';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
-import { toCsv } from '@/lib/csv';
+import { downloadCsv, toCsv } from '@/lib/csv';
 
 const BAND_LABEL: Record<string, string> = { READY: 'Ready', IN_TRAINING: 'In training', AT_RISK: 'At risk' };
-
-const BOM = String.fromCharCode(0xfeff); // Excel-friendly UTF-8 marker
-
-function download(filename: string, csv: string) {
-  const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
 
 export default function ReportsPage() {
   const { cohortId, cohorts } = useTpoConsole();
@@ -100,12 +95,15 @@ export default function ReportsPage() {
           interviewById.get(s.id) ?? '',
           codingById.get(s.id) ?? '',
           s.participation,
+          s.practiceAnswered,
+          s.mocksCompleted,
+          s.codingProblems,
           BAND_LABEL[s.band] ?? s.band,
           lastDate,
           lastTime,
         ];
       });
-    download(
+    downloadCsv(
       `student-report-${scope}.csv`,
       toCsv(
         [
@@ -116,7 +114,10 @@ export default function ReportsPage() {
           'Placement Readiness',
           'Interview Readiness',
           'Coding Readiness',
-          'Participation',
+          ACTIVITY_SCORE_CSV_HEADER,
+          'Practice Answers',
+          'Mock Attempts',
+          'Coding Problems',
           'Status',
           'Last Active Date',
           'Last Active Time',
@@ -129,7 +130,7 @@ export default function ReportsPage() {
   const exportCompanies = () => {
     if (!data) return;
     const rows = data.companyReadiness.map((c) => [c.name, c.readiness, c.attempted]);
-    download(`company-report-${scope}.csv`, toCsv(['Company', 'Readiness %', 'Attempts'], rows));
+    downloadCsv(`company-report-${scope}.csv`, toCsv(['Company', 'Readiness %', 'Attempts'], rows));
   };
 
   const exportCampus = () => {
@@ -149,7 +150,7 @@ export default function ReportsPage() {
       ['Highest CTC (LPA)', placements?.highestCtcLpa ?? ''],
       ...data.skillGaps.map((g) => [`Weak topic: ${g.topic}`, `${g.accuracy}%`]),
     ];
-    download(`campus-report-${scope}.csv`, toCsv(['Metric', 'Value'], rows));
+    downloadCsv(`campus-report-${scope}.csv`, toCsv(['Metric', 'Value'], rows));
   };
 
   if (loading) {
@@ -182,11 +183,11 @@ export default function ReportsPage() {
         }
       />
 
-      <div className="grid gap-5 md:grid-cols-3">
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         <ReportCard
           icon={GraduationCap}
           title="Student Report"
-          desc="Every student with readiness, participation, status & last-active."
+          desc={`Every student with readiness, Activity Score (${ACTIVITY_SCORE_CAPTION}), status & last-active.`}
           meta={`${data?.students.length ?? 0} students`}
           onExport={exportStudents}
         />
@@ -204,6 +205,7 @@ export default function ReportsPage() {
           meta="Summary metrics"
           onExport={exportCampus}
         />
+        <CompanyReadinessReportCard scope={scope} cohortId={cohortId} />
       </div>
 
       <BentoCard title="At a glance" subtitle="What the campus report contains." source="Practice + Mock + Coding + placements">
@@ -214,6 +216,80 @@ export default function ReportsPage() {
           <Glance label="Placed (real)" value={placements?.studentsPlaced ?? 0} />
         </div>
       </BentoCard>
+    </div>
+  );
+}
+
+/**
+ * Company Readiness export - the roster-wide, per-recruiter student report, reachable
+ * from Reports & Exports as well as its own console page (a TPO who lives in this
+ * screen had no way to discover it). Picking a company fetches and downloads in one
+ * step; the CSV is byte-identical to the one the Company Readiness page produces.
+ */
+function CompanyReadinessReportCard({ scope, cohortId }: { scope: string; cohortId: string | null }) {
+  const [companies, setCompanies] = useState<Array<{ slug: string; name: string }>>([]);
+  const [selected, setSelected] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    void listCompanies()
+      .then((cs) => setCompanies(cs.map((c) => ({ slug: c.slug, name: c.name }))))
+      .catch(() => setCompanies([]));
+  }, []);
+
+  const exportCompanyReadiness = async () => {
+    if (!selected) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const report = await getTpoCompanyReadinessStudents(selected, cohortId || undefined);
+      downloadCsv(
+        `company-readiness-${report.company.slug}-${scope}.csv`,
+        companyReadinessCsv(report),
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not build that report.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5">
+      <span className="grid size-11 place-items-center rounded-2xl bg-sky-50 text-sky-600 ring-1 ring-sky-100">
+        <Target className="size-5" />
+      </span>
+      <h2 className="mt-3 text-base font-black text-navy">Company Readiness Report</h2>
+      <p className="mt-1 flex-1 text-xs leading-relaxed text-slate-600">
+        Every student scored against one recruiter - readiness, accuracy, questions attempted,
+        difficulty split, topics and last activity.
+      </p>
+      <label className="mt-3 block">
+        <span className="sr-only">Company</span>
+        <select
+          value={selected}
+          onChange={(e) => setSelected(e.target.value)}
+          className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+        >
+          <option value="">Select a company…</option>
+          {companies.map((c) => (
+            <option key={c.slug} value={c.slug}>{c.name}</option>
+          ))}
+        </select>
+      </label>
+      {error ? (
+        <p role="alert" className="mt-2 text-[11px] font-medium text-red-700">{error}</p>
+      ) : null}
+      <Button
+        size="sm"
+        className="mt-3 w-full"
+        disabled={!selected || busy}
+        onClick={() => void exportCompanyReadiness()}
+      >
+        {busy ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+        Download CSV
+      </Button>
     </div>
   );
 }

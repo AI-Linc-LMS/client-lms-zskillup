@@ -8,8 +8,10 @@ import {
   emailCollegeReport,
   getAdminCollegeAnalytics,
   getAdminCollegeCohorts,
+  getAdminCollegeCompanyReadinessStudents,
   getAdminCollegeParticipation,
 } from '@/lib/api/admin-college-analytics';
+import { listCompanies } from '@/lib/api/catalog';
 import { describeError } from '@/lib/api/errors';
 import { Button } from '@/components/ui/button';
 import { ProgressBar } from '@/components/ui/progress-bar';
@@ -17,10 +19,13 @@ import { StatusPill, type StatusTone } from '@/components/student/StatusPill';
 import type {
   CohortDto,
   ReadinessBand,
+  TpoCompanyReadinessReport,
   TpoDashboard,
   TpoParticipation,
   TpoStudentRow,
 } from '@/shared';
+import { ACTIVITY_SCORE_CAPTION, ACTIVITY_SCORE_LABEL } from '@/components/tpo/activity-score';
+import { CompanyReadinessTable } from '@/components/tpo/CompanyReadinessTable';
 import { cn } from '@/lib/utils';
 
 const BAND: Record<ReadinessBand, { tone: StatusTone; label: string }> = {
@@ -30,10 +35,11 @@ const BAND: Record<ReadinessBand, { tone: StatusTone; label: string }> = {
 };
 
 /**
- * The rich TPO performance & participation dashboard for a college, rendered for an
+ * The rich TPO performance & activity dashboard for a college, rendered for an
  * ADMIN / SUPER_ADMIN (TPO Panel View). Reuses the server's college-scoped analytics;
- * adds a cohort filter and the one-click "email the report to the college".
- * `studentHrefBase` keeps the roster link inside the caller's console.
+ * adds a cohort filter, the per-recruiter Company Readiness report and the one-click
+ * "email the report to the college". `studentHrefBase` keeps the roster link inside
+ * the caller's console.
  */
 export function CollegePerformancePanel({
   collegeId,
@@ -106,7 +112,7 @@ export function CollegePerformancePanel({
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
               TPO Panel View
             </p>
-            <h2 className="text-lg font-bold text-navy">Performance &amp; Participation</h2>
+            <h2 className="text-lg font-bold text-navy">Performance &amp; Activity</h2>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -189,7 +195,7 @@ export function CollegePerformancePanel({
           </div>
 
           {participation ? (
-            <Card title="Engagement & participation">
+            <Card title="Engagement & activity">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
                 <Stat label="On a streak" value={participation.activeStreaks} />
                 <Stat label="Avg XP" value={participation.avgXp} />
@@ -202,9 +208,93 @@ export function CollegePerformancePanel({
           ) : null}
 
           <RosterTable students={data.students} truncated={data.truncated} studentHrefBase={studentHrefBase} />
+
+          <CompanyReadinessCard collegeId={collegeId} cohortId={cohortId} />
         </>
       )}
     </section>
+  );
+}
+
+/**
+ * Roster-wide student-level readiness for ONE recruiter, inside the TPO Panel View -
+ * the same report (and the same backend route) the college's own TPO sees, so an
+ * admin can answer "who is ready for Accenture?" without impersonating them.
+ */
+function CompanyReadinessCard({ collegeId, cohortId }: { collegeId: string; cohortId: string }) {
+  const [companies, setCompanies] = useState<Array<{ slug: string; name: string }>>([]);
+  const [selected, setSelected] = useState('');
+  const [report, setReport] = useState<TpoCompanyReadinessReport | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    void listCompanies()
+      .then((cs) => setCompanies(cs.map((c) => ({ slug: c.slug, name: c.name }))))
+      .catch(() => setCompanies([]));
+  }, []);
+
+  useEffect(() => {
+    if (!selected) {
+      setReport(null);
+      return;
+    }
+    let alive = true;
+    setLoading(true);
+    getAdminCollegeCompanyReadinessStudents(collegeId, selected, cohortId || undefined)
+      .then((r) => alive && setReport(r))
+      .catch(() => alive && setReport(null))
+      .finally(() => alive && setLoading(false));
+    return () => {
+      alive = false;
+    };
+  }, [collegeId, selected, cohortId]);
+
+  const companyName = report?.company.name ?? companies.find((c) => c.slug === selected)?.name ?? 'company';
+  const scopeLabel = cohortId ? 'cohort' : 'all-cohorts';
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            Company Readiness
+          </p>
+          <h3 className="text-sm font-bold text-navy">Student-level readiness for one recruiter</h3>
+        </div>
+        <label className="flex items-center gap-2">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+            Company
+          </span>
+          <select
+            value={selected}
+            onChange={(e) => setSelected(e.target.value)}
+            aria-label="Filter by company"
+            className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus:outline-none focus:ring-2 focus:ring-orange/30"
+          >
+            <option value="">Select a company…</option>
+            {companies.map((c) => (
+              <option key={c.slug} value={c.slug}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      {!selected ? (
+        <p className="py-6 text-center text-sm text-slate-500">
+          Pick a company to score every student on this roster against its questions and coding
+          problems.
+        </p>
+      ) : (
+        <CompanyReadinessTable
+          report={report}
+          loading={loading}
+          companyName={companyName}
+          scopeLabel={scopeLabel}
+          emptyHint={`Could not load readiness for ${companyName}. Try again in a moment.`}
+        />
+      )}
+    </div>
   );
 }
 
@@ -223,6 +313,9 @@ function RosterTable({
         <Users className="size-4 text-slate-400" />
         <h3 className="text-sm font-bold text-navy">Student roster ({students.length})</h3>
         {truncated ? <span className="text-xs text-slate-400">· capped</span> : null}
+        <span className="ml-auto hidden text-[11px] text-slate-500 sm:inline">
+          {ACTIVITY_SCORE_LABEL}: {ACTIVITY_SCORE_CAPTION}
+        </span>
       </div>
       {students.length === 0 ? (
         <div className="py-12 text-center text-sm text-slate-500">No students enrolled yet.</div>
@@ -234,7 +327,7 @@ function RosterTable({
                 <th className="px-4 py-3">Student</th>
                 <th className="px-4 py-3">Branch</th>
                 <th className="px-4 py-3 text-right">Readiness</th>
-                <th className="px-4 py-3 text-right">Participation</th>
+                <th className="px-4 py-3 text-right">{ACTIVITY_SCORE_LABEL}</th>
                 <th className="px-4 py-3">Band</th>
                 <th className="px-4 py-3">Last active</th>
               </tr>
@@ -250,7 +343,12 @@ function RosterTable({
                   </td>
                   <td className="px-4 py-3 text-slate-600">{s.branch ?? '—'}</td>
                   <td className="px-4 py-3 text-right tabular-nums text-navy">{s.readiness}</td>
-                  <td className="px-4 py-3 text-right tabular-nums text-slate-700">{s.participation}</td>
+                  <td
+                    className="px-4 py-3 text-right tabular-nums text-slate-700"
+                    title={`${s.practiceAnswered} practice answers + 3x${s.mocksCompleted} mocks + 2x${s.codingProblems} coding problems`}
+                  >
+                    {s.participation}
+                  </td>
                   <td className="px-4 py-3">
                     <StatusPill tone={BAND[s.band].tone} label={BAND[s.band].label} />
                   </td>

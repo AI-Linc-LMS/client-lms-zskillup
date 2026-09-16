@@ -2,11 +2,13 @@
 
 import { useMemo, useState } from 'react';
 import type { ReadinessBand, TpoStudentRow } from '@/shared';
+import { ACTIVITY_SCORE_CAPTION, ACTIVITY_SCORE_LABEL } from './activity-score';
 
 /**
- * Performance × Participation scatter - pure SVG, no chart lib. Each dot is a
- * student (x = participation volume, y = readiness). Two dividers split the plane
- * into the four quadrants the TPO acts on; click a dot to open the drill-down.
+ * Performance x Activity scatter - pure SVG, no chart lib. Each dot is a student
+ * (x = Activity Score, a weighted engagement COUNT; y = readiness %). Two dividers
+ * split the plane into the four quadrants the TPO acts on; click a dot to open the
+ * drill-down.
  */
 
 const BAND_DOT: Record<ReadinessBand, string> = {
@@ -68,17 +70,19 @@ export function QuadrantScatter({
       <line x1={PAD.l} y1={H - PAD.b} x2={W - PAD.r} y2={H - PAD.b} stroke="#e2e8f0" strokeWidth={1} />
 
       {/* Quadrant labels — shared taxonomy with the student panel.
-          Excelling = high participation + high performance (top-right);
-          Potential = low participation + high performance (top-left);
-          Growing = high participation + low performance (bottom-right);
-          Starting = low participation + low performance (bottom-left). */}
+          Excelling = high activity + high performance (top-right);
+          Potential = low activity + high performance (top-left);
+          Growing = high activity + low performance (bottom-right);
+          Starting = low activity + low performance (bottom-left). */}
       <text x={vx + 8} y={PAD.t + 14} className="fill-emerald-600" fontSize="11" fontWeight="700">Excelling</text>
       <text x={PAD.l + 6} y={PAD.t + 14} className="fill-sky-600" fontSize="11" fontWeight="700">Potential</text>
       <text x={vx + 8} y={H - PAD.b - 8} className="fill-amber-600" fontSize="11" fontWeight="700">Growing</text>
       <text x={PAD.l + 6} y={H - PAD.b - 8} className="fill-red-600" fontSize="11" fontWeight="700">Starting</text>
 
       {/* Axis captions */}
-      <text x={(W + PAD.l) / 2} y={H - 6} textAnchor="middle" className="fill-slate-400" fontSize="11">Participation →</text>
+      <text x={(W + PAD.l) / 2} y={H - 6} textAnchor="middle" className="fill-slate-400" fontSize="11">
+        {ACTIVITY_SCORE_LABEL} ({ACTIVITY_SCORE_CAPTION}) →
+      </text>
       <text x={14} y={(H - PAD.b + PAD.t) / 2} textAnchor="middle" fontSize="11" className="fill-slate-400" transform={`rotate(-90 14 ${(H - PAD.b + PAD.t) / 2})`}>Readiness →</text>
       {[0, 50, 100].map((r) => (
         <text key={r} x={PAD.l - 6} y={y(r) + 3} textAnchor="end" fontSize="9" className="fill-slate-400">{r}</text>
@@ -102,17 +106,17 @@ export function QuadrantScatter({
             onMouseLeave={() => setHoverId((cur) => (cur === s.id ? null : cur))}
             onClick={() => onSelect(s.id)}
           >
-            <title>{`${s.name ?? s.email} · ${s.readiness}% readiness · ${s.participation} participation`}</title>
+            <title>{`${s.name ?? s.email} · ${s.readiness}% readiness · ${ACTIVITY_SCORE_LABEL} ${s.participation} (${s.practiceAnswered} practice + 3x${s.mocksCompleted} mocks + 2x${s.codingProblems} coding)`}</title>
           </circle>
         );
       })}
 
       {/* In-SVG tooltip for the hovered dot */}
       {hovered && (
-        <g pointerEvents="none" transform={`translate(${Math.min(x(hovered.participation) + 10, W - 190)}, ${Math.max(y(hovered.readiness) - 34, PAD.t)})`}>
-          <rect width={180} height={30} rx={6} fill="#0a0a0c" opacity={0.92} />
+        <g pointerEvents="none" transform={`translate(${Math.min(x(hovered.participation) + 10, W - 240)}, ${Math.max(y(hovered.readiness) - 34, PAD.t)})`}>
+          <rect width={230} height={30} rx={6} fill="#0a0a0c" opacity={0.92} />
           <text x={8} y={13} fontSize="10" fontWeight="700" fill="white">{hovered.name ?? hovered.email}</text>
-          <text x={8} y={24} fontSize="9" fill="#cbd5e1">{`${hovered.readiness}% readiness · ${hovered.participation} participation`}</text>
+          <text x={8} y={24} fontSize="9" fill="#cbd5e1">{`${hovered.readiness}% readiness · ${ACTIVITY_SCORE_LABEL} ${hovered.participation}`}</text>
         </g>
       )}
     </svg>
