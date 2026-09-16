@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { animate, motion } from 'framer-motion';
 import { getInterview } from '@/lib/api/mock-interviews';
 import type { MockInterviewDetailDto } from '@/shared/dto/mock-interview.dto';
-import { ArrowLeft, CheckCircle2, Loader2, RotateCcw, Target, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Loader2, RotateCcw, Target, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { learnerCopy, NO_BREAKDOWN_FEEDBACK } from '@/lib/interview-feedback';
 
 function scoreColor(n: number): string {
   if (n >= 70) return 'text-green-600';
@@ -131,7 +132,9 @@ export function InterviewResult({ id }: { id: string }) {
             <span className={cn('rounded-full px-2.5 py-0.5 text-[11px] font-bold', scoreChip(evalv.overall_percentage))}>{b.label}</span>
           </div>
           <p className="mt-0.5 text-xs text-slate-500">{b.sub}</p>
-          <p className="mt-2 max-w-xl text-sm text-slate-600">{evalv.overall_feedback}</p>
+          <p className="mt-2 max-w-xl text-sm text-slate-600">
+            {learnerCopy(evalv.overall_feedback, NO_BREAKDOWN_FEEDBACK)}
+          </p>
         </div>
       </motion.section>
 
@@ -166,7 +169,9 @@ export function InterviewResult({ id }: { id: string }) {
                 {qs && <span className={cn('shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold', scoreChip(qs.percentage))}>{qs.percentage}%</span>}
               </div>
               <p className="mt-2 whitespace-pre-wrap rounded-lg bg-slate-50 p-2.5 text-[13px] text-slate-600">{ans || <span className="italic text-slate-500">No answer</span>}</p>
-              {qs?.feedback && <p className="mt-2 text-sm text-slate-700">{qs.feedback}</p>}
+              {qs && learnerCopy(qs.feedback, '') ? (
+                <p className="mt-2 text-sm text-slate-700">{learnerCopy(qs.feedback, '')}</p>
+              ) : null}
               {qs && (qs.strengths.length > 0 || qs.improvements.length > 0) && (
                 <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {qs.strengths.length > 0 && <div className="text-xs text-slate-600"><span className="font-semibold text-green-700">+ </span>{qs.strengths.join('; ')}</div>}

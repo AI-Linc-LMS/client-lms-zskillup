@@ -324,12 +324,21 @@ export interface TpoInterviewTrendPoint {
   interviews: number;
   readiness: number | null;
 }
-/** Scores are null when no graded interview data exists for that dimension -
- *  communication/confidence only populate on interviews graded after that
- *  pipeline shipped, so the UI can honestly show "needs data". */
+/** communicationScore / confidenceScore are null when NO interview in scope carries
+ *  them. That is an AI-grading failure, not a missing feature: the heuristic fallback
+ *  cannot score those dimensions, so an interview graded during an OpenAI outage has a
+ *  readiness score and nothing else. Compare aiGradedInterviews with
+ *  totalGradedInterviews to see how much of the cohort is affected. */
 export interface TpoInterviewAnalytics {
   studentsAttempted: number;
   totalInterviews: number;
+  /** Grading coverage. `aiGradedInterviews` are the graded interviews that actually
+   *  carry the AI sub-scores; `totalGradedInterviews` is the denominator (the same
+   *  count as `totalInterviews`, named explicitly so the pair reads as a ratio). A gap
+   *  means AI grading FAILED for those interviews and they can be re-graded - it is
+   *  never a sign that students simply practised less. */
+  aiGradedInterviews: number;
+  totalGradedInterviews: number;
   interviewReadiness: number | null;
   communicationScore: number | null;
   confidenceScore: number | null;

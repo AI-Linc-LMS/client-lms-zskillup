@@ -2,7 +2,18 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronDown, Info, Loader2, MessageSquare, Mic, Search, Smile, Users, X } from 'lucide-react';
+import {
+  AlertTriangle,
+  ChevronDown,
+  Info,
+  Loader2,
+  MessageSquare,
+  Mic,
+  Search,
+  Smile,
+  Users,
+  X,
+} from 'lucide-react';
 import {
   Area,
   AreaChart,
@@ -21,6 +32,7 @@ import { useTpoConsole } from '@/components/tpo/TpoConsole';
 import { BentoCard, ProvenanceChip } from '@/components/tpo/ui';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { cn } from '@/lib/utils';
+import { learnerCopy, NO_BREAKDOWN_FEEDBACK } from '@/lib/interview-feedback';
 
 /** One score→colour scale used across every tile, chart and pill on the page. */
 const scoreColor = (v: number | null | undefined) =>
@@ -36,6 +48,11 @@ const scoreBg = (v: number | null | undefined) =>
 
 const CHART_TOOLTIP = { borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 12 } as const;
 
+/** Why a communication / confidence cell is empty. It is a grading failure, not a gap in
+ *  the student's practice - the transcript is still stored and can be re-graded. */
+const NOT_GRADED_TITLE =
+  'AI grading did not produce communication and confidence scores for these interviews. The transcripts are kept, so an administrator can re-run grading.';
+
 function ScoreTile({
   icon: Icon,
   label,
@@ -43,6 +60,8 @@ function ScoreTile({
   source,
   suffix = '%',
   info,
+  emptyLabel = 'Needs data',
+  emptyHint = 'Populates as interviews are graded',
 }: {
   icon: typeof Mic;
   label: string;
@@ -51,6 +70,10 @@ function ScoreTile({
   suffix?: string;
   /** When present, an ⓘ next to the label reveals these calculation parameters. */
   info?: string[];
+  /** Shown instead of a score. Communication and confidence override these: once any
+   *  interview is graded, a null there means AI grading FAILED, not "keep practising". */
+  emptyLabel?: string;
+  emptyHint?: string;
 }) {
   const [showInfo, setShowInfo] = useState(false);
   const labelRow = (
@@ -101,9 +124,9 @@ function ScoreTile({
         </>
       ) : (
         <>
-          <p className="mt-3 text-sm font-bold text-slate-500">Needs data</p>
+          <p className="mt-3 text-sm font-bold text-slate-500">{emptyLabel}</p>
           {labelRow}
-          <p className="mt-1 text-[10px] text-slate-500">Populates as interviews are graded</p>
+          <p className="mt-1 text-[10px] text-slate-500">{emptyHint}</p>
         </>
       )}
       <p className="mt-2 flex items-center gap-1 text-[10px] text-slate-500">{source}</p>
@@ -212,10 +235,20 @@ function BranchChart({ data }: { data: TpoInterviewAnalytics['byBranch'] }) {
   );
 }
 
-function ScorePill({ value }: { value: number | null }) {
+/** A score, or a muted chip saying why there isn't one. A 0 is a real score and still
+ *  renders as 0% - only a null (never graded) gets the empty treatment. */
+function ScorePill({ value, emptyLabel = '—' }: { value: number | null; emptyLabel?: string }) {
+  const graded = value != null;
   return (
-    <span className={cn('inline-flex min-w-[2.75rem] justify-center rounded-full px-2 py-0.5 text-xs font-bold tabular-nums ring-1 ring-inset', scoreBg(value))}>
-      {value != null ? `${value}%` : '—'}
+    <span
+      title={!graded && emptyLabel !== '—' ? NOT_GRADED_TITLE : undefined}
+      className={cn(
+        'inline-flex min-w-[2.75rem] justify-center rounded-full px-2 py-0.5 tabular-nums ring-1 ring-inset',
+        graded ? 'text-xs font-bold' : 'text-[11px] font-semibold',
+        scoreBg(value),
+      )}
+    >
+      {graded ? `${value}%` : emptyLabel}
     </span>
   );
 }
@@ -287,8 +320,12 @@ function StudentTable({ rows }: { rows: TpoInterviewStudentRow[] }) {
                 </td>
                 <td className="px-3 py-2.5 text-right tabular-nums text-slate-600">{r.interviews}</td>
                 <td className="px-3 py-2.5 text-right"><ScorePill value={r.readiness} /></td>
-                <td className="px-3 py-2.5 text-right"><ScorePill value={r.communication} /></td>
-                <td className="px-3 py-2.5 text-right"><ScorePill value={r.confidence} /></td>
+                <td className="px-3 py-2.5 text-right">
+                  <ScorePill value={r.communication} emptyLabel="Not graded" />
+                </td>
+                <td className="px-3 py-2.5 text-right">
+                  <ScorePill value={r.confidence} emptyLabel="Not graded" />
+                </td>
                 <td className="px-3 py-2.5 text-right text-[11px] text-slate-500">
                   {r.lastAt ? new Date(r.lastAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}
                 </td>
@@ -448,11 +485,13 @@ function InterviewCard({
         <div className="space-y-4 border-t border-slate-100 px-4 py-4">
           <div className="flex flex-wrap gap-4 text-xs">
             <Metric label="Overall" value={iv.overallPercentage} />
-            <Metric label="Communication" value={iv.communicationScore} />
-            <Metric label="Confidence" value={iv.confidenceScore} />
+            <Metric label="Communication" value={iv.communicationScore} emptyLabel="Not graded" />
+            <Metric label="Confidence" value={iv.confidenceScore} emptyLabel="Not graded" />
           </div>
           {iv.overallFeedback ? (
-            <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">{iv.overallFeedback}</p>
+            <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
+              {learnerCopy(iv.overallFeedback, NO_BREAKDOWN_FEEDBACK)}
+            </p>
           ) : null}
           {iv.strengths.length > 0 || iv.areasForImprovement.length > 0 ? (
             <div className="grid gap-3 sm:grid-cols-2">
@@ -500,11 +539,28 @@ function InterviewCard({
   );
 }
 
-function Metric({ label, value }: { label: string; value: number | null }) {
+function Metric({
+  label,
+  value,
+  emptyLabel = '—',
+}: {
+  label: string;
+  value: number | null;
+  emptyLabel?: string;
+}) {
+  const graded = value != null;
   return (
     <div>
       <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
-      <p className="text-lg font-extrabold leading-none text-navy">{value != null ? `${value}%` : '—'}</p>
+      <p
+        title={!graded && emptyLabel !== '—' ? NOT_GRADED_TITLE : undefined}
+        className={cn(
+          'leading-none',
+          graded ? 'text-lg font-extrabold text-navy' : 'text-sm font-semibold text-slate-500',
+        )}
+      >
+        {graded ? `${value}%` : emptyLabel}
+      </p>
     </div>
   );
 }
@@ -576,6 +632,12 @@ export default function InterviewAnalyticsPage() {
   const distribution = data.distribution ?? [];
   const trend = data.trend ?? [];
 
+  // AI-grading coverage. Only meaningful when the API actually reports it - an older
+  // backend would otherwise read as "0 of N graded", which is the opposite of honest.
+  const totalGraded = data.totalGradedInterviews ?? data.totalInterviews;
+  const aiGraded = typeof data.aiGradedInterviews === 'number' ? data.aiGradedInterviews : null;
+  const ungraded = aiGraded != null ? Math.max(0, totalGraded - aiGraded) : 0;
+
   return (
     <div className="space-y-6">
       <ConsoleHero
@@ -604,15 +666,32 @@ export default function InterviewAnalyticsPage() {
             'Overall Interview Performance',
           ]}
         />
-        <ScoreTile icon={Mic} label="Communication" value={data.communicationScore} source="AI transcript scoring" />
-        <ScoreTile icon={Smile} label="Confidence" value={data.confidenceScore} source="AI transcript scoring" />
+        <ScoreTile
+          icon={Mic}
+          label="Communication"
+          value={data.communicationScore}
+          source="AI transcript scoring"
+          emptyLabel="Not graded"
+          emptyHint="AI grading produced no score for these interviews"
+        />
+        <ScoreTile
+          icon={Smile}
+          label="Confidence"
+          value={data.confidenceScore}
+          source="AI transcript scoring"
+          emptyLabel="Not graded"
+          emptyHint="AI grading produced no score for these interviews"
+        />
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
           <span className="grid size-9 place-items-center rounded-xl bg-[#fff5ea] text-[#f5b400]">
             <Users className="size-5" />
           </span>
           <p className="mt-3 text-2xl font-black tabular-nums text-navy">{data.studentsAttempted}</p>
           <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Students Practised</p>
-          <p className="mt-2 text-[10px] text-slate-500">{data.totalInterviews} interviews graded</p>
+          <p className="mt-2 text-[10px] text-slate-500">
+            {data.totalInterviews} interviews graded
+            {aiGraded != null ? ` · ${aiGraded} AI-scored` : ''}
+          </p>
         </div>
       </div>
 
@@ -681,13 +760,17 @@ export default function InterviewAnalyticsPage() {
         )}
       </BentoCard>
 
-      {(data.communicationScore == null || data.confidenceScore == null) && (
-        <div className="flex items-start gap-2 rounded-xl border border-[#ffc42d]/30 bg-[#fff5ea] p-4 text-xs text-slate-600">
-          <Mic className="mt-0.5 size-4 shrink-0 text-[#f5b400]" />
+      {ungraded > 0 && (
+        <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs text-slate-600">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-600" />
           <p>
-            Communication &amp; confidence scores are graded by AI from each interview transcript. They fill
-            in for interviews completed after this scoring shipped - older interviews contribute only to
-            interview readiness. <ProvenanceChip source="AI transcript scoring" className="ml-1 align-middle" />
+            <span className="font-semibold text-navy">
+              AI grading failed for {ungraded} of {totalGraded} graded interviews.
+            </span>{' '}
+            Those interviews have an interview-readiness score but no communication or confidence score,
+            so both averages above are calculated only from the {aiGraded} interviews the AI did score.
+            Their transcripts are kept, so an administrator can re-run grading for them.{' '}
+            <ProvenanceChip source="AI transcript scoring" className="ml-1 align-middle" />
           </p>
         </div>
       )}
