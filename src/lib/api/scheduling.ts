@@ -191,10 +191,18 @@ export async function deleteScheduledAssessment(id: string): Promise<void> {
   await apiClient.delete(`/api/v1/admin/scheduled-assessments/${id}`);
 }
 
+/** One section of the paper, scored for one student. `maxMarks` is the whole section's
+ *  worth — the same for every student, attempted or not — so a section a student never
+ *  opened is a 0 out of its maximum, never a blank. Sections arrive in the paper's own
+ *  order (`order` = the section's first item), which is the order the report's
+ *  section columns use. */
 export interface AssessmentResultSection {
   name: string;
-  correct: number;
-  total: number;
+  /** Marks earned in this section, by the same rules as the overall score (MCQ: full
+   *  marks when correct; coding: partial credit for test cases passed). */
+  score: number;
+  maxMarks: number;
+  order: number;
 }
 
 export interface AssessmentResultRow {

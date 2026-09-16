@@ -4,57 +4,13 @@ import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import type { AssessmentResults } from '@/lib/api/scheduling';
 import { branchShort } from '@/lib/branch';
-import { CSV_BOM, toCsv } from '@/lib/csv';
+import { buildResultsCsv, resultsColumns, resultsRecords } from '@/lib/results-export-rows';
 
 type ResultRow = AssessmentResults['rows'][number];
 
-/** The report's full flat column set (order = report spec), one object per student. */
-function flatRows(data: AssessmentResults): Record<string, string | number>[] {
-  return data.rows.map((r) => ({
-    Name: r.fullName ?? '',
-    Email: r.email,
-    Phone: r.phone ?? '',
-    College: r.collegeName ?? '',
-    Department: branchShort(r.branch),
-    Cohort: r.cohort ?? '',
-    Assessment: data.assessment.title,
-    'Started At': r.startedAt ? new Date(r.startedAt).toLocaleString() : '',
-    'Submitted At': r.submittedAt ? new Date(r.submittedAt).toLocaleString() : '',
-    'Max Marks': r.total,
-    Score: r.score,
-    'Percentage': r.scorePct,
-    // The pass criterion, on every row — a reader of the sheet must never have to
-    // infer it (or mistake 'Accuracy %', which is correct ÷ attempted, for it).
-    'Passing Score %': data.assessment.passingScore,
-    // Blank only in the deploy window before the paired backend serves passMarks.
-    'Pass Marks': data.assessment.passMarks ?? '',
-    'Result Basis': `Score % (marks scored / ${r.total} marks) >= ${data.assessment.passingScore}%`,
-    Rank: r.rank,
-    'Total Questions': r.totalQuestions,
-    'Attempted Questions': r.attemptedQuestions,
-    'Skipped Questions': Math.max(0, r.totalQuestions - r.attemptedQuestions),
-    'Correct Answers': r.correctAnswers,
-    'Incorrect Answers': r.incorrectAnswers,
-    'Accuracy % (of attempted)': r.accuracy,
-    'Time Taken (s)': r.timeTakenSec,
-    'Tab Switches': r.tabSwitches,
-    'Face Violations': r.faceViolations,
-    'Fullscreen Exits': r.fullscreenExits,
-    'Face Validation Failures': r.faceValidationFailures,
-    'Multiple Face Detections': r.multipleFaceDetections,
-    'Total Violations': r.violations,
-    'Integrity Score': r.integrityScore ?? '',
-    'Proctoring Warnings': r.warningCount ?? 0,
-    'Auto-submitted (Proctoring)': r.autoSubmittedByProctor ? 'Yes' : 'No',
-    // Topic-wise and MCQ-only: the section rows come from the MCQ answer rows, so a
-    // coding problem never appears here. Named honestly so nobody reads it as the
-    // whole paper's section breakdown.
-    'Topic-wise Correct (MCQ only)': r.sections
-      .map((s) => `${s.name}: ${s.correct}/${s.total}`)
-      .join('; '),
-    'Pass/Fail': r.passed ? 'Pass' : 'Fail',
-  }));
-}
+/** The CSV body, re-exported from the pure column module so existing importers (and
+ *  the tests) keep one entry point. */
+export { buildResultsCsv };
 
 function fileBase(data: AssessmentResults): string {
   const safe = data.assessment.title.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase();
@@ -72,15 +28,6 @@ function download(blob: Blob, filename: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-/** The CSV file body - BOM + CRLF, every cell quoted and formula-injection-safe (see
- *  lib/csv) - or '' when nobody attempted. Kept apart from the download for tests. */
-export function buildResultsCsv(data: AssessmentResults): string {
-  const rows = flatRows(data);
-  if (rows.length === 0) return '';
-  const headers = Object.keys(rows[0]);
-  return CSV_BOM + toCsv(headers, rows.map((r) => headers.map((h) => r[h])));
-}
-
 export function exportResultsCsv(data: AssessmentResults): void {
   const csv = buildResultsCsv(data);
   if (!csv) return;
@@ -88,12 +35,14 @@ export function exportResultsCsv(data: AssessmentResults): void {
 }
 
 export function exportResultsXlsx(data: AssessmentResults): void {
-  const rows = flatRows(data);
+  const rows = resultsRecords(data);
   if (rows.length === 0) return;
   // No formula neutralising needed (unlike the CSV): json_to_sheet stores every string
   // as a text cell and the writer only emits a formula for a cell's `f`, which is never
   // set - so "=HYPERLINK(...)" typed as a name opens as literal text.
-  const ws = XLSX.utils.json_to_sheet(rows);
+  // `header` is passed explicitly so the sheet's columns are the CSV's columns, in the
+  // same order, rather than whatever key order the first record happens to have.
+  const ws = XLSX.utils.json_to_sheet(rows, { header: resultsColumns(data) });
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Results');
   XLSX.writeFile(wb, `${fileBase(data)}.xlsx`);

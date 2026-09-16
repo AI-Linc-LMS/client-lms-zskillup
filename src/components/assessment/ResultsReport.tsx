@@ -23,8 +23,10 @@ const scoreTone = (v: number, passingScore: number) =>
 /**
  * Cohort-wise mock-assessment results report (shared by the Admin + TPO panels).
  * Full per-student roster with search, pass/fail filter, sortable columns, and
- * export to Excel / CSV / PDF. The row shows the key columns; the export carries
- * every field (contact, department, section-wise scores, full proctoring breakdown, …).
+ * export to Excel / CSV / PDF. The row shows the key columns; the Excel + CSV exports
+ * carry the owner's own column set - identity, timing, marks, the proctoring counts,
+ * and a scored / out-of pair for every SECTION of the paper (lib/results-export-rows).
+ * The PDF stays a formatted report, not a data dump.
  */
 export function ResultsReport({
   data,
