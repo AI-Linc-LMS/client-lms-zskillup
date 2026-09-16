@@ -121,6 +121,8 @@ export interface BuildAssessmentPayload {
   title: string;
   scheduledAt: string;
   durationMinutes: number;
+  /** Percent of the paper's total marks needed to pass. Omitted = 60. */
+  passingScore?: number;
   mcqCount?: number;
   codingCount?: number;
   difficulty?: 'EASY' | 'MEDIUM' | 'HARD' | 'MIXED';
@@ -254,9 +256,26 @@ export interface AssessmentResults {
     proctored: boolean;
     proctorAutoSubmit?: boolean;
     proctorMaxWarnings?: number;
+    /** Percent of `maxMarks` a student must score to pass. THE pass criterion —
+     *  never the roster's accuracy column, which is correct ÷ attempted. */
     passingScore: number;
+    /** MCQ items + coding items (counted from the link tables). */
     totalQuestions: number;
+    /** Sum of every item's marks (MCQ + coding). */
     maxMarks: number;
+    // The marks split. OPTIONAL only because this UI can be live for the few minutes
+    // before its paired backend is (deploy the backend first); once that is out they
+    // are always present. Absent ⇒ the split is simply not shown — never guessed,
+    // because a business value is rendered, never computed here (ADR-007).
+    mcqCount?: number;
+    codingCount?: number;
+    /** Marks carried by the MCQ half — below `passMarks` means the paper cannot be
+     *  passed on MCQs alone. */
+    mcqMarks?: number;
+    /** Marks carried by the coding half. */
+    codingMarks?: number;
+    /** `maxMarks × passingScore%`, rounded up — the whole-mark bar to clear. */
+    passMarks?: number;
   };
   stats: {
     registered: number;

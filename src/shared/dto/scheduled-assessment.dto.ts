@@ -118,6 +118,14 @@ export class AdminBuildAssessmentDto {
   @Max(300)
   durationMinutes!: number;
 
+  /** Percent of the paper's total marks a student must score to pass. Omitted = 60,
+   *  the value the builder used to hard-code — so an old client behaves as before. */
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  passingScore?: number;
+
   /** MCQ round size. 0 (or omitted) = no MCQ round. */
   @IsOptional()
   @IsInt()

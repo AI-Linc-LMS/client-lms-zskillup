@@ -173,6 +173,10 @@ export interface SelectionTally {
   coding: number;
   /** Draft marks of the NEW selection (per-section marks × items). */
   marks: number;
+  /** Marks the MCQ items carry. */
+  mcqMarks: number;
+  /** Marks the coding items carry. */
+  codingMarks: number;
   byOrigin: Record<ItemOrigin, number>;
   byDifficulty: { EASY: number; MEDIUM: number; HARD: number; OTHER: number };
   sections: SectionTally[];
@@ -186,6 +190,8 @@ export function tallySelection(sections: WizardSection[]): SelectionTally {
     mcq: 0,
     coding: 0,
     marks: 0,
+    mcqMarks: 0,
+    codingMarks: 0,
     byOrigin: { RANDOM: 0, MANUAL: 0, AI: 0 },
     byDifficulty: { EASY: 0, MEDIUM: 0, HARD: 0, OTHER: 0 },
     sections: [],
@@ -196,9 +202,11 @@ export function tallySelection(sections: WizardSection[]): SelectionTally {
       if (it.type === 'MCQ') {
         row.mcq += 1;
         row.marks += s.mcqMarks;
+        t.mcqMarks += s.mcqMarks;
       } else {
         row.coding += 1;
         row.marks += s.codingMarks;
+        t.codingMarks += s.codingMarks;
       }
       t.byOrigin[it.origin] += 1;
       const d = it.difficulty?.toUpperCase();
@@ -212,6 +220,45 @@ export function tallySelection(sections: WizardSection[]): SelectionTally {
   }
   t.total = t.mcq + t.coding;
   return t;
+}
+
+/**
+ * The whole paper's marks, and whether it can be passed at all. Pass every part of the
+ * paper — the new selection, and in edit mode what the assessment already holds.
+ *
+ * The failure this exists to catch: coding carries half the marks, so a student who
+ * answers EVERY MCQ correctly still caps at 50% and cannot clear a 60% pass mark. That
+ * is invisible while the paper is being built, and only shows up as a roster of Fails.
+ */
+export interface PaperMarks {
+  mcqMarks: number;
+  codingMarks: number;
+  totalMarks: number;
+  /** Whole marks needed to pass (totalMarks × passingScore%, rounded up). */
+  passMarks: number;
+  /** What a student who answers every MCQ correctly and writes no code scores, %. */
+  mcqOnlyPct: number;
+  /** True when even that student fails — the paper is unpassable on MCQs alone. */
+  mcqAloneCannotPass: boolean;
+}
+
+export function paperMarks(
+  parts: Array<{ mcqMarks: number; codingMarks: number }>,
+  passingScore: number,
+): PaperMarks {
+  const mcqMarks = parts.reduce((n, p) => n + p.mcqMarks, 0);
+  const codingMarks = parts.reduce((n, p) => n + p.codingMarks, 0);
+  const totalMarks = mcqMarks + codingMarks;
+  const passMarks = Math.ceil((totalMarks * passingScore) / 100);
+  return {
+    mcqMarks,
+    codingMarks,
+    totalMarks,
+    passMarks,
+    mcqOnlyPct: totalMarks > 0 ? Math.round((mcqMarks / totalMarks) * 100) : 0,
+    // Only meaningful once there IS a coding half and a paper to score.
+    mcqAloneCannotPass: totalMarks > 0 && codingMarks > 0 && mcqMarks < passMarks,
+  };
 }
 
 /** Problems that would make the server refuse the payload, phrased for the admin. */

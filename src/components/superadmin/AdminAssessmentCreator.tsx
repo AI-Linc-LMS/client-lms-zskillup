@@ -43,6 +43,8 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
     title: '',
     scheduledAt: '',
     durationMinutes: '60',
+    /** Percent of the paper's total marks needed to pass. Was hard-coded to 60 server-side. */
+    passingScore: '60',
     mcqCount: '20',
     codingCount: '0',
     difficulty: 'MIXED' as Band,
@@ -122,6 +124,11 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
       setErr('Pick a company for a company-wise assessment.');
       return;
     }
+    const passMark = Number(form.passingScore);
+    if (!Number.isInteger(passMark) || passMark < 0 || passMark > 100) {
+      setErr('The pass mark is a whole percentage between 0 and 100.');
+      return;
+    }
     setCreating(true);
     try {
       await buildScheduledAssessment({
@@ -130,6 +137,7 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
         title: form.title.trim(),
         scheduledAt: new Date(form.scheduledAt).toISOString(),
         durationMinutes: Number(form.durationMinutes),
+        passingScore: passMark,
         mcqCount: mcq,
         codingCount: coding || undefined,
         difficulty: form.difficulty,
@@ -331,6 +339,21 @@ export function AdminAssessmentCreator({ onCreated }: { onCreated: () => void })
             onChange={(e) => setForm((f) => ({ ...f, durationMinutes: e.target.value }))}
             className={inputCls}
           />
+        </label>
+        <label className="space-y-1">
+          <span className={labelCls}>Pass mark (%)</span>
+          <input
+            type="number"
+            min={0}
+            max={100}
+            value={form.passingScore}
+            onChange={(e) => setForm((f) => ({ ...f, passingScore: e.target.value }))}
+            className={inputCls}
+          />
+          <span className="block text-[11px] text-slate-500">
+            Percent of the paper&apos;s total marks needed to pass. Coding problems carry
+            their own marks, so a coding round raises the bar.
+          </span>
         </label>
         <label className="space-y-1">
           <span className={labelCls}>Cohort (optional)</span>

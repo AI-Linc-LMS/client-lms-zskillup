@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, type ReactNode } from 'react';
-import { Code2, ListChecks, Loader2, RefreshCw, Trash2 } from 'lucide-react';
+import { AlertTriangle, Code2, ListChecks, Loader2, RefreshCw, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { StatusPill } from '@/components/student/StatusPill';
@@ -9,7 +9,7 @@ import type { AdminQuestionPreview } from '@/lib/api/admin';
 import type { FlaggedIdGroup, SelectionError } from '@/lib/api/question-selection-errors';
 import type { AdminCodingProblemPreviewDto } from '@/shared/dto/admin-coding-search.dto';
 import { CodingMeta, McqPreviewBody } from './previews';
-import type { PickedItem, WizardSection } from './selection';
+import type { PaperMarks, PickedItem, WizardSection } from './selection';
 import { DifficultyPill, ErrorAlert, FixedMarker, OriginBadge, eyebrowCls, shortId } from './ui';
 
 /** How the runner orders the published set (Part A MCQs, then Part B coding). */
@@ -22,6 +22,8 @@ export const QUESTION_ORDER_NOTE = 'Students see MCQs first, then coding problem
  */
 export function ReviewStep({
   sections,
+  paper,
+  passingScore,
   canPreview,
   companyName,
   mcqPreview,
@@ -34,6 +36,10 @@ export function ReviewStep({
   onRemove,
 }: {
   sections: WizardSection[];
+  /** The WHOLE paper's marks split (new selection + anything already published). */
+  paper: PaperMarks;
+  /** Percent of the paper's marks a student must score to pass. */
+  passingScore: number;
   /** Answer keys + statements come from admin-only endpoints; a TPO reviews labels. */
   canPreview: boolean;
   companyName: (slug: string) => string;
@@ -91,6 +97,8 @@ export function ReviewStep({
       {hasStemDupes ? (
         <ErrorAlert>The same question text appears more than once — check the items marked “Same text” and remove the repeats.</ErrorAlert>
       ) : null}
+
+      <MarksSplit paper={paper} passingScore={passingScore} />
 
       {sections.map((s) => {
         const mcq = s.items.filter((i) => i.type === 'MCQ');
@@ -172,6 +180,41 @@ export function ReviewStep({
         );
       })}
     </div>
+  );
+}
+
+/**
+ * How the paper's marks split between the MCQ and coding halves, against the pass mark.
+ * Coding is graded by test cases passed, so a coding-heavy paper is much harder than the
+ * MCQ count suggests — and when the MCQ half is worth less than the pass mark, a perfect
+ * MCQ sheet still fails. That is invisible at build time unless it is said out loud here.
+ */
+function MarksSplit({ paper, passingScore }: { paper: PaperMarks; passingScore: number }) {
+  if (paper.totalMarks === 0) return null;
+  return (
+    <section aria-label="Marks split" className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p className={eyebrowCls}>Marks &amp; pass mark</p>
+      <p className="mt-2 text-sm text-slate-600">
+        <span className="font-semibold text-navy">
+          Pass mark {passingScore}% of {paper.totalMarks} marks ({paper.passMarks} marks)
+        </span>
+        {' · '}
+        MCQ {paper.mcqMarks} marks · Coding {paper.codingMarks} marks
+      </p>
+      {paper.mcqAloneCannotPass ? (
+        <p
+          role="alert"
+          className="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm font-medium text-amber-800"
+        >
+          <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
+          <span>
+            Coding carries {paper.codingMarks} of {paper.totalMarks} marks — a student who
+            answers every MCQ correctly scores {paper.mcqOnlyPct}%, below the {passingScore}%
+            pass mark. Lower the pass mark, add MCQ marks, or reduce the coding weight.
+          </span>
+        </p>
+      ) : null}
+    </section>
   );
 }
 
