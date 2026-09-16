@@ -216,11 +216,17 @@ import type {
 import type {
   AdminBulkUploadDto,
   AdminBulkUploadResultDto,
+  AdminBulkDeleteResultDto,
+  AdminBulkStatusResultDto,
   AdminCreateQuestionDto,
+  AdminCreateTopicDto,
   AdminQuestionListRowMeta,
   AdminQuestionPreviewDto,
+  AdminTopicDetailDto,
   AdminTopicNodeDto,
+  AdminTopicUsageDto,
   AdminUpdateQuestionDto,
+  AdminUpdateTopicDto,
 } from '@/shared/dto/admin-questions.dto';
 
 /**
@@ -473,6 +479,39 @@ export async function bulkSetQuestionDifficulty(
   return res.data;
 }
 
+/**
+ * Set the status of many questions at once — bulk publish, unpublish, archive and
+ * restore-from-archived all go through here. `notFound` lists ids that matched nothing.
+ *
+ * ARCHIVE IS NOT DELETE: an archived question stops being served to practice and stops
+ * being sampled into new assessments, but it REMAINS inside any mock or drive that
+ * already includes it, and every recorded attempt still grades against it.
+ */
+export async function bulkSetQuestionStatus(
+  ids: string[],
+  status: string,
+): Promise<AdminBulkStatusResultDto> {
+  const res = await apiClient.patch<AdminBulkStatusResultDto>(
+    '/api/v1/admin/questions/bulk-status',
+    { ids, status },
+  );
+  return res.data;
+}
+
+/**
+ * PERMANENTLY delete questions. PARTIAL by design — a 200 can still carry refusals:
+ * a question that is in a mock, answered in an assessment or already practised comes back
+ * in `refused` (code QUESTION_IN_USE) with the counts that blocked it, and everything else
+ * is deleted. At most MAX_BULK_DELETE_IDS (200) ids per call.
+ */
+export async function bulkDeleteQuestions(ids: string[]): Promise<AdminBulkDeleteResultDto> {
+  const res = await apiClient.post<AdminBulkDeleteResultDto>(
+    '/api/v1/admin/questions/bulk-delete',
+    { ids },
+  );
+  return res.data;
+}
+
 /** Full detail (with the correct answer) for a set of question ids — for the assessment
  *  "review the selected questions before publishing" step. */
 export type AdminQuestionPreview = AdminQuestionPreviewDto;
@@ -645,10 +684,54 @@ export async function bulkUploadQuestions(
   return res.data;
 }
 
-/** Section → Topic → Subtopic taxonomy tree for the bulk-upload mapping pickers. */
+/**
+ * Section → Topic → Subtopic taxonomy tree. Each node carries its parent, depth,
+ * direct + subtree question counts (ANY status) and `hidden` — the server's own
+ * classification of the machine-generated scratch roots (`*-ai`, `ai-practice-topics`)
+ * that the pickers leave out by default.
+ */
 export async function getQuestionTopicsTree(): Promise<AdminTopicNodeDto[]> {
   const res = await apiClient.get<AdminTopicNodeDto[]>('/api/v1/admin/questions/topics/tree');
   return res.data;
+}
+
+/** Create a Section (no parentId), Topic or Subtopic. THE SLUG IS SERVER-GENERATED —
+ *  never build one here. 409 TOPIC_NAME_TAKEN if a sibling already has that name. */
+export async function createQuestionTopic(
+  dto: AdminCreateTopicDto,
+): Promise<AdminTopicDetailDto> {
+  const res = await apiClient.post<AdminTopicDetailDto>('/api/v1/admin/questions/topics', dto);
+  return res.data;
+}
+
+/** Rename, re-parent or re-order a node. The slug never changes (study material,
+ *  adaptive sessions, study-plan days and billing scope refs all point at it). */
+export async function updateQuestionTopic(
+  id: string,
+  dto: AdminUpdateTopicDto,
+): Promise<AdminTopicDetailDto> {
+  const res = await apiClient.patch<AdminTopicDetailDto>(
+    `/api/v1/admin/questions/topics/${id}`,
+    dto,
+  );
+  return res.data;
+}
+
+/** Everything that references a node — i.e. exactly what would block a delete. Call this
+ *  BEFORE offering Delete so the console can name the blockers instead of showing a 409. */
+export async function getQuestionTopicUsage(id: string): Promise<AdminTopicUsageDto> {
+  const res = await apiClient.get<AdminTopicUsageDto>(
+    `/api/v1/admin/questions/topics/${id}/usage`,
+  );
+  return res.data;
+}
+
+/** Delete a node; `cascade` also deletes its subtree. 409 TOPIC_IN_USE (with the usage
+ *  breakdown in `details`) when anything still references it. */
+export async function deleteQuestionTopic(id: string, cascade = false): Promise<void> {
+  await apiClient.delete(
+    `/api/v1/admin/questions/topics/${id}${cascade ? '?cascade=true' : ''}`,
+  );
 }
 
 // ─── Courses / modules / lessons (Sprint 2 - superadmin authoring) ──────────

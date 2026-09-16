@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Archive,
   ArrowRight,
   BadgeCheck,
   ChevronLeft,
@@ -9,6 +10,7 @@ import {
   Download,
   ExternalLink,
   FileUp,
+  FolderTree,
   History,
   Loader2,
   Plus,
@@ -18,16 +20,22 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BulkUploadWizard } from '@/components/superadmin/BulkUploadWizard';
+import { TaxonomyManager } from '@/components/superadmin/TaxonomyManager';
+import { CascadingTopicSelect, topicPathLabel } from '@/components/superadmin/TaxonomyPicker';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { FormField } from '@/components/ui/form-field';
 import { ApiRequestError, describeApiError } from '@/lib/api/types';
 import { describeQuestionSetError } from '@/lib/api/question-selection-errors';
 import { listTopics, listCompanies, type ApiTopic } from '@/lib/api/catalog';
 import {
   archiveAdminQuestion,
+  bulkDeleteQuestions,
   bulkSetQuestionDifficulty,
+  bulkSetQuestionStatus,
   createAdminQuestion,
   exportQuestions,
   getAdminQuestion,
+  getQuestionTopicsTree,
   listAdminCompanies,
   listAdminQuestions,
   updateAdminQuestion,
@@ -37,7 +45,11 @@ import {
   type AdminQuestionRow,
 } from '@/lib/api/admin';
 import { QuestionDifficulty, QuestionStatus, QuestionType } from '@/shared/enums';
-import type { AdminCreateQuestionDto } from '@/shared/dto/admin-questions.dto';
+import type {
+  AdminBulkDeleteRefusalDto,
+  AdminCreateQuestionDto,
+  AdminTopicNodeDto,
+} from '@/shared/dto/admin-questions.dto';
 import { QUESTION_TYPE_LABEL } from '@/shared/question-taxonomy';
 import { resizeImageToDataUrl } from '@/lib/image';
 import { buildTopicOptions, indentedLabel } from '@/components/superadmin/assessment-wizard/topic-tree';
@@ -94,8 +106,8 @@ export function QuestionsAdmin() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [showForm, setShowForm] = useState(false);
-  const [showBulk, setShowBulk] = useState(false);
+  /** Only one authoring panel is open at a time — they all reload the list on close. */
+  const [panel, setPanel] = useState<'none' | 'form' | 'bulk' | 'taxonomy'>('none');
   const [topicNames, setTopicNames] = useState<Record<string, string>>({});
   const [companyNames, setCompanyNames] = useState<Record<string, string>>({});
   // Every catalog company, published or not (a question can be tagged to either).
@@ -108,6 +120,16 @@ export function QuestionsAdmin() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkDiff, setBulkDiff] = useState<QuestionDifficulty>(QuestionDifficulty.MEDIUM);
   const [bulkBusy, setBulkBusy] = useState(false);
+  const [bulkError, setBulkError] = useState<string | null>(null);
+  /** Which confirmation is open. Archive and Delete are different promises, so they get
+   *  different copy — see the dialogs at the bottom of this component. */
+  const [confirming, setConfirming] = useState<'archive' | 'delete' | null>(null);
+  /** The selection size at the moment the dialog opened — the selection itself is cleared
+   *  by the mutation, and a dialog that re-titles itself "0 questions" mid-action is a lie. */
+  const [confirmCount, setConfirmCount] = useState(0);
+  /** A partial delete leaves refusals behind; they stay on screen until dismissed. */
+  const [refused, setRefused] = useState<AdminBulkDeleteRefusalDto[] | null>(null);
+  const [refusedStems, setRefusedStems] = useState<Record<string, string>>({});
 
   // Debounce the search box → server query.
   useEffect(() => {
@@ -220,6 +242,11 @@ export function QuestionsAdmin() {
     [publishedCompanies],
   );
 
+  // Page-scoped select-all, with the third state the header checkbox needs.
+  const allOnPageSelected =
+    rows !== null && rows.length > 0 && rows.every((r) => selected.has(r.id));
+  const someOnPageSelected = rows !== null && rows.some((r) => selected.has(r.id));
+
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const visibleStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const visibleEnd = Math.min(page * PAGE_SIZE, total);
@@ -233,20 +260,60 @@ export function QuestionsAdmin() {
     });
   }, []);
 
-  const applyBulkDifficulty = useCallback(async () => {
+  /** Run one bulk mutation over the current selection, then refresh and clear it. */
+  const runBulk = useCallback(
+    async (fn: (ids: string[]) => Promise<void>, fallback: string) => {
+      const ids = [...selected];
+      if (ids.length === 0) return;
+      setBulkBusy(true);
+      setBulkError(null);
+      try {
+        await fn(ids);
+        setSelected(new Set());
+        await Promise.all([loadPage(), loadCounts()]);
+      } catch (err) {
+        setBulkError(describeApiError(err, fallback));
+      } finally {
+        setBulkBusy(false);
+      }
+    },
+    [selected, loadPage, loadCounts],
+  );
+
+  const applyBulkDifficulty = useCallback(
+    () =>
+      runBulk(
+        (ids) => bulkSetQuestionDifficulty(ids, bulkDiff).then(() => undefined),
+        'Could not update difficulty.',
+      ),
+    [runBulk, bulkDiff],
+  );
+
+  const applyBulkStatus = useCallback(
+    (status: QuestionStatus) =>
+      runBulk(
+        (ids) => bulkSetQuestionStatus(ids, status).then(() => undefined),
+        'Could not update those questions.',
+      ),
+    [runBulk],
+  );
+
+  /**
+   * PARTIAL delete: a 200 can still refuse individual ids (in a mock, answered in an
+   * assessment, already practised). Keep the refusals on screen with the stem text, so
+   * "17 of 20 deleted" is actionable rather than mysterious.
+   */
+  const applyBulkDelete = useCallback(async () => {
     const ids = [...selected];
     if (ids.length === 0) return;
-    setBulkBusy(true);
-    try {
-      await bulkSetQuestionDifficulty(ids, bulkDiff);
-      setSelected(new Set());
-      await Promise.all([loadPage(), loadCounts()]);
-    } catch (err) {
-      window.alert(err instanceof ApiRequestError ? err.message : 'Could not update difficulty.');
-    } finally {
-      setBulkBusy(false);
-    }
-  }, [selected, bulkDiff, loadPage, loadCounts]);
+    const stems = Object.fromEntries((rows ?? []).map((r) => [r.id, r.stem]));
+    await runBulk(async () => {
+      const res = await bulkDeleteQuestions(ids);
+      setRefused(res.refused.length > 0 ? res.refused : null);
+      setRefusedStems(stems);
+    }, 'Could not delete those questions.');
+    setConfirming(null);
+  }, [selected, rows, runBulk]);
 
   const mutateStatus = useCallback(
     async (row: AdminQuestionRow, next: QuestionStatus, confirmMsg?: string) => {
@@ -387,12 +454,19 @@ export function QuestionsAdmin() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => { setShowBulk((v) => !v); setShowForm(false); }}
+              onClick={() => setPanel((p) => (p === 'taxonomy' ? 'none' : 'taxonomy'))}
             >
-              <FileUp className="size-4" /> {showBulk ? 'Close' : 'Bulk upload'}
+              <FolderTree className="size-4" /> {panel === 'taxonomy' ? 'Close' : 'Taxonomy'}
             </Button>
-            <Button onClick={() => { setShowForm((v) => !v); setShowBulk(false); }} size="sm">
-              <Plus className="size-4" /> {showForm ? 'Close' : 'Add'}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPanel((p) => (p === 'bulk' ? 'none' : 'bulk'))}
+            >
+              <FileUp className="size-4" /> {panel === 'bulk' ? 'Close' : 'Bulk upload'}
+            </Button>
+            <Button onClick={() => setPanel((p) => (p === 'form' ? 'none' : 'form'))} size="sm">
+              <Plus className="size-4" /> {panel === 'form' ? 'Close' : 'Add'}
             </Button>
           </div>
 
@@ -426,20 +500,29 @@ export function QuestionsAdmin() {
         }}
       />
 
-      {showForm ? (
+      {panel === 'form' ? (
         <AddQuestionForm
           onCreated={() => {
-            setShowForm(false);
+            setPanel('none');
             void loadPage();
             void loadCounts();
           }}
         />
       ) : null}
 
-      {showBulk ? (
+      {panel === 'bulk' ? (
         <BulkUploadWizard
           onDone={() => {
-            setShowBulk(false);
+            setPanel('none');
+            void loadPage();
+            void loadCounts();
+          }}
+        />
+      ) : null}
+
+      {panel === 'taxonomy' ? (
+        <TaxonomyManager
+          onChanged={() => {
             void loadPage();
             void loadCounts();
           }}
@@ -453,34 +536,118 @@ export function QuestionsAdmin() {
       ) : null}
 
       {selected.size > 0 ? (
-        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-orange/30 bg-orange/5 px-4 py-3">
-          <span className="text-sm font-semibold text-navy">{selected.size} selected</span>
-          <span className="text-xs text-slate-500">Set difficulty to</span>
-          <select
-            value={bulkDiff}
-            onChange={(e) => setBulkDiff(e.target.value as QuestionDifficulty)}
-            aria-label="Bulk difficulty"
-            className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm font-semibold text-navy focus:border-orange focus-visible:ring-2 focus-visible:ring-orange/30"
-          >
-            <option value="EASY">Easy</option>
-            <option value="MEDIUM">Medium</option>
-            <option value="HARD">Hard</option>
-          </select>
-          <button
-            type="button"
-            onClick={() => void applyBulkDifficulty()}
-            disabled={bulkBusy}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-orange px-3.5 py-2 text-xs font-bold text-[#171717] disabled:opacity-50"
-          >
-            {bulkBusy ? <Loader2 className="size-4 animate-spin" /> : null} Apply
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelected(new Set())}
-            className="text-xs font-semibold text-slate-500 transition-colors hover:text-navy"
-          >
-            Clear
-          </button>
+        <div className="space-y-3 rounded-xl border border-orange/30 bg-orange/5 px-4 py-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-sm font-semibold text-navy">{selected.size} selected</span>
+            <span className="text-xs text-slate-500">Set difficulty to</span>
+            <select
+              value={bulkDiff}
+              onChange={(e) => setBulkDiff(e.target.value as QuestionDifficulty)}
+              aria-label="Bulk difficulty"
+              className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-sm font-semibold text-navy focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+            >
+              <option value="EASY">Easy</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="HARD">Hard</option>
+            </select>
+            <Button size="sm" onClick={() => void applyBulkDifficulty()} disabled={bulkBusy}>
+              {bulkBusy ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
+              Apply
+            </Button>
+
+            <span className="h-5 w-px bg-orange/30" aria-hidden="true" />
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => void applyBulkStatus(QuestionStatus.PUBLISHED)}
+              disabled={bulkBusy}
+            >
+              Publish
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => void applyBulkStatus(QuestionStatus.DRAFT)}
+              disabled={bulkBusy}
+            >
+              Unpublish
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setConfirmCount(selected.size);
+                setConfirming('archive');
+              }}
+              disabled={bulkBusy}
+            >
+              <Archive className="size-4" aria-hidden="true" /> Archive
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => {
+                setConfirmCount(selected.size);
+                setConfirming('delete');
+              }}
+              disabled={bulkBusy}
+            >
+              <Trash2 className="size-4" aria-hidden="true" /> Delete
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelected(new Set())}
+              disabled={bulkBusy}
+            >
+              Clear
+            </Button>
+          </div>
+          {bulkError ? (
+            <p
+              role="alert"
+              className="rounded-md bg-red-50 p-3 text-sm font-medium text-red-700 ring-1 ring-red-200"
+            >
+              {bulkError}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {refused && refused.length > 0 ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-700">
+                Kept, not deleted
+              </p>
+              <h3 className="text-base font-bold text-navy">
+                {refused.length} question{refused.length === 1 ? ' was' : 's were'} refused
+              </h3>
+              <p className="mt-0.5 text-sm text-slate-600">
+                Everything else in the selection was deleted. Archive these instead — that hides
+                them from practice and new assessments while keeping every recorded attempt intact.
+              </p>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => setRefused(null)}>
+              Dismiss
+            </Button>
+          </div>
+          <ul className="mt-4 space-y-2">
+            {refused.map((r) => (
+              <li
+                key={r.id}
+                className="rounded-xl border border-slate-200 bg-white p-4 text-sm shadow-sm"
+              >
+                <p className="line-clamp-2 font-semibold text-navy">
+                  {refusedStems[r.id] ?? r.id}
+                </p>
+                <p className="mt-1 text-sm text-slate-600">{r.reason}</p>
+              </li>
+            ))}
+          </ul>
         </div>
       ) : null}
 
@@ -494,7 +661,13 @@ export function QuestionsAdmin() {
                   <input
                     type="checkbox"
                     aria-label="Select all on this page"
-                    checked={rows !== null && rows.length > 0 && rows.every((r) => selected.has(r.id))}
+                    checked={allOnPageSelected}
+                    // `indeterminate` is a DOM property, not an attribute, so React can
+                    // only set it through a ref. Without it a partly-ticked page renders
+                    // as fully unticked, and the header box silently means two things.
+                    ref={(el) => {
+                      if (el) el.indeterminate = someOnPageSelected && !allOnPageSelected;
+                    }}
                     onChange={(e) => {
                       const on = e.target.checked;
                       setSelected((s) => {
@@ -674,6 +847,61 @@ export function QuestionsAdmin() {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirming === 'archive'}
+        eyebrow="Reversible"
+        title={`Archive ${confirmCount} question${confirmCount === 1 ? '' : 's'}?`}
+        confirmLabel="Archive them"
+        busyLabel="Archiving…"
+        tone="default"
+        busy={bulkBusy}
+        onConfirm={() => {
+          void applyBulkStatus(QuestionStatus.ARCHIVED).then(() => setConfirming(null));
+        }}
+        onClose={() => setConfirming(null)}
+      >
+        <p>
+          Archiving <span className="font-semibold text-navy">hides a question from practice and
+          from new assessments</span>, and it stops being sampled into any mock built from now on.
+        </p>
+        <p>
+          It <span className="font-semibold text-navy">remains inside any mock or drive that
+          already includes it</span>, and every recorded attempt still grades against it. Nothing
+          a student has already sat changes.
+        </p>
+        <p>You can restore an archived question at any time by publishing it again.</p>
+      </ConfirmDialog>
+
+      <ConfirmDialog
+        open={confirming === 'delete'}
+        eyebrow="Permanent"
+        title={`Permanently delete ${confirmCount} question${confirmCount === 1 ? '' : 's'}?`}
+        confirmLabel="Delete permanently"
+        busyLabel="Deleting…"
+        tone="destructive"
+        busy={bulkBusy}
+        onConfirm={() => void applyBulkDelete()}
+        onClose={() => setConfirming(null)}
+      >
+        <p>
+          Deleting is{' '}
+          <span className="font-semibold text-navy">permanent and can’t be undone.</span> The
+          question, its options, its company tags and its review items are removed outright.
+        </p>
+        <p>
+          A question is{' '}
+          <span className="font-semibold text-navy">refused if it is used in a mock, answered in
+          an assessment, or already practised</span>{' '}
+          by a student — deleting it would break those reports. Those come back listed, and the
+          rest are deleted.
+        </p>
+        <p>
+          If you only want a question out of circulation,{' '}
+          <span className="font-semibold text-navy">archive it instead</span>: that hides it from
+          practice and new assessments but keeps it inside anything students have already sat.
+        </p>
+      </ConfirmDialog>
 
       {detailRow ? (
         <QuestionDetailDrawer
@@ -1256,7 +1484,9 @@ function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
   const [difficulty, setDifficulty] = useState<QuestionDifficulty>(QuestionDifficulty.MEDIUM);
   const [stem, setStem] = useState('');
   const [imageUrl, setImageUrl] = useState('');
-  const [topicSlug, setTopicSlug] = useState('');
+  /** The node the question is filed under — Section, Topic or Subtopic, whichever the
+   *  author picked. `questions.subtopic_id` stores exactly that, at any of the three levels. */
+  const [topicNode, setTopicNode] = useState<AdminTopicNodeDto | null>(null);
   const [companySlug, setCompanySlug] = useState('');
   const [hint, setHint] = useState('');
   const [explanation, setExplanation] = useState('');
@@ -1265,19 +1495,25 @@ function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
     { text: '', isCorrect: true },
     { text: '', isCorrect: false },
   ]);
-  const [topics, setTopics] = useState<Array<{ slug: string; name: string }>>([]);
+  const [tree, setTree] = useState<AdminTopicNodeDto[]>([]);
   const [companies, setCompanies] = useState<Array<{ slug: string; name: string }>>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  /** Re-read the taxonomy (after an inline create) and hand the fresh tree back to the
+   *  picker so it can select the node it just made. */
+  const reloadTree = useCallback(async () => {
+    const next = await getQuestionTopicsTree();
+    setTree(next);
+    return next;
+  }, []);
+
   useEffect(() => {
-    listTopics()
-      .then((ts) => setTopics(ts.map((t) => ({ slug: t.slug, name: t.name }))))
-      .catch(() => {});
+    void reloadTree().catch(() => setTree([]));
     listCompanies()
       .then((cs) => setCompanies(cs.map((c) => ({ slug: c.slug, name: c.name }))))
       .catch(() => {});
-  }, []);
+  }, [reloadTree]);
 
   const isChoice = type === QuestionType.MCQ || type === QuestionType.MULTI_SELECT;
 
@@ -1297,7 +1533,7 @@ function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
     e.preventDefault();
     setError(null);
     if (stem.trim().length < 5) return setError('Question text must be at least 5 characters.');
-    if (!topicSlug) return setError('Pick a topic.');
+    if (!topicNode) return setError('Pick a Section, and a Topic under it.');
     const cleanOptions = options.filter((o) => o.text.trim().length > 0);
     if (isChoice) {
       if (cleanOptions.length < 2) return setError('Add at least two options.');
@@ -1314,7 +1550,7 @@ function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
       imageUrl: imageUrl || undefined,
       hint: hint.trim() || undefined,
       explanation: explanation.trim() || undefined,
-      subtopicSlug: topicSlug,
+      subtopicSlug: topicNode.slug,
       companySlug: companySlug || undefined,
       status,
       options: isChoice
@@ -1381,16 +1617,32 @@ function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
 
       <QuestionImageField value={imageUrl} onChange={setImageUrl} />
 
-      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="space-y-1.5">
-          <label htmlFor="q-topic" className="block text-sm font-medium text-navy">Topic</label>
-          <select id="q-topic" className={selectCls} value={topicSlug} onChange={(e) => setTopicSlug(e.target.value)}>
-            <option value="">Select a topic…</option>
-            {topics.map((t) => (
-              <option key={t.slug} value={t.slug}>{t.name}</option>
-            ))}
-          </select>
+      <div className="mt-5 space-y-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            Where it is filed
+          </p>
+          <p className="text-sm text-slate-600">
+            Pick a Section and a Topic — a Subtopic is optional. Anything missing can be created
+            right here.
+          </p>
         </div>
+        <CascadingTopicSelect
+          tree={tree}
+          leafId={topicNode?.id ?? ''}
+          onChange={setTopicNode}
+          onTreeChanged={reloadTree}
+          idPrefix="q"
+        />
+        {topicNode ? (
+          <p className="text-xs text-slate-500">
+            Filed under{' '}
+            <span className="font-semibold text-navy">{topicPathLabel(tree, topicNode.id)}</span>
+          </p>
+        ) : null}
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-1.5">
           <label htmlFor="q-company" className="block text-sm font-medium text-navy">Company (optional)</label>
           <select id="q-company" className={selectCls} value={companySlug} onChange={(e) => setCompanySlug(e.target.value)}>

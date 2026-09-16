@@ -351,7 +351,21 @@ export class AdminBulkUploadItemDto {
   @IsOptional() @IsString() @MaxLength(4000) hint?: string;
   @IsOptional() @IsString() @MaxLength(8000) explanation?: string;
   @IsOptional() @IsString() @MaxLength(8000) solution?: string;
-  /** The leaf topic (subtopic) slug this question maps to; chains up to Topic → Section. */
+  /**
+   * Taxonomy BY NAME — the CSV's own Section / Topic / Subtopic columns. The server
+   * resolves these case-insensitively and PARENT-SCOPED, creating whatever is missing
+   * with a server-generated slug, and reports where each row landed in
+   * `resolvedSection` / `resolvedTopic` / `resolvedSubtopic`. A blank field falls back
+   * to the request-level `defaultSectionName` / `defaultTopicName` / `defaultSubtopicName`.
+   *
+   * This replaced client-built slugs: the wizard used to invent `section--topic--subtopic`
+   * itself, which could exceed the 120-char slug limit (400ing the whole batch) and, worse,
+   * silently reused an unrelated existing node whenever its guessed slug happened to exist.
+   */
+  @IsOptional() @IsString() @MaxLength(160) sectionName?: string;
+  @IsOptional() @IsString() @MaxLength(160) topicName?: string;
+  @IsOptional() @IsString() @MaxLength(160) subtopicName?: string;
+  /** LEGACY escape hatch: an exact existing slug. Wins over the name fields when set. */
   @IsOptional() @IsString() @MaxLength(120) subtopicSlug?: string;
   @IsOptional()
   @IsArray()
@@ -364,6 +378,18 @@ export class AdminBulkUploadItemDto {
 export class AdminBulkUploadDto {
   /** true = validate only (per-row errors, no writes); false/omitted = import. */
   @IsOptional() @IsBoolean() dryRun?: boolean;
+  /** Section / Topic / Subtopic NAMES applied to every row that leaves its own blank —
+   *  the wizard's "map the whole file to one place" control. */
+  @IsOptional() @IsString() @MaxLength(160) defaultSectionName?: string;
+  @IsOptional() @IsString() @MaxLength(160) defaultTopicName?: string;
+  @IsOptional() @IsString() @MaxLength(160) defaultSubtopicName?: string;
+  /**
+   * OPT-IN to importing questions with NO topic at all. Off by default: an unfiled
+   * question is invisible in every topic picker and shows a dash in the bank, which is
+   * exactly the bug this flag guards — rows that resolve to nothing are reported
+   * INVALID (`field: 'subtopic'`) instead of being imported as orphans.
+   */
+  @IsOptional() @IsBoolean() allowUnfiled?: boolean;
   /** Optional: also tag every imported question to this company. */
   @IsOptional() @IsString() @MaxLength(80) companySlug?: string;
   @IsOptional() @IsEnum(CompanyImportance) defaultImportance?: CompanyImportance;
@@ -386,11 +412,26 @@ export interface AdminBulkUploadFieldError {
   field: string;
   message: string;
 }
+/** Where one level of a row's taxonomy resolved to. `slug` is null on a dry run for a
+ *  node that does not exist yet (`isNew`) — the server only mints a slug when it writes. */
+export interface AdminBulkUploadResolvedNodeDto {
+  name: string;
+  slug: string | null;
+  /** True when the import will CREATE this node rather than reuse an existing one. */
+  isNew: boolean;
+}
+
 export interface AdminBulkUploadRowResult {
   index: number;
   code: string | null;
   status: 'valid' | 'invalid' | 'created' | 'skipped';
   errors: AdminBulkUploadFieldError[];
+  /** Where this row will be (or was) filed — so Map & Review can show it per row
+   *  instead of the admin discovering a dash in the bank afterwards. Null at a level
+   *  the row does not use (e.g. no subtopic), and on a row with no taxonomy at all. */
+  resolvedSection?: AdminBulkUploadResolvedNodeDto | null;
+  resolvedTopic?: AdminBulkUploadResolvedNodeDto | null;
+  resolvedSubtopic?: AdminBulkUploadResolvedNodeDto | null;
 }
 export interface AdminBulkUploadResultDto {
   dryRun: boolean;
@@ -401,6 +442,8 @@ export interface AdminBulkUploadResultDto {
     created: number;
     skipped: number;
     topicsCreated: number;
+    /** Rows that resolve to NO topic (blocked unless `allowUnfiled`). */
+    unfiled: number;
   };
   rows: AdminBulkUploadRowResult[];
 }
@@ -411,6 +454,21 @@ export interface AdminTopicNodeDto {
   id: string;
   slug: string;
   name: string;
+  parentId: string | null;
+  orderIndex: number;
+  /** 0 = Section, 1 = Topic, 2 = Subtopic. */
+  depth: number;
+  /** Questions filed DIRECTLY on this node, any status. */
+  questionCount: number;
+  /** Questions filed on this node or anything below it, any status. */
+  subtreeQuestionCount: number;
+  /**
+   * A machine-generated scratch root the pickers hide by default: the `*-ai` roots left
+   * by an old generation run (a stray one literally named "strings") and
+   * `ai-practice-topics`. Classified on the SERVER so both repos agree, and inherited by
+   * every descendant.
+   */
+  hidden: boolean;
   children: AdminTopicNodeDto[];
 }
 
@@ -482,4 +540,193 @@ export interface AdminQuestionListRowMeta {
   topicName: string | null;
   sectionName: string | null;
   companies: string[];
+}
+
+// ─── Section / Topic / Subtopic taxonomy admin ───────────────────────────────
+//
+// `assessments.topics` is self-referential: a ROOT is a Section, its child a Topic,
+// its grandchild a Subtopic. `questions.subtopic_id` points at whichever level the
+// author picked, so all three are "filable". Nothing in the database has a FOREIGN
+// KEY into this table — every reference is either a loose uuid (questions.subtopic_id)
+// or a loose SLUG (study material, adaptive sessions, study-plan days, billing scope
+// refs). A naive DELETE therefore always succeeds and silently orphans them, which is
+// why the delete guard below re-checks every one of those references inside the same
+// statement (see scripts/cleanup-ai-topics.ts, the proven reference implementation).
+
+/**
+ * Stable `error.code` values for taxonomy admin.
+ *   TOPIC_NAME_TAKEN   409 — a sibling under the same parent already has this name
+ *                            (compared case-insensitively).
+ *   TOPIC_TOO_DEEP     400 — the taxonomy is exactly three levels
+ *                            (Section → Topic → Subtopic); a 4th has nowhere to go.
+ *   TOPIC_CYCLE        400 — re-parenting a node into its own subtree.
+ *   TOPIC_IN_USE       409 — something still references the node (or, with
+ *                            ?cascade=true, something in its subtree). `details`
+ *                            carries the full usage breakdown.
+ */
+export const TOPIC_ADMIN_ERRORS = {
+  TOPIC_NAME_TAKEN: 'TOPIC_NAME_TAKEN',
+  TOPIC_TOO_DEEP: 'TOPIC_TOO_DEEP',
+  TOPIC_CYCLE: 'TOPIC_CYCLE',
+  TOPIC_IN_USE: 'TOPIC_IN_USE',
+} as const;
+
+/** The taxonomy is exactly three levels: 0 = Section, 1 = Topic, 2 = Subtopic. */
+export const MAX_TOPIC_DEPTH = 2;
+/** `assessments.topics.slug` is varchar(120) UNIQUE — the server never emits a longer one. */
+export const TOPIC_SLUG_MAX_LENGTH = 120;
+/** `assessments.topics.name` is varchar(160). */
+export const TOPIC_NAME_MAX_LENGTH = 160;
+
+/** Body for POST /admin/questions/topics. The SLUG IS SERVER-GENERATED — callers send a
+ *  display name only, so no client can invent a colliding or over-long slug. */
+export class AdminCreateTopicDto {
+  @IsString()
+  @MinLength(2)
+  @MaxLength(TOPIC_NAME_MAX_LENGTH)
+  name!: string;
+
+  /** Parent node id. Omit / null for a new Section (root). */
+  @IsOptional()
+  @IsUUID('all')
+  parentId?: string | null;
+
+  /** Sort position among its siblings. Defaults to "after the last sibling". */
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(10_000)
+  orderIndex?: number;
+}
+
+/** Body for PATCH /admin/questions/topics/:id. Every field is optional; an absent field
+ *  is untouched. A RENAME NEVER CHANGES THE SLUG — study material, adaptive sessions,
+ *  study-plan days and billing scope refs all point at the slug as a string, so mutating
+ *  it would silently detach them. */
+export class AdminUpdateTopicDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  @MaxLength(TOPIC_NAME_MAX_LENGTH)
+  name?: string;
+
+  /** Move the node under a different parent; null promotes it to a root Section. */
+  @IsOptional()
+  @IsUUID('all')
+  parentId?: string | null;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(10_000)
+  orderIndex?: number;
+}
+
+/** One taxonomy node as the admin console sees it. */
+export interface AdminTopicDetailDto {
+  id: string;
+  slug: string;
+  name: string;
+  parentId: string | null;
+  orderIndex: number;
+  /** 0 = Section, 1 = Topic, 2 = Subtopic. */
+  depth: number;
+}
+
+/** Reference counts for ONE topic — every logical reference into `assessments.topics`,
+ *  grouped by the table that holds it. Non-zero anywhere ⇒ the node can't be deleted. */
+export interface AdminTopicUsageCounts {
+  /** Child topics directly under this node. */
+  childTopics: number;
+  /** `assessments.questions.subtopic_id` — ANY status, drafts and archived included. */
+  questions: number;
+  /** `catalog.study_material_items.quiz_topic_slug`. */
+  studyMaterialItems: number;
+  /** `assessments.adaptive_sessions.topic_slug`. */
+  adaptiveSessions: number;
+  /** `assessments.study_plan_days.focus_topic_slug`. */
+  studyPlanDays: number;
+  /** `billing.entitlements.scope_ref`. */
+  entitlements: number;
+  /** `billing.payment_orders.scope_ref`. */
+  paymentOrders: number;
+  /** `billing.payment_order_items.scope_ref`. */
+  paymentOrderItems: number;
+  /** `billing.coupons.applicability` jsonb `scopeRef`. */
+  coupons: number;
+  /** Sum of everything above EXCEPT `childTopics` (which a cascade delete removes itself). */
+  externalTotal: number;
+}
+
+/** GET /admin/questions/topics/:id/usage — exactly what would block a delete. */
+export interface AdminTopicUsageDto {
+  id: string;
+  slug: string;
+  name: string;
+  depth: number;
+  /** Every node in the subtree INCLUDING this one. */
+  subtreeSize: number;
+  /** References to this node alone. */
+  self: AdminTopicUsageCounts;
+  /** References to this node and every descendant (what ?cascade=true has to clear). */
+  subtree: AdminTopicUsageCounts;
+  /** DELETE without cascade will succeed: no children and nothing points at it. */
+  deletable: boolean;
+  /** DELETE ?cascade=true will succeed: nothing outside the subtree points into it. */
+  cascadeDeletable: boolean;
+}
+
+// ─── Bulk status / bulk delete on the question list ──────────────────────────
+
+/** Most ids one bulk-delete call may carry. A hard delete fans out across six tables
+ *  inside a single transaction, so the batch is kept small enough to stay short-lived. */
+export const MAX_BULK_DELETE_IDS = 200;
+
+/** Body for PATCH /admin/questions/bulk-status — publish / unpublish / archive / restore
+ *  many questions at once. */
+export class AdminBulkStatusDto {
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayMaxSize(2000)
+  @IsUUID('all', { each: true })
+  ids!: string[];
+
+  @IsEnum(QuestionStatus)
+  status!: QuestionStatus;
+}
+
+export interface AdminBulkStatusResultDto {
+  updated: number;
+  /** Ids that matched no question (already deleted elsewhere). */
+  notFound: string[];
+}
+
+/** Body for POST /admin/questions/bulk-delete — PERMANENT removal. */
+export class AdminBulkDeleteDto {
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayMaxSize(MAX_BULK_DELETE_IDS)
+  @IsUUID('all', { each: true })
+  ids!: string[];
+}
+
+/** Why one id in a bulk delete was refused. `QUESTION_IN_USE` reuses the existing
+ *  selection-error code (assessment-builder.dto.ts). */
+export interface AdminBulkDeleteRefusalDto {
+  id: string;
+  code: 'QUESTION_IN_USE' | 'QUESTION_NOT_FOUND';
+  reason: string;
+  /** Rows in `assessments.mock_test_questions` (the question sits in a mock). */
+  mockLinks?: number;
+  /** Rows in `assessments.mock_attempt_answers` (a student answered it in an assessment). */
+  recordedAnswers?: number;
+  /** Rows in `assessments.practice_attempts` (a student practised it). */
+  practiceAttempts?: number;
+}
+
+/** POST /admin/questions/bulk-delete is PARTIAL: the clean ids are deleted and the rest
+ *  come back in `refused` with the counts that blocked them. Never all-or-nothing. */
+export interface AdminBulkDeleteResultDto {
+  deleted: string[];
+  refused: AdminBulkDeleteRefusalDto[];
 }
