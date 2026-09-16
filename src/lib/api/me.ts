@@ -138,6 +138,11 @@ export interface GooglePhoneCandidate {
  * GOOGLE_TOKEN_INVALID is a 401 about the GOOGLE token, not our session, so it must never
  * trigger the refresh-and-logout path. Throws ApiRequestError (FEATURE_DISABLED 404,
  * GOOGLE_TOKEN_INVALID 401, GOOGLE_UNAVAILABLE 502, 429 throttle).
+ *
+ * DEPLOY PREREQUISITE: the body carries a third-party OAuth bearer token, and in production
+ * /api/v1/* is rewritten by Netlify to the ALB over plain HTTP (see netlify.toml) - the same
+ * leg every authenticated request already takes. Terminate TLS on the backend (HTTPS listener
+ * + https:// in netlify.toml) BEFORE GOOGLE_PHONE_FETCH_ENABLED is switched on in production.
  */
 export async function fetchGooglePhones(accessToken: string): Promise<GooglePhoneCandidate[]> {
   const res = await apiClient.post<{ phones?: GooglePhoneCandidate[] }>(

@@ -4,6 +4,7 @@ import { Fragment, useCallback, useEffect, useState } from 'react';
 import { ChevronDown, Loader2, Receipt } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { listAdminTransactions } from '@/lib/api/admin-payments';
+import { customerOf, type LedgerCustomer } from '@/lib/payments/ledger-customer';
 import type { AdminTransactionDto } from '@/shared/dto/payments.dto';
 
 const PAGE = 20;
@@ -103,33 +104,8 @@ function Detail({
   );
 }
 
-interface Customer {
-  name: string | null;
-  email: string | null;
-  phone: string | null;
-  /** Shown only when the phone was typed at checkout rather than saved on the profile. */
-  phoneNote: string | null;
-}
-
-/**
- * The row's customer contact: the server-resolved customer* fields (live registered name,
- * current profile phone, …), or the legacy userName/email/phone on a backend that predates
- * them - never a mix of the two.
- */
-function customerOf(t: AdminTransactionDto): Customer {
-  const resolved = t.customerName !== undefined || t.customerEmail !== undefined || t.customerPhone !== undefined;
-  if (!resolved) return { name: t.userName, email: t.email, phone: t.phone, phoneNote: null };
-  const phone = t.customerPhone ?? null;
-  return {
-    name: t.customerName ?? null,
-    email: t.customerEmail ?? null,
-    phone,
-    phoneNote: phone && t.customerPhoneSource === 'CHECKOUT' ? 'from checkout' : null,
-  };
-}
-
 /** A mobile number with its "from checkout" caption; '—' when there is none. */
-function Mobile({ c, compact = false }: { c: Customer; compact?: boolean }) {
+function Mobile({ c, compact = false }: { c: LedgerCustomer; compact?: boolean }) {
   return (
     <>
       <p className={cn('whitespace-nowrap tabular-nums', compact ? 'text-xs text-slate-500' : 'text-slate-600')}>

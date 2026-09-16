@@ -174,7 +174,7 @@ export default function CartPage() {
     setBusy(true);
     setMsg(null);
     // Settle the mobile the widget opens with (may briefly ask for one); closing that
-    // prompt cancels quietly - the cart is untouched.
+    // prompt cancels the checkout (it says so itself) - the cart is untouched.
     const checkoutPrefill = await resolveContact(prefill);
     if (!checkoutPrefill) {
       setBusy(false);

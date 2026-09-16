@@ -25,3 +25,21 @@ export function checkoutPrefillFromMe(
     contact: checkoutContact(me?.studentProfile?.phone) ?? null,
   };
 }
+
+/** What the Razorpay widget opens prefilled with - Razorpay's own `prefill` shape. */
+export interface WidgetPrefill {
+  name?: string;
+  email?: string;
+  contact?: string;
+}
+
+/** The widget's `prefill`: blanks omitted, and `contact` only as a valid normalised mobile -
+ *  never an invalid value the buyer would have to notice and fix inside Razorpay. */
+export function widgetPrefill(prefill?: CheckoutPrefill): WidgetPrefill {
+  const contact = checkoutContact(prefill?.contact);
+  return {
+    ...(prefill?.name ? { name: prefill.name } : {}),
+    ...(prefill?.email ? { email: prefill.email } : {}),
+    ...(contact ? { contact } : {}),
+  };
+}

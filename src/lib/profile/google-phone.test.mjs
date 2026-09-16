@@ -1,7 +1,8 @@
 /**
- * Tests for the customer-phone helpers: Google phone candidates, masking, failure messages,
- * the Razorpay contact prefill, and POST /me/phone/google through the real API client (a
- * rejected GOOGLE token must never be treated as a dead session). Zero-dependency: Node's
+ * Tests for the customer-contact helpers: Google phone candidates, masking, failure messages,
+ * the Razorpay prefill, the ledger's customer resolution (legacy backend vs resolved nulls),
+ * and POST /me/phone/google through the real API client (a rejected GOOGLE token must never
+ * be treated as a dead session). Zero-dependency: Node's
  * built-in test runner with native type stripping (Node >= 22.18):
  *
  *   node --test src/lib/profile/google-phone.test.mjs
@@ -36,7 +37,8 @@ registerHooks({
 });
 
 const { cleanGooglePhones, describeGooglePhoneFailure, maskPhone, phoneLabels } = await import('./google-phone.ts');
-const { checkoutContact, checkoutPrefillFromMe } = await import('@/lib/payments/checkout-contact');
+const { checkoutContact, checkoutPrefillFromMe, widgetPrefill } = await import('@/lib/payments/checkout-contact');
+const { customerOf } = await import('@/lib/payments/ledger-customer');
 const { GoogleConsentError } = await import('@/lib/google/identity');
 const { ApiRequestError } = await import('@/lib/api/types');
 
@@ -96,6 +98,59 @@ test('checkoutPrefillFromMe carries name, email and a valid profile phone', () =
   assert.equal(checkoutPrefillFromMe({ ...me, studentProfile: { phone: '98765' } }).contact, null);
   assert.equal(checkoutPrefillFromMe({ ...me, studentProfile: null }).contact, null);
   assert.deepEqual(checkoutPrefillFromMe(null), { name: null, email: null, contact: null });
+});
+
+test('widgetPrefill omits blanks and only ever passes a valid mobile to the widget', () => {
+  assert.deepEqual(widgetPrefill({ name: 'Asha Rao', email: 'asha@example.com', contact: '+91 98765 43210' }), {
+    name: 'Asha Rao',
+    email: 'asha@example.com',
+    contact: '9876543210',
+  });
+  // An invalid/legacy profile value is dropped rather than shown for the buyer to fix.
+  assert.deepEqual(widgetPrefill({ name: 'Asha Rao', email: '', contact: '98765' }), { name: 'Asha Rao' });
+  assert.deepEqual(widgetPrefill({ name: null, email: null, contact: null }), {});
+  assert.deepEqual(widgetPrefill(undefined), {});
+});
+
+// The ledger's whole "safe to deploy the frontend before the backend" claim: absent
+// customer* keys mean an older backend (fall back), present-but-null means "none".
+const legacyRow = {
+  userName: 'Legacy Name',
+  email: 'legacy@example.com',
+  phone: '9000000000',
+};
+
+test('customerOf falls back to the legacy fields only when no customer* key is present', () => {
+  assert.deepEqual(customerOf(legacyRow), {
+    name: 'Legacy Name',
+    email: 'legacy@example.com',
+    phone: '9000000000',
+    phoneNote: null,
+  });
+  // One resolved key is enough to trust the server's answer for all three.
+  assert.deepEqual(customerOf({ ...legacyRow, customerPhone: null, customerPhoneSource: null }), {
+    name: null,
+    email: null,
+    phone: null,
+    phoneNote: null,
+  });
+});
+
+test('customerOf never mixes resolved nulls with the legacy snapshot', () => {
+  assert.deepEqual(
+    customerOf({ ...legacyRow, customerName: null, customerEmail: null, customerPhone: null, customerPhoneSource: null }),
+    { name: null, email: null, phone: null, phoneNote: null },
+  );
+});
+
+test('customerOf captions a checkout-typed phone only', () => {
+  const row = { ...legacyRow, customerName: 'Asha Rao', customerEmail: 'asha@example.com', customerPhone: '9876543210' };
+  assert.equal(customerOf({ ...row, customerPhoneSource: 'CHECKOUT' }).phoneNote, 'from checkout');
+  assert.equal(customerOf({ ...row, customerPhoneSource: 'PROFILE' }).phoneNote, null);
+  assert.equal(customerOf({ ...row, customerPhoneSource: null }).phoneNote, null);
+  // No phone → no caption, whatever the stored source says.
+  assert.equal(customerOf({ ...row, customerPhone: null, customerPhoneSource: 'CHECKOUT' }).phoneNote, null);
+  assert.equal(customerOf({ ...row, customerPhoneSource: 'CHECKOUT' }).name, 'Asha Rao');
 });
 
 test('describeGooglePhoneFailure maps consent outcomes', () => {

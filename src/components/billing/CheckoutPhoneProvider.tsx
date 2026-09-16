@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useCallback, useContext, useId, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { toast } from 'sonner';
 import { Loader2, Smartphone, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,9 @@ import { notifyProfileUpdated } from '@/lib/profile-events';
  *   3. Else, ONLY for a student while `googlePhoneFetchEnabled` is on, a compact prompt
  *      offers "Use my Google phone" (saved through PATCH /me) or "Continue to payment".
  *      It never blocks paying (SMS OTP is on hold); skipping silences it for the rest of
- *      the session. Closing it (Esc / ✕ / backdrop) cancels the purchase.
+ *      the browser session - the provider is mounted once per route group ((student) and
+ *      (quiz)), so the flag lives in sessionStorage rather than in a component. Closing it
+ *      (Esc / ✕ / backdrop) cancels the purchase and says so.
  *
  * With the switch off - or outside the student area, where no provider is mounted - the
  * flow is exactly the old one plus a valid profile phone in the prefill.
@@ -36,6 +38,31 @@ type PromptResult = { kind: 'saved'; contact: string } | { kind: 'skip' } | { ki
 
 const CheckoutContactContext = createContext<ResolveCheckoutContact | null>(null);
 
+/** "Continue to payment" silences the prompt for the rest of the browser session. It has to
+ *  outlive a provider (each route group mounts its own) and a reload, so it is stored in
+ *  sessionStorage, mirrored in a module variable for when storage is unavailable. */
+const SKIP_KEY = 'zskillup:checkout-phone-skipped';
+let skippedThisSession = false;
+
+function hasSkipped(): boolean {
+  if (skippedThisSession) return true;
+  try {
+    skippedThisSession = window.sessionStorage.getItem(SKIP_KEY) === '1';
+  } catch {
+    /* private mode - the module flag is the whole answer */
+  }
+  return skippedThisSession;
+}
+
+function rememberSkip() {
+  skippedThisSession = true;
+  try {
+    window.sessionStorage.setItem(SKIP_KEY, '1');
+  } catch {
+    /* private mode - the skip then lasts only until a reload */
+  }
+}
+
 /** No provider (e.g. the TPO console): pass the caller's prefill through, phone validated. */
 const passThrough: ResolveCheckoutContact = async (prefill) => ({
   ...prefill,
@@ -48,7 +75,14 @@ export function useCheckoutContact(): ResolveCheckoutContact {
 
 export function CheckoutPhoneProvider({ children }: { children: ReactNode }) {
   const [prompt, setPrompt] = useState<{ me: ApiMe; settle: (r: PromptResult) => void } | null>(null);
-  const skipped = useRef(false);
+  // The prompt currently on screen, so a second purchase started while it is open shares
+  // its answer instead of replacing the dialog (which would strand the first caller).
+  const pending = useRef<Promise<PromptResult> | null>(null);
+  const settlePending = useRef<((result: PromptResult) => void) | null>(null);
+
+  // Leaving the route group with the prompt open (it is mounted per group) would otherwise
+  // leave every waiting caller's promise - and its `finally` - hanging forever.
+  useEffect(() => () => settlePending.current?.({ kind: 'closed' }), []);
 
   const resolve = useCallback<ResolveCheckoutContact>(async (prefill, opts) => {
     // The control that started checkout, read before any await (the caller disables it
@@ -67,19 +101,33 @@ export function CheckoutPhoneProvider({ children }: { children: ReactNode }) {
     };
     const saved = checkoutContact(me?.studentProfile?.phone);
     if (saved) return { ...base, contact: saved };
-    if (!me?.googlePhoneFetchEnabled || me.role !== 'STUDENT' || skipped.current) {
+    if (!me?.googlePhoneFetchEnabled || me.role !== 'STUDENT' || hasSkipped()) {
       return { ...base, contact: null };
     }
 
-    void loadGoogleIdentity(); // warm GIS so the prompt's button can open Google's popup at once
-    const result = await new Promise<PromptResult>((settle) => setPrompt({ me, settle }));
-    setPrompt(null);
+    let answer = pending.current;
+    if (!answer) {
+      void loadGoogleIdentity(); // warm GIS so the prompt's button can open Google's popup at once
+      answer = new Promise<PromptResult>((settle) => {
+        const once = (result: PromptResult) => {
+          if (settlePending.current !== once) return;
+          settlePending.current = null;
+          pending.current = null;
+          setPrompt(null);
+          settle(result);
+        };
+        settlePending.current = once;
+        setPrompt({ me, settle: once });
+      });
+      pending.current = answer;
+    }
+    const result = await answer;
     if (result.kind === 'closed') {
       refocusWhenEnabled(opener);
       return null;
     }
     if (result.kind === 'skip') {
-      skipped.current = true;
+      rememberSkip();
       return { ...base, contact: null };
     }
     return { ...base, contact: result.contact };
@@ -109,10 +157,16 @@ function CheckoutPhonePrompt({ me, onResult }: { me: ApiMe; onResult: (r: Prompt
   const titleId = useId();
   const google = useGooglePhone(me.email);
   const [saving, setSaving] = useState(false);
-  const close = useCallback(() => onResult({ kind: 'closed' }), [onResult]);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  // Dismissing the dialog cancels the purchase, so say so - nothing else would.
+  const close = useCallback(() => {
+    toast('Payment not started. Add a mobile number, or choose "Continue to payment".');
+    onResult({ kind: 'closed' });
+  }, [onResult]);
 
   const save = async (phone: string) => {
     setSaving(true);
+    setSaveError(null);
     try {
       // PATCH /me normalises the phone, applies can-correct-never-clear, and answers with
       // the refreshed GET /me payload - the stored number is what checkout opens with.
@@ -121,7 +175,9 @@ function CheckoutPhonePrompt({ me, onResult }: { me: ApiMe; onResult: (r: Prompt
       toast.success('Mobile number saved to your profile.');
       onResult({ kind: 'saved', contact: checkoutContact(updated.studentProfile?.phone) ?? phone });
     } catch (err) {
-      toast.error(describeApiError(err, 'Could not save your number. You can still continue to payment.'));
+      // Inline, beside the control that failed: a toast behind a modal is easy to miss, and
+      // the dialog must never just re-enable its buttons and say nothing.
+      setSaveError(describeApiError(err, 'Could not save your number. You can still continue to payment.'));
       setSaving(false);
     }
   };
@@ -167,6 +223,11 @@ function CheckoutPhonePrompt({ me, onResult }: { me: ApiMe; onResult: (r: Prompt
           useLabel={saving ? 'Saving…' : 'Save and continue'}
           busy={saving}
         />
+        {saveError ? (
+          <p role="alert" className="mt-2 text-xs font-medium text-red-700">
+            {saveError}
+          </p>
+        ) : null}
 
         <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button type="button" variant="outline" onClick={() => onResult({ kind: 'skip' })} disabled={saving}>

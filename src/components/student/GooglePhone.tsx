@@ -26,6 +26,8 @@ export type GooglePhoneState =
   | { status: 'none' }
   | { status: 'found'; phones: GooglePhoneCandidate[] }
   | { status: 'error'; message: string }
+  /** The user's own choice (a cancelled consent) - a note, not a failure. */
+  | { status: 'notice'; message: string }
   /** The server switch turned out to be off - hide the option. */
   | { status: 'disabled' };
 
@@ -57,12 +59,12 @@ export function useGooglePhone(loginHint?: string | null) {
         const failure = describeGooglePhoneFailure(err);
         if (failure.tone === 'info') toast(failure.message);
         else toast.error(failure.message);
+        // A cancelled consent is a note, not an error - but it still renders inline, so the
+        // pre-checkout modal never swallows the outcome behind a toast the user can miss.
         setState(
           failure.disabled
             ? { status: 'disabled' }
-            : failure.tone === 'info'
-              ? { status: 'idle' }
-              : { status: 'error', message: failure.message },
+            : { status: failure.tone === 'info' ? 'notice' : 'error', message: failure.message },
         );
       }
     })();
@@ -119,6 +121,13 @@ export function GooglePhoneChoices({
   if (state.status === 'error') {
     return (
       <p role="alert" className={cn('text-xs font-medium text-red-700', className)}>
+        {state.message}
+      </p>
+    );
+  }
+  if (state.status === 'notice') {
+    return (
+      <p role="status" className={cn('text-xs text-slate-500', className)}>
         {state.message}
       </p>
     );

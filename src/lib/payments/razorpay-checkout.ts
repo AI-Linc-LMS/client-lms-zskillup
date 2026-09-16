@@ -1,7 +1,7 @@
 import { createCartOrder, createCollegeOrder, createOrder, verifyPayment } from '@/lib/api/payments';
 import type { CartItemDto, EntitlementDto } from '@/shared/dto/payments.dto';
 import type { BillingPeriod, EntitlementScope } from '@/shared/enums';
-import { checkoutContact, type CheckoutPrefill } from './checkout-contact';
+import { widgetPrefill, type CheckoutPrefill } from './checkout-contact';
 
 /**
  * Razorpay Checkout integration. Loads the hosted checkout script on demand,
@@ -251,17 +251,6 @@ export async function startCartPurchase(
     );
     rzp.open();
   });
-}
-
-/** The widget's `prefill`: blanks omitted, and `contact` only as a valid normalised mobile -
- *  never an invalid value the buyer would have to notice and fix inside Razorpay. */
-function widgetPrefill(prefill?: CheckoutPrefill): RazorpayOptions['prefill'] {
-  const contact = checkoutContact(prefill?.contact);
-  return {
-    name: prefill?.name || undefined,
-    email: prefill?.email || undefined,
-    ...(contact ? { contact } : {}),
-  };
 }
 
 function messageOf(err: unknown, fallback: string): string {
