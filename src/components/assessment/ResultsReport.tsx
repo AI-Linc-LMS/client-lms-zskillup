@@ -14,8 +14,11 @@ const fmtTime = (s: number) => {
   const sec = s % 60;
   return m ? `${m}m ${sec}s` : `${sec}s`;
 };
-const scoreTone = (v: number) =>
-  v >= 70 ? 'text-emerald-700' : v >= 50 ? 'text-amber-700' : 'text-rose-700';
+/** Colour a score % against the assessment's ACTUAL pass mark, not a fixed 70/50 band:
+ *  cleared the bar, within 10 points of it, or below. A hard-coded band painted a 65%
+ *  score amber on a 60% paper — exactly the confusion this report has to remove. */
+const scoreTone = (v: number, passingScore: number) =>
+  v >= passingScore ? 'text-emerald-700' : v >= passingScore - 10 ? 'text-amber-700' : 'text-rose-700';
 
 /**
  * Cohort-wise mock-assessment results report (shared by the Admin + TPO panels).
@@ -69,8 +72,41 @@ export function ResultsReport({
     { label: 'Flagged', value: data.stats.flagged },
   ];
 
-  const Th = ({ k, children, className }: { k?: SortKey; children: React.ReactNode; className?: string }) => (
-    <th className={cn('whitespace-nowrap px-3 py-2 text-[10px] font-semibold uppercase tracking-wide', className)}>
+  const meta = data.assessment;
+  // The marks split, once the paired backend is serving it (see AssessmentResults).
+  // Until then the split line is simply not shown — nothing here guesses a mark.
+  const split =
+    meta.maxMarks > 0 && meta.passMarks != null && meta.mcqMarks != null && meta.codingMarks != null
+      ? {
+          passMarks: meta.passMarks,
+          mcqMarks: meta.mcqMarks,
+          codingMarks: meta.codingMarks,
+          mcqCount: meta.mcqCount ?? 0,
+          codingCount: meta.codingCount ?? 0,
+        }
+      : null;
+  // A paper whose MCQ half is worth less than the pass mark cannot be passed on MCQs
+  // alone — the reason a full-marks MCQ sheet can still read "Fail".
+  const mcqOnlyPct = split ? Math.round((split.mcqMarks / meta.maxMarks) * 100) : 0;
+  const mcqAloneCannotPass = !!split && split.codingMarks > 0 && split.mcqMarks < split.passMarks;
+
+  const Th = ({
+    k,
+    children,
+    className,
+    title,
+  }: {
+    k?: SortKey;
+    children: React.ReactNode;
+    className?: string;
+    /** Hover/focus explanation — how a column is computed, so Score % and Accuracy
+     *  can never be read as the same number. */
+    title?: string;
+  }) => (
+    <th
+      className={cn('whitespace-nowrap px-3 py-2 text-[10px] font-semibold uppercase tracking-wide', className)}
+      title={title}
+    >
       {k ? (
         <button
           type="button"
@@ -98,6 +134,32 @@ export function ResultsReport({
           ))}
         </div>
       </div>
+
+      {/* The pass criterion, spelled out. Without it a reader lands on the Accuracy
+          column (correct ÷ attempted) and reads it as "scored above the pass mark". */}
+      {split ? (
+        <div className="px-6 pt-3">
+          <p className="text-sm text-slate-600">
+            <span className="font-semibold text-navy">
+              Pass mark {meta.passingScore}% of {meta.maxMarks} marks ({split.passMarks} marks)
+            </span>
+            {' · '}
+            {meta.totalQuestions} {meta.totalQuestions === 1 ? 'question' : 'questions'}
+            {split.mcqCount > 0 ? ` · MCQ ${split.mcqCount} (${split.mcqMarks} marks)` : ''}
+            {split.codingCount > 0 ? ` · Coding ${split.codingCount} (${split.codingMarks} marks)` : ''}
+          </p>
+          {mcqAloneCannotPass ? (
+            <p className="mt-1.5 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800">
+              <ShieldAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+              <span>
+                Coding carries {split.codingMarks} of {meta.maxMarks} marks, so a student who
+                answered every MCQ correctly scores {mcqOnlyPct}% — below the {meta.passingScore}%
+                pass mark. This paper cannot be passed on the MCQ section alone.
+              </span>
+            </p>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="flex flex-wrap items-center gap-2 px-6 pb-3 pt-3">
         <div className="flex min-w-[12rem] flex-1 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5">
@@ -185,9 +247,19 @@ export function ResultsReport({
                 <Th k="rank">#</Th>
                 <Th>Student</Th>
                 <Th>College · Dept · Cohort</Th>
-                <Th k="scorePct" className="text-right">Score</Th>
-                <Th className="text-right">Correct</Th>
-                <Th k="accuracy" className="text-right">Acc.</Th>
+                <Th k="scorePct" className="text-right" title="Marks scored ÷ total marks. This is what the Pass / Fail verdict is based on.">
+                  Score %
+                </Th>
+                <Th className="text-right" title="Questions answered correctly, out of the questions the student attempted, out of the whole paper.">
+                  Correct
+                </Th>
+                <Th
+                  k="accuracy"
+                  className="text-right"
+                  title="Correct ÷ attempted. NOT the pass criterion — a student can be 100% accurate on the few questions they answered and still score below the pass mark."
+                >
+                  Accuracy (attempted)
+                </Th>
                 <Th k="timeTakenSec" className="text-right">Time</Th>
                 <Th k="violations" className="text-right">Integrity</Th>
                 <Th className="text-right">Result</Th>
@@ -211,12 +283,17 @@ export function ResultsReport({
                     {r.cohort ? <span className="block text-slate-400">{r.cohort}</span> : null}
                   </td>
                   <td className="px-3 py-2.5 text-right">
-                    <span className={cn('font-bold tabular-nums', scoreTone(r.scorePct))}>{r.scorePct}%</span>
-                    <span className="block text-[11px] text-slate-500">{r.score}/{r.total}</span>
+                    <span className={cn('font-bold tabular-nums', scoreTone(r.scorePct, meta.passingScore))}>{r.scorePct}%</span>
+                    <span className="block text-[11px] text-slate-500">{r.score}/{r.total} marks</span>
                   </td>
                   <td className="px-3 py-2.5 text-right tabular-nums text-slate-600">
                     {r.correctAnswers}/{r.attemptedQuestions}
-                    <span className="block text-[10px] text-slate-400">of {r.totalQuestions}</span>
+                    <span className="block text-[10px] text-slate-400">
+                      {Math.max(0, r.totalQuestions - r.attemptedQuestions) > 0
+                        ? `${r.totalQuestions - r.attemptedQuestions} skipped · `
+                        : ''}
+                      of {r.totalQuestions}
+                    </span>
                   </td>
                   <td className="px-3 py-2.5 text-right tabular-nums text-slate-600">{r.accuracy}%</td>
                   <td className="px-3 py-2.5 text-right text-[11px] tabular-nums text-slate-500">{fmtTime(r.timeTakenSec)}</td>

@@ -23,12 +23,19 @@ function flatRows(data: AssessmentResults): Record<string, string | number>[] {
     'Max Marks': r.total,
     Score: r.score,
     'Percentage': r.scorePct,
+    // The pass criterion, on every row — a reader of the sheet must never have to
+    // infer it (or mistake 'Accuracy %', which is correct ÷ attempted, for it).
+    'Passing Score %': data.assessment.passingScore,
+    // Blank only in the deploy window before the paired backend serves passMarks.
+    'Pass Marks': data.assessment.passMarks ?? '',
+    'Result Basis': `Score % (marks scored / ${r.total} marks) >= ${data.assessment.passingScore}%`,
     Rank: r.rank,
     'Total Questions': r.totalQuestions,
     'Attempted Questions': r.attemptedQuestions,
+    'Skipped Questions': Math.max(0, r.totalQuestions - r.attemptedQuestions),
     'Correct Answers': r.correctAnswers,
     'Incorrect Answers': r.incorrectAnswers,
-    'Accuracy %': r.accuracy,
+    'Accuracy % (of attempted)': r.accuracy,
     'Time Taken (s)': r.timeTakenSec,
     'Tab Switches': r.tabSwitches,
     'Face Violations': r.faceViolations,
@@ -39,7 +46,12 @@ function flatRows(data: AssessmentResults): Record<string, string | number>[] {
     'Integrity Score': r.integrityScore ?? '',
     'Proctoring Warnings': r.warningCount ?? 0,
     'Auto-submitted (Proctoring)': r.autoSubmittedByProctor ? 'Yes' : 'No',
-    'Section-wise Scores': r.sections.map((s) => `${s.name}: ${s.correct}/${s.total}`).join('; '),
+    // Topic-wise and MCQ-only: the section rows come from the MCQ answer rows, so a
+    // coding problem never appears here. Named honestly so nobody reads it as the
+    // whole paper's section breakdown.
+    'Topic-wise Correct (MCQ only)': r.sections
+      .map((s) => `${s.name}: ${s.correct}/${s.total}`)
+      .join('; '),
     'Pass/Fail': r.passed ? 'Pass' : 'Fail',
   }));
 }
@@ -126,15 +138,25 @@ export function buildResultsPdf(data: AssessmentResults): jsPDF {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(100);
+  const a = data.assessment;
   const meta = [
-    data.assessment.companyName,
-    data.assessment.cohort ? `Cohort: ${data.assessment.cohort}` : null,
-    new Date(data.assessment.scheduledAt).toLocaleString(),
+    a.companyName,
+    a.cohort ? `Cohort: ${a.cohort}` : null,
+    new Date(a.scheduledAt).toLocaleString(),
+    // The pass criterion belongs in the header of the printed report, not only in
+    // the reader's head. The marks split arrives with the paired backend; until then
+    // the pass mark is still stated, just without the per-half breakdown.
+    a.passMarks != null
+      ? `Pass mark: ${a.passingScore}% (${a.passMarks} / ${a.maxMarks} marks)`
+      : `Pass mark: ${a.passingScore}% of ${a.maxMarks} marks`,
+    a.codingCount && a.codingCount > 0
+      ? `${a.totalQuestions} questions - MCQ ${a.mcqCount} (${a.mcqMarks} marks), coding ${a.codingCount} (${a.codingMarks} marks)`
+      : `${a.totalQuestions} questions (${a.maxMarks} marks)`,
     `${data.stats.attempted} attempted · avg ${data.stats.avgScorePct}% · ${data.stats.passed} passed · ${data.stats.flagged} flagged`,
   ]
     .filter(Boolean)
     .join('   ·   ');
-  for (const line of wrapText(doc, meta, W - 80, 3)) {
+  for (const line of wrapText(doc, meta, W - 80, 4)) {
     doc.text(line, 40, y);
     y += 12;
   }
@@ -153,18 +175,23 @@ export function buildResultsPdf(data: AssessmentResults): jsPDF {
     { h: '#', w: 26, get: (r) => String(r.rank) },
     {
       h: 'Name',
-      w: 190,
+      w: 178,
       get: (r) => r.fullName || '-',
       maxLines: 3,
       sub: (r) => [r.email, r.phone].filter(Boolean).join(' · '),
     },
     // Legal college names run long ("... (Autonomous), <city>, <state>") - allow a 4th line.
-    { h: 'College', w: 146, get: (r) => r.collegeName ?? '', maxLines: 4 },
+    { h: 'College', w: 138, get: (r) => r.collegeName ?? '', maxLines: 4 },
     { h: 'Department', w: 64, get: (r) => branchShort(r.branch) },
-    { h: 'Score', w: 48, get: (r) => `${r.score}/${r.total}` },
-    { h: '%', w: 30, get: (r) => String(r.scorePct) },
-    { h: 'Correct', w: 50, get: (r) => `${r.correctAnswers}/${r.attemptedQuestions}` },
-    { h: 'Acc%', w: 34, get: (r) => String(r.accuracy) },
+    { h: 'Marks', w: 48, get: (r) => `${r.score}/${r.total}` },
+    { h: 'Score%', w: 38, get: (r) => String(r.scorePct) },
+    {
+      h: 'Correct',
+      w: 58,
+      get: (r) => `${r.correctAnswers}/${r.attemptedQuestions}`,
+      sub: (r) => `of ${r.totalQuestions}`,
+    },
+    { h: 'Acc%(att)', w: 46, get: (r) => String(r.accuracy) },
     { h: 'Violations', w: 54, get: (r) => String(r.violations) },
     { h: 'Integrity', w: 48, get: (r) => (r.integrityScore != null ? String(r.integrityScore) : '-') },
     {

@@ -41,6 +41,7 @@ import {
   applySectionEdit,
   newSection,
   normId,
+  paperMarks,
   removeIds,
   selectionProblems,
   takenIds as collectTakenIds,
@@ -219,6 +220,19 @@ export function AssessmentWizard({
   const existingTally = existing
     ? { total: existing.mcqCount + existing.codingCount, mcq: existing.mcqCount, coding: existing.codingCount, marks: existing.totalMarks }
     : null;
+  // The WHOLE paper: what is being added plus, in edit mode, what the assessment already
+  // holds (its items carry their own marks). Drives the review step's marks split and the
+  // "unpassable by construction" warning.
+  const paper = useMemo(() => {
+    const already = (existing?.items ?? []).reduce(
+      (acc, it) =>
+        it.type === 'CODING'
+          ? { ...acc, codingMarks: acc.codingMarks + it.marks }
+          : { ...acc, mcqMarks: acc.mcqMarks + it.marks },
+      { mcqMarks: 0, codingMarks: 0 },
+    );
+    return paperMarks([tally, already], passingScore);
+  }, [existing, tally, passingScore]);
 
   const windowInvalid = !!startAt && !!endAt && new Date(endAt) <= new Date(startAt);
   const detailsValid =
@@ -807,6 +821,8 @@ export function AssessmentWizard({
               ) : null}
               <ReviewStep
                 sections={sections}
+                paper={paper}
+                passingScore={passingScore}
                 canPreview={canPreview}
                 companyName={companyName}
                 mcqPreview={mcqPreview}

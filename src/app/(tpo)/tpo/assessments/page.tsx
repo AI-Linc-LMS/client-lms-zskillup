@@ -72,6 +72,8 @@ export default function AssessmentCenterPage() {
     title: '',
     scheduledAt: '',
     durationMinutes: '60',
+    /** Percent of the paper's total marks needed to pass. Was hard-coded to 60 server-side. */
+    passingScore: '60',
     mcqCount: '20',
     codingCount: '0',
     difficulty: 'MIXED',
@@ -156,6 +158,11 @@ export default function AssessmentCenterPage() {
       toast.error('Pick a company for a company-wise assessment');
       return;
     }
+    const passMark = Number(form.passingScore);
+    if (!Number.isInteger(passMark) || passMark < 0 || passMark > 100) {
+      toast.error('The pass mark is a whole percentage between 0 and 100');
+      return;
+    }
     setSaving(true);
     try {
       await createTpoAssessment({
@@ -164,6 +171,7 @@ export default function AssessmentCenterPage() {
         title: form.title.trim(),
         scheduledAt: new Date(form.scheduledAt).toISOString(),
         durationMinutes: Number(form.durationMinutes),
+        passingScore: passMark,
         mcqCount: Number(form.mcqCount),
         codingCount: Number(form.codingCount) || undefined,
         difficulty: form.difficulty,
@@ -408,6 +416,13 @@ export default function AssessmentCenterPage() {
           <label className="text-xs font-semibold text-slate-600">
             Duration (min)
             <input type="number" min="5" max="300" value={form.durationMinutes} onChange={(e) => setForm((f) => ({ ...f, durationMinutes: e.target.value }))} className={`mt-1 ${inputCls}`} />
+          </label>
+          <label className="text-xs font-semibold text-slate-600">
+            Pass mark (%)
+            <input type="number" min="0" max="100" value={form.passingScore} onChange={(e) => setForm((f) => ({ ...f, passingScore: e.target.value }))} className={`mt-1 ${inputCls}`} />
+            <span className="mt-1 block font-normal text-[11px] text-slate-500">
+              Percent of the paper&apos;s total marks. A coding round carries its own marks, so it raises the bar.
+            </span>
           </label>
           <label className="text-xs font-semibold text-slate-600">
             Batch

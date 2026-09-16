@@ -1511,8 +1511,11 @@ export function MockReportView({
             <Trophy className="size-7" aria-hidden="true" />
           </span>
           <h1 className="mt-4 text-[44px] font-extrabold leading-none text-navy">{report.pct}%</h1>
+          {/* score/total are MARKS, not a question count — a coding problem can carry 10 of
+              them. Calling them "correct" made a 18/40 marks paper read as 18 questions. */}
           <p className="mt-2 text-sm text-slate-600">
-            {report.score} of {report.total} correct
+            {report.score} of {report.total} marks · pass mark {report.passingScore}% (
+            {Math.ceil((report.total * report.passingScore) / 100)} marks)
           </p>
           <span
             className={cn(
@@ -1540,7 +1543,7 @@ export function MockReportView({
 
           <div className="mx-auto mt-6 grid max-w-lg grid-cols-2 gap-3 sm:grid-cols-4">
             <StatTile label="Percentile" value={`${report.percentile}th`} />
-            <StatTile label="Correct" value={`${report.score}/${report.total}`} />
+            <StatTile label="Marks" value={`${report.score}/${report.total}`} />
             <StatTile label="Time" value={formatDuration(report.timeTakenSec)} />
             <StatTile label="Avg / question" value={`${report.avgSecPerQuestion}s`} />
           </div>

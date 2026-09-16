@@ -36,7 +36,7 @@ registerHooks({
   },
 });
 
-const { LIMITS, toPayloadSections } = await import('./selection.ts');
+const { LIMITS, paperMarks, tallySelection, toPayloadSections } = await import('./selection.ts');
 const { buildTopicOptions } = await import('./topic-tree.ts');
 const { CODING_SECTION_LABEL } = await import('@/shared/question-taxonomy');
 const { UNKNOWN_COMPANY, unknownCompaniesFrom } = await import('@/lib/api/coding');
@@ -75,6 +75,55 @@ test('every payload name fits the server limit, even for a max-length section na
     );
     assert.ok(codingName.endsWith(CODING_SECTION_LABEL), 'the label is never truncated away');
   }
+});
+
+// ── marks split + the unpassable-paper guard ────────────────────────────────
+
+test('the tally splits marks between the MCQ and coding halves', () => {
+  // 20 MCQs × 1 mark + 2 coding × 10 marks = 20 + 20 of 40.
+  const items = [...Array(20)].map((_, i) => mcq(`q${i}`)).concat([coding('p1'), coding('p2')]);
+  const t = tallySelection([section({ mcqMarks: 1, codingMarks: 10, items })]);
+  assert.equal(t.mcqMarks, 20);
+  assert.equal(t.codingMarks, 20);
+  assert.equal(t.marks, 40);
+});
+
+test('a half-coding paper cannot be passed on MCQs alone at a 60% bar', () => {
+  // The reported drive: 20 MCQ marks + 20 coding marks, 60% pass mark. A perfect MCQ
+  // sheet scores 50% and still fails — the warning the wizard has to show.
+  const p = paperMarks([{ mcqMarks: 20, codingMarks: 20 }], 60);
+  assert.equal(p.totalMarks, 40);
+  assert.equal(p.passMarks, 24);
+  assert.equal(p.mcqOnlyPct, 50);
+  assert.equal(p.mcqAloneCannotPass, true);
+});
+
+test('the same paper is passable on MCQs alone once the bar drops to its MCQ share', () => {
+  const p = paperMarks([{ mcqMarks: 20, codingMarks: 20 }], 50);
+  assert.equal(p.passMarks, 20);
+  assert.equal(p.mcqAloneCannotPass, false);
+});
+
+test('an MCQ-only paper is never flagged, whatever the pass mark', () => {
+  const p = paperMarks([{ mcqMarks: 20, codingMarks: 0 }], 90);
+  assert.equal(p.mcqAloneCannotPass, false);
+  assert.equal(p.mcqOnlyPct, 100);
+});
+
+test('an empty paper reports no marks and no warning (nothing picked yet)', () => {
+  const p = paperMarks([{ mcqMarks: 0, codingMarks: 0 }], 60);
+  assert.deepEqual(
+    { totalMarks: p.totalMarks, passMarks: p.passMarks, mcqOnlyPct: p.mcqOnlyPct, warn: p.mcqAloneCannotPass },
+    { totalMarks: 0, passMarks: 0, mcqOnlyPct: 0, warn: false },
+  );
+});
+
+test('edit mode judges the WHOLE paper: already-published items plus what is being added', () => {
+  // Published: 10 MCQ marks. Adding: 30 coding marks. 10 of 40 is below a 60% bar.
+  const p = paperMarks([{ mcqMarks: 0, codingMarks: 30 }, { mcqMarks: 10, codingMarks: 0 }], 60);
+  assert.equal(p.totalMarks, 40);
+  assert.equal(p.mcqOnlyPct, 25);
+  assert.equal(p.mcqAloneCannotPass, true);
 });
 
 // ── section/topic filter tree ───────────────────────────────────────────────
