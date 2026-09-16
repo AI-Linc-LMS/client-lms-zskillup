@@ -77,6 +77,12 @@ export interface AdminCodingProblemSummaryDto {
   slug: string;
   title: string;
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
+  /** Always CODING_SECTION_LABEL ('Coding / Programming', shared/question-taxonomy).
+   *  Optional until the backend half of the QB contract ships these two fields — a
+   *  consumer falls back to the same constants. */
+  section?: string;
+  /** Always 'CODING'. Optional for the same reason as `section`. */
+  questionType?: 'CODING';
   /** Primary coding topic (tags[0]); null when untagged. */
   topic: string | null;
   tags: string[];

@@ -31,6 +31,7 @@ import { PriceTag } from '@/components/billing/PriceTag';
 import { listCompanies, listTopicsWithCounts, type ApiCompany, type ApiTopic } from '@/lib/api/catalog';
 import { listCodingTopics } from '@/lib/api/mocks';
 import { CODING_SECTION_SLUG } from '@/lib/sections/section-catalog';
+import { CODING_SECTION_LABEL } from '@/shared/question-taxonomy';
 import { HIDDEN_ROOT_SLUGS } from '@/components/practice/section-meta';
 import { buildPriceMap, mrpSavings, PERIODS, retailPrice } from '@/lib/payments/pricing';
 import { BillingPeriod, EntitlementScope } from '@/shared/enums';
@@ -153,7 +154,7 @@ export default function BuildYourOwnPage() {
       const codingSection: ApiTopic = {
         id: CODING_SECTION_SLUG,
         slug: CODING_SECTION_SLUG,
-        name: 'Programming / Coding',
+        name: CODING_SECTION_LABEL,
         parentId: null,
         questionCount: codingTopics.reduce((n, t) => n + t.count, 0),
       };

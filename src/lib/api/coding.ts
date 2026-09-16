@@ -1,5 +1,7 @@
 import { apiClient } from './client';
+import { ApiRequestError } from './types';
 import type { GamificationSummary } from './gamification-types';
+import type { CODING_QUESTION_TYPE } from '@/shared/question-taxonomy';
 import type {
   AdminCodingPreviewResultDto,
   AdminCodingSearchQueryDto,
@@ -140,6 +142,11 @@ export interface AdminCodingProblemSummary {
   title: string;
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   isActive: boolean;
+  // Classification (QB contract) - always 'Coding / Programming' + 'CODING'; `topic` is the
+  // primary tag (tags[0]). Optional so a console served by an older API falls back to tags[0].
+  section?: string;
+  questionType?: typeof CODING_QUESTION_TYPE;
+  topic?: string | null;
   // Provenance + verification (parity with the quiz bank).
   companies?: string[];
   roleTags?: string[];
@@ -171,6 +178,39 @@ export async function listAdminCodingProblems(): Promise<AdminCodingProblemSumma
 
 export async function setCodingProblemActive(id: string, isActive: boolean): Promise<void> {
   await apiClient.patch(`/api/v1/admin/coding/problems/${id}`, { isActive });
+}
+
+/** Most company slugs PATCH /admin/coding/problems/:id accepts in `companies`. */
+export const MAX_CODING_PROBLEM_COMPANIES = 20;
+
+/** 400 from PATCH /admin/coding/problems/:id when a slug being ADDED isn't a (non-deleted)
+ *  catalog company; `details.unknown` lists the offending slugs. */
+export const UNKNOWN_COMPANY = 'UNKNOWN_COMPANY';
+
+/**
+ * Replace the company tags on a coding problem (ADMIN, SUPER_ADMIN). Slugs are trimmed,
+ * lower-cased and de-duplicated server-side; `[]` untags the problem. Returns the updated
+ * problem row.
+ *
+ * Only slugs the problem does NOT already carry are checked against the catalog: the
+ * coding bank was ingested with off-catalog provenance tags (adobe, flipkart, oracle, …)
+ * that are deliberately kept, so an unrelated edit must not force an admin to delete them.
+ */
+export async function updateCodingProblemCompanies(
+  id: string,
+  companies: string[],
+): Promise<AdminCodingProblemSummary> {
+  const res = await apiClient.patch<AdminCodingProblemSummary>(`/api/v1/admin/coding/problems/${id}`, {
+    companies,
+  });
+  return res.data;
+}
+
+/** The slugs an UNKNOWN_COMPANY error names, or null for any other error. */
+export function unknownCompaniesFrom(err: unknown): string[] | null {
+  if (!(err instanceof ApiRequestError) || err.code !== UNKNOWN_COMPANY) return null;
+  const unknown = (err.details as { unknown?: unknown } | undefined)?.unknown;
+  return Array.isArray(unknown) ? unknown.map(String) : [];
 }
 
 /**

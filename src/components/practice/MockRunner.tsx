@@ -38,6 +38,7 @@ import { DIFFICULTY_RING } from '@/lib/ui-maps';
 import { Button } from '@/components/ui/button';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { StatTile } from '@/components/ui/stat-tile';
+import { CODING_SECTION_LABEL } from '@/shared/question-taxonomy';
 import {
   answerMock,
   getMock,
@@ -92,6 +93,15 @@ import { hasPreviewHint, roleHint } from '@/lib/session-hints';
  */
 
 type Phase = 'intro' | 'running' | 'report' | 'submitted';
+
+/** The runner's internal key for the coding section (and the report's coding bucket, which
+ *  the server names 'Coding'); shown to students as CODING_SECTION_LABEL. */
+const CODING_KEY = 'Coding';
+
+/** A report breakdown bucket's display name - the coding bucket reads as its section. */
+function reportBucketLabel(bucket: string): string {
+  return bucket === CODING_KEY ? CODING_SECTION_LABEL : bucket;
+}
 
 /** Human label for a proctoring warning/violation type shown in the report. */
 function prettyViolation(type: string): string {
@@ -1107,31 +1117,34 @@ function MockRunningView({
   // Verbal / Technical), coding last. Each section holds its questions with their
   // GLOBAL index so the palette + nav can jump correctly. Falls back to a single
   // "Quiz" section for mocks whose questions carry no section (older payloads).
+  // Coding keeps its full "Coding / Programming" label even on the tab chips: the tab
+  // strip scrolls horizontally and the label is barely longer than "Logical Reasoning".
   const sections = useMemo(() => {
     const SHORT: Record<string, string> = {
       'Numerical Ability': 'Quant',
       'Logical Reasoning': 'Logical Reasoning',
       'Verbal Ability': 'Verbal',
       'Technical MCQs': 'Technical',
+      [CODING_KEY]: CODING_SECTION_LABEL,
     };
     const items = start.questions.map((q, i) => ({ q, i }));
     const order: string[] = [];
     const byKey = new Map<string, typeof items>();
     for (const it of items) {
-      const key = it.q.type === 'CODING' ? 'Coding' : it.q.section || 'Quiz';
+      const key = it.q.type === 'CODING' ? CODING_KEY : it.q.section || 'Quiz';
       if (!byKey.has(key)) {
         byKey.set(key, []);
         order.push(key);
       }
       byKey.get(key)!.push(it);
     }
-    order.sort((a, b) => Number(a === 'Coding') - Number(b === 'Coding')); // coding always last
+    order.sort((a, b) => Number(a === CODING_KEY) - Number(b === CODING_KEY)); // coding always last
     return order.map((key) => ({ key, label: SHORT[key] ?? key, items: byKey.get(key)! }));
   }, [start.questions]);
 
   const activeKey = question
     ? question.type === 'CODING'
-      ? 'Coding'
+      ? CODING_KEY
       : question.section || 'Quiz'
     : (sections[0]?.key ?? 'Quiz');
   const activeSection = sections.find((s) => s.key === activeKey);
@@ -1332,11 +1345,11 @@ function MockRunningView({
         {/* Question palette (right, NTA-style) */}
         <aside className="lg:sticky lg:top-[7.5rem] lg:self-start">
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+            <div className="flex items-center justify-between gap-2">
+              <p className="min-w-0 text-[10px] font-bold uppercase tracking-widest text-slate-500">
                 {sections.length > 1 ? activeLabel : 'Questions'}
               </p>
-              <span className="text-[11px] font-bold text-slate-600">{answeredCount}/{total} answered</span>
+              <span className="shrink-0 text-[11px] font-bold text-slate-600">{answeredCount}/{total} answered</span>
             </div>
             <div className="mt-3 grid max-h-[14rem] grid-cols-5 gap-2 overflow-y-auto pr-1">
               {activeItems.map(({ q, i }, local) => {
@@ -1572,13 +1585,13 @@ export function MockReportView({
                 const pct = t.total === 0 ? 0 : Math.round((t.correct / t.total) * 100);
                 return (
                   <li key={t.topic}>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-semibold text-navy">{t.topic}</span>
+                    <div className="flex items-center justify-between gap-3 text-sm">
+                      <span className="font-semibold text-navy">{reportBucketLabel(t.topic)}</span>
                       <span className="text-slate-600">
                         {t.correct}/{t.total} · {pct}%
                       </span>
                     </div>
-                    <ProgressBar value={pct} className="mt-1.5 h-1.5" label={`${t.topic} accuracy`} />
+                    <ProgressBar value={pct} className="mt-1.5 h-1.5" label={`${reportBucketLabel(t.topic)} accuracy`} />
                   </li>
                 );
               })}

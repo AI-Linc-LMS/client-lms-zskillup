@@ -7,6 +7,7 @@ import { VimeoPicker } from '@/components/media/VimeoPicker';
 import { cn } from '@/lib/utils';
 import { listAdminCompanies, type AdminCompanyRow } from '@/lib/api/admin';
 import { listTopicsWithCounts, type ApiTopic } from '@/lib/api/catalog';
+import { CODING_SECTION_LABEL } from '@/shared/question-taxonomy';
 import {
   createItem,
   createItemsBulk,
@@ -100,7 +101,7 @@ export function StudyMaterialAdmin() {
   /** Sectional-Hub roots to author against (+ synthetic Coding). */
   const sectionOptions = useMemo(() => {
     const roots = buildSections(topics).map((s) => ({ slug: s.slug, name: s.name }));
-    return [...roots, { slug: 'coding', name: 'Coding' }];
+    return [...roots, { slug: 'coding', name: CODING_SECTION_LABEL }];
   }, [topics]);
 
   const scopeReady = scope === 'company' ? !!companyId : !!sectionSlug;

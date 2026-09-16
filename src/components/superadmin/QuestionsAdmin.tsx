@@ -21,50 +21,35 @@ import { BulkUploadWizard } from '@/components/superadmin/BulkUploadWizard';
 import { FormField } from '@/components/ui/form-field';
 import { ApiRequestError, describeApiError } from '@/lib/api/types';
 import { describeQuestionSetError } from '@/lib/api/question-selection-errors';
-import { listTopics, listCompanies } from '@/lib/api/catalog';
+import { listTopics, listCompanies, type ApiTopic } from '@/lib/api/catalog';
 import {
   archiveAdminQuestion,
   bulkSetQuestionDifficulty,
   createAdminQuestion,
   exportQuestions,
   getAdminQuestion,
+  listAdminCompanies,
   listAdminQuestions,
   updateAdminQuestion,
+  type AdminCompanyRow,
   type AdminQuestionDetail,
+  type AdminQuestionListRow,
   type AdminQuestionRow,
 } from '@/lib/api/admin';
 import { QuestionDifficulty, QuestionStatus, QuestionType } from '@/shared/enums';
 import type { AdminCreateQuestionDto } from '@/shared/dto/admin-questions.dto';
+import { QUESTION_TYPE_LABEL } from '@/shared/question-taxonomy';
 import { resizeImageToDataUrl } from '@/lib/image';
+import { buildTopicOptions, indentedLabel } from '@/components/superadmin/assessment-wizard/topic-tree';
+import {
+  CompanyChips,
+  DIFF_TONE,
+  SOURCE_LABEL,
+  SOURCE_TONE,
+  TypeChip,
+} from '@/components/superadmin/bank-labels';
 
-const TYPE_LABEL: Record<string, string> = {
-  MCQ: 'Single choice',
-  MULTI_SELECT: 'Multi-select',
-  NUMERIC: 'Numeric',
-  CODING: 'Coding',
-};
-
-const SOURCE_LABEL: Record<string, string> = {
-  PREVIOUS_YEAR_QUESTIONS: 'PYQ',
-  MEMORY_BASED: 'Memory-based',
-  PATTERN_BASED: 'Pattern-based',
-  MOCK_DERIVED: 'Mock-derived',
-  AI_GENERATED: 'AI-generated',
-};
-
-const SOURCE_TONE: Record<string, string> = {
-  PREVIOUS_YEAR_QUESTIONS: 'bg-violet-50 text-violet-700 ring-violet-200',
-  MEMORY_BASED: 'bg-sky-50 text-sky-700 ring-sky-200',
-  PATTERN_BASED: 'bg-slate-50 text-slate-600 ring-slate-200',
-  MOCK_DERIVED: 'bg-amber-50 text-amber-700 ring-amber-200',
-  AI_GENERATED: 'bg-fuchsia-50 text-fuchsia-700 ring-fuchsia-200',
-};
-
-const DIFF_TONE: Record<string, string> = {
-  EASY: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
-  MEDIUM: 'bg-amber-50 text-amber-700 ring-amber-200',
-  HARD: 'bg-rose-50 text-rose-700 ring-rose-200',
-};
+const TYPE_LABEL: Record<string, string> = QUESTION_TYPE_LABEL;
 
 /** Target roles present in the bank (drives the role funnel filter). */
 const ROLE_OPTIONS = [
@@ -91,7 +76,7 @@ const PAGE_SIZE = 15;
  * hint/solution - inline and in a per-question detail drawer.
  */
 export function QuestionsAdmin() {
-  const [rows, setRows] = useState<AdminQuestionRow[] | null>(null);
+  const [rows, setRows] = useState<AdminQuestionListRow[] | null>(null);
   const [total, setTotal] = useState(0);
   const [exporting, setExporting] = useState(false);
   const [counts, setCounts] = useState({ all: 0, published: 0, draft: 0, archived: 0 });
@@ -101,9 +86,11 @@ export function QuestionsAdmin() {
   const [difficultyFilter, setDifficultyFilter] = useState('');
   const [sourceFilter, setSourceFilter] = useState('');
   const [verifiedFilter, setVerifiedFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  /** A section/topic/subtopic id - the server matches its WHOLE subtree. */
   const [topicFilter, setTopicFilter] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
-  const [topicOptions, setTopicOptions] = useState<Array<{ id: string; slug: string; name: string; parentId: string | null }>>([]);
+  const [topics, setTopics] = useState<ApiTopic[]>([]);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -111,9 +98,12 @@ export function QuestionsAdmin() {
   const [showBulk, setShowBulk] = useState(false);
   const [topicNames, setTopicNames] = useState<Record<string, string>>({});
   const [companyNames, setCompanyNames] = useState<Record<string, string>>({});
-  const [companies, setCompanies] = useState<Array<{ slug: string; name: string }>>([]);
+  // Every catalog company, published or not (a question can be tagged to either).
+  const [companies, setCompanies] = useState<AdminCompanyRow[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [detailId, setDetailId] = useState<string | null>(null);
+  // The row the detail drawer was opened from: it carries the section/topic/companies meta
+  // the detail endpoint doesn't return.
+  const [detailRow, setDetailRow] = useState<AdminQuestionListRow | null>(null);
   // Page-scoped multi-select for bulk difficulty retagging.
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkDiff, setBulkDiff] = useState<QuestionDifficulty>(QuestionDifficulty.MEDIUM);
@@ -128,19 +118,20 @@ export function QuestionsAdmin() {
   // Reset to page 1 whenever a filter changes.
   useEffect(() => {
     setPage(1);
-  }, [statusFilter, companyFilter, difficultyFilter, sourceFilter, verifiedFilter, topicFilter, roleFilter, debouncedSearch]);
+  }, [statusFilter, typeFilter, companyFilter, difficultyFilter, sourceFilter, verifiedFilter, topicFilter, roleFilter, debouncedSearch]);
 
   const baseFilters = useMemo(
     () => ({
       company: companyFilter || undefined,
-      topic: topicFilter || undefined,
+      type: (typeFilter || undefined) as AdminQuestionRow['type'] | undefined,
+      topicId: topicFilter || undefined,
       role: roleFilter || undefined,
       difficulty: difficultyFilter || undefined,
       source: sourceFilter || undefined,
       verified: verifiedFilter === '' ? undefined : verifiedFilter === 'true',
       search: debouncedSearch || undefined,
     }),
-    [companyFilter, topicFilter, roleFilter, difficultyFilter, sourceFilter, verifiedFilter, debouncedSearch],
+    [companyFilter, typeFilter, topicFilter, roleFilter, difficultyFilter, sourceFilter, verifiedFilter, debouncedSearch],
   );
 
   // Selection is per-page — clear it when the page or the filters change so the checkboxes
@@ -199,16 +190,35 @@ export function QuestionsAdmin() {
     listTopics()
       .then((ts) => {
         setTopicNames(Object.fromEntries(ts.map((t) => [t.id, t.name])));
-        setTopicOptions(ts.map((t) => ({ id: t.id, slug: t.slug, name: t.name, parentId: t.parentId })));
+        setTopics(ts);
       })
       .catch(() => {});
-    listCompanies()
+    listAdminCompanies()
       .then((cs) => {
-        setCompanies(cs.map((c) => ({ slug: c.slug, name: c.name })));
+        setCompanies([...cs].sort((a, b) => a.name.localeCompare(b.name)));
         setCompanyNames(Object.fromEntries(cs.map((c) => [c.id, c.name])));
       })
       .catch(() => {});
   }, []);
+
+  // Section → Topic → Subtopic at every depth (drafts count too, so nothing is pruned, and
+  // the console lists questions under the ad-hoc as-wish root that students never see).
+  const topicOptions = useMemo(
+    () => buildTopicOptions(topics, { keepEmpty: true, keepHiddenRoots: true }),
+    [topics],
+  );
+  // Names for the chips come from every company, published or not, so an unpublished or
+  // legacy tag still reads as a name.
+  const companyNameBySlug = useMemo(
+    () => Object.fromEntries(companies.map((c) => [c.slug, c.name])),
+    [companies],
+  );
+  // Filtering and the PYQ spotlight keep to the live catalog.
+  const publishedCompanies = useMemo(() => companies.filter((c) => c.isPublished), [companies]);
+  const publishedCompanyNameBySlug = useMemo(
+    () => Object.fromEntries(publishedCompanies.map((c) => [c.slug, c.name])),
+    [publishedCompanies],
+  );
 
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const visibleStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
@@ -289,7 +299,7 @@ export function QuestionsAdmin() {
           </div>
 
           <div className="mt-5 flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3">
-            <div className="relative min-w-0 flex-1">
+            <div className="relative min-w-[14rem] flex-1">
               <Search
                 className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-500"
                 aria-hidden="true"
@@ -310,30 +320,31 @@ export function QuestionsAdmin() {
               ariaLabel="Filter by company"
             >
               <option value="">All companies</option>
-              {companies.map((c) => (
+              {/* Published only: ?company= is resolved through the published catalog, so an
+                  unpublished slug 404s the list and every count query. */}
+              {publishedCompanies.map((c) => (
                 <option key={c.slug} value={c.slug}>
                   {c.name}
                 </option>
               ))}
             </FilterSelect>
 
-            <FilterSelect value={topicFilter} onChange={setTopicFilter} ariaLabel="Filter by topic">
-              <option value="">All topics</option>
-              {topicOptions
-                .filter((t) => !t.parentId)
-                .map((root) => {
-                  const children = topicOptions.filter((c) => c.parentId === root.id);
-                  return (
-                    <optgroup key={root.id} label={root.name}>
-                      <option value={root.slug}>All {root.name}</option>
-                      {children.map((c) => (
-                        <option key={c.id} value={c.slug}>
-                          &nbsp;&nbsp;{c.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                  );
-                })}
+            <FilterSelect value={topicFilter} onChange={setTopicFilter} ariaLabel="Filter by section or topic">
+              <option value="">All sections &amp; topics</option>
+              {topicOptions.map((o) => (
+                <option key={o.id} value={o.id} title={o.path}>
+                  {indentedLabel(o)}
+                </option>
+              ))}
+            </FilterSelect>
+
+            <FilterSelect value={typeFilter} onChange={setTypeFilter} ariaLabel="Filter by question type">
+              <option value="">All types</option>
+              {Object.values(QuestionType).map((t) => (
+                <option key={t} value={t}>
+                  {TYPE_LABEL[t] ?? t}
+                </option>
+              ))}
             </FilterSelect>
 
             <FilterSelect value={roleFilter} onChange={setRoleFilter} ariaLabel="Filter by target role">
@@ -406,7 +417,7 @@ export function QuestionsAdmin() {
       </div>
 
       <PyqSpotlight
-        companyNameBySlug={Object.fromEntries(companies.map((c) => [c.slug, c.name]))}
+        companyNameBySlug={publishedCompanyNameBySlug}
         active={sourceFilter === 'PREVIOUS_YEAR_QUESTIONS' ? companyFilter : ''}
         onPick={(slug) => {
           setSourceFilter('PREVIOUS_YEAR_QUESTIONS');
@@ -476,7 +487,7 @@ export function QuestionsAdmin() {
       {/* Table */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px] text-left text-sm">
+          <table className="w-full min-w-[1280px] text-left text-sm">
             <thead className="bg-slate-50/90">
               <tr className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                 <th className="px-4 py-4">
@@ -498,7 +509,9 @@ export function QuestionsAdmin() {
                 <th className="px-4 py-4">Question</th>
                 <th className="px-4 py-4">Type</th>
                 <th className="px-4 py-4">Difficulty</th>
+                <th className="px-4 py-4">Section</th>
                 <th className="px-4 py-4">Topic</th>
+                <th className="px-4 py-4">Company</th>
                 <th className="px-4 py-4">Source</th>
                 <th className="px-4 py-4">Roles</th>
                 <th className="px-4 py-4">Status</th>
@@ -508,13 +521,13 @@ export function QuestionsAdmin() {
             <tbody>
               {rows === null ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-12 text-center">
+                  <td colSpan={11} className="px-4 py-12 text-center">
                     <Loader2 className="mx-auto size-5 animate-spin text-slate-500" aria-hidden="true" />
                   </td>
                 </tr>
               ) : rows.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-12 text-center text-sm text-slate-600">
+                  <td colSpan={11} className="px-4 py-12 text-center text-sm text-slate-600">
                     No questions match this view.
                   </td>
                 </tr>
@@ -522,7 +535,7 @@ export function QuestionsAdmin() {
                 rows.map((q) => (
                   <tr
                     key={q.id}
-                    onClick={() => setDetailId(q.id)}
+                    onClick={() => setDetailRow(q)}
                     className="cursor-pointer border-t border-slate-100/80 align-top transition-colors hover:bg-orange/5"
                   >
                     <td className="px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
@@ -538,15 +551,26 @@ export function QuestionsAdmin() {
                       <span className="line-clamp-2">{q.stem}</span>
                     </td>
                     <td className="px-4 py-3.5">
-                      <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
-                        {TYPE_LABEL[q.type] ?? q.type}
-                      </span>
+                      <TypeChip label={TYPE_LABEL[q.type] ?? q.type} />
                     </td>
                     <td className="px-4 py-3.5">
                       <Pill tone={DIFF_TONE[q.difficulty]}>{cap(q.difficulty)}</Pill>
                     </td>
-                    <td className="px-4 py-3.5 text-slate-600">
-                      {q.subtopicId ? topicNames[q.subtopicId] ?? '-' : '-'}
+                    <td className="max-w-[10rem] px-4 py-3.5 text-slate-600">
+                      {q.sectionName ?? <span className="text-slate-500">-</span>}
+                    </td>
+                    <td className="max-w-[12rem] px-4 py-3.5 text-slate-600">
+                      {q.topicName && q.topicName === q.sectionName ? (
+                        // Filed on the section root itself, not a topic under it.
+                        <span className="text-slate-500">(whole section)</span>
+                      ) : (
+                        q.topicName ?? (q.subtopicId ? topicNames[q.subtopicId] : null) ?? (
+                          <span className="text-slate-500">-</span>
+                        )
+                      )}
+                    </td>
+                    <td className="min-w-[13rem] px-4 py-3.5">
+                      <CompanyChips slugs={q.companies ?? []} nameBySlug={companyNameBySlug} />
                     </td>
                     <td className="px-4 py-3.5">
                       {q.source ? (
@@ -651,12 +675,13 @@ export function QuestionsAdmin() {
         </div>
       </div>
 
-      {detailId ? (
+      {detailRow ? (
         <QuestionDetailDrawer
-          id={detailId}
+          row={detailRow}
           topicNames={topicNames}
           companyNames={companyNames}
-          onClose={() => setDetailId(null)}
+          companyNameBySlug={companyNameBySlug}
+          onClose={() => setDetailRow(null)}
           onChanged={() => void loadPage()}
         />
       ) : null}
@@ -810,19 +835,24 @@ function MetricCard({ label, value, accent }: { label: string; value: number; ac
 // ─── Detail drawer ──────────────────────────────────────────────────────────
 
 function QuestionDetailDrawer({
-  id,
+  row,
   topicNames,
   companyNames,
+  companyNameBySlug,
   onClose,
   onChanged,
 }: {
-  id: string;
+  row: AdminQuestionListRow;
   topicNames: Record<string, string>;
+  /** Company id → name (the detail endpoint tags by id). */
   companyNames: Record<string, string>;
+  /** Company slug → name (list rows tag by slug). */
+  companyNameBySlug: Record<string, string>;
   onClose: () => void;
   /** Called after an in-place edit (difficulty) so the list row reflects it. */
   onChanged?: () => void;
 }) {
+  const id = row.id;
   const [detail, setDetail] = useState<AdminQuestionDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   // Diagram editor (existing questions): local draft + explicit save.
@@ -884,12 +914,12 @@ function QuestionDetailDrawer({
   return (
     <div className="fixed inset-0 z-[120] flex justify-end">
       <div
-        className="absolute inset-0 bg-navy/30 backdrop-blur-[1px]"
+        className="absolute inset-0 bg-navy/30"
         onClick={onClose}
         aria-hidden
       />
-      <aside className="relative h-full w-full max-w-xl overflow-y-auto border-l border-slate-200 bg-white shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white/95 px-5 py-3.5 backdrop-blur">
+      <aside className="relative h-full w-full max-w-xl overflow-y-auto border-l border-slate-200 bg-white shadow-lg">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-5 py-3.5">
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
             Question detail
           </p>
@@ -929,6 +959,18 @@ function QuestionDetailDrawer({
               )}
               <QStatusPill status={q.status} />
             </div>
+
+            <QuestionClassification
+              row={row}
+              type={q.type}
+              topicFallback={q.subtopicId ? topicNames[q.subtopicId] ?? null : null}
+              companyNames={
+                // Prefer the fresh detail tags (by id); fall back to the row's slugs.
+                detail.companyTags.length
+                  ? detail.companyTags.map((t) => companyNames[t.companyId] ?? t.companyId.slice(0, 6))
+                  : (row.companies ?? []).map((s) => companyNameBySlug[s] ?? s)
+              }
+            />
 
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
@@ -1011,27 +1053,6 @@ function QuestionDetailDrawer({
             {q.solution ? <Field label="Solution">{q.solution}</Field> : null}
             {q.explanation ? <Field label="Explanation">{q.explanation}</Field> : null}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Topic</p>
-                <p className="mt-1 text-sm text-slate-700">
-                  {q.subtopicId ? topicNames[q.subtopicId] ?? '-' : '-'}
-                </p>
-              </div>
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                  Companies
-                </p>
-                <p className="mt-1 text-sm text-slate-700">
-                  {detail.companyTags.length
-                    ? detail.companyTags
-                        .map((t) => companyNames[t.companyId] ?? t.companyId.slice(0, 6))
-                        .join(', ')
-                    : '-'}
-                </p>
-              </div>
-            </div>
-
             {q.sourceRef ? (
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
@@ -1099,6 +1120,58 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     <div>
       <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{label}</p>
       <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{children}</p>
+    </div>
+  );
+}
+
+/** Where a question is filed: Section › Topic, its type and the companies it's tagged to. */
+function QuestionClassification({
+  row,
+  type,
+  topicFallback,
+  companyNames,
+}: {
+  row: AdminQuestionListRow;
+  type: AdminQuestionRow['type'];
+  topicFallback: string | null;
+  companyNames: string[];
+}) {
+  const topic = row.topicName ?? topicFallback;
+  const section = row.sectionName;
+  const path = section && topic && section !== topic ? `${section} › ${topic}` : (topic ?? section);
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <dl className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto]">
+        <div className="min-w-0">
+          <dt className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Section › Topic</dt>
+          <dd className="mt-1 text-sm font-semibold text-navy">{path ?? <span className="font-normal text-slate-500">Not filed under a topic</span>}</dd>
+        </div>
+        <div>
+          <dt className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Type</dt>
+          <dd className="mt-1">
+            <TypeChip label={TYPE_LABEL[type] ?? type} />
+          </dd>
+        </div>
+        <div className="sm:col-span-2">
+          <dt className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Companies</dt>
+          <dd className="mt-1.5">
+            {companyNames.length ? (
+              <span className="flex flex-wrap gap-1.5">
+                {companyNames.map((n, i) => (
+                  <span
+                    key={`${n}-${i}`}
+                    className="rounded-full bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600 ring-1 ring-inset ring-slate-200"
+                  >
+                    {n}
+                  </span>
+                ))}
+              </span>
+            ) : (
+              <span className="text-sm text-slate-500">Untagged</span>
+            )}
+          </dd>
+        </div>
+      </dl>
     </div>
   );
 }
