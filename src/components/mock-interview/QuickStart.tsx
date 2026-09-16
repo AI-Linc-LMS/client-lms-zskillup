@@ -90,8 +90,8 @@ export function QuickStart() {
       {aiOk === false && (
         <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
           <Sparkles className="mt-0.5 size-4 shrink-0" />
-          AI isn&apos;t configured on this environment yet - interviews use a solid built-in question set and a
-          length-based score. Adaptive questions + rubric feedback switch on once the AI key is set.
+          Detailed AI feedback is unavailable right now - your interview runs on a solid built-in question
+          set and is scored on how fully you answer. Adaptive questions and rubric feedback return shortly.
         </div>
       )}
 
