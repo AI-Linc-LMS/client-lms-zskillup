@@ -4,9 +4,12 @@ import { Fragment, useCallback, useEffect, useState } from 'react';
 import { ChevronDown, Loader2, Receipt } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { listAdminTransactions } from '@/lib/api/admin-payments';
+import { customerOf, type LedgerCustomer } from '@/lib/payments/ledger-customer';
 import type { AdminTransactionDto } from '@/shared/dto/payments.dto';
 
 const PAGE = 20;
+/** Columns at the widest layout (Email and Mobile number fold into Customer below xl). */
+const COLS = 9;
 
 const STATUS_FILTERS: { key: string; label: string }[] = [
   { key: '', label: 'All' },
@@ -80,12 +83,37 @@ function StatusChip({ status }: { status: string }) {
 }
 
 /** Read-only line for the expanded detail grid. */
-function Detail({ label, value, mono = false }: { label: string; value: string | null; mono?: boolean }) {
+function Detail({
+  label,
+  value,
+  mono = false,
+  note,
+}: {
+  label: string;
+  value: string | null;
+  mono?: boolean;
+  /** Metadata caption under the value. */
+  note?: string | null;
+}) {
   return (
     <div>
       <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
       <p className={cn('mt-0.5 break-all text-sm text-navy', mono && 'font-mono text-[12px]')}>{value || '—'}</p>
+      {value && note ? <p className="text-xs text-slate-400">{note}</p> : null}
     </div>
+  );
+}
+
+/** A mobile number with its "from checkout" caption; '—' when there is none. */
+function Mobile({ c, compact = false }: { c: LedgerCustomer; compact?: boolean }) {
+  return (
+    <>
+      <p className={cn('whitespace-nowrap tabular-nums', compact ? 'text-xs text-slate-500' : 'text-slate-600')}>
+        {compact ? <span className="sr-only">Mobile number: </span> : null}
+        {c.phone || '—'}
+      </p>
+      {c.phoneNote ? <p className="text-xs text-slate-400">{c.phoneNote}</p> : null}
+    </>
   );
 }
 
@@ -152,7 +180,12 @@ export function TransactionsLedger() {
           <thead>
             <tr className="border-b border-slate-100 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
               <th className="p-3">Date</th>
-              <th className="p-3">Customer</th>
+              <th className="p-3">
+                <span className="xl:hidden">Customer</span>
+                <span className="hidden xl:inline">Customer name</span>
+              </th>
+              <th className="hidden p-3 xl:table-cell">Email</th>
+              <th className="hidden whitespace-nowrap p-3 xl:table-cell">Mobile number</th>
               <th className="p-3">Product</th>
               <th className="p-3 text-right">Amount</th>
               <th className="p-3">Status</th>
@@ -163,25 +196,26 @@ export function TransactionsLedger() {
           <tbody className="divide-y divide-slate-100">
             {rows === null ? (
               <tr>
-                <td colSpan={7} className="p-10 text-center">
+                <td colSpan={COLS} className="p-10 text-center">
                   <Loader2 className="mx-auto size-5 animate-spin text-slate-400" />
                 </td>
               </tr>
             ) : error ? (
               <tr>
-                <td colSpan={7} className="p-8 text-center text-sm text-red-600">
+                <td colSpan={COLS} className="p-8 text-center text-sm text-red-600">
                   {error}
                 </td>
               </tr>
             ) : rows.length === 0 ? (
               <tr>
-                <td colSpan={7} className="p-8 text-center text-sm text-slate-500">
+                <td colSpan={COLS} className="p-8 text-center text-sm text-slate-500">
                   No transactions{status ? ` with status ${status}` : ''} yet.
                 </td>
               </tr>
             ) : (
               rows.map((t) => {
                 const isOpen = open === t.paymentId;
+                const c = customerOf(t);
                 return (
                   <Fragment key={t.paymentId}>
                     <tr
@@ -190,8 +224,21 @@ export function TransactionsLedger() {
                     >
                       <td className="p-3 whitespace-nowrap text-slate-600">{fmtDate(t.capturedAt)}</td>
                       <td className="p-3">
-                        <p className="font-semibold text-navy">{t.userName || '—'}</p>
-                        <p className="text-xs text-slate-500">{t.email || '—'}</p>
+                        <p className="font-semibold text-navy">{c.name || '—'}</p>
+                        {/* Narrow widths: Email and Mobile number stack under the name. */}
+                        <div className="xl:hidden">
+                          <p className="text-xs text-slate-500 [overflow-wrap:anywhere]">
+                            <span className="sr-only">Email: </span>
+                            {c.email || '—'}
+                          </p>
+                          <Mobile c={c} compact />
+                        </div>
+                      </td>
+                      <td className="hidden max-w-[16rem] p-3 text-slate-600 [overflow-wrap:anywhere] xl:table-cell">
+                        {c.email || '—'}
+                      </td>
+                      <td className="hidden p-3 xl:table-cell">
+                        <Mobile c={c} />
                       </td>
                       <td className="p-3 text-slate-600">{productSummary(t)}</td>
                       <td className="p-3 text-right font-bold tabular-nums text-navy">{inr(t.amountCents, t.currency)}</td>
@@ -203,11 +250,11 @@ export function TransactionsLedger() {
                     </tr>
                     {isOpen ? (
                       <tr className="bg-slate-50/60">
-                        <td colSpan={7} className="p-4">
+                        <td colSpan={COLS} className="p-4">
                           <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                            <Detail label="User name" value={t.userName} />
-                            <Detail label="Email" value={t.email} />
-                            <Detail label="Mobile" value={t.phone} />
+                            <Detail label="Customer name" value={c.name} />
+                            <Detail label="Email" value={c.email} />
+                            <Detail label="Mobile number" value={c.phone} note={c.phoneNote} />
                             <Detail label="User ID" value={t.userId} mono />
                             <div className="sm:col-span-2">
                               <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">

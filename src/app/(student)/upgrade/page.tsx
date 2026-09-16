@@ -31,6 +31,8 @@ import { FeatureItem, IncludedGrid, PlanPill, StatBand, TrustBadges, ValueProps 
 import { PLAN_INCLUDED, PLAN_STATS, PLAN_VALUES } from '@/components/billing/plan-content';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { startCartPurchase } from '@/lib/payments/razorpay-checkout';
+import { checkoutPrefillFromMe } from '@/lib/payments/checkout-contact';
+import { useCheckoutContact } from '@/components/billing/CheckoutPhoneProvider';
 import { BillingPeriod, EntitlementScope, EntitlementSubject } from '@/shared/enums';
 import type { CartItemDto, EntitlementDto, MySubscriptionDto, PriceBookEntryDto, PurchaseHistoryItemDto } from '@/shared/dto/payments.dto';
 import { cn } from '@/lib/utils';
@@ -67,6 +69,7 @@ export default function UpgradeRenewPage() {
   const [loading, setLoading] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
   const { buy, busyKey } = usePurchase();
+  const resolveContact = useCheckoutContact();
 
   useEffect(() => {
     void (async () => {
@@ -107,7 +110,7 @@ export default function UpgradeRenewPage() {
       scope: EntitlementScope.PLATFORM,
       period,
       label: `Full Platform (${periodMonths(period)})`,
-      prefill: { name: me?.fullName, email: me?.email },
+      prefill: checkoutPrefillFromMe(me),
       onPurchased: refresh,
     });
 
@@ -126,7 +129,9 @@ export default function UpgradeRenewPage() {
     }));
     setRenewingPlan(true);
     try {
-      const res = await startCartPurchase(items, { name: me?.fullName, email: me?.email });
+      const prefill = await resolveContact(checkoutPrefillFromMe(me));
+      if (!prefill) return; // closed the mobile-number prompt - nothing was started
+      const res = await startCartPurchase(items, prefill);
       if (res.ok) {
         toast.success('Your plan has been renewed.');
         refresh();

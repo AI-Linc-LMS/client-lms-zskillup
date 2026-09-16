@@ -10,6 +10,7 @@ import { listCompanies, type ApiCompany } from '@/lib/api/catalog';
 import { formatPrice } from '@/lib/api/subscriptions';
 import { buildPriceMap, PERIODS, priceKey } from '@/lib/payments/pricing';
 import { usePurchase } from '@/components/billing/usePurchase';
+import { checkoutPrefillFromMe } from '@/lib/payments/checkout-contact';
 import type { PriceBookEntryDto } from '@/shared/dto/payments.dto';
 import { BillingPeriod, EntitlementScope, PriceTier } from '@/shared/enums';
 import { cn } from '@/lib/utils';
@@ -50,7 +51,7 @@ export default function TpoBillingPage() {
       period,
       label: `${c.name} - cohort access (${period.toLowerCase()})`,
       forCollege: true,
-      prefill: { name: me?.fullName, email: me?.email },
+      prefill: checkoutPrefillFromMe(me),
     });
 
   if (loading) {

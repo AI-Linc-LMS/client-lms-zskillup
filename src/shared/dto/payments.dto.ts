@@ -322,6 +322,10 @@ export interface PracticeAccessMapDto {
  * product scope, and the resulting access validity — everything needed to verify a
  * transaction or support a customer from one place.
  */
+/** Where a transaction's customer phone came from: the buyer's saved profile, or the number
+ *  typed into Razorpay checkout at payment time. */
+export type CustomerPhoneSource = 'PROFILE' | 'CHECKOUT';
+
 export interface AdminTransactionDto {
   paymentId: string;
   /** Gateway payment/transaction id (razorpay_payment_id); null if never captured. */
@@ -356,6 +360,17 @@ export interface AdminTransactionDto {
   couponCode: string | null;
   /** Discount applied by the coupon (minor units); 0 when none. */
   discountCents: number;
+  /** Customer contact, resolved per row by the server (additive - absent on backends that
+   *  predate it, so read through the ledger's fallback to userName/email/phone).
+   *  Name: the registered name, else the purchase-time snapshot, else the college name. */
+  customerName?: string | null;
+  /** The account email, else the snapshot, else the Razorpay checkout email. */
+  customerEmail?: string | null;
+  /** The buyer's CURRENT valid profile phone (so a later-saved phone shows up here), else
+   *  the purchase-time snapshot phone; normalised 10 digits. */
+  customerPhone?: string | null;
+  /** PROFILE for a saved profile phone, CHECKOUT when only the checkout-typed number exists. */
+  customerPhoneSource?: CustomerPhoneSource | null;
 }
 
 export interface AdminTransactionsPageDto {

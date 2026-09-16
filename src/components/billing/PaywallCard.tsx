@@ -7,6 +7,7 @@ import { getPricing } from '@/lib/api/payments';
 import { getMe } from '@/lib/api/me';
 import { formatPrice } from '@/lib/api/subscriptions';
 import { buildPriceMap, PERIODS, retailPrice } from '@/lib/payments/pricing';
+import { checkoutPrefillFromMe, type CheckoutPrefill } from '@/lib/payments/checkout-contact';
 import { usePurchase } from './usePurchase';
 import { useCartOptional } from './CartProvider';
 import { BillingPeriod, EntitlementScope } from '@/shared/enums';
@@ -51,14 +52,14 @@ export function PaywallCard({
   onUnlocked: () => void;
 }) {
   const [pricing, setPricing] = useState<PriceBookEntryDto[]>([]);
-  const [prefill, setPrefill] = useState<{ name?: string | null; email?: string | null }>({});
+  const [prefill, setPrefill] = useState<CheckoutPrefill>({});
   const { buy, busyKey } = usePurchase();
   const cart = useCartOptional();
 
   useEffect(() => {
     getPricing().then(setPricing).catch(() => {});
     getMe()
-      .then((m) => setPrefill({ name: m.fullName, email: m.email }))
+      .then((m) => setPrefill(checkoutPrefillFromMe(m)))
       .catch(() => {});
   }, []);
 
