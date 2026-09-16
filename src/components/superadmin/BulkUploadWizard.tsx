@@ -9,31 +9,41 @@ import {
   CheckCircle2,
   Download,
   FileUp,
+  FolderTree,
   Loader2,
   Plus,
   Upload,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ApiRequestError } from '@/lib/api/types';
-import {
-  bulkUploadQuestions,
-  getQuestionTopicsTree,
-} from '@/lib/api/admin';
+import { visibleRoots } from '@/components/superadmin/TaxonomyPicker';
+import { bulkUploadQuestions, getQuestionTopicsTree } from '@/lib/api/admin';
 import type {
-  AdminBulkEnsureTopicDto,
   AdminBulkUploadItemDto,
+  AdminBulkUploadResolvedNodeDto,
   AdminBulkUploadResultDto,
+  AdminBulkUploadRowResult,
   AdminTopicNodeDto,
 } from '@/shared/dto/admin-questions.dto';
 
 /**
  * Section/Topic + Bulk Upload wizard (Admin + Super Admin). Four steps:
  *   1. Upload  — drop a CSV/XLSX (parsed here) or paste; download a template.
- *   2. Map     — assign a Section → Topic → Subtopic (pick existing or create new);
- *                a row's own section/topic/subtopic columns override the global pick.
+ *   2. Map     — assign a Section → Topic → Subtopic for the whole file, and override it
+ *                per row; the table shows exactly where each row will land.
  *   3. Fix     — validate every row server-side (dry run, no writes), edit bad cells
  *                inline, re-validate; import stays disabled until zero invalid rows.
  *   4. Import  — commit; new taxonomy + questions land in the bank with their mappings.
+ *
+ * TAXONOMY IS RESOLVED ON THE SERVER, BY NAME. This used to be done here: `resolveTaxonomy`
+ * built `section--topic--subtopic` slugs in the browser and returned NULL whenever Section
+ * or Topic was blank. The payload then carried `subtopicSlug: undefined`, the server only
+ * validated the taxonomy `if (item.subtopicSlug)`, and the row was reported VALID — so the
+ * question was created with `subtopic_id = NULL` and showed a DASH under Topic in the bank.
+ * Client-built slugs also broke two other ways: one over 120 characters 400'd the whole
+ * batch, and a guessed slug that happened to exist silently attached the rows to an
+ * unrelated node. Now the wizard sends NAMES and the server does the matching
+ * (case-insensitive, parent-scoped), mints slugs, and reports per row where it landed.
  */
 
 const TYPES = ['MCQ', 'MULTI_SELECT', 'NUMERIC', 'CODING'] as const;
@@ -59,12 +69,6 @@ interface WizRow {
   explanation: string;
 }
 
-const EMPTY_ROW: WizRow = {
-  section: '', topic: '', subtopic: '', type: '', difficulty: '', stem: '', answer: '',
-  optionA: '', optionB: '', optionC: '', optionD: '', optionE: '', optionF: '',
-  correct: '', hint: '', explanation: '',
-};
-
 const TEMPLATE_HEADERS = [
   'section', 'topic', 'subtopic', 'type', 'difficulty', 'stem', 'answer',
   'optionA', 'optionB', 'optionC', 'optionD', 'correct', 'hint', 'explanation',
@@ -73,15 +77,6 @@ const TEMPLATE_ROWS = [
   ['Quantitative Aptitude', 'Percentages', 'Basics', 'MCQ', 'EASY', 'What is 15% of 200?', '', '20', '30', '35', '40', 'B', '10% is 20', '15% = 30'],
   ['Programming', 'Arrays', '', 'CODING', 'MEDIUM', 'Write a function that adds two numbers.', 'return a + b', '', '', '', '', '', '', 'Sum of two ints'],
 ];
-
-function slugify(s: string): string {
-  return s
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 60);
-}
 
 /** Case-insensitive header lookup with a few common aliases. */
 function pick(raw: Record<string, unknown>, keys: string[]): string {
@@ -99,10 +94,14 @@ function rowsFromWorkbook(wb: XLSX.WorkBook): WizRow[] {
   if (!sheet) return [];
   const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: '' });
   return json.map((raw) => ({
-    section: pick(raw, ['section']),
-    topic: pick(raw, ['topic']),
-    subtopic: pick(raw, ['subtopic', 'sub-topic', 'sub topic']),
-    type: pick(raw, ['type']),
+    // Taxonomy headers accept the names real exports actually use. `section`/`topic` had
+    // NO aliases, so a sheet headed "Category"/"Chapter" silently produced unfiled rows.
+    section: pick(raw, ['section', 'section name', 'section_name', 'category', 'subject', 'area']),
+    topic: pick(raw, ['topic', 'topic name', 'topic_name', 'chapter', 'concept']),
+    subtopic: pick(raw, [
+      'subtopic', 'sub-topic', 'sub topic', 'subtopic name', 'subtopic_name', 'sub_topic',
+    ]),
+    type: pick(raw, ['type', 'question type', 'question_type']),
     difficulty: pick(raw, ['difficulty', 'level']),
     stem: pick(raw, ['stem', 'question', 'question text']),
     answer: pick(raw, ['answer', 'correct answer']),
@@ -118,57 +117,22 @@ function rowsFromWorkbook(wb: XLSX.WorkBook): WizRow[] {
   }));
 }
 
-/** Flatten the tree into name→node lookups per level so we can reuse existing
- *  Section/Topic/Subtopic by name instead of creating duplicates. */
+/** Find a child by display name, case-insensitively — the same rule the server applies. */
 function childByName(nodes: AdminTopicNodeDto[], name: string): AdminTopicNodeDto | undefined {
   const n = name.trim().toLowerCase();
+  if (!n) return undefined;
   return nodes.find((c) => c.name.trim().toLowerCase() === n);
 }
 
 /**
- * Resolve one row's Section→Topic→Subtopic to a leaf slug the question maps to,
- * collecting any brand-new nodes into `ensure` (deduped by slug). Returns null when
- * the required Section or Topic is missing (surfaced as a row error by the server).
+ * The upload payload. Taxonomy travels as NAMES — no slugs are built here. A row that
+ * leaves a column blank inherits the file-wide value, exactly as the server does.
  */
-function resolveTaxonomy(
-  tree: AdminTopicNodeDto[],
-  section: string,
-  topic: string,
-  subtopic: string,
-  ensure: Map<string, AdminBulkEnsureTopicDto>,
-): string | null {
-  if (!section.trim() || !topic.trim()) return null;
-
-  const secNode = childByName(tree, section);
-  const secSlug = secNode?.slug ?? slugify(section);
-  if (!secNode) ensure.set(secSlug, { slug: secSlug, name: section.trim() });
-
-  const topNode = secNode ? childByName(secNode.children, topic) : undefined;
-  const topSlug = topNode?.slug ?? `${secSlug}--${slugify(topic)}`;
-  if (!topNode) ensure.set(topSlug, { slug: topSlug, name: topic.trim(), parentSlug: secSlug });
-
-  if (!subtopic.trim()) return topSlug; // no subtopic → attach at the topic level
-
-  const subNode = topNode ? childByName(topNode.children, subtopic) : undefined;
-  const subSlug = subNode?.slug ?? `${topSlug}--${slugify(subtopic)}`;
-  if (!subNode) ensure.set(subSlug, { slug: subSlug, name: subtopic.trim(), parentSlug: topSlug });
-  return subSlug;
-}
-
-function buildPayload(
+function buildItems(
   rows: WizRow[],
-  tree: AdminTopicNodeDto[],
   g: { section: string; topic: string; subtopic: string },
-): { ensureTopics: AdminBulkEnsureTopicDto[]; items: AdminBulkUploadItemDto[] } {
-  const ensure = new Map<string, AdminBulkEnsureTopicDto>();
-  const items = rows.map((r) => {
-    const leaf = resolveTaxonomy(
-      tree,
-      r.section || g.section,
-      r.topic || g.topic,
-      r.subtopic || g.subtopic,
-      ensure,
-    );
+): AdminBulkUploadItemDto[] {
+  return rows.map((r) => {
     const type = r.type.trim().toUpperCase();
     const isChoice = type === 'MCQ' || type === 'MULTI_SELECT';
     const correctSet = new Set(
@@ -186,11 +150,12 @@ function buildPayload(
       answer: r.answer.trim() || undefined,
       hint: r.hint.trim() || undefined,
       explanation: r.explanation.trim() || undefined,
-      subtopicSlug: leaf ?? undefined,
+      sectionName: (r.section || g.section).trim() || undefined,
+      topicName: (r.topic || g.topic).trim() || undefined,
+      subtopicName: (r.subtopic || g.subtopic).trim() || undefined,
       options,
     } satisfies AdminBulkUploadItemDto;
   });
-  return { ensureTopics: [...ensure.values()], items };
 }
 
 export function BulkUploadWizard({ onDone }: { onDone: () => void }) {
@@ -257,11 +222,9 @@ export function BulkUploadWizard({ onDone }: { onDone: () => void }) {
     invalidateValidation();
   };
 
-  const errorsByIndex = useMemo(() => {
-    const m = new Map<number, string[]>();
-    for (const r of validation?.rows ?? []) {
-      if (r.status === 'invalid') m.set(r.index, r.errors.map((e) => `${e.field}: ${e.message}`));
-    }
+  const resultByIndex = useMemo(() => {
+    const m = new Map<number, AdminBulkUploadRowResult>();
+    for (const r of validation?.rows ?? []) m.set(r.index, r);
     return m;
   }, [validation]);
 
@@ -269,8 +232,15 @@ export function BulkUploadWizard({ onDone }: { onDone: () => void }) {
     setBusy(true);
     setError(null);
     try {
-      const { ensureTopics, items } = buildPayload(rows, tree, g);
-      setValidation(await bulkUploadQuestions({ dryRun: true, ensureTopics, items }));
+      setValidation(
+        await bulkUploadQuestions({
+          dryRun: true,
+          defaultSectionName: g.section.trim() || undefined,
+          defaultTopicName: g.topic.trim() || undefined,
+          defaultSubtopicName: g.subtopic.trim() || undefined,
+          items: buildItems(rows, g),
+        }),
+      );
     } catch (err) {
       setError(err instanceof ApiRequestError ? err.message : 'Validation failed.');
     } finally {
@@ -282,8 +252,13 @@ export function BulkUploadWizard({ onDone }: { onDone: () => void }) {
     setBusy(true);
     setError(null);
     try {
-      const { ensureTopics, items } = buildPayload(rows, tree, g);
-      const res = await bulkUploadQuestions({ dryRun: false, ensureTopics, items });
+      const res = await bulkUploadQuestions({
+        dryRun: false,
+        defaultSectionName: g.section.trim() || undefined,
+        defaultTopicName: g.topic.trim() || undefined,
+        defaultSubtopicName: g.subtopic.trim() || undefined,
+        items: buildItems(rows, g),
+      });
       setImported(res);
       setStep('done');
       void getQuestionTopicsTree().then(setTree).catch(() => {});
@@ -296,7 +271,12 @@ export function BulkUploadWizard({ onDone }: { onDone: () => void }) {
 
   const validated = validation !== null;
   const invalidCount = validation?.summary.invalid ?? 0;
-  const canImport = validated && invalidCount === 0 && rows.length > 0;
+  const unfiledCount = validation?.summary.unfiled ?? 0;
+  const canImport = validated && invalidCount === 0 && unfiledCount === 0 && rows.length > 0;
+
+  // Datalists let a cell offer the names that already exist while still accepting a new
+  // one — the server treats an unknown name as "create it", so both work.
+  const sectionOptions = useMemo(() => visibleRoots(tree, false), [tree]);
 
   return (
     <div className="space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -332,12 +312,14 @@ export function BulkUploadWizard({ onDone }: { onDone: () => void }) {
             </Button>
           </div>
 
-          <div className="rounded-lg bg-slate-50 p-4 text-xs text-slate-600">
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 text-xs text-slate-600 shadow-sm">
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
               Columns (header row required, order-independent)
             </p>
             <p>
-              <span className="font-semibold text-navy">section, topic</span> (required),{' '}
+              <span className="font-semibold text-navy">section, topic</span> (required —{' '}
+              <span className="font-semibold text-navy">category / subject</span> and{' '}
+              <span className="font-semibold text-navy">chapter / concept</span> also work),{' '}
               <span className="font-semibold text-navy">subtopic</span> (optional),{' '}
               <span className="font-semibold text-navy">type</span> (MCQ / MULTI_SELECT / NUMERIC /
               CODING), <span className="font-semibold text-navy">difficulty</span> (EASY / MEDIUM /
@@ -421,11 +403,31 @@ export function BulkUploadWizard({ onDone }: { onDone: () => void }) {
             )}
           </div>
 
-          <div className="overflow-x-auto rounded-lg border border-slate-200">
+          {validated && unfiledCount > 0 ? (
+            <div
+              role="alert"
+              className="rounded-xl border border-red-200 bg-red-50/70 p-5"
+            >
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-red-700">
+                Import blocked
+              </p>
+              <h3 className="text-base font-bold text-navy">
+                {unfiledCount} row{unfiledCount === 1 ? ' has' : 's have'} no Section and Topic
+              </h3>
+              <p className="mt-1 text-sm leading-relaxed text-slate-600">
+                A question with no topic never appears in a topic picker and shows a dash under
+                Topic in the bank. Fill the Section and Topic cells below, or set them for the whole
+                file above — then validate again.
+              </p>
+            </div>
+          ) : null}
+
+          <div className="overflow-x-auto rounded-xl border border-slate-200">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                 <tr>
                   <th className="px-2 py-2">#</th>
+                  <th className="px-2 py-2 min-w-[300px]">Section / Topic / Subtopic</th>
                   <th className="px-2 py-2">Type</th>
                   <th className="px-2 py-2">Diff</th>
                   <th className="px-2 py-2 min-w-[220px]">Stem</th>
@@ -436,26 +438,60 @@ export function BulkUploadWizard({ onDone }: { onDone: () => void }) {
               </thead>
               <tbody>
                 {rows.map((r, i) => {
-                  const errs = errorsByIndex.get(i);
+                  const result = resultByIndex.get(i);
+                  const errs = result?.status === 'invalid' ? result.errors : undefined;
                   const bad = validated && !!errs;
-                  const ok = validated && !errs;
+                  const ok = validated && !!result && !errs;
+                  // Resolve against the SAME list the datalists are built from, so a
+                  // `list=` never points at an id that was filtered out.
+                  const section = childByName(sectionOptions, r.section || g.section);
+                  const topic = section ? childByName(section.children, r.topic || g.topic) : undefined;
                   return (
                     <tr key={i} className={'border-t border-slate-100 align-top ' + (bad ? 'bg-red-50/40' : '')}>
                       <td className="px-2 py-2 text-slate-400">{i + 1}</td>
                       <td className="px-2 py-2">
-                        <select value={r.type} onChange={(e) => editCell(i, 'type', e.target.value)} className={cellCls}>
+                        <div className="space-y-1">
+                          <input
+                            value={r.section}
+                            onChange={(e) => editCell(i, 'section', e.target.value)}
+                            placeholder={g.section || 'Section'}
+                            aria-label={`Section for row ${i + 1}`}
+                            list="bulk-sections"
+                            className={cellCls + ' w-full'}
+                          />
+                          <input
+                            value={r.topic}
+                            onChange={(e) => editCell(i, 'topic', e.target.value)}
+                            placeholder={g.topic || 'Topic'}
+                            aria-label={`Topic for row ${i + 1}`}
+                            list={section ? `bulk-topics-${section.id}` : undefined}
+                            className={cellCls + ' w-full'}
+                          />
+                          <input
+                            value={r.subtopic}
+                            onChange={(e) => editCell(i, 'subtopic', e.target.value)}
+                            placeholder={g.subtopic || 'Subtopic (optional)'}
+                            aria-label={`Subtopic for row ${i + 1}`}
+                            list={topic ? `bulk-subtopics-${topic.id}` : undefined}
+                            className={cellCls + ' w-full'}
+                          />
+                          {result ? <Placement result={result} /> : null}
+                        </div>
+                      </td>
+                      <td className="px-2 py-2">
+                        <select value={r.type} onChange={(e) => editCell(i, 'type', e.target.value)} aria-label={`Type for row ${i + 1}`} className={cellCls}>
                           <option value="">—</option>
                           {TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
                         </select>
                       </td>
                       <td className="px-2 py-2">
-                        <select value={r.difficulty} onChange={(e) => editCell(i, 'difficulty', e.target.value)} className={cellCls}>
+                        <select value={r.difficulty} onChange={(e) => editCell(i, 'difficulty', e.target.value)} aria-label={`Difficulty for row ${i + 1}`} className={cellCls}>
                           <option value="">—</option>
                           {DIFFS.map((d) => <option key={d} value={d}>{d}</option>)}
                         </select>
                       </td>
                       <td className="px-2 py-2">
-                        <textarea value={r.stem} onChange={(e) => editCell(i, 'stem', e.target.value)} rows={2} className={cellCls + ' w-full resize-y'} />
+                        <textarea value={r.stem} onChange={(e) => editCell(i, 'stem', e.target.value)} aria-label={`Question text for row ${i + 1}`} rows={2} className={cellCls + ' w-full resize-y'} />
                       </td>
                       <td className="px-2 py-2">
                         <div className="grid grid-cols-2 gap-1">
@@ -465,6 +501,7 @@ export function BulkUploadWizard({ onDone }: { onDone: () => void }) {
                               value={r[`option${L}` as keyof WizRow] as string}
                               onChange={(e) => editCell(i, `option${L}` as keyof WizRow, e.target.value)}
                               placeholder={L}
+                              aria-label={`Option ${L} for row ${i + 1}`}
                               className={cellCls + ' w-full'}
                             />
                           ))}
@@ -473,11 +510,12 @@ export function BulkUploadWizard({ onDone }: { onDone: () => void }) {
                           value={r.correct}
                           onChange={(e) => editCell(i, 'correct', e.target.value)}
                           placeholder="correct e.g. B"
+                          aria-label={`Correct option for row ${i + 1}`}
                           className={cellCls + ' mt-1 w-full'}
                         />
                       </td>
                       <td className="px-2 py-2">
-                        <input value={r.answer} onChange={(e) => editCell(i, 'answer', e.target.value)} className={cellCls + ' w-full'} />
+                        <input value={r.answer} onChange={(e) => editCell(i, 'answer', e.target.value)} aria-label={`Answer for row ${i + 1}`} className={cellCls + ' w-full'} />
                       </td>
                       <td className="px-2 py-2">
                         {!validated ? (
@@ -486,7 +524,7 @@ export function BulkUploadWizard({ onDone }: { onDone: () => void }) {
                           <span className="inline-flex items-center gap-1 text-emerald-600"><CheckCircle2 className="size-3.5" /> valid</span>
                         ) : (
                           <ul className="space-y-0.5 text-red-600">
-                            {errs!.map((m, k) => <li key={k}>• {m}</li>)}
+                            {(errs ?? []).map((e, k) => <li key={k}>• {e.field}: {e.message}</li>)}
                           </ul>
                         )}
                       </td>
@@ -496,6 +534,23 @@ export function BulkUploadWizard({ onDone }: { onDone: () => void }) {
               </tbody>
             </table>
           </div>
+
+          {/* Name suggestions per level. A name that isn't listed is simply a new node. */}
+          <datalist id="bulk-sections">
+            {sectionOptions.map((n) => <option key={n.id} value={n.name} />)}
+          </datalist>
+          {sectionOptions.map((s) => (
+            <datalist key={s.id} id={`bulk-topics-${s.id}`}>
+              {s.children.map((t) => <option key={t.id} value={t.name} />)}
+            </datalist>
+          ))}
+          {sectionOptions.flatMap((s) =>
+            s.children.map((t) => (
+              <datalist key={t.id} id={`bulk-subtopics-${t.id}`}>
+                {t.children.map((sub) => <option key={sub.id} value={sub.name} />)}
+              </datalist>
+            )),
+          )}
 
           <div className="flex items-center justify-between border-t border-slate-100 pt-4">
             <Button variant="ghost" size="sm" onClick={() => setStep('upload')}>
@@ -530,6 +585,7 @@ export function BulkUploadWizard({ onDone }: { onDone: () => void }) {
               </span>
             ) : null}
           </div>
+          <ImportedPlacements result={imported} />
           <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
             <Button onClick={onDone}>Done — view questions</Button>
           </div>
@@ -540,7 +596,65 @@ export function BulkUploadWizard({ onDone }: { onDone: () => void }) {
 }
 
 const cellCls =
-  'rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-navy focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30';
+  'rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-navy placeholder:text-slate-400 focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30';
+
+/** "→ Quant › Percentages › Basics", with the levels the import will CREATE called out. */
+function Placement({ result }: { result: AdminBulkUploadRowResult }) {
+  const levels = [result.resolvedSection, result.resolvedTopic, result.resolvedSubtopic].filter(
+    (n): n is AdminBulkUploadResolvedNodeDto => !!n,
+  );
+  if (levels.length === 0) {
+    return (
+      <p className="text-[11px] font-semibold text-red-600">Not filed under any topic</p>
+    );
+  }
+  return (
+    <p className="flex flex-wrap items-center gap-1 text-[11px] text-slate-500">
+      <FolderTree className="size-3" aria-hidden="true" />
+      {levels.map((n, i) => (
+        <span key={`${n.name}-${i}`} className={n.isNew ? 'font-semibold text-orange' : 'text-slate-600'}>
+          {i > 0 ? '› ' : ''}
+          {n.name}
+          {n.isNew ? ' (new)' : ''}
+        </span>
+      ))}
+    </p>
+  );
+}
+
+/** Where the imported rows actually landed, grouped — proof the taxonomy stuck. */
+function ImportedPlacements({ result }: { result: AdminBulkUploadResultDto }) {
+  const groups = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const r of result.rows) {
+      if (r.status !== 'created') continue;
+      const path = [r.resolvedSection, r.resolvedTopic, r.resolvedSubtopic]
+        .filter((n): n is AdminBulkUploadResolvedNodeDto => !!n)
+        .map((n) => n.name)
+        .join(' › ');
+      const key = path || 'Not filed under any topic';
+      m.set(key, (m.get(key) ?? 0) + 1);
+    }
+    return [...m.entries()].sort((a, b) => b[1] - a[1]);
+  }, [result]);
+
+  if (groups.length === 0) return null;
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+        Filed under
+      </p>
+      <ul className="space-y-1">
+        {groups.map(([path, n]) => (
+          <li key={path} className="flex items-center justify-between gap-4 text-sm">
+            <span className="text-slate-600">{path}</span>
+            <span className="font-semibold text-navy">{n}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 function StepDots({ step }: { step: 'upload' | 'review' | 'done' }) {
   const order = ['upload', 'review', 'done'] as const;
@@ -563,9 +677,8 @@ function StepDots({ step }: { step: 'upload' | 'review' | 'done' }) {
   );
 }
 
-/** Global Section → Topic → Subtopic assignment: pick an existing node at each
- *  level, or type a new name to create it. Applies to rows whose own
- *  section/topic/subtopic columns are blank. */
+/** File-wide Section → Topic → Subtopic: pick an existing node at each level, or type a new
+ *  name to create it. Applies to rows whose own section/topic/subtopic cells are blank. */
 function TaxonomyAssigner({
   tree,
   value,
@@ -575,18 +688,20 @@ function TaxonomyAssigner({
   value: { section: string; topic: string; subtopic: string };
   onChange: (v: { section: string; topic: string; subtopic: string }) => void;
 }) {
-  const sectionNode = childByName(tree, value.section);
+  // The `*-ai` / `ai-practice-topics` scratch roots are never a sensible import target.
+  const roots = useMemo(() => visibleRoots(tree, false), [tree]);
+  const sectionNode = childByName(roots, value.section);
   const topicNode = sectionNode ? childByName(sectionNode.children, value.topic) : undefined;
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-4">
-      <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-        Map to Section → Topic → Subtopic
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+        Map the whole file to Section → Topic → Subtopic
       </p>
       <div className="grid gap-3 sm:grid-cols-3">
         <PickOrCreate
           label="Section"
-          options={tree.map((n) => n.name)}
+          options={roots.map((n) => n.name)}
           value={value.section}
           onChange={(v) => onChange({ section: v, topic: '', subtopic: '' })}
         />
@@ -605,8 +720,8 @@ function TaxonomyAssigner({
         />
       </div>
       <p className="mt-2 text-xs text-slate-500">
-        A row with its own section/topic/subtopic columns keeps those; this fills the rest. New names
-        are created on import.
+        A row with its own Section/Topic/Subtopic cells keeps those; this fills the rest. New names
+        are created on import, with a slug the server generates.
       </p>
     </div>
   );
@@ -636,23 +751,35 @@ function PickOrCreate({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={hint ?? 'Type a new name'}
+            aria-label={label}
             className={cellCls + ' h-9 w-full'}
           />
           {options.length > 0 ? (
-            <button type="button" onClick={() => { setCreating(false); onChange(''); }} className="text-xs font-semibold text-slate-400 hover:text-navy">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => { setCreating(false); onChange(''); }}
+            >
               pick
-            </button>
+            </Button>
           ) : null}
         </div>
       ) : (
         <div className="mt-1 flex items-center gap-1">
-          <select value={value} onChange={(e) => onChange(e.target.value)} className={cellCls + ' h-9 w-full'}>
+          <select value={value} onChange={(e) => onChange(e.target.value)} aria-label={label} className={cellCls + ' h-9 w-full'}>
             <option value="">—</option>
             {options.map((o) => <option key={o} value={o}>{o}</option>)}
           </select>
-          <button type="button" onClick={() => { setCreating(true); onChange(''); }} className="inline-flex items-center text-xs font-semibold text-orange hover:underline">
-            <Plus className="size-3.5" /> new
-          </button>
+          <Button
+            type="button"
+            variant="link"
+            size="sm"
+            className="h-auto px-0"
+            onClick={() => { setCreating(true); onChange(''); }}
+          >
+            <Plus aria-hidden="true" /> new
+          </Button>
         </div>
       )}
       {isNew ? <p className="mt-0.5 text-[10px] font-semibold text-orange">will be created</p> : null}
