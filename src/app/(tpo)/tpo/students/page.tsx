@@ -7,11 +7,18 @@ import { getTpoAnalytics } from '@/lib/api/tpo';
 import type { ReadinessBand, TpoDashboard, TpoStudentRow } from '@/shared';
 import { useTpoConsole } from '@/components/tpo/TpoConsole';
 import { ReadinessBadge } from '@/components/tpo/ui';
+import {
+  ACTIVITY_SCORE_CAPTION,
+  ACTIVITY_SCORE_LABEL,
+  activityScoreBreakdown,
+} from '@/components/tpo/activity-score';
 import { Button } from '@/components/ui/button';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { cn } from '@/lib/utils';
 
 const PAGE_SIZE = 25;
+/** `participation` is the API field; the column and the sort control both read
+ *  "Activity Score" (see components/tpo/activity-score.ts). */
 type SortKey = 'name' | 'branch' | 'readiness' | 'participation' | 'lastActive';
 
 const BANDS: { value: ReadinessBand | ''; label: string }[] = [
@@ -119,7 +126,7 @@ export default function StudentManagementPage() {
         icon={Users}
         eyebrow="Placement Office"
         title="Student Management"
-        description="Search, filter and sort every student by placement readiness, participation and activity across your batches."
+        description={`Search, filter and sort every student by placement readiness, Activity Score (${ACTIVITY_SCORE_CAPTION}) and last activity across your batches.`}
         actions={
           <div className="flex items-center gap-3">
             <div className="text-right">
@@ -167,7 +174,7 @@ export default function StudentManagementPage() {
       {/* Table */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[820px] text-sm">
+          <table className="w-full min-w-[900px] text-sm">
             <thead className="border-b border-slate-100 bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500">
               <tr>
                 <Th label="Student" onClick={() => toggleSort('name')} active={sort.key === 'name'} />
@@ -175,6 +182,11 @@ export default function StudentManagementPage() {
                 <Th label="Branch" onClick={() => toggleSort('branch')} active={sort.key === 'branch'} />
                 <th className="px-4 py-2.5">Batch</th>
                 <Th label="Readiness" onClick={() => toggleSort('readiness')} active={sort.key === 'readiness'} />
+                <Th
+                  label={ACTIVITY_SCORE_LABEL}
+                  onClick={() => toggleSort('participation')}
+                  active={sort.key === 'participation'}
+                />
                 <th className="px-4 py-2.5">Status</th>
                 <Th label="Last active" onClick={() => toggleSort('lastActive')} active={sort.key === 'lastActive'} />
               </tr>
@@ -185,7 +197,7 @@ export default function StudentManagementPage() {
               ))}
               {pageRows.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-10 text-center text-sm text-slate-500">
+                  <td colSpan={8} className="px-4 py-10 text-center text-sm text-slate-500">
                     No students match these filters.
                   </td>
                 </tr>
@@ -261,6 +273,9 @@ function StudentRow({ s, cohortName }: { s: TpoStudentRow; cohortName: string | 
           </div>
           <span className="tabular-nums text-slate-600">{s.readiness}%</span>
         </div>
+      </td>
+      <td className="px-4 py-2.5 tabular-nums text-slate-600" title={activityScoreBreakdown(s)}>
+        {s.participation}
       </td>
       <td className="px-4 py-2.5">
         <ReadinessBadge band={s.band} />

@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Loader2, TrendingUp, Trophy } from 'lucide-react';
+import { Loader2, Trophy } from 'lucide-react';
 import { getTpoAnalytics, getTpoReadinessTrend } from '@/lib/api/tpo';
 import type { TpoDashboard, TpoReadinessTrend } from '@/shared';
 import { useTpoConsole } from '@/components/tpo/TpoConsole';
 import { BentoCard } from '@/components/tpo/ui';
 import { PlacementOutcomes } from '@/components/tpo/PlacementOutcomes';
-import { AreaChart, Donut } from '@/components/superadmin/dashboard-ui';
+import { Donut } from '@/components/superadmin/dashboard-ui';
+import { ReadinessTrendChart } from '@/components/tpo/ReadinessTrendChart';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 
 const BANDS = [
@@ -24,6 +25,10 @@ export default function PlacementReadinessPage() {
   const { cohortId, cohorts } = useTpoConsole();
   const [data, setData] = useState<TpoDashboard | null>(null);
   const [trend, setTrend] = useState<TpoReadinessTrend | null>(null);
+  const [trendLoading, setTrendLoading] = useState(true);
+  // A malformed range is now a 400 from the server rather than a silent fallback to
+  // the default window, so the page has to say so instead of drawing the wrong dates.
+  const [trendError, setTrendError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   // Readiness-trend date range (#4). Empty = backend default (last 5 days, dynamic).
@@ -46,12 +51,21 @@ export default function PlacementReadinessPage() {
   // adjusting dates never reloads the whole page.
   useEffect(() => {
     let alive = true;
+    setTrendLoading(true);
+    setTrendError(null);
     getTpoReadinessTrend(cohortId || undefined, {
       from: range.from || undefined,
       to: range.to || undefined,
     })
       .then((t) => alive && setTrend(t))
-      .catch(() => alive && setTrend({ points: [], collecting: true }));
+      .catch((e) => {
+        if (!alive) return;
+        setTrend(null);
+        setTrendError(
+          e instanceof Error ? e.message : 'Could not load the readiness trend for that range.',
+        );
+      })
+      .finally(() => alive && setTrendLoading(false));
     return () => {
       alive = false;
     };
@@ -110,7 +124,7 @@ export default function PlacementReadinessPage() {
 
         <BentoCard
           title="Readiness Trend"
-          subtitle="Average readiness over the selected range — defaults to the last 5 days."
+          subtitle="Average readiness for every date in the selected range - defaults to the last 5 days."
           source="Daily readiness snapshots"
         >
           <div className="mb-3 flex flex-wrap items-end gap-2">
@@ -146,22 +160,19 @@ export default function PlacementReadinessPage() {
               <span className="pb-2 text-xs text-slate-400">Showing the last 5 days</span>
             )}
           </div>
-          {trend && trend.points.length >= 2 ? (
-            <AreaChart
-              id="readiness-trend"
-              color="#f5b400"
-              height={200}
-              data={trend.points.map((p) => ({ date: p.date, count: p.avgReadiness }))}
-            />
-          ) : (
-            <div className="flex min-h-[160px] flex-col items-center justify-center gap-2 text-center">
-              <TrendingUp className="size-8 text-slate-400" />
-              <p className="text-sm font-semibold text-navy">Not enough data in this range</p>
-              <p className="max-w-xs text-xs text-slate-600">
-                A readiness snapshot is recorded once a day. Widen the date range (or check back
-                after a few days) for a trend line.
-              </p>
+          {trendError ? (
+            <div
+              role="alert"
+              className="rounded-lg bg-red-50 p-3 text-sm font-medium text-red-700 ring-1 ring-red-200"
+            >
+              {trendError}
             </div>
+          ) : trendLoading || !trend ? (
+            <div className="flex min-h-[200px] items-center justify-center">
+              <Loader2 className="size-6 animate-spin text-slate-400" />
+            </div>
+          ) : (
+            <ReadinessTrendChart trend={trend} />
           )}
         </BentoCard>
       </div>

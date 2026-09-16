@@ -22,6 +22,7 @@ import { getTpoAnalytics } from '@/lib/api/tpo';
 import type { TpoDashboard } from '@/shared';
 import { useTpoConsole } from '@/components/tpo/TpoConsole';
 import { ParticipationScatter } from '@/components/charts/ParticipationScatter';
+import { ACTIVITY_SCORE_CAPTION } from '@/components/tpo/activity-score';
 import { ReadinessDonut } from '@/components/charts/ReadinessDonut';
 import { CompanyHeatmap } from '@/components/charts/CompanyHeatmap';
 import { SkillGapBars } from '@/components/charts/SkillGapBars';
@@ -100,7 +101,7 @@ export default function TpoExecutiveDashboard() {
         title="Executive Dashboard"
         description={
           <>
-            Campus readiness, participation and skill gaps across{' '}
+            Campus readiness, activity and skill gaps across{' '}
             <span className="font-semibold text-white/90">{cohortLabel}</span>.
           </>
         }
@@ -123,12 +124,12 @@ export default function TpoExecutiveDashboard() {
         <KpiCard icon={AlertTriangle} label="At-Risk" value={o.atRisk} tone="red" source="Readiness < 40%" />
       </div>
 
-      {/* Bento row A: Participation×performance + Student snapshot */}
+      {/* Bento row A: activity x performance + Student snapshot */}
       <div className="grid gap-5 lg:grid-cols-3">
         <BentoCard
           n={1}
-          title="Performance & Participation Map"
-          subtitle="Each dot is a student - target the high-effort, under-performing quadrant."
+          title="Performance & Activity Map"
+          subtitle={`Each dot is a student - target the high-effort, under-performing quadrant. Activity Score is ${ACTIVITY_SCORE_CAPTION}.`}
           source="Assessment scores + platform activity"
         >
           <ParticipationScatter students={data.students} />
@@ -269,7 +270,7 @@ export default function TpoExecutiveDashboard() {
           <ClipboardCheck className="size-3.5" /> Live counts appear once you create your first assessment.
         </p>
         <div className="mt-3">
-          <ProvenanceChip source="Assessment records + participation" />
+          <ProvenanceChip source="Assessment records + student activity" />
         </div>
       </BentoCard>
     </div>
@@ -285,7 +286,7 @@ function EmptyState() {
       <h2 className="mt-4 text-lg font-extrabold text-navy">Your cohort is being onboarded</h2>
       <p className="mx-auto mt-1 max-w-md text-sm text-slate-600">
         Your Platform Admin adds your college&apos;s batches and students. Once they join and start
-        practising, campus readiness, participation quadrants, company readiness and skill gaps
+        practising, campus readiness, activity quadrants, company readiness and skill gaps
         populate this console automatically.
       </p>
       <div className="mt-5 flex flex-wrap justify-center gap-3">

@@ -13,10 +13,11 @@ import {
   YAxis,
 } from 'recharts';
 import type { TpoStudentRow } from '@/shared/dto/tpo-analytics.dto';
+import { ACTIVITY_SCORE_CAPTION, ACTIVITY_SCORE_LABEL } from '@/components/tpo/activity-score';
 
 const MID = 50;
 
-/** Quadrant colour by (performance x, participation y), split at the 50 midpoint. */
+/** Quadrant colour by (performance x, activity y), split at the 50 midpoint. */
 function quadColor(perf: number, part: number): string {
   if (part >= MID && perf >= MID) return '#059669'; // high effort · high performance
   if (part >= MID && perf < MID) return '#f59e0b'; // high effort · needs support
@@ -24,28 +25,47 @@ function quadColor(perf: number, part: number): string {
   return '#dc2626'; // low effort · low performance
 }
 
-type Pt = { x: number; y: number; name: string; branch: string; readiness: number; participation: number };
+type Pt = {
+  x: number;
+  y: number;
+  name: string;
+  branch: string;
+  readiness: number;
+  activityScore: number;
+  practiceAnswered: number;
+  mocksCompleted: number;
+  codingProblems: number;
+};
 
 function ScatterTip({ active, payload }: { active?: boolean; payload?: { payload: Pt }[] }) {
   if (!active || !payload?.length) return null;
   const p = payload[0].payload;
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-lg">
+    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-md">
       <p className="font-bold text-navy">{p.name}</p>
       {p.branch && <p className="text-slate-500">{p.branch}</p>}
       <p className="mt-1 text-slate-600">
         Performance <span className="font-semibold tabular-nums text-navy">{p.readiness}%</span>
       </p>
+      {/* The Activity Score is a weighted COUNT, never a percentage - it used to render
+          the raw number with a stray "%" sign, which read as an accuracy. */}
       <p className="text-slate-600">
-        Participation <span className="font-semibold tabular-nums text-navy">{p.participation}%</span>
+        {ACTIVITY_SCORE_LABEL}{' '}
+        <span className="font-semibold tabular-nums text-navy">{p.activityScore}</span>
+      </p>
+      <p className="mt-0.5 text-[10px] text-slate-500">
+        {p.practiceAnswered} practice + 3x{p.mocksCompleted} mocks + 2x{p.codingProblems} coding
       </p>
     </div>
   );
 }
 
 /**
- * Performance × Participation map - one dot per student, coloured by quadrant,
- * split at the 50-line. Faint quadrant tints + corner counts match the exec view.
+ * Performance x Activity map - one dot per student, coloured by quadrant, split at
+ * the 50-line. Faint quadrant tints + corner counts match the exec view.
+ *
+ * NOTE the y-axis is the Activity Score (a weighted count, see activity-score.ts),
+ * NOT a percentage - the axis is capped at 100 for the quadrant split.
  */
 export function ParticipationScatter({ students }: { students: TpoStudentRow[] }) {
   const points: Pt[] = students.map((s) => ({
@@ -54,7 +74,10 @@ export function ParticipationScatter({ students }: { students: TpoStudentRow[] }
     name: s.name ?? s.email,
     branch: s.branch ?? '',
     readiness: s.readiness,
-    participation: s.participation,
+    activityScore: s.participation,
+    practiceAnswered: s.practiceAnswered,
+    mocksCompleted: s.mocksCompleted,
+    codingProblems: s.codingProblems,
   }));
 
   const q = {
@@ -70,19 +93,19 @@ export function ParticipationScatter({ students }: { students: TpoStudentRow[] }
     <div className="relative h-72 w-full">
       {/* Corner quadrant labels (overlay) */}
       <span className={`${corner} left-10 top-1 text-amber-600`}>
-        High part · low perf<br />
+        High activity · low perf<br />
         <b className="text-sm tabular-nums">{q.hplp}</b>
       </span>
       <span className={`${corner} right-2 top-1 text-right text-emerald-600`}>
-        High part · high perf<br />
+        High activity · high perf<br />
         <b className="text-sm tabular-nums">{q.hphp}</b>
       </span>
       <span className={`${corner} bottom-8 left-10 text-rose-600`}>
-        Low part · low perf<br />
+        Low activity · low perf<br />
         <b className="text-sm tabular-nums">{q.lplp}</b>
       </span>
       <span className={`${corner} bottom-8 right-2 text-right text-sky-600`}>
-        Low part · high perf<br />
+        Low activity · high perf<br />
         <b className="text-sm tabular-nums">{q.lphp}</b>
       </span>
 
@@ -110,7 +133,7 @@ export function ParticipationScatter({ students }: { students: TpoStudentRow[] }
             domain={[0, 100]}
             tickCount={6}
             tick={{ fontSize: 10, fill: '#94a3b8' }}
-            label={{ value: 'Participation →', angle: -90, position: 'insideLeft', offset: 16, fontSize: 10, fill: '#94a3b8' }}
+            label={{ value: `${ACTIVITY_SCORE_LABEL} →`, angle: -90, position: 'insideLeft', offset: 16, fontSize: 10, fill: '#94a3b8' }}
           />
           <Tooltip content={<ScatterTip />} />
           <Scatter data={points} isAnimationActive={false}>
@@ -120,6 +143,9 @@ export function ParticipationScatter({ students }: { students: TpoStudentRow[] }
           </Scatter>
         </ScatterChart>
       </ResponsiveContainer>
+      <p className="pointer-events-none absolute bottom-0 left-10 text-[10px] text-slate-400">
+        {ACTIVITY_SCORE_LABEL} = {ACTIVITY_SCORE_CAPTION}
+      </p>
     </div>
   );
 }

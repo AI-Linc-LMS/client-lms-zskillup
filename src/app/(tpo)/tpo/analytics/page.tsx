@@ -9,6 +9,11 @@ import { BentoCard, Quad, ReadinessBadge } from '@/components/tpo/ui';
 import { QuadrantScatter } from '@/components/tpo/QuadrantScatter';
 import { StudentDrawer } from '@/components/tpo/StudentDrawer';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
+import {
+  ACTIVITY_SCORE_CAPTION,
+  ACTIVITY_SCORE_LABEL,
+  activityScoreBreakdown,
+} from '@/components/tpo/activity-score';
 
 const PART_HIGH = 15;
 const PERF_HIGH = 50;
@@ -70,7 +75,7 @@ export default function StudentAnalyticsPage() {
       .map(([branch, e]) => ({
         branch,
         count: e.count,
-        avgParticipation: Math.round(e.partSum / e.count),
+        avgActivityScore: Math.round(e.partSum / e.count),
         avgReadiness: Math.round(e.readySum / e.count),
       }))
       .sort((a, b) => b.count - a.count);
@@ -111,7 +116,7 @@ export default function StudentAnalyticsPage() {
         icon={TrendingUp}
         eyebrow="Placement Office"
         title="Student Analytics"
-        description="Performance mapped against participation for every student - find who's engaged, who's coasting, and who needs coaching."
+        description="Performance mapped against Activity Score for every student - find who's engaged, who's coasting, and who needs coaching."
         actions={
           <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white/80 ring-1 ring-inset ring-white/15">
             {cohortLabel}
@@ -121,8 +126,8 @@ export default function StudentAnalyticsPage() {
 
       {/* Scatter */}
       <BentoCard
-        title="Performance & Participation Map"
-        subtitle="Each dot is a student. Click to drill into their full profile."
+        title="Performance & Activity Map"
+        subtitle={`Each dot is a student - Activity Score is ${ACTIVITY_SCORE_CAPTION}. Click to drill into their full profile.`}
         source="Assessment scores + platform activity"
       >
         <QuadrantScatter students={data.students} partHigh={PART_HIGH} perfHigh={PERF_HIGH} onSelect={setSelectedId} />
@@ -155,29 +160,33 @@ export default function StudentAnalyticsPage() {
         </BentoCard>
 
         <BentoCard
-          title="Student Participation Score"
-          subtitle="Engagement volume across the platform."
+          title="Student Activity Score"
+          subtitle="Engagement volume across the platform - a count, not a percentage."
           source="Questions + mock tests + coding activity"
         >
           <div className="flex h-full flex-col justify-center gap-3">
             <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 text-center">
               <p className="text-sm font-semibold text-navy">
-                practice questions <span className="text-[#1a1a1a]">+ 3×</span> mock tests{' '}
-                <span className="text-[#1a1a1a]">+ 2×</span> coding problems
+                practice answers <span className="text-slate-500">+ 3x</span> mock tests{' '}
+                <span className="text-slate-500">+ 2x</span> coding problems
               </p>
             </div>
             <p className="flex items-center gap-1.5 text-xs text-slate-600">
               <Activity className="size-3.5 text-[#f5b400]" /> A student at <span className="font-bold text-navy">{PART_HIGH}+</span> counts
-              as high participation.
+              as high activity.
+            </p>
+            <p className="text-[11px] leading-relaxed text-slate-500">
+              It measures effort, not attendance or accuracy. A mock test&apos;s MCQ answers are
+              also recorded as practice, so a completed mock lifts both terms.
             </p>
           </div>
         </BentoCard>
       </div>
 
-      {/* Department + Company participation maps */}
+      {/* Department activity + company readiness maps */}
       <div className="grid gap-5 lg:grid-cols-2">
         <BentoCard
-          title="Department-wise Participation Map"
+          title="Department-wise Activity Map"
           subtitle="Engagement & readiness by branch."
           source="Student activity grouped by branch"
         >
@@ -207,7 +216,7 @@ export default function StudentAnalyticsPage() {
         </BentoCard>
 
         <BentoCard
-          title="Company-wise Participation Map"
+          title="Company-wise Readiness Map"
           subtitle="Readiness on each company's tagged questions."
           source="Company-tagged practice"
         >
@@ -238,7 +247,7 @@ export default function StudentAnalyticsPage() {
         <BentoCard
           title="Priority - high effort, needs support"
           subtitle="Engaged students under-performing. Click to open a profile."
-          source="Participation ≥ threshold + readiness < 50"
+          source={`Activity Score >= ${PART_HIGH} + readiness < ${PERF_HIGH}`}
           className="lg:col-span-2"
         >
           {needsSupport.length === 0 ? (
@@ -257,9 +266,10 @@ export default function StudentAnalyticsPage() {
                       <p className="truncate text-xs text-slate-500">{s.branch ?? '-'}</p>
                     </div>
                     <div className="flex shrink-0 items-center gap-3">
-                      <span className="text-xs text-slate-600">
+                      <span className="text-xs text-slate-600" title={activityScoreBreakdown(s)}>
                         <Activity className="mr-1 inline size-3" />
                         {s.participation}
+                        <span className="sr-only"> {ACTIVITY_SCORE_LABEL}</span>
                       </span>
                       <span className="w-10 text-right text-sm font-bold tabular-nums text-navy">{s.readiness}%</span>
                       <ReadinessBadge band={s.band} />
@@ -314,8 +324,8 @@ export default function StudentAnalyticsPage() {
       </div>
 
       <div className="flex items-center gap-1.5 text-xs text-slate-500">
-        <TrendingUp className="size-3.5" /> Tip: the top-left quadrant (engaged but under-performing) is where
-        coaching moves the needle fastest.
+        <TrendingUp className="size-3.5" /> Tip: the high-activity, low-performance quadrant
+        (engaged but under-performing) is where coaching moves the needle fastest.
       </div>
 
       <StudentDrawer studentId={selectedId} onClose={() => setSelectedId(null)} />
