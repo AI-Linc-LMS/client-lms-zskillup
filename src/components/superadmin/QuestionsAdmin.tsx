@@ -201,16 +201,23 @@ export function QuestionsAdmin() {
       .catch(() => {});
   }, []);
 
-  // Section → Topic → Subtopic at every depth (drafts count too, so nothing is pruned).
-  const topicOptions = useMemo(() => buildTopicOptions(topics, { keepEmpty: true }), [topics]);
+  // Section → Topic → Subtopic at every depth (drafts count too, so nothing is pruned, and
+  // the console lists questions under the ad-hoc as-wish root that students never see).
+  const topicOptions = useMemo(
+    () => buildTopicOptions(topics, { keepEmpty: true, keepHiddenRoots: true }),
+    [topics],
+  );
+  // Names for the chips come from every company, published or not, so an unpublished or
+  // legacy tag still reads as a name.
   const companyNameBySlug = useMemo(
     () => Object.fromEntries(companies.map((c) => [c.slug, c.name])),
     [companies],
   );
-  // The PYQ spotlight keeps to the live catalog, as before.
+  // Filtering and the PYQ spotlight keep to the live catalog.
+  const publishedCompanies = useMemo(() => companies.filter((c) => c.isPublished), [companies]);
   const publishedCompanyNameBySlug = useMemo(
-    () => Object.fromEntries(companies.filter((c) => c.isPublished).map((c) => [c.slug, c.name])),
-    [companies],
+    () => Object.fromEntries(publishedCompanies.map((c) => [c.slug, c.name])),
+    [publishedCompanies],
   );
 
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -313,10 +320,11 @@ export function QuestionsAdmin() {
               ariaLabel="Filter by company"
             >
               <option value="">All companies</option>
-              {companies.map((c) => (
+              {/* Published only: ?company= is resolved through the published catalog, so an
+                  unpublished slug 404s the list and every count query. */}
+              {publishedCompanies.map((c) => (
                 <option key={c.slug} value={c.slug}>
                   {c.name}
-                  {c.isPublished ? '' : ' (unpublished)'}
                 </option>
               ))}
             </FilterSelect>

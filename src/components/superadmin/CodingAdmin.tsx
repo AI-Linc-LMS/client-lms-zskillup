@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useMemo, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { BadgeCheck, Code2, ExternalLink, Loader2, Pencil, Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ import { listAdminCompanies, type AdminCompanyRow } from '@/lib/api/admin';
 import {
   MAX_CODING_PROBLEM_COMPANIES,
   listAdminCodingProblems,
+  previewAdminCodingProblems,
   setCodingProblemActive,
   unknownCompaniesFrom,
   updateCodingProblemCompanies,
@@ -79,6 +80,20 @@ export function CodingAdmin() {
     () => Object.fromEntries((catalog ?? []).map((c) => [c.slug, c.name])),
     [catalog],
   );
+  // The companies PATCH ships with the classification fields (one QB contract, one backend
+  // release). Rows without them come from an API that predates it and would refuse the
+  // PATCH on validation, so the editor stays hidden instead of dead-ending in an error.
+  const canEditCompanies = useMemo(
+    () => (rows ?? []).some((r) => r.section !== undefined || r.questionType !== undefined),
+    [rows],
+  );
+  /** The problem's tags as the server has them right now — the editor's baseline, so the
+   *  full-array PATCH can't drop a tag someone else added since this page loaded. (One
+   *  problem, metadata only: the review endpoint, not another full-bank list.) */
+  const fetchCurrentCompanies = useCallback(async (id: string) => {
+    const { items } = await previewAdminCodingProblems([id]);
+    return items[0]?.companies ?? null;
+  }, []);
   const selected = useMemo(() => rows?.find((r) => r.id === selectedId) ?? null, [rows, selectedId]);
 
   const openProblem = (id: string, editCompanies = false) => {
@@ -235,17 +250,19 @@ export function CodingAdmin() {
                     <td className="min-w-[15rem] px-4 py-3.5">
                       <div className="flex items-start gap-1.5">
                         <CompanyChips slugs={r.companies ?? []} nameBySlug={companyName} className="min-w-0" />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => openProblem(r.id, true)}
-                          aria-label={`Edit companies for ${r.title}`}
-                          title="Edit companies"
-                          className="-my-1 h-7 shrink-0 px-2"
-                        >
-                          <Pencil aria-hidden />
-                        </Button>
+                        {canEditCompanies ? (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openProblem(r.id, true)}
+                            aria-label={`Edit companies for ${r.title}`}
+                            title="Edit companies"
+                            className="-my-1 h-7 shrink-0 px-2"
+                          >
+                            <Pencil aria-hidden />
+                          </Button>
+                        ) : null}
                       </div>
                     </td>
                     <td className="px-4 py-3.5">
@@ -316,6 +333,8 @@ export function CodingAdmin() {
         companyName={companyName}
         catalog={catalog}
         catalogFailed={catalogFailed}
+        canEditCompanies={canEditCompanies}
+        fetchCurrentCompanies={fetchCurrentCompanies}
         editOnOpen={editOnOpen}
         onSaved={applyUpdate}
         onClose={() => setSelectedId(null)}
@@ -328,6 +347,9 @@ type DrawerProps = {
   companyName: Record<string, string>;
   catalog: AdminCompanyRow[] | null;
   catalogFailed: boolean;
+  /** False against an API that predates the companies PATCH — the tags are read-only then. */
+  canEditCompanies: boolean;
+  fetchCurrentCompanies: (id: string) => Promise<string[] | null>;
   /** Open with the companies editor already showing (the row's "Edit companies"). */
   editOnOpen: boolean;
   onSaved: (updated: AdminCodingProblemSummary) => void;
@@ -351,13 +373,15 @@ function CodingDetailBody({
   companyName,
   catalog,
   catalogFailed,
+  canEditCompanies,
+  fetchCurrentCompanies,
   editOnOpen,
   onSaved,
   onClose,
 }: DrawerProps & { p: AdminCodingProblemSummary; titleId: string }) {
   const cases = p.testCases ?? [];
   const c = classify(p);
-  const [editing, setEditing] = useState(editOnOpen);
+  const [editing, setEditing] = useState(editOnOpen && canEditCompanies);
   return (
     <>
       <div className="flex items-start justify-between gap-3 border-b border-slate-200 bg-white px-6 py-4">
@@ -415,7 +439,7 @@ function CodingDetailBody({
             <div className="mt-4 border-t border-slate-100 pt-4">
               <div className="flex min-h-8 items-center justify-between gap-2">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Companies</p>
-                {!editing ? (
+                {!editing && canEditCompanies ? (
                   <Button type="button" variant="outline" size="sm" onClick={() => setEditing(true)}>
                     <Pencil aria-hidden /> Edit companies
                   </Button>
@@ -427,6 +451,7 @@ function CodingDetailBody({
                     problem={p}
                     catalog={catalog}
                     catalogFailed={catalogFailed}
+                    fetchCurrentCompanies={fetchCurrentCompanies}
                     onCancel={() => setEditing(false)}
                     onSaved={(updated) => {
                       onSaved(updated);
@@ -444,6 +469,11 @@ function CodingDetailBody({
                 ) : (
                   <p className="text-sm text-slate-500">Untagged - not linked to any company hub.</p>
                 )}
+                {!canEditCompanies ? (
+                  <p className="mt-2 text-xs text-slate-500">
+                    Read-only here until the API ships company editing; tags can still be set by ingest.
+                  </p>
+                ) : null}
               </div>
             </div>
           </div>
@@ -545,37 +575,75 @@ function CodingDetailBody({
   );
 }
 
+/** Same set of slugs, order ignored. */
+function sameSlugs(a: string[], b: string[]): boolean {
+  return a.length === b.length && [...a].sort().join(',') === [...b].sort().join(',');
+}
+
 /**
- * Multi-select of catalog companies for one coding problem → PATCH { companies }. Tags the
- * catalog no longer knows stay listed (flagged) so they can be unticked; an UNKNOWN_COMPANY
- * refusal flags the slugs the server named.
+ * Multi-select of catalog companies for one coding problem → PATCH { companies }.
+ *
+ * Two things the bank's data shape forces:
+ *  - the baseline is re-read from the server when the editor opens, so the full-array
+ *    replace can't silently drop a tag another admin added since the page loaded;
+ *  - tags the catalog doesn't know ("asked at Adobe") are provenance the ingest left on
+ *    purpose, not errors: they stay ticked, are listed as off-catalog, and ride through an
+ *    unrelated edit untouched (the server only validates slugs being ADDED). Only slugs an
+ *    UNKNOWN_COMPANY refusal actually names are flagged as a problem.
  */
 function CompaniesEditor({
   problem,
   catalog,
   catalogFailed,
+  fetchCurrentCompanies,
   onSaved,
   onCancel,
 }: {
   problem: AdminCodingProblemSummary;
   catalog: AdminCompanyRow[] | null;
   catalogFailed: boolean;
+  fetchCurrentCompanies: (id: string) => Promise<string[] | null>;
   onSaved: (updated: AdminCodingProblemSummary) => void;
   onCancel: () => void;
 }) {
   const uid = useId();
-  // The problem's tags when the editor opened - the baseline for "changed?" and orphan rows.
-  const [initial] = useState<string[]>(() => problem.companies ?? []);
-  const [draft, setDraft] = useState<string[]>(initial);
+  // The row as the list had it - the fallback if the re-read fails.
+  const listed = useRef(problem.companies ?? []);
+  // The problem's tags on the server when the editor opened (null until the re-read lands):
+  // the baseline for "changed?", for the off-catalog rows, and for what a save preserves.
+  const [initial, setInitial] = useState<string[] | null>(null);
+  const [draft, setDraft] = useState<string[]>([]);
+  const [changedElsewhere, setChangedElsewhere] = useState(false);
   const [query, setQuery] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [unknown, setUnknown] = useState<string[]>([]);
 
+  useEffect(() => {
+    let alive = true;
+    fetchCurrentCompanies(problem.id)
+      .then((fresh) => {
+        if (!alive) return;
+        const current = fresh ?? listed.current;
+        setInitial(current);
+        setDraft(current);
+        setChangedElsewhere(!!fresh && !sameSlugs(current, listed.current));
+      })
+      .catch(() => {
+        // The list already gave us a usable baseline; a failed re-read isn't worth blocking on.
+        if (!alive) return;
+        setInitial(listed.current);
+        setDraft(listed.current);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [problem.id, fetchCurrentCompanies]);
+
   const options = useMemo(() => {
     const known = new Set((catalog ?? []).map((co) => co.slug));
     return [
-      ...initial
+      ...(initial ?? [])
         .filter((slug) => !known.has(slug))
         .map((slug) => ({ slug, name: slug, isPublished: true, inCatalog: false })),
       ...(catalog ?? []).map((co) => ({ slug: co.slug, name: co.name, isPublished: co.isPublished, inCatalog: true })),
@@ -586,8 +654,9 @@ function CompaniesEditor({
   const visible = q ? options.filter((o) => o.name.toLowerCase().includes(q) || o.slug.includes(q)) : options;
   const picked = new Set(draft);
   const unknownSet = new Set(unknown);
+  const offCatalog = options.filter((o) => !o.inCatalog).length;
   const over = draft.length > MAX_CODING_PROBLEM_COMPANIES;
-  const dirty = [...draft].sort().join(',') !== [...initial].sort().join(',');
+  const dirty = initial !== null && !sameSlugs(draft, initial);
   const errorId = `${uid}-error`;
 
   const toggle = (slug: string) =>
@@ -623,7 +692,7 @@ function CompaniesEditor({
       </p>
     );
   }
-  if (!catalog) {
+  if (!catalog || initial === null) {
     return <Loader2 className="size-4 animate-spin text-slate-400" aria-label="Loading companies" />;
   }
 
@@ -652,26 +721,36 @@ function CompaniesEditor({
         {visible.length ? (
           <ul className="max-h-60 divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-200">
             {visible.map((o) => {
-              const flagged = !o.inCatalog || unknownSet.has(o.slug);
+              // Rejected = the server named it; off-catalog = an existing provenance tag.
+              const rejected = unknownSet.has(o.slug);
+              const note = rejected
+                ? 'not in catalog'
+                : !o.inCatalog
+                  ? 'off catalog'
+                  : !o.isPublished
+                    ? 'unpublished'
+                    : null;
               return (
                 <li key={o.slug}>
                   <label
                     className={cn(
                       'flex cursor-pointer items-center gap-3 px-3 py-2 text-sm transition-colors',
-                      flagged ? 'bg-red-50/60 hover:bg-red-50' : 'hover:bg-slate-50',
+                      rejected ? 'bg-red-50/60 hover:bg-red-50' : 'hover:bg-slate-50',
                     )}
                   >
                     <input
                       type="checkbox"
                       checked={picked.has(o.slug)}
                       onChange={() => toggle(o.slug)}
-                      aria-label={flagged ? `${o.name} (not in catalog)` : o.isPublished ? o.name : `${o.name} (unpublished)`}
+                      aria-label={note ? `${o.name} (${note})` : o.name}
                       className={checkboxCls}
                     />
                     <span className="min-w-0 flex-1 truncate font-medium text-navy">{o.name}</span>
                     <span className="hidden text-[11px] text-slate-500 sm:inline">{o.slug}</span>
-                    {flagged ? (
+                    {rejected ? (
                       <StatusPill tone="negative" label="Not in catalog" />
+                    ) : !o.inCatalog ? (
+                      <StatusPill tone="neutral" label="Off catalog" />
                     ) : !o.isPublished ? (
                       <StatusPill tone="neutral" label="Unpublished" />
                     ) : null}
@@ -684,6 +763,20 @@ function CompaniesEditor({
           <p className="rounded-lg border border-slate-200 px-3 py-4 text-sm text-slate-500">No company matches “{query}”.</p>
         )}
       </fieldset>
+
+      {changedElsewhere ? (
+        <p className="rounded-md bg-amber-50 p-3 text-sm font-medium text-amber-800 ring-1 ring-amber-200">
+          These tags changed since the page loaded. Showing what the server has now.
+        </p>
+      ) : null}
+
+      {offCatalog ? (
+        <p className="text-xs leading-relaxed text-slate-500">
+          {offCatalog === 1 ? '1 tag is' : `${offCatalog} tags are`} outside the company catalog — provenance
+          kept from the import. Saving leaves {offCatalog === 1 ? 'it' : 'them'} in place; unticking removes
+          {offCatalog === 1 ? ' it' : ' them'} for good.
+        </p>
+      ) : null}
 
       {error ? (
         <p id={errorId} role="alert" className="rounded-md bg-red-50 p-3 text-sm font-medium text-red-700 ring-1 ring-red-200">

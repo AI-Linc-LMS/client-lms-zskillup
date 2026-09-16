@@ -5,7 +5,7 @@ import { HIDDEN_ROOT_SLUGS } from '@/components/practice/section-meta';
  * Section → Topic → Subtopic as ONE flat, depth-annotated option list, so every picker in
  * the wizard offers the same tree at every depth (picking a node samples its whole subtree
  * server-side). Hidden roots and branches with no published questions anywhere below are
- * left out.
+ * left out unless the caller opts back in.
  */
 export interface TopicOption {
   id: string;
@@ -18,8 +18,11 @@ export interface TopicOption {
 export function buildTopicOptions(
   topics: ApiTopic[],
   /** `keepEmpty`: keep every branch, e.g. for a bank console that also lists drafts (the
-   *  counts cover PUBLISHED questions only, and plain listTopics() carries none). */
-  { keepEmpty = false }: { keepEmpty?: boolean } = {},
+   *  counts cover PUBLISHED questions only, and plain listTopics() carries none).
+   *  `keepHiddenRoots`: also offer the roots students never see (HIDDEN_ROOT_SLUGS, i.e.
+   *  the ad-hoc `ai-practice-topics` tree) — the bank console lists their questions, so
+   *  its filter has to reach them too. */
+  { keepEmpty = false, keepHiddenRoots = false }: { keepEmpty?: boolean; keepHiddenRoots?: boolean } = {},
 ): TopicOption[] {
   const children = new Map<string | null, ApiTopic[]>();
   for (const t of topics) {
@@ -51,7 +54,9 @@ export function buildTopicOptions(
     out.push({ id: t.id, name: t.name, path: path.join(' › '), depth });
     for (const c of [...(children.get(t.id) ?? [])].sort(byName)) walk(c, depth + 1, path, guard);
   };
-  const roots = (children.get(null) ?? []).filter((r) => !HIDDEN_ROOT_SLUGS.has(r.slug)).sort(byName);
+  const roots = (children.get(null) ?? [])
+    .filter((r) => keepHiddenRoots || !HIDDEN_ROOT_SLUGS.has(r.slug))
+    .sort(byName);
   const guard = new Set<string>();
   for (const r of roots) walk(r, 0, [], guard);
   return out;

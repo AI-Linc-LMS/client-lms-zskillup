@@ -1,4 +1,5 @@
 import { EntitlementScope } from '@/shared/enums';
+import { CODING_SECTION_LABEL } from '@/shared/question-taxonomy';
 
 /**
  * Where a purchased entitlement lets the student go to actually use it. Topics
@@ -28,6 +29,11 @@ export function practiceLinkForEntitlement(
 /** Readable label for an entitlement scope + ref (e.g. "Topic: Profit Loss"). */
 export function entitlementLabel(scopeType: EntitlementScope, scopeRef: string | null): string {
   if (scopeType === EntitlementScope.PLATFORM) return 'Full platform';
+  // The coding section's scope ref stays 'coding' (payments contract); its NAME is the one
+  // every other surface shows.
+  if (scopeType === EntitlementScope.SECTION && scopeRef === 'coding') {
+    return `Section: ${CODING_SECTION_LABEL}`;
+  }
   const pretty = (scopeRef ?? '')
     .replace(/^coding:/, '')
     .split(/[-:]/)

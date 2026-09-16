@@ -183,14 +183,18 @@ export async function setCodingProblemActive(id: string, isActive: boolean): Pro
 /** Most company slugs PATCH /admin/coding/problems/:id accepts in `companies`. */
 export const MAX_CODING_PROBLEM_COMPANIES = 20;
 
-/** 400 from PATCH /admin/coding/problems/:id when a slug isn't a (non-deleted) catalog
- *  company; `details.unknown` lists the offending slugs. */
+/** 400 from PATCH /admin/coding/problems/:id when a slug being ADDED isn't a (non-deleted)
+ *  catalog company; `details.unknown` lists the offending slugs. */
 export const UNKNOWN_COMPANY = 'UNKNOWN_COMPANY';
 
 /**
  * Replace the company tags on a coding problem (ADMIN, SUPER_ADMIN). Slugs are trimmed,
- * lower-cased and de-duplicated server-side; each must be a catalog company (published
- * or not); `[]` untags the problem. Returns the updated problem row.
+ * lower-cased and de-duplicated server-side; `[]` untags the problem. Returns the updated
+ * problem row.
+ *
+ * Only slugs the problem does NOT already carry are checked against the catalog: the
+ * coding bank was ingested with off-catalog provenance tags (adobe, flipkart, oracle, …)
+ * that are deliberately kept, so an unrelated edit must not force an admin to delete them.
  */
 export async function updateCodingProblemCompanies(
   id: string,
