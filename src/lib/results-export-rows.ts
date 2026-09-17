@@ -53,13 +53,25 @@ export interface ResultColumnVariant {
   email: boolean;
   /** The six proctoring counts, after Attempted Questions. */
   proctoring: boolean;
+  /** "Attempted Status" (Yes/No), straight after Phone. Only a roster report can
+   *  answer it with anything but Yes, so only a roster report carries it. */
+  attemptedStatus: boolean;
 }
 
 /** The results modal's export (CSV + XLSX): no Email, with proctoring. */
-export const RESULTS_MODAL_COLUMNS: ResultColumnVariant = { email: false, proctoring: true };
+export const RESULTS_MODAL_COLUMNS: ResultColumnVariant = {
+  email: false,
+  proctoring: true,
+  attemptedStatus: false,
+};
 
-/** The TPO's Placement Readiness Test report: with Email, no proctoring. */
-export const TEST_REPORT_COLUMNS: ResultColumnVariant = { email: true, proctoring: false };
+/** The TPO's Placement Readiness Test report: with Email and Attempted Status, no
+ *  proctoring. It reports on a whole cohort, so "did they sit it" is a column. */
+export const TEST_REPORT_COLUMNS: ResultColumnVariant = {
+  email: true,
+  proctoring: false,
+  attemptedStatus: true,
+};
 
 const NAME: FixedField = { header: 'Name', value: (r) => r.fullName ?? '' };
 const EMAIL: FixedField = { header: 'Email', value: (r) => r.email ?? '' };
@@ -67,11 +79,20 @@ const EMAIL: FixedField = { header: 'Email', value: (r) => r.email ?? '' };
 /** A timestamp as text — never a bare Date, so a spreadsheet cannot render it as ####. */
 const stamp = (iso: string | null): string => (iso ? new Date(iso).toLocaleString() : '');
 
+/** Phone — the last column a student who never sat the test can still fill in. */
+const PHONE: FixedField = { header: 'Phone', value: (r) => r.phone ?? '' };
+
+/** Yes or No, never a blank and never a synonym: the owner specified those two words,
+ *  and a sheet that filters on this column has to be able to trust it. */
+const ATTEMPTED: FixedField = {
+  header: 'Attempted Status',
+  value: (r) => (r.attempted ? 'Yes' : 'No'),
+};
+
 /** The columns EVERY variant carries, in the owner's order. Nothing is recomputed
  *  here: the marks, the percentage and the counts are all server-side business values
  *  (ADR-007) that the report already carries. */
 const CORE: FixedField[] = [
-  { header: 'Phone', value: (r) => r.phone ?? '' },
   { header: 'Started At', value: (r) => stamp(r.startedAt) },
   { header: 'Submitted At', value: (r) => stamp(r.submittedAt) },
   { header: 'Maximum Marks', value: (r) => r.total },
@@ -96,9 +117,25 @@ function fixedFields(variant: ResultColumnVariant): FixedField[] {
   return [
     NAME,
     ...(variant.email ? [EMAIL] : []),
+    PHONE,
+    ...(variant.attemptedStatus ? [ATTEMPTED] : []),
     ...CORE,
     ...(variant.proctoring ? PROCTORING : []),
   ];
+}
+
+/**
+ * How many leading columns a student who never sat the test still fills in: Name,
+ * Email if the variant has it, Phone, and Attempted Status itself. Everything after
+ * them is about a sitting that did not happen, and is left BLANK rather than zeroed.
+ *
+ * A zero would be a lie a spreadsheet cannot see through — it averages, it sorts to
+ * the bottom next to the genuine zeros, and it makes an absentee look like someone who
+ * turned up and scored nothing. Blank is the only honest cell for a thing that has no
+ * value, which is also exactly what the owner asked for.
+ */
+function identityColumnCount(variant: ResultColumnVariant): number {
+  return 2 + (variant.email ? 1 : 0) + (variant.attemptedStatus ? 1 : 0);
 }
 
 /** The fixed column NAMES of one variant — the header before the section pairs. */
@@ -119,12 +156,18 @@ export function sectionColumnNames(section: string): [score: string, max: string
  * The assessment's sections, deduplicated, in the paper's own order (`order` = the
  * section's first item; ties break by name so the order is total and stable).
  *
- * Taken from the union of the students' section lists rather than the first row's: the
+ * The PAPER's own list wins when the backend sends it, because it is the only source
+ * that survives a cohort where nobody has sat the test: the rows are then all
+ * non-attempters carrying no sections, and a header inferred from them would quietly
+ * lose every section column — the state every NEW cohort starts in.
+ *
+ * Otherwise, the union of the students' section lists rather than the first row's: the
  * backend gives every student every section, and a union is still correct if one ever
  * does not.
  */
 export function resultSections(data: AssessmentResults): AssessmentResultSection[] {
   const byName = new Map<string, AssessmentResultSection>();
+  for (const s of data.assessment.sections ?? []) if (!byName.has(s.name)) byName.set(s.name, s);
   for (const row of data.rows) {
     for (const s of row.sections ?? []) if (!byName.has(s.name)) byName.set(s.name, s);
   }
@@ -150,7 +193,17 @@ function resultRow(
   r: ResultRow,
   sections: AssessmentResultSection[],
   fields: FixedField[],
+  variant: ResultColumnVariant,
 ): ExportCell[] {
+  // Never sat it: identity, then blanks. See identityColumnCount.
+  if (variant.attemptedStatus && !r.attempted) {
+    const keep = identityColumnCount(variant);
+    return [
+      ...fields.slice(0, keep).map((f) => f.value(r)),
+      ...fields.slice(keep).map(() => ''),
+      ...sections.flatMap(() => ['', '']),
+    ];
+  }
   const scored = new Map((r.sections ?? []).map((s) => [s.name, s]));
   return [
     ...fields.map((f) => f.value(r)),
@@ -168,7 +221,7 @@ export function resultsRows(
 ): ExportCell[][] {
   const sections = resultSections(data);
   const fields = fixedFields(variant);
-  return data.rows.map((r) => resultRow(r, sections, fields));
+  return data.rows.map((r) => resultRow(r, sections, fields, variant));
 }
 
 /** The same grid as objects, for the Excel writer (which wants records + a header). */

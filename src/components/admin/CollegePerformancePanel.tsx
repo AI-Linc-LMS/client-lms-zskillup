@@ -7,9 +7,11 @@ import { Loader2, Mail, TrendingUp, Users } from 'lucide-react';
 import {
   emailCollegeReport,
   getAdminCollegeAnalytics,
+  getAdminCollegeAssessmentResults,
   getAdminCollegeCohorts,
   getAdminCollegeCompanyReadinessStudents,
   getAdminCollegeParticipation,
+  getAdminCollegeReportableAssessments,
 } from '@/lib/api/admin-college-analytics';
 import { listCompanies } from '@/lib/api/catalog';
 import { describeError } from '@/lib/api/errors';
@@ -26,6 +28,7 @@ import type {
 } from '@/shared';
 import { ACTIVITY_SCORE_CAPTION, ACTIVITY_SCORE_LABEL } from '@/components/tpo/activity-score';
 import { CompanyReadinessTable } from '@/components/tpo/CompanyReadinessTable';
+import { PlacementReadinessReport } from '@/components/tpo/PlacementReadinessReport';
 import { cn } from '@/lib/utils';
 
 const BAND: Record<ReadinessBand, { tone: StatusTone; label: string }> = {
@@ -55,6 +58,14 @@ export function CollegePerformancePanel({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+
+  // Bound to this college once, so the report's effects key on the college rather
+  // than on a fresh closure every render.
+  const listTests = useCallback(() => getAdminCollegeReportableAssessments(collegeId), [collegeId]);
+  const loadReport = useCallback(
+    (id: string) => getAdminCollegeAssessmentResults(collegeId, id, { roster: true }),
+    [collegeId],
+  );
 
   useEffect(() => {
     void getAdminCollegeCohorts(collegeId)
@@ -210,6 +221,12 @@ export function CollegePerformancePanel({
           <RosterTable students={data.students} truncated={data.truncated} studentHrefBase={studentHrefBase} />
 
           <CompanyReadinessCard collegeId={collegeId} cohortId={cohortId} />
+
+          {/* The same report the college's own TPO sees, for a college chosen by id —
+              so a placement lead can read a cohort's Placement Readiness results
+              without impersonating the TPO, which is what "open Student Reports and
+              search each student by email" was standing in for. */}
+          <PlacementReadinessReport listTests={listTests} loadReport={loadReport} />
         </>
       )}
     </section>

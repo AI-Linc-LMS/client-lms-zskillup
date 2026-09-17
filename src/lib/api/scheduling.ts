@@ -210,6 +210,10 @@ export interface AssessmentResultRow {
   fullName: string | null;
   email: string;
   phone: string | null;
+  /** Did this student sit the test? False only on the roster rows a `roster` report
+   *  appends. Read this rather than inferring absence from a zero score - a genuine
+   *  zero is not an absence, and the two must never render the same. */
+  attempted: boolean;
   collegeName: string | null;
   /** Department - student_profiles.branch (CSE/IT/ECE/EEE/MECH/CIVIL/OTHER). */
   branch: string | null;
@@ -284,6 +288,11 @@ export interface AssessmentResults {
     codingMarks?: number;
     /** `maxMarks × passingScore%`, rounded up — the whole-mark bar to clear. */
     passMarks?: number;
+    /** The PAPER's sections in its own order — the authority for the report's section
+     *  columns. The rows carry the same list, but a cohort where nobody has sat the
+     *  test yet has none, and that is exactly when a new cohort runs its first report.
+     *  Optional for the deploy window only (backend ships first). */
+    sections?: AssessmentResultSection[];
   };
   stats: {
     registered: number;

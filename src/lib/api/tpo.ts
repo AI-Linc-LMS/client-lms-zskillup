@@ -223,8 +223,16 @@ export async function getTpoReportableAssessments(): Promise<TpoReportableAssess
  * only, with the summary recomputed over them - so the report is always the cohort
  * the caller is entitled to see.
  */
-export async function getTpoAssessmentResults(id: string): Promise<AssessmentResults> {
-  const res = await apiClient.get<AssessmentResults>(`/api/v1/tpo/assessments/${id}/results`);
+/** One drive's results. `roster` adds every student on the college roster who did NOT
+ *  attempt, as a row with `attempted: false` — the Placement Readiness report, which
+ *  exists to show the whole cohort in one place. Omitted = attempts only. */
+export async function getTpoAssessmentResults(
+  id: string,
+  opts: { roster?: boolean } = {},
+): Promise<AssessmentResults> {
+  const res = await apiClient.get<AssessmentResults>(
+    `/api/v1/tpo/assessments/${id}/results${opts.roster ? '?roster=1' : ''}`,
+  );
   return res.data;
 }
 
