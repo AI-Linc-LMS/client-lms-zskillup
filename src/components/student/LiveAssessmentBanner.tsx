@@ -8,6 +8,24 @@ import { assessmentWindowEndMs, getMySchedule, type ApiScheduledAssessment } fro
 import { getMockHistory } from '@/lib/api/mocks';
 
 /**
+ * How long is left, in the largest unit that still reads as a time. A drive can stay
+ * open for days, and printing that as raw minutes ("closes in 2795m") makes the student
+ * do the division themselves.
+ */
+function timeLeftLabel(ms: number): string {
+  const mins = Math.max(0, Math.round(ms / 60_000));
+  if (mins < 60) return `${mins}m`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) {
+    const rem = mins % 60;
+    return rem ? `${hours}h ${rem}m` : `${hours}h`;
+  }
+  const days = Math.floor(hours / 24);
+  const rem = hours % 24;
+  return rem ? `${days}d ${rem}h` : `${days}d`;
+}
+
+/**
  * Live-assessment banner - pinned to the very top of the dashboard. Renders ONLY
  * when the student has an assessment inside its live window (now between start
  * and start+duration); otherwise it returns null and stays out of the way.
@@ -62,7 +80,7 @@ export function LiveAssessmentBanner() {
   const a = live.find((x) => x.mockTestId && !attempts.has(x.mockTestId)) ?? live[0];
   const doneAttemptId = a.mockTestId ? attempts.get(a.mockTestId) : undefined;
   const endMs = assessmentWindowEndMs(a);
-  const minsLeft = Math.max(0, Math.round((endMs - now) / 60_000));
+  const closesIn = timeLeftLabel(endMs - now);
 
   return (
     <motion.section
@@ -103,7 +121,7 @@ export function LiveAssessmentBanner() {
               {doneAttemptId ? (
                 <span className="font-bold text-emerald-600">· you&apos;ve completed this</span>
               ) : (
-                <span className="font-bold text-emerald-600">· closes in {minsLeft}m</span>
+                <span className="font-bold text-emerald-600">· closes in {closesIn}</span>
               )}
             </p>
           </div>
