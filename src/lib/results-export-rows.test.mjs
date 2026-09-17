@@ -37,8 +37,16 @@ registerHooks({
   },
 });
 
-const { FIXED_RESULT_COLUMNS, buildResultsCsv, resultSections, resultsColumns, resultsRows } =
-  await import('./results-export-rows.ts');
+const {
+  FIXED_RESULT_COLUMNS,
+  RESULTS_MODAL_COLUMNS,
+  TEST_REPORT_COLUMNS,
+  buildResultsCsv,
+  resultsCsvBody,
+  resultSections,
+  resultsColumns,
+  resultsRows,
+} = await import('./results-export-rows.ts');
 const { CSV_BOM } = await import('./csv.ts');
 
 /** The three sections of the owner's sample paper, in the paper's order. */
@@ -241,4 +249,148 @@ test('an assessment with no sections is still a valid 15-column export', () => {
   const data = results([row({ sections: [] })]);
   assert.deepEqual(resultsColumns(data), [...FIXED_RESULT_COLUMNS]);
   assert.equal(resultsRows(data)[0].length, 15);
+});
+
+/**
+ * THE TPO's Placement Readiness Test report - the SAME generator, a different fixed
+ * block: Email in (a placement office identifies a student by email outside the
+ * console), the six proctoring counts out (the file is circulated as a score sheet).
+ *
+ * These tests exist because a second copy of the column list would drift from the
+ * first silently: a header that no longer matches its own cells is still a valid CSV.
+ */
+
+/** The four sections of the owner's "Placement Readiness Test", in the paper's order. */
+const PRT_SECTIONS = [
+  { name: 'Numerical Ability', maxMarks: 25, order: 0 },
+  { name: 'Logical Reasoning', maxMarks: 25, order: 25 },
+  { name: 'Verbal Ability', maxMarks: 25, order: 50 },
+  { name: 'Technical MCQs', maxMarks: 25, order: 75 },
+];
+
+/** The owner's header, verbatim, for that four-section paper. */
+const OWNER_HEADER =
+  'Name,Email,Phone,Started At,Submitted At,Maximum Marks,Overall Score,Percentage,' +
+  'Total Questions,Attempted Questions,' +
+  'Section-wise Scores-Numerical Ability,Section-wise Max Scores-Numerical Ability,' +
+  'Section-wise Scores-Logical Reasoning,Section-wise Max Scores-Logical Reasoning,' +
+  'Section-wise Scores-Verbal Ability,Section-wise Max Scores-Verbal Ability,' +
+  'Section-wise Scores-Technical MCQs,Section-wise Max Scores-Technical MCQs';
+
+test('the test report emits the owner\u2019s header exactly, for that paper\u2019s own sections', () => {
+  const data = results([row({ sections: PRT_SECTIONS.map((s) => ({ ...s, score: 0 })) })]);
+  assert.equal(resultsColumns(data, TEST_REPORT_COLUMNS).join(','), OWNER_HEADER);
+  // And that is the file's first line, cell for cell.
+  assert.deepEqual(
+    csvLines(buildResultsCsv(data, TEST_REPORT_COLUMNS))[0],
+    OWNER_HEADER.split(','),
+  );
+});
+
+test('the section pairs come from the paper, not from that one four-section test', () => {
+  // Same variant, a two-section paper: four section columns, in the paper's order.
+  const data = results([
+    row({
+      sections: [
+        { name: 'Aptitude', score: 8, maxMarks: 20, order: 0 },
+        { name: 'Coding', score: 5, maxMarks: 30, order: 20 },
+      ],
+    }),
+  ]);
+  assert.deepEqual(resultsColumns(data, TEST_REPORT_COLUMNS).slice(10), [
+    'Section-wise Scores-Aptitude',
+    'Section-wise Max Scores-Aptitude',
+    'Section-wise Scores-Coding',
+    'Section-wise Max Scores-Coding',
+  ]);
+});
+
+test('Email is a real column with the student\u2019s address, and proctoring is gone', () => {
+  const data = results([row({ sections: PRT_SECTIONS.map((s) => ({ ...s, score: 10 })) })]);
+  const columns = resultsColumns(data, TEST_REPORT_COLUMNS);
+  const [cells] = resultsRows(data, TEST_REPORT_COLUMNS);
+  assert.equal(columns[1], 'Email');
+  assert.equal(cells[1], 'asha@example.com');
+  // Not one proctoring column survives - by name or by value.
+  for (const c of [
+    'Tab Switches Count',
+    'Face Violations Count',
+    'Fullscreen Exits Count',
+    'Face Validation Failures Count',
+    'Multiple Face Detections Count',
+    'Total Violation Count',
+  ]) {
+    assert.equal(columns.includes(c), false, `${c} must not be in the test report`);
+  }
+  assert.equal(columns.length, 10 + 8);
+  assert.equal(cells.length, 10 + 8);
+  // The ten fixed cells are the row's own values, shifted one right by Email.
+  assert.deepEqual(cells.slice(0, 10), [
+    'Asha Rao',
+    'asha@example.com',
+    '9876543210',
+    new Date('2026-09-10T09:00:00.000Z').toLocaleString(),
+    new Date('2026-09-10T10:00:00.000Z').toLocaleString(),
+    45,
+    30,
+    67,
+    45,
+    40,
+  ]);
+});
+
+test('every student carries a value in every section column - 0 and the section max', () => {
+  const data = results([
+    row({
+      sections: [
+        { name: 'Numerical Ability', score: 18, maxMarks: 25, order: 0 },
+        { name: 'Logical Reasoning', score: 0, maxMarks: 25, order: 25 },
+        { name: 'Verbal Ability', score: 7, maxMarks: 25, order: 50 },
+        { name: 'Technical MCQs', score: 0, maxMarks: 25, order: 75 },
+      ],
+    }),
+    // Defensive: a row that arrives short still fills every column.
+    row({ userId: 'u2', sections: [{ name: 'Numerical Ability', score: 4, maxMarks: 25, order: 0 }] }),
+  ]);
+  const [first, second] = resultsRows(data, TEST_REPORT_COLUMNS);
+  assert.deepEqual(first.slice(10), [18, 25, 0, 25, 7, 25, 0, 25]);
+  assert.deepEqual(second.slice(10), [4, 25, 0, 25, 0, 25, 0, 25]);
+  const lines = csvLines(buildResultsCsv(data, TEST_REPORT_COLUMNS));
+  for (const values of lines.slice(1)) {
+    assert.equal(values.length, 10 + 8);
+    assert.equal(values.slice(10).includes(''), false, 'no section cell is blank');
+  }
+});
+
+test('the test report is as formula-injection-safe as the modal one', () => {
+  const data = results([
+    row({
+      fullName: '=cmd|/c calc',
+      email: '+admin@evil.test',
+      sections: PRT_SECTIONS.map((s) => ({ ...s, score: 1 })),
+    }),
+  ]);
+  const csv = buildResultsCsv(data, TEST_REPORT_COLUMNS);
+  assert.equal(csv.startsWith(CSV_BOM), true);
+  assert.equal(csv.includes('"\t=cmd|/c calc"'), true);
+  assert.equal(csv.includes('"\t+admin@evil.test"'), true);
+});
+
+test('resultsCsvBody is the same file WITHOUT the BOM - downloadCsv adds its own', () => {
+  // downloadCsv() prepends CSV_BOM, so the card must hand it a body, not a whole file:
+  // passing buildResultsCsv() there would write two BOMs and Excel shows a stray glyph.
+  const data = results([row({ sections: PRT_SECTIONS.map((s) => ({ ...s, score: 3 })) })]);
+  const body = resultsCsvBody(data, TEST_REPORT_COLUMNS);
+  assert.equal(body.startsWith(CSV_BOM), false);
+  assert.equal(CSV_BOM + body, buildResultsCsv(data, TEST_REPORT_COLUMNS));
+  assert.equal(resultsCsvBody(results([]), TEST_REPORT_COLUMNS), '');
+});
+
+test('the modal variant is untouched - it is still the default, still 15 fixed columns', () => {
+  const data = results([row()]);
+  assert.deepEqual(resultsColumns(data), resultsColumns(data, RESULTS_MODAL_COLUMNS));
+  assert.deepEqual(resultsRows(data), resultsRows(data, RESULTS_MODAL_COLUMNS));
+  assert.equal(FIXED_RESULT_COLUMNS.length, 15);
+  assert.equal(FIXED_RESULT_COLUMNS.includes('Email'), false);
+  assert.equal(buildResultsCsv(data), buildResultsCsv(data, RESULTS_MODAL_COLUMNS));
 });

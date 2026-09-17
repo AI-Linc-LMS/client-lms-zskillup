@@ -501,3 +501,37 @@ export interface TpoAssessmentList {
   activeCount: number;
   activeCap: number;
 }
+
+/**
+ * Where a reportable drive came from, from THIS college's point of view.
+ *
+ *   OWN        the college created it (Assessment Center) — the report covers the
+ *              whole sitting, exactly as it always has.
+ *   ATTEMPTED  someone else's drive (platform-wide, or another college's) that at
+ *              least one of this college's students sat. The report covers THIS
+ *              college's students only — see TpoAssessmentsService.results.
+ */
+export type TpoAssessmentScope = 'OWN' | 'ATTEMPTED';
+
+/**
+ * One drive a college can pull a student report for. Deliberately NOT TpoAssessment:
+ * an ATTEMPTED drive belongs to somebody else, so this carries only what is needed to
+ * name it in a picker and nothing that would describe another college's cohort (no
+ * assigned/attempted totals for the whole drive, no owning college).
+ */
+export interface TpoReportableAssessment {
+  id: string;
+  title: string;
+  /** Recruiter name, or null for a sectional / platform-wide drive. */
+  companyName: string | null;
+  scheduledAt: string;
+  endsAt: string | null;
+  status: TpoAssessmentStatus;
+  scope: TpoAssessmentScope;
+  /** Attempts BY THIS COLLEGE's students — exactly how many rows the report will have. */
+  collegeAttempts: number;
+}
+
+export interface TpoReportableAssessmentList {
+  assessments: TpoReportableAssessment[];
+}
