@@ -6,7 +6,9 @@ import type {
   TpoCompanyReadinessReport,
   TpoDashboard,
   TpoParticipation,
+  TpoReportableAssessment,
 } from '@/shared';
+import type { AssessmentResults } from './scheduling';
 
 /**
  * Admin / Super-Admin view of a college's TPO analytics (TPO Panel View). The SAME
@@ -51,6 +53,30 @@ export async function getAdminCollegeCompanyReadinessStudents(
       `${base(collegeId)}/company-readiness/students?${params.toString()}`,
     )
   ).data;
+}
+
+/** The drives this college can report on — its own, plus any its students attempted.
+ *  The same list a TPO's picker shows, for a college chosen by id. */
+export async function getAdminCollegeReportableAssessments(
+  collegeId: string,
+): Promise<TpoReportableAssessment[]> {
+  const res = await apiClient.get<{ assessments: TpoReportableAssessment[] }>(
+    `${base(collegeId)}/assessments/reportable`,
+  );
+  return res.data.assessments;
+}
+
+/** One drive's results for a college. `roster` adds every student on that college's
+ *  roster who did NOT attempt, as a row with `attempted: false`. */
+export async function getAdminCollegeAssessmentResults(
+  collegeId: string,
+  id: string,
+  opts: { roster?: boolean } = {},
+): Promise<AssessmentResults> {
+  const res = await apiClient.get<AssessmentResults>(
+    `${base(collegeId)}/assessments/${id}/results${opts.roster ? '?roster=1' : ''}`,
+  );
+  return res.data;
 }
 
 /** Cohorts for the batch filter (served by AdminCohortsController). */

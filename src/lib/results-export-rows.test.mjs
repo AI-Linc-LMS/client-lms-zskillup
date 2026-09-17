@@ -62,6 +62,7 @@ function row(overrides = {}) {
     fullName: 'Asha Rao',
     email: 'asha@example.com',
     phone: '9876543210',
+    attempted: true,
     collegeName: 'Alpha College',
     branch: 'CSE',
     cohort: null,
@@ -270,7 +271,7 @@ const PRT_SECTIONS = [
 
 /** The owner's header, verbatim, for that four-section paper. */
 const OWNER_HEADER =
-  'Name,Email,Phone,Started At,Submitted At,Maximum Marks,Overall Score,Percentage,' +
+  'Name,Email,Phone,Attempted Status,Started At,Submitted At,Maximum Marks,Overall Score,Percentage,' +
   'Total Questions,Attempted Questions,' +
   'Section-wise Scores-Numerical Ability,Section-wise Max Scores-Numerical Ability,' +
   'Section-wise Scores-Logical Reasoning,Section-wise Max Scores-Logical Reasoning,' +
@@ -297,7 +298,7 @@ test('the section pairs come from the paper, not from that one four-section test
       ],
     }),
   ]);
-  assert.deepEqual(resultsColumns(data, TEST_REPORT_COLUMNS).slice(10), [
+  assert.deepEqual(resultsColumns(data, TEST_REPORT_COLUMNS).slice(11), [
     'Section-wise Scores-Aptitude',
     'Section-wise Max Scores-Aptitude',
     'Section-wise Scores-Coding',
@@ -322,13 +323,14 @@ test('Email is a real column with the student\u2019s address, and proctoring is 
   ]) {
     assert.equal(columns.includes(c), false, `${c} must not be in the test report`);
   }
-  assert.equal(columns.length, 10 + 8);
-  assert.equal(cells.length, 10 + 8);
-  // The ten fixed cells are the row's own values, shifted one right by Email.
-  assert.deepEqual(cells.slice(0, 10), [
+  assert.equal(columns.length, 11 + 8);
+  assert.equal(cells.length, 11 + 8);
+  // The eleven fixed cells are the row's own values, shifted one right by Email.
+  assert.deepEqual(cells.slice(0, 11), [
     'Asha Rao',
     'asha@example.com',
     '9876543210',
+    'Yes',
     new Date('2026-09-10T09:00:00.000Z').toLocaleString(),
     new Date('2026-09-10T10:00:00.000Z').toLocaleString(),
     45,
@@ -353,13 +355,70 @@ test('every student carries a value in every section column - 0 and the section 
     row({ userId: 'u2', sections: [{ name: 'Numerical Ability', score: 4, maxMarks: 25, order: 0 }] }),
   ]);
   const [first, second] = resultsRows(data, TEST_REPORT_COLUMNS);
-  assert.deepEqual(first.slice(10), [18, 25, 0, 25, 7, 25, 0, 25]);
-  assert.deepEqual(second.slice(10), [4, 25, 0, 25, 0, 25, 0, 25]);
+  assert.deepEqual(first.slice(11), [18, 25, 0, 25, 7, 25, 0, 25]);
+  assert.deepEqual(second.slice(11), [4, 25, 0, 25, 0, 25, 0, 25]);
   const lines = csvLines(buildResultsCsv(data, TEST_REPORT_COLUMNS));
   for (const values of lines.slice(1)) {
-    assert.equal(values.length, 10 + 8);
-    assert.equal(values.slice(10).includes(''), false, 'no section cell is blank');
+    assert.equal(values.length, 11 + 8);
+    assert.equal(values.slice(11).includes(''), false, 'no section cell is blank');
   }
+});
+
+/**
+ * THE ROSTER ROWS - a student who never sat the test.
+ *
+ * The whole point of the report is that they appear at all; the whole risk is that
+ * their row reads like a sitting that went badly. Identity, then "No", then nothing:
+ * a zero would average, sort in among the genuine zeros, and make an absentee look
+ * like someone who turned up and scored nothing.
+ */
+test('a student who never sat it says No and leaves every test cell blank', () => {
+  const data = results([
+    row({ sections: PRT_SECTIONS.map((s) => ({ ...s, score: 10 })) }),
+    row({
+      userId: 'u2',
+      fullName: 'Never Sat',
+      email: 'never@example.com',
+      phone: '9000000003',
+      attempted: false,
+      status: 'NOT_ATTEMPTED',
+      score: 0,
+      total: 0,
+      scorePct: 0,
+      rank: 0,
+      passed: false,
+      startedAt: null,
+      submittedAt: null,
+      totalQuestions: 0,
+      attemptedQuestions: 0,
+      sections: [],
+    }),
+  ]);
+  const [sat, absent] = resultsRows(data, TEST_REPORT_COLUMNS);
+
+  // Identity is kept - that IS the row.
+  assert.deepEqual(absent.slice(0, 4), ['Never Sat', 'never@example.com', '9000000003', 'No']);
+  // Everything after it is blank, section columns included. Not 0, not '-'.
+  assert.deepEqual(
+    absent.slice(4),
+    new Array(absent.length - 4).fill(''),
+  );
+  // Same width as a real attempt, so the two are one grid.
+  assert.equal(absent.length, sat.length);
+  assert.equal(sat[3], 'Yes');
+});
+
+test('the header still carries every section when NOBODY has sat it yet', () => {
+  // A brand-new cohort: rows, but no section data in any of them. The paper's own
+  // section list is what keeps the columns - the rows cannot supply them.
+  const data = results([
+    row({ userId: 'u9', attempted: false, sections: [] }),
+  ]);
+  data.assessment.sections = PRT_SECTIONS;
+
+  assert.equal(resultsColumns(data, TEST_REPORT_COLUMNS).join(','), OWNER_HEADER);
+  const [cells] = resultsRows(data, TEST_REPORT_COLUMNS);
+  assert.equal(cells.length, 11 + 8);
 });
 
 test('the test report is as formula-injection-safe as the modal one', () => {
