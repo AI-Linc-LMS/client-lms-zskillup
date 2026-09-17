@@ -66,6 +66,16 @@ export async function getAdminCollegeReportableAssessments(
   return res.data.assessments;
 }
 
+/** A college's whole roster against the Placement Readiness Test. */
+export async function getAdminCollegePlacementReadinessReport(
+  collegeId: string,
+): Promise<AssessmentResults> {
+  const res = await apiClient.get<AssessmentResults>(
+    `${base(collegeId)}/reports/placement-readiness`,
+  );
+  return res.data;
+}
+
 /** One drive's results for a college. `roster` adds every student on that college's
  *  roster who did NOT attempt, as a row with `attempted: false`. */
 export async function getAdminCollegeAssessmentResults(
