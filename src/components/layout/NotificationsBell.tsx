@@ -17,7 +17,7 @@ import {
   Trophy,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { hasRoleHint } from '@/lib/session-hints';
+import { isStudentContext } from '@/lib/session-hints';
 import {
   getNotifications,
   markAllNotificationsRead,
@@ -54,13 +54,16 @@ export function NotificationsBell() {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<ApiNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  // The feed is a STUDENT route. Resolved after mount (the role hint is a cookie
+  // the server render cannot read, so deciding during SSR desyncs hydration).
+  const [forStudent, setForStudent] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
   const router = useRouter();
   const hasUnread = unreadCount > 0;
 
   const refresh = useCallback(() => {
-    if (!hasRoleHint()) return;
+    if (!isStudentContext()) return;
     getNotifications()
       .then((feed) => {
         setItems(feed.items);
@@ -71,6 +74,8 @@ export function NotificationsBell() {
 
   // Poll the feed for the unread badge (and lazily materialise reminders).
   useEffect(() => {
+    if (!isStudentContext()) return;
+    setForStudent(true);
     refresh();
     const t = setInterval(refresh, 60_000);
     return () => clearInterval(t);
@@ -112,6 +117,10 @@ export function NotificationsBell() {
       document.removeEventListener('keydown', onKey);
     };
   }, [open]);
+
+  // A TPO or super-admin can never have a feed - the bell would sit there
+  // permanently empty while its poll 403ed every minute in the console.
+  if (!forStudent) return null;
 
   return (
     <div className="relative" ref={ref} data-tour="chrome:notifications">
