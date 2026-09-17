@@ -23,6 +23,8 @@ import type {
   TpoCodingStudentRow,
   TpoCompanyReadinessReport,
   TpoRecommendations,
+  TpoReportableAssessment,
+  TpoReportableAssessmentList,
   TpoStudentDetail,
   TpoStudentInterviews,
 } from '@/shared';
@@ -198,6 +200,29 @@ export async function getTpoCodingTopics(company?: string): Promise<Array<{ topi
   return res.data;
 }
 
+/**
+ * Every drive this college can pull a student report for — its own Assessment Center
+ * drives PLUS any drive (platform-wide, or another college's) that at least one of its
+ * own students actually sat, each flagged `scope: 'OWN' | 'ATTEMPTED'`.
+ *
+ * A SIBLING of {@link getTpoAssessments}, not a replacement: the Assessment Center list
+ * still means "drives you own" (and its active-cap count with it). This one exists
+ * because the drives a college most wants a report on - the platform-wide ones its
+ * students sit - are by definition not its own.
+ */
+export async function getTpoReportableAssessments(): Promise<TpoReportableAssessment[]> {
+  const res = await apiClient.get<TpoReportableAssessmentList>(
+    '/api/v1/tpo/assessments/reportable',
+  );
+  return res.data.assessments;
+}
+
+/**
+ * The scored roster for one drive. For a drive this college OWNS that is the whole
+ * sitting; for one it merely attempted the backend returns this college's students
+ * only, with the summary recomputed over them - so the report is always the cohort
+ * the caller is entitled to see.
+ */
 export async function getTpoAssessmentResults(id: string): Promise<AssessmentResults> {
   const res = await apiClient.get<AssessmentResults>(`/api/v1/tpo/assessments/${id}/results`);
   return res.data;
