@@ -223,9 +223,21 @@ export async function getTpoReportableAssessments(): Promise<TpoReportableAssess
  * only, with the summary recomputed over them - so the report is always the cohort
  * the caller is entitled to see.
  */
+/**
+ * This college's whole roster against the Placement Readiness Test — one row per
+ * student, attempted or not.
+ *
+ * The sitting is resolved server-side from its calibration flag rather than picked
+ * from a list, so it works for a cohort in which nobody has sat the test yet — which
+ * is exactly when "who still has to take it" matters most.
+ */
+export async function getTpoPlacementReadinessReport(): Promise<AssessmentResults> {
+  const res = await apiClient.get<AssessmentResults>('/api/v1/tpo/reports/placement-readiness');
+  return res.data;
+}
+
 /** One drive's results. `roster` adds every student on the college roster who did NOT
- *  attempt, as a row with `attempted: false` — the Placement Readiness report, which
- *  exists to show the whole cohort in one place. Omitted = attempts only. */
+ *  attempt, as a row with `attempted: false`. Omitted = attempts only. */
 export async function getTpoAssessmentResults(
   id: string,
   opts: { roster?: boolean } = {},

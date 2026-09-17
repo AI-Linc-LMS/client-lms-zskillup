@@ -7,11 +7,10 @@ import { Loader2, Mail, TrendingUp, Users } from 'lucide-react';
 import {
   emailCollegeReport,
   getAdminCollegeAnalytics,
-  getAdminCollegeAssessmentResults,
   getAdminCollegeCohorts,
   getAdminCollegeCompanyReadinessStudents,
   getAdminCollegeParticipation,
-  getAdminCollegeReportableAssessments,
+  getAdminCollegePlacementReadinessReport,
 } from '@/lib/api/admin-college-analytics';
 import { listCompanies } from '@/lib/api/catalog';
 import { describeError } from '@/lib/api/errors';
@@ -59,11 +58,10 @@ export function CollegePerformancePanel({
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
 
-  // Bound to this college once, so the report's effects key on the college rather
+  // Bound to this college once, so the report's effect keys on the college rather
   // than on a fresh closure every render.
-  const listTests = useCallback(() => getAdminCollegeReportableAssessments(collegeId), [collegeId]);
   const loadReport = useCallback(
-    (id: string) => getAdminCollegeAssessmentResults(collegeId, id, { roster: true }),
+    () => getAdminCollegePlacementReadinessReport(collegeId),
     [collegeId],
   );
 
@@ -226,7 +224,7 @@ export function CollegePerformancePanel({
               so a placement lead can read a cohort's Placement Readiness results
               without impersonating the TPO, which is what "open Student Reports and
               search each student by email" was standing in for. */}
-          <PlacementReadinessReport listTests={listTests} loadReport={loadReport} />
+          <PlacementReadinessReport loadReport={loadReport} />
         </>
       )}
     </section>

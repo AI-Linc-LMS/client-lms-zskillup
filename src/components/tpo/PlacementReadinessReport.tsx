@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { Download, Loader2 } from 'lucide-react';
-import type { TpoReportableAssessment } from '@/shared';
 import type { AssessmentResults } from '@/lib/api/scheduling';
 import { BentoCard } from '@/components/tpo/ui';
 import { StatusPill } from '@/components/student/StatusPill';
@@ -26,19 +25,16 @@ import { cn } from '@/lib/utils';
  *     dashboard prompt, which records no sitting id - so the report matched 2 of one
  *     college's 9 sitters (see SchedulingRepository.attemptScope).
  *
- * The fetchers are injected because the SAME report serves a TPO (their own college,
+ * The fetcher is injected because the SAME report serves a TPO (their own college,
  * from their token) and an admin / super-admin (any college, by id) - one component,
  * two routes, so the two can never drift into showing different things.
  */
 export interface PlacementReadinessReportProps {
-  /** The tests this viewer may report on, newest first. */
-  listTests: () => Promise<TpoReportableAssessment[]>;
-  /** One test's report. MUST be a roster read - the absent students are the point. */
-  loadReport: (id: string) => Promise<AssessmentResults>;
+  /** This college's Placement Readiness report. The sitting is resolved server-side
+   *  from its calibration flag, so there is nothing to pick — and nothing that stops
+   *  working for a cohort in which nobody has sat the test yet. */
+  loadReport: () => Promise<AssessmentResults>;
 }
-
-/** The drive the owner asks for by name - selected by default whenever it is there. */
-const DEFAULT_TEST_TITLE = 'placement readiness test';
 
 /** Which slice of the roster the table shows. "Not attempted" is the one a placement
  *  office actually chases, so it is a first-class filter rather than a sort. */
@@ -49,85 +45,33 @@ const ATTEMPT_FILTERS: ReadonlyArray<{ key: AttemptFilter; label: string }> = [
   { key: 'NOT_ATTEMPTED', label: 'Not attempted' },
 ];
 
-/** Short, unambiguous wording for where a drive came from. An OWN drive is this
- *  college's own; an ATTEMPTED one belongs to somebody else (platform-wide, or another
- *  college) and the report covers this college's students only. */
-const SCOPE_GROUP: Record<TpoReportableAssessment['scope'], string> = {
-  OWN: 'Your college’s drives',
-  ATTEMPTED: 'Drives your students attempted',
-};
-
-/** The filename’s cohort scope - what the rows in the file actually are. */
-const SCOPE_SLUG: Record<TpoReportableAssessment['scope'], string> = {
-  OWN: 'all-attempts',
-  ATTEMPTED: 'my-college',
-};
-
-function testOptionLabel(a: TpoReportableAssessment): string {
-  const when = new Date(a.scheduledAt).toLocaleDateString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    timeZone: 'Asia/Kolkata',
-  });
-  const who =
-    a.scope === 'OWN'
-      ? `${a.collegeAttempts} attempt${a.collegeAttempts === 1 ? '' : 's'}`
-      : `${a.collegeAttempts} of your students`;
-  return `${a.title}${a.companyName ? ` · ${a.companyName}` : ''} · ${when} · ${who}`;
-}
-
 /**
- * Placement Readiness Test report - the per-student score sheet for ONE test, in the
- * owner’s column format: identity, timings, marks, and a score/max pair for every
- * section of that paper (generated from the paper, never hard-coded).
+ * THE PLACEMENT READINESS REPORT - one college's whole roster against one test.
  *
- * Replaces the old "Company Report" card, whose per-company readiness + attempt volume
- * the Company Readiness Report beside it now covers in far more detail.
+ * Per student: identity, timings, marks, and a score/max pair for every section of the
+ * paper (generated from the paper, never hard-coded), plus whether they sat it at all.
  *
- * The picker lists more than the Assessment Center does, and that is the point: the
- * drives a placement office most wants a report on are the platform-wide ones its
- * students sit, which the college does not own. Those are grouped separately and
- * labelled with how many of THIS college’s students are in them - which is exactly how
- * many rows the file will have, because the backend scopes a drive this college does
- * not own to its own students.
+ * There is NO test picker. It had one, and the owner asked for it to go — rightly: a
+ * picker can only offer drives a college owns or has already attended, so a cohort in
+ * which nobody had sat the Placement Readiness Test had nothing to select, and the
+ * report whose whole purpose is showing who has NOT taken it was the one report a new
+ * cohort could not open. The sitting is resolved server-side from its calibration flag
+ * instead, which is both simpler to use and correct from a cohort's first day.
  */
-export function PlacementReadinessReport({
-  listTests,
-  loadReport,
-}: PlacementReadinessReportProps) {
-  const [tests, setTests] = useState<TpoReportableAssessment[]>([]);
-  const [selected, setSelected] = useState('');
+export function PlacementReadinessReport({ loadReport }: PlacementReadinessReportProps) {
   const [report, setReport] = useState<AssessmentResults | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<AttemptFilter>('ALL');
   const [error, setError] = useState<string | null>(null);
 
+  // The report IS the section, so it loads on mount rather than on a click: the whole
+  // point is that a placement officer reads the cohort without first downloading it.
   useEffect(() => {
-    void listTests()
-      .then((rows) => {
-        setTests(rows);
-        // The owner asks for this report by the test’s name; fall back to the most
-        // recent drive (the list arrives newest first) so the card is never empty-handed.
-        const named = rows.find((r) => r.title.trim().toLowerCase() === DEFAULT_TEST_TITLE);
-        setSelected(named?.id ?? rows[0]?.id ?? '');
-      })
-      .catch(() => setTests([]));
-  }, [listTests]);
-
-  // The report IS the page here, so it loads on selection rather than on a click: the
-  // whole point of the rebuild is that a placement officer reads the cohort without
-  // first downloading it.
-  useEffect(() => {
-    if (!selected) {
-      setReport(null);
-      return;
-    }
     let cancelled = false;
     setLoading(true);
     setError(null);
     setFilter('ALL');
-    loadReport(selected)
+    loadReport()
       .then((r) => !cancelled && setReport(r))
       .catch((e) => {
         if (cancelled) return;
@@ -138,12 +82,7 @@ export function PlacementReadinessReport({
     return () => {
       cancelled = true;
     };
-  }, [selected, loadReport]);
-
-  const chosen = tests.find((t) => t.id === selected) ?? null;
-  const groups = (['OWN', 'ATTEMPTED'] as const)
-    .map((scope) => ({ scope, rows: tests.filter((t) => t.scope === scope) }))
-    .filter((g) => g.rows.length > 0);
+  }, [loadReport]);
 
   const rows = report?.rows ?? [];
   const sat = rows.filter((r) => r.attempted).length;
@@ -152,7 +91,7 @@ export function PlacementReadinessReport({
   );
 
   const exportTestReport = () => {
-    if (!chosen || !report) return;
+    if (!report) return;
     // Same generator as the results-modal export - only the fixed columns differ
     // (Email and Attempted Status in, proctoring out), which is a parameter, not a
     // second implementation. The file is exactly the table above it.
@@ -161,14 +100,14 @@ export function PlacementReadinessReport({
       setError('There is no student on your college roster to report on yet.');
       return;
     }
-    downloadCsv(`test-report-${csvScopeSlug(chosen.title)}-${SCOPE_SLUG[chosen.scope]}.csv`, csv);
+    downloadCsv(`${csvScopeSlug(report.assessment.title)}-my-college.csv`, csv);
   };
 
   return (
     <BentoCard
       title="Placement Readiness Test Report"
-      subtitle="Every student on your roster for one test — whether or not they attempted it."
-      source={report ? `${sat} of ${rows.length} attempted` : 'Pick a test'}
+      subtitle="Every student on your roster — whether or not they attempted the test."
+      source={report ? `${sat} of ${rows.length} attempted` : 'Loading'}
       action={
         <Button size="sm" disabled={!report || rows.length === 0} onClick={exportTestReport}>
           <Download className="size-4" /> Download CSV
@@ -176,23 +115,6 @@ export function PlacementReadinessReport({
       }
     >
       <div className="flex flex-wrap items-center gap-3">
-        <label className="min-w-0 flex-1">
-          <span className="sr-only">Test</span>
-          <select
-            value={selected}
-            onChange={(e) => setSelected(e.target.value)}
-            className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
-          >
-            <option value="">Select a test…</option>
-            {groups.map((g) => (
-              <optgroup key={g.scope} label={SCOPE_GROUP[g.scope]}>
-                {g.rows.map((t) => (
-                  <option key={t.id} value={t.id}>{testOptionLabel(t)}</option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        </label>
         {report ? (
           <div className="flex gap-1.5" role="group" aria-label="Filter by attempt">
             {ATTEMPT_FILTERS.map((f) => (

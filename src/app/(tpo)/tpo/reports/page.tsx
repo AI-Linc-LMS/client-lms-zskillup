@@ -9,8 +9,7 @@ import {
   getTpoCompanyReadinessStudents,
   getTpoInterviewAnalytics,
   getTpoPlacementSummary,
-  getTpoAssessmentResults,
-  getTpoReportableAssessments,
+  getTpoPlacementReadinessReport,
 } from '@/lib/api/tpo';
 import { listCompanies } from '@/lib/api/catalog';
 import type {
@@ -34,10 +33,7 @@ import { PlacementReadinessReport } from '@/components/tpo/PlacementReadinessRep
 
 const BAND_LABEL: Record<string, string> = { READY: 'Ready', IN_TRAINING: 'In training', AT_RISK: 'At risk' };
 
-/** Declared at module scope on purpose: an inline arrow would be a new identity on
- *  every render of this page, and the report's fetch effect keys on it — so each of
- *  this page's own loading states would silently refetch the whole roster. */
-const loadTestReport = (id: string) => getTpoAssessmentResults(id, { roster: true });
+
 
 export default function ReportsPage() {
   const { cohortId, cohorts } = useTpoConsole();
@@ -203,7 +199,7 @@ export default function ReportsPage() {
         <CompanyReadinessReportCard scope={scope} cohortId={cohortId} />
       </div>
 
-      <PlacementReadinessReport listTests={getTpoReportableAssessments} loadReport={loadTestReport} />
+      <PlacementReadinessReport loadReport={getTpoPlacementReadinessReport} />
 
       <BentoCard title="At a glance" subtitle="What the campus report contains." source="Practice + Mock + Coding + placements">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
