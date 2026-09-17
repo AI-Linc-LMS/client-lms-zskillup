@@ -54,6 +54,42 @@ export const QUESTION_SELECTION_ERRORS = {
   QUESTION_IN_USE: 'QUESTION_IN_USE',
 } as const;
 
+/**
+ * The closing window of a drive students have ALREADY sat. Everything that a recorded
+ * attempt was graded and reported against (title, start, duration, audience, proctoring,
+ * question set) stays frozen — but the deadline is not one of those things: moving it
+ * changes nothing about an existing attempt, it only decides who may still START. An
+ * admin extending a running (or just-closed) drive must not have to clone it, so these
+ * two columns remain editable for the whole life of the drive.
+ */
+export const DEADLINE_EDITABLE_FIELDS = ['endsAt', 'registrationCloseAt'] as const;
+export type DeadlineEditableField = (typeof DEADLINE_EDITABLE_FIELDS)[number];
+
+/**
+ * Stable `error.code` values for editing an already-scheduled assessment.
+ *   ASSESSMENT_LOCKED_EXCEPT_DEADLINE 400 — the drive has attempts and the patch changed
+ *                                           something other than its closing window;
+ *                                           `details` names what changed and what is still
+ *                                           editable. `message` is the long-standing
+ *                                           "…can no longer be edited" refusal, unchanged.
+ *   INVALID_CLOSING_TIME              400 — `endsAt` / `registrationCloseAt` is not a valid
+ *                                           instant, or the close is not after the start.
+ */
+export const ASSESSMENT_EDIT_ERRORS = {
+  LOCKED_EXCEPT_DEADLINE: 'ASSESSMENT_LOCKED_EXCEPT_DEADLINE',
+  INVALID_CLOSING_TIME: 'INVALID_CLOSING_TIME',
+} as const;
+
+/** `details` of a 400 ASSESSMENT_LOCKED_EXCEPT_DEADLINE. */
+export interface LockedExceptDeadlineDetails {
+  /** Recorded attempts that froze the drive. */
+  attempts: number;
+  /** Patch fields whose value differs from what is stored (the reason for the refusal). */
+  changedFields: string[];
+  /** What this drive still accepts — {@link DEADLINE_EDITABLE_FIELDS}. */
+  editableFields: string[];
+}
+
 /** `details` of a 400 INVALID_QUESTION_IDS — the offending ids grouped by reason. */
 export interface InvalidQuestionIdsDetails {
   /** MCQ ids that don't exist. */
@@ -181,7 +217,11 @@ export class EditAssessmentDto {
   @IsOptional() @IsUUID() companyId?: string;
   @IsOptional() @IsBoolean() platform?: boolean;
   @IsOptional() @IsISO8601() scheduledAt?: string;
+  /** Hard close of the availability window. Editable even once the drive has attempts
+   *  (see {@link DEADLINE_EDITABLE_FIELDS}) — must be after `scheduledAt`. */
   @IsOptional() @IsISO8601() endsAt?: string;
+  /** Registration / entry cutoff; null clears it. Editable alongside `endsAt`. */
+  @IsOptional() @IsISO8601() registrationCloseAt?: string | null;
   @IsOptional() @IsInt() @Min(5) @Max(600) durationMinutes?: number;
   @IsOptional() @IsBoolean() proctored?: boolean;
   @IsOptional() @IsBoolean() proctorAutoSubmit?: boolean;

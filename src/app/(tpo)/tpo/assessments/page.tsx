@@ -37,6 +37,7 @@ import { ResultsReport } from '@/components/assessment/ResultsReport';
 import { KpiCard } from '@/components/tpo/ui';
 import { SectionTopicPicker } from '@/components/tpo/SectionTopicPicker';
 import { AssessmentWizard } from '@/components/superadmin/AssessmentWizard';
+import { ExtendDeadlineDialog } from '@/components/assessment/ExtendDeadlineDialog';
 import { Button } from '@/components/ui/button';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { cn } from '@/lib/utils';
@@ -65,6 +66,8 @@ export default function AssessmentCenterPage() {
   const [aiWizard, setAiWizard] = useState(false);
   const [saving, setSaving] = useState(false);
   const [resultsFor, setResultsFor] = useState<TpoAssessment | null>(null);
+  /** The drive whose closing date is being moved — the one edit an attempted drive takes. */
+  const [extending, setExtending] = useState<TpoAssessment | null>(null);
 
   const [form, setForm] = useState({
     mode: 'SECTIONAL',
@@ -541,7 +544,21 @@ export default function AssessmentCenterPage() {
                     <td className="px-4 py-2.5 text-slate-600">{a.companyName ?? 'Sectional'}</td>
                     <td className="px-4 py-2.5 tabular-nums text-slate-600">{a.assigned}</td>
                     <td className="px-4 py-2.5 tabular-nums text-slate-600">{a.attempted}</td>
-                    <td className="px-4 py-2.5 text-xs text-slate-600">{fmtDateTime(a.scheduledAt)}</td>
+                    <td className="px-4 py-2.5 text-xs text-slate-600">
+                      {fmtDateTime(a.scheduledAt)}
+                      {a.endsAt ? (
+                        <span
+                          className={cn(
+                            'mt-0.5 block',
+                            new Date(a.endsAt).getTime() < Date.now() ? 'font-semibold text-amber-700' : 'text-slate-400',
+                          )}
+                        >
+                          {new Date(a.endsAt).getTime() < Date.now() ? 'Closed' : 'Closes'} {fmtDateTime(a.endsAt)}
+                        </span>
+                      ) : (
+                        <span className="mt-0.5 block text-slate-400">No closing time</span>
+                      )}
+                    </td>
                     <td className="px-4 py-2.5">
                       <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${STATUS_STYLE[a.status]}`}>{a.status}</span>
                       {a.resultsReleased && <span className="ml-1 text-[10px] font-semibold text-emerald-600">· released</span>}
@@ -556,6 +573,15 @@ export default function AssessmentCenterPage() {
                           title="Publish & notify students"
                         >
                           {publishingId === a.id ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setExtending(a)}
+                          className="text-slate-500 transition-colors hover:text-orange"
+                          title="Extend deadline — change the closing date/time, even once students have attempted it"
+                        >
+                          <CalendarClock className="size-4" />
+                          <span className="sr-only">Extend deadline</span>
                         </button>
                         <button type="button" onClick={() => setResultsFor(a)} className="text-slate-500 hover:text-navy" title="Results">
                           <BarChart3 className="size-4" />
@@ -579,6 +605,23 @@ export default function AssessmentCenterPage() {
       </p>
 
       {resultsFor && <ResultsModal assessment={resultsFor} onClose={() => setResultsFor(null)} onReleased={load} />}
+
+      {extending && (
+        <ExtendDeadlineDialog
+          assessmentId={extending.id}
+          title={extending.title}
+          onClose={() => setExtending(null)}
+          onSaved={(saved) => {
+            setExtending(null);
+            toast.success(
+              saved.endsAt
+                ? `Closing time set to ${fmtDateTime(saved.endsAt)}.`
+                : 'Closing time updated.',
+            );
+            load();
+          }}
+        />
+      )}
 
       {aiWizard && (
         <AssessmentWizard

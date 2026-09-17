@@ -3,8 +3,22 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { ArrowRight, BarChart3, ChevronDown, ClipboardList, Loader2, Pencil, Plus, Trash2, Users, Video, X } from 'lucide-react';
+import {
+  ArrowRight,
+  BarChart3,
+  CalendarClock,
+  ChevronDown,
+  ClipboardList,
+  Loader2,
+  Pencil,
+  Plus,
+  Trash2,
+  Users,
+  Video,
+  X,
+} from 'lucide-react';
 import { AssessmentWizard } from '@/components/superadmin/AssessmentWizard';
+import { ExtendDeadlineDialog } from '@/components/assessment/ExtendDeadlineDialog';
 import { AdminAssessmentCreator } from '@/components/superadmin/AdminAssessmentCreator';
 import { ResultsReport } from '@/components/assessment/ResultsReport';
 import { cn } from '@/lib/utils';
@@ -49,6 +63,8 @@ export function SchedulingAdmin() {
   const [resultsLoading, setResultsLoading] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [editWizardId, setEditWizardId] = useState<string | null>(null);
+  /** The row whose closing date is being moved (the one edit a drive with attempts takes). */
+  const [extending, setExtending] = useState<ApiScheduledAssessment | null>(null);
   const [showExistingMock, setShowExistingMock] = useState(false);
   const [showQuickBuild, setShowQuickBuild] = useState(false);
 
@@ -170,6 +186,22 @@ export function SchedulingAdmin() {
       ) : null}
       {editWizardId ? (
         <AssessmentWizard editId={editWizardId} onClose={() => setEditWizardId(null)} onCreated={load} />
+      ) : null}
+      {extending ? (
+        <ExtendDeadlineDialog
+          assessmentId={extending.id}
+          title={extending.title}
+          onClose={() => setExtending(null)}
+          onSaved={(saved) => {
+            setExtending(null);
+            toast.success(
+              saved.endsAt
+                ? `Closing time set to ${new Date(saved.endsAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}.`
+                : 'Closing time updated.',
+            );
+            void load();
+          }}
+        />
       ) : null}
 
       {/* Primary entry point: the assessment wizard (random + manual selection, review,
@@ -420,13 +452,8 @@ export function SchedulingAdmin() {
                   <td className="px-4 py-3.5 font-semibold text-navy">{r.title}</td>
                   <td className="px-4 py-3.5 text-slate-600">{companyName[r.companyId] ?? r.companyName}</td>
                   <td className="px-4 py-3.5 text-slate-600">
-                    {new Date(r.scheduledAt).toLocaleString([], {
-                      month: 'short',
-                      day: 'numeric',
-                      hour: 'numeric',
-                      minute: '2-digit',
-                      hour12: true,
-                    })}
+                    {fmtWhen(r.scheduledAt)}
+                    <CloseLine assessment={r} />
                   </td>
                   <td className="px-4 py-3.5 text-slate-600">{r.durationMinutes}m</td>
                   <td className="px-4 py-3.5">
@@ -461,6 +488,14 @@ export function SchedulingAdmin() {
                         className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-100"
                       >
                         <Pencil className="size-3.5" /> Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setExtending(r)}
+                        title="Change the closing date/time — works even once students have attempted it"
+                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold text-orange-700 hover:bg-orange-50"
+                      >
+                        <CalendarClock className="size-3.5" /> Extend deadline
                       </button>
                       <button
                         type="button"
@@ -541,6 +576,24 @@ export function SchedulingAdmin() {
         </div>
       ) : null}
     </div>
+  );
+}
+
+const fmtWhen = (iso: string) =>
+  new Date(iso).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+
+/**
+ * The drive's close, under its start — the value that actually decides whether a student
+ * can still start (never scheduledAt + durationMinutes, which is the per-attempt limit).
+ * Reads "Closed" in amber once it has passed, so extending a drive visibly re-opens it.
+ */
+function CloseLine({ assessment }: { assessment: ApiScheduledAssessment }) {
+  if (!assessment.endsAt) return <span className="mt-0.5 block text-xs text-slate-400">No closing time</span>;
+  const closed = new Date(assessment.endsAt).getTime() < Date.now();
+  return (
+    <span className={cn('mt-0.5 block text-xs', closed ? 'font-semibold text-amber-700' : 'text-slate-400')}>
+      {closed ? 'Closed' : 'Closes'} {fmtWhen(assessment.endsAt)}
+    </span>
   );
 }
 
