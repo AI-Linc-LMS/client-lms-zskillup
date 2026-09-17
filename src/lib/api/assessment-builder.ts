@@ -129,7 +129,11 @@ export interface EditableAssessment {
   mockTestId: string | null;
   title: string;
   scheduledAt: string;
+  /** Hard close of the availability window (null = open-ended). THE gate on whether a
+   *  student may still start — an admin can move it even after attempts have started. */
   endsAt: string | null;
+  /** Registration / entry cutoff (null = none). Moves with `endsAt`. */
+  registrationCloseAt: string | null;
   durationMinutes: number;
   proctored: boolean;
   proctorAutoSubmit?: boolean;
@@ -142,7 +146,17 @@ export interface EditableAssessment {
   codingCount: number;
   /** Sum of every linked item's marks. */
   totalMarks: number;
+  /** Nothing about the drive may change (it has attempts). The closing window is the
+   *  exception — see `deadlineEditable`. */
   editable: boolean;
+  /**
+   * The closing window (`endsAt` / `registrationCloseAt`) can be moved whatever `editable`
+   * says. OPTIONAL only because this console can be live for the few minutes before its
+   * paired backend is (deploy the backend first): absent ⇒ an older server that still
+   * refuses every edit of an attempted drive, so keep it fully locked rather than offering
+   * a Save that would 400.
+   */
+  deadlineEditable?: boolean;
   items: EditableAssessmentItem[];
 }
 
@@ -166,4 +180,18 @@ export async function updateAssessment(id: string, payload: EditAssessmentPayloa
     payload,
   );
   return res.data;
+}
+
+/**
+ * Move ONLY a drive's closing date/time — the one edit an assessment students have
+ * already sat still accepts (anything else comes back 400
+ * ASSESSMENT_LOCKED_EXCEPT_DEADLINE). Sends nothing but `endsAt`, so a value the admin
+ * never touched can't accidentally count as a change.
+ *
+ * Deliberately this route and not PATCH /admin/scheduled-assessments/:id: the builder
+ * endpoint is the one a COLLEGE_ADMIN may call, so the super-admin scheduler and the TPO
+ * Assessment Center extend a deadline through exactly the same path and scoping.
+ */
+export async function extendAssessmentDeadline(id: string, endsAtIso: string): Promise<EditedAssessment> {
+  return updateAssessment(id, { endsAt: endsAtIso });
 }

@@ -475,6 +475,10 @@ export interface TpoAssessment {
   companyName: string | null;
   mockTestId: string | null;
   scheduledAt: string;
+  /** Hard close of the availability window, or null = open-ended. THE gate on whether a
+   *  student may still start (never scheduledAt + durationMinutes, which is the
+   *  per-attempt limit); an admin can move it even after attempts have started. */
+  endsAt: string | null;
   durationMinutes: number;
   proctored: boolean;
   cohortId: string | null;

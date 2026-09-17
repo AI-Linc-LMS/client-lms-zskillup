@@ -214,6 +214,19 @@ export function AssessmentWizard({
     latestExisting.current = existingItems;
   }, [existingItems]);
   const locked = !!existing && !existing.editable;
+  /**
+   * Attempts froze the drive, but its CLOSING time can still move (the server allows a
+   * patch whose only real change is `endsAt`). So the wizard keeps exactly that one field
+   * live, greys out the rest, and — critically — sends ONLY the date, so a value the admin
+   * never touched can't count as a change and bounce the save.
+   *
+   * `deadlineEditable` is absent on a server that predates the rule; then the drive stays
+   * fully locked rather than offering a Save that would 400.
+   */
+  const deadlineOnly = locked && existing?.deadlineEditable === true;
+  /** The stored close as a datetime-local value, to tell "actually moved" from "re-sent". */
+  const storedEndAt = existing?.endsAt ? toLocalInput(existing.endsAt) : '';
+  const deadlineMoved = deadlineOnly && !!endAt && endAt !== storedEndAt;
 
   const tally = useMemo(() => tallySelection(sections), [sections]);
   const problems = useMemo(() => selectionProblems(sections), [sections]);
@@ -386,7 +399,11 @@ export function AssessmentWizard({
     const isPlatform = companyId === PLATFORM;
     const companyArg = isPlatform || !companyId ? undefined : companyId;
     try {
-      if (editId) {
+      if (editId && deadlineOnly) {
+        // ONLY the closing date. Everything else is frozen and re-sending it unchanged
+        // would still be compared field by field server-side — send nothing to compare.
+        setSaved(await updateAssessment(editId, { endsAt: new Date(endAt).toISOString() }));
+      } else if (editId) {
         const e = await updateAssessment(editId, {
           title: title.trim(),
           companyId: companyArg,
@@ -441,12 +458,16 @@ export function AssessmentWizard({
 
   const working = inFlight > 0;
   const canReview = (editId ? true : tally.total > 0) && problems.length === 0 && !working;
-  const canPublish = canReview && !locked && !activeSelErr;
-  const publishLabel = editId
-    ? tally.total
-      ? `Save & add ${plural(tally.total, 'question', 'questions')}`
-      : 'Save changes'
-    : `Create & publish ${plural(tally.total, 'question', 'questions')}`;
+  const canPublish = deadlineOnly
+    ? deadlineMoved && !windowInvalid
+    : canReview && !locked && !activeSelErr;
+  const publishLabel = deadlineOnly
+    ? 'Save closing date'
+    : editId
+      ? tally.total
+        ? `Save & add ${plural(tally.total, 'question', 'questions')}`
+        : 'Save changes'
+      : `Create & publish ${plural(tally.total, 'question', 'questions')}`;
 
   return (
     <DialogShell open onClose={requestClose} labelledBy={titleId} dismissible={!creating} maxWidth="max-w-6xl">
@@ -458,9 +479,11 @@ export function AssessmentWizard({
             {editId ? 'Edit assessment' : 'Create assessment'}
           </h2>
           <p className="text-sm text-slate-500">
-            {editId
-              ? 'Edit details and add questions (only before anyone has attempted it).'
-              : 'Draw questions at random from the bank or pick them by hand, review them, then publish.'}
+            {deadlineOnly
+              ? `${plural(existing?.attempts ?? 0, 'student has', 'students have')} attempted this — only the closing date can be changed.`
+              : editId
+                ? 'Edit details and add questions (only before anyone has attempted it).'
+                : 'Draw questions at random from the bank or pick them by hand, review them, then publish.'}
           </p>
         </div>
         <Button type="button" variant="ghost" size="icon" onClick={requestClose} aria-label="Close" disabled={creating}>
@@ -508,19 +531,21 @@ export function AssessmentWizard({
         {created ? (
           <PublishedResult created={created} onDone={requestClose} />
         ) : saved ? (
-          <SavedResult saved={saved} onDone={requestClose} />
+          <SavedResult saved={saved} deadlineOnly={deadlineOnly} onDone={requestClose} />
         ) : step === 0 ? (
           <div className="mx-auto max-w-3xl space-y-4">
             {loadErr ? <ErrorAlert>{loadErr}</ErrorAlert> : null}
+            {deadlineOnly ? <DeadlineOnlyNotice attempts={existing?.attempts ?? 0} /> : null}
             <div>
               <label htmlFor={`${titleId}-title`} className={fieldLabelCls}>
                 Title
               </label>
               <input
                 id={`${titleId}-title`}
-                data-autofocus
+                data-autofocus={!deadlineOnly || undefined}
                 value={title}
                 maxLength={200}
+                disabled={deadlineOnly}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="TCS NQT - Round 1"
                 className={`mt-1 ${inputCls}`}
@@ -530,7 +555,13 @@ export function AssessmentWizard({
               <label htmlFor={`${titleId}-audience`} className={fieldLabelCls}>
                 Audience
               </label>
-              <select id={`${titleId}-audience`} value={companyId} onChange={(e) => setCompanyId(e.target.value)} className={`mt-1 ${inputCls}`}>
+              <select
+                id={`${titleId}-audience`}
+                value={companyId}
+                disabled={deadlineOnly}
+                onChange={(e) => setCompanyId(e.target.value)}
+                className={`mt-1 ${inputCls}`}
+              >
                 <option value="">Select audience</option>
                 {!isTpo && <option value={PLATFORM}>Platform-wide (all students)</option>}
                 {companies.map((c) => (
@@ -547,7 +578,13 @@ export function AssessmentWizard({
                 <label htmlFor={`${titleId}-cohort`} className={fieldLabelCls}>
                   Cohort / batch (optional)
                 </label>
-                <select id={`${titleId}-cohort`} value={cohortId} onChange={(e) => setCohortId(e.target.value)} className={`mt-1 ${inputCls}`}>
+                <select
+                  id={`${titleId}-cohort`}
+                  value={cohortId}
+                  disabled={deadlineOnly}
+                  onChange={(e) => setCohortId(e.target.value)}
+                  className={`mt-1 ${inputCls}`}
+                >
                   <option value="">All cohorts in your college</option>
                   {cohortOptions.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -567,6 +604,7 @@ export function AssessmentWizard({
                     <select
                       id={`${titleId}-college`}
                       value={collegeId}
+                      disabled={deadlineOnly}
                       onChange={(e) => {
                         setCollegeId(e.target.value);
                         if (!individualCohorts.some((c) => c.id === cohortId)) setCohortId('');
@@ -588,6 +626,7 @@ export function AssessmentWizard({
                     <select
                       id={`${titleId}-cohort`}
                       value={cohortId}
+                      disabled={deadlineOnly}
                       onChange={(e) => {
                         const v = e.target.value;
                         setCohortId(v);
@@ -638,7 +677,14 @@ export function AssessmentWizard({
                 <label htmlFor={`${titleId}-start`} className={fieldLabelCls}>
                   Opens *
                 </label>
-                <input id={`${titleId}-start`} type="datetime-local" value={startAt} onChange={(e) => setStartAt(e.target.value)} className={`mt-1 ${inputCls}`} />
+                <input
+                  id={`${titleId}-start`}
+                  type="datetime-local"
+                  value={startAt}
+                  disabled={deadlineOnly}
+                  onChange={(e) => setStartAt(e.target.value)}
+                  className={`mt-1 ${inputCls}`}
+                />
               </div>
               <div>
                 <label htmlFor={`${titleId}-end`} className={fieldLabelCls}>
@@ -648,11 +694,19 @@ export function AssessmentWizard({
                   id={`${titleId}-end`}
                   type="datetime-local"
                   value={endAt}
+                  data-autofocus={deadlineOnly || undefined}
                   onChange={(e) => setEndAt(e.target.value)}
                   aria-invalid={windowInvalid || undefined}
-                  aria-describedby={windowInvalid ? `${titleId}-end-err` : undefined}
+                  aria-describedby={
+                    windowInvalid ? `${titleId}-end-err` : deadlineOnly ? `${titleId}-end-open` : undefined
+                  }
                   className={`mt-1 ${inputCls}`}
                 />
+                {deadlineOnly ? (
+                  <p id={`${titleId}-end-open`} className="mt-1 text-xs font-semibold text-emerald-700">
+                    Editable — students who have not attempted yet can start until this time.
+                  </p>
+                ) : null}
               </div>
               <div>
                 <label htmlFor={`${titleId}-duration`} className={fieldLabelCls}>
@@ -664,6 +718,7 @@ export function AssessmentWizard({
                   min={5}
                   max={600}
                   value={durationMinutes}
+                  disabled={deadlineOnly}
                   onChange={(e) => setDurationMinutes(Number(e.target.value))}
                   className={`mt-1 ${inputCls}`}
                 />
@@ -686,19 +741,32 @@ export function AssessmentWizard({
                   min={0}
                   max={100}
                   value={passingScore}
+                  disabled={deadlineOnly}
                   onChange={(e) => setPassingScore(Number(e.target.value))}
                   className={`mt-1 ${inputCls}`}
                 />
               </div>
               <div className="space-y-2.5 sm:pt-6">
                 <label className="flex items-center gap-2 text-sm text-slate-600">
-                  <input type="checkbox" checked={proctored} onChange={(e) => setProctored(e.target.checked)} className={checkboxCls} />
+                  <input
+                    type="checkbox"
+                    checked={proctored}
+                    disabled={deadlineOnly}
+                    onChange={(e) => setProctored(e.target.checked)}
+                    className={checkboxCls}
+                  />
                   Proctored (camera + mic)
                 </label>
                 {proctored ? (
                   <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600">
                     <label className="flex items-center gap-2">
-                      <input type="checkbox" checked={proctorAutoSubmit} onChange={(e) => setProctorAutoSubmit(e.target.checked)} className={checkboxCls} />
+                      <input
+                        type="checkbox"
+                        checked={proctorAutoSubmit}
+                        disabled={deadlineOnly}
+                        onChange={(e) => setProctorAutoSubmit(e.target.checked)}
+                        className={checkboxCls}
+                      />
                       Auto-submit after
                     </label>
                     <input
@@ -706,7 +774,7 @@ export function AssessmentWizard({
                       min={1}
                       max={10}
                       value={proctorMaxWarnings}
-                      disabled={!proctorAutoSubmit}
+                      disabled={!proctorAutoSubmit || deadlineOnly}
                       aria-label="Warnings before auto-submit"
                       onChange={(e) => setProctorMaxWarnings(Number(e.target.value) || 3)}
                       className="h-10 w-16 rounded-lg border border-slate-200 bg-white px-2 text-sm text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30 disabled:opacity-50"
@@ -715,11 +783,23 @@ export function AssessmentWizard({
                   </div>
                 ) : null}
                 <label className="flex items-center gap-2 text-sm text-slate-600">
-                  <input type="checkbox" checked={subscriptionLock} onChange={(e) => setSubscriptionLock(e.target.checked)} className={checkboxCls} />
+                  <input
+                    type="checkbox"
+                    checked={subscriptionLock}
+                    disabled={deadlineOnly}
+                    onChange={(e) => setSubscriptionLock(e.target.checked)}
+                    className={checkboxCls}
+                  />
                   Require subscription / upgrade (paywall)
                 </label>
                 <label className="flex items-center gap-2 text-sm text-slate-600">
-                  <input type="checkbox" checked={profileLock} onChange={(e) => setProfileLock(e.target.checked)} className={checkboxCls} />
+                  <input
+                    type="checkbox"
+                    checked={profileLock}
+                    disabled={deadlineOnly}
+                    onChange={(e) => setProfileLock(e.target.checked)}
+                    className={checkboxCls}
+                  />
                   Require profile completion (Placement Readiness Test)
                 </label>
               </div>
@@ -797,7 +877,9 @@ export function AssessmentWizard({
                 proctored={proctored}
                 autoSubmit={proctored && proctorAutoSubmit ? proctorMaxWarnings : null}
               />
-              {locked ? (
+              {deadlineOnly ? (
+                <DeadlineOnlyNotice attempts={existing?.attempts ?? 0} newCloseAt={deadlineMoved ? endAt : null} />
+              ) : locked ? (
                 <ErrorAlert>
                   <span className="inline-flex items-center gap-1.5">
                     <Lock className="size-4" aria-hidden /> This assessment already has {existing?.attempts} attempt(s), so it can no
@@ -851,7 +933,12 @@ export function AssessmentWizard({
           <Button type="button" variant="outline" onClick={() => (step === 0 ? requestClose() : setStep(step - 1))} disabled={creating}>
             <ArrowLeft aria-hidden /> {step === 0 ? 'Cancel' : 'Back'}
           </Button>
-          {step === 0 ? (
+          {step === 0 && deadlineOnly ? (
+            // Nothing to review but the date the admin just typed — one click saves it.
+            <Button type="button" disabled={!canPublish || creating} onClick={() => setConfirmOpen(true)}>
+              {publishLabel}
+            </Button>
+          ) : step === 0 ? (
             <Button type="button" disabled={!detailsValid || (!!editId && !existing)} onClick={() => setStep(1)}>
               Next: questions <ArrowRight aria-hidden />
             </Button>
@@ -879,6 +966,7 @@ export function AssessmentWizard({
       <ConfirmPublishDialog
         open={confirmOpen}
         mode={editId ? 'edit' : 'create'}
+        deadlineOnly={deadlineOnly}
         tally={tally}
         title={title}
         audience={audienceLabel}
@@ -890,6 +978,32 @@ export function AssessmentWizard({
         onConfirm={publish}
       />
     </DialogShell>
+  );
+}
+
+/**
+ * The state of an attempted drive, said plainly: what is frozen, what is not, and what
+ * the pending change actually does. Amber (a constraint to work within), not red (an
+ * error) — there IS a change the admin can make from here.
+ */
+function DeadlineOnlyNotice({ attempts, newCloseAt }: { attempts: number; newCloseAt?: string | null }) {
+  return (
+    <NoticeBox>
+      <span className="inline-flex items-start gap-1.5">
+        <Lock className="mt-0.5 size-4 shrink-0" aria-hidden />
+        <span>
+          This assessment has {plural(attempts, 'attempt', 'attempts')} — only the closing date can be changed. The
+          questions, marks, start time, duration, audience and proctoring stay exactly as they are, and every recorded
+          attempt keeps its answers and score.
+          {newCloseAt ? (
+            <span className="mt-1 block font-semibold">
+              New closing time: {new Date(newCloseAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })} —
+              students who have not attempted it yet can start until then.
+            </span>
+          ) : null}
+        </span>
+      </span>
+    </NoticeBox>
   );
 }
 
@@ -905,7 +1019,7 @@ function ExistingQuestions({ existing }: { existing: EditableAssessment }) {
         <ErrorAlert className="mt-3">
           <span className="inline-flex items-center gap-1.5">
             <Lock className="size-4" aria-hidden /> {plural(existing.attempts, 'student attempt', 'student attempts')} already — the
-            questions are locked and this assessment can no longer be edited.
+            questions are locked{existing.deadlineEditable ? '. Only the closing date can still be changed.' : ' and this assessment can no longer be edited.'}
           </span>
         </ErrorAlert>
       ) : null}
@@ -1006,20 +1120,45 @@ function PublishedResult({ created, onDone }: { created: CreatedAssessment; onDo
   );
 }
 
-function SavedResult({ saved, onDone }: { saved: EditedAssessment; onDone: () => void }) {
+function SavedResult({
+  saved,
+  deadlineOnly,
+  onDone,
+}: {
+  saved: EditedAssessment;
+  deadlineOnly: boolean;
+  onDone: () => void;
+}) {
   const skipped = leftOut(saved.skippedAlreadyPresent, saved.droppedDuplicates);
+  const closesAt = saved.endsAt ? new Date(saved.endsAt) : null;
   return (
     <div className="mx-auto max-w-lg py-6 text-center">
       <span className="mx-auto grid size-11 place-items-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
         <CheckCircle2 className="size-5" aria-hidden />
       </span>
       <h3 className="mt-4 text-lg font-bold text-navy" role="status">
-        Changes saved
+        {deadlineOnly ? 'Closing date updated' : 'Changes saved'}
       </h3>
-      <p className="mt-1 text-sm text-slate-600">
-        The assessment now has {plural(saved.mcqCount + saved.codingCount, 'question', 'questions')} ({saved.mcqCount} MCQ ·{' '}
-        {saved.codingCount} coding) · {saved.totalMarks} marks.
-      </p>
+      {deadlineOnly ? (
+        <p className="mt-1 text-sm text-slate-600">
+          {closesAt ? (
+            <>
+              This assessment now closes{' '}
+              <span className="font-semibold text-navy">
+                {closesAt.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+              </span>
+              . Students who have not attempted it yet can start until then; nothing else changed.
+            </>
+          ) : (
+            'The closing time was updated. Nothing else about the assessment changed.'
+          )}
+        </p>
+      ) : (
+        <p className="mt-1 text-sm text-slate-600">
+          The assessment now has {plural(saved.mcqCount + saved.codingCount, 'question', 'questions')} ({saved.mcqCount} MCQ ·{' '}
+          {saved.codingCount} coding) · {saved.totalMarks} marks.
+        </p>
+      )}
       {skipped ? (
         <NoticeBox className="mt-4 text-left">
           {plural(skipped, 'question was', 'questions were')} not added again because the assessment already had them.

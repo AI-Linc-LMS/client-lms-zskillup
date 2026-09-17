@@ -20,6 +20,7 @@ const fmt = (localDateTime: string) =>
 export function ConfirmPublishDialog({
   open,
   mode,
+  deadlineOnly = false,
   tally,
   title,
   audience,
@@ -32,6 +33,9 @@ export function ConfirmPublishDialog({
 }: {
   open: boolean;
   mode: 'create' | 'edit';
+  /** The drive has attempts: the ONLY thing this save changes is its closing date, so the
+   *  question/marks facts are dropped — showing "Adding 0" would read like a failed append. */
+  deadlineOnly?: boolean;
   tally: SelectionTally;
   title: string;
   audience: string;
@@ -45,8 +49,9 @@ export function ConfirmPublishDialog({
 }) {
   const titleId = useId();
   const n = tally.total;
-  const action =
-    mode === 'create'
+  const action = deadlineOnly
+    ? 'Save closing date'
+    : mode === 'create'
       ? `Create & publish ${n} ${n === 1 ? 'question' : 'questions'}`
       : n > 0
         ? `Save & add ${n} ${n === 1 ? 'question' : 'questions'}`
@@ -56,7 +61,9 @@ export function ConfirmPublishDialog({
     <DialogShell open={open} onClose={onCancel} labelledBy={titleId} dismissible={!busy} maxWidth="max-w-md">
       <div className="space-y-5 p-6">
         <div>
-          <p className={eyebrowCls}>{mode === 'create' ? 'Ready to publish' : 'Confirm changes'}</p>
+          <p className={eyebrowCls}>
+            {deadlineOnly ? 'Confirm new closing date' : mode === 'create' ? 'Ready to publish' : 'Confirm changes'}
+          </p>
           <h2 id={titleId} className="mt-1 text-lg font-bold text-navy">
             {action}?
           </h2>
@@ -64,13 +71,23 @@ export function ConfirmPublishDialog({
         </div>
 
         <dl className="grid grid-cols-2 gap-3 text-sm">
-          <Fact label={mode === 'create' ? 'Questions' : 'Adding'} value={`${n} (${tally.mcq} MCQ · ${tally.coding} coding)`} />
-          <Fact label={mode === 'create' ? 'Total marks' : 'Marks added'} value={String(tally.marks)} />
+          {deadlineOnly ? null : (
+            <>
+              <Fact label={mode === 'create' ? 'Questions' : 'Adding'} value={`${n} (${tally.mcq} MCQ · ${tally.coding} coding)`} />
+              <Fact label={mode === 'create' ? 'Total marks' : 'Marks added'} value={String(tally.marks)} />
+            </>
+          )}
           <Fact label="Opens" value={fmt(startAt)} />
-          <Fact label="Closes" value={fmt(endAt)} />
+          <Fact label={deadlineOnly ? 'New close' : 'Closes'} value={fmt(endAt)} />
           <Fact label="Time per attempt" value={`${durationMinutes} min`} />
           <Fact label="Audience" value={audience} />
         </dl>
+        {deadlineOnly ? (
+          <p className="text-sm leading-relaxed text-slate-600">
+            Only the closing date changes. Every recorded attempt keeps its answers and score, and students who have not
+            attempted it yet can start until the new time.
+          </p>
+        ) : null}
 
         {n > 0 ? (
           <div className="space-y-1.5">
