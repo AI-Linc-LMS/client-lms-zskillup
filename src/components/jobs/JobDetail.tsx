@@ -22,9 +22,9 @@ const STRUCTURE_LABEL: Record<CompensationStructure, string> = {
   [CompensationStructure.FIXED_PLUS_VARIABLE]: 'Fixed + Variable',
 };
 import { ApplyButton } from './ApplyButton';
+import { ExternalApplyButton } from './ExternalApplyButton';
 import { AuroraBackground, Marquee, Reveal, RevealX } from '@/components/motion/primitives';
 import { StatusPill, type StatusTone } from '@/components/student/StatusPill';
-import { Button } from '@/components/ui/button';
 import {
   compensationLabel,
   deadlineLabel,
@@ -252,6 +252,11 @@ export function JobDetail({
   const closes = deadlineLabel(job.applicationDeadline);
   const closed = job.status !== JobStatus.ACTIVE || closes?.tone === 'closed';
   const applyHref = safeHttpUrl(job.applyUrl);
+  // This posting is EXTERNAL when the employer has an application site of their own -
+  // whether or not this viewer may see the link. The URL is paid content and the server
+  // redacts it (applyUrlLocked says so), so copy and layout key off this flag; keying
+  // off the URL would describe a locked external role as an in-portal one-click apply.
+  const isExternal = Boolean(applyHref) || job.applyUrlLocked;
   const logoSrc = safeHttpUrl(job.companyLogoUrl);
   const jd = safeHttpUrl(job.jdFileUrl);
   const pay = compensationLabel(job);
@@ -467,7 +472,7 @@ export function JobDetail({
                   {JOB_KIND_LABEL[job.jobKind].toLowerCase()} yet.{' '}
                   {closed
                     ? 'This role is no longer accepting applications.'
-                    : applyHref
+                    : isExternal
                       ? 'Apply on their site to see the full details and requirements.'
                       : 'Apply in one click and we’ll share your ZSkillup profile with them.'}
                 </p>
@@ -557,18 +562,14 @@ export function JobDetail({
             <Label>Apply</Label>
             {closed ? (
               <p className="mt-3 text-sm text-slate-600">Applications are closed for this role.</p>
-            ) : applyHref ? (
-              <>
-                <Button asChild size="lg" className="mt-3 w-full">
-                  <a href={applyHref} target="_blank" rel="noopener noreferrer">
-                    Apply on the company site
-                  </a>
-                </Button>
-                <p className="mt-2 text-xs leading-relaxed text-slate-500">
-                  {job.companyName} takes applications directly, so this one isn&apos;t tracked in
-                  your ZSkillup applications.
-                </p>
-              </>
+            ) : isExternal ? (
+              <ExternalApplyButton
+                slug={job.slug}
+                companyName={job.companyName}
+                jobTitle={job.title}
+                applyUrl={applyHref}
+                locked={job.applyUrlLocked}
+              />
             ) : (
               <div className="mt-3">
                 <ApplyButton

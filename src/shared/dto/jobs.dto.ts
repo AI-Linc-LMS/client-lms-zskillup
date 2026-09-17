@@ -341,7 +341,18 @@ export interface JobPostingDto {
   skills: string[];
   passoutYears: string[];
   openings: number | null;
+  /**
+   * The employer's OWN application site, when they collect applications themselves.
+   *
+   * PAID CONTENT, and redacted server-side: it is present only for a viewer who passes
+   * the same gate as applying through the platform (job-entitlement.ts), and is NULL
+   * for everyone else - including every logged-out visitor, because this payload is
+   * served from a public route. `applyUrlLocked` tells the client which of the two
+   * "null" cases it is looking at, so it can offer the plan instead of the link.
+   */
   applyUrl: string | null;
+  /** This posting HAS an external apply URL that this viewer may not see. */
+  applyUrlLocked: boolean;
   applicationDeadline: string | null;
   status: JobStatus;
   /** Visibility, separate from lifecycle `status`. */
