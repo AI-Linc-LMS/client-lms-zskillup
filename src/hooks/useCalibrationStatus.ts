@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getMyCalibration, type CalibrationStatusDto } from '@/lib/api/calibration';
+import { isStudentContext } from '@/lib/session-hints';
 
 export interface CalibrationState extends CalibrationStatusDto {
   loading: boolean;
@@ -26,6 +27,14 @@ export function useCalibrationStatus(): CalibrationState {
   const [state, setState] = useState<CalibrationState>({ loading: true, ...IDLE });
 
   useEffect(() => {
+    // GET /me/calibration is a STUDENT route. Asking it as a TPO or super-admin was a
+    // guaranteed 403 - on mount and again on every focus and tab-visibility change -
+    // which is a lot of console noise for an answer we already know. Resolved after
+    // mount: the role hint is a cookie the server render cannot read.
+    if (!isStudentContext()) {
+      setState({ loading: false, ...IDLE });
+      return;
+    }
     let cancelled = false;
     const check = () => {
       getMyCalibration()
