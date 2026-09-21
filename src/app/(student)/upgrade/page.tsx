@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { getMe, type ApiMe } from '@/lib/api/me';
 import { getMySubscription, getPricing } from '@/lib/api/payments';
+import { AutopayPanel } from '@/components/payments/AutopayPanel';
 import { getReadiness, type Readiness } from '@/lib/api/readiness';
 import { formatMoney, formatPrice } from '@/lib/api/subscriptions';
 import { buildPriceMap, periodMonths, retailPrice } from '@/lib/payments/pricing';
@@ -162,6 +163,14 @@ export default function UpgradeRenewPage() {
           ? 'Your membership, readiness and quick actions in one place.'
           : 'See what you already have and choose the best way to continue your preparation.'}
       </p>
+
+      {/* Renders nothing while autopay is switched off and the student has no mandate. */}
+      <AutopayPanel
+        entitlements={sub?.entitlements ?? []}
+        history={sub?.history ?? []}
+        pricing={pricing}
+        onChanged={refresh}
+      />
 
       {hasPlatform ? (
         <PremiumView

@@ -43,6 +43,7 @@ import {
   Users,
   Video,
   Wallet,
+  Repeat,
 } from 'lucide-react';
 import type { FeatureLockModule } from '@/lib/api/feature-locks';
 
@@ -221,6 +222,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
       { label: 'Subscriptions', href: '/superadmin/subscriptions', icon: CreditCard },
       { label: 'Billing & Revenue', href: '/superadmin/billing', icon: Wallet },
       { label: 'Coupons', href: '/admin/coupons', icon: Ticket },
+      { label: 'Autopay', href: '/admin/autopay', icon: Repeat },
       { label: 'Financials', href: '/superadmin/financials', icon: IndianRupee },
       { label: 'Reports', href: '/superadmin/reports', icon: FileText },
       { label: 'Broadcasts', href: '/superadmin/broadcasts', icon: Megaphone },
@@ -350,6 +352,7 @@ export const ADMIN_NAV: NavSection[] = [
       { label: 'Testimonials', href: '/admin/testimonials', icon: Quote },
       { label: 'SEO', href: '/admin/seo', icon: Search },
       { label: 'Coupons', href: '/admin/coupons', icon: Ticket },
+      { label: 'Autopay', href: '/admin/autopay', icon: Repeat },
     ],
   },
   {

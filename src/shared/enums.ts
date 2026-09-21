@@ -139,7 +139,6 @@ export enum QuestionStatus {
 
 // ─── Mock tests (Sprint 4) ───────────────────────────────────────────────────
 
-
 /** How often a question has appeared in real company assessments (Framework §Metadata). */
 export enum QuestionFrequency {
   VERY_HIGH = 'VERY_HIGH',
@@ -260,6 +259,43 @@ export enum EntitlementScope {
 }
 
 /** Billing period a price maps to. Duration in days is stored per price row. */
+/**
+ * Razorpay AUTOPAY MANDATE lifecycle, mirrored from the gateway rather than invented
+ * here. Deliberately NOT called SubscriptionStatus: that name is already taken by a
+ * COLLEGE's subscription (above), and the two are unrelated — one is a B2B contract
+ * we track ourselves, this one is a student's recurring card/UPI mandate at Razorpay — the webhook carries these exact strings and a renamed copy would have to be
+ * mapped in two directions forever.
+ *
+ * CREATED      made by us, the student has not authorised the mandate yet.
+ * AUTHENTICATED the mandate is approved; the first charge may not have landed.
+ * ACTIVE       charging normally.
+ * PENDING      a charge failed; Razorpay is retrying on its own schedule.
+ * HALTED       retries are exhausted. Only the student can revive it.
+ * PAUSED       paused by us or by Razorpay.
+ * CANCELLED    stopped, by the student or by an admin.
+ * COMPLETED    ran to its agreed number of cycles.
+ *
+ * ACCESS RULE: entitlement lifetime is driven by CHARGES, never by this status. A
+ * cancelled mandate must not retract access the student has already paid for.
+ */
+export enum AutopayStatus {
+  CREATED = 'CREATED',
+  AUTHENTICATED = 'AUTHENTICATED',
+  ACTIVE = 'ACTIVE',
+  PENDING = 'PENDING',
+  HALTED = 'HALTED',
+  PAUSED = 'PAUSED',
+  CANCELLED = 'CANCELLED',
+  COMPLETED = 'COMPLETED',
+}
+
+/** Did one attempt on a mandate take the money? */
+export enum AutopayChargeStatus {
+  CAPTURED = 'CAPTURED',
+  FAILED = 'FAILED',
+  REFUNDED = 'REFUNDED',
+}
+
 export enum BillingPeriod {
   MONTHLY = 'MONTHLY',
   QUARTERLY = 'QUARTERLY',
