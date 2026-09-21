@@ -5,6 +5,7 @@ import { Sidebar } from './Sidebar';
 import { PreviewBanner } from './PreviewBanner';
 import { CommandPalette } from './CommandPalette';
 import { SeoTitle } from './SeoTitle';
+import { AutopayOffer } from '@/components/payments/AutopayOffer';
 
 /**
  * Persistent authenticated chrome (frontend/CLAUDE §4): top bar + left sidebar +
@@ -28,6 +29,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         richColors
       />
       <TopBar />
+      {/* Offers autopay after a one-time purchase. Idle until a checkout announces one. */}
+      <AutopayOffer />
       {/* Full-width super-admin "view as student" banner (renders only while previewing). */}
       <PreviewBanner />
       <div className="flex flex-1">
