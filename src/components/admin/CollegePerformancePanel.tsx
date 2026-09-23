@@ -11,6 +11,8 @@ import {
   getAdminCollegeCompanyReadinessStudents,
   getAdminCollegeParticipation,
   getAdminCollegePlacementReadinessReport,
+  getAdminCollegeReportSections,
+  getAdminCollegeSectionReport,
 } from '@/lib/api/admin-college-analytics';
 import { listCompanies } from '@/lib/api/catalog';
 import { describeError } from '@/lib/api/errors';
@@ -28,6 +30,7 @@ import type {
 import { ACTIVITY_SCORE_CAPTION, ACTIVITY_SCORE_LABEL } from '@/components/tpo/activity-score';
 import { CompanyReadinessTable } from '@/components/tpo/CompanyReadinessTable';
 import { PlacementReadinessReport } from '@/components/tpo/PlacementReadinessReport';
+import { SectionWiseReportCard } from '@/components/tpo/SectionWiseReportCard';
 import { cn } from '@/lib/utils';
 
 const BAND: Record<ReadinessBand, { tone: StatusTone; label: string }> = {
@@ -62,6 +65,11 @@ export function CollegePerformancePanel({
   // than on a fresh closure every render.
   const loadReport = useCallback(
     () => getAdminCollegePlacementReadinessReport(collegeId),
+    [collegeId],
+  );
+  const listSections = useCallback(() => getAdminCollegeReportSections(collegeId), [collegeId]);
+  const loadSectionReport = useCallback(
+    (section: string) => getAdminCollegeSectionReport(collegeId, section),
     [collegeId],
   );
 
@@ -225,6 +233,10 @@ export function CollegePerformancePanel({
               without impersonating the TPO, which is what "open Student Reports and
               search each student by email" was standing in for. */}
           <PlacementReadinessReport loadReport={loadReport} />
+
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            <SectionWiseReportCard listSections={listSections} loadReport={loadSectionReport} />
+          </div>
         </>
       )}
     </section>
