@@ -1048,6 +1048,52 @@ export async function recordUserSheetExport(entry: UserSheetExportRecord): Promi
   return res.data;
 }
 
+/**
+ * A LIVE USER-SHEET LINK — one URL that always returns the current sheet as CSV.
+ *
+ * The export is a file: stale the moment it opens, and staying current means
+ * downloading it again. This is the alternative — a URL Google Sheets (IMPORTDATA)
+ * or Excel (From Web) pulls on its own schedule, so one spreadsheet keeps itself
+ * up to date.
+ *
+ * The URL is a credential: it returns every user's name, email and phone with no
+ * session behind it. The server stores only a hash, so `url` below is the ONLY
+ * time it can ever be read.
+ */
+export interface UserSheetLink {
+  id: string;
+  label: string | null;
+  createdAt: string;
+  /** When a spreadsheet last pulled it — how a forgotten live link is spotted. */
+  lastUsedAt: string | null;
+  useCount: number;
+  revokedAt: string | null;
+}
+
+export async function listUserSheetLinks(): Promise<UserSheetLink[]> {
+  const res = await apiClient.get<UserSheetLink[]>('/api/v1/admin/user-sheet/links');
+  return res.data;
+}
+
+/** Mints a link. `url` is returned once and cannot be retrieved again. */
+export async function createUserSheetLink(
+  label: string | null,
+): Promise<{ link: UserSheetLink; url: string }> {
+  const res = await apiClient.post<{ link: UserSheetLink; url: string }>(
+    '/api/v1/admin/user-sheet/links',
+    { label: label || undefined },
+  );
+  return res.data;
+}
+
+export async function revokeUserSheetLink(id: string): Promise<UserSheetLink> {
+  const res = await apiClient.post<UserSheetLink>(
+    `/api/v1/admin/user-sheet/links/${id}/revoke`,
+    {},
+  );
+  return res.data;
+}
+
 // ─── Exports (question bank + mocks) ────────────────────────────────────────
 
 /** Trigger a browser download of a JSON payload. */
