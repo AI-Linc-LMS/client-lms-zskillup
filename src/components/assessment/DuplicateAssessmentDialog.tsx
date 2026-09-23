@@ -176,7 +176,7 @@ export function DuplicateAssessmentDialog({
           </div>
 
           <p className="text-xs text-slate-400">
-            Timer stays at {durationMinutes} minutes. Leave &ldquo;Closes&rdquo; empty for no
+            Timer stays at {durationMinutes}&nbsp;minutes. Leave &ldquo;Closes&rdquo; empty for no
             closing time.
           </p>
 
