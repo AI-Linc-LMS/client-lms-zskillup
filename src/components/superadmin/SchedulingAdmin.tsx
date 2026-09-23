@@ -12,6 +12,8 @@ import {
   Loader2,
   Pencil,
   Plus,
+  CopyPlus,
+  Send,
   Trash2,
   Users,
   Video,
@@ -21,6 +23,8 @@ import { AssessmentWizard } from '@/components/superadmin/AssessmentWizard';
 import { ExtendDeadlineDialog } from '@/components/assessment/ExtendDeadlineDialog';
 import { AdminAssessmentCreator } from '@/components/superadmin/AdminAssessmentCreator';
 import { ResultsReport } from '@/components/assessment/ResultsReport';
+import { DuplicateAssessmentDialog } from '@/components/assessment/DuplicateAssessmentDialog';
+import { PublishAssessmentDialog } from '@/components/assessment/PublishAssessmentDialog';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ApiRequestError } from '@/lib/api/types';
@@ -63,6 +67,9 @@ export function SchedulingAdmin() {
   const [resultsLoading, setResultsLoading] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [editWizardId, setEditWizardId] = useState<string | null>(null);
+  /** Re-run a drive (same paper, new window) and announce one — both act on a row. */
+  const [duplicating, setDuplicating] = useState<ApiScheduledAssessment | null>(null);
+  const [publishing, setPublishing] = useState<ApiScheduledAssessment | null>(null);
   /** The row whose closing date is being moved (the one edit a drive with attempts takes). */
   const [extending, setExtending] = useState<ApiScheduledAssessment | null>(null);
   const [showExistingMock, setShowExistingMock] = useState(false);
@@ -186,6 +193,35 @@ export function SchedulingAdmin() {
       ) : null}
       {editWizardId ? (
         <AssessmentWizard editId={editWizardId} onClose={() => setEditWizardId(null)} onCreated={load} />
+      ) : null}
+      {duplicating ? (
+        <DuplicateAssessmentDialog
+          assessmentId={duplicating.id}
+          title={duplicating.title}
+          scheduledAt={duplicating.scheduledAt}
+          endsAt={duplicating.endsAt}
+          durationMinutes={duplicating.durationMinutes}
+          onClose={() => setDuplicating(null)}
+          onDuplicated={(created) => {
+            setDuplicating(null);
+            toast.success(
+              `"${created.title}" created with ${created.mcqCount + created.codingCount} questions. It is not published yet.`,
+            );
+            void load();
+          }}
+        />
+      ) : null}
+      {publishing ? (
+        <PublishAssessmentDialog
+          assessmentId={publishing.id}
+          title={publishing.title}
+          onClose={() => setPublishing(null)}
+          onPublished={() => {
+            setPublishing(null);
+            toast.success('Published — its audience is being emailed.');
+            void load();
+          }}
+        />
       ) : null}
       {extending ? (
         <ExtendDeadlineDialog
@@ -499,6 +535,31 @@ export function SchedulingAdmin() {
                       </button>
                       <button
                         type="button"
+                        onClick={() => setDuplicating(r)}
+                        title="Run this assessment again — same questions, new window"
+                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold text-sky-700 hover:bg-sky-50"
+                      >
+                        <CopyPlus className="size-3.5" /> Duplicate
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPublishing(r)}
+                        title={
+                          r.publishedAt
+                            ? 'Already published — send to anyone who was missed'
+                            : 'Publish and email this assessment to its audience'
+                        }
+                        className={cn(
+                          'inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold',
+                          r.publishedAt
+                            ? 'text-slate-500 hover:bg-slate-100'
+                            : 'text-emerald-700 hover:bg-emerald-50',
+                        )}
+                      >
+                        <Send className="size-3.5" /> {r.publishedAt ? 'Published' : 'Publish'}
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => openResults(r.id)}
                         className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold text-violet-700 hover:bg-violet-50"
                       >
@@ -594,6 +655,7 @@ function CloseLine({ assessment }: { assessment: ApiScheduledAssessment }) {
     <span className={cn('mt-0.5 block text-xs', closed ? 'font-semibold text-amber-700' : 'text-slate-400')}>
       {closed ? 'Closed' : 'Closes'} {fmtWhen(assessment.endsAt)}
     </span>
+
   );
 }
 

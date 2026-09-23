@@ -359,3 +359,61 @@ export class GenerateOneDto {
   /** Stems/titles already chosen — so the model avoids duplicates. */
   @IsOptional() @IsArray() @ArrayMaxSize(60) @IsString({ each: true }) avoid?: string[];
 }
+
+/**
+ * Re-run an existing drive: same paper, new window.
+ *
+ * The questions are COPIED into a fresh mock rather than the new drive pointing at
+ * the old one. Attempts are keyed on mock_test_id, so sharing a mock would lock out
+ * everyone who sat the original — the exact trap a "duplicate" button invites.
+ */
+export class DuplicateAssessmentDto {
+  /** Defaults to the source title with a "(copy)" suffix. */
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  @MaxLength(200)
+  title?: string;
+
+  /** When the new window opens. */
+  @IsISO8601()
+  scheduledAt!: string;
+
+  /** When it closes. Omitted = open-ended, like the source's own null. */
+  @IsOptional()
+  @IsISO8601()
+  endsAt?: string;
+
+  /** Per-attempt timer. Omitted = the source's. */
+  @IsOptional()
+  @IsInt()
+  @Min(5)
+  @Max(600)
+  durationMinutes?: number;
+
+  /** Each omitted = copied from the source, so a duplicate is a duplicate. */
+  @IsOptional() @IsBoolean() proctored?: boolean;
+  @IsOptional() @IsBoolean() proctorAutoSubmit?: boolean;
+  @IsOptional() @IsInt() @Min(1) @Max(10) proctorMaxWarnings?: number;
+}
+
+export interface DuplicateAssessmentResultDto {
+  scheduledAssessmentId: string;
+  mockTestId: string;
+  title: string;
+  mcqCount: number;
+  codingCount: number;
+}
+
+/** Who a publish would reach, so the admin is told the number BEFORE sending. */
+export interface AssessmentAudienceDto {
+  /** How the audience is chosen — cohort → college → company → everyone. */
+  scope: 'cohort' | 'college' | 'company' | 'platform';
+  /** Human label for the scope ("Platform-wide", a college name, …). */
+  scopeLabel: string;
+  /** Students who would be emailed. */
+  recipients: number;
+  /** Already emailed for this drive (a re-publish never re-sends them). */
+  alreadyEmailed: number;
+  publishedAt: string | null;
+}

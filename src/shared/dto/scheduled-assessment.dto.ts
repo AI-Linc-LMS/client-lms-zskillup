@@ -247,6 +247,8 @@ export class ScheduledAssessmentDto {
   @ApiProperty() proctorAutoSubmit!: boolean;
   @ApiProperty() proctorMaxWarnings!: number;
   @ApiProperty() isActive!: boolean;
+  /** When publish stamped it — null means its audience was never emailed. */
+  @ApiPropertyOptional() publishedAt!: string | null;
   /** Student calendar only: true = visible-locked (not entitled to open/attempt). */
   @ApiPropertyOptional() locked?: boolean;
 }
