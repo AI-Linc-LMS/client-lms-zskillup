@@ -20,6 +20,8 @@ export interface ApiScheduledAssessment {
   proctorAutoSubmit?: boolean;
   proctorMaxWarnings?: number;
   isActive: boolean;
+  /** Stamped by publish; null = built but its audience was never emailed. */
+  publishedAt?: string | null;
   /** Hard close of the availability window (admin-set), or null = open-ended.
    *  This is the REAL close — use it (not scheduledAt+duration) to decide whether
    *  a student can still start; see {@link assessmentWindowEndMs}. */

@@ -195,3 +195,58 @@ export async function updateAssessment(id: string, payload: EditAssessmentPayloa
 export async function extendAssessmentDeadline(id: string, endsAtIso: string): Promise<EditedAssessment> {
   return updateAssessment(id, { endsAt: endsAtIso });
 }
+
+/** Who a publish would email — fetched BEFORE the send, so the number is never a surprise. */
+export interface AssessmentAudience {
+  scope: 'cohort' | 'college' | 'company' | 'platform';
+  scopeLabel: string;
+  recipients: number;
+  alreadyEmailed: number;
+  publishedAt: string | null;
+}
+
+export async function getAssessmentAudience(id: string): Promise<AssessmentAudience> {
+  const res = await apiClient.get<AssessmentAudience>(
+    `/api/v1/admin/assessment-builder/${id}/audience`,
+  );
+  return res.data;
+}
+
+/** Publish a built drive: marks it live AND emails its audience. Not undoable. */
+export async function publishAssessment(id: string): Promise<{ id: string; publishedAt: string }> {
+  const res = await apiClient.post<{ id: string; publishedAt: string }>(
+    `/api/v1/admin/assessment-builder/${id}/publish`,
+    {},
+  );
+  return res.data;
+}
+
+export interface DuplicateAssessmentPayload {
+  title?: string;
+  scheduledAt: string;
+  endsAt?: string;
+  durationMinutes?: number;
+  proctored?: boolean;
+  proctorAutoSubmit?: boolean;
+  proctorMaxWarnings?: number;
+}
+
+export interface DuplicatedAssessment {
+  scheduledAssessmentId: string;
+  mockTestId: string;
+  title: string;
+  mcqCount: number;
+  codingCount: number;
+}
+
+/** Re-run a drive: the same paper copied into a new mock, on a new window. */
+export async function duplicateAssessment(
+  id: string,
+  payload: DuplicateAssessmentPayload,
+): Promise<DuplicatedAssessment> {
+  const res = await apiClient.post<DuplicatedAssessment>(
+    `/api/v1/admin/assessment-builder/${id}/duplicate`,
+    payload,
+  );
+  return res.data;
+}
