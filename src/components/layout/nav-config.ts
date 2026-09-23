@@ -243,6 +243,11 @@ export const SUPERADMIN_NAV: NavSection[] = [
       { label: 'Courses', href: '/superadmin/courses', icon: GraduationCap },
       { label: 'Study Material', href: '/superadmin/study-material', icon: MonitorPlay },
       { label: 'Concept Videos', href: '/superadmin/concept-videos', icon: Film },
+      // Feature Locks lives in the /admin console and its API has always been
+      // @Roles(ADMIN, SUPER_ADMIN) — but only the admin nav linked it, so the
+      // super-admins the owner actually signs in as had no way there but the URL.
+      // Same situation, and same fix, as the JOBS links below.
+      { label: 'Feature Locks', href: '/admin/settings', icon: SlidersHorizontal, tip: 'Per-module subscription + profile-completion locks, tunable without a deploy.' },
     ],
   },
   {
