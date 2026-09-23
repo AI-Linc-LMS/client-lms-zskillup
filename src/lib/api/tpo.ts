@@ -29,6 +29,7 @@ import type {
   TpoStudentInterviews,
 } from '@/shared';
 import type { AssessmentResults } from './scheduling';
+import type { SectionOptionDto, SectionReportDto } from '@/shared/dto/section-report.dto';
 
 export async function getTpoAnalytics(cohortId?: string): Promise<TpoDashboard> {
   const qs = cohortId ? `?cohortId=${encodeURIComponent(cohortId)}` : '';
@@ -268,5 +269,18 @@ export async function deleteTpoAssessment(id: string): Promise<void> {
 
 export async function bulkInviteStudents(dto: TpoBulkInviteDto): Promise<TpoBulkInviteResult> {
   const res = await apiClient.post<TpoBulkInviteResult>('/api/v1/tpo/invitations', dto);
+  return res.data;
+}
+
+/** Sections a section-wise report can be run for (root topics + coding). */
+export async function getTpoReportSections(): Promise<SectionOptionDto[]> {
+  return (await apiClient.get<SectionOptionDto[]>('/api/v1/tpo/reports/sections')).data;
+}
+
+/** One section, every student on the college roster, across tests AND practice. */
+export async function getTpoSectionReport(section: string): Promise<SectionReportDto> {
+  const res = await apiClient.get<SectionReportDto>(
+    `/api/v1/tpo/reports/section-wise?section=${encodeURIComponent(section)}`,
+  );
   return res.data;
 }

@@ -9,6 +9,7 @@ import type {
   TpoReportableAssessment,
 } from '@/shared';
 import type { AssessmentResults } from './scheduling';
+import type { SectionOptionDto, SectionReportDto } from '@/shared/dto/section-report.dto';
 
 /**
  * Admin / Super-Admin view of a college's TPO analytics (TPO Panel View). The SAME
@@ -99,4 +100,22 @@ export async function emailCollegeReport(
   body: { cohortId?: string; recipients?: string[] },
 ): Promise<SendCollegeReportResult> {
   return (await apiClient.post<SendCollegeReportResult>(`${base(collegeId)}/report/email`, body)).data;
+}
+
+/** Sections a section-wise report can be run for. */
+export async function getAdminCollegeReportSections(
+  collegeId: string,
+): Promise<SectionOptionDto[]> {
+  return (await apiClient.get<SectionOptionDto[]>(`${base(collegeId)}/reports/sections`)).data;
+}
+
+/** A college's roster in ONE section, across tests and practice. */
+export async function getAdminCollegeSectionReport(
+  collegeId: string,
+  section: string,
+): Promise<SectionReportDto> {
+  const res = await apiClient.get<SectionReportDto>(
+    `${base(collegeId)}/reports/section-wise?section=${encodeURIComponent(section)}`,
+  );
+  return res.data;
 }

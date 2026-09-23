@@ -10,6 +10,8 @@ import {
   getTpoInterviewAnalytics,
   getTpoPlacementSummary,
   getTpoPlacementReadinessReport,
+  getTpoReportSections,
+  getTpoSectionReport,
 } from '@/lib/api/tpo';
 import { listCompanies } from '@/lib/api/catalog';
 import type {
@@ -30,6 +32,7 @@ import { Button } from '@/components/ui/button';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { downloadCsv, toCsv } from '@/lib/csv';
 import { PlacementReadinessReport } from '@/components/tpo/PlacementReadinessReport';
+import { SectionWiseReportCard } from '@/components/tpo/SectionWiseReportCard';
 
 const BAND_LABEL: Record<string, string> = { READY: 'Ready', IN_TRAINING: 'In training', AT_RISK: 'At risk' };
 
@@ -181,7 +184,7 @@ export default function ReportsPage() {
         }
       />
 
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         <ReportCard
           icon={GraduationCap}
           title="Student Report"
@@ -197,6 +200,8 @@ export default function ReportsPage() {
           onExport={exportCampus}
         />
         <CompanyReadinessReportCard scope={scope} cohortId={cohortId} />
+        {/* After Company Readiness, per the owner's layout. */}
+        <SectionWiseReportCard listSections={getTpoReportSections} loadReport={getTpoSectionReport} />
       </div>
 
       <PlacementReadinessReport loadReport={getTpoPlacementReadinessReport} />
