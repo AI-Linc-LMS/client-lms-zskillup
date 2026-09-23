@@ -1,7 +1,7 @@
 'use client';
 
 import { useDeferredValue, useMemo, useState } from 'react';
-import { AlertTriangle, Download, FileSpreadsheet, Loader2, RefreshCw } from 'lucide-react';
+import { AlertTriangle, Download, FileSpreadsheet, Link2, Loader2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatusPill, type StatusTone } from '@/components/student/StatusPill';
 import {
@@ -24,6 +24,7 @@ import {
   type SheetPaidFilter,
 } from './sheet-model';
 import { runUserSheetExport } from './sheet-export';
+import { LiveLinkPanel } from './LiveLinkPanel';
 import { saveUserSheet, type SheetFileFormat } from './sheet-file';
 import { UserSheetTable } from './UserSheetTable';
 import { useLiveUserSheet, type LiveState } from './useLiveUserSheet';
@@ -81,6 +82,8 @@ export function UserSheet() {
   const [page, setPage] = useState(0);
   const [exporting, setExporting] = useState<SheetFileFormat | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
+  /** The live-link dialog: a URL a spreadsheet pulls, instead of a file that goes stale. */
+  const [liveLinkOpen, setLiveLinkOpen] = useState(false);
   /** Non-blocking export outcome: nothing matched, or the file saved but was not logged. */
   const [exportNotice, setExportNotice] = useState<string | null>(null);
 
@@ -213,6 +216,10 @@ export function UserSheet() {
               {exporting === 'xlsx' ? <Loader2 className="animate-spin" /> : <FileSpreadsheet />}
               Export Excel
             </Button>
+            <Button variant="outline" size="sm" onClick={() => setLiveLinkOpen(true)}>
+              <Link2 />
+              Live link
+            </Button>
           </div>
         </div>
 
@@ -307,6 +314,8 @@ export function UserSheet() {
           onPage={setPage}
         />
       </section>
+
+      <LiveLinkPanel open={liveLinkOpen} onClose={() => setLiveLinkOpen(false)} />
     </div>
   );
 }
