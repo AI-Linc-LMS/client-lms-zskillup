@@ -98,7 +98,12 @@ export function AutopayPanel({
   }, [data?.enabled, entitlements, history, pricing, liveKeys]);
 
   if (!data) return null;
-  if (mandates.length === 0 && renewables.length === 0) return null;
+  // Switched off entirely (and no legacy mandate to manage): the feature does not exist.
+  if (!data.enabled && mandates.length === 0) return null;
+  // Switched ON but nothing to put on it yet. Previously this vanished too, which is
+  // how "I can't find where to enable autopay" happens: a paying student opens
+  // Upgrade & Renew and autopay is simply absent, with nothing saying why. Say so.
+  const nothingYet = mandates.length === 0 && renewables.length === 0;
 
   const turnOn = async (r: Renewable) => {
     setBusyKey(r.key);
@@ -157,6 +162,15 @@ export function AutopayPanel({
           </p>
         </div>
       </div>
+
+      {nothingYet && (
+        <p className="mt-4 rounded-lg bg-slate-50 p-3 text-sm text-slate-600 ring-1 ring-slate-200">
+          Nothing to renew automatically yet. Autopay becomes available on a subscription
+          you have bought yourself, once it has a renewal date — so it will appear here
+          after your next purchase. College-provided and lifetime access never renew, so
+          they are never charged.
+        </p>
+      )}
 
       {mandates.length > 0 ? (
         <ul className="mt-5 divide-y divide-slate-100">
