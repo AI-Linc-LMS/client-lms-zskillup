@@ -23,6 +23,7 @@ import { AssessmentWizard } from '@/components/superadmin/AssessmentWizard';
 import { ExtendDeadlineDialog } from '@/components/assessment/ExtendDeadlineDialog';
 import { AdminAssessmentCreator } from '@/components/superadmin/AdminAssessmentCreator';
 import { ResultsReport } from '@/components/assessment/ResultsReport';
+import { RowActionsMenu } from '@/components/ui/RowActionsMenu';
 import { DuplicateAssessmentDialog } from '@/components/assessment/DuplicateAssessmentDialog';
 import { PublishAssessmentDialog } from '@/components/assessment/PublishAssessmentDialog';
 import { cn } from '@/lib/utils';
@@ -517,62 +518,60 @@ export function SchedulingAdmin() {
                     </button>
                   </td>
                   <td className="px-4 py-3.5 text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <button
-                        type="button"
-                        onClick={() => setEditWizardId(r.id)}
-                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-100"
-                      >
-                        <Pencil className="size-3.5" /> Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setExtending(r)}
-                        title="Change the closing date/time — works even once students have attempted it"
-                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold text-orange-700 hover:bg-orange-50"
-                      >
-                        <CalendarClock className="size-3.5" /> Extend deadline
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setDuplicating(r)}
-                        title="Run this assessment again — same questions, new window"
-                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold text-sky-700 hover:bg-sky-50"
-                      >
-                        <CopyPlus className="size-3.5" /> Duplicate
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPublishing(r)}
-                        title={
-                          r.publishedAt
-                            ? 'Already published — send to anyone who was missed'
-                            : 'Publish and email this assessment to its audience'
-                        }
-                        className={cn(
-                          'inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold',
-                          r.publishedAt
-                            ? 'text-slate-500 hover:bg-slate-100'
-                            : 'text-emerald-700 hover:bg-emerald-50',
-                        )}
-                      >
-                        <Send className="size-3.5" /> {r.publishedAt ? 'Published' : 'Publish'}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openResults(r.id)}
-                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold text-violet-700 hover:bg-violet-50"
-                      >
-                        <BarChart3 className="size-3.5" /> Results
-                      </button>
-                      <button
-                        type="button"
-                        disabled={busyId === r.id}
-                        onClick={() => remove(r.id)}
-                        className="grid size-8 place-items-center rounded-lg text-slate-500 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
-                      >
-                        <Trash2 className="size-4" />
-                      </button>
+                    {/* One trigger per row: six spelled-out links made the table mostly
+                        chrome, and every action added widened the wall. */}
+                    <div className="flex items-center justify-end">
+                      <RowActionsMenu
+                        label={`Actions for ${r.title}`}
+                        items={[
+                          {
+                            key: 'edit',
+                            label: 'Edit',
+                            icon: Pencil,
+                            onSelect: () => setEditWizardId(r.id),
+                          },
+                          {
+                            key: 'extend',
+                            label: 'Extend deadline',
+                            icon: CalendarClock,
+                            tone: 'warning',
+                            hint: 'Works even after students have attempted it',
+                            onSelect: () => setExtending(r),
+                          },
+                          {
+                            key: 'duplicate',
+                            label: 'Duplicate',
+                            icon: CopyPlus,
+                            hint: 'Same questions, new window',
+                            onSelect: () => setDuplicating(r),
+                          },
+                          {
+                            key: 'publish',
+                            label: r.publishedAt ? 'Published' : 'Publish',
+                            icon: Send,
+                            tone: r.publishedAt ? 'default' : 'success',
+                            hint: r.publishedAt
+                              ? 'Send to anyone who was missed'
+                              : 'Emails its audience — shows the count first',
+                            onSelect: () => setPublishing(r),
+                          },
+                          {
+                            key: 'results',
+                            label: 'Results',
+                            icon: BarChart3,
+                            onSelect: () => openResults(r.id),
+                          },
+                          {
+                            key: 'delete',
+                            label: 'Delete',
+                            icon: Trash2,
+                            tone: 'danger',
+                            separated: true,
+                            disabled: busyId === r.id,
+                            onSelect: () => remove(r.id),
+                          },
+                        ]}
+                      />
                     </div>
                   </td>
                 </tr>
