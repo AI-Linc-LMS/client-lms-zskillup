@@ -5,11 +5,21 @@ import type { CohortDto } from '@/shared';
 
 export type IndividualCohort = CohortDto;
 
+export interface CohortMemberAccess {
+  scope: string;
+  ref: string | null;
+  /** "Infosys", "Full platform" — never "COMPANY:infosys". */
+  label: string;
+  expiresAt: string | null;
+}
+
 export interface IndividualCohortMember {
   id: string;
   fullName: string | null;
   email: string;
   status: string;
+  /** Live access only — expired and cancelled entitlements are excluded. */
+  access: CohortMemberAccess[];
 }
 
 export interface AddCohortUsersResult {

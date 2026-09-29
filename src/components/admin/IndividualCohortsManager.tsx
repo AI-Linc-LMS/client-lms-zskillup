@@ -307,6 +307,32 @@ function MembersPanel({ cohort, onCountChange }: { cohort: IndividualCohort; onC
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-semibold text-navy">{m.fullName ?? m.email}</span>
                   <span className="text-[11px] text-slate-500">{m.email} · {m.status.toLowerCase()}</span>
+                  {/* What they can actually open. The access is the reason the group
+                      exists, and it was the one thing the list did not show — so
+                      "did the grant land?" meant looking a student up one by one. */}
+                  <span className="mt-1 flex flex-wrap items-center gap-1">
+                    {m.access.length === 0 ? (
+                      <span className="rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-500 ring-1 ring-slate-200">
+                        No access
+                      </span>
+                    ) : (
+                      m.access.map((a) => (
+                        <span
+                          key={`${a.scope}:${a.ref ?? ''}`}
+                          title={a.expiresAt ? `Until ${new Date(a.expiresAt).toLocaleDateString('en-IN')}` : 'No expiry'}
+                          className={cn(
+                            'rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1',
+                            a.scope === 'PLATFORM'
+                              ? 'bg-violet-50 text-violet-700 ring-violet-200'
+                              : 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+                          )}
+                        >
+                          {a.label}
+                          {a.expiresAt ? ` · to ${new Date(a.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}` : ''}
+                        </span>
+                      ))
+                    )}
+                  </span>
                 </span>
                 <button type="button" onClick={() => remove(m)} className="grid size-8 shrink-0 place-items-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-500"><Trash2 className="size-4" /></button>
               </li>
