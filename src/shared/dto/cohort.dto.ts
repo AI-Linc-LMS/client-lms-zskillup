@@ -134,11 +134,24 @@ export class AddIndividualCohortUsersDto {
   entries!: IndividualCohortEntryDto[];
 }
 
+/** One live entitlement, named the way a person would say it. */
+export interface CohortMemberAccessDto {
+  scope: string;
+  ref: string | null;
+  /** "Infosys", "Full platform" — never "COMPANY:infosys". */
+  label: string;
+  /** null = no expiry. */
+  expiresAt: string | null;
+}
+
 export interface IndividualCohortMemberDto {
   id: string;
   fullName: string | null;
   email: string;
   status: string;
+  /** What this student can open right now. Expired and cancelled access is excluded,
+   *  so the list shows what they HAVE, not what they were once given. */
+  access: CohortMemberAccessDto[];
 }
 
 export interface AddCohortUsersResultDto {
