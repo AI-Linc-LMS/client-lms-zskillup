@@ -51,3 +51,30 @@ export async function addCohortUsers(
 export async function removeCohortMember(id: string, userId: string): Promise<void> {
   await apiClient.delete(`${BASE}/${id}/members/${userId}`);
 }
+
+/** What a grant to this cohort would reach, before committing to it. */
+export interface CohortAccessPreview {
+  members: number;
+  alreadyHave: number;
+  wouldGrant: number;
+}
+
+export async function previewCohortAccess(
+  id: string,
+  scope: string,
+  scopeRef?: string,
+): Promise<CohortAccessPreview> {
+  const qs = new URLSearchParams({ scope, ...(scopeRef ? { scopeRef } : {}) });
+  return (await apiClient.get<CohortAccessPreview>(`${BASE}/${id}/access?${qs}`)).data;
+}
+
+/** Give every member the same access. Members who already hold it are left alone. */
+export async function grantCohortAccess(
+  id: string,
+  body: { scope: string; scopeRef?: string; durationDays?: number },
+): Promise<{ members: number; granted: number; alreadyHad: number }> {
+  return (await apiClient.post<{ members: number; granted: number; alreadyHad: number }>(
+    `${BASE}/${id}/access`,
+    body,
+  )).data;
+}

@@ -1,5 +1,5 @@
 /**
- * SHARED CONTRACT - DUPLICATED ACROSS BOTH REPOS (ADR-011).
+ * SHARED CONTRACT — DUPLICATED ACROSS BOTH REPOS (ADR-011).
  * Mirrored byte-for-byte at frontend-repo/src/shared/dto/cohort.dto.ts.
  *
  * Cohorts (Batch 4). A cohort groups a college's students. TPO creates/lists
@@ -10,6 +10,7 @@ import { Transform, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
+  IsEnum,
   IsInt,
   IsOptional,
   IsString,
@@ -20,39 +21,64 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
+import { EntitlementScope } from '../enums';
 
 const trimString = ({ value }: { value: unknown }): unknown =>
   typeof value === 'string' ? value.trim() : value;
 
 export class CreateCohortDto {
-  @Transform(trimString) @IsString() @MinLength(2) @MaxLength(160)
+  @Transform(trimString)
+  @IsString()
+  @MinLength(2)
+  @MaxLength(160)
   name!: string;
 
-  @IsOptional() @Transform(trimString) @IsString() @MaxLength(500)
+  @IsOptional()
+  @Transform(trimString)
+  @IsString()
+  @MaxLength(500)
   description?: string;
 
-  @IsOptional() @IsInt() @Min(1900) @Max(2100)
+  @IsOptional()
+  @IsInt()
+  @Min(1900)
+  @Max(2100)
   year?: number;
 
-  @IsOptional() @Transform(trimString) @IsString() @MaxLength(20)
+  @IsOptional()
+  @Transform(trimString)
+  @IsString()
+  @MaxLength(20)
   branch?: string;
 }
 
 /** Assign existing college students to a cohort (bulk membership move). */
 export class AssignCohortMembersDto {
-  @IsArray() @ArrayMaxSize(1000) @IsUUID('all', { each: true })
+  @IsArray()
+  @ArrayMaxSize(1000)
+  @IsUUID('all', { each: true })
   userIds!: string[];
 }
 
 /** Admin one-time import of an approved request's student list into a new cohort. */
 export class ImportRequestStudentsDto {
-  @IsOptional() @Transform(trimString) @IsString() @MinLength(2) @MaxLength(160)
+  @IsOptional()
+  @Transform(trimString)
+  @IsString()
+  @MinLength(2)
+  @MaxLength(160)
   cohortName?: string;
 
-  @IsOptional() @IsInt() @Min(1900) @Max(2100)
+  @IsOptional()
+  @IsInt()
+  @Min(1900)
+  @Max(2100)
   year?: number;
 
-  @IsOptional() @Transform(trimString) @IsString() @MaxLength(20)
+  @IsOptional()
+  @Transform(trimString)
+  @IsString()
+  @MaxLength(20)
   branch?: string;
 }
 
@@ -72,25 +98,39 @@ export interface CohortDto {
 
 /** Create an individual (non-college) cohort - just a name + optional description. */
 export class CreateIndividualCohortDto {
-  @Transform(trimString) @IsString() @MinLength(2) @MaxLength(160)
+  @Transform(trimString)
+  @IsString()
+  @MinLength(2)
+  @MaxLength(160)
   name!: string;
 
-  @IsOptional() @Transform(trimString) @IsString() @MaxLength(500)
+  @IsOptional()
+  @Transform(trimString)
+  @IsString()
+  @MaxLength(500)
   description?: string;
 }
 
 export class IndividualCohortEntryDto {
-  @Transform(trimString) @IsString() @MaxLength(200)
+  @Transform(trimString)
+  @IsString()
+  @MaxLength(200)
   email!: string;
 
-  @IsOptional() @Transform(trimString) @IsString() @MaxLength(160)
+  @IsOptional()
+  @Transform(trimString)
+  @IsString()
+  @MaxLength(160)
   fullName?: string;
 }
 
 /** Add users to an individual cohort by email. Existing non-college users are
  *  assigned; unknown emails are invited as new (non-college) students. */
 export class AddIndividualCohortUsersDto {
-  @IsArray() @ArrayMaxSize(2000) @ValidateNested({ each: true }) @Type(() => IndividualCohortEntryDto)
+  @IsArray()
+  @ArrayMaxSize(2000)
+  @ValidateNested({ each: true })
+  @Type(() => IndividualCohortEntryDto)
   entries!: IndividualCohortEntryDto[];
 }
 
@@ -105,5 +145,50 @@ export interface AddCohortUsersResultDto {
   added: number;
   invited: number;
   skipped: number;
-  rows: Array<{ email: string; status: 'added' | 'invited' | 'skipped' | 'invalid'; reason?: string }>;
+  rows: Array<{
+    email: string;
+    status: 'added' | 'invited' | 'skipped' | 'invalid';
+    reason?: string;
+  }>;
+}
+
+/**
+ * Give every member of a cohort the same access, in one action.
+ *
+ * Granting was one student at a time: find them, open the form, pick the scope,
+ * submit — then repeat. For a session roster of 175 that is 175 rounds of it, which
+ * is why it was being done with SQL instead. A cohort already IS the group, so the
+ * grant belongs on the cohort.
+ */
+export class GrantCohortAccessDto {
+  @IsEnum(EntitlementScope)
+  scope!: EntitlementScope;
+
+  /** The company / section slug. Omitted for a PLATFORM grant. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  scopeRef?: string;
+
+  /** Omitted = perpetual. Otherwise access expires this many days out. */
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(3650)
+  durationDays?: number;
+}
+
+export interface CohortAccessPreviewDto {
+  /** Everyone in the cohort. */
+  members: number;
+  /** Members who already hold this exact access — a grant leaves them alone. */
+  alreadyHave: number;
+  /** Members a grant would actually reach. */
+  wouldGrant: number;
+}
+
+export interface GrantCohortAccessResultDto {
+  members: number;
+  granted: number;
+  alreadyHad: number;
 }

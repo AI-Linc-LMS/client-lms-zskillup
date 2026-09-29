@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { Loader2, Pencil, Plus, Trash2, Upload, UserPlus, Users, X } from 'lucide-react';
+import { Gift, Loader2, Pencil, Plus, Trash2, Upload, UserPlus, Users, X } from 'lucide-react';
 import {
   addCohortUsers,
   createIndividualCohort,
@@ -15,6 +15,7 @@ import {
   type IndividualCohort,
   type IndividualCohortMember,
 } from '@/lib/api/individual-cohorts';
+import { GrantCohortAccessDialog } from './GrantCohortAccessDialog';
 import { describeError } from '@/lib/api/errors';
 import { cn } from '@/lib/utils';
 
@@ -173,6 +174,7 @@ function MembersPanel({ cohort, onCountChange }: { cohort: IndividualCohort; onC
   const [members, setMembers] = useState<IndividualCohortMember[] | null>(null);
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
+  const [granting, setGranting] = useState(false);
   const [result, setResult] = useState<AddCohortUsersResult | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -231,7 +233,29 @@ function MembersPanel({ cohort, onCountChange }: { cohort: IndividualCohort; onC
           <h2 className="text-base font-black text-navy">{cohort.name}</h2>
           <p className="text-xs text-slate-500">{members?.length ?? cohort.studentCount} member{(members?.length ?? cohort.studentCount) === 1 ? '' : 's'} · non-college</p>
         </div>
+        {/* The whole point of grouping them: give the group its access in one action,
+            instead of the single-student grant form once per member. */}
+        <button
+          type="button"
+          onClick={() => setGranting(true)}
+          disabled={(members?.length ?? cohort.studentCount) === 0}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-emerald-700 transition-colors hover:bg-emerald-50 disabled:opacity-50"
+        >
+          <Gift className="size-3.5" /> Grant access
+        </button>
       </div>
+
+      {granting && (
+        <GrantCohortAccessDialog
+          cohortId={cohort.id}
+          cohortName={cohort.name}
+          onClose={() => setGranting(false)}
+          onGranted={() => {
+            setGranting(false);
+            void load();
+          }}
+        />
+      )}
 
       {/* Add users */}
       <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50/50 p-3">
