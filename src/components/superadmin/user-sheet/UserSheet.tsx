@@ -95,7 +95,15 @@ export function UserSheet() {
     const opts = [
       { value: '', label: 'All colleges' },
       { value: NO_COLLEGE, label: 'No college' },
-      ...colleges.map((c) => ({ value: c.name, label: `${c.name} (${c.count.toLocaleString('en-IN')})` })),
+      // A group that folds several spellings says so, so the duplication in the data
+      // is legible from the filter rather than hidden by it.
+      ...colleges.map((c) => ({
+        value: c.name,
+        label:
+          c.spellings > 1
+            ? `${c.name} (${c.count.toLocaleString('en-IN')} · ${c.spellings} spellings)`
+            : `${c.name} (${c.count.toLocaleString('en-IN')})`,
+      })),
     ];
     // Keep a chosen college selectable even if no user carries it any more.
     if (selects.college && selects.college !== NO_COLLEGE && !colleges.some((c) => c.name === selects.college)) {

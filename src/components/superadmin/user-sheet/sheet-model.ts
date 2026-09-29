@@ -1,5 +1,6 @@
 import type { UserSheetResult, UserSheetRow } from '@/lib/api/admin';
 import { branchShort } from '@/lib/branch';
+import { collegeGroupKey, groupCollegeNames } from '@/shared/college-name';
 
 /**
  * Pure data model of the live user sheet: applying a server read to the rows on screen,
@@ -192,16 +193,30 @@ export function filterSheetRows(rows: readonly UserSheetRow[], f: SheetFilters):
       (!f.role || r.role === f.role) &&
       (!f.status || r.status === f.status) &&
       matchesPaid(r, f.paid) &&
-      (!f.college || (f.college === NO_COLLEGE ? !r.collegeName : r.collegeName === f.college)) &&
+      (!f.college ||
+        (f.college === NO_COLLEGE
+          ? !r.collegeName
+          // Match every spelling in the chosen college's group, not just its label.
+          : collegeGroupKey(r.collegeName) === collegeGroupKey(f.college))) &&
       (terms.length === 0 || terms.every((t) => haystack(r).includes(t))),
   );
 }
 
-/** Distinct college names on the sheet, alphabetical, with how many users each has. */
-export function collegeOptions(rows: readonly UserSheetRow[]): { name: string; count: number }[] {
-  const counts = new Map<string, number>();
-  for (const r of rows) if (r.collegeName) counts.set(r.collegeName, (counts.get(r.collegeName) ?? 0) + 1);
-  return [...counts.entries()]
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => a.name.localeCompare(b.name, 'en-IN', { sensitivity: 'base' }));
+/**
+ * One entry per COLLEGE on the sheet, alphabetical, with how many users each has.
+ *
+ * Keyed on the shared college-name grouping key rather than the raw string, because
+ * the raw string is whatever each student typed: one college was filling this
+ * dropdown five times over, differing only in capitals. The label shown is the
+ * spelling most of them used, and `spellings` says how many variants it folds — so
+ * the duplication is visible as a fact about the data instead of as a broken filter.
+ */
+export function collegeOptions(
+  rows: readonly UserSheetRow[],
+): { name: string; count: number; spellings: number }[] {
+  return groupCollegeNames(rows, (r) => r.collegeName).map((g) => ({
+    name: g.label,
+    count: g.count,
+    spellings: g.spellings,
+  }));
 }
