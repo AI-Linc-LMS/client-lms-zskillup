@@ -1,4 +1,5 @@
 import type { AssessmentResults, AssessmentResultSection } from '@/lib/api/scheduling';
+import { branchShort } from '@/lib/branch';
 import { CSV_BOM, toCsv } from '@/lib/csv';
 
 /**
@@ -51,6 +52,9 @@ interface FixedField {
 export interface ResultColumnVariant {
   /** The student's Email, straight after Name. */
   email: boolean;
+  /** The student's department, after Phone — identity, not a result, so an absentee
+   *  still fills it. */
+  branch: boolean;
   /** The six proctoring counts, after Attempted Questions. */
   proctoring: boolean;
   /** "Attempted Status" (Yes/No), straight after Phone. Only a roster report can
@@ -61,6 +65,7 @@ export interface ResultColumnVariant {
 /** The results modal's export (CSV + XLSX): no Email, with proctoring. */
 export const RESULTS_MODAL_COLUMNS: ResultColumnVariant = {
   email: false,
+  branch: false,
   proctoring: true,
   attemptedStatus: false,
 };
@@ -69,6 +74,7 @@ export const RESULTS_MODAL_COLUMNS: ResultColumnVariant = {
  *  proctoring. It reports on a whole cohort, so "did they sit it" is a column. */
 export const TEST_REPORT_COLUMNS: ResultColumnVariant = {
   email: true,
+  branch: true,
   proctoring: false,
   attemptedStatus: true,
 };
@@ -79,8 +85,13 @@ const EMAIL: FixedField = { header: 'Email', value: (r) => r.email ?? '' };
 /** A timestamp as text — never a bare Date, so a spreadsheet cannot render it as ####. */
 const stamp = (iso: string | null): string => (iso ? new Date(iso).toLocaleString() : '');
 
-/** Phone — the last column a student who never sat the test can still fill in. */
 const PHONE: FixedField = { header: 'Phone', value: (r) => r.phone ?? '' };
+
+/** Which department the student is in. Identity, like Name and Phone — so it is one
+ *  of the columns an absentee still fills, and it is what lets a placement office
+ *  read the report by branch rather than one student at a time. Blank where the
+ *  student has not given it: a guess here would be worse than a gap. */
+const BRANCH: FixedField = { header: 'Branch', value: (r) => branchShort(r.branch) };
 
 /** Yes or No, never a blank and never a synonym: the owner specified those two words,
  *  and a sheet that filters on this column has to be able to trust it. */
@@ -118,6 +129,7 @@ function fixedFields(variant: ResultColumnVariant): FixedField[] {
     NAME,
     ...(variant.email ? [EMAIL] : []),
     PHONE,
+    ...(variant.branch ? [BRANCH] : []),
     ...(variant.attemptedStatus ? [ATTEMPTED] : []),
     ...CORE,
     ...(variant.proctoring ? PROCTORING : []),
@@ -135,7 +147,7 @@ function fixedFields(variant: ResultColumnVariant): FixedField[] {
  * value, which is also exactly what the owner asked for.
  */
 function identityColumnCount(variant: ResultColumnVariant): number {
-  return 2 + (variant.email ? 1 : 0) + (variant.attemptedStatus ? 1 : 0);
+  return 2 + (variant.email ? 1 : 0) + (variant.branch ? 1 : 0) + (variant.attemptedStatus ? 1 : 0);
 }
 
 /** The fixed column NAMES of one variant — the header before the section pairs. */

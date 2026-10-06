@@ -119,3 +119,18 @@ export async function getAdminCollegeSectionReport(
   );
   return res.data;
 }
+
+/**
+ * The Placement Readiness Test across the WHOLE platform — every active student,
+ * attempted or not, in one read.
+ *
+ * The per-college report above answers "who in THIS college has not taken it". With
+ * 30 colleges, answering it for the platform meant 30 reads. Super-admin only: an
+ * admin is portfolio-scoped and a platform roster would reach past their colleges.
+ */
+export async function getPlatformPlacementReadinessReport(): Promise<AssessmentResults> {
+  const res = await apiClient.get<AssessmentResults>(
+    '/api/v1/admin/reports/placement-readiness',
+  );
+  return res.data;
+}
