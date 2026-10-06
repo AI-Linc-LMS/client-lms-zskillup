@@ -269,9 +269,11 @@ const PRT_SECTIONS = [
   { name: 'Technical MCQs', maxMarks: 25, order: 75 },
 ];
 
-/** The owner's header, verbatim, for that four-section paper. */
+/** The owner's header, verbatim, for that four-section paper. Branch sits with the
+ *  identity columns (Name, Email, Phone) because it is who the student IS, not how
+ *  they did — so an absentee still fills it. */
 const OWNER_HEADER =
-  'Name,Email,Phone,Attempted Status,Started At,Submitted At,Maximum Marks,Overall Score,Percentage,' +
+  'Name,Email,Phone,Branch,Attempted Status,Started At,Submitted At,Maximum Marks,Overall Score,Percentage,' +
   'Total Questions,Attempted Questions,' +
   'Section-wise Scores-Numerical Ability,Section-wise Max Scores-Numerical Ability,' +
   'Section-wise Scores-Logical Reasoning,Section-wise Max Scores-Logical Reasoning,' +
@@ -298,7 +300,7 @@ test('the section pairs come from the paper, not from that one four-section test
       ],
     }),
   ]);
-  assert.deepEqual(resultsColumns(data, TEST_REPORT_COLUMNS).slice(11), [
+  assert.deepEqual(resultsColumns(data, TEST_REPORT_COLUMNS).slice(12), [
     'Section-wise Scores-Aptitude',
     'Section-wise Max Scores-Aptitude',
     'Section-wise Scores-Coding',
@@ -323,13 +325,15 @@ test('Email is a real column with the student\u2019s address, and proctoring is 
   ]) {
     assert.equal(columns.includes(c), false, `${c} must not be in the test report`);
   }
-  assert.equal(columns.length, 11 + 8);
-  assert.equal(cells.length, 11 + 8);
-  // The eleven fixed cells are the row's own values, shifted one right by Email.
-  assert.deepEqual(cells.slice(0, 11), [
+  // 12 fixed (Branch joined the identity block) + 4 sections x 2.
+  assert.equal(columns.length, 12 + 8);
+  assert.equal(cells.length, 12 + 8);
+  // The twelve fixed cells are the row's own values, shifted right by Email + Branch.
+  assert.deepEqual(cells.slice(0, 12), [
     'Asha Rao',
     'asha@example.com',
     '9876543210',
+    'CSE',
     'Yes',
     new Date('2026-09-10T09:00:00.000Z').toLocaleString(),
     new Date('2026-09-10T10:00:00.000Z').toLocaleString(),
@@ -355,12 +359,12 @@ test('every student carries a value in every section column - 0 and the section 
     row({ userId: 'u2', sections: [{ name: 'Numerical Ability', score: 4, maxMarks: 25, order: 0 }] }),
   ]);
   const [first, second] = resultsRows(data, TEST_REPORT_COLUMNS);
-  assert.deepEqual(first.slice(11), [18, 25, 0, 25, 7, 25, 0, 25]);
-  assert.deepEqual(second.slice(11), [4, 25, 0, 25, 0, 25, 0, 25]);
+  assert.deepEqual(first.slice(12), [18, 25, 0, 25, 7, 25, 0, 25]);
+  assert.deepEqual(second.slice(12), [4, 25, 0, 25, 0, 25, 0, 25]);
   const lines = csvLines(buildResultsCsv(data, TEST_REPORT_COLUMNS));
   for (const values of lines.slice(1)) {
-    assert.equal(values.length, 11 + 8);
-    assert.equal(values.slice(11).includes(''), false, 'no section cell is blank');
+    assert.equal(values.length, 12 + 8);
+    assert.equal(values.slice(12).includes(''), false, 'no section cell is blank');
   }
 });
 
@@ -396,16 +400,16 @@ test('a student who never sat it says No and leaves every test cell blank', () =
   ]);
   const [sat, absent] = resultsRows(data, TEST_REPORT_COLUMNS);
 
-  // Identity is kept - that IS the row.
-  assert.deepEqual(absent.slice(0, 4), ['Never Sat', 'never@example.com', '9000000003', 'No']);
+  // Identity is kept - that IS the row. Branch is identity too, so it survives.
+  assert.deepEqual(absent.slice(0, 5), ['Never Sat', 'never@example.com', '9000000003', 'CSE', 'No']);
   // Everything after it is blank, section columns included. Not 0, not '-'.
   assert.deepEqual(
-    absent.slice(4),
-    new Array(absent.length - 4).fill(''),
+    absent.slice(5),
+    new Array(absent.length - 5).fill(''),
   );
   // Same width as a real attempt, so the two are one grid.
   assert.equal(absent.length, sat.length);
-  assert.equal(sat[3], 'Yes');
+  assert.equal(sat[4], 'Yes');
 });
 
 test('the header still carries every section when NOBODY has sat it yet', () => {
@@ -418,7 +422,7 @@ test('the header still carries every section when NOBODY has sat it yet', () => 
 
   assert.equal(resultsColumns(data, TEST_REPORT_COLUMNS).join(','), OWNER_HEADER);
   const [cells] = resultsRows(data, TEST_REPORT_COLUMNS);
-  assert.equal(cells.length, 11 + 8);
+  assert.equal(cells.length, 12 + 8);
 });
 
 test('the test report is as formula-injection-safe as the modal one', () => {

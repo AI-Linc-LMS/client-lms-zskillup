@@ -209,6 +209,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
     heading: 'PEOPLE',
     items: [
       { label: 'Student Reports', href: '/superadmin/students', icon: BarChart3 },
+      { label: 'Placement Readiness', href: '/superadmin/placement-readiness', icon: ClipboardCheck },
       { label: 'Users', href: '/superadmin/users', icon: Users },
       { label: 'User Sheet', href: '/superadmin/user-sheet', icon: Sheet },
       { label: 'Colleges', href: '/superadmin/colleges', icon: School },

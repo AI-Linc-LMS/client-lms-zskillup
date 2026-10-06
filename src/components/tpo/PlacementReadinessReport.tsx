@@ -6,6 +6,7 @@ import type { AssessmentResults } from '@/lib/api/scheduling';
 import { BentoCard } from '@/components/tpo/ui';
 import { StatusPill } from '@/components/student/StatusPill';
 import { Button } from '@/components/ui/button';
+import { branchShort } from '@/lib/branch';
 import { csvScopeSlug, downloadCsv } from '@/lib/csv';
 import { resultsCsvBody, TEST_REPORT_COLUMNS } from '@/lib/results-export-rows';
 import { cn } from '@/lib/utils';
@@ -155,6 +156,7 @@ export function PlacementReadinessReport({ loadReport }: PlacementReadinessRepor
               <tr className="border-b border-slate-200 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                 <th className="pb-2 pr-3 font-semibold">Student</th>
                 <th className="pb-2 pr-3 font-semibold">Phone</th>
+                <th className="pb-2 pr-3 font-semibold">Branch</th>
                 <th className="pb-2 pr-3 font-semibold">Attempted</th>
                 <th className="pb-2 pr-3 text-right font-semibold">Score</th>
                 <th className="pb-2 pr-3 text-right font-semibold">%</th>
@@ -169,6 +171,10 @@ export function PlacementReadinessReport({ loadReport }: PlacementReadinessRepor
                     <span className="block text-xs text-slate-500">{r.email}</span>
                   </td>
                   <td className="py-2 pr-3 text-slate-600">{r.phone ?? '—'}</td>
+                  {/* Identity, like the name and phone — so an absentee still shows it.
+                      Blank where the student has not given it; a guess would be worse
+                      than a gap. */}
+                  <td className="py-2 pr-3 text-slate-600">{branchShort(r.branch) || '—'}</td>
                   <td className="py-2 pr-3">
                     {/* The one column that is never blank - it is what the row is for. */}
                     <StatusPill
