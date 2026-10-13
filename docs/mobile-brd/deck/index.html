@@ -69,6 +69,8 @@ h3{font-size:12.5pt;font-weight:800;letter-spacing:-.01em}
 .phone{width:57mm;flex:0 0 57mm;border-radius:7mm;background:#1a1a1a;padding:1.4mm}
 .phone .scr{border-radius:5.8mm;background:var(--bg);overflow:hidden;height:107mm;display:flex;flex-direction:column;position:relative}
 .phone.tall .scr{height:120mm}
+.page.tight .phone .scr{height:95mm}
+.page.tight .bcard p{font-size:7.3pt}
 .sbar{display:flex;justify-content:space-between;align-items:center;padding:1.6mm 3mm .6mm;font-size:5.2pt;font-weight:700;color:var(--text)}
 .sbar .dots{letter-spacing:.5px}
 .phd{display:flex;justify-content:space-between;align-items:center;padding:1.4mm 3mm;background:#fff;border-bottom:1px solid var(--line)}
@@ -821,6 +823,142 @@ ul.ticks li b{color:var(--text)}
   <div class="pfoot"><span>Workspace 01 · Student · drives</span><span>08</span></div>
 </section>
 
+<!-- ============ 9. THE DASHBOARD QUESTION ============ -->
+<section class="page tight">
+  <div class="eyebrow">The question everyone asks first</div>
+  <h2>Where is the dashboard?</h2>
+  <p class="sub">It is the densest page in the product — eighteen panels on the web — and it is deliberately not in
+  the first release. Not because a dashboard is unimportant, but because almost every panel on it is a window into a
+  module the app does not have yet. A v1 dashboard would be a page of links to things the app cannot do.</p>
+
+  <div class="grid3" style="margin-top:6mm;gap:6mm">
+    <div class="bcard" style="background:var(--slate50)">
+      <h4>What the web dashboard carries</h4>
+      <p style="margin-top:2mm">An AI briefing hero, a live-assessment banner, headline stats, a readiness panel,
+      the daily quest, company cards, quick aptitude, the daily challenge, coding practice, challenges, the practice
+      hub, an adaptive skill profile, and a right rail of deadlines and company readiness. Eighteen panels.</p>
+    </div>
+    <div class="bcard" style="background:var(--brand-soft);border-color:#f3d79a">
+      <h4>What survives without its module</h4>
+      <p style="margin-top:2mm">Three things. The streak and coin chips. The live-attempt banner. The practice
+      entry point. Everything else needs practice, hubs, jobs, coding, challenges or gamification to exist first.</p>
+      <p style="margin-top:3mm;font-size:7.2pt;color:#92400e"><b>So in v1 the Practice tab is the home</b> — it already
+      carries all three, and it opens on the thing a student came to do rather than on a summary of it.</p>
+    </div>
+    <div class="bcard">
+      <h4>When the real one arrives</h4>
+      <p style="margin-top:2mm">In the release after launch, alongside performance, calendar, practice and the hubs.
+      By then its panels have something to point at, and the design below is what it becomes.</p>
+      <p style="margin-top:3mm;font-size:7.2pt;color:var(--subtle)">Drawn now rather than later because it shares
+      components with the v1 home, and building those twice would be the expensive way round.</p>
+    </div>
+  </div>
+
+  <div class="phones" style="margin-top:7mm">
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">&#9646;&#9646;&#9646; &#9685; &#9646;</span></div>
+        <div class="phd"><div class="wm"><i>pre</i>phasz</div><div class="chips"><span class="chip s">&#128293; 12</span><span class="chip c">&#9670; 340</span></div></div>
+        <div class="pbody">
+          <div class="pcard acc">
+            <div class="prow"><div class="plabel" style="color:#b45309">In progress</div><span class="spill sp-live">14:22 left</span></div>
+            <div class="ph2" style="margin-top:1.2mm">Quant + Logical, 25 Q</div>
+            <div class="pbar" style="margin:1.6mm 0"><i style="width:44%"></i></div>
+            <div class="pbtn" style="margin-top:1.4mm">Resume attempt</div>
+          </div>
+          <div class="plabel">Build a mock</div>
+          <div class="pcard">
+            <div class="prow"><span class="ptxt">Questions</span><span class="ph2">25</span></div>
+            <div class="prow" style="margin-top:1.4mm"><span class="ptxt">Duration</span><span class="ph2">30 min</span></div>
+            <div class="pbtn" style="margin-top:2mm">Build and start</div>
+          </div>
+          <div class="plabel">Ready to take</div>
+          <div class="pcard"><div class="prow"><div><div class="ph2">TCS Pattern Mock 4</div><div class="pmeta">30 Q &middot; 60 min</div></div><span class="spill sp-live">Open</span></div></div>
+        </div>
+        <div class="ptabs"><div class="on"><b></b>Practice</div><div><b></b>Assessments</div><div><b></b>Profile</div></div>
+      </div></div>
+      <div class="caption"><b>v1 &middot; the home</b>no summary layer, just the work</div>
+    </div>
+
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">&#9646;&#9646;&#9646; &#9685; &#9646;</span></div>
+        <div class="phd"><div class="wm"><i>pre</i>phasz</div><div class="chips"><span class="chip s">&#128293; 12</span><span class="chip c">&#9670; 340</span></div></div>
+        <div class="pbody">
+          <div class="pcard" style="background:linear-gradient(140deg,#14161f,#242838);border-color:#242838">
+            <div class="plabel" style="color:#8b93a8">Your briefing &middot; week 6</div>
+            <div class="ph1" style="color:#fff;margin-top:1.2mm">Good morning,<br>Aarav.</div>
+            <div class="ptxt" style="color:#aeb5c6;margin-top:1.2mm;font-size:5.1pt">Syllogisms are costing you the
+            most marks. Twenty minutes there moves your readiness more than anything else today.</div>
+            <div class="pbtn" style="margin-top:2mm">Start that drill</div>
+          </div>
+          <div class="prow" style="gap:1.2mm">
+            <div class="pstat"><div class="v">1,240</div><div class="k">Total XP</div></div>
+            <div class="pstat"><div class="v">12</div><div class="k">Streak</div></div>
+            <div class="pstat"><div class="v">#6</div><div class="k">Rank</div></div>
+          </div>
+          <div class="pcard">
+            <div class="prow"><span class="plabel">Level 7</span><span class="pmeta">260 XP to level 8</span></div>
+            <div class="pbar y" style="margin-top:1.4mm"><i style="width:68%"></i></div>
+          </div>
+          <div class="pcard acc">
+            <div class="prow"><span class="spill" style="background:#ff7a1a;color:#fff">Daily quest</span><span class="pmeta">0 / 3</span></div>
+            <div class="ptxt" style="margin-top:1.2mm;font-size:5.1pt">Answer 10 questions &middot; finish a drill &middot; take one mock</div>
+            <div class="ph2" style="margin-top:1.2mm;color:#b45309">+150 XP and a streak freeze</div>
+          </div>
+        </div>
+        <div class="ptabs"><div class="on"><b></b>Home</div><div><b></b>Practice</div><div><b></b>Assessments</div><div><b></b>Profile</div></div>
+      </div></div>
+      <div class="caption"><b>P2 &middot; the dashboard</b>briefing, standing, the day&rsquo;s quest</div>
+    </div>
+
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">&#9646;&#9646;&#9646; &#9685; &#9646;</span></div>
+        <div class="phd"><div class="wm"><i>pre</i>phasz</div><div class="chips"><span class="chip s">&#128293; 12</span></div></div>
+        <div class="pbody">
+          <div class="plabel">Placement readiness</div>
+          <div class="pcard">
+            <div class="prow" style="align-items:flex-end"><div><span style="font-size:13pt;font-weight:900;letter-spacing:-.03em">62</span><span class="ph2">%</span></div><span class="spill sp-live">On track</span></div>
+            <div class="pbar" style="margin-top:1.4mm"><i style="width:62%;background:#16c79a"></i></div>
+            <div class="ptxt" style="margin-top:1.2mm;font-size:5pt">Service-based roles &middot; 4 of 6 sections clear</div>
+          </div>
+          <div class="plabel">Continue</div>
+          <div class="pcard">
+            <div class="prow"><div class="ph2">Quantitative &middot; Percentages</div><span class="pmeta">60%</span></div>
+            <div class="pbar" style="margin:1.4mm 0"><i style="width:60%"></i></div>
+            <div class="pbtn" style="margin-top:1mm">Resume</div>
+          </div>
+          <div class="plabel">Your companies</div>
+          <div class="prow" style="gap:1.2mm">
+            <div class="pstat"><div class="v" style="font-size:6pt">TCS</div><div class="k">74% ready</div></div>
+            <div class="pstat"><div class="v" style="font-size:6pt">Infosys</div><div class="k">61% ready</div></div>
+            <div class="pstat"><div class="v" style="font-size:6pt">Wipro</div><div class="k">48% ready</div></div>
+          </div>
+          <div class="plabel">Next up</div>
+          <div class="pcard"><div class="prow"><div><div class="ph2">Infosys Screening</div><div class="pmeta">16 Oct &middot; 10:00</div></div><span class="spill sp-soon">2 days</span></div></div>
+        </div>
+        <div class="ptabs"><div class="on"><b></b>Home</div><div><b></b>Practice</div><div><b></b>Assessments</div><div><b></b>Profile</div></div>
+      </div></div>
+      <div class="caption"><b>P2 &middot; continued</b>readiness, continue, companies, deadlines</div>
+    </div>
+  </div>
+
+  <div class="reqstrip" style="padding:4mm">
+    <div class="hd" style="margin-bottom:2.5mm"><span class="l">Why this is P2, panel by panel</span><span class="r">The dashboard question</span></div>
+    <div class="ids">
+      <span class="k">streak + coins</span><span class="k">live attempt</span><span class="k">practice entry</span>
+      <span>briefing</span><span>readiness</span><span>daily quest</span><span>continue</span><span>companies</span>
+      <span>coding</span><span>challenges</span><span>skill profile</span><span>deadlines</span><span>participation</span>
+      <span>calibration</span><span>quick aptitude</span><span>subscription</span>
+    </div>
+    <p style="margin-top:2.5mm">The three highlighted panels work with only the mock engine behind them, and all three already live on the
+    Practice tab. The other thirteen each need a module that is not in the first release — which is the argument: a
+    dashboard is a window onto a product, and in v1 there is not yet enough product behind the glass.</p>
+  </div>
+  <div class="pfoot"><span>The dashboard question</span><span>09</span></div>
+</section>
+
 <!-- ============ 9. TPO ============ -->
 <section class="page">
   <div class="eyebrow">Workspace 02 · TPO</div>
@@ -919,7 +1057,7 @@ ul.ticks li b{color:var(--text)}
     <div class="fcard"><h4>One route out</h4><p>Everything else is a single labelled "Open TPO console" action rather than fourteen half-built screens.</p></div>
   </div>
   <div class="reqstrip"><div class="hd"><span class="l">Requirements covered</span><span class="r">TPO drive day</span></div><div class="ids"><span class="">FR-6.1</span><span class="">FR-6.2</span><span class="">FR-6.3</span><span class="">FR-6.4</span><span class="">FR-6.5</span><span class="">FR-0.1</span><span class="">FR-0.3</span></div><p>Read-only by design. Every write a TPO performs — scheduling, inviting, exporting — is a desk task and stays on the web, reachable through one labelled action.</p></div>
-  <div class="pfoot"><span>Workspace 02 · TPO</span><span>09</span></div>
+  <div class="pfoot"><span>Workspace 02 · TPO</span><span>10</span></div>
 </section>
 
 <!-- ============ 10. ADMIN ============ -->
@@ -1031,7 +1169,7 @@ ul.ticks li b{color:var(--text)}
     <div class="fcard"><h4>32 pages stay put</h4><p>Catalogue, users, colleges, finance, marketing, audit. All of it is better on a 27-inch screen and none of it is urgent on a phone.</p></div>
   </div>
   <div class="reqstrip"><div class="hd"><span class="l">Requirements covered</span><span class="r">The live drive monitor</span></div><div class="ids"><span class="">FR-7.1</span><span class="">FR-7.2</span><span class="">FR-7.3</span><span class="k">FR-7.4</span><span class="">FR-7.5</span><span class="">FR-0.1</span><span class="">FR-0.3</span></div><p>FR-7.4 is the only write in the whole admin surface, and it is confirmed first: publishing makes results visible to every student in the sitting at the same moment.</p></div>
-  <div class="pfoot"><span>Workspace 03 · Admin</span><span>10</span></div>
+  <div class="pfoot"><span>Workspace 03 · Admin</span><span>11</span></div>
 </section>
 
 <!-- ============ 11. AUTH ============ -->
@@ -1120,7 +1258,7 @@ ul.ticks li b{color:var(--text)}
     <div class="fcard"><h4>Suspended is explained</h4><p>A suspended account cannot refresh into a session. The app says so as an account message, not a network failure.</p></div>
   </div>
   <div class="reqstrip"><div class="hd"><span class="l">Requirements covered</span><span class="r">Every authentication surface</span></div><div class="ids"><span class="">FR-1.1</span><span class="">FR-1.2</span><span class="">FR-1.3</span><span class="">FR-1.4</span><span class="">FR-1.5</span><span class="">FR-1.6</span><span class="k">FR-1.7</span><span class="">FR-1.8</span><span class="">FR-1.9</span><span class="">FR-1.10</span><span class="">FR-0.4</span></div><p>FR-1.7 is the one to test hardest: a session that does not survive a force-quit turns every cold start into a login screen, which is how a practice habit dies.</p></div>
-  <div class="pfoot"><span>Authentication</span><span>11</span></div>
+  <div class="pfoot"><span>Authentication</span><span>12</span></div>
 </section>
 
 <!-- ============ 12. WEB AT PHONE WIDTH ============ -->
@@ -1168,7 +1306,7 @@ ul.ticks li b{color:var(--text)}
       described as a marketing surface and appears in the sitemap.</p>
     </div>
   </div>
-  <div class="pfoot"><span>The web at phone width</span><span>12</span></div>
+  <div class="pfoot"><span>The web at phone width</span><span>13</span></div>
 </section>
 
 <!-- ============ 13. MODULE CATALOGUE ============ -->
@@ -1271,7 +1409,7 @@ ul.ticks li b{color:var(--text)}
 
     </div>
   </div>
-  <div class="pfoot"><span>Module catalogue · 75 modules, 18 in v1</span><span>13</span></div>
+  <div class="pfoot"><span>Module catalogue · 75 modules, 18 in v1</span><span>14</span></div>
 </section>
 
 <!-- ============ 14. HOW TO READ THIS ============ -->
@@ -1306,7 +1444,7 @@ ul.ticks li b{color:var(--text)}
     <div class="fcard"><h4>Screenshots of authenticated screens</h4><p>A read-only production login, or a seeded local stack. Needed before design sign-off.</p></div>
     <div class="fcard"><h4>Minimum OS versions</h4><p>To be set against the real student device mix rather than a guess. Low-end Android is the design target.</p></div>
   </div>
-  <div class="pfoot"><span>How to read this</span><span>14</span></div>
+  <div class="pfoot"><span>How to read this</span><span>15</span></div>
 </section>
 
 <!-- ============ 15. CLOSE ============ -->
@@ -1356,7 +1494,7 @@ ul.ticks li b{color:var(--text)}
     means either one can be the launch date — and only one of them is under our control. Start both developer
     enrolments today, confirm the Play account type, and get a cheap Android into the room.</p>
   </div>
-  <div class="pfoot"><span>prephasz mobile · business requirements · draft for sign-off</span><span>15</span></div>
+  <div class="pfoot"><span>prephasz mobile · business requirements · draft for sign-off</span><span>16</span></div>
 </section>
 
 </body>
