@@ -66,7 +66,7 @@ h3{font-size:12.5pt;font-weight:800;letter-spacing:-.01em}
 .t-web{background:#fff;color:#64748b;border:1px solid var(--slate200)}
 
 /* ---- phone mockup ---- */
-.phone{width:57mm;flex:0 0 57mm;border-radius:7mm;background:#1a1a1a;padding:1.4mm;box-shadow:0 2px 10px rgba(16,19,34,.13)}
+.phone{width:57mm;flex:0 0 57mm;border-radius:7mm;background:#1a1a1a;padding:1.4mm}
 .phone .scr{border-radius:5.8mm;background:var(--bg);overflow:hidden;height:107mm;display:flex;flex-direction:column;position:relative}
 .phone.tall .scr{height:120mm}
 .sbar{display:flex;justify-content:space-between;align-items:center;padding:1.6mm 3mm .6mm;font-size:5.2pt;font-weight:700;color:var(--text)}
@@ -149,6 +149,14 @@ ul.ticks{list-style:none;margin-top:4mm}
 ul.ticks li{font-size:8pt;line-height:1.5;color:var(--muted);padding-left:5mm;position:relative;margin-bottom:2.5mm}
 ul.ticks li::before{content:"";position:absolute;left:0;top:2.6mm;width:2mm;height:2mm;border-radius:50%;background:var(--brand)}
 ul.ticks li b{color:var(--text)}
+.reqstrip{margin-top:auto;border:1px solid var(--line);border-radius:10px;padding:5mm;background:#fcfcfe}
+.reqstrip .hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3.5mm}
+.reqstrip .hd .l{font-size:7.4pt;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--subtle)}
+.reqstrip .hd .r{font-size:7pt;color:#a2a9b8}
+.ids{display:flex;flex-wrap:wrap;gap:2mm}
+.ids span{font-family:'JetBrains Mono',monospace;font-size:6.6pt;font-weight:500;border:1px solid var(--line);border-radius:999px;padding:1.2mm 3mm;color:var(--text);background:#fff}
+.ids span.k{background:var(--brand);border-color:var(--brand-strong);font-weight:700}
+.reqstrip p{font-size:7.4pt;line-height:1.5;color:var(--muted);margin-top:3.5mm;max-width:160mm}
 </style>
 </head>
 <body>
@@ -509,6 +517,7 @@ ul.ticks li b{color:var(--text)}
     <div class="fcard"><h4>Coding refused up front</h4><p>Checked on the paper's coding count before start, so backing out cannot spend a sitting.</p></div>
     <div class="fcard"><h4>Locked is honest</h4><p>A locked surface says what is locked and that it is managed on the web. No price, no buy button.</p></div>
   </div>
+  <div class="reqstrip"><div class="hd"><span class="l">Requirements covered</span><span class="r">Build, start and the gates in front of them</span></div><div class="ids"><span class="">FR-2.1</span><span class="">FR-2.2</span><span class="">FR-2.3</span><span class="k">FR-2.4</span><span class="">FR-2.5</span><span class="">FR-2.6</span><span class="">FR-2.7</span><span class="">FR-8.2</span></div><p>FR-2.4 is starred because it is the one that costs a student something when it is wrong: the coding check happens on the paper, before an attempt exists.</p></div>
   <div class="pfoot"><span>Workspace 01 · Student</span><span>05</span></div>
 </section>
 
@@ -544,8 +553,13 @@ ul.ticks li b{color:var(--text)}
       <div class="phone"><div class="scr">
         <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
         <div class="phd"><div class="wm" style="font-size:6pt;color:#64748b">✕ Exit</div><div class="chips"><span class="chip" style="background:#1a1a1a;color:#fff">⏱ 18:42</span></div></div>
-        <div class="pbody" style="opacity:.28"><div class="pbar"><i style="width:28%"></i></div><div class="pcard" style="height:14mm"></div><div class="popt">&nbsp;</div><div class="popt">&nbsp;</div></div>
-        <div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);border-radius:3mm 3mm 0 0;padding:2.6mm;box-shadow:0 -3px 14px rgba(16,19,34,.1)">
+        <div class="pbody" style="opacity:.3;flex:0 0 auto">
+          <div class="prow"><span class="pmeta">Question 7 of 25</span><span class="pmeta">Quantitative</span></div>
+          <div class="pbar"><i style="width:28%"></i></div>
+          <div class="pcard" style="padding:2.4mm"><div class="ptxt" style="color:#101322;font-size:5.8pt;line-height:1.45">A train 180 m long crosses a platform 270 m long in 25 seconds. What is its speed in km/h?</div></div>
+          <div class="popt"><span class="rad"></span>54 km/h</div>
+        </div>
+        <div style="margin-top:auto;background:#fff;border-top:1px solid var(--line);border-radius:3mm 3mm 0 0;padding:2.6mm">
           <div style="width:9mm;height:.8mm;background:#cbd5e1;border-radius:9px;margin:0 auto 2.4mm"></div>
           <div class="prow"><div class="plabel">Questions</div><div class="pmeta">18 answered · 3 flagged</div></div>
           <div class="pgrid" style="margin-top:2mm">
@@ -568,8 +582,15 @@ ul.ticks li b{color:var(--text)}
       <div class="phone"><div class="scr">
         <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
         <div class="phd"><div class="wm" style="font-size:6pt;color:#64748b">✕ Exit</div><div class="chips"><span class="chip" style="background:#ef4444;color:#fff">⏱ 00:48</span></div></div>
-        <div class="pbody" style="opacity:.28"><div class="pbar"><i style="width:92%"></i></div><div class="pcard" style="height:14mm"></div></div>
-        <div style="position:absolute;inset:0;background:rgba(16,19,34,.42);display:flex;align-items:center;padding:3mm">
+        <div class="pbody" style="opacity:.32">
+          <div class="prow"><span class="pmeta">Question 25 of 25</span><span class="pmeta">Logical</span></div>
+          <div class="pbar"><i style="width:92%"></i></div>
+          <div class="pcard" style="padding:2.4mm"><div class="ptxt" style="color:#101322;font-size:5.8pt;line-height:1.45">If all Zeta are Kappa, and some Kappa are Mu, which must be true?</div></div>
+          <div class="popt"><span class="rad"></span>All Zeta are Mu</div>
+          <div class="popt"><span class="rad"></span>Some Zeta are Mu</div>
+          <div class="popt"><span class="rad"></span>No conclusion follows</div>
+        </div>
+        <div style="position:absolute;inset:0;background:rgba(16,19,34,.3);display:flex;align-items:center;padding:3mm">
           <div class="pcard" style="width:100%;padding:3mm">
             <div class="ph1">Submit your assessment?</div>
             <div class="ptxt" style="margin-top:1.6mm;font-size:5.2pt">You have answered 23 of 25. Two are unanswered
@@ -592,6 +613,7 @@ ul.ticks li b{color:var(--text)}
     <div class="fcard"><h4>Backgrounding is not an exit</h4><p>A phone call mid-attempt returns to the same question. Only an explicit, confirmed exit leaves, and it leaves the attempt open.</p></div>
     <div class="fcard"><h4>Auto-submit at zero</h4><p>At the deadline the attempt submits itself and the report opens. The student is never left wondering whether it counted.</p></div>
   </div>
+  <div class="reqstrip"><div class="hd"><span class="l">Requirements covered</span><span class="r">The runner, and the five that are non-negotiable</span></div><div class="ids"><span class="k">FR-3.1</span><span class="">FR-3.2</span><span class="">FR-3.3</span><span class="k">FR-3.4</span><span class="k">FR-3.5</span><span class="">FR-3.6</span><span class="">FR-3.7</span><span class="">FR-3.8</span><span class="">FR-3.9</span><span class="k">FR-3.10</span><span class="">FR-3.11</span></div><p>Four of these exist only because this is a phone: a server-anchored clock, a durable answer queue, resume as a first-class path, and the rule that nothing in the app may block the paper.</p></div>
   <div class="pfoot"><span>Workspace 01 · Student · the runner</span><span>06</span></div>
 </section>
 
@@ -686,6 +708,7 @@ ul.ticks li b{color:var(--text)}
     <div class="fcard"><h4>Re-openable</h4><p>Any finalised attempt reopens its full report from history. Nothing is only available once.</p></div>
     <div class="fcard"><h4>Topic breakdown</h4><p>Where the marks went, by topic, so the next practice session has an obvious subject.</p></div>
   </div>
+  <div class="reqstrip"><div class="hd"><span class="l">Requirements covered</span><span class="r">Results and history</span></div><div class="ids"><span class="">FR-4.1</span><span class="">FR-4.2</span><span class="">FR-4.3</span><span class="">FR-4.4</span><span class="">FR-4.5</span></div><p>Every value on these screens is server-computed. The app has no scoring, percentile or XP logic to drift out of step with the web.</p></div>
   <div class="pfoot"><span>Workspace 01 · Student · results</span><span>07</span></div>
 </section>
 
@@ -794,6 +817,7 @@ ul.ticks li b{color:var(--text)}
     <div class="fcard"><h4>A refusal explains itself</h4><p>Proctored or coding papers show why, what is needed, and a route to the web. A locked row is never just greyed out.</p></div>
     <div class="fcard"><h4>Push closes the loop</h4><p>In the release after launch, "your drive starts in 30 minutes" is the single highest-value notification this product can send.</p></div>
   </div>
+  <div class="reqstrip"><div class="hd"><span class="l">Requirements covered</span><span class="r">Drives, read-only, and the profile</span></div><div class="ids"><span class="">FR-5.1</span><span class="k">FR-5.2</span><span class="">FR-5.3</span><span class="">FR-5.4</span><span class="">FR-5.5</span><span class="">FR-5.6</span><span class="">FR-8.1</span><span class="">FR-8.3</span><span class="">FR-8.5</span></div><p>FR-5.2 is starred for history: reading a window as start plus duration, rather than the sitting's real closing time, once made a live drive disappear from students' lists mid-drive.</p></div>
   <div class="pfoot"><span>Workspace 01 · Student · drives</span><span>08</span></div>
 </section>
 
@@ -894,6 +918,7 @@ ul.ticks li b{color:var(--text)}
     <div class="fcard"><h4>Named, not counted</h4><p>A count tells a TPO there is a problem. A list of names lets them solve it before the window closes.</p></div>
     <div class="fcard"><h4>One route out</h4><p>Everything else is a single labelled "Open TPO console" action rather than fourteen half-built screens.</p></div>
   </div>
+  <div class="reqstrip"><div class="hd"><span class="l">Requirements covered</span><span class="r">TPO drive day</span></div><div class="ids"><span class="">FR-6.1</span><span class="">FR-6.2</span><span class="">FR-6.3</span><span class="">FR-6.4</span><span class="">FR-6.5</span><span class="">FR-0.1</span><span class="">FR-0.3</span></div><p>Read-only by design. Every write a TPO performs — scheduling, inviting, exporting — is a desk task and stays on the web, reachable through one labelled action.</p></div>
   <div class="pfoot"><span>Workspace 02 · TPO</span><span>09</span></div>
 </section>
 
@@ -970,8 +995,18 @@ ul.ticks li b{color:var(--text)}
       <div class="phone"><div class="scr">
         <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
         <div class="phd"><div class="wm" style="font-size:6.4pt">← Wipro Elite</div><div class="chips"><span class="chip d" style="background:#1a1a1a;color:#fff">ADMIN</span></div></div>
-        <div class="pbody" style="opacity:.3"><div class="pcard" style="height:16mm"></div><div class="pcard" style="height:12mm"></div></div>
-        <div style="position:absolute;inset:0;background:rgba(16,19,34,.42);display:flex;align-items:center;padding:3mm">
+        <div class="pbody" style="opacity:.32">
+          <div class="plabel">Ended, awaiting release</div>
+          <div class="pcard">
+            <div class="prow"><div class="ph2">Wipro Elite — 3 colleges</div><span class="spill sp-done">Ended</span></div>
+            <div class="prow" style="margin-top:1.8mm;gap:1.2mm">
+              <div class="pstat"><div class="v">612</div><div class="k">Attempts</div></div>
+              <div class="pstat"><div class="v">58%</div><div class="k">Pass rate</div></div>
+            </div>
+          </div>
+          <div class="pcard"><div class="prow"><span class="ptxt">Results visible to students</span><span class="spill sp-lock">No</span></div></div>
+        </div>
+        <div style="position:absolute;inset:0;background:rgba(16,19,34,.3);display:flex;align-items:center;padding:3mm">
           <div class="pcard" style="width:100%;padding:3mm">
             <div class="ph1">Publish results to<br>612 students?</div>
             <div class="ptxt" style="margin-top:1.6mm;font-size:5.2pt">Every student in this sitting sees their score
@@ -995,6 +1030,7 @@ ul.ticks li b{color:var(--text)}
     <div class="fcard"><h4>One write action</h4><p>Publishing results is the only thing this surface changes, and it is confirmed first — it is visible to every student in the sitting at once.</p></div>
     <div class="fcard"><h4>32 pages stay put</h4><p>Catalogue, users, colleges, finance, marketing, audit. All of it is better on a 27-inch screen and none of it is urgent on a phone.</p></div>
   </div>
+  <div class="reqstrip"><div class="hd"><span class="l">Requirements covered</span><span class="r">The live drive monitor</span></div><div class="ids"><span class="">FR-7.1</span><span class="">FR-7.2</span><span class="">FR-7.3</span><span class="k">FR-7.4</span><span class="">FR-7.5</span><span class="">FR-0.1</span><span class="">FR-0.3</span></div><p>FR-7.4 is the only write in the whole admin surface, and it is confirmed first: publishing makes results visible to every student in the sitting at the same moment.</p></div>
   <div class="pfoot"><span>Workspace 03 · Admin</span><span>10</span></div>
 </section>
 
@@ -1083,6 +1119,7 @@ ul.ticks li b{color:var(--text)}
     <div class="fcard"><h4>Invited students included</h4><p>Set-password is in v1 precisely because colleges onboard in bulk and those students arrive on a phone.</p></div>
     <div class="fcard"><h4>Suspended is explained</h4><p>A suspended account cannot refresh into a session. The app says so as an account message, not a network failure.</p></div>
   </div>
+  <div class="reqstrip"><div class="hd"><span class="l">Requirements covered</span><span class="r">Every authentication surface</span></div><div class="ids"><span class="">FR-1.1</span><span class="">FR-1.2</span><span class="">FR-1.3</span><span class="">FR-1.4</span><span class="">FR-1.5</span><span class="">FR-1.6</span><span class="k">FR-1.7</span><span class="">FR-1.8</span><span class="">FR-1.9</span><span class="">FR-1.10</span><span class="">FR-0.4</span></div><p>FR-1.7 is the one to test hardest: a session that does not survive a force-quit turns every cold start into a login screen, which is how a practice habit dies.</p></div>
   <div class="pfoot"><span>Authentication</span><span>11</span></div>
 </section>
 
