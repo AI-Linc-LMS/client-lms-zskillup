@@ -1,0 +1,1326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>prephasz Mobile — role by role</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f8f9fc; --surface:#fff; --ink:#14161f; --ink2:#1a1a1a;
+  --text:#101322; --muted:#475569; --subtle:#64748b;
+  --brand:#ffc42d; --brand-strong:#f5b400; --brand-soft:#fff5ea; --brand-ink:#171717;
+  --streak:#ff7a1a; --coin:#f5b400; --success:#16c79a; --success-soft:#eafbf4;
+  --danger:#ef4444; --danger-soft:#fee2e2; --info:#3b82f6; --info-soft:#dbeafe;
+  --line:#e9edf5; --line2:#f1f4f9; --slate50:#f8fafc; --slate100:#f1f5f9; --slate200:#e2e8f0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+@page{size:A4;margin:0}
+html,body{background:#fff}
+body{font-family:Inter,system-ui,sans-serif;color:var(--text);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+
+.page{width:210mm;height:297mm;padding:15mm 15mm 21mm;page-break-after:always;position:relative;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+.page:last-child{page-break-after:auto}
+.page.dark{background:var(--ink);color:#fff}
+
+/* ---- type ---- */
+.eyebrow{font-size:8.5pt;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--brand-strong)}
+.eyebrow.alt{color:var(--subtle)}
+.eyebrow::before{content:"";display:block;width:34px;height:3px;background:var(--brand);border-radius:2px;margin-bottom:7px}
+h1{font-size:40pt;line-height:1.02;letter-spacing:-.025em;font-weight:800}
+h1 .g{color:#8a8f9e}
+h2{font-size:21pt;line-height:1.1;letter-spacing:-.02em;font-weight:800;margin-top:4px}
+h3{font-size:12.5pt;font-weight:800;letter-spacing:-.01em}
+.lede{font-size:10pt;line-height:1.55;color:var(--muted);max-width:155mm;margin-top:9px}
+.sub{font-size:8.6pt;line-height:1.5;color:var(--muted);margin-top:6px;max-width:160mm}
+.tiny{font-size:7.2pt;line-height:1.45;color:var(--subtle)}
+.rule{height:1px;background:var(--line);margin:9mm 0}
+
+/* ---- stats ---- */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:7mm;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:7mm 0;margin-top:8mm}
+.stat .n{font-size:25pt;font-weight:800;letter-spacing:-.03em;line-height:1}
+.stat .l{font-size:7pt;color:var(--subtle);margin-top:5px;line-height:1.35}
+
+/* ---- cards ---- */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:5mm}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:5mm}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:4mm}
+.fcard{border-left:2.5px solid var(--brand);padding:3mm 0 3mm 4mm}
+.fcard h4{font-size:9pt;font-weight:700;margin-bottom:3px}
+.fcard p{font-size:7.6pt;line-height:1.45;color:var(--muted)}
+.bcard{border:1px solid var(--line);border-radius:10px;padding:4.5mm;background:#fff}
+.bcard h4{font-size:9.5pt;font-weight:800;margin-bottom:4px}
+.bcard p{font-size:7.6pt;line-height:1.45;color:var(--muted)}
+.bcard .num{font-family:'JetBrains Mono',monospace;font-size:7pt;color:var(--subtle);margin-bottom:5px}
+
+/* ---- pills ---- */
+.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 9px;font-size:7.2pt;font-weight:700;color:var(--text)}
+.pill.b{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.pill.d{background:var(--ink2);border-color:var(--ink2);color:#fff}
+.tag{display:inline-block;border-radius:999px;padding:1.5px 7px;font-size:6.4pt;font-weight:800;letter-spacing:.03em}
+.t-v1{background:var(--brand);color:#171717}
+.t-p2{background:var(--info-soft);color:#1d4ed8}
+.t-p3{background:var(--slate100);color:#475569}
+.t-web{background:#fff;color:#64748b;border:1px solid var(--slate200)}
+
+/* ---- phone mockup ---- */
+.phone{width:57mm;flex:0 0 57mm;border-radius:7mm;background:#1a1a1a;padding:1.4mm;box-shadow:0 2px 10px rgba(16,19,34,.13)}
+.phone .scr{border-radius:5.8mm;background:var(--bg);overflow:hidden;height:107mm;display:flex;flex-direction:column;position:relative}
+.phone.tall .scr{height:120mm}
+.sbar{display:flex;justify-content:space-between;align-items:center;padding:1.6mm 3mm .6mm;font-size:5.2pt;font-weight:700;color:var(--text)}
+.sbar .dots{letter-spacing:.5px}
+.phd{display:flex;justify-content:space-between;align-items:center;padding:1.4mm 3mm;background:#fff;border-bottom:1px solid var(--line)}
+.phd .wm{font-size:7pt;font-weight:900;letter-spacing:-.02em}
+.phd .wm i{color:var(--brand-strong);font-style:normal}
+.phd .chips{display:flex;gap:1.2mm}
+.chip{font-size:5pt;font-weight:800;border-radius:999px;padding:.7mm 1.6mm;background:var(--slate100);color:var(--muted)}
+.chip.s{background:#fff2e6;color:#c2410c}
+.chip.c{background:#fef3c7;color:#92400e}
+.pbody{flex:1;padding:2.4mm;overflow:hidden;display:flex;flex-direction:column;gap:2mm}
+.plabel{font-size:4.6pt;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#94a3b8}
+.pcard{background:#fff;border:1px solid var(--line);border-radius:2.6mm;padding:2.2mm}
+.pcard.acc{border-color:rgba(255,196,45,.45);background:linear-gradient(135deg,#fffdf6,#fff8e8)}
+.ph1{font-size:8pt;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.ph2{font-size:6.4pt;font-weight:800;line-height:1.2}
+.ptxt{font-size:5.4pt;color:var(--muted);line-height:1.4}
+.pmeta{font-size:4.8pt;color:#94a3b8}
+.pbtn{display:block;text-align:center;background:linear-gradient(180deg,#ffc42d,#f5b400);color:#171717;font-size:6.2pt;font-weight:800;border-radius:999px;padding:1.9mm 0}
+.pbtn.ghost{background:#fff;border:1px solid var(--slate200);color:var(--text)}
+.pbtn.dark{background:var(--ink2);color:#fff}
+.prow{display:flex;justify-content:space-between;align-items:center;gap:1.5mm}
+.popt{border:1px solid var(--slate200);border-radius:2mm;padding:1.7mm 2mm;font-size:5.6pt;color:var(--text);display:flex;align-items:center;gap:1.6mm;background:#fff}
+.popt .rad{width:2.2mm;height:2.2mm;border-radius:50%;border:1px solid #cbd5e1;flex:0 0 auto}
+.popt.sel{border-color:var(--brand-strong);background:var(--brand-soft)}
+.popt.sel .rad{border-color:var(--brand-strong);background:var(--brand-strong);box-shadow:inset 0 0 0 .5mm #fff}
+.pbar{height:1.3mm;border-radius:999px;background:var(--slate100);overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--ink2);border-radius:999px}
+.pbar.y i{background:linear-gradient(90deg,#ffc42d,#ff7a1a)}
+.ptabs{display:flex;border-top:1px solid var(--line);background:#fff;padding:1.4mm 0 1.8mm}
+.ptabs div{flex:1;text-align:center;font-size:4.8pt;font-weight:700;color:#94a3b8}
+.ptabs div.on{color:var(--text)}
+.ptabs div b{display:block;width:3mm;height:3mm;border-radius:1mm;background:#cbd5e1;margin:0 auto 1mm}
+.ptabs div.on b{background:var(--ink2)}
+.pstat{flex:1;border:1px solid var(--line);border-radius:2mm;padding:1.6mm;background:#fff;text-align:center}
+.pstat .v{font-size:8pt;font-weight:800;line-height:1}
+.pstat .k{font-size:4.4pt;color:#94a3b8;margin-top:1mm;letter-spacing:.07em;text-transform:uppercase;font-weight:700}
+.spill{font-size:4.6pt;font-weight:800;border-radius:999px;padding:.6mm 1.5mm}
+.sp-live{background:#eafbf4;color:#119b69}
+.sp-soon{background:#fff3e0;color:#b45309}
+.sp-lock{background:var(--slate100);color:#64748b}
+.sp-done{background:var(--info-soft);color:#1d4ed8}
+.pgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:1mm}
+.pgrid span{aspect-ratio:1;border-radius:1mm;border:1px solid var(--slate200);font-size:4.4pt;font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--subtle);background:#fff}
+.pgrid span.a{background:var(--ink2);color:#fff;border-color:var(--ink2)}
+.pgrid span.f{background:var(--brand);border-color:var(--brand-strong);color:#171717}
+.caption{font-size:6.6pt;color:var(--subtle);margin-top:2.5mm;text-align:center;line-height:1.35}
+.caption b{color:var(--text);font-weight:700;display:block;font-size:7pt}
+.phones{display:flex;gap:4.5mm;justify-content:center;align-items:flex-start}
+.phonewrap{display:flex;flex-direction:column;align-items:center}
+
+/* ---- diagram ---- */
+.flow{display:flex;align-items:center;gap:0;justify-content:space-between}
+.node{border:1px solid var(--line);border-radius:9px;padding:3.5mm 3mm;text-align:center;flex:1;background:#fff}
+.node.dk{background:var(--ink);color:#fff;border-color:var(--ink)}
+.node .t{font-size:8.2pt;font-weight:800}
+.node .s{font-size:6.2pt;color:var(--subtle);margin-top:2px}
+.node.dk .s{color:#9aa1b4}
+.arr{flex:0 0 7mm;text-align:center;color:#c3c9d6;font-size:11pt}
+.framebox{border:1px solid var(--line);border-radius:12px;padding:7mm 6mm;background:#fcfcfe}
+
+/* ---- footer ---- */
+.pfoot{position:absolute;left:15mm;right:15mm;bottom:8mm;display:flex;justify-content:space-between;font-size:6.4pt;color:#a2a9b8;border-top:1px solid var(--line);padding-top:3mm}
+.page.dark .pfoot{color:#6b7280;border-color:#2a2d3a}
+.spacer{flex:1}
+.imgshot{width:100%;border:1px solid var(--line);border-radius:6px;display:block}
+.shotwrap{background:#fcfcfe;border:1px solid var(--line);border-radius:8px;padding:2.5mm}
+.shotbar{display:flex;align-items:center;gap:2mm;margin-bottom:2mm}
+.shotbar .u{font-family:'JetBrains Mono',monospace;font-size:5.6pt;color:var(--subtle);background:#fff;border:1px solid var(--line);border-radius:999px;padding:.8mm 2.5mm;flex:1;overflow:hidden;white-space:nowrap}
+.shotbar .b{font-size:5.4pt;font-weight:800;background:var(--brand);color:#171717;border-radius:999px;padding:.8mm 2mm}
+table.mod{width:100%;border-collapse:collapse;font-size:6.3pt}
+table.mod td{padding:1.25mm 0;border-bottom:1px solid var(--line2);vertical-align:top}
+table.mod td.r{font-family:'JetBrains Mono',monospace;color:var(--subtle);font-size:6pt}
+table.mod td.tg{text-align:right;white-space:nowrap}
+.colhead{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink2);padding-bottom:2mm;margin-bottom:1mm}
+.colhead .n{font-size:9.4pt;font-weight:800}
+.colhead .c{font-size:6.4pt;color:var(--subtle)}
+ul.ticks{list-style:none;margin-top:4mm}
+ul.ticks li{font-size:8pt;line-height:1.5;color:var(--muted);padding-left:5mm;position:relative;margin-bottom:2.5mm}
+ul.ticks li::before{content:"";position:absolute;left:0;top:2.6mm;width:2mm;height:2mm;border-radius:50%;background:var(--brand)}
+ul.ticks li b{color:var(--text)}
+</style>
+</head>
+<body>
+
+<!-- ============ 1. COVER ============ -->
+<section class="page">
+  <div class="eyebrow">The placement platform, on a phone</div>
+  <h1 style="margin-top:7mm">prephasz mobile,<br><span class="g">role by role.</span></h1>
+  <p class="lede">prephasz is a placement-preparation platform with four roles, 139 web pages and a live
+  production backend running real college drives. The mobile app is not a port of that product. It is a
+  deliberately narrow companion that does the handful of things a phone is genuinely better at — and
+  routes everything else to the web, on purpose.</p>
+  <p class="lede" style="margin-top:4mm">Same backend. Same APIs. No second source of truth. The
+  server issues the attempt, the deadline, the questions and the grade; the app renders what it is told.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="n">4</div><div class="l">roles, all signing in from day one</div></div>
+    <div class="stat"><div class="n">75</div><div class="l">modules inventoried across the platform</div></div>
+    <div class="stat"><div class="n">18</div><div class="l">of them in the first release</div></div>
+    <div class="stat"><div class="n">139</div><div class="l">pages in the web product today</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">new sources of truth</div></div>
+  </div>
+
+  <div class="grid4" style="margin-top:8mm">
+    <div><h3>Narrow on purpose</h3><p class="tiny" style="margin-top:3px">Every module has a verdict: in v1, planned, later, or staying on the web. The module catalogue is the record of what was left out deliberately.</p></div>
+    <div><h3>The server decides</h3><p class="tiny" style="margin-top:3px">Timer, grading, entitlement and every gate are server-authoritative. The app computes no business value.</p></div>
+    <div><h3>No camera, no checkout</h3><p class="tiny" style="margin-top:3px">No proctoring and no purchase surface in v1 — the two decisions that remove most of the launch risk.</p></div>
+    <div><h3>Stoppable in minutes</h3><p class="tiny" style="margin-top:3px">Remote config can raise the version floor or halt every build without waiting on a store review.</p></div>
+  </div>
+
+  <div class="spacer"></div>
+  <div class="phones" style="margin-bottom:4mm">
+    <!-- cover phone 1: practice home -->
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="phd"><div class="wm"><i>pre</i>phasz</div><div class="chips"><span class="chip s">🔥 12</span><span class="chip c">◆ 340</span></div></div>
+        <div class="pbody">
+          <div class="pcard acc">
+            <div class="prow"><div class="plabel" style="color:#b45309">In progress</div><span class="spill sp-live">14:22 left</span></div>
+            <div class="ph2" style="margin-top:1.2mm">Quant + Logical, 25 Q</div>
+            <div class="pbar" style="margin:1.6mm 0"><i style="width:44%"></i></div>
+            <div class="pbtn" style="margin-top:1.4mm">Resume attempt</div>
+          </div>
+          <div class="plabel">Build a mock</div>
+          <div class="pcard">
+            <div class="prow"><span class="ptxt">Questions</span><span class="ph2">25</span></div>
+            <div class="prow" style="margin-top:1.4mm"><span class="ptxt">Duration</span><span class="ph2">30 min</span></div>
+            <div class="pbtn" style="margin-top:2mm">Build and start</div>
+          </div>
+          <div class="plabel">Ready to take</div>
+          <div class="pcard"><div class="prow"><div><div class="ph2">TCS Pattern Mock 4</div><div class="pmeta">30 Q · 60 min</div></div><span class="spill sp-live">Open</span></div></div>
+        </div>
+        <div class="ptabs"><div class="on"><b></b>Practice</div><div><b></b>Assessments</div><div><b></b>Profile</div></div>
+      </div></div>
+      <div class="caption"><b>Practice</b>the student home</div>
+    </div>
+    <!-- cover phone 2: runner -->
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="phd"><div class="wm" style="font-size:6pt;color:#64748b">✕ Exit</div><div class="chips"><span class="chip" style="background:#1a1a1a;color:#fff">⏱ 18:42</span></div></div>
+        <div class="pbody">
+          <div class="prow"><span class="pmeta">Question 7 of 25</span><span class="pmeta">Quantitative</span></div>
+          <div class="pbar"><i style="width:28%"></i></div>
+          <div class="pcard" style="padding:2.4mm">
+            <div class="ptxt" style="color:#101322;font-size:5.8pt;line-height:1.45">A train 180 m long crosses a platform 270 m long in 25 seconds. What is its speed in km/h?</div>
+          </div>
+          <div class="popt"><span class="rad"></span>54 km/h</div>
+          <div class="popt sel"><span class="rad"></span>64.8 km/h</div>
+          <div class="popt"><span class="rad"></span>72 km/h</div>
+          <div class="popt"><span class="rad"></span>80 km/h</div>
+          <div class="spacer"></div>
+          <div class="prow"><span class="pbtn ghost" style="flex:1">⚑ Flag</span><span class="pbtn" style="flex:1.4">Next →</span></div>
+        </div>
+      </div></div>
+      <div class="caption"><b>The runner</b>server-timed, offline-tolerant</div>
+    </div>
+    <!-- cover phone 3: TPO -->
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="phd"><div class="wm"><i>pre</i>phasz</div><div class="chips"><span class="chip">TPO</span></div></div>
+        <div class="pbody">
+          <div class="plabel">Live now</div>
+          <div class="pcard">
+            <div class="prow"><div class="ph2">TCS NQT Drive — Batch A</div><span class="spill sp-live">Live</span></div>
+            <div class="pmeta" style="margin-top:1mm">Ends 11:30 · 60 min</div>
+            <div class="prow" style="margin-top:2mm;gap:1.2mm">
+              <div class="pstat"><div class="v" style="color:#119b69">84</div><div class="k">In progress</div></div>
+              <div class="pstat"><div class="v">31</div><div class="k">Submitted</div></div>
+              <div class="pstat"><div class="v" style="color:#b91c1c">12</div><div class="k">No show</div></div>
+            </div>
+            <div class="pbtn ghost" style="margin-top:2mm">See the 12 who haven't started</div>
+          </div>
+          <div class="plabel">Readiness</div>
+          <div class="pcard">
+            <div class="prow"><span class="ptxt">Ready</span><span class="ph2">38%</span></div>
+            <div class="pbar" style="margin-top:1.2mm"><i style="width:38%;background:#16c79a"></i></div>
+            <div class="prow" style="margin-top:1.6mm"><span class="ptxt">At risk</span><span class="ph2">22%</span></div>
+            <div class="pbar" style="margin-top:1.2mm"><i style="width:22%;background:#ef4444"></i></div>
+          </div>
+        </div>
+        <div class="ptabs"><div class="on"><b></b>Drive day</div><div><b></b>Readiness</div><div><b></b>Profile</div></div>
+      </div></div>
+      <div class="caption"><b>Drive day</b>what a TPO needs standing in the lab</div>
+    </div>
+  </div>
+  <div class="pfoot"><span>prephasz mobile · business requirements</span><span>Draft for sign-off · 13 Oct 2026</span></div>
+</section>
+
+<!-- ============ 2. HOW IT WORKS ============ -->
+<section class="page">
+  <div class="eyebrow">How it works</div>
+  <h2>Four roles, three tab bars</h2>
+  <p class="sub">A session resolves to a role, and the role decides which app renders. There is no separate
+  admin build and no second login: the same binary serves a student, a placement officer and platform staff,
+  with a different bottom tab bar and a different set of endpoints behind it. Authorisation is never the app's
+  job — every screen sits behind the same backend guard the web uses.</p>
+
+  <div class="framebox" style="margin-top:7mm">
+    <div class="flow">
+      <div class="node"><div class="t">Sign in</div><div class="s">email, or Google</div></div>
+      <div class="arr">→</div>
+      <div class="node dk"><div class="t">Role on the token</div><div class="s">server-issued, never client-set</div></div>
+      <div class="arr">→</div>
+      <div style="flex:1.3;display:flex;flex-direction:column;gap:2.5mm">
+        <div class="node" style="padding:2.4mm"><div class="t" style="font-size:7.4pt">Student · Practice</div><div class="s">Assessments · Profile</div></div>
+        <div class="node" style="padding:2.4mm"><div class="t" style="font-size:7.4pt">TPO · Drive day</div><div class="s">Readiness · Profile</div></div>
+        <div class="node" style="padding:2.4mm"><div class="t" style="font-size:7.4pt">Admin · Drives</div><div class="s">Profile</div></div>
+      </div>
+    </div>
+    <p class="tiny" style="margin-top:6mm;border-top:1px solid var(--line);padding-top:4mm">What signing in actually
+    resolves. The role is a claim on a server-signed token; the app reads it to pick a tab bar, which is a
+    convenience, not a security boundary. A student who edited their own role claim would reach screens whose
+    every endpoint still refuses them.</p>
+  </div>
+
+  <div class="grid4" style="margin-top:9mm">
+    <div class="bcard"><div class="num">01</div><h4>Student</h4><p>The reason the app exists. Builds and sits timed mock assessments, sees upcoming drives, reads reports.</p><div style="margin-top:3mm"><span class="tag t-v1">7 modules in v1</span></div></div>
+    <div class="bcard"><div class="num">02</div><h4>TPO</h4><p>Placement officer at a partner college. Drive-day participation and cohort readiness, read-only.</p><div style="margin-top:3mm"><span class="tag t-v1">2 modules in v1</span></div></div>
+    <div class="bcard"><div class="num">03</div><h4>Admin</h4><p>prephasz operations. Watches a live drive and publishes results. The other 32 console pages stay on the web.</p><div style="margin-top:3mm"><span class="tag t-v1">2 modules in v1</span></div></div>
+    <div class="bcard"><div class="num">04</div><h4>Super Admin</h4><p>Same mobile surface as Admin in v1. Finance, audit and access control are desk work and stay there.</p><div style="margin-top:3mm"><span class="tag t-v1">2 modules in v1</span></div></div>
+  </div>
+
+  <div class="rule"></div>
+  <div class="eyebrow alt">The session</div>
+  <h3 style="margin-top:3mm;font-size:14pt">The one thing that could not be ported</h3>
+  <div class="grid3" style="margin-top:5mm">
+    <div class="fcard"><h4>Web is cookie-only, and stays that way</h4><p>The refresh token is an HttpOnly cookie precisely so page script can never read it. That posture is unchanged by anything the app does.</p></div>
+    <div class="fcard"><h4>The app uses the Keychain instead</h4><p>A native client has no cookie jar worth hanging a timed assessment on, so it receives the token in the response body and stores it in hardware-backed storage.</p></div>
+    <div class="fcard"><h4>The guard fails closed</h4><p>Native means the client header is present <i>and</i> neither Origin nor Referer is. Every browser sends one of those; a native fetch sends neither.</p></div>
+  </div>
+  <div class="pfoot"><span>How it works</span><span>02</span></div>
+</section>
+
+<!-- ============ 3. SCOPE DECISIONS ============ -->
+<section class="page">
+  <div class="eyebrow">The spine</div>
+  <h2>Four decisions that shape everything</h2>
+  <p class="sub">Settled by the owner before a line of app code was written. Each one removes work and risk
+  rather than adding a feature, which is why they are at the front of this document rather than buried in an appendix.</p>
+
+  <div class="grid2" style="margin-top:7mm;gap:6mm">
+    <div class="bcard" style="padding:6mm">
+      <div class="prow"><span class="pill d">D1</span><span class="tag t-v1">Settled</span></div>
+      <h4 style="margin-top:4mm;font-size:12pt">The app sells nothing</h4>
+      <p style="margin-top:2mm">Entitlement-aware but purchase-free. Where something is locked it says so plainly —
+      no buy button, no price, no link to the web store on iOS. Students upgrade on the web and the app picks it
+      up on next load.</p>
+      <p style="margin-top:3mm;font-size:7.2pt;color:var(--subtle)"><b>Why:</b> digital content sold outside IAP is
+      the classic App Store §3.1.1 rejection, and it is discovered at review — after the whole project is built.</p>
+    </div>
+    <div class="bcard" style="padding:6mm">
+      <div class="prow"><span class="pill d">D2</span><span class="tag t-v1">Settled</span></div>
+      <h4 style="margin-top:4mm;font-size:12pt">No proctoring, no coding</h4>
+      <p style="margin-top:2mm">Proctored sittings and papers containing coding questions are visible but not
+      startable, with an honest state. This removes the camera from the app entirely.</p>
+      <p style="margin-top:3mm;font-size:7.2pt;color:var(--subtle)"><b>Why it is nearly free:</b> the mock engine's
+      default path is already unproctored, so the same server-timed, server-graded engine runs with no backend change at all.</p>
+    </div>
+    <div class="bcard" style="padding:6mm">
+      <div class="prow"><span class="pill d">D3</span><span class="tag t-p2">Infrastructure</span></div>
+      <h4 style="margin-top:4mm;font-size:12pt">A dedicated API host</h4>
+      <p style="margin-top:2mm">The app talks to its own subdomain pointing at the same load balancer, rather than
+      routing every candidate's traffic through the web host's proxy.</p>
+      <p style="margin-top:3mm;font-size:7.2pt;color:var(--subtle)"><b>Why:</b> the web calls its own origin on
+      purpose, to keep the session cookie first-party. A native client has no such constraint and no reason to inherit the hop.</p>
+    </div>
+    <div class="bcard" style="padding:6mm">
+      <div class="prow"><span class="pill d">D4</span><span class="tag t-v1">Settled</span></div>
+      <h4 style="margin-top:4mm;font-size:12pt">All four roles, one module each</h4>
+      <p style="margin-top:2mm">Parity with 139 web pages is not a first release. A login that dead-ends for three
+      of four roles is not a launch either. Each role gets the one thing a phone is genuinely good for.</p>
+      <p style="margin-top:3mm;font-size:7.2pt;color:var(--subtle)"><b>Everything else</b> is reachable as a single
+      labelled "Open on web" row. It never pretends to be a feature that is missing.</p>
+    </div>
+  </div>
+
+  <div class="framebox" style="margin-top:8mm">
+    <div class="flow">
+      <div class="node dk" style="flex:1.1"><div class="t">One backend</div><div class="s">the same production API the web uses</div></div>
+      <div class="arr">→</div>
+      <div class="node"><div class="t">Web</div><div class="s">139 pages · all four roles</div></div>
+      <div class="arr" style="flex:0 0 4mm">+</div>
+      <div class="node" style="border-color:var(--brand-strong);background:var(--brand-soft)"><div class="t">Mobile</div><div class="s">18 modules · all four roles</div></div>
+    </div>
+    <p class="tiny" style="margin-top:5mm;border-top:1px solid var(--line);padding-top:4mm">No business logic moves.
+    Every value the app shows — score, percentile, XP, rank, time remaining, whether a surface is locked — is computed
+    by the server and rendered by the client. There is nothing the app can get wrong that the web gets right.</p>
+  </div>
+  <div class="pfoot"><span>The spine · scope decisions</span><span>03</span></div>
+</section>
+
+<!-- ============ 4. THE LOOP ============ -->
+<section class="page">
+  <div class="eyebrow">The core loop</div>
+  <h2>One assessment, end to end</h2>
+  <p class="sub">Everything in the student release serves this sequence. It is worth reading once, because four of
+  the five hard requirements in the runner exist to protect a single step of it.</p>
+
+  <div class="framebox" style="margin-top:7mm">
+    <div class="flow">
+      <div class="node"><div class="t">Build</div><div class="s">sections, count, duration</div></div><div class="arr">→</div>
+      <div class="node dk"><div class="t">Start</div><div class="s">server issues the attempt + deadline</div></div><div class="arr">→</div>
+      <div class="node"><div class="t">Answer</div><div class="s">each one saved locally and posted</div></div><div class="arr">→</div>
+      <div class="node"><div class="t">Submit</div><div class="s">or auto-submit at zero</div></div><div class="arr">→</div>
+      <div class="node" style="border-color:var(--brand-strong);background:var(--brand-soft)"><div class="t">Report</div><div class="s">score, percentile, review</div></div>
+    </div>
+    <p class="tiny" style="margin-top:5mm;border-top:1px solid var(--line);padding-top:4mm">
+    <b>Start hands over the whole paper.</b> One call returns the attempt id, the server-authoritative expiry and every
+    question, plus any answers already saved. That is what makes a phone on campus wifi viable: the paper is in hand
+    before the network gets a chance to be bad.</p>
+  </div>
+
+  <div class="rule"></div>
+  <div class="eyebrow alt">Why resume is a feature, not an error path</div>
+  <h3 style="margin-top:3mm;font-size:14pt">A phone will interrupt the exam. The exam has to survive it.</h3>
+  <p class="sub">A call arrives. The battery dies. Android kills the app to reclaim memory. On a laptop these are
+  rare; on a phone they are Tuesday. The backend already solved this and the app inherits it for free: starting an
+  attempt that is already open returns <i>that</i> attempt — same deadline, same saved answers — and deliberately
+  skips the paywall and profile gates, so nobody mid-exam is ever stranded by a lapse in their plan.</p>
+
+  <div class="grid3" style="margin-top:6mm">
+    <div class="fcard"><h4>The timer is the server's</h4><p>The countdown derives from the issued expiry and re-anchors on every foreground and every successful request. Changing the device clock changes nothing.</p></div>
+    <div class="fcard"><h4>Answers are durable</h4><p>Each answer is written locally and posted; failures retry from a queue that survives a cold start. Sixty seconds in a lift loses nothing.</p></div>
+    <div class="fcard"><h4>Nothing blocks the paper</h4><p>Network, sync or telemetry failure degrades silently. The candidate keeps answering. This rule outranks every other behaviour in the app.</p></div>
+  </div>
+
+  <div class="grid2" style="margin-top:7mm;gap:6mm">
+    <div class="bcard" style="background:var(--slate50)">
+      <h4>What the app refuses to start</h4>
+      <p style="margin-top:2mm">A paper containing coding questions, and any proctored sitting. Both are shown with
+      their window and duration, and an honest reason.</p>
+      <p style="margin-top:3mm;font-size:7.2pt;color:var(--subtle)">The refusal happens <b>before</b> the attempt is
+      created. Starting and backing out would leave a live attempt behind and, on a drive, spend the one sitting a
+      student gets.</p>
+    </div>
+    <div class="bcard" style="background:var(--slate50)">
+      <h4>What the phone is actually for</h4>
+      <p style="margin-top:2mm">Practice between classes, and knowing when your drive is. High-stakes proctored
+      sittings stay on a laptop with an invigilator.</p>
+      <p style="margin-top:3mm;font-size:7.2pt;color:var(--subtle)">Worth being precise about with colleges: the app
+      is a practice and visibility surface, not an equivalent surface for an evaluated drive.</p>
+    </div>
+  </div>
+  <div class="pfoot"><span>The core loop</span><span>04</span></div>
+</section>
+
+<!-- ============ 5. STUDENT — BUILD ============ -->
+<section class="page">
+  <div class="eyebrow">Workspace 01 · Student</div>
+  <h2>Build a mock, and start it</h2>
+  <p class="sub">The student home opens on the one thing a student came to do. A live attempt always offers itself
+  first; below that, a builder that assembles a paper from chosen sections and topics, then the catalogue.</p>
+
+  <div class="phones" style="margin-top:7mm">
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="phd"><div class="wm"><i>pre</i>phasz</div><div class="chips"><span class="chip s">🔥 12</span><span class="chip c">◆ 340</span></div></div>
+        <div class="pbody">
+          <div class="plabel">Build a mock</div>
+          <div class="pcard">
+            <div class="ph2">Sections</div>
+            <div style="display:flex;gap:1mm;flex-wrap:wrap;margin-top:1.5mm">
+              <span class="spill sp-done">Quantitative ✓</span><span class="spill sp-done">Logical ✓</span><span class="spill sp-lock">Verbal</span>
+            </div>
+            <div class="prow" style="margin-top:2.4mm"><span class="ptxt">Questions</span><span class="prow" style="gap:2mm"><span class="pmeta">−</span><span class="ph2">25</span><span class="pmeta">+</span></span></div>
+            <div class="prow" style="margin-top:1.6mm"><span class="ptxt">Duration</span><span class="prow" style="gap:2mm"><span class="pmeta">−</span><span class="ph2">30 min</span><span class="pmeta">+</span></span></div>
+            <div class="pbtn" style="margin-top:2.4mm">Build and start</div>
+          </div>
+          <div class="plabel">Ready to take</div>
+          <div class="pcard"><div class="prow"><div><div class="ph2">TCS Pattern Mock 4</div><div class="pmeta">30 Q · 60 min · MCQ only</div></div><span class="spill sp-live">Open</span></div></div>
+          <div class="pcard" style="opacity:.62">
+            <div class="prow"><div><div class="ph2">Infosys Full Mock</div><div class="pmeta">40 Q · 90 min · has coding</div></div><span class="spill sp-lock">🔒</span></div>
+            <div class="ptxt" style="margin-top:1.2mm;font-size:4.9pt">Has a coding section — open this on a laptop</div>
+          </div>
+        </div>
+        <div class="ptabs"><div class="on"><b></b>Practice</div><div><b></b>Assessments</div><div><b></b>Profile</div></div>
+      </div></div>
+      <div class="caption"><b>Practice</b>builder, catalogue, and what it will not start</div>
+    </div>
+
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="phd"><div class="wm" style="font-size:6.4pt">← Before you start</div><div class="chips"></div></div>
+        <div class="pbody">
+          <div class="pcard">
+            <div class="plabel">What we built</div>
+            <div class="ph1" style="margin-top:1.4mm">Quantitative + Logical</div>
+            <div class="prow" style="margin-top:2.4mm;gap:1.2mm">
+              <div class="pstat"><div class="v">22</div><div class="k">Questions</div></div>
+              <div class="pstat"><div class="v">30</div><div class="k">Minutes</div></div>
+              <div class="pstat"><div class="v">22</div><div class="k">Marks</div></div>
+            </div>
+          </div>
+          <div class="pcard acc">
+            <div class="ph2" style="color:#92400e">You asked for 25, we built 22</div>
+            <div class="ptxt" style="margin-top:1.2mm;font-size:5pt">Three questions were skipped because you have
+            already answered them. Pick another topic for a longer paper.</div>
+          </div>
+          <div class="pcard">
+            <div class="plabel">Before the timer starts</div>
+            <div class="ptxt" style="margin-top:1.4mm;font-size:5.1pt">· One timer for the whole paper<br>· Move freely between questions<br>· Answers save as you go<br>· It submits itself at zero</div>
+          </div>
+          <div class="spacer"></div>
+          <div class="pbtn">Start the timer</div>
+          <div class="pbtn ghost">Not now</div>
+        </div>
+      </div></div>
+      <div class="caption"><b>Pre-start</b>honest about what was actually assembled</div>
+    </div>
+
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="phd"><div class="wm" style="font-size:6.4pt">One-time details</div><div class="chips"></div></div>
+        <div class="pbody">
+          <div class="ph1">We need five details<br>before your first paper</div>
+          <div class="ptxt" style="font-size:5.2pt">They go on your result and your college's report. You will not be asked again.</div>
+          <div class="pcard" style="padding:1.8mm 2.2mm"><div class="pmeta">Full name</div><div class="ph2" style="margin-top:.6mm">Aarav Sharma</div></div>
+          <div class="pcard" style="padding:1.8mm 2.2mm"><div class="pmeta">College</div><div class="ph2" style="margin-top:.6mm">VIT Vellore</div></div>
+          <div class="pcard" style="padding:1.8mm 2.2mm;border-color:#ffc42d"><div class="pmeta" style="color:#b45309">Department</div><div class="ph2" style="margin-top:.6mm;color:#94a3b8">Select…</div></div>
+          <div class="pcard" style="padding:1.8mm 2.2mm"><div class="pmeta">Phone</div><div class="ph2" style="margin-top:.6mm">98765 43210</div></div>
+          <div class="spacer"></div>
+          <div class="pbtn">Save and continue</div>
+        </div>
+      </div></div>
+      <div class="caption"><b>Details gate</b>server-driven, only the missing fields</div>
+    </div>
+  </div>
+
+  <div class="grid4" style="margin-top:8mm">
+    <div class="fcard"><h4>A live attempt wins</h4><p>Anything already open is offered before anything new can be started.</p></div>
+    <div class="fcard"><h4>Short papers are explained</h4><p>Thin topics, a per-plan cap or questions you have already seen — said out loud, before the timer.</p></div>
+    <div class="fcard"><h4>Coding refused up front</h4><p>Checked on the paper's coding count before start, so backing out cannot spend a sitting.</p></div>
+    <div class="fcard"><h4>Locked is honest</h4><p>A locked surface says what is locked and that it is managed on the web. No price, no buy button.</p></div>
+  </div>
+  <div class="pfoot"><span>Workspace 01 · Student</span><span>05</span></div>
+</section>
+
+<!-- ============ 6. STUDENT — RUNNER ============ -->
+<section class="page">
+  <div class="eyebrow">Workspace 01 · Student</div>
+  <h2>The runner</h2>
+  <p class="sub">The screen that matters most, and the one with the least room for cleverness. One question at a
+  time, large targets, a palette one tap away, and a clock that belongs to the server.</p>
+
+  <div class="phones" style="margin-top:7mm">
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="phd"><div class="wm" style="font-size:6pt;color:#64748b">✕ Exit</div><div class="chips"><span class="chip" style="background:#1a1a1a;color:#fff">⏱ 18:42</span></div></div>
+        <div class="pbody">
+          <div class="prow"><span class="pmeta">Question 7 of 25</span><span class="pmeta">Quantitative · Medium</span></div>
+          <div class="pbar"><i style="width:28%"></i></div>
+          <div class="pcard" style="padding:2.4mm"><div class="ptxt" style="color:#101322;font-size:5.8pt;line-height:1.45">A train 180 m long crosses a platform 270 m long in 25 seconds. What is its speed in km/h?</div></div>
+          <div class="popt"><span class="rad"></span>54 km/h</div>
+          <div class="popt sel"><span class="rad"></span>64.8 km/h</div>
+          <div class="popt"><span class="rad"></span>72 km/h</div>
+          <div class="popt"><span class="rad"></span>80 km/h</div>
+          <div class="spacer"></div>
+          <div class="prow"><span class="pbtn ghost" style="flex:1">⚑ Flag</span><span class="pbtn" style="flex:1.4">Next →</span></div>
+          <div style="text-align:center" class="pmeta">Questions ▴</div>
+        </div>
+      </div></div>
+      <div class="caption"><b>One question</b>single column, 44pt targets</div>
+    </div>
+
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="phd"><div class="wm" style="font-size:6pt;color:#64748b">✕ Exit</div><div class="chips"><span class="chip" style="background:#1a1a1a;color:#fff">⏱ 18:42</span></div></div>
+        <div class="pbody" style="opacity:.28"><div class="pbar"><i style="width:28%"></i></div><div class="pcard" style="height:14mm"></div><div class="popt">&nbsp;</div><div class="popt">&nbsp;</div></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);border-radius:3mm 3mm 0 0;padding:2.6mm;box-shadow:0 -3px 14px rgba(16,19,34,.1)">
+          <div style="width:9mm;height:.8mm;background:#cbd5e1;border-radius:9px;margin:0 auto 2.4mm"></div>
+          <div class="prow"><div class="plabel">Questions</div><div class="pmeta">18 answered · 3 flagged</div></div>
+          <div class="pgrid" style="margin-top:2mm">
+            <span class="a">1</span><span class="a">2</span><span class="a">3</span><span class="f">4</span><span class="a">5</span>
+            <span class="a">6</span><span class="a">7</span><span class="a">8</span><span class="a">9</span><span class="f">10</span>
+            <span class="a">11</span><span class="a">12</span><span class="a">13</span><span class="a">14</span><span class="a">15</span>
+            <span class="a">16</span><span class="f">17</span><span class="a">18</span><span>19</span><span>20</span>
+            <span>21</span><span>22</span><span>23</span><span>24</span><span>25</span>
+          </div>
+          <div class="prow" style="margin-top:2.4mm;gap:2mm">
+            <span class="pmeta">▪ answered</span><span class="pmeta">▪ flagged</span><span class="pmeta">▫ unseen</span>
+          </div>
+          <div class="pbtn dark" style="margin-top:2.4mm">Submit assessment</div>
+        </div>
+      </div></div>
+      <div class="caption"><b>Palette</b>answered, flagged, unseen — one tap away</div>
+    </div>
+
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="phd"><div class="wm" style="font-size:6pt;color:#64748b">✕ Exit</div><div class="chips"><span class="chip" style="background:#ef4444;color:#fff">⏱ 00:48</span></div></div>
+        <div class="pbody" style="opacity:.28"><div class="pbar"><i style="width:92%"></i></div><div class="pcard" style="height:14mm"></div></div>
+        <div style="position:absolute;inset:0;background:rgba(16,19,34,.42);display:flex;align-items:center;padding:3mm">
+          <div class="pcard" style="width:100%;padding:3mm">
+            <div class="ph1">Submit your assessment?</div>
+            <div class="ptxt" style="margin-top:1.6mm;font-size:5.2pt">You have answered 23 of 25. Two are unanswered
+            and will be marked zero. This cannot be undone.</div>
+            <div class="pcard" style="margin-top:2mm;padding:1.6mm;background:var(--slate50)">
+              <div class="prow"><span class="pmeta">Unanswered</span><span class="ph2">Q19, Q24</span></div>
+            </div>
+            <div class="pbtn" style="margin-top:2.4mm">Submit now</div>
+            <div class="pbtn ghost" style="margin-top:1.4mm">Keep working</div>
+          </div>
+        </div>
+      </div></div>
+      <div class="caption"><b>Submit</b>never accidental, never ambiguous</div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+  <div class="grid3">
+    <div class="fcard"><h4>The timer is the server's</h4><p>Derived from the issued expiry, re-anchored on every foreground and successful request. A sleeping phone cannot lie about it.</p></div>
+    <div class="fcard"><h4>Backgrounding is not an exit</h4><p>A phone call mid-attempt returns to the same question. Only an explicit, confirmed exit leaves, and it leaves the attempt open.</p></div>
+    <div class="fcard"><h4>Auto-submit at zero</h4><p>At the deadline the attempt submits itself and the report opens. The student is never left wondering whether it counted.</p></div>
+  </div>
+  <div class="pfoot"><span>Workspace 01 · Student · the runner</span><span>06</span></div>
+</section>
+
+<!-- ============ 7. STUDENT — REPORT ============ -->
+<section class="page">
+  <div class="eyebrow">Workspace 01 · Student</div>
+  <h2>The report, and the record</h2>
+  <p class="sub">Every number here is computed by the server and rendered by the app. Score, percentage, percentile,
+  pass verdict, topic breakdown and the XP the attempt earned all arrive as values, never as formulas.</p>
+
+  <div class="phones" style="margin-top:7mm">
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="phd"><div class="wm" style="font-size:6.4pt">← Result</div><div class="chips"><span class="chip c">+120 XP</span></div></div>
+        <div class="pbody">
+          <div class="pcard" style="background:linear-gradient(140deg,#14161f,#242838);border-color:#242838">
+            <div class="plabel" style="color:#8b93a8">Quantitative + Logical</div>
+            <div class="prow" style="align-items:flex-end;margin-top:1.4mm">
+              <div><span style="font-size:15pt;font-weight:900;color:#fff;letter-spacing:-.03em">18</span><span style="font-size:7pt;color:#8b93a8">/22</span></div>
+              <span class="spill" style="background:#16c79a;color:#fff">Passed</span>
+            </div>
+            <div class="pbar" style="margin-top:2mm;background:#2e3243"><i style="width:82%;background:#16c79a"></i></div>
+            <div class="prow" style="margin-top:2mm">
+              <div><div class="pmeta" style="color:#8b93a8">Percentile</div><div class="ph2" style="color:#fff">87th</div></div>
+              <div><div class="pmeta" style="color:#8b93a8">Time</div><div class="ph2" style="color:#fff">24m 10s</div></div>
+              <div><div class="pmeta" style="color:#8b93a8">Per Q</div><div class="ph2" style="color:#fff">66s</div></div>
+            </div>
+          </div>
+          <div class="plabel">By topic</div>
+          <div class="pcard">
+            <div class="prow"><span class="ptxt">Time & Distance</span><span class="ph2">5/5</span></div>
+            <div class="pbar" style="margin:1mm 0 1.8mm"><i style="width:100%;background:#16c79a"></i></div>
+            <div class="prow"><span class="ptxt">Percentages</span><span class="ph2">4/6</span></div>
+            <div class="pbar" style="margin:1mm 0 1.8mm"><i style="width:66%"></i></div>
+            <div class="prow"><span class="ptxt">Syllogisms</span><span class="ph2">2/6</span></div>
+            <div class="pbar" style="margin-top:1mm"><i style="width:33%;background:#ef4444"></i></div>
+          </div>
+          <div class="pbtn ghost">Review all 22 questions</div>
+        </div>
+      </div></div>
+      <div class="caption"><b>Report</b>server-computed, top to bottom</div>
+    </div>
+
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="phd"><div class="wm" style="font-size:6.4pt">← Question 12 of 22</div><div class="chips"></div></div>
+        <div class="pbody">
+          <div class="prow"><span class="spill" style="background:#fee2e2;color:#b91c1c">Incorrect</span><span class="pmeta">Syllogisms · Hard</span></div>
+          <div class="pcard" style="padding:2.4mm"><div class="ptxt" style="color:#101322;font-size:5.6pt;line-height:1.45">All pens are books. Some books are red. Which conclusion necessarily follows?</div></div>
+          <div class="popt" style="border-color:#ef4444;background:#fef2f2"><span class="rad" style="border-color:#ef4444;background:#ef4444"></span>Some pens are red</div>
+          <div class="popt" style="border-color:#16c79a;background:#eafbf4"><span class="rad" style="border-color:#16c79a;background:#16c79a"></span>Neither conclusion follows</div>
+          <div class="pcard" style="background:var(--slate50);padding:2mm">
+            <div class="plabel">Why</div>
+            <div class="ptxt" style="margin-top:1mm;font-size:5pt;line-height:1.45">"Some books are red" does not
+            establish that any of those books are pens. No necessary link exists between pens and red.</div>
+          </div>
+          <div class="spacer"></div>
+          <div class="prow"><span class="pbtn ghost" style="flex:1">← Prev</span><span class="pbtn ghost" style="flex:1">Next →</span></div>
+        </div>
+      </div></div>
+      <div class="caption"><b>Review</b>your answer, the right one, and why</div>
+    </div>
+
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="phd"><div class="wm"><i>pre</i>phasz</div><div class="chips"><span class="chip s">🔥 12</span></div></div>
+        <div class="pbody">
+          <div class="plabel">Your attempts</div>
+          <div class="pcard"><div class="prow"><div><div class="ph2">Quantitative + Logical</div><div class="pmeta">13 Oct · 22 Q</div></div><div style="text-align:right"><div class="ph2">82%</div><span class="spill sp-live">Passed</span></div></div></div>
+          <div class="pcard"><div class="prow"><div><div class="ph2">TCS Pattern Mock 4</div><div class="pmeta">09 Oct · 30 Q</div></div><div style="text-align:right"><div class="ph2">64%</div><span class="spill sp-live">Passed</span></div></div></div>
+          <div class="pcard"><div class="prow"><div><div class="ph2">Verbal Ability drill</div><div class="pmeta">06 Oct · 20 Q</div></div><div style="text-align:right"><div class="ph2">41%</div><span class="spill" style="background:#fee2e2;color:#b91c1c">Missed</span></div></div></div>
+          <div class="pcard" style="opacity:.6"><div class="prow"><div><div class="ph2">Logical Reasoning set 2</div><div class="pmeta">02 Oct · 25 Q</div></div><div style="text-align:right"><div class="ph2">71%</div><span class="spill sp-live">Passed</span></div></div></div>
+          <div class="plabel" style="margin-top:1mm">This week</div>
+          <div class="prow" style="gap:1.2mm">
+            <div class="pstat"><div class="v">4</div><div class="k">Attempts</div></div>
+            <div class="pstat"><div class="v">64%</div><div class="k">Average</div></div>
+            <div class="pstat"><div class="v">12</div><div class="k">Streak</div></div>
+          </div>
+        </div>
+        <div class="ptabs"><div class="on"><b></b>Practice</div><div><b></b>Assessments</div><div><b></b>Profile</div></div>
+      </div></div>
+      <div class="caption"><b>History</b>every finalised attempt, newest first</div>
+    </div>
+  </div>
+
+  <div class="grid4" style="margin-top:8mm">
+    <div class="fcard"><h4>Rendered, never computed</h4><p>Percentile, pass verdict and XP arrive as values. The app has no formula to get wrong.</p></div>
+    <div class="fcard"><h4>Full answer review</h4><p>Every question, your answer, the correct one, and the explanation — the same content the web shows.</p></div>
+    <div class="fcard"><h4>Re-openable</h4><p>Any finalised attempt reopens its full report from history. Nothing is only available once.</p></div>
+    <div class="fcard"><h4>Topic breakdown</h4><p>Where the marks went, by topic, so the next practice session has an obvious subject.</p></div>
+  </div>
+  <div class="pfoot"><span>Workspace 01 · Student · results</span><span>07</span></div>
+</section>
+
+<!-- ============ 8. STUDENT — DRIVES ============ -->
+<section class="page">
+  <div class="eyebrow">Workspace 01 · Student</div>
+  <h2>Drives, visible but not sat</h2>
+  <p class="sub">A college drive is the highest-stakes thing a student does on this platform, and in v1 the app does
+  not run the proctored ones. It does something quieter and still valuable: it puts the schedule on the device the
+  student actually carries, so nobody misses a sitting because it was only ever on a laptop.</p>
+
+  <div class="phones" style="margin-top:7mm">
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="phd"><div class="wm"><i>pre</i>phasz</div><div class="chips"><span class="chip">Assessments</span></div></div>
+        <div class="pbody">
+          <div class="plabel">Live now</div>
+          <div class="pcard acc">
+            <div class="prow"><div class="ph2">TCS NQT — Batch A</div><span class="spill sp-live">Live</span></div>
+            <div class="pmeta" style="margin-top:1mm">Closes 11:30 · 60 min · 35 Q</div>
+            <div class="ptxt" style="margin-top:1.4mm;font-size:5pt;color:#92400e">🔒 Proctored — sit this on a laptop</div>
+          </div>
+          <div class="plabel">Upcoming</div>
+          <div class="pcard">
+            <div class="prow"><div class="ph2">Infosys Screening</div><span class="spill sp-soon">In 2 days</span></div>
+            <div class="pmeta" style="margin-top:1mm">16 Oct, 10:00 · 90 min · 40 Q</div>
+            <div class="ptxt" style="margin-top:1.4mm;font-size:5pt;color:#64748b">🔒 Has a coding section — laptop required</div>
+          </div>
+          <div class="pcard">
+            <div class="prow"><div class="ph2">Aptitude Checkpoint 3</div><span class="spill sp-soon">In 4 days</span></div>
+            <div class="pmeta" style="margin-top:1mm">18 Oct, 16:00 · 30 min · 25 Q</div>
+            <div class="pbtn" style="margin-top:1.8mm">You can take this here</div>
+          </div>
+          <div class="plabel">Past</div>
+          <div class="pcard"><div class="prow"><div><div class="ph2">Wipro Elite</div><div class="pmeta">28 Sep</div></div><span class="spill sp-done">Result out</span></div></div>
+        </div>
+        <div class="ptabs"><div><b></b>Practice</div><div class="on"><b></b>Assessments</div><div><b></b>Profile</div></div>
+      </div></div>
+      <div class="caption"><b>Assessments</b>the schedule, and what can be sat here</div>
+    </div>
+
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="phd"><div class="wm" style="font-size:6.4pt">← TCS NQT — Batch A</div><div class="chips"></div></div>
+        <div class="pbody">
+          <div class="pcard">
+            <div class="prow"><span class="spill sp-live">Live</span><span class="pmeta">Closes 11:30</span></div>
+            <div class="ph1" style="margin-top:1.6mm">TCS National<br>Qualifier — Batch A</div>
+            <div class="prow" style="margin-top:2.4mm;gap:1.2mm">
+              <div class="pstat"><div class="v">35</div><div class="k">Questions</div></div>
+              <div class="pstat"><div class="v">60</div><div class="k">Minutes</div></div>
+              <div class="pstat"><div class="v">1</div><div class="k">Attempt</div></div>
+            </div>
+          </div>
+          <div class="pcard" style="border-color:#fed7aa;background:#fff7ed">
+            <div class="ph2" style="color:#9a3412">🔒 Sit this on a laptop</div>
+            <div class="ptxt" style="margin-top:1.2mm;font-size:5.1pt;color:#9a3412">This drive is camera-proctored.
+            The app cannot run a proctored sitting, so open prephasz.com on a laptop with a webcam before 11:30.</div>
+            <div class="pbtn ghost" style="margin-top:2mm">Open on the web ↗</div>
+          </div>
+          <div class="pcard">
+            <div class="plabel">What you'll need</div>
+            <div class="ptxt" style="margin-top:1.2mm;font-size:5.1pt">· A laptop with a working webcam<br>· A stable connection<br>· A quiet room, alone<br>· 60 uninterrupted minutes</div>
+          </div>
+          <div class="spacer"></div>
+          <div class="ptxt" style="text-align:center;font-size:4.9pt">Remind me 30 minutes before</div>
+        </div>
+      </div></div>
+      <div class="caption"><b>A proctored drive</b>a reason, and a route, not a dead end</div>
+    </div>
+
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="phd"><div class="wm" style="font-size:6.4pt">← Profile</div><div class="chips"></div></div>
+        <div class="pbody">
+          <div class="pcard" style="text-align:center;padding:3mm">
+            <div style="width:9mm;height:9mm;border-radius:50%;background:var(--brand);margin:0 auto;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:7pt;color:#171717">AS</div>
+            <div class="ph1" style="margin-top:1.8mm">Aarav Sharma</div>
+            <div class="pmeta">VIT Vellore · CSE · 2027</div>
+            <span class="spill sp-done" style="margin-top:1.4mm;display:inline-block">Full Platform</span>
+          </div>
+          <div class="pcard" style="padding:0">
+            <div class="prow" style="padding:2mm 2.2mm;border-bottom:1px solid var(--line2)"><span class="ptxt">Edit my details</span><span class="pmeta">›</span></div>
+            <div class="prow" style="padding:2mm 2.2mm;border-bottom:1px solid var(--line2)"><span class="ptxt">My plan</span><span class="pmeta">Manage on web ↗</span></div>
+            <div class="prow" style="padding:2mm 2.2mm;border-bottom:1px solid var(--line2)"><span class="ptxt">Practice, hubs, jobs</span><span class="pmeta">Open on web ↗</span></div>
+            <div class="prow" style="padding:2mm 2.2mm"><span class="ptxt">Help &amp; support</span><span class="pmeta">›</span></div>
+          </div>
+          <div class="pcard" style="padding:0">
+            <div class="prow" style="padding:2mm 2.2mm;border-bottom:1px solid var(--line2)"><span class="ptxt">Privacy policy</span><span class="pmeta">›</span></div>
+            <div class="prow" style="padding:2mm 2.2mm"><span class="ptxt" style="color:#b91c1c">Sign out</span><span class="pmeta">›</span></div>
+          </div>
+          <div class="spacer"></div>
+          <div class="pmeta" style="text-align:center">prephasz 1.0.0 (build 112)</div>
+        </div>
+        <div class="ptabs"><div><b></b>Practice</div><div><b></b>Assessments</div><div class="on"><b></b>Profile</div></div>
+      </div></div>
+      <div class="caption"><b>Profile</b>where "open on web" lives, labelled</div>
+    </div>
+  </div>
+
+  <div class="grid3" style="margin-top:8mm">
+    <div class="fcard"><h4>The window comes from the sitting</h4><p>A row's end time is read from the drive's real closing time, never inferred from start plus duration. That exact inference once made a live drive vanish from students' lists.</p></div>
+    <div class="fcard"><h4>A refusal explains itself</h4><p>Proctored or coding papers show why, what is needed, and a route to the web. A locked row is never just greyed out.</p></div>
+    <div class="fcard"><h4>Push closes the loop</h4><p>In the release after launch, "your drive starts in 30 minutes" is the single highest-value notification this product can send.</p></div>
+  </div>
+  <div class="pfoot"><span>Workspace 01 · Student · drives</span><span>08</span></div>
+</section>
+
+<!-- ============ 9. TPO ============ -->
+<section class="page">
+  <div class="eyebrow">Workspace 02 · TPO</div>
+  <h2>Drive day, from the lab floor</h2>
+  <p class="sub">A placement officer has sixteen pages on the web and needs roughly two of them while standing in a
+  room with ninety students. The question is never "what is our six-month skill-gap trend"; it is "who has not
+  started yet, and what is their name".</p>
+
+  <div class="phones" style="margin-top:7mm">
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="phd"><div class="wm"><i>pre</i>phasz</div><div class="chips"><span class="chip">VIT Vellore</span></div></div>
+        <div class="pbody">
+          <div class="plabel">Live now</div>
+          <div class="pcard">
+            <div class="prow"><div class="ph2">TCS NQT — Batch A</div><span class="spill sp-live">Live</span></div>
+            <div class="pmeta" style="margin-top:1mm">Closes 11:30 · 127 invited</div>
+            <div class="prow" style="margin-top:2mm;gap:1.2mm">
+              <div class="pstat"><div class="v" style="color:#119b69">84</div><div class="k">In progress</div></div>
+              <div class="pstat"><div class="v">31</div><div class="k">Submitted</div></div>
+              <div class="pstat"><div class="v" style="color:#b91c1c">12</div><div class="k">Not started</div></div>
+            </div>
+            <div class="pbar" style="margin-top:2mm"><i style="width:90%;background:#16c79a"></i></div>
+            <div class="pmeta" style="margin-top:1mm">90% of the batch has started</div>
+            <div class="pbtn dark" style="margin-top:2mm">See the 12 who haven't</div>
+          </div>
+          <div class="plabel">Later today</div>
+          <div class="pcard"><div class="prow"><div><div class="ph2">TCS NQT — Batch B</div><div class="pmeta">14:00 · 118 invited</div></div><span class="spill sp-soon">14:00</span></div></div>
+          <div class="plabel">This week</div>
+          <div class="pcard"><div class="prow"><div><div class="ph2">Infosys Screening</div><div class="pmeta">16 Oct · 240 invited</div></div><span class="spill sp-soon">Thu</span></div></div>
+        </div>
+        <div class="ptabs"><div class="on"><b></b>Drive day</div><div><b></b>Readiness</div><div><b></b>Profile</div></div>
+      </div></div>
+      <div class="caption"><b>Drive day</b>the number that matters, first</div>
+    </div>
+
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="phd"><div class="wm" style="font-size:6.4pt">← Not started · 12</div><div class="chips"></div></div>
+        <div class="pbody">
+          <div class="pcard" style="background:var(--slate50);padding:1.8mm"><div class="ptxt" style="font-size:5.1pt">TCS NQT — Batch A · closes 11:30. These 12 were invited and have not opened the paper.</div></div>
+          <div class="pcard" style="padding:0">
+            <div class="prow" style="padding:1.9mm 2.2mm;border-bottom:1px solid var(--line2)"><div><div class="ph2">Ananya Reddy</div><div class="pmeta">CSE · 21BCE1043</div></div><span class="pmeta">›</span></div>
+            <div class="prow" style="padding:1.9mm 2.2mm;border-bottom:1px solid var(--line2)"><div><div class="ph2">Vivaan Nair</div><div class="pmeta">IT · 21BIT0219</div></div><span class="pmeta">›</span></div>
+            <div class="prow" style="padding:1.9mm 2.2mm;border-bottom:1px solid var(--line2)"><div><div class="ph2">Saanvi Iyer</div><div class="pmeta">ECE · 21BEC2201</div></div><span class="pmeta">›</span></div>
+            <div class="prow" style="padding:1.9mm 2.2mm;border-bottom:1px solid var(--line2)"><div><div class="ph2">Aadhya Desai</div><div class="pmeta">CSE · 21BCE0877</div></div><span class="pmeta">›</span></div>
+            <div class="prow" style="padding:1.9mm 2.2mm;border-bottom:1px solid var(--line2)"><div><div class="ph2">Rohan Mehta</div><div class="pmeta">MECH · 21BME1120</div></div><span class="pmeta">›</span></div>
+            <div class="prow" style="padding:1.9mm 2.2mm"><div><div class="ph2">Kabir Shah</div><div class="pmeta">CSE · 21BCE3310</div></div><span class="pmeta">›</span></div>
+          </div>
+          <div class="pmeta" style="text-align:center">6 more</div>
+          <div class="spacer"></div>
+          <div class="pbtn ghost">Pull to refresh</div>
+        </div>
+      </div></div>
+      <div class="caption"><b>By name</b>enough to walk the room and find them</div>
+    </div>
+
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="phd"><div class="wm"><i>pre</i>phasz</div><div class="chips"><span class="chip">Readiness</span></div></div>
+        <div class="pbody">
+          <div class="pcard">
+            <div class="plabel">Placement readiness</div>
+            <div class="prow" style="align-items:flex-end;margin-top:1.4mm"><div><span style="font-size:14pt;font-weight:900;letter-spacing:-.03em">38</span><span class="ph2">%</span></div><span class="pmeta">842 students</span></div>
+            <div class="ptxt" style="font-size:5pt">ready for a service-based drive</div>
+          </div>
+          <div class="pcard">
+            <div class="prow"><span class="ptxt">Ready</span><span class="ph2">320</span></div>
+            <div class="pbar" style="margin:1mm 0 2mm"><i style="width:38%;background:#16c79a"></i></div>
+            <div class="prow"><span class="ptxt">Nearly there</span><span class="ph2">337</span></div>
+            <div class="pbar" style="margin:1mm 0 2mm"><i style="width:40%;background:#ffc42d"></i></div>
+            <div class="prow"><span class="ptxt">At risk</span><span class="ph2">185</span></div>
+            <div class="pbar" style="margin-top:1mm"><i style="width:22%;background:#ef4444"></i></div>
+          </div>
+          <div class="plabel">Weakest areas</div>
+          <div class="pcard">
+            <div class="prow"><span class="ptxt">Verbal Ability</span><span class="spill" style="background:#fee2e2;color:#b91c1c">41%</span></div>
+            <div class="prow" style="margin-top:1.6mm"><span class="ptxt">Data Interpretation</span><span class="spill" style="background:#fff3e0;color:#b45309">54%</span></div>
+            <div class="prow" style="margin-top:1.6mm"><span class="ptxt">Quantitative</span><span class="spill" style="background:#eafbf4;color:#119b69">72%</span></div>
+          </div>
+          <div class="pbtn ghost">Full analytics on web ↗</div>
+        </div>
+        <div class="ptabs"><div><b></b>Drive day</div><div class="on"><b></b>Readiness</div><div><b></b>Profile</div></div>
+      </div></div>
+      <div class="caption"><b>Readiness</b>read-only, server-computed</div>
+    </div>
+  </div>
+
+  <div class="grid4" style="margin-top:8mm">
+    <div class="fcard"><h4>Read-only on purpose</h4><p>Scheduling a drive, inviting a cohort and exporting a report are desk tasks. They stay on the web where they are better.</p></div>
+    <div class="fcard"><h4>Refreshes on foreground</h4><p>Coming back to the app during a live sitting shows the current state, not whatever was true when it was last opened.</p></div>
+    <div class="fcard"><h4>Named, not counted</h4><p>A count tells a TPO there is a problem. A list of names lets them solve it before the window closes.</p></div>
+    <div class="fcard"><h4>One route out</h4><p>Everything else is a single labelled "Open TPO console" action rather than fourteen half-built screens.</p></div>
+  </div>
+  <div class="pfoot"><span>Workspace 02 · TPO</span><span>09</span></div>
+</section>
+
+<!-- ============ 10. ADMIN ============ -->
+<section class="page">
+  <div class="eyebrow">Workspace 03 · Admin &amp; Super Admin</div>
+  <h2>Two consoles, one mobile job</h2>
+  <p class="sub">The admin and super-admin consoles are 67 pages of dense tables, CSV exports and large-screen
+  charts. Almost all of it is desk work, and a phone version would be worse at the job than the web one that
+  already exists. Exactly one slice is genuinely mobile: watching a drive while it runs, and publishing the result
+  when it ends.</p>
+
+  <div class="phones" style="margin-top:7mm">
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="phd"><div class="wm"><i>pre</i>phasz</div><div class="chips"><span class="chip d" style="background:#1a1a1a;color:#fff">ADMIN</span></div></div>
+        <div class="pbody">
+          <div class="plabel">Live across colleges</div>
+          <div class="pcard">
+            <div class="prow"><div class="ph2">TCS NQT — VIT Vellore</div><span class="spill sp-live">Live</span></div>
+            <div class="pmeta" style="margin-top:1mm">Batch A · closes 11:30</div>
+            <div class="prow" style="margin-top:1.8mm;gap:1.2mm">
+              <div class="pstat"><div class="v">115</div><div class="k">Started</div></div>
+              <div class="pstat"><div class="v">31</div><div class="k">Submitted</div></div>
+              <div class="pstat"><div class="v" style="color:#b45309">7</div><div class="k">Warnings</div></div>
+            </div>
+          </div>
+          <div class="pcard">
+            <div class="prow"><div class="ph2">Infosys — SRM Chennai</div><span class="spill sp-live">Live</span></div>
+            <div class="pmeta" style="margin-top:1mm">Closes 12:00</div>
+            <div class="prow" style="margin-top:1.8mm;gap:1.2mm">
+              <div class="pstat"><div class="v">203</div><div class="k">Started</div></div>
+              <div class="pstat"><div class="v">88</div><div class="k">Submitted</div></div>
+              <div class="pstat"><div class="v">2</div><div class="k">Warnings</div></div>
+            </div>
+          </div>
+          <div class="plabel">Ended, not published</div>
+          <div class="pcard acc"><div class="prow"><div><div class="ph2">Wipro Elite — 3 colleges</div><div class="pmeta">Ended 09:40 · 612 attempts</div></div><span class="spill" style="background:#ffc42d;color:#171717">Action</span></div></div>
+        </div>
+        <div class="ptabs"><div class="on"><b></b>Drives</div><div><b></b>Profile</div></div>
+      </div></div>
+      <div class="caption"><b>Drive monitor</b>every live sitting, one screen</div>
+    </div>
+
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="phd"><div class="wm" style="font-size:6.4pt">← TCS NQT — VIT</div><div class="chips"><span class="chip d" style="background:#1a1a1a;color:#fff">ADMIN</span></div></div>
+        <div class="pbody">
+          <div class="pcard">
+            <div class="prow"><span class="spill sp-live">Live</span><span class="pmeta">34 min left</span></div>
+            <div class="prow" style="margin-top:2mm;gap:1.2mm">
+              <div class="pstat"><div class="v">115</div><div class="k">Started</div></div>
+              <div class="pstat"><div class="v">31</div><div class="k">Submitted</div></div>
+              <div class="pstat"><div class="v">62%</div><div class="k">Avg so far</div></div>
+            </div>
+          </div>
+          <div class="plabel">Proctoring warnings</div>
+          <div class="pcard" style="padding:0">
+            <div class="prow" style="padding:1.8mm 2.2mm;border-bottom:1px solid var(--line2)"><div><div class="ph2">Kabir Shah</div><div class="pmeta">Tab switch · 2 warnings</div></div><span class="spill sp-soon">2</span></div>
+            <div class="prow" style="padding:1.8mm 2.2mm;border-bottom:1px solid var(--line2)"><div><div class="ph2">Meera Raghavan</div><div class="pmeta">Face not visible · 3 warnings</div></div><span class="spill" style="background:#fee2e2;color:#b91c1c">3</span></div>
+            <div class="prow" style="padding:1.8mm 2.2mm"><div><div class="ph2">Arjun Pillai</div><div class="pmeta">Fullscreen exit · 1 warning</div></div><span class="spill sp-lock">1</span></div>
+          </div>
+          <div class="pcard" style="background:var(--slate50);padding:1.8mm"><div class="ptxt" style="font-size:4.9pt">Warnings come from web-sat attempts. The app monitors proctoring; it does not perform it.</div></div>
+          <div class="spacer"></div>
+          <div class="pbtn ghost">Open full console ↗</div>
+        </div>
+      </div></div>
+      <div class="caption"><b>A live sitting</b>warnings as they land</div>
+    </div>
+
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="phd"><div class="wm" style="font-size:6.4pt">← Wipro Elite</div><div class="chips"><span class="chip d" style="background:#1a1a1a;color:#fff">ADMIN</span></div></div>
+        <div class="pbody" style="opacity:.3"><div class="pcard" style="height:16mm"></div><div class="pcard" style="height:12mm"></div></div>
+        <div style="position:absolute;inset:0;background:rgba(16,19,34,.42);display:flex;align-items:center;padding:3mm">
+          <div class="pcard" style="width:100%;padding:3mm">
+            <div class="ph1">Publish results to<br>612 students?</div>
+            <div class="ptxt" style="margin-top:1.6mm;font-size:5.2pt">Every student in this sitting sees their score
+            and full answer review immediately. Three colleges are included. This cannot be undone from here.</div>
+            <div class="pcard" style="margin-top:2mm;padding:1.8mm;background:var(--slate50)">
+              <div class="prow"><span class="pmeta">Attempts</span><span class="ph2">612</span></div>
+              <div class="prow" style="margin-top:1mm"><span class="pmeta">Colleges</span><span class="ph2">3</span></div>
+              <div class="prow" style="margin-top:1mm"><span class="pmeta">Pass rate</span><span class="ph2">58%</span></div>
+            </div>
+            <div class="pbtn" style="margin-top:2.4mm">Publish results</div>
+            <div class="pbtn ghost" style="margin-top:1.4mm">Not yet</div>
+          </div>
+        </div>
+      </div></div>
+      <div class="caption"><b>Publish</b>confirmed, because 612 people see it at once</div>
+    </div>
+  </div>
+
+  <div class="grid3" style="margin-top:8mm">
+    <div class="fcard"><h4>Monitors, never proctors</h4><p>The warnings shown here were raised by web-sat attempts. The app has no camera and takes no part in proctoring.</p></div>
+    <div class="fcard"><h4>One write action</h4><p>Publishing results is the only thing this surface changes, and it is confirmed first — it is visible to every student in the sitting at once.</p></div>
+    <div class="fcard"><h4>32 pages stay put</h4><p>Catalogue, users, colleges, finance, marketing, audit. All of it is better on a 27-inch screen and none of it is urgent on a phone.</p></div>
+  </div>
+  <div class="pfoot"><span>Workspace 03 · Admin</span><span>10</span></div>
+</section>
+
+<!-- ============ 11. AUTH ============ -->
+<section class="page">
+  <div class="eyebrow">Every role starts here</div>
+  <h2>Sign in, and the three-step signup</h2>
+  <p class="sub">All seven authentication surfaces are in the first release, including the one most mobile apps skip:
+  the set-password flow for a student a college bulk-invited. Colleges invite in batches of hundreds, and those
+  students have to be able to activate on the phone in their hand.</p>
+
+  <div class="phones" style="margin-top:7mm">
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="pbody" style="padding:4mm 3.4mm">
+          <div class="wm" style="font-size:9pt;font-weight:900;letter-spacing:-.02em;text-align:center;margin-top:3mm"><i style="color:#f5b400;font-style:normal">pre</i>phasz</div>
+          <div class="plabel" style="margin-top:5mm">Welcome back</div>
+          <div class="ph1" style="font-size:9.5pt">Sign in to your<br>workspace</div>
+          <div class="ptxt" style="font-size:5.2pt">We'll take you straight to the right place.</div>
+          <div class="pbtn ghost" style="margin-top:3mm">Continue with Google</div>
+          <div class="pmeta" style="text-align:center;margin:1.6mm 0">or sign in with email</div>
+          <div class="pcard" style="padding:1.9mm 2.2mm"><div class="pmeta">Email address</div><div class="ph2" style="margin-top:.6mm;color:#94a3b8">you@email.com</div></div>
+          <div class="pcard" style="padding:1.9mm 2.2mm"><div class="pmeta">Password</div><div class="ph2" style="margin-top:.6mm;color:#94a3b8">••••••••</div></div>
+          <div class="prow"><span class="pmeta">☐ Keep me signed in</span><span class="pmeta" style="color:#b45309">Forgot?</span></div>
+          <div class="pbtn" style="margin-top:1.6mm">Sign in →</div>
+          <div class="spacer"></div>
+          <div class="pmeta" style="text-align:center">New here? <b style="color:#b45309">Create a free account</b></div>
+        </div>
+      </div></div>
+      <div class="caption"><b>Sign in</b>one screen, four roles behind it</div>
+    </div>
+
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="pbody" style="padding:4mm 3.4mm">
+          <div class="wm" style="font-size:9pt;font-weight:900;letter-spacing:-.02em;text-align:center;margin-top:3mm"><i style="color:#f5b400;font-style:normal">pre</i>phasz</div>
+          <div class="plabel" style="margin-top:5mm">Step 2 of 3</div>
+          <div class="ph1" style="font-size:9.5pt">Check your email</div>
+          <div class="ptxt" style="font-size:5.2pt">We sent a 6-digit code to aarav@vit.ac.in</div>
+          <div class="prow" style="margin-top:3mm;gap:1.3mm">
+            <div class="pcard" style="flex:1;text-align:center;padding:2.4mm 0"><span class="ph1">4</span></div>
+            <div class="pcard" style="flex:1;text-align:center;padding:2.4mm 0"><span class="ph1">1</span></div>
+            <div class="pcard" style="flex:1;text-align:center;padding:2.4mm 0"><span class="ph1">9</span></div>
+            <div class="pcard" style="flex:1;text-align:center;padding:2.4mm 0;border-color:#ffc42d"><span class="ph1">2</span></div>
+            <div class="pcard" style="flex:1;text-align:center;padding:2.4mm 0"><span class="ph1" style="color:#cbd5e1">–</span></div>
+            <div class="pcard" style="flex:1;text-align:center;padding:2.4mm 0"><span class="ph1" style="color:#cbd5e1">–</span></div>
+          </div>
+          <div class="pbtn" style="margin-top:3mm">Verify and continue</div>
+          <div class="pmeta" style="text-align:center;margin-top:2mm">Resend in 0:24</div>
+          <div class="spacer"></div>
+          <div class="pcard" style="background:var(--slate50);padding:1.8mm"><div class="ptxt" style="font-size:4.9pt">The code autofills from your messages. If the limit is hit, we say when to try again rather than failing silently.</div></div>
+        </div>
+      </div></div>
+      <div class="caption"><b>Verify</b>OTP autofill, honest rate limits</div>
+    </div>
+
+    <div class="phonewrap">
+      <div class="phone"><div class="scr">
+        <div class="sbar"><span>9:41</span><span class="dots">▮▮▮ ◗ ▰</span></div>
+        <div class="pbody" style="padding:4mm 3.4mm">
+          <div class="wm" style="font-size:9pt;font-weight:900;letter-spacing:-.02em;text-align:center;margin-top:3mm"><i style="color:#f5b400;font-style:normal">pre</i>phasz</div>
+          <div class="plabel" style="margin-top:5mm">Step 3 of 3</div>
+          <div class="ph1" style="font-size:9.5pt">Where do you study?</div>
+          <div class="pcard" style="padding:1.9mm 2.2mm;margin-top:2.4mm"><div class="pmeta">College</div><div class="ph2" style="margin-top:.6mm">VIT Vellore</div></div>
+          <div class="prow" style="gap:1.4mm">
+            <div class="pcard" style="flex:1;padding:1.9mm 2.2mm"><div class="pmeta">Branch</div><div class="ph2" style="margin-top:.6mm">CSE</div></div>
+            <div class="pcard" style="flex:1;padding:1.9mm 2.2mm"><div class="pmeta">Passout</div><div class="ph2" style="margin-top:.6mm">2027</div></div>
+          </div>
+          <div class="plabel" style="margin-top:1.4mm">Target companies</div>
+          <div style="display:flex;gap:1mm;flex-wrap:wrap">
+            <span class="spill sp-done">TCS ✓</span><span class="spill sp-done">Infosys ✓</span><span class="spill sp-lock">Wipro</span><span class="spill sp-lock">Accenture</span><span class="spill sp-done">Cognizant ✓</span><span class="spill sp-lock">IBM</span>
+          </div>
+          <div class="spacer"></div>
+          <div class="pbtn">Finish and start</div>
+        </div>
+      </div></div>
+      <div class="caption"><b>Onboarding</b>college, branch, targets</div>
+    </div>
+  </div>
+
+  <div class="grid4" style="margin-top:8mm">
+    <div class="fcard"><h4>Survives a force-quit</h4><p>Kill the app, restart the phone, come back a day later — still signed in. The session lives in hardware-backed storage, not a cookie jar.</p></div>
+    <div class="fcard"><h4>Native Google sign-in</h4><p>The platform SDK, not a web view. A cancelled flow returns to the form with no error state.</p></div>
+    <div class="fcard"><h4>Invited students included</h4><p>Set-password is in v1 precisely because colleges onboard in bulk and those students arrive on a phone.</p></div>
+    <div class="fcard"><h4>Suspended is explained</h4><p>A suspended account cannot refresh into a session. The app says so as an account message, not a network failure.</p></div>
+  </div>
+  <div class="pfoot"><span>Authentication</span><span>11</span></div>
+</section>
+
+<!-- ============ 12. WEB AT PHONE WIDTH ============ -->
+<section class="page">
+  <div class="eyebrow">Today, for comparison</div>
+  <h2>The web at phone width</h2>
+  <p class="sub">Captured from the live site at 390 × 844 on 13 October 2026. These are real pages, rendered as a
+  phone renders them now — the starting point the app improves on, not a design target. Marketing pages stay on the
+  web; the store listing is the app's front door.</p>
+
+  <div class="grid3" style="margin-top:7mm">
+    <div>
+      <div class="shotwrap"><div class="shotbar"><span class="u">prephasz.com</span><span class="b">LIVE</span></div>
+        <img class="imgshot" src="../web-at-phone-width/home.png" style="height:92mm;object-fit:cover;object-position:top"></div>
+      <div class="caption"><b>Home</b>stays on the web — v1 has no marketing surface</div>
+    </div>
+    <div>
+      <div class="shotwrap"><div class="shotbar"><span class="u">prephasz.com/login</span><span class="b">LIVE</span></div>
+        <img class="imgshot" src="../web-at-phone-width/login.png" style="height:92mm;object-fit:cover;object-position:top"></div>
+      <div class="caption"><b>Login</b>the app reproduces this with native keyboard and Google sign-in</div>
+    </div>
+    <div>
+      <div class="shotwrap"><div class="shotbar"><span class="u">prephasz.com/signup</span><span class="b">LIVE</span></div>
+        <img class="imgshot" src="../web-at-phone-width/signup.png" style="height:92mm;object-fit:cover;object-position:top"></div>
+      <div class="caption"><b>Signup, step 1 of 3</b>the same three steps, with OTP autofill</div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+  <div class="grid2" style="gap:7mm">
+    <div>
+      <h3>Why the authenticated screens are not here</h3>
+      <p class="sub" style="margin-top:2mm">Production needs credentials this document's author does not hold, and
+      the local environment has no seeded data. Empty-state screenshots of a dashboard with no students in it would
+      be misleading in a requirements document, so they are absent rather than faked.</p>
+      <p class="sub" style="margin-top:3mm">Two ways to add them before design sign-off: a read-only production
+      student and TPO login, or a seeded local stack. <b>Worth doing.</b></p>
+    </div>
+    <div>
+      <h3>One thing capturing turned up</h3>
+      <p class="sub" style="margin-top:2mm">The public job board at <code class="mono" style="font-size:7.4pt">/jobs</code>
+      returns HTTP 200, but a browser lands on <code class="mono" style="font-size:7.4pt">/login</code>. The board sits
+      inside the authenticated route group, while only individual job pages are public.</p>
+      <p class="sub" style="margin-top:3mm">Possibly intended. Worth confirming, because the public board is
+      described as a marketing surface and appears in the sitemap.</p>
+    </div>
+  </div>
+  <div class="pfoot"><span>The web at phone width</span><span>12</span></div>
+</section>
+
+<!-- ============ 13. MODULE CATALOGUE ============ -->
+<section class="page">
+  <div class="eyebrow">Nothing left out</div>
+  <h2>Every module, by role</h2>
+  <p class="sub">The complete inventory of what the platform does today, with a verdict on each. This is the point of
+  the document: the record of what was consciously left out, rather than forgotten.
+  <span class="tag t-v1">V1</span> first release &nbsp;
+  <span class="tag t-p2">P2</span> planned next &nbsp;
+  <span class="tag t-p3">P3</span> later &nbsp;
+  <span class="tag t-web">WEB</span> stays on the web</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6mm;margin-top:6mm">
+    <div>
+      <div class="colhead"><span class="n">Student</span><span class="c">32 · 7 in v1</span></div>
+      <table class="mod">
+        <tr><td>Mock Assessment builder</td><td class="tg"><span class="tag t-v1">V1</span></td></tr>
+        <tr><td>Mock runner</td><td class="tg"><span class="tag t-v1">V1</span></td></tr>
+        <tr><td>Mock report</td><td class="tg"><span class="tag t-v1">V1</span></td></tr>
+        <tr><td>Mock history</td><td class="tg"><span class="tag t-v1">V1</span></td></tr>
+        <tr><td>Assessments / drives</td><td class="tg"><span class="tag t-v1">V1 read-only</span></td></tr>
+        <tr><td>Profile</td><td class="tg"><span class="tag t-v1">V1</span></td></tr>
+        <tr><td>Help &amp; support</td><td class="tg"><span class="tag t-v1">V1</span></td></tr>
+        <tr><td>Dashboard</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Study Plan</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Performance</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Leaderboard</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>My Calendar</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Assessment leaderboard</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Adaptive practice</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Non-adaptive practice</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Practice review</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Adaptive quiz runner</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Company Hubs (7 tabs)</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Company prep &amp; PYQs</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Sectional Hubs</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Job board</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>My applications</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Certificates</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>My Learning</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Recommendations</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Community</td><td class="tg"><span class="tag t-p3">P3</span></td></tr>
+        <tr><td>Live Sessions</td><td class="tg"><span class="tag t-p3">P3</span></td></tr>
+        <tr><td>Mock Interview</td><td class="tg"><span class="tag t-p3">P3</span></td></tr>
+        <tr><td>How XP works</td><td class="tg"><span class="tag t-p3">P3</span></td></tr>
+        <tr><td>Resume Builder</td><td class="tg"><span class="tag t-web">WEB</span></td></tr>
+        <tr><td>Coding practice</td><td class="tg"><span class="tag t-web">WEB</span></td></tr>
+        <tr><td>Plans, upgrade, cart</td><td class="tg"><span class="tag t-web">WEB</span></td></tr>
+      </table>
+    </div>
+
+    <div>
+      <div class="colhead"><span class="n">TPO</span><span class="c">15 · 2 in v1</span></div>
+      <table class="mod">
+        <tr><td>Drive day — participation</td><td class="tg"><span class="tag t-v1">V1</span></td></tr>
+        <tr><td>Placement Readiness</td><td class="tg"><span class="tag t-v1">V1 read-only</span></td></tr>
+        <tr><td>Executive Dashboard</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Student Analytics</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Company Readiness</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Skill Gap Analytics</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Student Management</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Coding Analytics</td><td class="tg"><span class="tag t-web">WEB</span></td></tr>
+        <tr><td>Interview Analytics</td><td class="tg"><span class="tag t-web">WEB</span></td></tr>
+        <tr><td>Assessment Center</td><td class="tg"><span class="tag t-web">WEB</span></td></tr>
+        <tr><td>Cohorts</td><td class="tg"><span class="tag t-web">WEB</span></td></tr>
+        <tr><td>Invitations</td><td class="tg"><span class="tag t-web">WEB</span></td></tr>
+        <tr><td>Reports &amp; Exports</td><td class="tg"><span class="tag t-web">WEB</span></td></tr>
+        <tr><td>Subscription &amp; billing</td><td class="tg"><span class="tag t-web">WEB</span></td></tr>
+        <tr><td>Settings</td><td class="tg"><span class="tag t-web">WEB</span></td></tr>
+      </table>
+
+      <div class="colhead" style="margin-top:6mm"><span class="n">Auth &amp; public</span><span class="c">14 · 7 in v1</span></div>
+      <table class="mod">
+        <tr><td>Login, Google, signup &times;3, reset, set-password</td><td class="tg"><span class="tag t-v1">V1</span></td></tr>
+        <tr><td>Public job detail</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Roadmap</td><td class="tg"><span class="tag t-p3">P3</span></td></tr>
+        <tr><td>Home, Prepare, About, Blog, Verify</td><td class="tg"><span class="tag t-web">WEB</span></td></tr>
+      </table>
+    </div>
+
+    <div>
+      <div class="colhead"><span class="n">Admin &amp; Super&nbsp;Admin</span><span class="c">14 · 2 in v1</span></div>
+      <table class="mod">
+        <tr><td>Live drive monitor</td><td class="tg"><span class="tag t-v1">V1</span></td></tr>
+        <tr><td>Publish results</td><td class="tg"><span class="tag t-v1">V1</span></td></tr>
+        <tr><td>Dashboard &amp; analytics</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Support inbox</td><td class="tg"><span class="tag t-p2">P2</span></td></tr>
+        <tr><td>Broadcasts</td><td class="tg"><span class="tag t-p3">P3</span></td></tr>
+        <tr><td>Users, colleges, cohorts</td><td class="tg"><span class="tag t-web">WEB</span></td></tr>
+        <tr><td>Catalogue (9 surfaces)</td><td class="tg"><span class="tag t-web">WEB</span></td></tr>
+        <tr><td>Commerce (5 surfaces)</td><td class="tg"><span class="tag t-web">WEB</span></td></tr>
+        <tr><td>Marketing (4 surfaces)</td><td class="tg"><span class="tag t-web">WEB</span></td></tr>
+        <tr><td>Jobs administration</td><td class="tg"><span class="tag t-web">WEB</span></td></tr>
+        <tr><td>Feature locks, calibration</td><td class="tg"><span class="tag t-web">WEB</span></td></tr>
+        <tr><td>Audit, user sheet, reports</td><td class="tg"><span class="tag t-web">WEB</span></td></tr>
+        <tr><td>Live sessions, WhatsApp</td><td class="tg"><span class="tag t-web">WEB</span></td></tr>
+        <tr><td>Mobile remote config <i style="color:#64748b">(new)</i></td><td class="tg"><span class="tag t-web">WEB</span></td></tr>
+      </table>
+
+    </div>
+  </div>
+  <div class="pfoot"><span>Module catalogue · 75 modules, 18 in v1</span><span>13</span></div>
+</section>
+
+<!-- ============ 14. HOW TO READ THIS ============ -->
+<section class="page">
+  <div class="eyebrow">How to read this</div>
+  <h2>What these screens are,<br>and are not</h2>
+  <p class="sub">Accuracy matters more than polish in a document that gets signed off, so a few things are worth
+  stating plainly.</p>
+
+  <ul class="ticks" style="margin-top:7mm">
+    <li><b>The phone screens are mockups, not the live product.</b> The app does not exist yet; this document is part
+    of deciding what it should be. The mockups are drawn to the platform's own design tokens — the same yellow, the
+    same near-black ink, the same card and pill treatments — so they read as prephasz rather than as a generic deck.
+    They are structural: what is on the screen and in what order. They are not a design specification.</li>
+    <li><b>The web screenshots are real.</b> Captured from the live site at phone width on 13 October 2026, shown as
+    they loaded. Authenticated screens are deliberately absent rather than faked from an empty database.</li>
+    <li><b>The numbers come from the codebase.</b> 139 web pages, 75 modules, four roles and the module verdicts were
+    read out of the repository, not estimated. Where something was inferred rather than verified it is marked as an
+    assumption in the requirements document.</li>
+    <li><b>Sample data is invented.</b> Student names, scores, college names and drive titles are illustrative. No
+    real student record appears anywhere in this document.</li>
+    <li><b>Scope is settled; the rest is not.</b> The four decisions are agreed. Screen layouts, copy and visual
+    design are open, and the design system is written before any screen is built.</li>
+  </ul>
+
+  <div class="rule"></div>
+  <div class="eyebrow alt">Still open</div>
+  <h3 style="margin-top:3mm;font-size:14pt">Five things that need an owner</h3>
+  <div class="grid2" style="margin-top:5mm;gap:5mm">
+    <div class="fcard"><h4>Play Console account type</h4><p>Organisation accounts go straight to production review. A personal account needs roughly twelve testers over fourteen days first — two to three weeks of calendar, and the single largest unknown in the launch date.</p></div>
+    <div class="fcard"><h4>Session length on mobile</h4><p>The refresh window is seven days and global. Leaving it means a student signs in weekly; raising it changes the web's posture too.</p></div>
+    <div class="fcard"><h4>Screenshots of authenticated screens</h4><p>A read-only production login, or a seeded local stack. Needed before design sign-off.</p></div>
+    <div class="fcard"><h4>Minimum OS versions</h4><p>To be set against the real student device mix rather than a guess. Low-end Android is the design target.</p></div>
+  </div>
+  <div class="pfoot"><span>How to read this</span><span>14</span></div>
+</section>
+
+<!-- ============ 15. CLOSE ============ -->
+<section class="page dark">
+  <div class="eyebrow">What happens next</div>
+  <h1 style="margin-top:7mm;color:#fff;font-size:34pt">The build has<br><span style="color:#ffc42d">already started.</span></h1>
+  <p class="lede" style="color:#aeb5c6;margin-top:6mm">Three pull requests are open against the production
+  repositories. None of them changes a single thing about how the web product behaves — that was the constraint, and
+  the tests assert it.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5mm;margin-top:9mm">
+    <div style="border:1px solid #2a2d3a;border-radius:10px;padding:5mm;background:#1a1d29">
+      <div class="mono" style="font-size:6.4pt;color:#ffc42d">backend · open</div>
+      <h4 style="font-size:10pt;margin-top:3mm;color:#fff">The app holds its own session</h4>
+      <p style="font-size:7.4pt;line-height:1.45;color:#9aa1b4;margin-top:2mm">A native client receives the refresh
+      token in the body and keeps it in the Keychain. The guard fails closed: a browser can never opt in, even by
+      spoofing the header. <b style="color:#dfe3ec">17 tests</b>, all of the important ones negative.</p>
+    </div>
+    <div style="border:1px solid #2a2d3a;border-radius:10px;padding:5mm;background:#1a1d29">
+      <div class="mono" style="font-size:6.4pt;color:#ffc42d">backend · open</div>
+      <h4 style="font-size:10pt;margin-top:3mm;color:#fff">Remote config and a coding count</h4>
+      <p style="font-size:7.4pt;line-height:1.45;color:#9aa1b4;margin-top:2mm">A version floor, an outage stop and
+      per-surface flags — the lever that stops a bad build without a store review. Plus the field that lets the app
+      refuse a coding paper before it starts one.</p>
+    </div>
+    <div style="border:1px solid #2a2d3a;border-radius:10px;padding:5mm;background:#1a1d29">
+      <div class="mono" style="font-size:6.4pt;color:#ffc42d">frontend · open</div>
+      <h4 style="font-size:10pt;margin-top:3mm;color:#fff">The plan, the log and this document</h4>
+      <p style="font-size:7.4pt;line-height:1.45;color:#9aa1b4;margin-top:2mm">A costed engineering plan, a build log
+      written to be picked up cold, and the requirements document behind these pages.</p>
+    </div>
+  </div>
+
+  <div class="stats" style="border-color:#2a2d3a;margin-top:10mm">
+    <div class="stat"><div class="n" style="color:#fff">21</div><div class="l" style="color:#6b7280">working days of build</div></div>
+    <div class="stat"><div class="n" style="color:#fff">4</div><div class="l" style="color:#6b7280">sprints, A through D</div></div>
+    <div class="stat"><div class="n" style="color:#fff">11 Nov</div><div class="l" style="color:#6b7280">submitted to both stores</div></div>
+    <div class="stat"><div class="n" style="color:#fff">Late Nov</div><div class="l" style="color:#6b7280">live, if the accounts are ready</div></div>
+    <div class="stat"><div class="n" style="color:#fff">1,685</div><div class="l" style="color:#6b7280">backend tests passing</div></div>
+  </div>
+
+  <div class="spacer"></div>
+  <div style="border:1px solid #2a2d3a;border-radius:12px;padding:7mm;background:#1a1d29">
+    <h3 style="color:#fff;font-size:13pt">The critical path is not the code</h3>
+    <p style="font-size:8.4pt;line-height:1.5;color:#9aa1b4;margin-top:3mm;max-width:150mm">At this pace the build
+    finishes in about four weeks. Apple's organisation enrolment takes two to four. They now finish together, which
+    means either one can be the launch date — and only one of them is under our control. Start both developer
+    enrolments today, confirm the Play account type, and get a cheap Android into the room.</p>
+  </div>
+  <div class="pfoot"><span>prephasz mobile · business requirements · draft for sign-off</span><span>15</span></div>
+</section>
+
+</body>
+</html>
