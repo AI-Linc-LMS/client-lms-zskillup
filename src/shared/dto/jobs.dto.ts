@@ -52,6 +52,7 @@ import { RoundKind, RoundRsvpResponse, type PlannedRound } from '../drive-rounds
 import { AuthoringMode, PracticeWeight } from '../round-assessment-plan';
 import { AssignmentAudience } from '../assignment-audience';
 import { PracticeDecision, PracticeRecommendation } from '../practice-decision';
+import { InterviewMode, SessionStatus } from '../interview-plan';
 import { DriveStatus } from '../drive-lifecycle';
 import { ApplicationStage } from '../application-pipeline';
 import {
@@ -1230,4 +1231,72 @@ export class RecordPracticeDecisionDto {
 export class RecommendationThresholdsDto {
   @IsInt() @Min(0) @Max(100) readyAt!: number;
   @IsInt() @Min(0) @Max(100) borderlineAt!: number;
+}
+
+/* ------------------------------------------------------------------------- */
+/* §23.6 — interview practice                                                 */
+/* ------------------------------------------------------------------------- */
+
+export class CompetencyDto {
+  @IsString() @MaxLength(160) name!: string;
+  /** What a good answer actually contains — §23.6's "expected evidence". A competency
+   *  without it cannot be scored the same way by two people, which `checkInterviewPlan`
+   *  enforces rather than a decorator, because the message has to name the competency. */
+  @IsArray() @ArrayMaxSize(12) @IsString({ each: true }) @MaxLength(400, { each: true })
+  expectedEvidence!: string[];
+  @IsInt() @Min(0) @Max(100) weight!: number;
+}
+
+export class InterviewQuestionPlanDto {
+  @IsString() @MaxLength(1000) question!: string;
+  @IsString() @MaxLength(160) competency!: string;
+  @IsOptional() @IsArray() @ArrayMaxSize(8) @IsString({ each: true }) @MaxLength(500, { each: true })
+  followUps?: string[];
+}
+
+export class SaveInterviewPlanDto {
+  @IsEnum(InterviewMode) mode!: InterviewMode;
+  @IsOptional() @IsString() @MaxLength(200) role?: string | null;
+  @IsArray() @ArrayMaxSize(20) @ValidateNested({ each: true }) @Type(() => CompetencyDto)
+  competencies!: CompetencyDto[];
+  @IsOptional() @IsArray() @ArrayMaxSize(60) @ValidateNested({ each: true })
+  @Type(() => InterviewQuestionPlanDto)
+  questions?: InterviewQuestionPlanDto[];
+  @IsOptional() @IsString() @MaxLength(5000) rubric?: string | null;
+  @IsOptional() @IsString() @MaxLength(5000) candidateBrief?: string | null;
+  @IsOptional() @IsInt() @Min(5) @Max(240) durationMinutes?: number | null;
+  @IsOptional() @IsUUID() jdExtractionId?: string | null;
+}
+
+/** Schedule a human-led mock interview (PRD §23.6). */
+export class ScheduleInterviewDto {
+  @IsUUID() userId!: string;
+  @IsDateString() scheduledAt!: string;
+  @IsOptional() @IsInt() @Min(5) @Max(240) durationMinutes?: number | null;
+  /** An account OR a name: a panel member is often an employer's engineer with no
+   *  account here, and requiring one would make this unusable for the interviews that
+   *  matter most. One of the two is required, enforced in the service. */
+  @IsOptional() @IsUUID() interviewerUserId?: string | null;
+  @IsOptional() @IsString() @MaxLength(200) interviewerName?: string | null;
+  @IsOptional() @IsString() @MaxLength(255) venue?: string | null;
+  @IsOptional() @IsString() @MaxLength(1000) meetingLink?: string | null;
+}
+
+export class CompetencyScoreDto {
+  @IsString() @MaxLength(160) name!: string;
+  @IsOptional() @IsInt() @Min(0) @Max(100) score?: number | null;
+}
+
+/** Record what happened in a session (PRD §23.6). */
+export class RecordInterviewOutcomeDto {
+  @IsEnum(SessionStatus) status!: SessionStatus;
+  @IsOptional() @IsArray() @ArrayMaxSize(20) @ValidateNested({ each: true })
+  @Type(() => CompetencyScoreDto)
+  competencyScores?: CompetencyScoreDto[] | null;
+  @IsOptional() @IsInt() @Min(0) @Max(100) overallScore?: number | null;
+  @IsOptional() @IsString() @MaxLength(5000) feedback?: string | null;
+  /** §23.6's "recommended practice areas" — the field the student most needs. */
+  @IsOptional() @IsArray() @ArrayMaxSize(12) @IsString({ each: true }) @MaxLength(300, { each: true })
+  recommendedPractice?: string[] | null;
+  @IsOptional() @IsString() @MaxLength(2000) statusReason?: string | null;
 }
