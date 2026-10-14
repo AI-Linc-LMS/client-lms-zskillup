@@ -1111,3 +1111,36 @@ export class RoundRsvpDto {
    *  scheduler than a timestamp picker would allow. */
   @IsOptional() @IsString() @MaxLength(500) preferredSlot?: string | null;
 }
+
+/* ------------------------------------------------------------------------- */
+/* §23.1 — reading a job description                                          */
+/* ------------------------------------------------------------------------- */
+
+/** Paste or upload a JD to be read (PRD §23.1). */
+export class ExtractJdDto {
+  @IsString() @MaxLength(60_000) jdText!: string;
+  /** Optional: the drive this JD belongs to, when it already exists. */
+  @IsOptional() @IsUUID() driveId?: string | null;
+}
+
+/**
+ * Record the operator's review of an extraction (PRD §23.1, §23.2).
+ *
+ * `edits` is stored beside the machine's output, never merged over it: §23.8 asks for the
+ * generation inputs AND the edits, which is a request for both halves rather than the
+ * result.
+ */
+export class ReviewJdExtractionDto {
+  @IsOptional() edits?: Record<string, unknown> | null;
+}
+
+/** Write a reviewed round plan onto a drive (PRD §23.1). */
+export class ApplyJdExtractionDto {
+  @IsUUID() driveId!: string;
+  /**
+   * §23.1: "if the JD or round plan changes, show which assessments and assignments may
+   * be affected and ASK BEFORE REGENERATING OR REPLACING THEM." Without this the call
+   * reports what it would replace and does nothing.
+   */
+  @IsOptional() @IsBoolean() replaceExisting?: boolean;
+}
