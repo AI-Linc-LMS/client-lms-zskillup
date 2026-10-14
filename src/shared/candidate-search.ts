@@ -147,6 +147,10 @@ export interface SearchableCandidate {
   bestOfferCtc: number | null;
   lastActivityAt: string | null;
   answers?: Record<string, string> | null;
+  /** §17: share of the measured weight whose evidence is older than STALE_AFTER_DAYS. */
+  staleWeightPct?: number;
+  /** Age in days of the oldest measurement behind the score. Null when unmeasured. */
+  oldestEvidenceAgeDays?: number | null;
 }
 
 /* ------------------------------------------------------------------------- */

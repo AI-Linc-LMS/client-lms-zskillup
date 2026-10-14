@@ -289,3 +289,76 @@ export function withOverride(
         : MatchRecommendation.PRACTICE_RECOMMENDED,
   };
 }
+
+/* ------------------------------------------------------------------------- */
+/* Staleness (PRD §17)                                                        */
+/* ------------------------------------------------------------------------- */
+
+/**
+ * How old a measurement may be before it is called stale.
+ *
+ * §17 asks the platform to "show when scores are based on stale or missing data". The
+ * missing half is already loud — `coverage`, `missing` and MissingReason exist precisely
+ * so an unmeasured dimension cannot pass for a measured one. The STALE half was silent: an
+ * aptitude score from fourteen months ago rendered identically to one from last week,
+ * which is the more dangerous of the two cases because it looks like evidence.
+ *
+ * Six months is chosen to be defensible rather than clever: it is roughly a semester, so a
+ * score that predates it was earned by a student who has since done a different year of
+ * their degree.
+ */
+export const STALE_AFTER_DAYS = 182;
+
+export interface Staleness {
+  /** Dimensions whose newest measurement is older than STALE_AFTER_DAYS. */
+  staleDimensions: MatchDimension[];
+  /** The oldest measurement behind this score, ISO. Null when nothing was measured. */
+  oldestMeasuredAt: string | null;
+  /** Age in days of the oldest measurement. Null when nothing was measured. */
+  oldestAgeDays: number | null;
+  /**
+   * Share of the measured weight that is stale, 0–100.
+   *
+   * Weighted rather than counted, for the same reason `coverage` is: one stale dimension
+   * carrying half the drive's weight matters more than three carrying a tenth between them.
+   */
+  staleWeightPct: number;
+}
+
+/**
+ * How old the evidence behind a score is.
+ *
+ * `now` is injected rather than read from the clock so this stays a pure function — the
+ * same reason nothing else in this contract reads the time.
+ */
+export function stalenessOf(
+  components: readonly ComponentScore[],
+  now: string | Date,
+): Staleness {
+  const nowMs = (now instanceof Date ? now : new Date(now)).getTime();
+  const measured = components.filter(
+    (c) => c.score !== null && c.measuredAt !== null && c.measuredAt !== undefined,
+  );
+  if (measured.length === 0) {
+    return { staleDimensions: [], oldestMeasuredAt: null, oldestAgeDays: null, staleWeightPct: 0 };
+  }
+
+  const ageDays = (iso: string) => Math.floor((nowMs - new Date(iso).getTime()) / 86_400_000);
+  const stale = measured.filter((c) => ageDays(c.measuredAt as string) > STALE_AFTER_DAYS);
+
+  const measuredWeight = measured.reduce((t, c) => t + c.weight, 0);
+  const staleWeight = stale.reduce((t, c) => t + c.weight, 0);
+
+  const oldest = measured.reduce((a, b) =>
+    (a.measuredAt as string) < (b.measuredAt as string) ? a : b,
+  );
+
+  return {
+    staleDimensions: stale.map((c) => c.dimension),
+    oldestMeasuredAt: oldest.measuredAt as string,
+    oldestAgeDays: ageDays(oldest.measuredAt as string),
+    // Zero when nothing was measured rather than NaN from an empty denominator.
+    staleWeightPct:
+      measuredWeight > 0 ? Math.round((staleWeight / measuredWeight) * 100) : 0,
+  };
+}

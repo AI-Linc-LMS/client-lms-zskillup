@@ -48,7 +48,7 @@ import {
   MissingDataPolicy,
   type EligibilityRuleSet,
 } from '../drive-eligibility';
-import { RoundKind, type PlannedRound } from '../drive-rounds';
+import { RoundKind, RoundRsvpResponse, type PlannedRound } from '../drive-rounds';
 import { DriveStatus } from '../drive-lifecycle';
 import { ApplicationStage } from '../application-pipeline';
 import {
@@ -1078,4 +1078,36 @@ export class BulkCandidateActionDto {
   @IsOptional() @IsUUID() scheduledAssessmentId?: string | null;
   @IsOptional() @IsUUID() ownerUserId?: string | null;
   @IsOptional() @Type(() => Number) @IsInt() @Min(0) expectedCount?: number | null;
+}
+
+/* ------------------------------------------------------------------------- */
+/* §18 — resume replacement and round RSVP                                    */
+/* ------------------------------------------------------------------------- */
+
+/**
+ * Use a different resume on an application already sent (PRD §18.7).
+ *
+ * The originally submitted version is preserved; this names the replacement.
+ */
+export class ReplaceApplicationResumeDto {
+  @IsOptional() @IsUUID() resumeId?: string | null;
+  @IsOptional() @IsString() @MaxLength(1000) resumeUrl?: string | null;
+  @IsOptional() @IsString() @MaxLength(255) resumeName?: string | null;
+}
+
+/**
+ * Whether the candidate can make a round (PRD §18.13).
+ *
+ * `reason` is required for a decline or a reschedule request, enforced by `checkRsvp`
+ * rather than by a decorator: whoever reschedules has to choose between "I have a
+ * university exam" and "I have another offer", and a decline with no reason tends to be
+ * read as the second.
+ */
+export class RoundRsvpDto {
+  @IsString() @MaxLength(64) roundId!: string;
+  @IsEnum(RoundRsvpResponse) response!: RoundRsvpResponse;
+  @IsOptional() @IsString() @MaxLength(2000) reason?: string | null;
+  /** Free text on purpose: "any afternoon after the 14th" is more useful to a human
+   *  scheduler than a timestamp picker would allow. */
+  @IsOptional() @IsString() @MaxLength(500) preferredSlot?: string | null;
 }

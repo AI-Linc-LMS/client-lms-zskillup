@@ -86,6 +86,23 @@ export enum EligibilityField {
 
   // ── Lawful-only, never defaulted (PRD §4: "only where lawful, necessary and
   //    explicitly approved — never default filters") ────────────────────────
+  /**
+   * Where the student stands on placement (PRD §7, §18).
+   *
+   * Lets a drive say "unplaced students only" as a RULE rather than as a filter somebody
+   * remembers to apply. §18 asks what happens when a student "becomes placed after
+   * applying", and §7 asks to "include already-placed students only for a higher
+   * package" — neither is expressible without this.
+   */
+  PLACEMENT_STATUS = 'PLACEMENT_STATUS',
+  /**
+   * The best live offer the student already holds, in rupees (PRD §7).
+   *
+   * The other half of "only for a higher package": a drive paying ₹12L can admit a
+   * student holding ₹6L and exclude one holding ₹15L, which is a rule about the OFFER
+   * rather than about the person.
+   */
+  BEST_OFFER_CTC = 'BEST_OFFER_CTC',
   AGE = 'AGE',
   GENDER = 'GENDER',
 }
@@ -113,6 +130,9 @@ export const NUMERIC_FIELDS: ReadonlySet<EligibilityField> = new Set([
   EligibilityField.GRADUATION_YEAR,
   EligibilityField.NOTICE_PERIOD_DAYS,
   EligibilityField.AGE,
+  // Rupees, so it compares with GTE/LTE/RANGE like any other number — "already holds
+  // more than this" is the §7 rule it exists for.
+  EligibilityField.BEST_OFFER_CTC,
 ]);
 
 /** Academic scores are stored on a 0–100 percentage scale; CGPA is converted on entry. */
@@ -196,6 +216,8 @@ export type StudentEligibilityFacts = Partial<Record<EligibilityField, number | 
 
 /** Pretty name for a field, for reasons and form labels. */
 export const FIELD_LABELS: Readonly<Record<EligibilityField, string>> = {
+  [EligibilityField.PLACEMENT_STATUS]: 'Placement status',
+  [EligibilityField.BEST_OFFER_CTC]: 'Best offer already held (CTC)',
   [EligibilityField.SCORE_10TH]: '10th',
   [EligibilityField.SCORE_12TH]: '12th',
   [EligibilityField.SCORE_DIPLOMA]: 'Diploma',
