@@ -29,7 +29,12 @@ import { Type } from 'class-transformer';
 import {
   CompensationKind,
   CompensationStructure,
+  DriveApprovalStatus,
+  DriveAudienceMode,
+  DrivePriority,
+  EmployerType,
   EmploymentType,
+  IneligibleDisplay,
   JobApplicationStatus,
   JobKind,
   JobQuestionKind,
@@ -37,6 +42,52 @@ import {
   JobTargetType,
   WorkMode,
 } from '../enums';
+import {
+  EligibilityField,
+  EligibilityOperator,
+  MissingDataPolicy,
+  type EligibilityRuleSet,
+} from '../drive-eligibility';
+import { RoundKind, type PlannedRound } from '../drive-rounds';
+
+/** One hard-eligibility criterion (PRD §4 "Eligibility"). See shared/drive-eligibility.ts
+ *  for what each operator means and why missing data is never a failure. */
+export class EligibilityRuleDto {
+  @IsEnum(EligibilityField) field!: EligibilityField;
+  @IsEnum(EligibilityOperator) operator!: EligibilityOperator;
+  /** Number for a numeric field, text for a categorical one — hence the loose type. */
+  @IsOptional() value?: number | string | null;
+  @IsOptional() @IsInt() valueMax?: number | null;
+  @IsOptional() @IsArray() @ArrayMaxSize(100) @IsString({ each: true }) @MaxLength(120, { each: true })
+  options?: string[];
+  @IsOptional() @IsString() @MaxLength(120) label?: string | null;
+  /** Mandatory for a sensitive field; enforced by validateRuleSet, not by decorators,
+   *  because the requirement depends on WHICH field was chosen. */
+  @IsOptional() @IsString() @MaxLength(500) justification?: string | null;
+}
+
+export class EligibilityRuleSetDto {
+  @IsArray() @ArrayMaxSize(40) @ValidateNested({ each: true }) @Type(() => EligibilityRuleDto)
+  rules!: EligibilityRuleDto[];
+
+  @IsEnum(MissingDataPolicy) missingDataPolicy!: MissingDataPolicy;
+}
+
+/** One round the drive plans to run (PRD §4 "Drive operations"). */
+export class PlannedRoundDto {
+  @IsString() @MinLength(1) @MaxLength(64) id!: string;
+  @IsEnum(RoundKind) kind!: RoundKind;
+  @IsOptional() @IsString() @MaxLength(120) name?: string | null;
+  @IsInt() @Min(1) @Max(50) sequence!: number;
+  @IsOptional() @IsDateString() tentativeDate?: string | null;
+  @IsOptional() @IsDateString() finalDate?: string | null;
+  @IsOptional() @IsString() @MaxLength(255) venue?: string | null;
+  @IsOptional() @IsString() @MaxLength(1000) meetingLink?: string | null;
+  @IsOptional() @IsInt() @Min(1) durationMinutes?: number | null;
+  @IsOptional() @IsString() @MaxLength(5000) instructions?: string | null;
+  @IsOptional() @IsString() @MaxLength(5000) notes?: string | null;
+  @IsOptional() @IsBoolean() isPrephaszHosted?: boolean;
+}
 
 export class CreateJobPostingDto {
   @IsString()
@@ -289,6 +340,99 @@ export class CreateJobPostingDto {
   @IsOptional()
   @IsEnum(JobStatus)
   status?: JobStatus;
+
+  /* ── PRD §4: the full placement DRIVE record ───────────────────────────────
+   * Grouped as the PRD groups them. All optional: the job board posts roles with
+   * none of this, and a campus drive fills it in. */
+
+  // Identity & ownership
+  @IsOptional() @IsString() @MaxLength(32) driveCode?: string | null;
+  @IsOptional() @IsString() @MaxLength(120) owningTeam?: string | null;
+  @IsOptional() @IsString() @MaxLength(200) campusScope?: string | null;
+  @IsOptional() @IsString() @MaxLength(5000) internalNotes?: string | null;
+  @IsOptional() @IsArray() @ArrayMaxSize(30) @IsString({ each: true }) @MaxLength(40, { each: true })
+  tags?: string[];
+
+  // Employer details
+  @IsOptional() @ValidateIf((_, v) => v !== null && v !== '') @IsUrl({ require_tld: false }) @MaxLength(500)
+  companyWebsite?: string | null;
+  @IsOptional() @IsString() @MaxLength(120) companyIndustry?: string | null;
+  @IsOptional() @IsString() @MaxLength(160) hrContactName?: string | null;
+  @IsOptional() @IsString() @MaxLength(120) hrContactDesignation?: string | null;
+  @IsOptional() @IsString() @MaxLength(255) hrContactEmail?: string | null;
+  @IsOptional() @IsString() @MaxLength(32) hrContactPhone?: string | null;
+  @IsOptional() @IsString() @MaxLength(160) hiringManager?: string | null;
+  @IsOptional() @IsEnum(EmployerType) employerType?: EmployerType | null;
+  @IsOptional() @IsUUID() relationshipOwnerId?: string | null;
+  @IsOptional() @IsBoolean() isConfidential?: boolean;
+
+  // Role details
+  @IsOptional() @IsString() @MaxLength(160) departmentFunction?: string | null;
+  @IsOptional() @IsString() @MaxLength(20000) responsibilities?: string | null;
+  @IsOptional() @IsArray() @ArrayMaxSize(50) @IsString({ each: true }) @MaxLength(60, { each: true })
+  preferredSkills?: string[];
+  @IsOptional() @IsString() @MaxLength(120) roleCategory?: string | null;
+  @IsOptional() @IsString() @MaxLength(255) travelRequirements?: string | null;
+  @IsOptional() @IsString() @MaxLength(160) shiftTiming?: string | null;
+  @IsOptional() @IsDateString() joiningDate?: string | null;
+  @IsOptional() @IsString() @MaxLength(5000) probationDetails?: string | null;
+
+  // Compensation
+  @IsOptional() @IsString() @MaxLength(8) currency?: string;
+  @IsOptional() @IsEnum(CompensationStructure) ctcStructure?: CompensationStructure | null;
+  @IsOptional() @IsInt() @Min(0) ctcFixedAmount?: number | null;
+  @IsOptional() @IsInt() @Min(0) ctcVariableAmount?: number | null;
+  @IsOptional() @IsString() @MaxLength(5000) benefits?: string | null;
+  @IsOptional() @IsString() @MaxLength(5000) bonusDetails?: string | null;
+
+  /** Hard eligibility — academics and the rest (shared/drive-eligibility.ts). */
+  @IsOptional() @ValidateNested() @Type(() => EligibilityRuleSetDto)
+  eligibilityRules?: EligibilityRuleSetDto;
+
+  // Application settings
+  @IsOptional() @IsDateString() applicationOpensAt?: string | null;
+  @IsOptional() @IsString() @MaxLength(64) timezone?: string;
+  @IsOptional() @IsInt() @Min(1) maxApplications?: number | null;
+  @IsOptional() @IsBoolean() allowLateApplication?: boolean;
+  @IsOptional() @IsBoolean() allowApplicationEdit?: boolean;
+  @IsOptional() @IsBoolean() resumeRequired?: boolean;
+  @IsOptional() @IsString() @MaxLength(10000) applicationInstructions?: string | null;
+
+  // Access & visibility
+  @IsOptional() @IsEnum(DriveAudienceMode) audienceMode?: DriveAudienceMode;
+  @IsOptional() @IsEnum(IneligibleDisplay) ineligibleDisplay?: IneligibleDisplay;
+  @IsOptional() @IsBoolean() isHidden?: boolean;
+  @IsOptional() @IsDateString() publishAt?: string | null;
+  @IsOptional() @IsDateString() unpublishAt?: string | null;
+
+  // Matching & selection
+  @IsOptional() @IsInt() @Min(0) @Max(100) minMatchScore?: number | null;
+  @IsOptional() @IsBoolean() scoreVisibleToStaff?: boolean;
+  @IsOptional() @IsBoolean() scoreVisibleToStudent?: boolean;
+  @IsOptional() @IsInt() @Min(1) shortlistCapacity?: number | null;
+
+  // Drive operations
+  @IsOptional() @IsUUID() driveOwnerId?: string | null;
+  @IsOptional() @IsUUID() opsOwnerId?: string | null;
+  @IsOptional() @IsUUID() tpoOwnerId?: string | null;
+  @IsOptional() @IsEnum(DrivePriority) priority?: DrivePriority | null;
+  @IsOptional() @IsArray() @ArrayMaxSize(20) @ValidateNested({ each: true }) @Type(() => PlannedRoundDto)
+  plannedRounds?: PlannedRoundDto[];
+  @IsOptional() @IsString() @MaxLength(255) venue?: string | null;
+  @IsOptional() @ValidateIf((_, v) => v !== null && v !== '') @IsUrl({ require_tld: false }) @MaxLength(1000)
+  meetingLink?: string | null;
+  @IsOptional() @IsString() @MaxLength(10000) reportingInstructions?: string | null;
+  @IsOptional() @IsString() @MaxLength(255) queryContact?: string | null;
+  @IsOptional() @IsString() @MaxLength(10000) internalComments?: string | null;
+  @IsOptional() @IsString() @MaxLength(160) linkedRequisition?: string | null;
+
+  // Governance
+  @IsOptional() @IsEnum(DriveApprovalStatus) approvalStatus?: DriveApprovalStatus;
+  @IsOptional() @IsString() @MaxLength(120) jobSource?: string | null;
+  @IsOptional() @IsBoolean() dataSharingPermitted?: boolean;
+  @IsOptional() @IsBoolean() resumeSharingConsentRequired?: boolean;
+  @IsOptional() @IsString() @MaxLength(20000) employerTerms?: string | null;
+  @IsOptional() @IsString() @MaxLength(2000) cancellationReason?: string | null;
 }
 
 /**
@@ -395,6 +539,86 @@ export interface JobPostingDto {
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
+
+  /* ── PRD §4: the placement DRIVE record ─────────────────────────────────────
+   * Split by audience in toDto(). The fields above this line plus the first block
+   * below go to everyone; the STAFF-ONLY block is absent entirely for a student
+   * (absent, not blanked — this payload is served from a public route). */
+
+  driveCode: string | null;
+  tags: string[];
+  companyWebsite: string | null;
+  companyIndustry: string | null;
+  employerType: EmployerType | null;
+  departmentFunction: string | null;
+  responsibilities: string | null;
+  preferredSkills: string[];
+  roleCategory: string | null;
+  travelRequirements: string | null;
+  shiftTiming: string | null;
+  joiningDate: string | null;
+  probationDetails: string | null;
+  currency: string;
+  ctcStructure: CompensationStructure | null;
+  ctcFixedAmount: number | null;
+  ctcVariableAmount: number | null;
+  benefits: string | null;
+  bonusDetails: string | null;
+  /** Criteria are public so an ineligible student can be told why (PRD §8). A sensitive
+   *  rule's `justification` is stripped for anyone but staff. */
+  eligibilityRules: EligibilityRuleSet;
+  applicationOpensAt: string | null;
+  timezone: string;
+  allowLateApplication: boolean;
+  allowApplicationEdit: boolean;
+  resumeRequired: boolean;
+  applicationInstructions: string | null;
+  audienceMode: DriveAudienceMode;
+  ineligibleDisplay: IneligibleDisplay;
+  /** Staff `notes` on each round are stripped for a student. */
+  plannedRounds: PlannedRound[];
+  venue: string | null;
+  meetingLink: string | null;
+  reportingInstructions: string | null;
+  queryContact: string | null;
+
+  // ── Staff-only (PRD §17) ──────────────────────────────────────────────────
+  owningTeam?: string | null;
+  campusScope?: string | null;
+  internalNotes?: string | null;
+  hrContactName?: string | null;
+  hrContactDesignation?: string | null;
+  hrContactEmail?: string | null;
+  hrContactPhone?: string | null;
+  hiringManager?: string | null;
+  relationshipOwnerId?: string | null;
+  isConfidential?: boolean;
+  unpaidApprovedBy?: string | null;
+  unpaidApprovedAt?: string | null;
+  maxApplications?: number | null;
+  isHidden?: boolean;
+  publishAt?: string | null;
+  unpublishAt?: string | null;
+  matchingConfig?: Record<string, unknown>;
+  minMatchScore?: number | null;
+  scoreVisibleToStaff?: boolean;
+  scoreVisibleToStudent?: boolean;
+  shortlistCapacity?: number | null;
+  driveOwnerId?: string | null;
+  opsOwnerId?: string | null;
+  tpoOwnerId?: string | null;
+  priority?: DrivePriority | null;
+  internalComments?: string | null;
+  linkedRequisition?: string | null;
+  approvalStatus?: DriveApprovalStatus;
+  approvedBy?: string | null;
+  approvedAt?: string | null;
+  jobSource?: string | null;
+  dataSharingPermitted?: boolean;
+  resumeSharingConsentRequired?: boolean;
+  employerTerms?: string | null;
+  cancellationReason?: string | null;
+  archivedAt?: string | null;
 }
 
 /** A student's own view of an application they submitted. */
@@ -553,6 +777,13 @@ export class JobTargetDto {
 
   @IsUUID()
   targetId!: string;
+
+  /** Subtractive rather than additive (PRD §4 "named candidate inclusion/exclusion").
+   *  Inclusion rows are OR-ed to WIDEN reach; an exclusion row removes whoever it names
+   *  from whatever the inclusions let in, and is applied last. */
+  @IsOptional()
+  @IsBoolean()
+  isExclusion?: boolean;
 }
 
 /** The full audience for a posting. Replace-in-full, never a diff: the composer holds
@@ -569,6 +800,8 @@ export class SetJobTargetsDto {
 export interface JobTargetViewDto {
   targetType: JobTargetType;
   targetId: string;
+  /** True when this row REMOVES its audience rather than adding it. */
+  isExclusion: boolean;
   /** Null when the college/cohort/student it pointed at no longer exists. The row is
    *  inert in that case (it can never match), and the UI says so rather than showing
    *  a bare uuid. */

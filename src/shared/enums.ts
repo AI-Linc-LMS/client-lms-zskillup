@@ -427,11 +427,64 @@ export const STUDENT_VISIBLE_JOB_STATUSES: readonly JobStatus[] = [
   JobStatus.COMPLETED,
 ] as const;
 
-/** A posting is either a job or an internship. Drives the compensation vocabulary
- *  (salary vs stipend) and the one filter students most want. */
+/** What kind of opportunity this is. Drives the compensation vocabulary (salary vs
+ *  stipend) and the one filter students most want. APPRENTICESHIP and PPO_CONVERSION
+ *  were added for the placement drive record (PRD §4 "Identity & ownership"): a PPO
+ *  conversion is a real drive an institution runs against its own interns, and it is
+ *  neither a fresh job posting nor a new internship. */
 export enum JobKind {
   JOB = 'JOB',
   INTERNSHIP = 'INTERNSHIP',
+  APPRENTICESHIP = 'APPRENTICESHIP',
+  PPO_CONVERSION = 'PPO_CONVERSION',
+}
+
+/** The employer's own shape — reported by placement teams, never used to rank students. */
+export enum EmployerType {
+  PRODUCT = 'PRODUCT',
+  SERVICE = 'SERVICE',
+  STARTUP = 'STARTUP',
+  MNC = 'MNC',
+  PSU_GOVERNMENT = 'PSU_GOVERNMENT',
+  NGO = 'NGO',
+  OTHER = 'OTHER',
+}
+
+/** Who may SEE a drive, once targeting has decided who it reaches (PRD §8). */
+export enum DriveAudienceMode {
+  /** Everyone the targeting reaches who also passes hard eligibility. */
+  ALL_ELIGIBLE = 'ALL_ELIGIBLE',
+  /** Only students the staff explicitly picked, eligibility notwithstanding. */
+  SELECTED_ONLY = 'SELECTED_ONLY',
+}
+
+/** What an INELIGIBLE student sees. The PRD asks for all three to be configurable per
+ *  drive, because the honest answer differs: a confidential role hides, a campus drive
+ *  explains, and a nearly-eligible student is better told why than left guessing. */
+export enum IneligibleDisplay {
+  /** Not in listings, not by search, not by direct URL. */
+  HIDE = 'HIDE',
+  /** Listed, with the failed criteria spelled out. */
+  SHOW_REASON = 'SHOW_REASON',
+  /** Listed and readable, with Apply disabled. */
+  SHOW_DISABLED = 'SHOW_DISABLED',
+}
+
+/** Operational urgency of a drive, for the placement team's own queue. */
+export enum DrivePriority {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  CRITICAL = 'CRITICAL',
+}
+
+/** Governance gate before a drive may be published (PRD §4 "Governance", §5). */
+export enum DriveApprovalStatus {
+  /** This drive does not need anyone's sign-off. */
+  NOT_REQUIRED = 'NOT_REQUIRED',
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
 }
 
 export enum EmploymentType {

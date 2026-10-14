@@ -23,6 +23,17 @@ import { cn } from '@/lib/utils';
 import { TargetPicker } from './TargetPicker';
 import { QuestionPicker } from './QuestionPicker';
 import { RelatedContentPicker } from './RelatedContentPicker';
+import { EligibilityRulesEditor } from './EligibilityRulesEditor';
+import { PlannedRoundsEditor } from './PlannedRoundsEditor';
+import { EMPTY_RULE_SET, type EligibilityRuleSet } from '@/shared/drive-eligibility';
+import type { PlannedRound } from '@/shared/drive-rounds';
+import {
+  DriveApprovalStatus,
+  DriveAudienceMode,
+  DrivePriority,
+  EmployerType,
+  IneligibleDisplay,
+} from '@/shared/enums';
 import { EMPLOYMENT_LABEL, JOB_KIND_LABEL, WORK_MODE_LABEL } from '@/lib/jobs/format';
 import { JOB_STATUS_LABEL } from './JobStatusPill';
 
@@ -36,6 +47,7 @@ const STEPS = [
   { key: 'basics', title: 'Basics', hint: 'Title, company, where and how' },
   { key: 'role', title: 'The role', hint: 'Description, skills, process, JD' },
   { key: 'eligibility', title: 'Eligibility', hint: 'Who can apply' },
+  { key: 'drive', title: 'Drive', hint: 'Employer contact, rounds, governance' },
   { key: 'audience', title: 'Audience', hint: 'Who sees it' },
   { key: 'questions', title: 'Questions', hint: 'What applicants are asked' },
   { key: 'related', title: 'Related content', hint: 'Placement stories & articles' },
@@ -107,16 +119,81 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
     ugRequirement: existing?.ugRequirement ?? '',
     pgRequirement: existing?.pgRequirement ?? '',
     otherRequirements: existing?.otherRequirements ?? '',
+
+    /* ── PRD §4 ── */
+    driveCode: existing?.driveCode ?? '',
+    owningTeam: existing?.owningTeam ?? '',
+    campusScope: existing?.campusScope ?? '',
+    internalNotes: existing?.internalNotes ?? '',
+    tags: (existing?.tags ?? []).join(', '),
+    companyWebsite: existing?.companyWebsite ?? '',
+    companyIndustry: existing?.companyIndustry ?? '',
+    hrContactName: existing?.hrContactName ?? '',
+    hrContactDesignation: existing?.hrContactDesignation ?? '',
+    hrContactEmail: existing?.hrContactEmail ?? '',
+    hrContactPhone: existing?.hrContactPhone ?? '',
+    hiringManager: existing?.hiringManager ?? '',
+    employerType: existing?.employerType ?? '',
+    isConfidential: existing?.isConfidential ?? false,
+    departmentFunction: existing?.departmentFunction ?? '',
+    responsibilities: existing?.responsibilities ?? '',
+    preferredSkills: (existing?.preferredSkills ?? []).join(', '),
+    roleCategory: existing?.roleCategory ?? '',
+    travelRequirements: existing?.travelRequirements ?? '',
+    shiftTiming: existing?.shiftTiming ?? '',
+    joiningDate: existing?.joiningDate ?? '',
+    probationDetails: existing?.probationDetails ?? '',
+    currency: existing?.currency ?? 'INR',
+    ctcStructure: existing?.ctcStructure ?? '',
+    ctcFixedAmount: existing?.ctcFixedAmount?.toString() ?? '',
+    ctcVariableAmount: existing?.ctcVariableAmount?.toString() ?? '',
+    benefits: existing?.benefits ?? '',
+    bonusDetails: existing?.bonusDetails ?? '',
+    applicationOpensAt: toLocalInput(existing?.applicationOpensAt),
+    maxApplications: existing?.maxApplications?.toString() ?? '',
+    allowLateApplication: existing?.allowLateApplication ?? false,
+    allowApplicationEdit: existing?.allowApplicationEdit ?? true,
+    resumeRequired: existing?.resumeRequired ?? true,
+    applicationInstructions: existing?.applicationInstructions ?? '',
+    audienceMode: existing?.audienceMode ?? DriveAudienceMode.ALL_ELIGIBLE,
+    ineligibleDisplay: existing?.ineligibleDisplay ?? IneligibleDisplay.SHOW_REASON,
+    isHidden: existing?.isHidden ?? false,
+    publishAt: toLocalInput(existing?.publishAt),
+    unpublishAt: toLocalInput(existing?.unpublishAt),
+    minMatchScore: existing?.minMatchScore?.toString() ?? '',
+    shortlistCapacity: existing?.shortlistCapacity?.toString() ?? '',
+    priority: existing?.priority ?? '',
+    venue: existing?.venue ?? '',
+    meetingLink: existing?.meetingLink ?? '',
+    reportingInstructions: existing?.reportingInstructions ?? '',
+    queryContact: existing?.queryContact ?? '',
+    internalComments: existing?.internalComments ?? '',
+    linkedRequisition: existing?.linkedRequisition ?? '',
+    approvalStatus: existing?.approvalStatus ?? DriveApprovalStatus.NOT_REQUIRED,
+    jobSource: existing?.jobSource ?? '',
+    dataSharingPermitted: existing?.dataSharingPermitted ?? false,
+    resumeSharingConsentRequired: existing?.resumeSharingConsentRequired ?? true,
+    employerTerms: existing?.employerTerms ?? '',
+    cancellationReason: existing?.cancellationReason ?? '',
     passoutYears: (existing?.passoutYears ?? []).join(', '),
     status: existing?.status ?? JobStatus.ACTIVE,
     isPrephaszOpportunity: existing?.isPrephaszOpportunity ?? true,
   });
 
-  const set = (k: Exclude<keyof typeof form, 'hasPpo' | 'isPrephaszOpportunity'>, v: string) => {
+  // Structured, so they live outside the flat string form.
+  const [rules, setRules] = useState<EligibilityRuleSet>(
+    existing?.eligibilityRules ?? EMPTY_RULE_SET,
+  );
+  const [rounds, setRounds] = useState<PlannedRound[]>(existing?.plannedRounds ?? []);
+
+  const set = (k: Exclude<keyof typeof form, BoolKey>, v: string) => {
     setForm((f) => ({ ...f, [k]: v }));
     setDirty(true);
   };
-  const setBool = (k: 'hasPpo' | 'isPrephaszOpportunity', v: boolean) => {
+  type BoolKey = {
+    [K in keyof typeof form]: (typeof form)[K] extends boolean ? K : never;
+  }[keyof typeof form];
+  const setBool = (k: BoolKey, v: boolean) => {
     setForm((f) => ({ ...f, [k]: v }));
     setDirty(true);
   };
@@ -171,8 +248,77 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
       passoutYears: list(form.passoutYears),
       status: form.status as JobStatus,
       isPrephaszOpportunity: form.isPrephaszOpportunity,
+
+      /* ── PRD §4: the placement drive record ───────────────────────────── */
+      driveCode: form.driveCode.trim() || null,
+      owningTeam: form.owningTeam.trim() || null,
+      campusScope: form.campusScope.trim() || null,
+      internalNotes: form.internalNotes.trim() || null,
+      tags: list(form.tags),
+
+      companyWebsite: form.companyWebsite.trim() || null,
+      companyIndustry: form.companyIndustry.trim() || null,
+      hrContactName: form.hrContactName.trim() || null,
+      hrContactDesignation: form.hrContactDesignation.trim() || null,
+      hrContactEmail: form.hrContactEmail.trim() || null,
+      hrContactPhone: form.hrContactPhone.trim() || null,
+      hiringManager: form.hiringManager.trim() || null,
+      employerType: (form.employerType || null) as EmployerType | null,
+      isConfidential: form.isConfidential,
+
+      departmentFunction: form.departmentFunction.trim() || null,
+      responsibilities: form.responsibilities.trim() || null,
+      preferredSkills: list(form.preferredSkills),
+      roleCategory: form.roleCategory.trim() || null,
+      travelRequirements: form.travelRequirements.trim() || null,
+      shiftTiming: form.shiftTiming.trim() || null,
+      joiningDate: form.joiningDate || null,
+      probationDetails: form.probationDetails.trim() || null,
+
+      currency: form.currency.trim() || 'INR',
+      ctcStructure: (form.ctcStructure || null) as CompensationStructure | null,
+      ctcFixedAmount: num(form.ctcFixedAmount),
+      ctcVariableAmount: num(form.ctcVariableAmount),
+      benefits: form.benefits.trim() || null,
+      bonusDetails: form.bonusDetails.trim() || null,
+
+      eligibilityRules: rules,
+
+      applicationOpensAt: form.applicationOpensAt
+        ? new Date(form.applicationOpensAt).toISOString()
+        : null,
+      maxApplications: num(form.maxApplications),
+      allowLateApplication: form.allowLateApplication,
+      allowApplicationEdit: form.allowApplicationEdit,
+      resumeRequired: form.resumeRequired,
+      applicationInstructions: form.applicationInstructions.trim() || null,
+
+      audienceMode: form.audienceMode as DriveAudienceMode,
+      ineligibleDisplay: form.ineligibleDisplay as IneligibleDisplay,
+      isHidden: form.isHidden,
+      publishAt: form.publishAt ? new Date(form.publishAt).toISOString() : null,
+      unpublishAt: form.unpublishAt ? new Date(form.unpublishAt).toISOString() : null,
+
+      minMatchScore: num(form.minMatchScore),
+      shortlistCapacity: num(form.shortlistCapacity),
+
+      priority: (form.priority || null) as DrivePriority | null,
+      plannedRounds: rounds,
+      venue: form.venue.trim() || null,
+      meetingLink: form.meetingLink.trim() || null,
+      reportingInstructions: form.reportingInstructions.trim() || null,
+      queryContact: form.queryContact.trim() || null,
+      internalComments: form.internalComments.trim() || null,
+      linkedRequisition: form.linkedRequisition.trim() || null,
+
+      approvalStatus: form.approvalStatus as DriveApprovalStatus,
+      jobSource: form.jobSource.trim() || null,
+      dataSharingPermitted: form.dataSharingPermitted,
+      resumeSharingConsentRequired: form.resumeSharingConsentRequired,
+      employerTerms: form.employerTerms.trim() || null,
+      cancellationReason: form.cancellationReason.trim() || null,
     };
-  }, [form]);
+  }, [form, rules, rounds]);
 
   /** Persist whatever has been typed. Creates the draft on first call. */
   const persist = useCallback(async (): Promise<JobPostingDto | null> => {
@@ -288,7 +434,7 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
         <p className="mt-0.5 text-sm text-slate-500">{current.hint}</p>
 
         <div className="mt-5 space-y-4">
-          {step === 0 ? (
+          {current.key === 'basics' ? (
             <>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field>
@@ -542,7 +688,7 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
             </>
           ) : null}
 
-          {step === 1 ? (
+          {current.key === 'role' ? (
             <>
               <Field>
                 <span className={label}>One-line summary (shown on the card and in link previews)</span>
@@ -594,7 +740,22 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
             </>
           ) : null}
 
-          {step === 2 ? (
+          {current.key === 'eligibility' ? (
+            <div className="space-y-6">
+              <section className="space-y-2">
+                <p className={label}>Hard criteria</p>
+                <p className="text-xs text-slate-500">
+                  Checked against each student&rsquo;s record. A student who fails one of these
+                  cannot apply; what the drive does about a student we have never asked is set below.
+                </p>
+                <EligibilityRulesEditor value={rules} onChange={(r) => { setRules(r); setDirty(true); }} />
+              </section>
+
+              <section className="space-y-2">
+                <p className={label}>In the employer&rsquo;s own words</p>
+                <p className="text-xs text-slate-500">
+                  Shown to students as written. Not checked by the system &mdash; the criteria above are.
+                </p>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field>
                 <span className={label}>Education</span>
@@ -619,11 +780,230 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
                 </Field>
               </div>
             </div>
+              </section>
+            </div>
           ) : null}
 
-          {step === 3 ? job ? <TargetPicker jobId={job.id} /> : null : null}
-          {step === 4 ? job ? <QuestionPicker jobId={job.id} /> : null : null}
-          {step === 5 ? (
+          {current.key === 'drive' ? (
+            <div className="space-y-6">
+              {/* Conditional by design (PRD §4): a drive has eleven field groups and an
+                  ordinary job posting needs none of them, so each block is collapsed
+                  behind its own heading rather than dumped on one page. */}
+              <section className="space-y-3">
+                <p className={label}>Identity</p>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <Field>
+                    <span className={label}>Drive code</span>
+                    <input value={form.driveCode} onChange={(e) => set('driveCode', e.target.value)} className={input} placeholder="ACN-2027-01" />
+                    <span className="mt-1 block text-xs text-slate-500">The handle you and the employer quote at each other. Must be unique.</span>
+                  </Field>
+                  <Field>
+                    <span className={label}>Owning team</span>
+                    <input value={form.owningTeam} onChange={(e) => set('owningTeam', e.target.value)} className={input} />
+                  </Field>
+                  <Field>
+                    <span className={label}>Campus scope</span>
+                    <input value={form.campusScope} onChange={(e) => set('campusScope', e.target.value)} className={input} placeholder="Pune campus" />
+                  </Field>
+                  <Field>
+                    <span className={label}>Tags - comma separated</span>
+                    <input value={form.tags} onChange={(e) => set('tags', e.target.value)} className={input} />
+                  </Field>
+                  <Field>
+                    <span className={label}>Linked requisition</span>
+                    <input value={form.linkedRequisition} onChange={(e) => set('linkedRequisition', e.target.value)} className={input} />
+                  </Field>
+                  <Field>
+                    <span className={label}>Priority</span>
+                    <select value={form.priority} onChange={(e) => set('priority', e.target.value)} className={input}>
+                      <option value="">Not set</option>
+                      {Object.values(DrivePriority).map((p) => <option key={p} value={p}>{p[0] + p.slice(1).toLowerCase()}</option>)}
+                    </select>
+                  </Field>
+                </div>
+              </section>
+
+              <section className="space-y-3">
+                <p className={label}>Employer contact</p>
+                <p className="text-xs text-slate-500">Staff-only. None of this reaches a student.</p>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <Field><span className={label}>Website</span><input value={form.companyWebsite} onChange={(e) => set('companyWebsite', e.target.value)} className={input} placeholder="https://" /></Field>
+                  <Field><span className={label}>Industry</span><input value={form.companyIndustry} onChange={(e) => set('companyIndustry', e.target.value)} className={input} /></Field>
+                  <Field>
+                    <span className={label}>Employer type</span>
+                    <select value={form.employerType} onChange={(e) => set('employerType', e.target.value)} className={input}>
+                      <option value="">Not set</option>
+                      {Object.values(EmployerType).map((t) => <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>)}
+                    </select>
+                  </Field>
+                  <Field><span className={label}>HR contact</span><input value={form.hrContactName} onChange={(e) => set('hrContactName', e.target.value)} className={input} /></Field>
+                  <Field><span className={label}>Designation</span><input value={form.hrContactDesignation} onChange={(e) => set('hrContactDesignation', e.target.value)} className={input} /></Field>
+                  <Field><span className={label}>Hiring manager</span><input value={form.hiringManager} onChange={(e) => set('hiringManager', e.target.value)} className={input} /></Field>
+                  <Field><span className={label}>Contact email</span><input value={form.hrContactEmail} onChange={(e) => set('hrContactEmail', e.target.value)} className={input} /></Field>
+                  <Field><span className={label}>Contact phone</span><input value={form.hrContactPhone} onChange={(e) => set('hrContactPhone', e.target.value)} className={input} /></Field>
+                  <Field><span className={label}>Source of this job</span><input value={form.jobSource} onChange={(e) => set('jobSource', e.target.value)} className={input} placeholder="Referral, inbound, alumni" /></Field>
+                </div>
+                <label className="flex items-start gap-2 text-sm text-slate-700">
+                  <input type="checkbox" checked={form.isConfidential} onChange={(e) => setBool('isConfidential', e.target.checked)} className="mt-0.5" />
+                  <span>Confidential - keep this employer off public listings and limit who sees candidate data.</span>
+                </label>
+              </section>
+
+              <section className="space-y-3">
+                <p className={label}>Role detail</p>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <Field><span className={label}>Department / function</span><input value={form.departmentFunction} onChange={(e) => set('departmentFunction', e.target.value)} className={input} /></Field>
+                  <Field><span className={label}>Role category</span><input value={form.roleCategory} onChange={(e) => set('roleCategory', e.target.value)} className={input} /></Field>
+                  <Field><span className={label}>Preferred skills - comma separated</span><input value={form.preferredSkills} onChange={(e) => set('preferredSkills', e.target.value)} className={input} /></Field>
+                  <Field><span className={label}>Shift / timing</span><input value={form.shiftTiming} onChange={(e) => set('shiftTiming', e.target.value)} className={input} /></Field>
+                  <Field><span className={label}>Travel</span><input value={form.travelRequirements} onChange={(e) => set('travelRequirements', e.target.value)} className={input} /></Field>
+                  <Field><span className={label}>Joining date</span><input type="date" value={form.joiningDate} onChange={(e) => set('joiningDate', e.target.value)} className={input} /></Field>
+                </div>
+                <Field><span className={label}>Responsibilities</span><textarea rows={3} value={form.responsibilities} onChange={(e) => set('responsibilities', e.target.value)} className={area} /></Field>
+                <Field><span className={label}>Probation / contract</span><textarea rows={2} value={form.probationDetails} onChange={(e) => set('probationDetails', e.target.value)} className={area} /></Field>
+              </section>
+
+              <section className="space-y-3">
+                <p className={label}>Compensation detail</p>
+                <div className="grid gap-4 sm:grid-cols-4">
+                  <Field><span className={label}>Currency</span><input value={form.currency} onChange={(e) => set('currency', e.target.value)} className={input} /></Field>
+                  <Field>
+                    <span className={label}>CTC structure</span>
+                    <select value={form.ctcStructure} onChange={(e) => set('ctcStructure', e.target.value)} className={input}>
+                      <option value="">Not set</option>
+                      {Object.values(CompensationStructure).map((c) => <option key={c} value={c}>{c.replace(/_/g, ' + ').toLowerCase()}</option>)}
+                    </select>
+                  </Field>
+                  <Field><span className={label}>Fixed</span><input type="number" value={form.ctcFixedAmount} onChange={(e) => set('ctcFixedAmount', e.target.value)} className={input} /></Field>
+                  <Field><span className={label}>Variable</span><input type="number" value={form.ctcVariableAmount} onChange={(e) => set('ctcVariableAmount', e.target.value)} className={input} /></Field>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field><span className={label}>Benefits</span><textarea rows={2} value={form.benefits} onChange={(e) => set('benefits', e.target.value)} className={area} /></Field>
+                  <Field><span className={label}>Bonus / incentives</span><textarea rows={2} value={form.bonusDetails} onChange={(e) => set('bonusDetails', e.target.value)} className={area} /></Field>
+                </div>
+              </section>
+
+              <section className="space-y-3">
+                <p className={label}>Planned rounds</p>
+                <PlannedRoundsEditor value={rounds} onChange={(r) => { setRounds(r); setDirty(true); }} />
+              </section>
+
+              <section className="space-y-3">
+                <p className={label}>On the day</p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field><span className={label}>Venue</span><input value={form.venue} onChange={(e) => set('venue', e.target.value)} className={input} /></Field>
+                  <Field><span className={label}>Meeting link</span><input value={form.meetingLink} onChange={(e) => set('meetingLink', e.target.value)} className={input} placeholder="https://" /></Field>
+                  <Field><span className={label}>Contact for queries</span><input value={form.queryContact} onChange={(e) => set('queryContact', e.target.value)} className={input} /></Field>
+                  <Field><span className={label}>Shortlist capacity</span><input type="number" value={form.shortlistCapacity} onChange={(e) => set('shortlistCapacity', e.target.value)} className={input} /></Field>
+                </div>
+                <Field><span className={label}>Reporting instructions</span><textarea rows={2} value={form.reportingInstructions} onChange={(e) => set('reportingInstructions', e.target.value)} className={area} /></Field>
+              </section>
+
+              <section className="space-y-3">
+                <p className={label}>Governance</p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field>
+                    <span className={label}>Approval</span>
+                    <select value={form.approvalStatus} onChange={(e) => set('approvalStatus', e.target.value)} className={input}>
+                      {Object.values(DriveApprovalStatus).map((a) => <option key={a} value={a}>{a.replace(/_/g, ' ').toLowerCase()}</option>)}
+                    </select>
+                  </Field>
+                  <Field><span className={label}>Cancellation reason</span><input value={form.cancellationReason} onChange={(e) => set('cancellationReason', e.target.value)} className={input} /></Field>
+                </div>
+                <Field><span className={label}>Employer terms</span><textarea rows={2} value={form.employerTerms} onChange={(e) => set('employerTerms', e.target.value)} className={area} /></Field>
+                <label className="flex items-start gap-2 text-sm text-slate-700">
+                  <input type="checkbox" checked={form.dataSharingPermitted} onChange={(e) => setBool('dataSharingPermitted', e.target.checked)} className="mt-0.5" />
+                  <span>The employer may receive candidate data for this drive.</span>
+                </label>
+                <label className="flex items-start gap-2 text-sm text-slate-700">
+                  <input type="checkbox" checked={form.resumeSharingConsentRequired} onChange={(e) => setBool('resumeSharingConsentRequired', e.target.checked)} className="mt-0.5" />
+                  <span>Ask each student to consent before their resume is shared.</span>
+                </label>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field><span className={label}>Internal notes</span><textarea rows={2} value={form.internalNotes} onChange={(e) => set('internalNotes', e.target.value)} className={area} /></Field>
+                  <Field><span className={label}>Internal comments</span><textarea rows={2} value={form.internalComments} onChange={(e) => set('internalComments', e.target.value)} className={area} /></Field>
+                </div>
+              </section>
+            </div>
+          ) : null}
+
+          {current.key === 'audience' ? (
+            <div className="space-y-6">
+              <section className="grid gap-4 sm:grid-cols-2">
+                <Field>
+                  <span className={label}>Who may see it</span>
+                  <select value={form.audienceMode} onChange={(e) => set('audienceMode', e.target.value)} className={input}>
+                    <option value={DriveAudienceMode.ALL_ELIGIBLE}>Everyone it reaches who is eligible</option>
+                    <option value={DriveAudienceMode.SELECTED_ONLY}>Only the students picked below</option>
+                  </select>
+                  <span className="mt-1 block text-xs text-slate-500">
+                    A picked audience has no public fallback: leave the list empty and it reaches nobody.
+                  </span>
+                </Field>
+                <Field>
+                  <span className={label}>Students who are not eligible</span>
+                  <select
+                    value={form.ineligibleDisplay}
+                    onChange={(e) => set('ineligibleDisplay', e.target.value)}
+                    disabled={form.audienceMode === DriveAudienceMode.SELECTED_ONLY}
+                    className={input}
+                  >
+                    <option value={IneligibleDisplay.SHOW_REASON}>See it, and why they cannot apply</option>
+                    <option value={IneligibleDisplay.SHOW_DISABLED}>See it, with Apply disabled</option>
+                    <option value={IneligibleDisplay.HIDE}>Do not see it at all</option>
+                  </select>
+                  {form.audienceMode === DriveAudienceMode.SELECTED_ONLY ? (
+                    <span className="mt-1 block text-xs text-slate-500">
+                      Fixed to hidden - a picked audience has nobody else to show a reason to.
+                    </span>
+                  ) : null}
+                </Field>
+                <Field>
+                  <span className={label}>Publish at</span>
+                  <input type="datetime-local" value={form.publishAt} onChange={(e) => set('publishAt', e.target.value)} className={input} />
+                </Field>
+                <Field>
+                  <span className={label}>Unpublish at</span>
+                  <input type="datetime-local" value={form.unpublishAt} onChange={(e) => set('unpublishAt', e.target.value)} className={input} />
+                </Field>
+                <Field>
+                  <span className={label}>Applications open at</span>
+                  <input type="datetime-local" value={form.applicationOpensAt} onChange={(e) => set('applicationOpensAt', e.target.value)} className={input} />
+                </Field>
+                <Field>
+                  <span className={label}>Maximum applications</span>
+                  <input type="number" value={form.maxApplications} onChange={(e) => set('maxApplications', e.target.value)} className={input} />
+                </Field>
+              </section>
+
+              <section className="space-y-2">
+                <label className="flex items-start gap-2 text-sm text-slate-700">
+                  <input type="checkbox" checked={form.isHidden} onChange={(e) => setBool('isHidden', e.target.checked)} className="mt-0.5" />
+                  <span>Hidden - off the board entirely, including from its own link.</span>
+                </label>
+                <label className="flex items-start gap-2 text-sm text-slate-700">
+                  <input type="checkbox" checked={form.resumeRequired} onChange={(e) => setBool('resumeRequired', e.target.checked)} className="mt-0.5" />
+                  <span>A resume is required to apply.</span>
+                </label>
+                <label className="flex items-start gap-2 text-sm text-slate-700">
+                  <input type="checkbox" checked={form.allowApplicationEdit} onChange={(e) => setBool('allowApplicationEdit', e.target.checked)} className="mt-0.5" />
+                  <span>Students may edit or withdraw their application.</span>
+                </label>
+                <label className="flex items-start gap-2 text-sm text-slate-700">
+                  <input type="checkbox" checked={form.allowLateApplication} onChange={(e) => setBool('allowLateApplication', e.target.checked)} className="mt-0.5" />
+                  <span>Accept applications after the deadline.</span>
+                </label>
+                <Field>
+                  <span className={label}>Application instructions</span>
+                  <textarea rows={2} value={form.applicationInstructions} onChange={(e) => set('applicationInstructions', e.target.value)} className={area} />
+                </Field>
+              </section>
+
+              {job ? <TargetPicker jobId={job.id} /> : null}
+            </div>
+          ) : null}
+          {current.key === 'questions' ? (job ? <QuestionPicker jobId={job.id} /> : null) : null}
+          {current.key === 'related' ? (
             job ? (
               <RelatedContentPicker
                 jobId={job.id}
@@ -635,7 +1015,7 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
             ) : null
           ) : null}
 
-          {step === 6 ? (
+          {current.key === 'publish' ? (
             <div className="space-y-4">
               <Field>
                 <span className={label}>Status</span>
@@ -715,14 +1095,14 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
               <span className="text-xs text-slate-400">Draft saved</span>
             ) : null}
             {step < STEPS.length - 1 ? (
-              <Button onClick={next} disabled={saving || (step === 0 && !basicsValid)}>
+              <Button onClick={next} disabled={saving || (current.key === 'basics' && !basicsValid)}>
                 Save and continue <ChevronRight className="size-4" />
               </Button>
             ) : null}
           </div>
         </div>
 
-        {step === 0 && !basicsValid ? (
+        {current.key === 'basics' && !basicsValid ? (
           <p className="mt-3 text-xs text-slate-500">
             A title and company are needed before the rest can be saved.
           </p>
