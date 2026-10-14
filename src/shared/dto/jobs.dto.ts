@@ -49,6 +49,7 @@ import {
   type EligibilityRuleSet,
 } from '../drive-eligibility';
 import { RoundKind, RoundRsvpResponse, type PlannedRound } from '../drive-rounds';
+import { AuthoringMode, PracticeWeight } from '../round-assessment-plan';
 import { DriveStatus } from '../drive-lifecycle';
 import { ApplicationStage } from '../application-pipeline';
 import {
@@ -1143,4 +1144,43 @@ export class ApplyJdExtractionDto {
    * reports what it would replace and does nothing.
    */
   @IsOptional() @IsBoolean() replaceExisting?: boolean;
+}
+
+/* ------------------------------------------------------------------------- */
+/* §23.2 — how a round's practice gets authored                               */
+/* ------------------------------------------------------------------------- */
+
+export class PlanConfigDto {
+  @IsOptional() @IsInt() @Min(1) @Max(200) questionCount?: number | null;
+  @IsOptional() @IsInt() @Min(1) @Max(600) durationMinutes?: number | null;
+  @IsOptional() difficultyMix?: { easy: number; medium: number; hard: number } | null;
+  @IsOptional() @IsArray() @ArrayMaxSize(40) @IsString({ each: true }) topics?: string[] | null;
+  @IsOptional() @IsArray() @ArrayMaxSize(20) @IsString({ each: true }) languages?: string[] | null;
+  @IsOptional() @IsInt() @Min(0) marksPerQuestion?: number | null;
+  @IsOptional() @IsInt() @Min(0) negativeMarkPerQuestion?: number | null;
+  @IsOptional() @IsInt() @Min(0) @Max(100) passMark?: number | null;
+  @IsOptional() @IsInt() @Min(1) @Max(10) attemptsAllowed?: number | null;
+  @IsOptional() @IsString() @MaxLength(5000) instructions?: string | null;
+  @IsOptional() @IsString() @MaxLength(5000) rubric?: string | null;
+}
+
+/**
+ * Create or revise a round's practice plan (PRD §23.2).
+ *
+ * `gateApprovedBy` is required when `weight` is SELECTION_GATE: §6 and §23.5 both forbid a
+ * score rejecting anybody on its own "unless the authorised operator has explicitly
+ * enabled a transparent rule", so a gate takes a named person rather than a dropdown
+ * value. Enforced by `checkPlan`, not by a decorator, because the requirement is
+ * conditional on another field.
+ */
+export class UpsertRoundPlanDto {
+  @IsEnum(AuthoringMode) mode!: AuthoringMode;
+  @IsOptional() @IsEnum(PracticeWeight) weight?: PracticeWeight;
+  @IsOptional() @ValidateNested() @Type(() => PlanConfigDto) config?: PlanConfigDto;
+  /** A LINK to the assessment this plan produced, never a copy of it (§12). */
+  @IsOptional() @IsUUID() scheduledAssessmentId?: string | null;
+  /** Which JD extraction the generation inputs came from (§23.8 reproducibility). */
+  @IsOptional() @IsUUID() jdExtractionId?: string | null;
+  @IsOptional() @IsString() @MaxLength(2000) note?: string | null;
+  @IsOptional() @IsUUID() gateApprovedBy?: string | null;
 }
