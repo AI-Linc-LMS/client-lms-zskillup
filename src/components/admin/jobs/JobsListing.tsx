@@ -16,7 +16,8 @@ import {
   Search,
   Trash2,
   Users,
-  MoveRight,} from 'lucide-react';
+  MoveRight,
+  Target,} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cloneJob, deleteJob, exportApplicantsCsv, listAdminJobs, updateJob } from '@/lib/api/jobs';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
@@ -245,6 +246,12 @@ export function JobsListing() {
 
                   {/* A status move is its own decision, with its own screen — cancelling
                       emails every applicant, so it does not belong on an edit form. */}
+                  <Button asChild size="sm" variant="outline">
+                    <Link href={`/admin/jobs/${j.id}/candidates`}>
+                      <Target className="size-3.5" /> Candidates
+                    </Link>
+                  </Button>
+
                   <Button size="sm" variant="outline" onClick={() => setMoving(j)}>
                     <MoveRight className="size-3.5" /> Status
                   </Button>

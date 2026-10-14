@@ -16,6 +16,8 @@ import type {
   UpsertJobQuestionDto,
 } from '@/shared/dto/jobs.dto';
 import type { JobApplicationStatus, JobStatus } from '@/shared/enums';
+import type { EligibilityOutcome } from '@/shared/drive-eligibility';
+import type { MatchResult, MatchWeights } from '@/shared/drive-matching';
 
 export type {
   JobApplicantDto,
@@ -310,5 +312,45 @@ export async function transitionDrive(
 /** A drive's full status history, newest first. */
 export async function getDriveStatusHistory(id: string): Promise<JobStatusEventDto[]> {
   const res = await apiClient.get<JobStatusEventDto[]>(`/api/v1/admin/jobs/${id}/status-history`);
+  return res.data;
+}
+
+/* ── PRD §6: the candidate-fit view ─────────────────────────────────────────── */
+
+export interface CandidateRow {
+  userId: string;
+  fullName: string | null;
+  email: string;
+  collegeName: string | null;
+  cohort: string | null;
+  branch: string | null;
+  paidAccess: boolean;
+  eligibility: EligibilityOutcome;
+  match: MatchResult;
+  applicationStatus: string | null;
+  appliedAt: string | null;
+  placementStatus: string | null;
+  resumeUpdatedAt: string | null;
+  lastActivityAt: string | null;
+}
+
+export interface CandidateView {
+  drive: { id: string; title: string; companyName: string };
+  weights: MatchWeights;
+  rows: CandidateRow[];
+  summary: {
+    audience: number;
+    eligible: number;
+    failedEligibility: number;
+    needsReview: number;
+    applied: number;
+    scored: number;
+    insufficientData: number;
+  };
+}
+
+/** Eligibility and match for everyone a drive reaches. Staff-only. */
+export async function getDriveCandidates(id: string): Promise<CandidateView> {
+  const res = await apiClient.get<CandidateView>(`/api/v1/admin/jobs/${id}/candidates`);
   return res.data;
 }
