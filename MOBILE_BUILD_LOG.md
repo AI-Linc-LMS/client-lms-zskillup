@@ -5,7 +5,7 @@
 > and the exact next action. Append to it at every checkpoint — newest status at the top of each
 > section, not a diary.
 >
-> Last updated: **2026-10-13**, end of Sprint A day 1.
+> Last updated: **2026-10-14**, end of Sprint A day 2.
 
 ---
 
@@ -17,7 +17,7 @@
 | This log | `client-lms-zskillup/MOBILE_BUILD_LOG.md` |
 | Backend | `client-lms-zskillup-backend` → `AI-Linc-LMS/client-lms-zskillup-backend` |
 | Web frontend (the port source) | `client-lms-zskillup` → `AI-Linc-LMS/client-lms-zskillup` |
-| Mobile app repo | **not created yet** — will be `AI-Linc-LMS/client-lms-zskillup-mobile` |
+| Mobile app repo | `client-lms-zskillup-mobile` → `AI-Linc-LMS/client-lms-zskillup-mobile` ✅ |
 
 GitHub CLI is authenticated as `utkarshsingx` with `repo` + `workflow` scope, org `AI-Linc-LMS`.
 
@@ -83,22 +83,77 @@ Sprint A = foundations, **Tue 13 Oct → Mon 19 Oct**. No feature screens.
 
 | # | Item | Status |
 |---|---|---|
-| 1 | Backend: native-client session | ✅ **PR [#236](https://github.com/AI-Linc-LMS/client-lms-zskillup-backend/pull/236)** — open, not merged |
-| 2 | Backend: `codingCount` + mobile remote config | ✅ **PR [#237](https://github.com/AI-Linc-LMS/client-lms-zskillup-backend/pull/237)** — open, not merged |
+| 1 | Backend: native-client session | ✅ **merged** (#236) — ⛔ **NOT DEPLOYED**, see §4.1 |
+| 2 | Backend: `codingCount` + mobile remote config | ✅ **merged** (#237) — ⛔ **NOT DEPLOYED**, see §4.1 |
 | 3 | ADR-006 mobile amendment | ⛔ **blocked** — no `project-brain/` in the repo (§3.3) |
-| 4 | `api.prephasz.com` → ALB | ⬜ not started (AWS) |
-| 5 | Mobile repo scaffold + EAS build on both platforms | ⬜ not started |
-| 6 | `MOBILE_DESIGN_LAW.md` + tokens module | ⬜ not started — **gates every screen** |
-| 7 | `client.ts` ported | ⬜ not started |
-| 8 | Login → role-aware home, all four roles | ⬜ not started |
+| 4 | `api.prephasz.com` → ALB | ⬜ not started — **and I cannot do it**, see §4.2 |
+| 5 | Mobile repo scaffold + bundle | ✅ Expo SDK 57 / RN 0.86 / expo-router 57; `expo export` produces a 2.5 MB iOS bundle |
+| 6 | `MOBILE_DESIGN_LAW.md` + tokens | ✅ `src/theme/tokens.ts` + the doc + six primitives |
+| 7 | `client.ts` ported | ✅ three postures, three-way refresh verdict, single-flight, submit lock |
+| 8 | Login → role-aware home, all four roles | ✅ code complete — **unverified on a device** (§4.3) |
 | 9 | Sentry | ⬜ not started |
-| 10 | Apple + Google developer enrolment | ⬜ **owner action — day-one critical path** |
-| 11 | Confirm Play account type (org vs personal) | ⬜ **owner action — worth ~2–3 weeks** |
-| 12 | Test devices: one iPhone, one 2–3 GB Android | ⬜ **owner action** |
+| 10 | Apple + Google developer enrolment | ⬜ **owner — day-one critical path** |
+| 11 | Confirm Play account type | ⬜ **owner — worth ~2–3 weeks** |
+| 12 | Test devices: one iPhone, one 2–3 GB Android | ⬜ **owner** |
+
+### 4.1 ⛔ BLOCKER — the backend CI deploy will not start
+Both PRs merged cleanly (checks green: typecheck, unit tests, real-Postgres API smoke). Both
+`push`-to-main deploy runs then failed with **`startup_failure`** — the workflow never
+initialised, so **nothing deployed**. Evidence:
+
+- Runs `38514661868` (6f40e2c) and `38514752751` (d40f93c), both `conclusion: startup_failure`,
+  `path: "BuildFailed"`, empty workflow name, **zero jobs**.
+- `.github/workflows/deploy.yml` is **byte-identical** to the version that deployed successfully
+  on 2026-10-06 (`git diff dbf664a 6f40e2c -- .github/workflows/deploy.yml` is empty).
+- Repo Actions are enabled, all actions allowed, no `environment:` on the deploy job.
+- The same workflow file passed on the `pull_request` event for both PRs **the day before**.
+- `gh run rerun` refuses: *"This workflow run cannot be retried."*
+
+PR-event runs pass and push-event runs fail to start, with an unchanged file. That points at an
+**account-level Actions problem** — a spending limit, a quota, or an org policy change — which
+needs org-admin visibility. `gh api orgs/AI-Linc-LMS/actions/permissions` returns 403 for this
+token, so it cannot be confirmed from here.
+
+**Impact is contained:** production still serves the previous image, and nothing is broken. The
+two commits sit on main undeployed. Mobile work continues against the current API for everything
+except the native session and mobile-config, which cannot be exercised against production until
+this clears.
+
+### 4.2 ⛔ A manual deploy is not available to me
+`aws sts get-caller-identity` resolves to account **584435903341**, but the deploy targets ECR
+registry **511974511619** and the `zskillup` ECS cluster is not found in the account I can reach.
+Different AWS account. The same constraint blocks the `api.prephasz.com` DNS work (item 4).
+
+### 4.3 Not yet verified on a device
+The login → role-home flow typechecks and bundles, but has not been run against a real backend on
+real hardware. That is the Sprint A exit criterion and it is **not met**. It needs either the
+deploy above, or a dev build pointed at a local backend.
 
 ---
 
 ## 5. What shipped, in detail
+
+### The mobile app (new repo, commit `25d3b25`)
+```
+src/theme/tokens.ts        the design law in code — colour, type, radius, spacing,
+                           elevation, 44pt touch minimum, status map
+MOBILE_DESIGN_LAW.md       why; what carries over from web and what changes
+src/components/ui/         Text, Card, Button, StatusPill, ProgressBar, Screen
+src/lib/api/client.ts      the port: 3 postures, 3-way refresh verdict,
+                           single-flight, 403 never retried, submit lock
+src/lib/api/auth.ts        login/google/verify/register/logout/me
+src/lib/session.ts         refresh token in Keychain / Keystore
+src/store/auth.ts          access token in MEMORY ONLY
+src/app/                   _layout (providers + session-ended handler),
+                           index (cold-start restore), login, 3 role homes
+```
+**Deliberate deviation:** NativeWind was the plan's first choice and is **not** used. On a
+just-released SDK, coupling the design system to a styling library's compatibility window buys
+nothing the tokens module does not already give. The plan allowed for exactly this fallback.
+
+**Verified:** `npm run typecheck` clean; `npx expo export --platform ios` produces a 2.5 MB
+Hermes bundle. **Not verified:** anything on a device.
+
 
 ### PR #236 — `feat(auth): let the mobile app hold its own session`
 Branch `feat/native-session`. Files: `auth/native-client.ts` *(new)*,
@@ -164,6 +219,14 @@ npx tsc --noEmit                                        # 1 PRE-EXISTING failure
 ---
 
 ## 7. Next action
+
+**Owner first — two of these are blocking and neither is code:**
+1. **Get GitHub Actions deploying again** (§4.1). Check the org's Actions billing / spending limit
+   and policy. Until this clears, no backend change reaches production.
+2. **AWS access to account 511974511619**, or someone who has it, for `api.prephasz.com` (§4.2).
+3. Apple + Google enrolment, Play account type, test devices — still the launch critical path.
+
+**Then, unblocked:**
 
 **Merge order does not matter** — #236 and #237 are independent and touch disjoint files.
 
