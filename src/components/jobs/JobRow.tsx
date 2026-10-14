@@ -5,7 +5,7 @@ import { Bookmark, Briefcase, Clock, IndianRupee, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn, safeHttpUrl } from '@/lib/utils';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
-import { JobStatus } from '@/shared/enums';
+import { acceptsApplications } from '@/shared/drive-lifecycle';
 import { compensationLabel, deadlineLabel, jobMetaLine } from '@/lib/jobs/format';
 
 /**
@@ -28,7 +28,7 @@ export function JobRow({
 }) {
   const closes = deadlineLabel(job.applicationDeadline);
   const pay = compensationLabel(job);
-  const shut = job.status !== JobStatus.ACTIVE || closes?.tone === 'closed';
+  const shut = !acceptsApplications(job.status) || closes?.tone === 'closed';
 
   return (
     <div

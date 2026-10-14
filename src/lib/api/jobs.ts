@@ -15,7 +15,7 @@ import type {
   JobPostingPatch,
   UpsertJobQuestionDto,
 } from '@/shared/dto/jobs.dto';
-import type { JobApplicationStatus } from '@/shared/enums';
+import type { JobApplicationStatus, JobStatus } from '@/shared/enums';
 
 export type {
   JobApplicantDto,
@@ -274,4 +274,41 @@ export async function exportApplicantsCsv(
 ): Promise<DownloadedFile> {
   const qs = toQuery({ jobId, status: status?.join(',') });
   return (await apiClient.getFile(`/api/v1/admin/jobs/export/applications${qs}`)).data;
+}
+
+/** One move in a drive's life (PRD §5). */
+export interface JobStatusEventDto {
+  id: string;
+  fromStatus: JobStatus | null;
+  toStatus: JobStatus;
+  reason: string | null;
+  nextReviewAt: string | null;
+  changedBy: string | null;
+  createdAt: string;
+}
+
+/**
+ * Move a drive through its lifecycle.
+ *
+ * Its own call rather than a field on the edit PATCH, because a status move is something
+ * somebody DID: cancelling emails every applicant, going cold books a date to look again.
+ * The server refuses an impossible move and says which ones are possible instead.
+ */
+export async function transitionDrive(
+  id: string,
+  to: JobStatus,
+  opts: { reason?: string | null; nextReviewDate?: string | null } = {},
+): Promise<JobPostingDto> {
+  const res = await apiClient.post<JobPostingDto>(`/api/v1/admin/jobs/${id}/transition`, {
+    to,
+    reason: opts.reason ?? undefined,
+    nextReviewDate: opts.nextReviewDate ?? undefined,
+  });
+  return res.data;
+}
+
+/** A drive's full status history, newest first. */
+export async function getDriveStatusHistory(id: string): Promise<JobStatusEventDto[]> {
+  const res = await apiClient.get<JobStatusEventDto[]>(`/api/v1/admin/jobs/${id}/status-history`);
+  return res.data;
 }

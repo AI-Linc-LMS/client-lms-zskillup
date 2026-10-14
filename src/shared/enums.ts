@@ -411,21 +411,22 @@ export enum CommunityPostType {
  * own URL - a paused requisition must not leak through a link someone already shared.
  * CLOSED and COMPLETED stay readable: a shared link should explain itself, not 404.
  */
-export enum JobStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  CLOSED = 'CLOSED',
-  COMPLETED = 'COMPLETED',
-  ON_HOLD = 'ON_HOLD',
-}
-
-/** Statuses a student is allowed to see the job in. ON_HOLD is deliberately absent. */
-export const STUDENT_VISIBLE_JOB_STATUSES: readonly JobStatus[] = [
-  JobStatus.ACTIVE,
-  JobStatus.INACTIVE,
-  JobStatus.CLOSED,
-  JobStatus.COMPLETED,
-] as const;
+/**
+ * A posting's lifecycle status.
+ *
+ * Was five values answering "is this open". PRD §5 replaced them with the twelve-status
+ * DRIVE lifecycle, which answers "where has the hiring got to" — published, shortlisting,
+ * interviewing and offer stage are all "open" and mean entirely different things to a
+ * waiting cohort. Defined in drive-lifecycle.ts alongside the transition map and the
+ * visibility rules, and ALIASED here so the board's long-standing imports keep reading
+ * naturally: a job posting and a placement drive are the same row.
+ */
+export { DriveStatus as JobStatus } from './drive-lifecycle';
+export {
+  STUDENT_VISIBLE_DRIVE_STATUSES as STUDENT_VISIBLE_JOB_STATUSES,
+  APPLICABLE_DRIVE_STATUSES,
+  DRIVE_STATUS_LABELS,
+} from './drive-lifecycle';
 
 /** What kind of opportunity this is. Drives the compensation vocabulary (salary vs
  *  stipend) and the one filter students most want. APPRENTICESHIP and PPO_CONVERSION

@@ -49,6 +49,7 @@ import {
   type EligibilityRuleSet,
 } from '../drive-eligibility';
 import { RoundKind, type PlannedRound } from '../drive-rounds';
+import { DriveStatus } from '../drive-lifecycle';
 
 /** One hard-eligibility criterion (PRD §4 "Eligibility"). See shared/drive-eligibility.ts
  *  for what each operator means and why missing data is never a failure. */
@@ -784,6 +785,30 @@ export class JobTargetDto {
   @IsOptional()
   @IsBoolean()
   isExclusion?: boolean;
+}
+
+/**
+ * Move a drive through its lifecycle (PRD §5).
+ *
+ * A status move is an event with a reason and an audience, not another field on the edit
+ * form — cancelling notifies every applicant and going cold books a date to look again —
+ * so it has its own payload and its own route.
+ */
+export class TransitionDriveDto {
+  @IsEnum(DriveStatus)
+  to!: DriveStatus;
+
+  /** Required for ON_HOLD and CANCELLED; the server enforces which, since it depends on
+   *  the target status rather than on this field. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  reason?: string | null;
+
+  /** "Cold / On Hold — reason and next review date should be captured." */
+  @IsOptional()
+  @IsDateString()
+  nextReviewDate?: string | null;
 }
 
 /** The full audience for a posting. Replace-in-full, never a diff: the composer holds
