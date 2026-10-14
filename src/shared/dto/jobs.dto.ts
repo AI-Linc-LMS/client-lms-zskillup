@@ -50,6 +50,7 @@ import {
 } from '../drive-eligibility';
 import { RoundKind, RoundRsvpResponse, type PlannedRound } from '../drive-rounds';
 import { AuthoringMode, PracticeWeight } from '../round-assessment-plan';
+import { AssignmentAudience } from '../assignment-audience';
 import { DriveStatus } from '../drive-lifecycle';
 import { ApplicationStage } from '../application-pipeline';
 import {
@@ -1183,4 +1184,24 @@ export class UpsertRoundPlanDto {
   @IsOptional() @IsUUID() jdExtractionId?: string | null;
   @IsOptional() @IsString() @MaxLength(2000) note?: string | null;
   @IsOptional() @IsUUID() gateApprovedBy?: string | null;
+}
+
+/* ------------------------------------------------------------------------- */
+/* §23.4 — who an assessment is assigned to                                   */
+/* ------------------------------------------------------------------------- */
+
+/**
+ * Resolve an assignment audience (PRD §23.4).
+ *
+ * What each audience requires is enforced by `checkAudience` rather than by decorators,
+ * because the requirement depends on which audience was chosen — a drive id is mandatory
+ * for "everyone eligible" and meaningless for "one cohort".
+ */
+export class ResolveAudienceDto {
+  @IsEnum(AssignmentAudience) audience!: AssignmentAudience;
+  @IsOptional() @IsUUID() driveId?: string | null;
+  @IsOptional() @IsUUID() collegeId?: string | null;
+  @IsOptional() @IsUUID() cohortId?: string | null;
+  @IsOptional() @IsArray() @ArrayMaxSize(2000) @IsUUID('4', { each: true })
+  userIds?: string[] | null;
 }
