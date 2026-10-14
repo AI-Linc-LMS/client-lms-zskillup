@@ -72,6 +72,37 @@ export interface PlannedRound {
   /** True when this round is run on Prephasz rather than by the employer — it is then
    *  eligible for a generated practice/screening assessment (PRD §23). */
   isPrephaszHosted?: boolean;
+
+  /* ── PRD §12: the assessment behind this round ──────────────────────────── */
+
+  /**
+   * An existing Prephasz scheduled assessment this round is run with.
+   *
+   * A LINK, not a copy. The assessment keeps its own window, duration, proctoring and
+   * grading — §12 says "select an existing Prephasz assessment", and duplicating its
+   * settings here would create a second source of truth that drifts the first time
+   * somebody edits one of them.
+   */
+  scheduledAssessmentId?: string | null;
+
+  /** An employer-run assessment on their own platform. Mutually exclusive in practice
+   *  with the above, but not enforced: a drive may genuinely run both and compare. */
+  externalAssessmentUrl?: string | null;
+
+  /** Whether this round's result counts toward selection, or is practice only. §23.4
+   *  asks for the distinction to be visible to students and staff; a practice round that
+   *  silently gated progression would be the worst of both. */
+  isEvaluative?: boolean;
+
+  /** Score needed to pass, when the round has one. Null = no automatic threshold, which
+   *  is the safer default: §6 forbids an opaque score deciding alone. */
+  passMark?: number | null;
+
+  /** Who is running it — panel, interviewer, or the team. */
+  panel?: string | null;
+
+  /** How many candidates this round can take. Null = no cap. */
+  capacity?: number | null;
 }
 
 /** The round's display name: the employer's wording, else the kind. */

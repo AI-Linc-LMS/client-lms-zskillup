@@ -50,6 +50,14 @@ import {
 } from '../drive-eligibility';
 import { RoundKind, type PlannedRound } from '../drive-rounds';
 import { DriveStatus } from '../drive-lifecycle';
+import { ApplicationStage } from '../application-pipeline';
+import {
+  BulkAction,
+  CandidateSortKey,
+  MAX_BULK_SIZE,
+  MAX_PAGE_SIZE,
+  SavedView,
+} from '../candidate-search';
 
 /** One hard-eligibility criterion (PRD §4 "Eligibility"). See shared/drive-eligibility.ts
  *  for what each operator means and why missing data is never a failure. */
@@ -88,6 +96,75 @@ export class PlannedRoundDto {
   @IsOptional() @IsString() @MaxLength(5000) instructions?: string | null;
   @IsOptional() @IsString() @MaxLength(5000) notes?: string | null;
   @IsOptional() @IsBoolean() isPrephaszHosted?: boolean;
+}
+
+/**
+ * Per-drive match weights (PRD §6: "weights must be configurable per role and total
+ * 100%"). Stored under `matching_config.weights`; the server rejects a set that does not
+ * total 100, because a set that does not is not a weighting — it silently rescales every
+ * score without saying so.
+ */
+export class MatchWeightsDto {
+  @IsOptional() @IsInt() @Min(0) @Max(100) APTITUDE?: number;
+  @IsOptional() @IsInt() @Min(0) @Max(100) TECHNICAL?: number;
+  @IsOptional() @IsInt() @Min(0) @Max(100) COMMUNICATION?: number;
+  @IsOptional() @IsInt() @Min(0) @Max(100) RESUME?: number;
+  @IsOptional() @IsInt() @Min(0) @Max(100) INTERVIEW_READINESS?: number;
+  @IsOptional() @IsInt() @Min(0) @Max(100) PLACEMENT_READINESS?: number;
+  @IsOptional() @IsInt() @Min(0) @Max(100) CUSTOM_QUESTIONS?: number;
+}
+
+/**
+ * An authorised override of a candidate's computed match score (PRD §6).
+ * The reason is required — an override without one is indistinguishable from a mistake.
+ */
+export class SetMatchOverrideDto {
+  @IsUUID()
+  userId!: string;
+
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  score!: number;
+
+  @IsString()
+  @MinLength(3)
+  @MaxLength(2000)
+  reason!: string;
+}
+
+/** Move one candidate through the drive's pipeline (PRD §10). */
+export class MoveApplicationStageDto {
+  @IsEnum(ApplicationStage)
+  to!: ApplicationStage;
+
+  /** Required for rejections, holds, waitlists and no-shows — the server decides which,
+   *  since it depends on the target stage rather than on this field. */
+  @IsOptional() @IsString() @MaxLength(2000) reason?: string | null;
+
+  /** What the panel or employer said, kept apart from the internal reason. */
+  @IsOptional() @IsString() @MaxLength(5000) feedback?: string | null;
+
+  @IsOptional() @IsInt() @Min(0) @Max(100) score?: number | null;
+
+  /** Which of the drive's planned rounds — required when moving to IN_ROUND. */
+  @IsOptional() @IsString() @MaxLength(64) roundId?: string | null;
+}
+
+/** The same move, applied to several candidates (PRD §15). */
+export class BulkMoveApplicationStageDto extends MoveApplicationStageDto {
+  @IsArray()
+  @ArrayMaxSize(500)
+  @IsUUID('4', { each: true })
+  applicationIds!: string[];
+}
+
+/** Invite a subset of a drive's candidates into one of its rounds (PRD §12). */
+export class InviteToRoundDto {
+  @IsString() @MinLength(1) @MaxLength(64) roundId!: string;
+
+  @IsArray() @ArrayMaxSize(500) @IsUUID('4', { each: true })
+  applicationIds!: string[];
 }
 
 export class CreateJobPostingDto {
@@ -407,6 +484,8 @@ export class CreateJobPostingDto {
   @IsOptional() @IsDateString() unpublishAt?: string | null;
 
   // Matching & selection
+  @IsOptional() @ValidateNested() @Type(() => MatchWeightsDto)
+  matchWeights?: MatchWeightsDto;
   @IsOptional() @IsInt() @Min(0) @Max(100) minMatchScore?: number | null;
   @IsOptional() @IsBoolean() scoreVisibleToStaff?: boolean;
   @IsOptional() @IsBoolean() scoreVisibleToStudent?: boolean;
@@ -931,4 +1010,72 @@ export class ApplyToJobDto {
   @IsString()
   @MaxLength(255)
   resumeName?: string | null;
+}
+
+/* ------------------------------------------------------------------------- */
+/* §15 — search, saved views and bulk actions                                 */
+/* ------------------------------------------------------------------------- */
+
+/**
+ * Query for a drive's candidate list (PRD §15).
+ *
+ * Query strings arrive as text, so every number and boolean is coerced explicitly. A
+ * `minScore=60` that stayed the string "60" would compare lexically and quietly match "7".
+ */
+export class SearchCandidatesDto {
+  @IsOptional() @IsEnum(SavedView) view?: SavedView;
+  @IsOptional() @IsString() @MaxLength(200) search?: string;
+  @IsOptional() @IsIn(['ELIGIBLE', 'INELIGIBLE', 'NEEDS_REVIEW'])
+  eligibility?: 'ELIGIBLE' | 'INELIGIBLE' | 'NEEDS_REVIEW';
+
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) @Max(100) minScore?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) @Max(100) maxScore?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) @Max(100) minCoverage?: number;
+
+  @IsOptional() @IsArray() @ArrayMaxSize(50) @IsString({ each: true }) @MaxLength(80, { each: true })
+  skills?: string[];
+  @IsOptional() @IsString() @MaxLength(160) location?: string;
+  @IsOptional() @IsUUID() collegeId?: string;
+  @IsOptional() @IsString() @MaxLength(120) cohort?: string;
+  @IsOptional() @IsString() @MaxLength(120) department?: string;
+
+  @IsOptional() @Type(() => Boolean) @IsBoolean() paidAccess?: boolean;
+  @IsOptional() @IsArray() @ArrayMaxSize(20) @IsString({ each: true })
+  placementStatus?: string[];
+  @IsOptional() @IsArray() @ArrayMaxSize(30) @IsString({ each: true })
+  applicationStatus?: string[];
+  @IsOptional() @Type(() => Boolean) @IsBoolean() hasApplied?: boolean;
+  @IsOptional() @IsDateString() activeSince?: string;
+
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) ctcMin?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) ctcMax?: number;
+
+  @IsOptional() @IsEnum(CandidateSortKey) sort?: CandidateSortKey;
+  @IsOptional() @IsIn(['asc', 'desc']) dir?: 'asc' | 'desc';
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(MAX_PAGE_SIZE) limit?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) offset?: number;
+  /** Archived applications are hidden by default; this brings them back. */
+  @IsOptional() @Type(() => Boolean) @IsBoolean() includeArchived?: boolean;
+}
+
+/**
+ * A bulk action over a selection of candidates (PRD §15).
+ *
+ * `expectedCount` is the guard that matters: a filtered list can change between the
+ * operator ticking "select all" and this request arriving, and without it a bulk reject
+ * can land on a set nobody looked at. Optional in the type, because an API client acting
+ * on explicit ids has nothing to confirm — but the UI always sends it.
+ */
+export class BulkCandidateActionDto {
+  @IsEnum(BulkAction) action!: BulkAction;
+
+  @IsArray() @ArrayMaxSize(MAX_BULK_SIZE) @IsUUID('4', { each: true })
+  candidateIds!: string[];
+
+  @IsOptional() @IsString() @MaxLength(2000) reason?: string | null;
+  @IsOptional() @IsEnum(ApplicationStage) toStage?: ApplicationStage | null;
+  @IsOptional() @IsString() @MaxLength(64) roundId?: string | null;
+  @IsOptional() @IsUUID() scheduledAssessmentId?: string | null;
+  @IsOptional() @IsUUID() ownerUserId?: string | null;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) expectedCount?: number | null;
 }

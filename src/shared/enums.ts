@@ -533,6 +533,15 @@ export enum JobQuestionKind {
   SELECT = 'SELECT',
   MULTI_SELECT = 'MULTI_SELECT',
   URL = 'URL',
+  /** PRD §9. A yes/no is not a two-option SELECT: it is the shape most eligibility
+   *  questions actually take ("willing to relocate?"), and giving it its own kind is
+   *  what lets an answer feed a hard rule without parsing free text. */
+  YES_NO = 'YES_NO',
+  /** A document the employer asked for. The answer stores the uploaded file's URL. */
+  FILE = 'FILE',
+  /** An acknowledgement the student must tick. Recorded because consent that cannot be
+   *  evidenced afterwards is not consent (PRD §17). */
+  CONSENT = 'CONSENT',
 }
 
 /** Where a student's job application stands. The admin moves an application through

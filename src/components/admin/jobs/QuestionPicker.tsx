@@ -26,6 +26,11 @@ const KIND_LABEL: Record<JobQuestionKind, string> = {
   [JobQuestionKind.SELECT]: 'Choose one',
   [JobQuestionKind.MULTI_SELECT]: 'Choose many',
   [JobQuestionKind.URL]: 'Link',
+  [JobQuestionKind.YES_NO]: 'Yes / no',
+  [JobQuestionKind.FILE]: 'File upload',
+  // §9 treats a consent question as its own kind rather than a yes/no, because a "no"
+  // to consent is a refusal to proceed and the backend validates it that way.
+  [JobQuestionKind.CONSENT]: 'Consent',
 };
 
 /**
