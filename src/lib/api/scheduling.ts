@@ -320,6 +320,34 @@ export async function releaseAssessmentResults(id: string, released = true): Pro
   await apiClient.post(`/api/v1/admin/scheduled-assessments/${id}/release`, { released });
 }
 
+/** What came of nudging a drive's outstanding students. */
+export interface AssessmentReminderResult {
+  title: string;
+  /** How many students were queued an email — eligible, able to sign in, not finished. */
+  queued: number;
+  /** Of those, how many still owe at least one report detail (phone, department, …). */
+  withMissingDetails: number;
+  closesIST: string;
+}
+
+/**
+ * Email everyone who can sit this drive and has not finished it, asking for any missing
+ * report details in the same breath.
+ *
+ * Deliberately a button rather than a schedule. The built-in reminder only fires in the
+ * hour BEFORE a drive starts, which is no help in the case that actually needs it: a
+ * window just extended, or a cohort just unblocked, where the people who could not sit
+ * the paper suddenly can. Deduped per student per day, so pressing it twice in an
+ * afternoon does not mail anyone twice.
+ */
+export async function remindPendingStudents(id: string): Promise<AssessmentReminderResult> {
+  const res = await apiClient.post<AssessmentReminderResult>(
+    `/api/v1/admin/scheduled-assessments/${id}/remind`,
+    {},
+  );
+  return res.data;
+}
+
 export interface AssessmentLeaderboardEntry {
   rank: number;
   userId: string;

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { branchShort } from '@/lib/branch';
 import { csvScopeSlug, downloadCsv } from '@/lib/csv';
 import { resultsCsvBody, TEST_REPORT_COLUMNS } from '@/lib/results-export-rows';
+import { collegeGroupKey, groupCollegeNames } from '@/shared/college-name';
 import { cn } from '@/lib/utils';
 
 /**
@@ -46,6 +47,32 @@ const ATTEMPT_FILTERS: ReadonlyArray<{ key: AttemptFilter; label: string }> = [
   { key: 'NOT_ATTEMPTED', label: 'Not attempted' },
 ];
 
+/** The value every dropdown uses for "no filter" — '' is also what an empty cell
+ *  normalises to, so a sentinel keeps "All" apart from "students with no branch". */
+const ANY = '__any__';
+
+const eyebrow = 'text-[10px] font-semibold uppercase tracking-widest text-slate-400';
+const selectCls =
+  'h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus-visible:ring-2 focus-visible:ring-orange/30';
+
+/** Distinct values of one row field, with how many rows carry each, name-sorted. Used
+ *  for Department and Cohort; College goes through groupCollegeNames instead, because
+ *  its values are partly free text and the same college arrives spelled several ways. */
+function countBy<T>(
+  rows: readonly T[],
+  pick: (r: T) => string | null | undefined,
+): Array<{ value: string; label: string; count: number }> {
+  const counts = new Map<string, number>();
+  for (const r of rows) {
+    const v = pick(r);
+    if (!v) continue;
+    counts.set(v, (counts.get(v) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([value, count]) => ({ value, label: value, count }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+}
+
 /**
  * THE PLACEMENT READINESS REPORT - one college's whole roster against one test.
  *
@@ -63,6 +90,12 @@ export function PlacementReadinessReport({ loadReport }: PlacementReadinessRepor
   const [report, setReport] = useState<AssessmentResults | null>(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<AttemptFilter>('ALL');
+  // Three identity filters, because "who has not taken it" is only an actionable
+  // question once it is narrowed to a group somebody owns — a department head, a
+  // college's TPO, a cohort's trainer.
+  const [branch, setBranch] = useState<string>(ANY);
+  const [college, setCollege] = useState<string>(ANY);
+  const [cohort, setCohort] = useState<string>(ANY);
   const [error, setError] = useState<string | null>(null);
 
   // The report IS the section, so it loads on mount rather than on a click: the whole
@@ -72,6 +105,9 @@ export function PlacementReadinessReport({ loadReport }: PlacementReadinessRepor
     setLoading(true);
     setError(null);
     setFilter('ALL');
+    setBranch(ANY);
+    setCollege(ANY);
+    setCohort(ANY);
     loadReport()
       .then((r) => !cancelled && setReport(r))
       .catch((e) => {
@@ -86,35 +122,129 @@ export function PlacementReadinessReport({ loadReport }: PlacementReadinessRepor
   }, [loadReport]);
 
   const rows = report?.rows ?? [];
-  const sat = rows.filter((r) => r.attempted).length;
-  const shown = rows.filter((r) =>
+
+  // Options come from the rows themselves, so a filter can never offer a group that
+  // would come back empty. Colleges are GROUPED by name rather than listed raw: the
+  // same college arrives as "AIT college", "AIT College", "ait" — one dropdown entry
+  // per college, not one per spelling.
+  const branchOptions = countBy(rows, (r) => branchShort(r.branch));
+  const cohortOptions = countBy(rows, (r) => r.cohort);
+  const collegeOptions = groupCollegeNames(rows, (r) => r.collegeName);
+
+  // Identity first, attempted/not second — so the attempt pills can show counts WITHIN
+  // the chosen group, which is the number anyone chasing a department actually wants.
+  const scoped = rows.filter(
+    (r) =>
+      (branch === ANY || branchShort(r.branch) === branch) &&
+      (cohort === ANY || r.cohort === cohort) &&
+      (college === ANY || collegeGroupKey(r.collegeName) === college),
+  );
+  const sat = scoped.filter((r) => r.attempted).length;
+  const shown = scoped.filter((r) =>
     filter === 'ALL' ? true : filter === 'ATTEMPTED' ? r.attempted : !r.attempted,
   );
+  const filtered = branch !== ANY || college !== ANY || cohort !== ANY || filter !== 'ALL';
+
+  const clearFilters = () => {
+    setBranch(ANY);
+    setCollege(ANY);
+    setCohort(ANY);
+    setFilter('ALL');
+  };
 
   const exportTestReport = () => {
     if (!report) return;
     // Same generator as the results-modal export - only the fixed columns differ
     // (Email and Attempted Status in, proctoring out), which is a parameter, not a
-    // second implementation. The file is exactly the table above it.
-    const csv = resultsCsvBody(report, TEST_REPORT_COLUMNS);
+    // second implementation. The file is exactly the table above it: the CSV carries
+    // the FILTERED rows, so "download the ECE students who have not taken it" is one
+    // action rather than an export plus a spreadsheet pass.
+    const csv = resultsCsvBody({ ...report, rows: shown }, TEST_REPORT_COLUMNS);
     if (!csv) {
-      setError('There is no student on your college roster to report on yet.');
+      setError(
+        filtered
+          ? 'No students match these filters, so there is nothing to export.'
+          : 'There is no student on your college roster to report on yet.',
+      );
       return;
     }
-    downloadCsv(`${csvScopeSlug(report.assessment.title)}-my-college.csv`, csv);
+    const scopeName =
+      college !== ANY
+        ? csvScopeSlug(collegeOptions.find((c) => c.key === college)?.label ?? 'college')
+        : 'my-college';
+    downloadCsv(`${csvScopeSlug(report.assessment.title)}-${scopeName}.csv`, csv);
   };
 
   return (
     <BentoCard
       title="Placement Readiness Test Report"
       subtitle="Every student on your roster — whether or not they attempted the test."
-      source={report ? `${sat} of ${rows.length} attempted` : 'Loading'}
+      source={report ? `${sat} of ${scoped.length} attempted` : 'Loading'}
       action={
         <Button size="sm" disabled={!report || rows.length === 0} onClick={exportTestReport}>
           <Download className="size-4" /> Download CSV
         </Button>
       }
     >
+      {report ? (
+        <div className="mb-4 grid gap-3 sm:grid-cols-3">
+          <div>
+            <label htmlFor="pr-college" className={eyebrow}>
+              College
+            </label>
+            <select
+              id="pr-college"
+              value={college}
+              onChange={(e) => setCollege(e.target.value)}
+              className={cn(selectCls, 'mt-1.5')}
+            >
+              <option value={ANY}>All colleges ({rows.length})</option>
+              {collegeOptions.map((c) => (
+                <option key={c.key} value={c.key}>
+                  {c.label} ({c.count})
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="pr-branch" className={eyebrow}>
+              Department
+            </label>
+            <select
+              id="pr-branch"
+              value={branch}
+              onChange={(e) => setBranch(e.target.value)}
+              className={cn(selectCls, 'mt-1.5')}
+            >
+              <option value={ANY}>All departments</option>
+              {branchOptions.map((b) => (
+                <option key={b.value} value={b.value}>
+                  {b.label} ({b.count})
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="pr-cohort" className={eyebrow}>
+              Cohort
+            </label>
+            <select
+              id="pr-cohort"
+              value={cohort}
+              onChange={(e) => setCohort(e.target.value)}
+              className={cn(selectCls, 'mt-1.5')}
+            >
+              <option value={ANY}>All cohorts</option>
+              {cohortOptions.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label} ({c.count})
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      ) : null}
+
       <div className="flex flex-wrap items-center gap-3">
         {report ? (
           <div className="flex gap-1.5" role="group" aria-label="Filter by attempt">
@@ -133,11 +263,20 @@ export function PlacementReadinessReport({ loadReport }: PlacementReadinessRepor
               >
                 {f.label}
                 <span className="ml-1.5 tabular-nums opacity-70">
-                  {f.key === 'ALL' ? rows.length : f.key === 'ATTEMPTED' ? sat : rows.length - sat}
+                  {f.key === 'ALL'
+                    ? scoped.length
+                    : f.key === 'ATTEMPTED'
+                      ? sat
+                      : scoped.length - sat}
                 </span>
               </button>
             ))}
           </div>
+        ) : null}
+        {filtered ? (
+          <Button variant="ghost" size="sm" onClick={clearFilters}>
+            Clear filters
+          </Button>
         ) : null}
       </div>
 

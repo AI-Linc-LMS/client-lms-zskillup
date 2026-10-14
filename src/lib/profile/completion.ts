@@ -1,7 +1,7 @@
 import type { ApiMe } from '@/lib/api/me';
 
 export interface ProfileCompletion {
-  /** 0-100 across all 8 profile fields - drives the completion banner + the
+  /** 0-100 across all 9 profile fields - drives the completion banner + the
    *  profile-page checklist ("how finished is my profile?"). */
   percent: number;
   missing: string[];
@@ -22,7 +22,7 @@ export interface ProfileCompletion {
  * a 100%-complete profile, and the only flow that ever filled 7 of those 8
  * fields in one pass was the 4-step onboarding wizard. That wizard is no longer
  * routed to on sign-in or signup (product decision - students land on the
- * dashboard), so an un-onboarded student is now the NORMAL case, and a 8/8 bar
+ * dashboard), so an un-onboarded student is now the NORMAL case, and a 9/9 bar
  * would have walled every student out of the three core practice surfaces on
  * their first click - relocating the wizard's friction rather than removing it.
  * The remaining 5 fields (course, year of study, passout year, skills, target
@@ -48,11 +48,11 @@ export const PROFILE_GATE_ENABLED = false;
 const ESSENTIAL_FIELDS = new Set(['name', 'phone', 'college']);
 
 /**
- * The 8 fields that make up a "complete" student profile - the single source of
+ * The 9 fields that make up a "complete" student profile - the single source of
  * truth mirrored by the profile page, the dashboard completion banner and the
- * feature lock gate (name, phone, course, year, college, passout year, skills,
- * target roles). Non-students (e.g. an admin previewing the student app) are
- * never considered incomplete, so they're never gated.
+ * feature lock gate (name, phone, department, course, year, college, passout year,
+ * skills, target roles). Non-students (e.g. an admin previewing the student app)
+ * are never considered incomplete, so they're never gated.
  */
 export function profileCompletion(me: ApiMe | null): ProfileCompletion {
   if (!me || me.role !== 'STUDENT') {
@@ -62,6 +62,12 @@ export function profileCompletion(me: ApiMe | null): ProfileCompletion {
   const fields: Array<[string, boolean]> = [
     ['name', !!me.fullName?.trim()],
     ['phone', !!p?.phone],
+    // Department. Added 2026-10-14: it was the one report field nothing ever asked
+    // for — not this banner, not the profile checklist — and 2,433 of 3,959 active
+    // students had none, which is why assessment result sheets came back with the
+    // column blank. The CSV importer does capture branch, so this only shows for
+    // students whose enrolment path never set it.
+    ['department', !!p?.branch],
     ['course', !!p?.course],
     ['year of study', !!p?.yearOfStudy],
     // A college the platform already knows about counts even when the free-text
