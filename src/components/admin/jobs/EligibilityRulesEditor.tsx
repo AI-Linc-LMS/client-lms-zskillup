@@ -55,6 +55,13 @@ const FIELD_GROUPS: ReadonlyArray<{ title: string; fields: EligibilityField[] }>
     ],
   },
   {
+    // §7 and §18: "unplaced students only", and "already-placed students only for a
+    // higher package". Both are rules about the drive's audience rather than about the
+    // student's record, which is why they sit in their own group.
+    title: 'Placement status',
+    fields: [EligibilityField.PLACEMENT_STATUS, EligibilityField.BEST_OFFER_CTC],
+  },
+  {
     title: 'Only where lawful and approved',
     fields: [EligibilityField.AGE, EligibilityField.GENDER],
   },

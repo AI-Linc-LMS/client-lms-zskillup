@@ -159,3 +159,71 @@ export function validatePlannedRounds(rounds: readonly PlannedRound[]): string[]
   }
   return problems;
 }
+
+/* ------------------------------------------------------------------------- */
+/* Can the candidate make it? (PRD §18.13)                                    */
+/* ------------------------------------------------------------------------- */
+
+/**
+ * A candidate's answer to being put in a round.
+ *
+ * §18: "a student cannot attend a round: allow RSVP, decline/reschedule request and
+ * reason capture." Before this, a student whose university exam clashed with an interview
+ * slot had two options: not turn up and be recorded as a NO_SHOW, or email somebody and
+ * hope. NO_SHOW is a judgement that follows a candidate around, and it is the wrong one
+ * for a person who told us in advance.
+ *
+ * DECLINING IS NOT WITHDRAWING. A student who cannot make Tuesday has not pulled out of
+ * the drive, and conflating the two would end their candidacy over a diary clash. The
+ * RSVP is information for whoever is scheduling; §10 still owns every stage change, and a
+ * student may not set their own stage beyond withdrawing.
+ */
+export enum RoundRsvpResponse {
+  ATTENDING = 'ATTENDING',
+  /** Cannot attend this round at all. Not a withdrawal from the drive. */
+  DECLINED = 'DECLINED',
+  /** Cannot attend as scheduled, and is asking for another time. */
+  RESCHEDULE_REQUESTED = 'RESCHEDULE_REQUESTED',
+}
+
+export const RSVP_LABELS: Readonly<Record<RoundRsvpResponse, string>> = {
+  [RoundRsvpResponse.ATTENDING]: 'Attending',
+  [RoundRsvpResponse.DECLINED]: 'Cannot attend',
+  [RoundRsvpResponse.RESCHEDULE_REQUESTED]: 'Asked to reschedule',
+};
+
+/**
+ * Responses that need the student to say why.
+ *
+ * Not bureaucracy: whoever reschedules the round has to decide between "I have a
+ * university exam" and "I have another offer", and those lead to different actions. A
+ * decline with no reason tends to be read as the second.
+ */
+export const RSVP_REASON_REQUIRED: readonly RoundRsvpResponse[] = [
+  RoundRsvpResponse.DECLINED,
+  RoundRsvpResponse.RESCHEDULE_REQUESTED,
+] as const;
+
+export interface RsvpProblem {
+  code: 'REASON_REQUIRED' | 'UNKNOWN_ROUND';
+  message: string;
+}
+
+export function checkRsvp(input: {
+  response: RoundRsvpResponse;
+  reason?: string | null;
+  /** The drive's planned rounds, so an RSVP cannot name a round that does not exist. */
+  rounds: readonly PlannedRound[];
+  roundId: string;
+}): RsvpProblem | null {
+  if (!input.rounds.some((r) => r.id === input.roundId)) {
+    return { code: 'UNKNOWN_ROUND', message: 'That round is not part of this drive.' };
+  }
+  if (RSVP_REASON_REQUIRED.includes(input.response) && !(input.reason ?? '').trim()) {
+    return {
+      code: 'REASON_REQUIRED',
+      message: 'Tell us why, so the team can work around it rather than guess.',
+    };
+  }
+  return null;
+}
