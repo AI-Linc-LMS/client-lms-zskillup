@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, Globe2, Loader2, Search, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
 import { getJobReach, getJobTargets, setJobTargets } from '@/lib/api/jobs';
 import type { JobTargetViewDto } from '@/shared/dto/jobs.dto';
 import { JobTargetType } from '@/shared/enums';
@@ -47,6 +46,8 @@ export function TargetPicker({ jobId }: { jobId: string }) {
   const [options, setOptions] = useState<Option[]>([]);
   const [reach, setReach] = useState<{ isPublic: boolean; students: number } | null>(null);
   const [query, setQuery] = useState('');
+  /** Whether the next audience added WIDENS reach or removes someone from it. */
+  const [mode, setMode] = useState<'INCLUDE' | 'EXCLUDE'>('INCLUDE');
   const [type, setType] = useState<JobTargetType>(JobTargetType.COLLEGE);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -175,7 +176,11 @@ export function TargetPicker({ jobId }: { jobId: string }) {
     try {
       await setJobTargets(
         jobId,
-        next.map((t) => ({ targetType: t.targetType, targetId: t.targetId })),
+        next.map((t) => ({
+          targetType: t.targetType,
+          targetId: t.targetId,
+          isExclusion: t.isExclusion,
+        })),
       );
       await refresh();
     } catch (err) {
@@ -185,9 +190,15 @@ export function TargetPicker({ jobId }: { jobId: string }) {
     }
   };
 
+  /** `isExclusion` is explicit rather than defaulted: an audience row that silently
+   *  defaulted the wrong way would either leak a drive or hide it, and neither shows up
+   *  until somebody complains that nobody applied. */
   const add = (o: Option) => {
     setQuery('');
-    void commit([...targets, { targetType: o.type, targetId: o.id, label: o.name }]);
+    void commit([
+      ...targets,
+      { targetType: o.type, targetId: o.id, label: o.name, isExclusion: mode === 'EXCLUDE' },
+    ]);
   };
 
   const remove = (t: JobTargetViewDto) =>
@@ -236,9 +247,16 @@ export function TargetPicker({ jobId }: { jobId: string }) {
           {targets.map((t) => (
             <span
               key={`${t.targetType}:${t.targetId}`}
-              className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 py-1 pl-3 pr-1.5 text-xs font-semibold text-slate-700"
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-full py-1 pl-3 pr-1.5 text-xs font-semibold',
+                t.isExclusion
+                  ? 'bg-red-50 text-red-700 ring-1 ring-red-200'
+                  : 'bg-slate-100 text-slate-700',
+              )}
             >
-              <span className="text-slate-400">{TYPE_LABEL[t.targetType]}</span>
+              <span className={t.isExclusion ? 'text-red-400' : 'text-slate-400'}>
+                {t.isExclusion ? 'Except' : ''} {TYPE_LABEL[t.targetType]}
+              </span>
               {t.label ?? (
                 <span className="italic text-slate-400">no longer exists</span>
               )}
@@ -257,6 +275,33 @@ export function TargetPicker({ jobId }: { jobId: string }) {
       ) : null}
 
       <div className="rounded-xl border border-slate-200 bg-white p-4">
+        {/* Inclusions are OR-ed and WIDEN reach; an exclusion subtracts and is applied
+            last, so it beats every way the student might otherwise have been let in. */}
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          {(['INCLUDE', 'EXCLUDE'] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setMode(m)}
+              aria-pressed={mode === m}
+              className={cn(
+                'rounded-full px-3 py-1 text-xs font-semibold transition-colors',
+                mode === m
+                  ? m === 'EXCLUDE'
+                    ? 'bg-red-600 text-white'
+                    : 'bg-navy text-white'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
+              )}
+            >
+              {m === 'INCLUDE' ? 'Add to audience' : 'Keep out'}
+            </button>
+          ))}
+          <span className="text-xs text-slate-400">
+            {mode === 'INCLUDE'
+              ? 'Each audience you add widens reach.'
+              : 'Removes them even if another audience would have let them in.'}
+          </span>
+        </div>
         <div className="flex flex-wrap gap-2">
           {Object.values(JobTargetType).map((t) => (
               <button

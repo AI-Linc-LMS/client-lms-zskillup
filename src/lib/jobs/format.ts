@@ -20,6 +20,8 @@ export const EMPLOYMENT_LABEL: Record<EmploymentType, string> = {
 export const JOB_KIND_LABEL: Record<JobKind, string> = {
   [JobKind.JOB]: 'Job',
   [JobKind.INTERNSHIP]: 'Internship',
+  [JobKind.APPRENTICESHIP]: 'Apprenticeship',
+  [JobKind.PPO_CONVERSION]: 'PPO conversion',
 };
 
 /** Indian money, the way Indians read it. 1200000 -> "12 LPA", 20000 -> "Rs 20,000". */
