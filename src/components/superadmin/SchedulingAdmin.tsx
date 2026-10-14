@@ -18,6 +18,7 @@ import {
   Users,
   Video,
   X,
+  MailQuestion,
 } from 'lucide-react';
 import { AssessmentWizard } from '@/components/superadmin/AssessmentWizard';
 import { ExtendDeadlineDialog } from '@/components/assessment/ExtendDeadlineDialog';
@@ -36,6 +37,7 @@ import {
   createScheduledAssessment,
   assessmentWindowEndMs,
   deleteScheduledAssessment,
+  remindPendingStudents,
   getAssessmentResults,
   listScheduledAssessments,
   releaseAssessmentResults,
@@ -169,6 +171,37 @@ export function SchedulingAdmin() {
       await load();
     } catch (e) {
       toast.error(describeAccessError(e, `You can't delete this assessment ${NOT_YOUR_COLLEGE}`, 'Could not delete the assessment.'));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  /**
+   * Nudge everyone who still has this drive to take. The toast reports BOTH numbers —
+   * how many were mailed, and how many of those are missing report details — because
+   * "47 emailed, 31 missing details" is the line that tells an admin why their result
+   * sheet has blank columns, and that it is being chased rather than ignored.
+   */
+  const remindPending = async (id: string) => {
+    setBusyId(id);
+    try {
+      const out = await remindPendingStudents(id);
+      toast.success(
+        out.queued === 0
+          ? 'Everyone eligible has already finished this one.'
+          : `Emailing ${out.queued} student${out.queued === 1 ? '' : 's'} who have not finished it.` +
+              (out.withMissingDetails
+                ? ` ${out.withMissingDetails} also asked for missing details.`
+                : ''),
+      );
+    } catch (e) {
+      toast.error(
+        describeAccessError(
+          e,
+          `You can't remind students on this assessment ${NOT_YOUR_COLLEGE}`,
+          'Could not send the reminders.',
+        ),
+      );
     } finally {
       setBusyId(null);
     }
@@ -554,6 +587,14 @@ export function SchedulingAdmin() {
                               ? 'Send to anyone who was missed'
                               : 'Emails its audience — shows the count first',
                             onSelect: () => setPublishing(r),
+                          },
+                          {
+                            key: 'remind',
+                            label: 'Remind pending',
+                            icon: MailQuestion,
+                            hint: 'Emails everyone who has not finished it yet',
+                            disabled: busyId === r.id,
+                            onSelect: () => remindPending(r.id),
                           },
                           {
                             key: 'results',
