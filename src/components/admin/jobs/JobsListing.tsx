@@ -16,7 +16,7 @@ import {
   Search,
   Trash2,
   Users,
-} from 'lucide-react';
+  MoveRight,} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cloneJob, deleteJob, exportApplicantsCsv, listAdminJobs, updateJob } from '@/lib/api/jobs';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
@@ -25,6 +25,7 @@ import { describeError } from '@/lib/api/errors';
 import { saveBlob } from '@/lib/download';
 import { cn } from '@/lib/utils';
 import { JOB_STATUS_LABEL, JobStatusPill, PublishPill } from './JobStatusPill';
+import { DriveStatusDialog } from './DriveStatusDialog';
 
 type Filter = 'ALL' | 'PUBLISHED' | 'DRAFT' | JobStatus;
 
@@ -32,11 +33,15 @@ const FILTERS: Array<{ key: Filter; label: string }> = [
   { key: 'ALL', label: 'All' },
   { key: 'PUBLISHED', label: 'Published' },
   { key: 'DRAFT', label: 'Drafts' },
-  { key: JobStatus.ACTIVE, label: 'Active' },
-  { key: JobStatus.INACTIVE, label: 'Inactive' },
+  // The lifecycle stages an operator actually chases (PRD §5). The in-flight hiring
+  // stages share one chip because "where is this up to" is answered by the row's own
+  // pill; what a list filter is for is "show me the ones that need me".
+  { key: JobStatus.PUBLISHED, label: 'Open' },
+  { key: JobStatus.ON_HOLD, label: 'On hold' },
+  { key: JobStatus.PENDING_APPROVAL, label: 'Awaiting approval' },
   { key: JobStatus.CLOSED, label: 'Closed' },
   { key: JobStatus.COMPLETED, label: 'Completed' },
-  { key: JobStatus.ON_HOLD, label: 'On hold' },
+  { key: JobStatus.CANCELLED, label: 'Cancelled' },
 ];
 
 /**
@@ -54,6 +59,8 @@ export function JobsListing() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>('ALL');
   const [search, setSearch] = useState('');
+  /** The drive whose status is being moved, if any. */
+  const [moving, setMoving] = useState<JobPostingDto | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [page, setPage] = useState(0);
@@ -236,6 +243,12 @@ export function JobsListing() {
                     </Link>
                   </Button>
 
+                  {/* A status move is its own decision, with its own screen — cancelling
+                      emails every applicant, so it does not belong on an edit form. */}
+                  <Button size="sm" variant="outline" onClick={() => setMoving(j)}>
+                    <MoveRight className="size-3.5" /> Status
+                  </Button>
+
                   {j.isPublished ? (
                     <>
                       <Button size="sm" variant="outline" onClick={() => void copyLink(j.slug)}>
@@ -358,6 +371,20 @@ export function JobsListing() {
           </div>
         ) : null}
       </section>
+
+      {moving ? (
+        <DriveStatusDialog
+          job={moving}
+          onClose={() => setMoving(null)}
+          onMoved={(next) => {
+            // Patch the row in place rather than refetching: the list is paginated and
+            // filtered, and a refetch would jump an operator away from the row they
+            // just acted on.
+            setJobs((list) => list.map((j) => (j.id === next.id ? next : j)));
+            setMoving(null);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

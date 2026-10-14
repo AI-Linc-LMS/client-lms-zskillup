@@ -15,7 +15,8 @@ import {
 import { safeHttpUrl } from '@/lib/utils';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
 import type { BlogPostDto, PlacementRecordDto, TestimonialDto } from '@/shared/dto/content.dto';
-import { CompensationStructure, JobKind, JobStatus } from '@/shared/enums';
+import { CompensationStructure, JobKind } from '@/shared/enums';
+import { acceptsApplications } from '@/shared/drive-lifecycle';
 
 const STRUCTURE_LABEL: Record<CompensationStructure, string> = {
   [CompensationStructure.FIXED]: 'Fixed',
@@ -250,7 +251,7 @@ export function JobDetail({
   placements?: PlacementRecordDto[];
 }) {
   const closes = deadlineLabel(job.applicationDeadline);
-  const closed = job.status !== JobStatus.ACTIVE || closes?.tone === 'closed';
+  const closed = !acceptsApplications(job.status) || closes?.tone === 'closed';
   const applyHref = safeHttpUrl(job.applyUrl);
   // This posting is EXTERNAL when the employer has an application site of their own -
   // whether or not this viewer may see the link. The URL is paid content and the server
@@ -577,7 +578,7 @@ export function JobDetail({
                   jobId={job.id}
                   jobTitle={job.title}
                   applicationDeadline={job.applicationDeadline}
-                  statusClosed={job.status !== JobStatus.ACTIVE}
+                  statusClosed={!acceptsApplications(job.status)}
                 />
               </div>
             )}

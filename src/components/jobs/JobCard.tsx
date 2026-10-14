@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Bookmark, Briefcase, Clock, IndianRupee, MapPin } from 'lucide-react';
 import { cn, safeHttpUrl } from '@/lib/utils';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
-import { JobStatus } from '@/shared/enums';
+import { acceptsApplications } from '@/shared/drive-lifecycle';
 import { compensationLabel, deadlineLabel, jobMetaLine, JOB_KIND_LABEL } from '@/lib/jobs/format';
 
 const DEADLINE_TONE: Record<string, string> = {
@@ -35,7 +35,7 @@ export function JobCard({
   const closes = deadlineLabel(job.applicationDeadline);
   const pay = compensationLabel(job);
   const meta = jobMetaLine(job);
-  const shut = job.status !== JobStatus.ACTIVE || closes?.tone === 'closed';
+  const shut = !acceptsApplications(job.status) || closes?.tone === 'closed';
 
   return (
     <div

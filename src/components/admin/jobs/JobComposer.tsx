@@ -176,7 +176,7 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
     employerTerms: existing?.employerTerms ?? '',
     cancellationReason: existing?.cancellationReason ?? '',
     passoutYears: (existing?.passoutYears ?? []).join(', '),
-    status: existing?.status ?? JobStatus.ACTIVE,
+    status: existing?.status ?? JobStatus.DRAFT,
     isPrephaszOpportunity: existing?.isPrephaszOpportunity ?? true,
   });
 
