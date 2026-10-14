@@ -51,6 +51,7 @@ import {
 import { RoundKind, RoundRsvpResponse, type PlannedRound } from '../drive-rounds';
 import { AuthoringMode, PracticeWeight } from '../round-assessment-plan';
 import { AssignmentAudience } from '../assignment-audience';
+import { PracticeDecision, PracticeRecommendation } from '../practice-decision';
 import { DriveStatus } from '../drive-lifecycle';
 import { ApplicationStage } from '../application-pipeline';
 import {
@@ -1204,4 +1205,29 @@ export class ResolveAudienceDto {
   @IsOptional() @IsUUID() cohortId?: string | null;
   @IsOptional() @IsArray() @ArrayMaxSize(2000) @IsUUID('4', { each: true })
   userIds?: string[] | null;
+}
+
+/* ------------------------------------------------------------------------- */
+/* §23.5 — the human decision, recorded apart from the measurement            */
+/* ------------------------------------------------------------------------- */
+
+/**
+ * Record what a person decided about a candidate's practice (PRD §23.5).
+ *
+ * `recommendationAtDecision` is sent by the client because §23.5 asks for the override to
+ * stay visible: storing what the thresholds said AT THE TIME keeps a divergence legible
+ * even if the thresholds are changed afterwards.
+ */
+export class RecordPracticeDecisionDto {
+  @IsEnum(PracticeDecision) decision!: PracticeDecision;
+  @IsOptional() @IsString() @MaxLength(2000) reason?: string | null;
+  @IsOptional() @IsEnum(PracticeRecommendation)
+  recommendationAtDecision?: PracticeRecommendation | null;
+  @IsOptional() @IsUUID() mockAttemptId?: string | null;
+}
+
+/** Per-round score thresholds (PRD §23.5 "configurable score thresholds"). */
+export class RecommendationThresholdsDto {
+  @IsInt() @Min(0) @Max(100) readyAt!: number;
+  @IsInt() @Min(0) @Max(100) borderlineAt!: number;
 }
