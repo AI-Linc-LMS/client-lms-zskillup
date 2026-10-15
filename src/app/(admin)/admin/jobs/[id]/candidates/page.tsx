@@ -37,7 +37,14 @@ export default async function CandidatesPage({ params }: { params: Promise<{ id:
         >
           Report
         </Link>{' '}
-        shows the funnel and where people are lost.
+        shows the funnel and where people are lost.{' '}
+        <Link
+          href={`/admin/jobs/${id}/practice`}
+          className="font-semibold text-navy underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-orange/40"
+        >
+          Practice
+        </Link>{' '}
+        turns the JD into each round&rsquo;s preparation.
       </p>
       <CandidateFitScreen jobId={id} />
     </div>
