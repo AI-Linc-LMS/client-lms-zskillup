@@ -21,10 +21,16 @@ import {
   emailJobApplicant,
   exportApplicantsCsv,
   getApplicantFacets,
+  listAdminJobs,
   listApplicants,
+  moveApplicationStage,
   updateJobApplication,
   type JobApplicantDto,
 } from '@/lib/api/jobs';
+import { StageMoveDialog } from './StageMoveDialog';
+import { ApplicationHistory } from './ApplicationHistory';
+import { LEGACY_STATUS_MAP, STAGE_LABELS, type ApplicationStage } from '@/shared/application-pipeline';
+import type { PlannedRound } from '@/shared/drive-rounds';
 import { JobApplicationStatus } from '@/shared/enums';
 import { APPLICATION_STATUS, APPLICATION_STATUS_ORDER } from '@/lib/jobs/application-status';
 import { describeError } from '@/lib/api/errors';
@@ -53,6 +59,11 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [status, setStatus] = useState<JobApplicationStatus[]>([]);
+  // §10: moving a candidate to IN_ROUND has to name WHICH round, so the dialog needs the
+  // drive's planned rounds. Fetched once — it is a property of the drive, not the page.
+  const [rounds, setRounds] = useState<PlannedRound[]>([]);
+  const [moving, setMoving] = useState<JobApplicantDto | null>(null);
+  const [movingBusy, setMovingBusy] = useState(false);
   const [search, setSearch] = useState('');
   const [debounced, setDebounced] = useState('');
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -115,6 +126,52 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
       toast.error(describeError(err, 'Could not export applicants.'));
     } finally {
       setExporting(false);
+    }
+  };
+
+  useEffect(() => {
+    let alive = true;
+    // There is no single-drive admin GET, so this reads the list and picks the one —
+    // the same thing EditJobComposer does.
+    listAdminJobs()
+      .then((all) => {
+        if (!alive) return;
+        const drive = all.find((d) => d.id === jobId);
+        setRounds((drive?.plannedRounds ?? []) as PlannedRound[]);
+      })
+      .catch(() => {
+        /* The list works without them; only the move-to-round option needs them. */
+      });
+    return () => {
+      alive = false;
+    };
+  }, [jobId]);
+
+  /**
+   * Record a §10 stage move.
+   *
+   * Goes through the pipeline endpoint rather than the legacy status patch, so the move is
+   * validated, written to the candidate's history with its reason, and notified — the three
+   * things §10 exists to guarantee and which a plain status update does none of.
+   */
+  const moveStage = async (input: {
+    to: ApplicationStage;
+    reason: string | null;
+    roundId: string | null;
+    feedback: string | null;
+  }) => {
+    if (!moving) return;
+    setMovingBusy(true);
+    try {
+      await moveApplicationStage(moving.id, input);
+      toast.success(`${moving.fullName ?? moving.email} → ${STAGE_LABELS[input.to]}`);
+      setMoving(null);
+      await load();
+      loadFacets();
+    } catch (err) {
+      toast.error(describeError(err, 'Could not record the move.'));
+    } finally {
+      setMovingBusy(false);
     }
   };
 
@@ -484,14 +541,33 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
             </div>
           </div>
 
-          <div className="mt-5 flex justify-end gap-3">
+          <div className="mt-5 border-t border-slate-200 pt-4">
+            <ApplicationHistory applicationId={open.id} />
+          </div>
+
+          <div className="mt-5 flex flex-wrap justify-end gap-3">
             <Button variant="outline" onClick={() => setComposing(open)}>
               <Mail className="size-4" /> Email
+            </Button>
+            {/* The §10 path: 21 stages, a reason, a round and a recorded history — rather
+                than the six legacy statuses the row dropdown still offers. */}
+            <Button variant="secondary" onClick={() => setMoving(open)}>
+              Move stage
             </Button>
             <Button onClick={() => setOpen(null)}>Close</Button>
           </div>
         </Modal>
       ) : null}
+
+      <StageMoveDialog
+        open={moving !== null}
+        candidateName={moving?.fullName ?? moving?.email ?? 'this candidate'}
+        currentStatus={moving?.status ?? ''}
+        rounds={rounds}
+        busy={movingBusy}
+        onConfirm={moveStage}
+        onClose={() => setMoving(null)}
+      />
 
       {composing ? (
         <ComposeEmail applicant={composing} onClose={() => setComposing(null)} />
