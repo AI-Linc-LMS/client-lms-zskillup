@@ -15,7 +15,7 @@ import type {
   JobPostingPatch,
   UpsertJobQuestionDto,
 } from '@/shared/dto/jobs.dto';
-import type { JobApplicationStatus, JobStatus } from '@/shared/enums';
+import type { JobStatus } from '@/shared/enums';
 import type { EligibilityOutcome } from '@/shared/drive-eligibility';
 import type { MatchResult, MatchWeights } from '@/shared/drive-matching';
 
@@ -246,7 +246,8 @@ export interface ApplicantPage {
 
 export async function listApplicants(
   jobId: string | null,
-  opts: { status?: JobApplicationStatus[]; search?: string; sort?: string; limit?: number; offset?: number } = {},
+  // §10 stage strings, not the six-value enum — the API accepts all twenty-one.
+  opts: { status?: string[]; search?: string; sort?: string; limit?: number; offset?: number } = {},
 ): Promise<ApplicantPage> {
   const base = jobId ? `/api/v1/admin/jobs/${jobId}/applications` : '/api/v1/admin/jobs/applications';
   return (await apiClient.get<ApplicantPage>(`${base}${toQuery(opts as Record<string, unknown>)}`)).data;
@@ -257,9 +258,9 @@ export async function listApplicants(
 export async function getApplicantFacets(
   jobId: string,
   opts: { search?: string } = {},
-): Promise<Record<JobApplicationStatus, number>> {
+): Promise<Record<string, number>> {
   return (
-    await apiClient.get<Record<JobApplicationStatus, number>>(
+    await apiClient.get<Record<string, number>>(
       `/api/v1/admin/jobs/${jobId}/applications/facets${toQuery(opts as Record<string, unknown>)}`,
     )
   ).data;
@@ -272,7 +273,7 @@ export async function getApplicantFacets(
  */
 export async function exportApplicantsCsv(
   jobId?: string | null,
-  status?: JobApplicationStatus[],
+  status?: string[],
 ): Promise<DownloadedFile> {
   const qs = toQuery({ jobId, status: status?.join(',') });
   return (await apiClient.getFile(`/api/v1/admin/jobs/export/applications${qs}`)).data;

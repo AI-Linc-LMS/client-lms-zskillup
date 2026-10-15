@@ -29,10 +29,14 @@ import {
 } from '@/lib/api/jobs';
 import { StageMoveDialog } from './StageMoveDialog';
 import { ApplicationHistory } from './ApplicationHistory';
-import { LEGACY_STATUS_MAP, STAGE_LABELS, type ApplicationStage } from '@/shared/application-pipeline';
-import type { PlannedRound } from '@/shared/drive-rounds';
+import { ApplicationStage, STAGE_LABELS } from '@/shared/application-pipeline';
 import { JobApplicationStatus } from '@/shared/enums';
-import { APPLICATION_STATUS, APPLICATION_STATUS_ORDER } from '@/lib/jobs/application-status';
+import type { PlannedRound } from '@/shared/drive-rounds';
+import {
+  APPLICATION_STATUS_ORDER,
+  LEGACY_APPLICATION_STATUS_ORDER,
+  statusMeta,
+} from '@/lib/jobs/application-status';
 import { describeError } from '@/lib/api/errors';
 import { saveBlob } from '@/lib/download';
 import { cn, safeHttpUrl } from '@/lib/utils';
@@ -58,7 +62,9 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
-  const [status, setStatus] = useState<JobApplicationStatus[]>([]);
+  // §10's vocabulary is twenty-one values wide, so these are stage strings rather
+  // than the six-value enum the board shipped with.
+  const [status, setStatus] = useState<string[]>([]);
   // §10: moving a candidate to IN_ROUND has to name WHICH round, so the dialog needs the
   // drive's planned rounds. Fetched once — it is a property of the drive, not the page.
   const [rounds, setRounds] = useState<PlannedRound[]>([]);
@@ -72,7 +78,7 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
   const [exporting, setExporting] = useState(false);
-  const [facets, setFacets] = useState<Record<JobApplicationStatus, number> | null>(null);
+  const [facets, setFacets] = useState<Record<string, number> | null>(null);
   const [noteDraft, setNoteDraft] = useState('');
   const [savingNote, setSavingNote] = useState(false);
   const [viewingResume, setViewingResume] = useState<{ id: string; name: string } | null>(null);
@@ -183,7 +189,7 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
       setRows((prev) => prev.map((r) => (r.id === row.id ? updated : r)));
       if (open?.id === row.id) setOpen(updated);
       loadFacets(); // a status moved - the chip totals shifted
-      toast.success(`${row.fullName ?? row.email} → ${APPLICATION_STATUS[next].label}. Email sent.`);
+      toast.success(`${row.fullName ?? row.email} → ${statusMeta(next).label}. Email sent.`);
     } catch (err) {
       toast.error(describeError(err, 'Could not update the application.'));
     } finally {
@@ -215,7 +221,8 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
   const toggle = (id: string) =>
     setSelected((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
 
@@ -231,7 +238,7 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
     if (!ids.length) return;
     if (
       !window.confirm(
-        `Move ${ids.length} ${ids.length === 1 ? 'applicant' : 'applicants'} to ${APPLICATION_STATUS[next].label}? Each one is emailed.`,
+        `Move ${ids.length} ${ids.length === 1 ? 'applicant' : 'applicants'} to ${statusMeta(next).label}? Each one is emailed.`,
       )
     ) {
       return;
@@ -240,7 +247,7 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
     try {
       await Promise.all(ids.map((id) => updateJobApplication(id, { status: next })));
       toast.success(
-        `${ids.length} ${ids.length === 1 ? 'applicant' : 'applicants'} → ${APPLICATION_STATUS[next].label}. Emails sent.`,
+        `${ids.length} ${ids.length === 1 ? 'applicant' : 'applicants'} → ${statusMeta(next).label}. Emails sent.`,
       );
     } catch (err) {
       toast.error(describeError(err, 'Could not update every applicant. Reloading.'));
@@ -307,7 +314,7 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
                 on ? 'bg-navy text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
               )}
             >
-              {APPLICATION_STATUS[s].label}
+              {statusMeta(s).label}
               {counts[s] ? (
                 <span className={cn('ml-1.5', on ? 'text-white/70' : 'text-slate-400')}>
                   {counts[s]}
@@ -404,8 +411,8 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
 
                 <div className="flex shrink-0 items-center gap-2">
                   <StatusPill
-                    tone={APPLICATION_STATUS[r.status].tone}
-                    label={APPLICATION_STATUS[r.status].label}
+                    tone={statusMeta(r.status).tone}
+                    label={statusMeta(r.status).label}
                   />
                   <select
                     aria-label={`Status for ${r.fullName ?? r.email}`}
@@ -414,9 +421,22 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
                     onChange={(e) => void change(r, e.target.value as JobApplicationStatus)}
                     className="h-8 rounded-lg border border-slate-200 bg-white px-2 text-xs text-navy focus:border-orange focus-visible:ring-2 focus-visible:ring-orange/30"
                   >
-                    {APPLICATION_STATUS_ORDER.map((s) => (
+                    {/* The SIX this quick control can actually write. It posts to the
+                        legacy PATCH, which validates against the original enum, so
+                        offering §10's other fifteen here would be offering choices the
+                        API rejects. Those moves go through "Move stage", which asks for
+                        a reason and writes history — the filter chips above still read
+                        all twenty-one. */}
+                    {!LEGACY_APPLICATION_STATUS_ORDER.includes(
+                      r.status as JobApplicationStatus,
+                    ) ? (
+                      <option value={r.status} disabled>
+                        {statusMeta(r.status).label}
+                      </option>
+                    ) : null}
+                    {LEGACY_APPLICATION_STATUS_ORDER.map((s) => (
                       <option key={s} value={s}>
-                        {APPLICATION_STATUS[s].label}
+                        {statusMeta(s).label}
                       </option>
                     ))}
                   </select>
@@ -458,8 +478,8 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <StatusPill
-              tone={APPLICATION_STATUS[open.status].tone}
-              label={APPLICATION_STATUS[open.status].label}
+              tone={statusMeta(open.status).tone}
+              label={statusMeta(open.status).label}
             />
             <span className="text-xs text-slate-400">
               Applied {new Date(open.appliedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
