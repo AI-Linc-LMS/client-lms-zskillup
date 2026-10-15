@@ -45,6 +45,28 @@ export const AUDIT_ACTIONS: { value: string; label: string }[] = [
   { value: 'impersonation.start', label: 'Impersonation' },
   { value: 'user_sheet.view', label: 'User sheet viewed' },
   { value: 'user_sheet.export', label: 'User sheet exported' },
+
+  /**
+   * The placement surface (§17).
+   *
+   * These nine were written by the backend from the day §4–§18 shipped and were absent
+   * from this list, so the viewer could not filter to a single one of them — "who took
+   * the candidate list?" was unanswerable through the interface that exists to answer it.
+   *
+   * Deliberately NOT here: stage changes, drive status changes and employer shares. Each
+   * already has a richer domain table (`application_stage_events`, `job_status_events`,
+   * `candidate_share_log`) carrying the reason, the feedback and the fields shared.
+   * Duplicating them into audit would create two trails that can disagree.
+   */
+  { value: 'drive.score_override', label: 'Match score overridden' },
+  { value: 'drive.score_override_cleared', label: 'Score override cleared' },
+  { value: 'drive.eligibility_mark', label: 'Marked eligible / ineligible' },
+  { value: 'drive.audience_change', label: 'Drive visibility changed' },
+  { value: 'drive.candidates_export', label: 'Candidate list exported' },
+  { value: 'drive.analytics_export', label: 'Report exported' },
+  { value: 'application.owner_assign', label: 'Application owner assigned' },
+  { value: 'application.archive', label: 'Application archived' },
+  { value: 'application.unarchive', label: 'Application restored' },
 ];
 
 export async function listAuditLogs(
