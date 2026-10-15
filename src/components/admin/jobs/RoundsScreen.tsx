@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { AlertTriangle, CalendarClock, Loader2, Share2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -161,9 +162,12 @@ export function RoundsScreen({ driveId }: { driveId: string }) {
               return (
                 <li key={r.roundId} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-navy">
+                    <Link
+                      href={`/admin/jobs/${driveId}/rounds/${encodeURIComponent(r.roundId)}`}
+                      className="text-sm font-semibold text-navy underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:ring-orange/40"
+                    >
                       <span className="text-slate-400">{r.sequence}.</span> {r.round}
-                    </p>
+                    </Link>
                     <p className="mt-0.5 text-xs text-slate-500">
                       {r.inRound} in this round
                       {r.capacity !== null ? ` · ${r.capacity} places` : ' · no stated capacity'}
