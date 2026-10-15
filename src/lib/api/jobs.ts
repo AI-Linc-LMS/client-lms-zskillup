@@ -354,3 +354,108 @@ export async function getDriveCandidates(id: string): Promise<CandidateView> {
   const res = await apiClient.get<CandidateView>(`/api/v1/admin/jobs/${id}/candidates`);
   return res.data;
 }
+
+/* ------------------------------------------------------------------------- */
+/* §15 — candidate search, saved views and bulk actions                       */
+/* ------------------------------------------------------------------------- */
+
+/** One row of the §15 candidate list. Mirrors the server's SearchableCandidate. */
+export interface SearchedCandidate {
+  userId: string;
+  fullName: string | null;
+  email: string;
+  collegeName: string | null;
+  cohort: string | null;
+  branch: string | null;
+  paidAccess: boolean;
+  eligible: boolean;
+  needsReview: boolean;
+  score: number | null;
+  coverage: number;
+  dimensionScores?: Partial<Record<string, number | null>> | null;
+  applicationStatus: string | null;
+  appliedAt: string | null;
+  placementStatus: string | null;
+  /** `'withheld'` when the viewer lacks canViewFinancials — never 0 (§17). */
+  bestOfferCtc: number | null | 'withheld';
+  lastActivityAt: string | null;
+  staleWeightPct?: number;
+  oldestEvidenceAgeDays?: number | null;
+}
+
+export interface CandidateSearchPage {
+  items: SearchedCandidate[];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+  /** False when the viewer may not read CTC — the column renders "withheld". */
+  ctcVisible: boolean;
+  viewCounts: Array<{ view: string; label: string; description: string; count: number }>;
+  appliedView: string | null;
+  sort: { key: string; dir: 'asc' | 'desc' };
+}
+
+export interface CandidateSearchOptions {
+  views: Array<{ key: string; label: string; description: string }>;
+  sorts: Array<{ key: string; label: string; unavailableReason: string | null }>;
+  bulkActions: Array<{ key: string; label: string; needsReason: boolean }>;
+  maxBulkSize: number;
+}
+
+export interface BulkActionResult {
+  action: string;
+  applied: Array<{ candidateId: string; name: string | null }>;
+  skipped: Array<{ candidateId: string; name: string | null; reason: string }>;
+  appliedCount: number;
+  skippedCount: number;
+  capacityWarning?: string;
+}
+
+export async function getCandidateSearchOptions(driveId: string): Promise<CandidateSearchOptions> {
+  const res = await apiClient.get<CandidateSearchOptions>(
+    `/api/v1/admin/jobs/${driveId}/candidates/options`,
+  );
+  return res.data;
+}
+
+export async function searchCandidates(
+  driveId: string,
+  params: Record<string, string | number | boolean | undefined | null>,
+): Promise<CandidateSearchPage> {
+  const qs = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v === undefined || v === null || v === '') continue;
+    qs.set(k, String(v));
+  }
+  const res = await apiClient.get<CandidateSearchPage>(
+    `/api/v1/admin/jobs/${driveId}/candidates?${qs.toString()}`,
+  );
+  return res.data;
+}
+
+/**
+ * Act on a selection (§15).
+ *
+ * `expectedCount` is always sent: the server refuses the request if the resolved set no
+ * longer matches what the operator saw, which is the guard against a filtered list having
+ * changed under them.
+ */
+export async function bulkCandidateAction(
+  driveId: string,
+  body: {
+    action: string;
+    candidateIds: string[];
+    reason?: string | null;
+    toStage?: string | null;
+    roundId?: string | null;
+    ownerUserId?: string | null;
+    expectedCount: number;
+  },
+): Promise<BulkActionResult> {
+  const res = await apiClient.post<BulkActionResult>(
+    `/api/v1/admin/jobs/${driveId}/candidates/bulk`,
+    body,
+  );
+  return res.data;
+}
