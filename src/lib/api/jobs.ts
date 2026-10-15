@@ -459,3 +459,65 @@ export async function bulkCandidateAction(
   );
   return res.data;
 }
+
+/* ------------------------------------------------------------------------- */
+/* §10 — the application pipeline                                             */
+/* ------------------------------------------------------------------------- */
+
+/** One recorded move in a candidate's history. Nothing here is ever overwritten. */
+export interface StageEventDto {
+  fromStage: string | null;
+  toStage: string;
+  roundId: string | null;
+  reason: string | null;
+  /** The panel's words, kept apart from `reason` (which is why WE moved them). */
+  feedback: string | null;
+  score: number | null;
+  changedBy: string | null;
+  byStudent: boolean;
+  createdAt: string;
+}
+
+export interface MoveStageResultDto {
+  stage: string;
+  from: string;
+}
+
+/** Move one candidate. The server validates with the same `checkStageMove` the UI uses. */
+export async function moveApplicationStage(
+  applicationId: string,
+  body: { to: string; reason?: string | null; roundId?: string | null; feedback?: string | null; score?: number | null },
+): Promise<MoveStageResultDto> {
+  const res = await apiClient.post<MoveStageResultDto>(
+    `/api/v1/admin/jobs/applications/${applicationId}/stage`,
+    body,
+  );
+  return res.data;
+}
+
+/**
+ * Move several at once.
+ *
+ * Returns the failures NAMED rather than a count — a bulk move that quietly drops a
+ * third of its targets is worse than one that fails, because nobody checks a number.
+ */
+export async function moveApplicationStagesBulk(body: {
+  applicationIds: string[];
+  to: string;
+  reason?: string | null;
+  roundId?: string | null;
+}): Promise<{ moved: number; failed: Array<{ applicationId: string; reason: string }> }> {
+  const res = await apiClient.post<{
+    moved: number;
+    failed: Array<{ applicationId: string; reason: string }>;
+  }>(`/api/v1/admin/jobs/applications/stage/bulk`, body);
+  return res.data;
+}
+
+/** Every move ever recorded for one application, newest first. */
+export async function getApplicationHistory(applicationId: string): Promise<StageEventDto[]> {
+  const res = await apiClient.get<StageEventDto[]>(
+    `/api/v1/admin/jobs/applications/${applicationId}/history`,
+  );
+  return res.data;
+}
