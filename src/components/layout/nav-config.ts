@@ -267,6 +267,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
     heading: 'JOBS',
     items: [
       { label: 'Job Board', href: '/admin/jobs', icon: Briefcase },
+      { label: 'Placement Report', href: '/admin/placement-report', icon: TrendingUp },
     ],
   },
 ];
@@ -349,6 +350,7 @@ export const ADMIN_NAV: NavSection[] = [
     heading: 'JOBS',
     items: [
       { label: 'Job Board', href: '/admin/jobs', icon: Briefcase },
+      { label: 'Placement Report', href: '/admin/placement-report', icon: TrendingUp },
     ],
   },
   {
