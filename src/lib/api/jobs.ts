@@ -521,3 +521,109 @@ export async function getApplicationHistory(applicationId: string): Promise<Stag
   );
   return res.data;
 }
+
+/* ------------------------------------------------------------------------- */
+/* §14 — placement analytics                                                  */
+/* ------------------------------------------------------------------------- */
+
+/**
+ * A measured rate, with everything needed to read it honestly.
+ *
+ * Deliberately not a number. §14 asks for the denominator and the period on every rate,
+ * and `pct` is null when there is nothing to divide — "no data" is not "zero percent".
+ */
+export interface RateDto {
+  numerator: number;
+  denominator: number;
+  pct: number | null;
+  period: { from: string | null; to: string | null };
+  of: string;
+}
+
+export interface FunnelStepDto {
+  stage: string;
+  label: string;
+  count: number;
+  conversionFromPrevious: RateDto | null;
+  conversionFromTop: RateDto | null;
+  stoppedHere: number;
+}
+
+export interface DriveAnalyticsDto {
+  drive: {
+    id: string;
+    title: string;
+    companyName: string;
+    status: string;
+    employmentType: string | null;
+    location: string | null;
+    publishedAt: string | null;
+    deadline: string | null;
+  };
+  audience: {
+    total: number;
+    eligible: number;
+    failedEligibility: number;
+    /** §4 returns UNKNOWN for absent data — kept apart from "failed" on purpose. */
+    needsReview: number;
+    alreadyPlaced: number;
+  };
+  funnel: {
+    steps: FunnelStepDto[];
+    period: { from: string | null; to: string | null };
+    worstDropOff: { stage: string; label: string; lost: number; rate: RateDto } | null;
+  };
+  /** Who in the audience CANNOT apply — not a count of refusals, which are never logged. */
+  audienceWithoutPaidAccess: number;
+  assessmentParticipation: RateDto;
+  shortlistRatio: RateDto;
+  shortlistCapacity: number | null;
+  timeToFillDays: number | null;
+  ctc: {
+    bands: Array<{ label: string; min: number; max: number | null; count: number }>;
+    /** Leads the display: one exceptional offer drags a mean above what most students see. */
+    median: number | null;
+    highest: number | null;
+    lowest: number | null;
+    mean: number | null;
+    counted: number;
+  };
+}
+
+export async function getDriveAnalytics(driveId: string): Promise<DriveAnalyticsDto> {
+  const res = await apiClient.get<DriveAnalyticsDto>(
+    `/api/v1/admin/placement-analytics/drives/${driveId}`,
+  );
+  return res.data;
+}
+
+export interface StageImprovementDto {
+  period: { from: string | null; to: string | null };
+  worstDropOff: { stage: string; label: string; lost: number; rate: RateDto } | null;
+  losses: Array<{
+    stage: string;
+    label: string;
+    lost: number;
+    rate: RateDto;
+    /** A fixed, readable mapping — not a generated sentence that sounds like analysis. */
+    intervention: string | null;
+  }>;
+  recordedReasons: Array<{ stage: string; reason: string | null; n: number }>;
+}
+
+export async function getStageImprovement(
+  params: { driveId?: string } = {},
+): Promise<StageImprovementDto> {
+  const qs = params.driveId ? `?driveId=${encodeURIComponent(params.driveId)}` : '';
+  const res = await apiClient.get<StageImprovementDto>(
+    `/api/v1/admin/placement-analytics/stage-improvement${qs}`,
+  );
+  return res.data;
+}
+
+/** The drive funnel as CSV. §14: "provide downloadable reports." */
+export async function exportDriveFunnelCsv(
+  driveId: string,
+): Promise<{ blob: Blob; filename: string | null }> {
+  return (await apiClient.getFile(`/api/v1/admin/placement-analytics/drives/${driveId}/export`)).data;
+}

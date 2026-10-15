@@ -30,7 +30,14 @@ export default async function CandidatesPage({ params }: { params: Promise<{ id:
         >
           Candidate search
         </Link>{' '}
-        has the saved views and bulk actions.
+        has the saved views and bulk actions, and{' '}
+        <Link
+          href={`/admin/jobs/${id}/report`}
+          className="font-semibold text-navy underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-orange/40"
+        >
+          Report
+        </Link>{' '}
+        shows the funnel and where people are lost.
       </p>
       <CandidateFitScreen jobId={id} />
     </div>
