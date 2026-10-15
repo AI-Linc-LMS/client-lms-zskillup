@@ -627,3 +627,111 @@ export async function exportDriveFunnelCsv(
 ): Promise<{ blob: Blob; filename: string | null }> {
   return (await apiClient.getFile(`/api/v1/admin/placement-analytics/drives/${driveId}/export`)).data;
 }
+
+/* ------------------------------------------------------------------------- */
+/* §23.1 / §23.2 — reading a JD, and planning each round's practice           */
+/* ------------------------------------------------------------------------- */
+
+import type { ExtractedJd, RoundPracticePlan } from '@/shared/jd-extraction';
+import type { AuthoringMode, PlanConfig, PracticeWeight } from '@/shared/round-assessment-plan';
+
+export interface JdExtractionResultDto {
+  id: string;
+  extraction: ExtractedJd;
+  roundPlan: Array<{
+    sequence: number;
+    kind: string;
+    name: string;
+    practice: RoundPracticePlan;
+  }>;
+}
+
+/** Read a JD into a reviewable draft. Writes nothing to any drive (§23.1, §23.2). */
+export async function extractJd(body: {
+  jdText: string;
+  driveId?: string | null;
+}): Promise<JdExtractionResultDto> {
+  const res = await apiClient.post<JdExtractionResultDto>(
+    '/api/v1/admin/jobs/jd/extract',
+    body,
+  );
+  return res.data;
+}
+
+/** Record a review (and any edits) before the plan may be applied. */
+export async function reviewJdExtraction(
+  extractionId: string,
+  edits?: Record<string, unknown> | null,
+): Promise<{ reviewed: boolean }> {
+  const res = await apiClient.post<{ reviewed: boolean }>(
+    `/api/v1/admin/jobs/jd/extractions/${extractionId}/review`,
+    { edits: edits ?? null },
+  );
+  return res.data;
+}
+
+/**
+ * Write a reviewed round plan onto a drive.
+ *
+ * Without `replaceExisting` this REPORTS what it would replace and does nothing — §23.1
+ * asks to "ask before regenerating or replacing them".
+ */
+export async function applyJdExtraction(
+  extractionId: string,
+  body: { driveId: string; replaceExisting?: boolean },
+): Promise<{ applied: boolean; rounds: number; wouldReplace?: number }> {
+  const res = await apiClient.post<{ applied: boolean; rounds: number; wouldReplace?: number }>(
+    `/api/v1/admin/jobs/jd/extractions/${extractionId}/apply`,
+    body,
+  );
+  return res.data;
+}
+
+export interface RoundPlanRowDto {
+  roundId: string;
+  roundKind: string;
+  label: string;
+  sequence: number;
+  competencies: string[];
+  practiceFormat: string;
+  /** False for rounds a person must score — the UI must not offer a pass mark then. */
+  autoScored: boolean;
+  noPracticeReason: string | null;
+  plan: Record<string, unknown> | null;
+  suggestedConfig: PlanConfig | null;
+}
+
+export interface RoundPlansDto {
+  drive: { id: string; title: string };
+  rounds: RoundPlanRowDto[];
+  summary: {
+    total: number;
+    planned: number;
+    /** The number that matters: rounds with practice still unplanned. */
+    awaitingPlan: number;
+    nothingToPractise: number;
+  };
+}
+
+export async function getRoundPlans(driveId: string): Promise<RoundPlansDto> {
+  const res = await apiClient.get<RoundPlansDto>(`/api/v1/admin/jobs/${driveId}/round-plans`);
+  return res.data;
+}
+
+export async function upsertRoundPlan(
+  driveId: string,
+  roundId: string,
+  body: {
+    mode: AuthoringMode;
+    weight?: PracticeWeight;
+    config?: PlanConfig;
+    note?: string | null;
+    gateApprovedBy?: string | null;
+  },
+): Promise<Record<string, unknown>> {
+  const res = await apiClient.post<Record<string, unknown>>(
+    `/api/v1/admin/jobs/${driveId}/round-plans/${encodeURIComponent(roundId)}`,
+    body,
+  );
+  return res.data;
+}
