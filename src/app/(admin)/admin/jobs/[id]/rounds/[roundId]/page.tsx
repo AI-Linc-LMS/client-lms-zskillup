@@ -3,6 +3,9 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { DriveTabs } from '@/components/admin/jobs/DriveTabs';
 import { RoundPracticeScreen } from '@/components/admin/jobs/RoundPracticeScreen';
+import { InterviewPlanCard } from '@/components/admin/jobs/InterviewPlanCard';
+import { RoundCalibrationCard } from '@/components/admin/jobs/RoundCalibrationCard';
+import { AudiencePreviewCard } from '@/components/admin/jobs/AudiencePreviewCard';
 
 /** One round's practice results and the decisions people made (PRD §23.5). */
 export default async function RoundDetailPage({
@@ -30,6 +33,15 @@ export default async function RoundDetailPage({
       />
       <DriveTabs driveId={id} />
       <RoundPracticeScreen driveId={id} roundId={roundId} />
+      {/* §23.6 and §23.7 sit beneath the dashboard rather than on their own pages: all
+          three answer a question about THIS round, and splitting them would mean three
+          navigations to form one judgement. Each handles its own empty and error state,
+          so a round with no interview plan or too little paired data still renders. */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <InterviewPlanCard driveId={id} roundId={roundId} />
+        <RoundCalibrationCard driveId={id} roundId={roundId} />
+      </div>
+      <AudiencePreviewCard driveId={id} />
     </div>
   );
 }

@@ -1189,3 +1189,191 @@ export async function getPracticeDecisionHistory(
   );
   return res.data;
 }
+
+/* ------------------------------------------------------------------------- */
+/* §23.6 — interview plans and the sessions run against them                  */
+/* ------------------------------------------------------------------------- */
+
+import type { InterviewPlan } from '@/shared/interview-plan';
+import type { CalibrationReport } from '@/shared/practice-calibration';
+import type { QuestionIssue } from '@/shared/question-quality';
+import type { AssignmentAudience } from '@/shared/assignment-audience';
+
+/** The saved plan row, or null when a round has none yet. */
+export interface SavedInterviewPlanDto {
+  id: string;
+  job_posting_id: string;
+  round_id: string;
+  round_kind: string;
+  mode: string;
+  role: string | null;
+  competencies: InterviewPlan['competencies'];
+  questions: InterviewPlan['questions'];
+  rubric: string | null;
+  duration_minutes: number | null;
+  candidate_brief: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getInterviewPlan(
+  driveId: string,
+  roundId: string,
+): Promise<SavedInterviewPlanDto | null> {
+  const res = await apiClient.get<SavedInterviewPlanDto | null>(
+    `/api/v1/admin/jobs/${driveId}/rounds/${encodeURIComponent(roundId)}/interview-plan`,
+  );
+  return res.data;
+}
+
+/**
+ * A starting plan suggested from the round and the JD.
+ *
+ * It deliberately leaves `expectedEvidence` empty on every competency: the shared rule
+ * refuses to save a competency with none, so the suggestion cannot be accepted blind.
+ * Somebody has to say what a good answer sounds like before this becomes a plan.
+ */
+export async function suggestInterviewPlan(
+  driveId: string,
+  roundId: string,
+): Promise<InterviewPlan> {
+  const res = await apiClient.get<InterviewPlan>(
+    `/api/v1/admin/jobs/${driveId}/rounds/${encodeURIComponent(roundId)}/interview-plan/suggest`,
+  );
+  return res.data;
+}
+
+export async function saveInterviewPlan(
+  driveId: string,
+  roundId: string,
+  plan: InterviewPlan,
+): Promise<SavedInterviewPlanDto> {
+  const res = await apiClient.post<SavedInterviewPlanDto>(
+    `/api/v1/admin/jobs/${driveId}/rounds/${encodeURIComponent(roundId)}/interview-plan`,
+    plan,
+  );
+  return res.data;
+}
+
+/** Scheduling result. A clash is REPORTED, never blocked. */
+export interface InterviewSessionDto {
+  id: string;
+  userId: string;
+  interviewerName: string | null;
+  scheduledAt: string | null;
+  status: string;
+  clashWarning?: string | null;
+}
+
+export async function scheduleInterview(
+  driveId: string,
+  roundId: string,
+  body: {
+    userId: string;
+    interviewerUserId?: string | null;
+    interviewerName?: string | null;
+    scheduledAt?: string | null;
+    durationMinutes?: number | null;
+    venue?: string | null;
+    meetingLink?: string | null;
+  },
+): Promise<InterviewSessionDto> {
+  const res = await apiClient.post<InterviewSessionDto>(
+    `/api/v1/admin/jobs/${driveId}/rounds/${encodeURIComponent(roundId)}/interview-sessions`,
+    body,
+  );
+  return res.data;
+}
+
+export async function recordInterviewOutcome(
+  sessionId: string,
+  body: {
+    status: string;
+    competencyScores?: Array<{ competency: string; score: number | null }> | null;
+    overallScore?: number | null;
+    feedback?: string | null;
+    recommendedPractice?: string[] | null;
+    statusReason?: string | null;
+  },
+): Promise<{ recorded: true }> {
+  const res = await apiClient.post<{ recorded: true }>(
+    `/api/v1/admin/jobs/interview-sessions/${sessionId}/outcome`,
+    body,
+  );
+  return res.data;
+}
+
+/* ------------------------------------------------------------------------- */
+/* §23.7 — did the practice predict what the employer actually did?           */
+/* ------------------------------------------------------------------------- */
+
+export type RoundCalibrationDto = CalibrationReport & {
+  round: { roundId: string; roundKind: string; autoScored: boolean };
+};
+
+export async function getRoundCalibration(
+  driveId: string,
+  roundId: string,
+): Promise<RoundCalibrationDto> {
+  const res = await apiClient.get<RoundCalibrationDto>(
+    `/api/v1/admin/jobs/${driveId}/rounds/${encodeURIComponent(roundId)}/calibration`,
+  );
+  return res.data;
+}
+
+/* ------------------------------------------------------------------------- */
+/* §23.8 — read a paper before students do                                    */
+/* ------------------------------------------------------------------------- */
+
+export interface QuestionReviewDto {
+  assessment: { id: string; title: string };
+  questions: number;
+  issues: Array<QuestionIssue & { stem: string | null; relatedStem: string | null }>;
+  blocking: number;
+  review: number;
+  clean: number;
+  /** The server's own framing — a flag list is easy to misread as a verdict. */
+  note: string;
+  severities: Record<string, string>;
+}
+
+export async function getQuestionReview(
+  scheduledAssessmentId: string,
+): Promise<QuestionReviewDto> {
+  const res = await apiClient.get<QuestionReviewDto>(
+    `/api/v1/admin/jobs/assessments/${scheduledAssessmentId}/question-review`,
+  );
+  return res.data;
+}
+
+/* ------------------------------------------------------------------------- */
+/* §23.4 — who an assignment would actually reach                             */
+/* ------------------------------------------------------------------------- */
+
+/**
+ * `blocked` is kept APART from `recipients`, and `matched` sits alongside both — so a
+ * recipient list shortened by the access gate is always visibly shorter than the audience
+ * it came from, rather than quietly looking like the whole cohort.
+ */
+export interface ResolvedAudienceDto {
+  audience: AssignmentAudience;
+  label: string;
+  recipients: Array<{ userId: string; name: string | null; email: string }>;
+  blocked: Array<{ userId: string; name: string | null; email: string; reason: string }>;
+  matched: number;
+}
+
+export async function resolveAssignmentAudience(body: {
+  audience: AssignmentAudience;
+  driveId?: string | null;
+  roundId?: string | null;
+  collegeId?: string | null;
+  cohortId?: string | null;
+  userIds?: string[] | null;
+}): Promise<ResolvedAudienceDto> {
+  const res = await apiClient.post<ResolvedAudienceDto>(
+    '/api/v1/admin/jobs/assignment-audience/resolve',
+    body,
+  );
+  return res.data;
+}
