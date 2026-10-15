@@ -1,4 +1,5 @@
 import { Target } from 'lucide-react';
+import Link from 'next/link';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { CandidateFitScreen } from '@/components/admin/jobs/CandidateFitScreen';
@@ -21,6 +22,16 @@ export default async function CandidatesPage({ params }: { params: Promise<{ id:
         title="Candidate fit"
         description="Who may be considered, and how they look. Eligibility and match are separate — a high score never overrides a failed criterion."
       />
+      <p className="text-sm text-slate-600">
+        Looking to filter, sort or act on a group?{' '}
+        <Link
+          href={`/admin/jobs/${id}/search`}
+          className="font-semibold text-navy underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-orange/40"
+        >
+          Candidate search
+        </Link>{' '}
+        has the saved views and bulk actions.
+      </p>
       <CandidateFitScreen jobId={id} />
     </div>
   );
