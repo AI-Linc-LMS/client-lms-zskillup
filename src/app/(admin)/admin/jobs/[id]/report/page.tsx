@@ -2,6 +2,7 @@ import { BarChart3 } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { DriveAnalyticsScreen } from '@/components/admin/jobs/DriveAnalyticsScreen';
+import { DriveTabs } from '@/components/admin/jobs/DriveTabs';
 
 /** One drive's funnel, conversion, offers and biggest losses (PRD §14). */
 export default async function DriveReportPage({
@@ -26,6 +27,7 @@ export default async function DriveReportPage({
         title="Drive report"
         description="Where candidates are lost, and what each rate is a rate of. Counts are ever-reached rather than currently-at, so they never fall as decisions get made."
       />
+      <DriveTabs driveId={id} />
       <DriveAnalyticsScreen driveId={id} />
     </div>
   );

@@ -2,6 +2,7 @@ import { Users } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { CandidateSearchScreen } from '@/components/admin/jobs/CandidateSearchScreen';
+import { DriveTabs } from '@/components/admin/jobs/DriveTabs';
 
 /**
  * Searching and acting on a drive's candidates (PRD §15).
@@ -32,6 +33,7 @@ export default async function CandidateSearchPage({
         title="Candidate search"
         description="Saved views answer the questions asked every week — eligible and unplaced, high match but not applied, applied and not reviewed. A blank score means nobody has measured that student, not that they scored badly."
       />
+      <DriveTabs driveId={id} />
       <CandidateSearchScreen driveId={id} />
     </div>
   );

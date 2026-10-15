@@ -2,6 +2,7 @@ import { Users } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { ApplicantsScreen } from '@/components/admin/jobs/ApplicantsScreen';
+import { DriveTabs } from '@/components/admin/jobs/DriveTabs';
 
 export default async function ApplicantsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -21,6 +22,7 @@ export default async function ApplicantsPage({ params }: { params: Promise<{ id:
         title="Applicants"
         description="Move people through the pipeline. Every status change emails the candidate."
       />
+      <DriveTabs driveId={id} />
       <ApplicantsScreen jobId={id} />
     </div>
   );

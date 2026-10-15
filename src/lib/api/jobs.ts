@@ -934,3 +934,167 @@ export async function upsertRoundPlan(
   );
   return res.data;
 }
+
+/* ------------------------------------------------------------------------- */
+/* §12 / §13 — rounds, invites, RSVPs, and what was shared with whom          */
+/* ------------------------------------------------------------------------- */
+
+/** Who is in each round right now — the view a drive owner runs the day on. */
+export interface RoundRosterRowDto {
+  roundId: string;
+  round: string;
+  sequence: number;
+  inRound: number;
+  /** Null when the round has no stated capacity. Capacity is reported, never enforced. */
+  capacity: number | null;
+}
+
+export async function getRoundRoster(driveId: string): Promise<RoundRosterRowDto[]> {
+  const res = await apiClient.get<RoundRosterRowDto[]>(`/api/v1/admin/jobs/${driveId}/rounds/roster`);
+  return res.data;
+}
+
+/** The latest RSVP per candidate per round. Earlier answers stay in the table. */
+export interface RoundRsvpDto {
+  roundId: string;
+  response: string;
+  reason: string | null;
+  preferredSlot: string | null;
+  respondedAt: string;
+  userId: string;
+  name: string | null;
+  email: string;
+}
+
+export async function getRoundRsvps(driveId: string): Promise<RoundRsvpDto[]> {
+  const res = await apiClient.get<RoundRsvpDto[]>(`/api/v1/admin/jobs/${driveId}/rounds/rsvps`);
+  return res.data;
+}
+
+/**
+ * The result of inviting people into a round.
+ *
+ * `skipped` NAMES every failure rather than counting them: "38 of 41 invited" tells an
+ * operator three people need chasing without saying which three, so nobody chases them.
+ * `capacityWarning` is advisory — §12 asks to surface clashes and allow an override, so a
+ * team knowingly putting 30 people in a 25-seat lab is told and then left alone.
+ */
+export interface RoundInviteResultDto {
+  round: string;
+  invited: number;
+  skipped: Array<{ applicationId: string; reason: string }>;
+  capacityWarning?: string;
+}
+
+export async function inviteToRound(
+  driveId: string,
+  roundId: string,
+  applicationIds: string[],
+): Promise<RoundInviteResultDto> {
+  const res = await apiClient.post<RoundInviteResultDto>(
+    `/api/v1/admin/jobs/${driveId}/rounds/invite`,
+    { roundId, applicationIds },
+  );
+  return res.data;
+}
+
+/** One recorded disclosure of candidate data (§13). */
+export interface ShareLogEntryDto {
+  id: string;
+  jobPostingId: string | null;
+  kind: string;
+  recipient: string | null;
+  recipientEmail: string | null;
+  candidateIds: string[];
+  candidateCount: number;
+  fields: string[];
+  includedResumes: boolean;
+  consentBasis: string | null;
+  sharedBy: string | null;
+  createdAt: string;
+}
+
+export async function getDriveShares(driveId: string): Promise<ShareLogEntryDto[]> {
+  const res = await apiClient.get<ShareLogEntryDto[]>(`/api/v1/admin/jobs/${driveId}/shares`);
+  return res.data;
+}
+
+/* ------------------------------------------------------------------------- */
+/* §18 — duplicates and the effect of changing eligibility mid-drive          */
+/* ------------------------------------------------------------------------- */
+
+/**
+ * Accounts that look like the same person, grouped by the SIGNAL that matched them.
+ *
+ * Ordered by how much each signal is worth rather than by size: a phone collision is
+ * nearly always the same person, a shared name frequently is not.
+ */
+export interface DuplicateGroupDto {
+  matchedOn: string;
+  signal: 'PHONE' | 'NAME_ONE_WITHOUT_COLLEGE' | 'NAME_AND_COLLEGE' | string;
+  accounts: number;
+  members: Array<{
+    userId: string;
+    name: string | null;
+    email: string;
+    collegeId: string | null;
+    createdAt: string;
+    lastLoginAt: string | null;
+  }>;
+}
+
+export interface DuplicateStudentsDto {
+  groups: DuplicateGroupDto[];
+  counts: { byPhone: number; nameWithOrphanAccount: number; byNameAndCollege: number };
+  /** The server says, in the payload, that it will not merge. Rendered, not paraphrased. */
+  note: string;
+  duplicateApplications: string;
+}
+
+export async function getDuplicateStudents(
+  params: { collegeId?: string; limit?: number } = {},
+): Promise<DuplicateStudentsDto> {
+  const q = new URLSearchParams();
+  if (params.collegeId) q.set('collegeId', params.collegeId);
+  if (params.limit) q.set('limit', String(params.limit));
+  const qs = q.toString();
+  const res = await apiClient.get<DuplicateStudentsDto>(
+    `/api/v1/admin/jobs/students/duplicates${qs ? `?${qs}` : ''}`,
+  );
+  return res.data;
+}
+
+/* ------------------------------------------------------------------------- */
+/* §18 — the effect of changing eligibility mid-drive                         */
+/* ------------------------------------------------------------------------- */
+
+/**
+ * Who was judged under eligibility rules that have since changed (§18).
+ *
+ * Named, never counted: a warning that cannot say WHO is asking an operator to accept a
+ * risk nobody has measured. Only people who actually applied appear — an evaluation run
+ * while browsing gave nobody a place to lose.
+ */
+export interface EligibilityImpactDto {
+  currentRulesVersion: number;
+  rulesChangedAt: string | null;
+  impacted: Array<{
+    userId: string;
+    name: string | null;
+    email: string;
+    judgedUnderVersion: number;
+    wasEligible: boolean | null;
+    verdict: string | null;
+    evaluatedAt: string | null;
+    applicationId: string;
+    applicationStatus: string;
+  }>;
+  impactedCount: number;
+}
+
+export async function getEligibilityImpact(driveId: string): Promise<EligibilityImpactDto> {
+  const res = await apiClient.get<EligibilityImpactDto>(
+    `/api/v1/admin/jobs/${driveId}/eligibility-impact`,
+  );
+  return res.data;
+}
