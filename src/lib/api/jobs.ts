@@ -549,6 +549,24 @@ export interface FunnelStepDto {
   stoppedHere: number;
 }
 
+/** The funnel, named because all six §14 reporting levels return the same shape. */
+export interface FunnelDto {
+  steps: FunnelStepDto[];
+  period: { from: string | null; to: string | null };
+  worstDropOff: { stage: string; label: string; lost: number; rate: RateDto } | null;
+}
+
+/** A CTC spread. Median leads everywhere it is rendered — see `CtcCard`. */
+export interface CtcDto {
+  bands: Array<{ label: string; min: number; max: number | null; count: number }>;
+  /** Leads the display: one exceptional offer drags a mean above what most students see. */
+  median: number | null;
+  highest: number | null;
+  lowest: number | null;
+  mean: number | null;
+  counted: number;
+}
+
 export interface DriveAnalyticsDto {
   drive: {
     id: string;
@@ -568,26 +586,14 @@ export interface DriveAnalyticsDto {
     needsReview: number;
     alreadyPlaced: number;
   };
-  funnel: {
-    steps: FunnelStepDto[];
-    period: { from: string | null; to: string | null };
-    worstDropOff: { stage: string; label: string; lost: number; rate: RateDto } | null;
-  };
+  funnel: FunnelDto;
   /** Who in the audience CANNOT apply — not a count of refusals, which are never logged. */
   audienceWithoutPaidAccess: number;
   assessmentParticipation: RateDto;
   shortlistRatio: RateDto;
   shortlistCapacity: number | null;
   timeToFillDays: number | null;
-  ctc: {
-    bands: Array<{ label: string; min: number; max: number | null; count: number }>;
-    /** Leads the display: one exceptional offer drags a mean above what most students see. */
-    median: number | null;
-    highest: number | null;
-    lowest: number | null;
-    mean: number | null;
-    counted: number;
-  };
+  ctc: CtcDto;
 }
 
 export async function getDriveAnalytics(driveId: string): Promise<DriveAnalyticsDto> {
@@ -611,12 +617,46 @@ export interface StageImprovementDto {
   recordedReasons: Array<{ stage: string; reason: string | null; n: number }>;
 }
 
+/**
+ * The §14 filter set, as the server parses it.
+ *
+ * Every field is optional and an unknown value is ignored rather than guessed — the report
+ * narrows, it does not fail. College scoping is NOT in here on purpose: the server decides
+ * which colleges a caller may read from their own portfolio, so a client cannot widen its
+ * own scope by sending a different id.
+ */
+export interface AnalyticsFilterParams {
+  from?: string;
+  to?: string;
+  collegeId?: string;
+  cohort?: string;
+  department?: string;
+  companyId?: string;
+  driveId?: string;
+  role?: string;
+  driveStatus?: string;
+  employmentType?: string;
+  location?: string;
+  placementStatus?: string;
+  ctcMin?: number;
+  ctcMax?: number;
+}
+
+function analyticsQuery(params: AnalyticsFilterParams = {}): string {
+  const q = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v === undefined || v === null || v === '') continue;
+    q.set(k, String(v));
+  }
+  const s = q.toString();
+  return s ? `?${s}` : '';
+}
+
 export async function getStageImprovement(
-  params: { driveId?: string } = {},
+  params: AnalyticsFilterParams = {},
 ): Promise<StageImprovementDto> {
-  const qs = params.driveId ? `?driveId=${encodeURIComponent(params.driveId)}` : '';
   const res = await apiClient.get<StageImprovementDto>(
-    `/api/v1/admin/placement-analytics/stage-improvement${qs}`,
+    `/api/v1/admin/placement-analytics/stage-improvement${analyticsQuery(params)}`,
   );
   return res.data;
 }
@@ -626,6 +666,164 @@ export async function exportDriveFunnelCsv(
   driveId: string,
 ): Promise<{ blob: Blob; filename: string | null }> {
   return (await apiClient.getFile(`/api/v1/admin/placement-analytics/drives/${driveId}/export`)).data;
+}
+
+/* ------------------------------------------------------------------------- */
+/* §14 — the other four reporting levels                                      */
+/*                                                                            */
+/* The drive level shipped first because it sits beside the per-drive pages.  */
+/* These are the ones a super-admin and a TPO actually open: the platform as  */
+/* a whole, one college or cohort, one employer, one student.                 */
+/* ------------------------------------------------------------------------- */
+
+/** Level 5 — ZSkillup overall. The only level with no id, because it is everything. */
+export interface OverallReportDto {
+  scope: {
+    active_drives: number;
+    employers: number;
+    students: number;
+    colleges: number;
+    period: { from: string | null; to: string | null };
+  };
+  funnel: FunnelDto;
+  placement: {
+    offersReceived: RateDto;
+    accepted: RateDto;
+    joined: RateDto;
+    /** The conversion campus hiring actually loses people at: accepted is not at a desk. */
+    offerToJoining: RateDto;
+  };
+  roleDemand: Array<{ role: string; drives: number }>;
+  timeToPlacementDays: number | null;
+  ctc: CtcDto;
+}
+
+export async function getOverallPlacementReport(
+  params: AnalyticsFilterParams = {},
+): Promise<OverallReportDto> {
+  const res = await apiClient.get<OverallReportDto>(
+    `/api/v1/admin/placement-analytics/overall${analyticsQuery(params)}`,
+  );
+  return res.data;
+}
+
+/** Level 3 — one college, or one cohort or department inside it. */
+export interface CollegeReportDto {
+  college: { id: string; name: string; city: string | null; state: string | null };
+  cohort: string | null;
+  department: string | null;
+  students: number;
+  profileCompleteness: RateDto;
+  applicationCoverage: RateDto;
+  paidAccess: {
+    /** Three counts rather than one "paid" figure — a college buying for its cohort is
+     *  not the same commercial fact as a cohort paying individually. */
+    anyAccess: RateDto;
+    cashPaid: RateDto;
+    complimentary: number;
+    collegeSponsored: number;
+  };
+  funnel: FunnelDto;
+  placement: {
+    offersReceived: RateDto;
+    accepted: RateDto;
+    joined: RateDto;
+    placedStudents: RateDto;
+    unplaced: number;
+    notSeeking: number;
+  };
+  ctc: CtcDto;
+  byDepartment: Array<{ group: string; students: number; share: RateDto }>;
+  byCohort: Array<{ group: string; students: number; share: RateDto }>;
+  byPassoutYear: Array<{ group: string; students: number; share: RateDto }>;
+}
+
+export async function getCollegePlacementReport(
+  collegeId: string,
+  params: AnalyticsFilterParams = {},
+): Promise<CollegeReportDto> {
+  const res = await apiClient.get<CollegeReportDto>(
+    `/api/v1/admin/placement-analytics/colleges/${collegeId}${analyticsQuery(params)}`,
+  );
+  return res.data;
+}
+
+/** Level 2 — one employer across every drive they have run. */
+export interface CompanyReportDto {
+  company: { id: string; name: string | null };
+  drives: number;
+  driveList: Array<{
+    id: string;
+    title: string;
+    status: string;
+    employment_type: string | null;
+    published_at: string | null;
+    company_name: string | null;
+  }>;
+  funnel: FunnelDto;
+  /** True — and rendered — because an eligible audience across drives double-counts people. */
+  funnelTopIsApplied: boolean;
+  declineReasons: Array<{ stage: string; reason: string | null; n: number }>;
+  timeToFillDays: number | null;
+  ctc: CtcDto;
+}
+
+export async function getCompanyPlacementReport(
+  companyId: string,
+  params: AnalyticsFilterParams = {},
+): Promise<CompanyReportDto> {
+  const res = await apiClient.get<CompanyReportDto>(
+    `/api/v1/admin/placement-analytics/companies/${companyId}${analyticsQuery(params)}`,
+  );
+  return res.data;
+}
+
+/** Level 4 — one student: every application, the whole move history, and their offers. */
+export interface StudentReportDto {
+  userId: string;
+  applications: Array<{
+    id: string;
+    job_posting_id: string;
+    status: string;
+    applied_at: string;
+    title: string;
+    company_name: string | null;
+    employment_type: string | null;
+  }>;
+  timeline: Array<{
+    application_id: string;
+    from_stage: string | null;
+    to_stage: string;
+    round_id: string | null;
+    reason: string | null;
+    feedback: string | null;
+    score: string | number | null;
+    by_student: boolean;
+    created_at: string;
+  }>;
+  placement: {
+    status: string;
+    offers: Array<{
+      id?: string;
+      status: string;
+      kind: string;
+      ctc?: number | null;
+      offerDate?: string | null;
+      companyName?: string | null;
+    }>;
+    milestones: { offersReceived: number; accepted: number; joined: number };
+    bestCtc: number | null;
+  } | null;
+  /** §14's "repeated rejection stages" — where this student keeps stopping. */
+  recurringStopStages: Array<{ stage: string; times: number }>;
+  conversion: RateDto;
+}
+
+export async function getStudentPlacementReport(userId: string): Promise<StudentReportDto> {
+  const res = await apiClient.get<StudentReportDto>(
+    `/api/v1/admin/placement-analytics/students/${userId}`,
+  );
+  return res.data;
 }
 
 /* ------------------------------------------------------------------------- */

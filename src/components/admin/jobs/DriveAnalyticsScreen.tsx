@@ -1,55 +1,25 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { AlertTriangle, Download, Loader2, TrendingDown } from 'lucide-react';
+import { AlertTriangle, Download, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import { describeError } from '@/lib/api/errors';
 import { saveBlob } from '@/lib/download';
+import {
+  CtcCard,
+  FunnelTable,
+  RateRow,
+  StageLossesCard,
+  label,
+} from '@/components/admin/analytics/rate';
 import {
   exportDriveFunnelCsv,
   getDriveAnalytics,
   getStageImprovement,
   type DriveAnalyticsDto,
-  type RateDto,
   type StageImprovementDto,
 } from '@/lib/api/jobs';
-
-const label = 'text-[10px] font-semibold uppercase tracking-widest text-slate-400';
-
-/**
- * Render a rate the way §14 insists it be read.
- *
- * "Show denominator and time period for each rate." A bare "68%" is unreadable — 68% of
- * seventeen people last week is a different claim from 68% of nine hundred over a year,
- * and the number alone cannot distinguish them. So the denominator is always beside it.
- *
- * AND AN EMPTY DENOMINATOR IS NOT ZERO PERCENT. `pct` is null when there is nothing to
- * divide, and this renders "no data" rather than "0%" — nobody applied yet is not the same
- * fact as everybody failed.
- */
-function Rate({ rate, className }: { rate: RateDto | null; className?: string }) {
-  if (!rate) return <span className="text-xs text-slate-300">—</span>;
-  if (rate.pct === null) {
-    return (
-      <span className={cn('text-xs text-slate-400', className)} title={`0 ${rate.of}`}>
-        no data
-      </span>
-    );
-  }
-  return (
-    <span className={cn('whitespace-nowrap', className)}>
-      <span className="text-sm font-semibold text-navy tabular-nums">{rate.pct}%</span>{' '}
-      <span className="text-xs text-slate-400 tabular-nums">
-        ({rate.numerator.toLocaleString('en-IN')} of {rate.denominator.toLocaleString('en-IN')})
-      </span>
-    </span>
-  );
-}
-
-const rupees = (n: number | null) =>
-  n === null ? '—' : `₹${(n / 100000).toFixed(1)}L`;
 
 /**
  * ONE DRIVE'S FUNNEL AND OUTCOMES (PRD §14).
@@ -123,8 +93,6 @@ export function DriveAnalyticsScreen({ driveId }: { driveId: string }) {
   }
   if (!data) return null;
 
-  const top = data.funnel.steps[0]?.count ?? 0;
-
   return (
     <section className="space-y-5">
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -188,69 +156,14 @@ export function DriveAnalyticsScreen({ driveId }: { driveId: string }) {
         </p>
       ) : null}
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-200 px-5 py-4">
-          <p className={label}>Funnel</p>
-          <p className="mt-0.5 text-base font-bold text-navy">Where people are lost</p>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-left">
-            <thead>
-              <tr className="border-b border-slate-200">
-                {['Stage', 'Reached', 'Stopped here', 'From previous', 'From the top'].map((h) => (
-                  <th key={h} scope="col" className={cn('px-5 py-3', label)}>
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {data.funnel.steps.map((s) => (
-                <tr key={s.stage} className="border-b border-slate-100 last:border-0">
-                  <td className="px-5 py-3">
-                    <span className="text-sm font-semibold text-navy">{s.label}</span>
-                    {/* A bar makes the shape readable without inventing a chart library. */}
-                    <span className="mt-1 block h-1.5 w-full max-w-[160px] overflow-hidden rounded-full bg-slate-100">
-                      <span
-                        className="block h-full rounded-full bg-navy"
-                        style={{ width: top > 0 ? `${Math.min(100, (s.count / top) * 100)}%` : '0%' }}
-                      />
-                    </span>
-                  </td>
-                  <td className="px-5 py-3 text-sm font-semibold text-navy tabular-nums">
-                    {s.count.toLocaleString('en-IN')}
-                  </td>
-                  <td className="px-5 py-3 text-sm text-slate-600 tabular-nums">
-                    {s.stoppedHere.toLocaleString('en-IN')}
-                  </td>
-                  <td className="px-5 py-3">
-                    <Rate rate={s.conversionFromPrevious} />
-                  </td>
-                  <td className="px-5 py-3">
-                    <Rate rate={s.conversionFromTop} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <FunnelTable funnel={data.funnel} />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <p className={label}>Conversion</p>
           <dl className="mt-2 space-y-2">
-            {[
-              { k: 'Shortlist ratio', v: data.shortlistRatio },
-              { k: 'Assessment participation', v: data.assessmentParticipation },
-            ].map((r) => (
-              <div key={r.k} className="flex items-center justify-between gap-3">
-                <dt className="text-sm text-slate-600">{r.k}</dt>
-                <dd>
-                  <Rate rate={r.v} />
-                </dd>
-              </div>
-            ))}
+            <RateRow k="Shortlist ratio" rate={data.shortlistRatio} />
+            <RateRow k="Assessment participation" rate={data.assessmentParticipation} />
             <div className="flex items-center justify-between gap-3">
               <dt className="text-sm text-slate-600">Median time to fill</dt>
               <dd className="text-sm font-semibold text-navy tabular-nums">
@@ -268,67 +181,10 @@ export function DriveAnalyticsScreen({ driveId }: { driveId: string }) {
           </p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className={label}>Offers</p>
-          {data.ctc.counted === 0 ? (
-            <p className="mt-2 text-sm text-slate-500">No offers recorded yet.</p>
-          ) : (
-            <>
-              <p className="mt-1 text-[26px] font-extrabold leading-none text-navy tabular-nums">
-                {rupees(data.ctc.median)}
-              </p>
-              {/* Median leads; the mean is present and deliberately secondary, because one
-                  exceptional offer drags it above anything most students will see. */}
-              <p className="mt-1 text-xs text-slate-500">
-                median of {data.ctc.counted} · range {rupees(data.ctc.lowest)}–
-                {rupees(data.ctc.highest)} · mean {rupees(data.ctc.mean)}
-              </p>
-              <ul className="mt-3 space-y-1.5">
-                {data.ctc.bands
-                  .filter((b) => b.count > 0)
-                  .map((b) => (
-                    <li key={b.label} className="flex items-center justify-between gap-3 text-sm">
-                      <span className="text-slate-600">{b.label}</span>
-                      <span className="font-semibold text-navy tabular-nums">{b.count}</span>
-                    </li>
-                  ))}
-              </ul>
-            </>
-          )}
-        </div>
+        <CtcCard ctc={data.ctc} />
       </div>
 
-      {gaps && gaps.losses.length > 0 ? (
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className={label}>Stage improvement</p>
-          <p className="mt-0.5 text-base font-bold text-navy">Biggest losses, and what helps</p>
-          <ul className="mt-3 space-y-3">
-            {gaps.losses.slice(0, 4).map((l) => (
-              <li key={l.stage} className="flex gap-3">
-                <span
-                  className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-xl bg-red-50 text-red-600 ring-1 ring-red-100"
-                  aria-hidden
-                >
-                  <TrendingDown className="size-4" />
-                </span>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-navy">
-                    {l.label} — lost {l.lost.toLocaleString('en-IN')}
-                  </p>
-                  <p className="text-xs text-slate-400">
-                    <Rate rate={l.rate} />
-                  </p>
-                  {/* A fixed, readable mapping an operator can disagree with — not a
-                      generated sentence that merely sounds like analysis. */}
-                  {l.intervention ? (
-                    <p className="mt-1 text-sm leading-relaxed text-slate-600">{l.intervention}</p>
-                  ) : null}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
+      {gaps ? <StageLossesCard losses={gaps.losses} /> : null}
     </section>
   );
 }
