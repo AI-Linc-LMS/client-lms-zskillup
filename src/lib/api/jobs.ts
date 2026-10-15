@@ -415,7 +415,7 @@ export interface BulkActionResult {
 
 export async function getCandidateSearchOptions(driveId: string): Promise<CandidateSearchOptions> {
   const res = await apiClient.get<CandidateSearchOptions>(
-    `/api/v1/admin/jobs/${driveId}/candidates/options`,
+    `/api/v1/admin/jobs/${driveId}/candidate-search/options`,
   );
   return res.data;
 }
@@ -430,7 +430,7 @@ export async function searchCandidates(
     qs.set(k, String(v));
   }
   const res = await apiClient.get<CandidateSearchPage>(
-    `/api/v1/admin/jobs/${driveId}/candidates?${qs.toString()}`,
+    `/api/v1/admin/jobs/${driveId}/candidate-search?${qs.toString()}`,
   );
   return res.data;
 }
@@ -455,7 +455,7 @@ export async function bulkCandidateAction(
   },
 ): Promise<BulkActionResult> {
   const res = await apiClient.post<BulkActionResult>(
-    `/api/v1/admin/jobs/${driveId}/candidates/bulk`,
+    `/api/v1/admin/jobs/${driveId}/candidate-search/bulk`,
     body,
   );
   return res.data;
@@ -1407,5 +1407,48 @@ export async function setStageNotification(
     stage,
     enabled,
   });
+  return res.data;
+}
+
+/* ------------------------------------------------------------------------- */
+/* §20 — importing the academic marks the eligibility engine needs            */
+/* ------------------------------------------------------------------------- */
+
+import type {
+  AcademicColumn,
+  AcademicImportResult,
+  ScoreScale,
+} from '@/shared/academic-import';
+
+export async function getAcademicCoverage(params: { collegeId?: string } = {}): Promise<{
+  total: number;
+  withGraduation: number;
+  withTenth: number;
+  withTwelfth: number;
+}> {
+  const qs = params.collegeId ? `?collegeId=${encodeURIComponent(params.collegeId)}` : '';
+  const res = await apiClient.get<{
+    total: number;
+    withGraduation: number;
+    withTenth: number;
+    withTwelfth: number;
+  }>(`/api/v1/admin/academics/coverage${qs}`);
+  return res.data;
+}
+
+/**
+ * Preview or apply a CSV of academic marks.
+ *
+ * `apply` defaults to false on the server, so the first call always reports what WOULD
+ * happen. Nothing is written until somebody has read that.
+ */
+export async function importAcademics(body: {
+  csv: string;
+  collegeId?: string | null;
+  scales?: Partial<Record<AcademicColumn, ScoreScale>>;
+  cgpaMultiplier?: number;
+  apply?: boolean;
+}): Promise<AcademicImportResult> {
+  const res = await apiClient.post<AcademicImportResult>('/api/v1/admin/academics/import', body);
   return res.data;
 }
