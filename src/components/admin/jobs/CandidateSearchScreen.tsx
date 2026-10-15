@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, Clock, Loader2, Search, Users } from 'lucide-react';
+import { Clock, Loader2, Search, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { cn } from '@/lib/utils';
@@ -166,7 +166,10 @@ export function CandidateSearchScreen({ driveId }: { driveId: string }) {
             Everyone
           </button>
           {options.views.map((v) => {
-            const count = page?.viewCounts.find((c) => c.view === v.key)?.count;
+            // `page?.` guarded the page and not the field, so a payload without
+            // viewCounts threw and took the screen down. A missing count is a missing
+            // number, not a reason to lose the search.
+            const count = page?.viewCounts?.find((c) => c.view === v.key)?.count;
             return (
               <button
                 key={v.key}
@@ -344,7 +347,7 @@ export function CandidateSearchScreen({ driveId }: { driveId: string }) {
                   </td>
                 </tr>
               ) : (
-                rows.map((r) => <Row key={r.userId} row={r} ctcVisible={page?.ctcVisible ?? false} selected={selected.has(r.userId)} onToggle={() => toggle(r.userId)} />)
+                rows.map((r) => <Row key={r.userId} row={r} selected={selected.has(r.userId)} onToggle={() => toggle(r.userId)} />)
               )}
             </tbody>
           </table>
@@ -417,14 +420,14 @@ export function CandidateSearchScreen({ driveId }: { driveId: string }) {
   );
 }
 
+/** Withholding is carried per row by the server as the sentinel 'withheld', so this
+ *  needs no page-level flag — one source of truth for who may see a salary. */
 function Row({
   row,
-  ctcVisible,
   selected,
   onToggle,
 }: {
   row: SearchedCandidate;
-  ctcVisible: boolean;
   selected: boolean;
   onToggle: () => void;
 }) {
