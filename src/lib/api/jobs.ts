@@ -1098,3 +1098,94 @@ export async function getEligibilityImpact(driveId: string): Promise<Eligibility
   );
   return res.data;
 }
+
+/* ------------------------------------------------------------------------- */
+/* §23.5 — one round's practice, and the decisions people made about it       */
+/* ------------------------------------------------------------------------- */
+
+import type {
+  CandidatePracticeRow,
+  PracticeDecision,
+  RecommendationThresholds,
+} from '@/shared/practice-decision';
+
+/**
+ * The practice dashboard for one round.
+ *
+ * Driven by the ASSIGNED list rather than by attempts, so a student who was assigned and
+ * never started is a row rather than an absence — they are precisely who this exists to
+ * surface.
+ */
+export interface RoundPracticeDto {
+  round: { roundId: string; roundKind: string; autoScored: boolean };
+  thresholds: RecommendationThresholds;
+  rows: CandidatePracticeRow[];
+  summary: {
+    assigned: number;
+    submitted: number;
+    notStarted: number;
+    decided: number;
+    awaitingDecision: number;
+    /** Decisions that went against the recommendation. Surfaced, never prevented. */
+    divergent: number;
+  };
+}
+
+export async function getRoundPractice(
+  driveId: string,
+  roundId: string,
+): Promise<RoundPracticeDto> {
+  const res = await apiClient.get<RoundPracticeDto>(
+    `/api/v1/admin/jobs/${driveId}/rounds/${encodeURIComponent(roundId)}/practice`,
+  );
+  return res.data;
+}
+
+/**
+ * The result of recording a decision.
+ *
+ * `stageMoveRequired` is the important field: four of the six decisions are practice-side
+ * only, and the two that change the candidate's position in the EMPLOYER's process must
+ * also go through §10's pipeline — so the server says when that is still owed rather than
+ * quietly doing it somewhere the move would not be validated, recorded or notified.
+ */
+export interface PracticeDecisionResultDto {
+  recorded: true;
+  decision: PracticeDecision;
+  stageMoveRequired: boolean;
+  suggestedStage?: string | null;
+  divergesFromRecommendation: boolean;
+}
+
+export async function recordPracticeDecision(
+  driveId: string,
+  roundId: string,
+  userId: string,
+  body: { decision: PracticeDecision; reason?: string | null },
+): Promise<PracticeDecisionResultDto> {
+  const res = await apiClient.post<PracticeDecisionResultDto>(
+    `/api/v1/admin/jobs/${driveId}/rounds/${encodeURIComponent(roundId)}/practice/${userId}/decision`,
+    body,
+  );
+  return res.data;
+}
+
+export interface PracticeDecisionHistoryRowDto {
+  decision: string;
+  reason: string | null;
+  recommendationAtDecision: string | null;
+  decidedBy: string | null;
+  decidedByName?: string | null;
+  createdAt: string;
+}
+
+export async function getPracticeDecisionHistory(
+  driveId: string,
+  roundId: string,
+  userId: string,
+): Promise<PracticeDecisionHistoryRowDto[]> {
+  const res = await apiClient.get<PracticeDecisionHistoryRowDto[]>(
+    `/api/v1/admin/jobs/${driveId}/rounds/${encodeURIComponent(roundId)}/practice/${userId}/decisions`,
+  );
+  return res.data;
+}
