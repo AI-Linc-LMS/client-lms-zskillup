@@ -13,7 +13,7 @@ import {
   type JobApplicantDto,
 } from '@/lib/api/jobs';
 import { describeError } from '@/lib/api/errors';
-import { APPLICATION_STATUS, APPLICATION_STATUS_ORDER } from '@/lib/jobs/application-status';
+import { LEGACY_APPLICATION_STATUS_ORDER, statusMeta } from '@/lib/jobs/application-status';
 import { JobApplicationStatus } from '@/shared/enums';
 
 /**
@@ -55,7 +55,7 @@ export function JobApplicantsPanel({
     try {
       const updated = await updateJobApplication(row.id, { status });
       setRows((prev) => prev?.map((r) => (r.id === row.id ? updated : r)) ?? null);
-      toast.success(`${row.fullName ?? row.email} → ${APPLICATION_STATUS[status].label}. Email sent.`);
+      toast.success(`${row.fullName ?? row.email} → ${statusMeta(status).label}. Email sent.`);
     } catch (err) {
       toast.error(describeError(err, 'Could not update the application.'));
     } finally {
@@ -106,8 +106,8 @@ export function JobApplicantsPanel({
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     <StatusPill
-                      tone={APPLICATION_STATUS[r.status].tone}
-                      label={APPLICATION_STATUS[r.status].label}
+                      tone={statusMeta(r.status).tone}
+                      label={statusMeta(r.status).label}
                     />
                     <select
                       aria-label={`Status for ${r.fullName ?? r.email}`}
@@ -118,9 +118,9 @@ export function JobApplicantsPanel({
                       }
                       className="h-8 rounded-lg border border-slate-200 bg-white px-2 text-xs text-navy focus:border-orange focus-visible:ring-2 focus-visible:ring-orange/30"
                     >
-                      {APPLICATION_STATUS_ORDER.map((s) => (
+                      {LEGACY_APPLICATION_STATUS_ORDER.map((s) => (
                         <option key={s} value={s}>
-                          {APPLICATION_STATUS[s].label}
+                          {statusMeta(s).label}
                         </option>
                       ))}
                     </select>

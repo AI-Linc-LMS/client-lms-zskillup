@@ -705,6 +705,22 @@ export interface JobPostingDto {
   archivedAt?: string | null;
 }
 
+/**
+ * The stage an application is actually in, as READ back.
+ *
+ * §10 widened the pipeline to twenty-one stages and deliberately did not rename the six
+ * the board shipped with — the migration widened the CHECK constraint and left the rows
+ * alone. So a row read today carries either vocabulary, and a read DTO claiming only the
+ * original six is simply wrong about its own data. It was wrong in a way that compiled:
+ * every consumer indexed a six-key lookup table with it, and the first candidate moved to
+ * a §10-only stage took the applicants page down with `undefined.tone`.
+ *
+ * Writes are a different matter and stay narrow: the legacy PATCH still accepts only
+ * `JobApplicationStatus` (see `UpdateJobApplicationDto`), and the twenty-one-stage moves
+ * go through `POST /applications/:id/stage`, which carries a reason and writes history.
+ */
+export type ApplicationStatusRead = ApplicationStage | JobApplicationStatus;
+
 /** A student's own view of an application they submitted. */
 export interface JobApplicationDto {
   id: string;
@@ -712,7 +728,7 @@ export interface JobApplicationDto {
   jobSlug: string;
   jobTitle: string;
   companyName: string;
-  status: JobApplicationStatus;
+  status: ApplicationStatusRead;
   appliedAt: string;
   statusChangedAt: string | null;
 }

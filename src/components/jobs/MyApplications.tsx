@@ -6,7 +6,7 @@ import { Briefcase, PartyPopper } from 'lucide-react';
 import { StatusPill } from '@/components/student/StatusPill';
 import { Button } from '@/components/ui/button';
 import { listMyApplications, type JobApplicationDto } from '@/lib/api/jobs';
-import { APPLICATION_STATUS, APPLICATION_STATUS_ORDER } from '@/lib/jobs/application-status';
+import { APPLICATION_STATUS_ORDER, statusMeta } from '@/lib/jobs/application-status';
 import { JobApplicationStatus } from '@/shared/enums';
 import { cn } from '@/lib/utils';
 
@@ -18,7 +18,8 @@ function formatDate(iso: string): string {
   });
 }
 
-type Filter = JobApplicationStatus | 'all';
+// A §10 stage string, or 'all'. Twenty-one values can reach here, not six.
+type Filter = string;
 
 function FilterChip({
   active,
@@ -68,7 +69,7 @@ export function MyApplications() {
   }, []);
 
   const counts = useMemo(() => {
-    const c = {} as Partial<Record<JobApplicationStatus, number>>;
+    const c: Record<string, number> = {};
     for (const a of rows ?? []) c[a.status] = (c[a.status] ?? 0) + 1;
     return c;
   }, [rows]);
@@ -135,14 +136,14 @@ export function MyApplications() {
         </FilterChip>
         {APPLICATION_STATUS_ORDER.filter((s) => (counts[s] ?? 0) > 0).map((s) => (
           <FilterChip key={s} active={filter === s} onClick={() => setFilter(s)}>
-            {APPLICATION_STATUS[s].label} {counts[s]}
+            {statusMeta(s).label} {counts[s]}
           </FilterChip>
         ))}
       </div>
 
       <ul className="space-y-3">
         {visible.map((a) => {
-          const meta = APPLICATION_STATUS[a.status];
+          const meta = statusMeta(a.status);
           return (
             <li key={a.id} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-3">
