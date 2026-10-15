@@ -1377,3 +1377,35 @@ export async function resolveAssignmentAudience(body: {
   );
   return res.data;
 }
+
+/* ------------------------------------------------------------------------- */
+/* §11 — which stage changes email the candidate                             */
+/* ------------------------------------------------------------------------- */
+
+export interface StageNotificationsDto {
+  stages: Array<{
+    stage: string;
+    label: string;
+    enabled: boolean;
+    /** Stages where silence is actively harmful — the candidate has to act. */
+    actionRequired: boolean;
+  }>;
+  /** The server's own statement that reasons never reach the candidate. Rendered as is. */
+  note: string;
+}
+
+export async function getStageNotifications(): Promise<StageNotificationsDto> {
+  const res = await apiClient.get<StageNotificationsDto>('/api/v1/admin/stage-notifications');
+  return res.data;
+}
+
+export async function setStageNotification(
+  stage: string,
+  enabled: boolean,
+): Promise<StageNotificationsDto> {
+  const res = await apiClient.patch<StageNotificationsDto>('/api/v1/admin/stage-notifications', {
+    stage,
+    enabled,
+  });
+  return res.data;
+}

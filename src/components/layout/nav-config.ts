@@ -38,6 +38,7 @@ import {
   ShieldCheck,
   Sparkles,
   Target,
+  Mail,
   TrendingUp,
   Trophy,
   Users,
@@ -268,6 +269,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
     items: [
       { label: 'Job Board', href: '/admin/jobs', icon: Briefcase },
       { label: 'Placement Report', href: '/admin/placement-report', icon: TrendingUp },
+      { label: 'Stage Emails', href: '/admin/stage-notifications', icon: Mail },
     ],
   },
 ];
@@ -352,6 +354,7 @@ export const ADMIN_NAV: NavSection[] = [
     items: [
       { label: 'Job Board', href: '/admin/jobs', icon: Briefcase },
       { label: 'Placement Report', href: '/admin/placement-report', icon: TrendingUp },
+      { label: 'Stage Emails', href: '/admin/stage-notifications', icon: Mail },
     ],
   },
   {
