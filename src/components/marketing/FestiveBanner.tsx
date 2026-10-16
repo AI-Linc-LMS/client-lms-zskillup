@@ -18,11 +18,14 @@ import { CalendarDays, Ticket } from 'lucide-react';
  */
 const CAMPAIGN = {
   code: 'DUSSEHRA25',
-  /** 18 Oct 2026, 00:00 IST. */
+  /** The strip goes up now, as a teaser, before the code works. */
+  teaserFrom: Date.parse('2026-10-16T00:00:00+05:30'),
+  /** 18 Oct 2026, 00:00 IST. The code starts working here. */
   startsAt: Date.parse('2026-10-18T00:00:00+05:30'),
   /** Start of 23 Oct 2026 IST, so all of the 22nd counts. */
   endsAt: Date.parse('2026-10-23T00:00:00+05:30'),
   validLabel: '18 Oct to 22 Oct 2026',
+  opensLabel: '18 Oct 2026',
   terms:
     'T&C: Dussehra25 offer is applicable only on the 1-Year Full Platform Access plan. Offer valid till 22 October 2026.',
 } as const;
@@ -50,6 +53,13 @@ const SCROLL_SECONDS = 38;
 export function FestiveBanner() {
   const reduceMotion = useReducedMotion();
   const [live, setLive] = useState(false);
+  /**
+   * Whether the code actually WORKS yet, which is not the same as whether the strip is
+   * up. The strip runs early as a teaser, and in those days it must not tell anybody to
+   * type a code that will be refused at checkout: two days of students trying a dead
+   * coupon costs more goodwill than the extra two days of promotion buys.
+   */
+  const [redeemable, setRedeemable] = useState(false);
 
   useEffect(() => {
     // Decided on the client, after mount: the server renders this page for everyone and
@@ -59,7 +69,8 @@ export function FestiveBanner() {
       typeof window !== 'undefined' &&
       new URLSearchParams(window.location.search).has('festive');
     const now = Date.now();
-    setLive(preview || (now >= CAMPAIGN.startsAt && now < CAMPAIGN.endsAt));
+    setLive(preview || (now >= CAMPAIGN.teaserFrom && now < CAMPAIGN.endsAt));
+    setRedeemable(now >= CAMPAIGN.startsAt && now < CAMPAIGN.endsAt);
   }, []);
 
   if (!live) return null;
@@ -75,15 +86,28 @@ export function FestiveBanner() {
       <Dot />
       <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-400/40 bg-orange-400/10 px-3 py-1">
         <Ticket className="size-3.5 text-orange-300" aria-hidden />
-        <span className="text-xs font-medium text-orange-100">Use code</span>
-        <span className="text-xs font-extrabold tracking-wider text-orange-300">
-          {CAMPAIGN.code}
-        </span>
+        {redeemable ? (
+          <>
+            <span className="text-xs font-medium text-orange-100">Use code</span>
+            <span className="text-xs font-extrabold tracking-wider text-orange-300">
+              {CAMPAIGN.code}
+            </span>
+          </>
+        ) : (
+          <>
+            <span className="text-xs font-medium text-orange-100">Opens</span>
+            <span className="text-xs font-extrabold tracking-wider text-orange-300">
+              {CAMPAIGN.opensLabel}
+            </span>
+          </>
+        )}
       </span>
       <Dot />
       <span className="inline-flex items-center gap-1.5">
         <CalendarDays className="size-3.5 text-orange-300/80" aria-hidden />
-        <span className="text-xs text-orange-100/90">Valid {CAMPAIGN.validLabel}</span>
+        <span className="text-xs text-orange-100/90">
+          {redeemable ? `Valid ${CAMPAIGN.validLabel}` : `Code live ${CAMPAIGN.validLabel}`}
+        </span>
       </span>
       <Dot />
       <span className="text-xs text-orange-100/70">{CAMPAIGN.terms}</span>
