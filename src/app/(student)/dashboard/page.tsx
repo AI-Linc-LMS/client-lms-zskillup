@@ -1,4 +1,5 @@
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { FestiveBanner } from '@/components/marketing/FestiveBanner';
 import { AiBriefingHero } from '@/components/student/AiBriefingHero';
 import { LiveAssessmentBanner } from '@/components/student/LiveAssessmentBanner';
 import { ProfileCompletionBanner } from '@/components/student/ProfileCompletionBanner';
@@ -33,6 +34,9 @@ export default function StudentDashboardPage() {
 
       <div className="grid gap-6 xl:grid-cols-[1fr_20rem]">
         <div className="min-w-0 space-y-6">
+          {/* Above the briefing, per the campaign brief. Removes itself when the
+              campaign window closes, so nobody has to remember to take it down. */}
+          <FestiveBanner />
           <AiBriefingHero />
           <LiveAssessmentBanner />
           <AuroraStats />

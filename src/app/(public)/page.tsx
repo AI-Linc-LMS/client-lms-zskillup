@@ -54,6 +54,7 @@ import {
   LANDING_NAV,
   LANDING_SOCIALS,
 } from '@/lib/landing-config';
+import { FestiveBanner } from '@/components/marketing/FestiveBanner';
 
 /** Footer "Follow us" icon per social label. */
 const SOCIAL_ICON = { Instagram, LinkedIn: Linkedin, YouTube: Youtube } as const;
@@ -197,6 +198,7 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-white text-[var(--color-text)]">
+      <FestiveBanner />
 
       {/* ── Public Navbar ─────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-white/10 bg-gradient-to-r from-[#0a0a0c] to-[#141a2e] px-5 md:px-8">
