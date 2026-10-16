@@ -18,14 +18,15 @@ import { CalendarDays, Ticket } from 'lucide-react';
  */
 const CAMPAIGN = {
   code: 'DUSSEHRA25',
-  /** The strip goes up now, as a teaser, before the code works. */
-  teaserFrom: Date.parse('2026-10-16T00:00:00+05:30'),
-  /** 18 Oct 2026, 00:00 IST. The code starts working here. */
-  startsAt: Date.parse('2026-10-18T00:00:00+05:30'),
+  /**
+   * When the STRIP goes up. Earlier than the coupon's own window on purpose: the banner
+   * runs as marketing from today and states the dates the code is good for, so a student
+   * who reads it before the 18th knows when to come back.
+   */
+  showFrom: Date.parse('2026-10-16T00:00:00+05:30'),
   /** Start of 23 Oct 2026 IST, so all of the 22nd counts. */
   endsAt: Date.parse('2026-10-23T00:00:00+05:30'),
   validLabel: '18 Oct to 22 Oct 2026',
-  opensLabel: '18 Oct 2026',
   terms:
     'T&C: Dussehra25 offer is applicable only on the 1-Year Full Platform Access plan. Offer valid till 22 October 2026.',
 } as const;
@@ -50,16 +51,9 @@ const SCROLL_SECONDS = 38;
  * same sentence, because a student who reads the first and not the second arrives at
  * checkout expecting a discount that will not apply to what is in their basket.
  */
-export function FestiveBanner() {
+export function FestiveBanner({ variant = 'bleed' }: { variant?: 'bleed' | 'contained' } = {}) {
   const reduceMotion = useReducedMotion();
   const [live, setLive] = useState(false);
-  /**
-   * Whether the code actually WORKS yet, which is not the same as whether the strip is
-   * up. The strip runs early as a teaser, and in those days it must not tell anybody to
-   * type a code that will be refused at checkout: two days of students trying a dead
-   * coupon costs more goodwill than the extra two days of promotion buys.
-   */
-  const [redeemable, setRedeemable] = useState(false);
 
   useEffect(() => {
     // Decided on the client, after mount: the server renders this page for everyone and
@@ -69,55 +63,48 @@ export function FestiveBanner() {
       typeof window !== 'undefined' &&
       new URLSearchParams(window.location.search).has('festive');
     const now = Date.now();
-    setLive(preview || (now >= CAMPAIGN.teaserFrom && now < CAMPAIGN.endsAt));
-    setRedeemable(now >= CAMPAIGN.startsAt && now < CAMPAIGN.endsAt);
+    setLive(preview || (now >= CAMPAIGN.showFrom && now < CAMPAIGN.endsAt));
   }, []);
 
   if (!live) return null;
 
   const offer = (
     <>
-      <span className="font-serif text-[15px] font-semibold tracking-wide text-orange-200">
+      <span className="font-serif text-[17px] font-semibold tracking-wide text-orange-200">
         Dussehra Special
       </span>
       <Dot />
-      <span className="text-[15px] font-extrabold text-orange-400">25% OFF</span>
-      <span className="text-[15px] font-semibold text-white">on prephasz</span>
+      <span className="text-[19px] font-extrabold text-orange-400">25% OFF</span>
+      <span className="text-[17px] font-semibold text-white">on prephasz</span>
       <Dot />
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-400/40 bg-orange-400/10 px-3 py-1">
-        <Ticket className="size-3.5 text-orange-300" aria-hidden />
-        {redeemable ? (
-          <>
-            <span className="text-xs font-medium text-orange-100">Use code</span>
-            <span className="text-xs font-extrabold tracking-wider text-orange-300">
-              {CAMPAIGN.code}
-            </span>
-          </>
-        ) : (
-          <>
-            <span className="text-xs font-medium text-orange-100">Opens</span>
-            <span className="text-xs font-extrabold tracking-wider text-orange-300">
-              {CAMPAIGN.opensLabel}
-            </span>
-          </>
-        )}
-      </span>
-      <Dot />
-      <span className="inline-flex items-center gap-1.5">
-        <CalendarDays className="size-3.5 text-orange-300/80" aria-hidden />
-        <span className="text-xs text-orange-100/90">
-          {redeemable ? `Valid ${CAMPAIGN.validLabel}` : `Code live ${CAMPAIGN.validLabel}`}
+      <span className="inline-flex items-center gap-2 rounded-full border border-orange-400/40 bg-orange-400/10 px-4 py-1.5">
+        <Ticket className="size-4 text-orange-300" aria-hidden />
+        <span className="text-[13px] font-medium text-orange-100">Use code</span>
+        <span className="text-[13px] font-extrabold tracking-wider text-orange-300">
+          {CAMPAIGN.code}
         </span>
       </span>
       <Dot />
-      <span className="text-xs text-orange-100/70">{CAMPAIGN.terms}</span>
+      <span className="inline-flex items-center gap-1.5">
+        <CalendarDays className="size-4 text-orange-300/80" aria-hidden />
+        <span className="text-[13px] text-orange-100/90">Valid {CAMPAIGN.validLabel}</span>
+      </span>
+      <Dot />
+      <span className="text-[13px] text-orange-100/70">{CAMPAIGN.terms}</span>
     </>
   );
 
   return (
     <aside
       aria-label="Dussehra offer"
-      className="relative isolate w-full overflow-hidden border-y border-orange-400/20 bg-navy-900"
+      className={
+        // "bleed" spans the viewport, for the very top of a page. "contained" sits
+        // inside a page container and is rounded, so it reads as a card in a column
+        // rather than a strip that has been cut off at both ends.
+        variant === 'contained'
+          ? 'relative isolate w-full overflow-hidden rounded-xl border border-orange-400/25 bg-navy-900'
+          : 'relative isolate w-full overflow-hidden border-y border-orange-400/20 bg-navy-900'
+      }
     >
       {/* One soft gold glow, matching the dark premium surfaces elsewhere. Not a
           decorative gradient: it lifts the gold text off a flat black strip. */}
@@ -127,13 +114,13 @@ export function FestiveBanner() {
       />
 
       {reduceMotion ? (
-        <p className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-3 gap-y-1.5 px-6 py-2.5 text-center">
+        <p className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-3.5 gap-y-2 px-6 py-4 text-center">
           {offer}
         </p>
       ) : (
-        <div className="flex py-2.5">
+        <div className="flex py-4">
           <motion.div
-            className="flex shrink-0 items-center gap-3 whitespace-nowrap pr-3"
+            className="flex shrink-0 items-center gap-4 whitespace-nowrap pr-4"
             animate={{ x: ['0%', '-50%'] }}
             transition={{ duration: SCROLL_SECONDS, ease: 'linear', repeat: Infinity }}
           >
@@ -155,7 +142,7 @@ function Pass({ children, ariaHidden }: { children: React.ReactNode; ariaHidden?
   return (
     <span
       aria-hidden={ariaHidden || undefined}
-      className="flex shrink-0 items-center gap-3 pl-3"
+      className="flex shrink-0 items-center gap-4 pl-4"
     >
       {children}
     </span>
@@ -165,7 +152,7 @@ function Pass({ children, ariaHidden }: { children: React.ReactNode; ariaHidden?
 /** The diya between items. Decorative, so it is hidden from screen readers. */
 function Dot() {
   return (
-    <span aria-hidden className="select-none text-[13px] leading-none opacity-90">
+    <span aria-hidden className="select-none text-[16px] leading-none opacity-90">
       🪔
     </span>
   );
