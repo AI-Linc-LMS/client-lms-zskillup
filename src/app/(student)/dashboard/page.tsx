@@ -36,7 +36,7 @@ export default function StudentDashboardPage() {
         <div className="min-w-0 space-y-6">
           {/* Above the briefing, per the campaign brief. Removes itself when the
               campaign window closes, so nobody has to remember to take it down. */}
-          <FestiveBanner />
+          <FestiveBanner variant="contained" />
           <AiBriefingHero />
           <LiveAssessmentBanner />
           <AuroraStats />

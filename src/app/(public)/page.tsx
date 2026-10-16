@@ -198,7 +198,6 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-white text-[var(--color-text)]">
-      <FestiveBanner />
 
       {/* ── Public Navbar ─────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-white/10 bg-gradient-to-r from-[#0a0a0c] to-[#141a2e] px-5 md:px-8">
@@ -425,6 +424,13 @@ export default async function HomePage() {
 
         {/* Recruiter logo ticker - centred, larger logos, colour on hover. Solid black
             so the bottom of the hero stays fully dark (no lighter band showing through). */}
+        {/* Dussehra strip, sat directly above the recruiter logos and inside the SAME
+            container, so the two share a left and right edge rather than one bleeding
+            past the other. */}
+        <div className="relative mx-auto max-w-[1400px] px-5 pb-6 md:px-8">
+          <FestiveBanner variant="contained" />
+        </div>
+
         <div className="relative border-t border-white/10 bg-[#0a0a0c]">
           <div className="mx-auto max-w-[1400px] px-5 py-8 md:px-8">
             <p className="text-center text-[11px] font-bold uppercase tracking-[0.18em] text-white/55">
