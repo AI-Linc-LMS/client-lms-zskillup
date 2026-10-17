@@ -3,6 +3,7 @@ import { Toaster } from 'sonner';
 import { TopBar } from './TopBar';
 import { Sidebar } from './Sidebar';
 import { PreviewBanner } from './PreviewBanner';
+import { FestiveBanner } from '@/components/marketing/FestiveBanner';
 import { CommandPalette } from './CommandPalette';
 import { SeoTitle } from './SeoTitle';
 import { AutopayOffer } from '@/components/payments/AutopayOffer';
@@ -33,6 +34,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       <AutopayOffer />
       {/* Full-width super-admin "view as student" banner (renders only while previewing). */}
       <PreviewBanner />
+      {/* The festive strip sits in the shell rather than on the page, because this is
+          the only level that spans the whole window: inside the page it would be as
+          narrow as the content column and stop short of the sidebar and right rail.
+          Limited to the dashboard, which is where it was asked for. */}
+      <FestiveBanner restrictTo={['/dashboard']} />
       <div className="flex flex-1">
         <Sidebar />
         <main className="min-w-0 flex-1 overflow-x-clip px-4 py-5 sm:px-6 sm:py-6">{children}</main>

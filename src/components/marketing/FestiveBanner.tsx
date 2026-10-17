@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { motion, useReducedMotion } from 'framer-motion';
 import { CalendarDays, Ticket } from 'lucide-react';
+import { BrandLogo } from '@/components/layout/BrandLogo';
 
 /**
  * THE DUSSEHRA CAMPAIGN, IN ONE PLACE.
@@ -51,7 +53,17 @@ const SCROLL_SECONDS = 38;
  * same sentence, because a student who reads the first and not the second arrives at
  * checkout expecting a discount that will not apply to what is in their basket.
  */
-export function FestiveBanner({ variant = 'bleed' }: { variant?: 'bleed' | 'contained' } = {}) {
+export function FestiveBanner({
+  variant = 'bleed',
+  /**
+   * Routes this may appear on. Set when the banner is mounted in the app shell, which
+   * wraps every signed-in page: the shell is the only place that spans the full width
+   * of the window, but the campaign was asked for on the dashboard rather than on all
+   * of them, so the limit lives here instead of duplicating the banner per page.
+   */
+  restrictTo,
+}: { variant?: 'bleed' | 'contained'; restrictTo?: readonly string[] } = {}) {
+  const pathname = usePathname();
   const reduceMotion = useReducedMotion();
   const [live, setLive] = useState(false);
 
@@ -66,6 +78,7 @@ export function FestiveBanner({ variant = 'bleed' }: { variant?: 'bleed' | 'cont
     setLive(preview || (now >= CAMPAIGN.showFrom && now < CAMPAIGN.endsAt));
   }, []);
 
+  if (restrictTo && !restrictTo.includes(pathname ?? '')) return null;
   if (!live) return null;
 
   const offer = (
@@ -75,7 +88,12 @@ export function FestiveBanner({ variant = 'bleed' }: { variant?: 'bleed' | 'cont
       </span>
       <Dot />
       <span className="text-[19px] font-extrabold text-orange-400">25% OFF</span>
-      <span className="text-[17px] font-semibold text-white">on prephasz</span>
+      <span className="text-[17px] font-semibold text-white">on</span>
+      {/* The wordmark rather than the word. href={null} because this sits inside a
+          marquee that is duplicated: a link repeated twice, half of it aria-hidden, is
+          a worse affordance than no link at all. The light lockup is the one made for
+          dark surfaces. */}
+      <BrandLogo variant="light" href={null} className="h-6 w-auto" />
       <Dot />
       <span className="inline-flex items-center gap-2 rounded-full border border-orange-400/40 bg-orange-400/10 px-4 py-1.5">
         <Ticket className="size-4 text-orange-300" aria-hidden />
