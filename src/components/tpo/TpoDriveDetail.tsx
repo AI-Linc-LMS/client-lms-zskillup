@@ -6,6 +6,10 @@ import { ArrowLeft, Loader2 } from 'lucide-react';
 import { describeError } from '@/lib/api/errors';
 import { getTpoDrive, type TpoDrivePipeline } from '@/lib/api/tpo';
 import { APPLICATION_SOURCE_LABELS } from '@/shared/drive-roster-import';
+import { JobStatusPill } from '@/components/admin/jobs/JobStatusPill';
+import { StatusPill } from '@/components/student/StatusPill';
+import { stageTone } from '@/lib/ui-maps';
+import type { JobStatus } from '@/shared/enums';
 
 const eyebrow = 'text-[10px] font-semibold uppercase tracking-widest text-slate-400';
 const card = 'rounded-xl border border-slate-200 bg-white p-5 shadow-sm';
@@ -71,9 +75,7 @@ export function TpoDriveDetail({ driveId }: { driveId: string }) {
           {data.drive.title}
         </h1>
         <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-600">
-          <span className="rounded-full bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600 ring-1 ring-slate-200">
-            {data.drive.status}
-          </span>
+          <JobStatusPill status={data.drive.status as JobStatus} />
           {data.drive.location ? <span>· {data.drive.location}</span> : null}
           {data.drive.applyBy ? (
             <span>· Applications close {new Date(data.drive.applyBy).toLocaleDateString()}</span>
@@ -132,9 +134,7 @@ export function TpoDriveDetail({ driveId }: { driveId: string }) {
                     <td className="px-4 py-3 text-slate-600">{s.branch ?? '—'}</td>
                     <td className="px-4 py-3 text-slate-600">{s.cohortName ?? '—'}</td>
                     <td className="px-4 py-3">
-                      <span className="rounded-full bg-sky-50 px-2.5 py-0.5 text-[11px] font-semibold text-sky-700 ring-1 ring-sky-200">
-                        {s.stageLabel}
-                      </span>
+                      <StatusPill tone={stageTone(s.stage)} label={s.stageLabel} />
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-500">
                       {APPLICATION_SOURCE_LABELS[s.source as keyof typeof APPLICATION_SOURCE_LABELS] ?? s.source}

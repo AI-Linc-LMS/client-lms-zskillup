@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 import { describeError } from '@/lib/api/errors';
 import { getTpoStudentPlacement, type TpoStudentPlacement as Data } from '@/lib/api/tpo';
+import { StatusPill } from '@/components/student/StatusPill';
+import { offerStatusPill, stageTone } from '@/lib/ui-maps';
 import { APPLICATION_SOURCE_LABELS } from '@/shared/drive-roster-import';
 
 const eyebrow = 'text-[10px] font-semibold uppercase tracking-widest text-slate-400';
@@ -147,9 +149,7 @@ export function TpoStudentPlacement({ userId }: { userId: string }) {
                     </td>
                     <td className="px-4 py-3 text-slate-600">{a.companyName ?? '—'}</td>
                     <td className="px-4 py-3">
-                      <span className="rounded-full bg-sky-50 px-2.5 py-0.5 text-[11px] font-semibold text-sky-700 ring-1 ring-sky-200">
-                        {a.stageLabel}
-                      </span>
+                      <StatusPill tone={stageTone(a.stage)} label={a.stageLabel} />
                       {a.reason ? (
                         <span className="mt-1 block text-xs text-slate-500">{a.reason}</span>
                       ) : null}
@@ -188,9 +188,7 @@ export function TpoStudentPlacement({ userId }: { userId: string }) {
                     ) : null}
                   </span>
                   <span className="flex items-center gap-3">
-                    <span className="rounded-full bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600 ring-1 ring-slate-200">
-                      {o.status}
-                    </span>
+                    <StatusPill {...offerStatusPill(o.status)} />
                     <span className="text-xs text-slate-400">
                       {o.offerDate ? new Date(o.offerDate).toLocaleDateString() : ''}
                     </span>

@@ -6,6 +6,10 @@ import { ArrowRight, Loader2 } from 'lucide-react';
 import { describeError } from '@/lib/api/errors';
 import { getTpoPlacementDashboard, getTpoPlacementDrives } from '@/lib/api/tpo';
 import type { TpoDrivePipelineSummary, TpoDriveRow } from '@/shared/tpo-placement';
+import { JobStatusPill } from '@/components/admin/jobs/JobStatusPill';
+import { StatusPill } from '@/components/student/StatusPill';
+import { stageTone } from '@/lib/ui-maps';
+import type { JobStatus } from '@/shared/enums';
 
 const eyebrow = 'text-[10px] font-semibold uppercase tracking-widest text-slate-400';
 const card = 'rounded-xl border border-slate-200 bg-white p-5 shadow-sm';
@@ -153,9 +157,11 @@ export function TpoPlacementScreen() {
                     </td>
                     <td className="px-4 py-3 text-slate-600">{d.companyName ?? '—'}</td>
                     <td className="px-4 py-3">
-                      <span className="rounded-full bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600 ring-1 ring-slate-200">
-                        {d.status}
-                      </span>
+                      {/* The shared pill, not a copy of it: it carries the lifecycle
+                          labels and a colour per state, so Closed and Published stop
+                          looking identical. The cast is the honest bridge - the column is
+                          varchar and the pill already falls back on an unknown value. */}
+                      <JobStatusPill status={d.status as JobStatus} />
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-500">
                       {d.applyBy ? new Date(d.applyBy).toLocaleDateString() : '—'}
@@ -175,7 +181,10 @@ export function TpoPlacementScreen() {
                     <td className="px-4 py-3 tabular-nums text-slate-700">{d.selected}</td>
                     <td className="px-4 py-3 tabular-nums text-slate-700">{d.offers}</td>
                     <td className="px-4 py-3 tabular-nums text-slate-700">{d.joined}</td>
-                    {/* How far this drive has got FOR US, by pipeline order. */}
+                    {/* How far this drive has got FOR US, by pipeline order. One
+                        informational colour is right here, and is not the bug fixed
+                        above: STAGE_PROGRESS excludes the terminal negatives, so this
+                        can only ever name a forward stage. */}
                     <td className="px-4 py-3">
                       {d.currentRound ? (
                         <span className="rounded-full bg-sky-50 px-2.5 py-0.5 text-[11px] font-semibold text-sky-700 ring-1 ring-sky-200">
@@ -217,9 +226,7 @@ export function TpoPlacementScreen() {
                   <span className="text-slate-600"> · {a.driveTitle}</span>
                 </span>
                 <span className="flex shrink-0 items-center gap-3">
-                  <span className="rounded-full bg-sky-50 px-2.5 py-0.5 text-[11px] font-semibold text-sky-700 ring-1 ring-sky-200">
-                    {a.stageLabel}
-                  </span>
+                  <StatusPill tone={stageTone(a.stage)} label={a.stageLabel} />
                   <span className="text-xs text-slate-400">
                     {new Date(a.at).toLocaleDateString()}
                   </span>

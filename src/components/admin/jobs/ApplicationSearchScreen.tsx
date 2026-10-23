@@ -23,6 +23,8 @@ import type {
 } from '@/shared/application-search';
 import { APPLICATION_SOURCE_LABELS } from '@/shared/drive-roster-import';
 import { STAGE_LABELS } from '@/shared/application-pipeline';
+import { StatusPill } from '@/components/student/StatusPill';
+import { stageTone } from '@/lib/ui-maps';
 
 const inputCls =
   'h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus-visible:ring-2 focus-visible:ring-orange/30';
@@ -405,9 +407,7 @@ export function ApplicationSearchScreen({ basePath = '/admin' }: { basePath?: st
                   <td className="px-4 py-3 text-slate-600">{r.companyName ?? '—'}</td>
                   <td className="px-4 py-3 text-slate-600">{r.driveTitle}</td>
                   <td className="px-4 py-3">
-                    <span className="rounded-full bg-sky-50 px-2.5 py-0.5 text-[11px] font-semibold text-sky-700 ring-1 ring-sky-200">
-                      {r.stageLabel}
-                    </span>
+                    <StatusPill tone={stageTone(r.stage)} label={r.stageLabel} />
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-500">
                     {APPLICATION_SOURCE_LABELS[r.source as keyof typeof APPLICATION_SOURCE_LABELS] ?? r.source}

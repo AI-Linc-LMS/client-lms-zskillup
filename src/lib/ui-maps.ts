@@ -1,4 +1,6 @@
 import type { StatusTone } from '@/components/student/StatusPill';
+import { ApplicationStage } from '@/shared/application-pipeline';
+import { OfferStatus } from '@/shared/placement-status';
 import type {
   AccessLabel,
   AdminActiveEntitlement,
@@ -87,3 +89,77 @@ export const ENTITLEMENT_SOURCE_LABEL: Record<AdminActiveEntitlement['source'], 
   TRIAL: 'Trial',
   COLLEGE_INHERITED: 'College',
 };
+
+/**
+ * A HIRING STAGE AS A TONE (§4.11).
+ *
+ * TOTAL OVER THE ENUM ON PURPOSE. A six-key map against §10's twenty-one stages is what
+ * white-screened the applicants page once: `Record<ApplicationStage, …>` makes the
+ * compiler refuse the next stage anyone adds until it has been given a colour here.
+ *
+ * The point of the colour is that it says something true. Rejected, declined and no-show
+ * are negative; a live round is informational; selected, accepted and joined are
+ * positive; held and waitlisted are a warning rather than a failure. Painting all of them
+ * one colour — which this screen did — is the §4.11 defect of a status pill that no
+ * longer communicates status.
+ */
+export const APPLICATION_STAGE_TONE: Readonly<Record<ApplicationStage, StatusTone>> = {
+  [ApplicationStage.APPLIED]: 'neutral',
+  [ApplicationStage.UNDER_REVIEW]: 'info',
+  [ApplicationStage.NEEDS_INFO]: 'warning',
+  [ApplicationStage.SHORTLISTED]: 'info',
+  [ApplicationStage.ON_HOLD]: 'warning',
+  [ApplicationStage.ASSESSMENT_INVITED]: 'info',
+  [ApplicationStage.ASSESSMENT_COMPLETED]: 'info',
+  [ApplicationStage.SHARED_WITH_EMPLOYER]: 'info',
+  [ApplicationStage.EMPLOYER_SHORTLISTED]: 'info',
+  [ApplicationStage.IN_ROUND]: 'info',
+  [ApplicationStage.SELECTED]: 'positive',
+  [ApplicationStage.WAITLISTED]: 'warning',
+  [ApplicationStage.REJECTED]: 'negative',
+  [ApplicationStage.OFFER_ISSUED]: 'positive',
+  [ApplicationStage.OFFER_ACCEPTED]: 'positive',
+  [ApplicationStage.OFFER_DECLINED]: 'negative',
+  [ApplicationStage.OFFER_EXPIRED]: 'negative',
+  [ApplicationStage.JOINED]: 'positive',
+  [ApplicationStage.DID_NOT_JOIN]: 'negative',
+  [ApplicationStage.WITHDRAWN]: 'neutral',
+  [ApplicationStage.NO_SHOW]: 'negative',
+};
+
+/**
+ * Never throws and never returns undefined.
+ *
+ * The stage column holds either §10's vocabulary or the six values the board shipped
+ * with — the entity says so — so a row read today can carry a string this map has never
+ * heard of. An unknown stage renders neutral, which is honest: we do not know what it
+ * means, so we do not colour it as though we did.
+ */
+export function stageTone(stage: string): StatusTone {
+  return APPLICATION_STAGE_TONE[stage as ApplicationStage] ?? 'neutral';
+}
+
+/**
+ * AN OFFER'S STATUS AS A PILL (§4.11) — tone and the words to show.
+ *
+ * `students.placements.status` holds `OfferStatus`, NOT `ApplicationStage`; mixing the
+ * two is what made a student holding an offer read "In process". Rendering the raw enum
+ * puts DID_NOT_JOIN on a TPO's screen, so the label is part of the map.
+ */
+export const OFFER_STATUS_TONE: Readonly<
+  Record<OfferStatus, { tone: StatusTone; label: string }>
+> = {
+  [OfferStatus.OFFERED]: { tone: 'info', label: 'Offered' },
+  [OfferStatus.ACCEPTED]: { tone: 'positive', label: 'Accepted' },
+  [OfferStatus.JOINED]: { tone: 'positive', label: 'Joined' },
+  [OfferStatus.DECLINED]: { tone: 'negative', label: 'Declined' },
+  [OfferStatus.DID_NOT_JOIN]: { tone: 'negative', label: 'Did not join' },
+  [OfferStatus.RESCINDED]: { tone: 'negative', label: 'Rescinded' },
+  [OfferStatus.EXPIRED]: { tone: 'neutral', label: 'Expired' },
+};
+
+/** Same contract as `stageTone`: an unrecognised status shows its own text, uncoloured,
+ *  rather than disappearing or crashing the row. */
+export function offerStatusPill(status: string): { tone: StatusTone; label: string } {
+  return OFFER_STATUS_TONE[status as OfferStatus] ?? { tone: 'neutral', label: status };
+}
