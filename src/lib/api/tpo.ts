@@ -284,3 +284,36 @@ export async function getTpoSectionReport(section: string): Promise<SectionRepor
   );
   return res.data;
 }
+
+/* ------------------------------------------------------------------------- */
+/* The TPO's placement view (additional requirement 1)                        */
+/* ------------------------------------------------------------------------- */
+
+import type { TpoDrivePipelineSummary, TpoDriveRow } from '@/shared/tpo-placement';
+
+/** The eleven dashboard counters, scoped to the caller's own college by the server. */
+export async function getTpoPlacementDashboard(): Promise<TpoDrivePipelineSummary> {
+  const res = await apiClient.get<TpoDrivePipelineSummary>('/api/v1/tpo/placement/summary');
+  return res.data;
+}
+
+/** Drives open to this college, carrying THIS college's own numbers. */
+export async function getTpoPlacementDrives(): Promise<TpoDriveRow[]> {
+  const res = await apiClient.get<TpoDriveRow[]>('/api/v1/tpo/placement/drives');
+  return res.data;
+}
+
+export interface TpoDrivePipeline {
+  drive: { id: string; title: string; companyName: string | null; status: string; applyBy: string | null; description: string | null; location: string | null };
+  pipeline: Array<{ stage: string; stageLabel: string; count: number }>;
+  students: Array<{
+    userId: string; fullName: string | null; email: string; branch: string | null;
+    cohortName: string | null; stage: string; stageLabel: string;
+    appliedAt: string; source: string;
+  }>;
+}
+
+export async function getTpoDrive(driveId: string): Promise<TpoDrivePipeline> {
+  const res = await apiClient.get<TpoDrivePipeline>(`/api/v1/tpo/placement/drives/${driveId}`);
+  return res.data;
+}

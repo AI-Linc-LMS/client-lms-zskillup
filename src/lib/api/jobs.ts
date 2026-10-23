@@ -1452,3 +1452,151 @@ export async function importAcademics(body: {
   const res = await apiClient.post<AcademicImportResult>('/api/v1/admin/academics/import', body);
   return res.data;
 }
+
+/* ------------------------------------------------------------------------- */
+/* Drive roster import — bulk-adding a drive's offline registrations          */
+/* ------------------------------------------------------------------------- */
+
+import type {
+  ImportPreview,
+  ImportResult,
+  RosterRow,
+} from '@/shared/drive-roster-import';
+
+/**
+ * Classify an uploaded roster against a drive. Writes nothing.
+ *
+ * The file is parsed in the browser and only rows travel, so spreadsheet quirks
+ * (encodings, a title row above the headers, merged cells) stay out of the API while
+ * every decision that touches the database stays on the server.
+ */
+export async function previewDriveRoster(
+  driveId: string,
+  body: { rows: RosterRow[]; defaultStage?: string | null },
+): Promise<ImportPreview> {
+  const res = await apiClient.post<ImportPreview>(
+    `/api/v1/admin/jobs/${driveId}/roster/preview`,
+    body,
+  );
+  return res.data;
+}
+
+/**
+ * Add the importable rows to the drive.
+ *
+ * The server re-classifies from scratch rather than trusting what preview returned: in
+ * between, a student can apply on the board, an account can be suspended, or another
+ * operator can import the same sheet.
+ */
+export async function importDriveRoster(
+  driveId: string,
+  body: {
+    rows: RosterRow[];
+    defaultStage?: string | null;
+    collegeId?: string;
+    cohortId?: string;
+    sourceNote?: string;
+    source?: 'BULK_UPLOAD' | 'OFFLINE' | 'TPO_ADDED';
+  },
+): Promise<ImportResult> {
+  const res = await apiClient.post<ImportResult>(
+    `/api/v1/admin/jobs/${driveId}/roster/import`,
+    body,
+  );
+  return res.data;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Cross-drive application search, and job creatives                          */
+/* ------------------------------------------------------------------------- */
+
+import type {
+  ApplicationSearchResult,
+  CompanyFacet,
+  DriveFacet,
+  SavedApplicationView,
+} from '@/shared/application-search';
+import type { JobCreativeDto } from '@/shared/dto/jobs.dto';
+
+export interface ApplicationSearchFilters {
+  companyName?: string;
+  driveId?: string;
+  collegeId?: string;
+  cohort?: string;
+  branch?: string;
+  stages?: string[];
+  source?: string;
+  search?: string;
+  appliedFrom?: string;
+  appliedTo?: string;
+  view?: string;
+  sort?: string;
+  dir?: 'asc' | 'desc';
+  page?: number;
+  pageSize?: number;
+}
+
+export async function getApplicationSearchOptions(): Promise<{
+  views: SavedApplicationView[];
+  sorts: Record<string, string>;
+}> {
+  const res = await apiClient.get<{ views: SavedApplicationView[]; sorts: Record<string, string> }>(
+    '/api/v1/admin/applications/options',
+  );
+  return res.data;
+}
+
+export async function getApplicationCompanies(): Promise<CompanyFacet[]> {
+  const res = await apiClient.get<CompanyFacet[]>('/api/v1/admin/applications/companies');
+  return res.data;
+}
+
+/** Drives, optionally narrowed to one company — the dropdown only offers what exists. */
+export async function getApplicationDrives(company?: string): Promise<DriveFacet[]> {
+  const qs = company ? `?company=${encodeURIComponent(company)}` : '';
+  const res = await apiClient.get<DriveFacet[]>(`/api/v1/admin/applications/drives${qs}`);
+  return res.data;
+}
+
+export async function searchApplications(
+  filters: ApplicationSearchFilters,
+): Promise<ApplicationSearchResult> {
+  const res = await apiClient.post<ApplicationSearchResult>(
+    '/api/v1/admin/applications/search',
+    filters,
+  );
+  return res.data;
+}
+
+/** The export carries exactly the current filter, so the file matches the screen. */
+export async function exportApplications(filters: ApplicationSearchFilters) {
+  // Unwrapped here rather than at the call site: every other client function in this
+  // file returns the payload, not the envelope, and one that differed would be a trap.
+  const res = await apiClient.postFile('/api/v1/admin/applications/search/export', filters);
+  return res.data;
+}
+
+export async function listJobCreatives(jobId: string): Promise<JobCreativeDto[]> {
+  const res = await apiClient.get<JobCreativeDto[]>(`/api/v1/admin/jobs/${jobId}/creatives`);
+  return res.data;
+}
+
+export async function addJobCreative(
+  jobId: string,
+  body: { url: string; alt?: string; isCover?: boolean },
+): Promise<JobCreativeDto> {
+  const res = await apiClient.post<JobCreativeDto>(`/api/v1/admin/jobs/${jobId}/creatives`, body);
+  return res.data;
+}
+
+export async function reorderJobCreatives(jobId: string, ids: string[]): Promise<void> {
+  await apiClient.put(`/api/v1/admin/jobs/${jobId}/creatives/order`, { ids });
+}
+
+export async function setJobCreativeCover(jobId: string, creativeId: string): Promise<void> {
+  await apiClient.put(`/api/v1/admin/jobs/${jobId}/creatives/${creativeId}/cover`, {});
+}
+
+export async function deleteJobCreative(jobId: string, creativeId: string): Promise<void> {
+  await apiClient.delete(`/api/v1/admin/jobs/${jobId}/creatives/${creativeId}`);
+}

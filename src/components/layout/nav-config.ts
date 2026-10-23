@@ -268,6 +268,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
     heading: 'JOBS',
     items: [
       { label: 'Job Board', href: '/admin/jobs', icon: Briefcase },
+      { label: 'Student Search', href: '/admin/applications', icon: Search },
       { label: 'Placement Report', href: '/admin/placement-report', icon: TrendingUp },
       { label: 'Stage Emails', href: '/admin/stage-notifications', icon: Mail },
     ],
@@ -300,6 +301,7 @@ export const TPO_NAV: NavSection[] = [
   {
     heading: 'MANAGE',
     items: [
+      { label: 'Placement', href: '/tpo/placement', icon: Briefcase },
       { label: 'Student Management', href: '/tpo/students', icon: Users },
       { label: 'Assessment Center', href: '/tpo/assessments', icon: ClipboardCheck },
       // Cohorts + Invitations are configured by the Platform Admin (per-college),
@@ -354,6 +356,7 @@ export const ADMIN_NAV: NavSection[] = [
     heading: 'JOBS',
     items: [
       { label: 'Job Board', href: '/admin/jobs', icon: Briefcase },
+      { label: 'Student Search', href: '/admin/applications', icon: Search },
       { label: 'Placement Report', href: '/admin/placement-report', icon: TrendingUp },
       { label: 'Stage Emails', href: '/admin/stage-notifications', icon: Mail },
     ],

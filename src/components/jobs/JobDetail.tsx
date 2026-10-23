@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { JobCreativeCarousel } from '@/components/jobs/JobCreativeCarousel';
 import {
   ArrowLeft,
   ArrowRight,
@@ -461,6 +462,16 @@ export function JobDetail({
                   ) : null}
                 </dl>
               </Card>
+            </Reveal>
+          ) : null}
+
+          {/* Placement creatives, above the copy: a poster carries the role, the
+              company and the deadline at a glance, which is what a student scanning
+              the page is actually after. Renders nothing when none were uploaded, so
+              the layout is unchanged for every drive that has no creative. */}
+          {job.creatives && job.creatives.length > 0 ? (
+            <Reveal>
+              <JobCreativeCarousel creatives={job.creatives} />
             </Reveal>
           ) : null}
 

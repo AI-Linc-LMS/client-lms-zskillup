@@ -379,6 +379,15 @@ export const apiClient = {
     apiRequest<DownloadedFile>(path, { ...options, method: 'GET', responseType: 'file' }),
   post: <T>(path: string, json?: unknown, options?: RequestOptions) =>
     apiRequest<T>(path, { ...options, method: 'POST', json }),
+  /**
+   * POST that comes back as an attachment.
+   *
+   * Needed because a filtered export sends its filters in a body — a dozen repeated
+   * query params is unreadable in a log and gets truncated by proxies — while the
+   * response is still a file. Same token and refresh flow as every other call.
+   */
+  postFile: (path: string, json?: unknown, options?: RequestOptions) =>
+    apiRequest<DownloadedFile>(path, { ...options, method: 'POST', json, responseType: 'file' }),
   put: <T>(path: string, json?: unknown, options?: RequestOptions) =>
     apiRequest<T>(path, { ...options, method: 'PUT', json }),
   postForm: <T>(path: string, formData: FormData, options?: RequestOptions) =>

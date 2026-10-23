@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils';
 import { TargetPicker } from './TargetPicker';
 import { QuestionPicker } from './QuestionPicker';
 import { RelatedContentPicker } from './RelatedContentPicker';
+import { JobCreativesManager } from './JobCreativesManager';
 import { EligibilityRulesEditor } from './EligibilityRulesEditor';
 import { PlannedRoundsEditor } from './PlannedRoundsEditor';
 import { EMPTY_RULE_SET, type EligibilityRuleSet } from '@/shared/drive-eligibility';
@@ -51,6 +52,7 @@ const STEPS = [
   { key: 'audience', title: 'Audience', hint: 'Who sees it' },
   { key: 'questions', title: 'Questions', hint: 'What applicants are asked' },
   { key: 'related', title: 'Related content', hint: 'Placement stories & articles' },
+  { key: 'creatives', title: 'Creatives', hint: 'Posters on the public page' },
   { key: 'publish', title: 'Publish', hint: 'Status and go live' },
 ] as const;
 
@@ -1013,6 +1015,16 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
                 onSaved={setJob}
               />
             ) : null
+          ) : null}
+
+          {/* Creatives live beside related content: both are what the public page shows
+              rather than what the drive IS, and both need the drive to exist first. */}
+          {current.key === 'creatives' ? (
+            job ? (
+              <JobCreativesManager jobId={job.id} />
+            ) : (
+              <p className="text-sm text-slate-500">Save the drive first, then add images.</p>
+            )
           ) : null}
 
           {current.key === 'publish' ? (

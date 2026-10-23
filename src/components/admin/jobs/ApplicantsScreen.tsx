@@ -12,6 +12,7 @@ import {
   Mail,
   Search,
   StickyNote,
+  Upload,
   Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -39,6 +40,7 @@ import {
 } from '@/lib/jobs/application-status';
 import { describeError } from '@/lib/api/errors';
 import { saveBlob } from '@/lib/download';
+import { DriveRosterImport } from '@/components/admin/jobs/DriveRosterImport';
 import { cn, safeHttpUrl } from '@/lib/utils';
 
 // The built-resume preview pulls in the resume template engine; load it only when an
@@ -78,6 +80,7 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [facets, setFacets] = useState<Record<string, number> | null>(null);
   const [noteDraft, setNoteDraft] = useState('');
   const [savingNote, setSavingNote] = useState(false);
@@ -298,7 +301,24 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
           )}
           {exporting ? 'Exporting…' : 'Export CSV'}
         </Button>
+        <Button variant="secondary" onClick={() => setImporting((v) => !v)}>
+          <Upload className="size-4" aria-hidden />
+          Bulk add
+        </Button>
       </div>
+
+      {/* Students who registered off-platform — a Google Form, the ERP, WhatsApp — and
+          never applied on the board. They come in as ordinary applicants. */}
+      {importing ? (
+        <DriveRosterImport
+          jobId={jobId}
+          onClose={() => setImporting(false)}
+          onImported={() => {
+            setImporting(false);
+            void load();
+          }}
+        />
+      ) : null}
 
       <div className="flex flex-wrap gap-2">
         {APPLICATION_STATUS_ORDER.map((s) => {

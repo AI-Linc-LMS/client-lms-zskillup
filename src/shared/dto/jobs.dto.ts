@@ -551,11 +551,26 @@ export class UpdateJobPostingDto extends CreateJobPostingDto {
  */
 export type JobPostingPatch = Partial<CreateJobPostingDto>;
 
+/** One image on a drive's public page (additional requirement 3). */
+export interface JobCreativeDto {
+  id: string;
+  url: string;
+  /** WCAG 2.1 AA: a hiring poster is informational, so it needs a label. */
+  alt: string | null;
+  sortOrder: number;
+  isCover: boolean;
+}
+
 export interface JobPostingDto {
   id: string;
   slug: string;
   title: string;
   companyName: string;
+  /**
+   * Placement creatives, cover first. Present on the DETAIL payload only — a board
+   * listing of forty jobs does not download forty posters, it uses `coverUrl`.
+   */
+  creatives?: JobCreativeDto[];
   excerpt: string | null;
   workMode: WorkMode | null;
   companyId: string | null;
@@ -1315,4 +1330,91 @@ export class RecordInterviewOutcomeDto {
   @IsOptional() @IsArray() @ArrayMaxSize(12) @IsString({ each: true }) @MaxLength(300, { each: true })
   recommendedPractice?: string[] | null;
   @IsOptional() @IsString() @MaxLength(2000) statusReason?: string | null;
+}
+
+/* ── Drive roster import (additional requirement 2) ─────────────────────────── */
+
+/**
+ * One row of an uploaded roster, already parsed out of CSV/XLSX by the client.
+ *
+ * PARSED CLIENT-SIDE, CLASSIFIED SERVER-SIDE. The file never reaches the server: the
+ * browser turns it into rows, and the server decides what each row means. That split
+ * keeps spreadsheet parsing (encodings, merged cells, a title row above the headers)
+ * out of the API, while leaving every decision that touches the database on the server
+ * where it cannot be skipped by a crafted request.
+ */
+export class RosterRowDto {
+  /** 1-based line in the operator's own file, so an error names what they can see. */
+  @Type(() => Number) @IsInt() @Min(1) line!: number;
+
+  @IsOptional() @IsString() @MaxLength(320) email?: string;
+  @IsOptional() @IsString() @MaxLength(200) fullName?: string | null;
+  @IsOptional() @IsString() @MaxLength(40) phone?: string | null;
+  @IsOptional() @IsString() @MaxLength(64) rollNumber?: string | null;
+  @IsOptional() @IsString() @MaxLength(120) branch?: string | null;
+  @IsOptional() @IsString() @MaxLength(64) batch?: string | null;
+  @IsOptional() @IsString() @MaxLength(120) course?: string | null;
+  @IsOptional() @IsString() @MaxLength(200) collegeName?: string | null;
+  @IsOptional() @IsString() @MaxLength(40) applicationDate?: string | null;
+  @IsOptional() @IsString() @MaxLength(64) currentStage?: string | null;
+}
+
+/** Shared by preview and apply, so the two can never disagree about the input. */
+export class DriveRosterDto {
+  @IsArray()
+  @ArrayMaxSize(2000, { message: 'Up to 2000 rows per upload' })
+  @ValidateNested({ each: true })
+  @Type(() => RosterRowDto)
+  rows!: RosterRowDto[];
+
+  /** Stage for any row whose own "Current Stage" cell is blank. Defaults to Applied. */
+  @IsOptional() @IsString() @MaxLength(64) defaultStage?: string | null;
+}
+
+/**
+ * Apply. Carries the college a NEW student would be created under — required only when
+ * the file actually contains new students, which preview tells the operator in advance.
+ */
+export class ApplyDriveRosterDto extends DriveRosterDto {
+  @IsOptional() @IsUUID() collegeId?: string;
+  @IsOptional() @IsUUID() cohortId?: string;
+  /** Which sheet or form this came from. Shown on the applicant row afterwards. */
+  @IsOptional() @IsString() @MaxLength(300) sourceNote?: string;
+  /** BULK_UPLOAD unless the operator says these came from an offline desk. */
+  @IsOptional() @IsIn(['BULK_UPLOAD', 'OFFLINE', 'TPO_ADDED']) source?: string;
+}
+
+/* ── Cross-drive application search (additional requirement 4) ──────────────── */
+
+/**
+ * Filters for the company-wide / drive-wide student search.
+ *
+ * A POST rather than a query string: `stages` is a list and the saved views compose with
+ * everything else, and a URL carrying twelve repeated params is unreadable in a log and
+ * truncated by proxies.
+ */
+export class SearchApplicationsDto {
+  /** The filter that works today — every drive carries a free-text company name. */
+  @IsOptional() @IsString() @MaxLength(200) companyName?: string;
+  /** Accepted for when drives are linked to the catalog; none are today. */
+  @IsOptional() @IsUUID() companyId?: string;
+  @IsOptional() @IsUUID() driveId?: string;
+  @IsOptional() @IsUUID() collegeId?: string;
+  @IsOptional() @IsString() @MaxLength(160) cohort?: string;
+  @IsOptional() @IsString() @MaxLength(120) branch?: string;
+
+  @IsOptional() @IsArray() @ArrayMaxSize(30) @IsString({ each: true })
+  stages?: string[];
+
+  @IsOptional() @IsIn(['JOB_BOARD', 'BULK_UPLOAD', 'OFFLINE', 'TPO_ADDED']) source?: string;
+  @IsOptional() @IsString() @MaxLength(200) search?: string;
+  @IsOptional() @IsDateString() appliedFrom?: string;
+  @IsOptional() @IsDateString() appliedTo?: string;
+  /** One of SAVED_APPLICATION_VIEWS. Narrows; never replaces the other filters. */
+  @IsOptional() @IsString() @MaxLength(40) view?: string;
+
+  @IsOptional() @IsString() @MaxLength(40) sort?: string;
+  @IsOptional() @IsIn(['asc', 'desc']) dir?: 'asc' | 'desc';
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) page?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(200) pageSize?: number;
 }
