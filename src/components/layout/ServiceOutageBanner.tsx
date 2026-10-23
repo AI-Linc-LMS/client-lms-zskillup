@@ -8,15 +8,21 @@ const RETRY_MS = 30_000;
 /**
  * A public, unauthenticated read that needs the API to be alive.
  *
- * ABSOLUTE, AGAINST THE API ORIGIN — NOT A RELATIVE PATH. A relative URL resolves
- * against the page, which is served by Next; that host is up by definition whenever
- * this component is running, so the probe would answer 404 from the web tier and the
- * banner could never fire during the exact outage it exists for. The frontend and the
- * API are deployed separately, which is the whole premise of this banner, so the probe
- * has to cross that boundary too.
+ * RELATIVE, AND THAT IS THE WHOLE POINT. `netlify.toml` proxies `/api/v1/*` to the load
+ * balancer with `force = true`, so this path is same-origin to the browser and still
+ * served by the backend — verified against production, where a bogus `/api/v1/...` path
+ * answers with the API's own `{"error":{"code":"NOT_FOUND"}}` envelope rather than a Next
+ * HTML 404. When the API is down the proxy passes the balancer's 502 straight back, so a
+ * same-origin probe measures the API's health and not the web tier's.
+ *
+ * It used to be built from NEXT_PUBLIC_API_URL on the theory that a relative URL could
+ * only ever measure the host serving the page. That reasoning ignored the proxy, and it
+ * made the banner dead code: the variable is `http://localhost:3001` in the repo's env
+ * files, so the probe either pointed at the viewer's own machine or — when the variable
+ * was absent from the build — was skipped by its own empty-base guard. Either way the
+ * banner could never fire during the outage it exists for.
  */
-const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/$/, '');
-const PROBE = `${API_BASE}/api/v1/colleges?limit=1`;
+const PROBE = '/api/v1/colleges?limit=1';
 
 /**
  * SAYS "WE ARE DOWN" WHEN THE API IS DOWN — AND GETS OUT OF THE WAY WHEN IT IS NOT.
@@ -51,9 +57,6 @@ export function ServiceOutageBanner() {
         // so it is not treated as an outage: a false "we are down" is its own damage.
         isDown = false;
       }
-      // With no API origin configured there is nothing meaningful to probe, and a
-      // same-origin 404 from the web tier would otherwise read as "healthy" forever.
-      if (!API_BASE) isDown = false;
       if (!alive) return;
       setDown(isDown);
       // Keep checking while down, so recovery needs no deploy and no human.
