@@ -7,6 +7,7 @@ import { FestiveBanner } from '@/components/marketing/FestiveBanner';
 import { CommandPalette } from './CommandPalette';
 import { SeoTitle } from './SeoTitle';
 import { AutopayOffer } from '@/components/payments/AutopayOffer';
+import { ServiceOutageBanner } from '@/components/layout/ServiceOutageBanner';
 
 /**
  * Persistent authenticated chrome (frontend/CLAUDE §4): top bar + left sidebar +
@@ -21,6 +22,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <SeoTitle />
+      {/* An API outage otherwise leaves this shell rendering perfectly over nothing. */}
+      <ServiceOutageBanner />
       <CommandPalette />
       <Toaster
         position="bottom-center"

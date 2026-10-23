@@ -130,7 +130,7 @@ export function TpoPlacementScreen() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200">
-                  {['Drive', 'Company', 'Status', 'Eligible', 'Applied', 'Shortlisted', 'In rounds', 'Offers', 'Joined', ''].map((h) => (
+                  {['Drive', 'Company', 'Status', 'Closes', 'Eligible', 'Applied', 'Shortlisted', 'In rounds', 'Selected', 'Offers', 'Joined', 'Furthest', ''].map((h) => (
                     <th key={h} className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                       {h}
                     </th>
@@ -157,6 +157,9 @@ export function TpoPlacementScreen() {
                         {d.status}
                       </span>
                     </td>
+                    <td className="px-4 py-3 text-xs text-slate-500">
+                      {d.applyBy ? new Date(d.applyBy).toLocaleDateString() : '—'}
+                    </td>
                     {/* 0 of 0 evaluated is "not assessed yet". 0 of 40 is "nobody
                         qualifies". Printing a bare 0 for both says the wrong one. */}
                     <td className="px-4 py-3 tabular-nums text-slate-700">
@@ -169,8 +172,19 @@ export function TpoPlacementScreen() {
                     <td className="px-4 py-3 tabular-nums text-slate-700">{d.applied}</td>
                     <td className="px-4 py-3 tabular-nums text-slate-700">{d.shortlisted}</td>
                     <td className="px-4 py-3 tabular-nums text-slate-700">{d.inRounds}</td>
+                    <td className="px-4 py-3 tabular-nums text-slate-700">{d.selected}</td>
                     <td className="px-4 py-3 tabular-nums text-slate-700">{d.offers}</td>
                     <td className="px-4 py-3 tabular-nums text-slate-700">{d.joined}</td>
+                    {/* How far this drive has got FOR US, by pipeline order. */}
+                    <td className="px-4 py-3">
+                      {d.currentRound ? (
+                        <span className="rounded-full bg-sky-50 px-2.5 py-0.5 text-[11px] font-semibold text-sky-700 ring-1 ring-sky-200">
+                          {d.currentRound}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-slate-400">—</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3">
                       <Link
                         href={`/tpo/placement/drives/${d.id}`}

@@ -317,3 +317,34 @@ export async function getTpoDrive(driveId: string): Promise<TpoDrivePipeline> {
   const res = await apiClient.get<TpoDrivePipeline>(`/api/v1/tpo/placement/drives/${driveId}`);
   return res.data;
 }
+
+export interface TpoStudentPlacement {
+  student: {
+    id: string; fullName: string | null; email: string; status: string;
+    phone: string | null; branch: string | null; course: string | null;
+    passoutYear: number | null; cohortName: string | null;
+    score10th: string | null; score12th: string | null;
+    scoreGraduation: string | null; activeBacklogs: number | null;
+  };
+  applications: Array<{
+    id: string; driveId: string; driveTitle: string; companyName: string | null;
+    stage: string; stageLabel: string; appliedAt: string; updatedAt: string;
+    source: string; reason: string | null;
+  }>;
+  offers: Array<{
+    id: string; companyName: string; role: string | null; status: string;
+    ctcLpa: string | null; offerDate: string | null; joiningDate: string | null;
+    offerType: string | null;
+  }>;
+  performance: { attempts: number; avgScore: string | null; bestScore: string | null };
+  /** §7's three milestones, derived from offers rather than a stored flag. */
+  placement: { offered: boolean; accepted: boolean; joined: boolean };
+}
+
+/** One of this college's students. 404s anyone else's. */
+export async function getTpoStudentPlacement(userId: string): Promise<TpoStudentPlacement> {
+  const res = await apiClient.get<TpoStudentPlacement>(
+    `/api/v1/tpo/placement/students/${userId}`,
+  );
+  return res.data;
+}

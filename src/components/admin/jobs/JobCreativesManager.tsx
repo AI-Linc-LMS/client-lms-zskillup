@@ -180,6 +180,27 @@ export function JobCreativesManager({ jobId }: { jobId: string }) {
                   <Button variant="ghost" size="sm" disabled={busy || i === items.length - 1} onClick={() => move(i, i + 1)} aria-label="Move later">
                     <ArrowDown className="size-4" />
                   </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={busy}
+                    onClick={() => {
+                      const next = window.prompt('New image URL for this creative', c.url);
+                      if (!next || next === c.url) return;
+                      // Replace keeps the slot: add at the same cover flag, then remove
+                      // the old one, so position and cover survive the swap.
+                      void act(async () => {
+                        await addJobCreative(jobId, {
+                          url: next.trim(),
+                          alt: c.alt ?? undefined,
+                          isCover: c.isCover,
+                        });
+                        await deleteJobCreative(jobId, c.id);
+                      }, 'Replaced');
+                    }}
+                  >
+                    Replace
+                  </Button>
                   {!c.isCover ? (
                     <Button variant="outline" size="sm" disabled={busy}
                       onClick={() => void act(() => setJobCreativeCover(jobId, c.id), 'Cover updated')}>

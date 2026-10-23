@@ -57,6 +57,19 @@ export function JobCard({
       ) : null}
 
       <Link href={`/jobs/${job.slug}`} className="flex min-w-0 flex-1 flex-col">
+        {/* The placement creative, when one was uploaded. One image per card, from the
+            listing's `coverUrl` — a board of forty jobs must not pull forty posters, so
+            the full creative list stays on the detail payload. Absent one, the card is
+            unchanged, which is most of them. */}
+        {safeHttpUrl(job.coverUrl) ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={safeHttpUrl(job.coverUrl) as string}
+            alt=""
+            loading="lazy"
+            className="mb-3 aspect-[16/9] w-full rounded-lg object-cover ring-1 ring-slate-100"
+          />
+        ) : null}
         <div className="flex items-start gap-3 pr-8">
           {safeHttpUrl(job.companyLogoUrl) ? (
             // eslint-disable-next-line @next/next/no-img-element

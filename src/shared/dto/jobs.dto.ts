@@ -571,6 +571,13 @@ export interface JobPostingDto {
    * listing of forty jobs does not download forty posters, it uses `coverUrl`.
    */
   creatives?: JobCreativeDto[];
+  /**
+   * The cover creative's URL, on LISTING payloads only.
+   *
+   * A board of forty jobs must not download forty posters, so the listing carries one
+   * url per card and the full `creatives` array stays on the detail payload.
+   */
+  coverUrl?: string | null;
   excerpt: string | null;
   workMode: WorkMode | null;
   companyId: string | null;
@@ -1402,6 +1409,17 @@ export class SearchApplicationsDto {
   @IsOptional() @IsUUID() collegeId?: string;
   @IsOptional() @IsString() @MaxLength(160) cohort?: string;
   @IsOptional() @IsString() @MaxLength(120) branch?: string;
+  @IsOptional() @IsString() @MaxLength(120) course?: string;
+
+  /** §6's stored verdict on the drive. NOT_EVALUATED is the absence of a verdict, which
+   *  is a different fact from failing one and must stay separable. */
+  @IsOptional() @IsIn(['ELIGIBLE', 'INELIGIBLE', 'NOT_EVALUATED']) eligibility?: string;
+  /** Offer status with this drive's employer. */
+  @IsOptional() @IsString() @MaxLength(40) offerStatus?: string;
+  /** Derived from offers (§7), never a stored column. */
+  @IsOptional() @IsIn(['PLACED', 'UNPLACED']) placementStatus?: string;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) @Max(100) minScore?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) @Max(100) maxScore?: number;
 
   @IsOptional() @IsArray() @ArrayMaxSize(30) @IsString({ each: true })
   stages?: string[];

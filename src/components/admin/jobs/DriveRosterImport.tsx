@@ -374,15 +374,30 @@ export function DriveRosterImport({
                 {problems.length} row{problems.length === 1 ? '' : 's'} will not be added
               </p>
               <p className="mt-1 text-sm text-slate-600">
-                Every one is named below. Fix them in your file and upload again, or go ahead
-                and deal with them separately.
+                Every one is named below with its line number. Untick a row to leave it out
+                of this import, fix it in your file and upload again, or go ahead and deal
+                with them separately.
               </p>
               <ul className="mt-3 max-h-72 divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-200">
                 {problems.map((r: PreviewedRow) => (
-                  <li key={r.line} className="flex items-start gap-3 px-3 py-2">
-                    <span className="w-12 shrink-0 text-xs text-slate-400 tabular-nums">
-                      L{r.line}
-                    </span>
+                  <li key={r.line} className={`flex items-start gap-3 px-3 py-2 ${excluded.has(r.line) ? 'opacity-50' : ''}`}>
+                    <label className="flex shrink-0 items-center gap-2 pt-0.5">
+                      <input
+                        type="checkbox"
+                        checked={!excluded.has(r.line)}
+                        onChange={(e) =>
+                          setExcluded((prev) => {
+                            const next = new Set(prev);
+                            if (e.target.checked) next.delete(r.line);
+                            else next.add(r.line);
+                            return next;
+                          })
+                        }
+                        aria-label={`Include line ${r.line}`}
+                        className="size-4 rounded border-slate-300"
+                      />
+                      <span className="w-10 text-xs text-slate-400 tabular-nums">L{r.line}</span>
+                    </label>
                     <span
                       className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${TONE[r.outcome]}`}
                     >

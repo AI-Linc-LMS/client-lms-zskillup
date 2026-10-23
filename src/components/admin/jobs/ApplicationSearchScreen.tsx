@@ -54,6 +54,7 @@ export function ApplicationSearchScreen({ basePath = '/admin' }: { basePath?: st
   const [exporting, setExporting] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [term, setTerm] = useState('');
+  const [more, setMore] = useState(false);
 
   useEffect(() => {
     void (async () => {
@@ -232,6 +233,96 @@ export function ApplicationSearchScreen({ basePath = '/admin' }: { basePath?: st
           </div>
         </div>
 
+        {more ? (
+          <div className="mt-4 grid gap-4 border-t border-slate-100 pt-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <label htmlFor="f-college" className={eyebrow}>College</label>
+              <input id="f-college" value={filters.collegeId ?? ''}
+                onChange={(e) => set({ collegeId: e.target.value || undefined })}
+                placeholder="College id" className={`mt-1 w-full ${inputCls}`} />
+            </div>
+            <div>
+              <label htmlFor="f-batch" className={eyebrow}>Batch</label>
+              <input id="f-batch" value={filters.cohort ?? ''}
+                onChange={(e) => set({ cohort: e.target.value || undefined })}
+                placeholder="e.g. Batch of 2027" className={`mt-1 w-full ${inputCls}`} />
+            </div>
+            <div>
+              <label htmlFor="f-branch" className={eyebrow}>Branch</label>
+              <input id="f-branch" value={filters.branch ?? ''}
+                onChange={(e) => set({ branch: e.target.value || undefined })}
+                placeholder="e.g. ECE" className={`mt-1 w-full ${inputCls}`} />
+            </div>
+            <div>
+              <label htmlFor="f-course" className={eyebrow}>Course</label>
+              <input id="f-course" value={filters.course ?? ''}
+                onChange={(e) => set({ course: e.target.value || undefined })}
+                placeholder="e.g. B.E." className={`mt-1 w-full ${inputCls}`} />
+            </div>
+            <div>
+              <label htmlFor="f-elig" className={eyebrow}>Eligibility</label>
+              <select id="f-elig" value={filters.eligibility ?? ''}
+                onChange={(e) => set({ eligibility: e.target.value || undefined })}
+                className={`mt-1 w-full ${inputCls}`}>
+                <option value="">Any</option>
+                <option value="ELIGIBLE">Eligible</option>
+                <option value="INELIGIBLE">Not eligible</option>
+                {/* Never judged is a different fact from judged and failed. */}
+                <option value="NOT_EVALUATED">Not assessed</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="f-placement" className={eyebrow}>Placement status</label>
+              <select id="f-placement" value={filters.placementStatus ?? ''}
+                onChange={(e) => set({ placementStatus: e.target.value || undefined })}
+                className={`mt-1 w-full ${inputCls}`}>
+                <option value="">Any</option>
+                <option value="PLACED">Placed (accepted or joined)</option>
+                <option value="UNPLACED">Unplaced</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="f-offer" className={eyebrow}>Offer status</label>
+              <select id="f-offer" value={filters.offerStatus ?? ''}
+                onChange={(e) => set({ offerStatus: e.target.value || undefined })}
+                className={`mt-1 w-full ${inputCls}`}>
+                <option value="">Any</option>
+                {/* OfferStatus, which is what students.placements actually stores —
+                    not the pipeline's OFFER_ISSUED/OFFER_ACCEPTED. */}
+                {['OFFERED','ACCEPTED','DECLINED','JOINED','DID_NOT_JOIN','RESCINDED'].map((o) => (
+                  <option key={o} value={o}>{o.replace(/_/g,' ').toLowerCase()}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="f-score" className={eyebrow}>Assessment score</label>
+              <div className="mt-1 flex items-center gap-2">
+                <input id="f-score" type="number" min={0} max={100} value={filters.minScore ?? ''}
+                  onChange={(e) => set({ minScore: e.target.value ? Number(e.target.value) : undefined })}
+                  placeholder="min" className={`w-full ${inputCls}`} />
+                <span className="text-slate-400">–</span>
+                <input type="number" min={0} max={100} value={filters.maxScore ?? ''}
+                  onChange={(e) => set({ maxScore: e.target.value ? Number(e.target.value) : undefined })}
+                  aria-label="Maximum assessment score"
+                  placeholder="max" className={`w-full ${inputCls}`} />
+              </div>
+            </div>
+            <div className="sm:col-span-2">
+              <label htmlFor="f-from" className={eyebrow}>Applied between</label>
+              <div className="mt-1 flex items-center gap-2">
+                <input id="f-from" type="date" value={filters.appliedFrom ?? ''}
+                  onChange={(e) => set({ appliedFrom: e.target.value || undefined })}
+                  className={`w-full ${inputCls}`} />
+                <span className="text-slate-400">–</span>
+                <input type="date" value={filters.appliedTo ?? ''}
+                  aria-label="Applied before"
+                  onChange={(e) => set({ appliedTo: e.target.value || undefined })}
+                  className={`w-full ${inputCls}`} />
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <div className="relative min-w-[16rem] flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" aria-hidden />
@@ -243,6 +334,9 @@ export function ApplicationSearchScreen({ basePath = '/admin' }: { basePath?: st
               className={`w-full pl-9 ${inputCls}`}
             />
           </div>
+          <Button variant="ghost" onClick={() => setMore((v) => !v)}>
+            {more ? 'Fewer filters' : 'More filters'}
+          </Button>
           <Button variant="outline" onClick={() => void doExport()} disabled={exporting || !result?.total}>
             {exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
             Export
@@ -296,7 +390,11 @@ export function ApplicationSearchScreen({ basePath = '/admin' }: { basePath?: st
                 <tr key={r.applicationId} className="border-b border-slate-100 last:border-0">
                   <td className="px-4 py-3">
                     <Link
-                      href={`${basePath}/placement-report/students/${r.userId}`}
+                      href={
+                        basePath === '/tpo'
+                          ? `/tpo/placement/students/${r.userId}`
+                          : `${basePath}/placement-report/students/${r.userId}`
+                      }
                       className="font-semibold text-navy underline-offset-4 hover:underline"
                     >
                       {r.fullName ?? r.email}

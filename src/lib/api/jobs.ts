@@ -1526,6 +1526,12 @@ export interface ApplicationSearchFilters {
   branch?: string;
   stages?: string[];
   source?: string;
+  course?: string;
+  eligibility?: string;
+  offerStatus?: string;
+  placementStatus?: string;
+  minScore?: number;
+  maxScore?: number;
   search?: string;
   appliedFrom?: string;
   appliedTo?: string;

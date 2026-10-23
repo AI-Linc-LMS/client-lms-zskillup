@@ -302,6 +302,7 @@ export const TPO_NAV: NavSection[] = [
     heading: 'MANAGE',
     items: [
       { label: 'Placement', href: '/tpo/placement', icon: Briefcase },
+      { label: 'Student Search', href: '/tpo/search', icon: Search },
       { label: 'Student Management', href: '/tpo/students', icon: Users },
       { label: 'Assessment Center', href: '/tpo/assessments', icon: ClipboardCheck },
       // Cohorts + Invitations are configured by the Platform Admin (per-college),

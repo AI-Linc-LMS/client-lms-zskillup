@@ -122,7 +122,7 @@ export function TpoDriveDetail({ driveId }: { driveId: string }) {
                   <tr key={s.userId} className="border-b border-slate-100 last:border-0">
                     <td className="px-4 py-3">
                       <Link
-                        href={`/tpo/students/${s.userId}`}
+                        href={`/tpo/placement/students/${s.userId}`}
                         className="font-semibold text-navy underline-offset-4 hover:underline"
                       >
                         {s.fullName ?? s.email}
