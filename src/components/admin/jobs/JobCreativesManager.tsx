@@ -6,6 +6,7 @@ import { ArrowDown, ArrowUp, Loader2, Star, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { describeError } from '@/lib/api/errors';
+import { IMAGE_URL_FORMATS, IMAGE_URL_PATTERN } from '@/shared/dto/media.dto';
 import {
   addJobCreative,
   deleteJobCreative,
@@ -37,6 +38,12 @@ export function JobCreativesManager({ jobId }: { jobId: string }) {
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+
+  // The same rule the backend enforces, so a wrong link is answered inline instead of
+  // by a 400 after the round trip. `IsUrl` passing is not enough: a PDF or a Drive
+  // viewer link is a valid URL that renders as a broken image on the public page.
+  const trimmedUrl = url.trim();
+  const urlLooksWrong = trimmedUrl !== '' && !IMAGE_URL_PATTERN.test(trimmedUrl);
 
   const load = async () => {
     try {
@@ -103,7 +110,15 @@ export function JobCreativesManager({ jobId }: { jobId: string }) {
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://…/poster.png"
               className={`mt-1 w-full ${inputCls}`}
+              aria-invalid={urlLooksWrong}
+              aria-describedby={urlLooksWrong ? 'cr-url-err' : undefined}
             />
+            {urlLooksWrong && (
+              <p id="cr-url-err" role="alert" className="mt-1 text-xs text-red-600">
+                Needs to be an image file ({IMAGE_URL_FORMATS}) — this link points at
+                something else.
+              </p>
+            )}
           </div>
           <div>
             <label htmlFor="cr-alt" className={eyebrow}>What the image says *</label>
@@ -118,7 +133,7 @@ export function JobCreativesManager({ jobId }: { jobId: string }) {
         </div>
         <div className="mt-3 flex items-center gap-3">
           <Button
-            disabled={!url.trim() || !alt.trim() || busy}
+            disabled={!trimmedUrl || urlLooksWrong || !alt.trim() || busy}
             onClick={() =>
               void act(
                 async () => {
@@ -187,6 +202,10 @@ export function JobCreativesManager({ jobId }: { jobId: string }) {
                     onClick={() => {
                       const next = window.prompt('New image URL for this creative', c.url);
                       if (!next || next === c.url) return;
+                      if (!IMAGE_URL_PATTERN.test(next.trim())) {
+                        toast.error(`Needs to be an image file (${IMAGE_URL_FORMATS}).`);
+                        return;
+                      }
                       // Replace keeps the slot: add at the same cover flag, then remove
                       // the old one, so position and cover survive the swap.
                       void act(async () => {

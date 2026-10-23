@@ -18,6 +18,27 @@ export const ALLOWED_IMAGE_CONTENT_TYPES = [
 
 export type AllowedImageContentType = (typeof ALLOWED_IMAGE_CONTENT_TYPES)[number];
 
+/**
+ * The same three formats, as the extensions a pasted URL is allowed to end in.
+ *
+ * WHY THE RULE IS SPELLED TWICE. An upload goes through the presign path above, which
+ * checks the content-type of the bytes being sent. A URL typed or pasted into a form
+ * never does -- nothing about it has been uploaded -- so the only thing available to
+ * check is the URL itself. A link to a PDF, to a Drive viewer page, or to a bare domain
+ * saves happily and then renders as a broken image on a public page, which is the kind
+ * of defect nobody notices until a candidate does.
+ *
+ * A query string or fragment may follow the extension, so a presigned S3 link or a CDN
+ * url carrying a cache key still passes. This cannot prove the bytes are an image --
+ * only fetching them could -- and it is not meant to: it catches the mistake a human
+ * makes, not an attacker, who is in any case bounded by this value only ever being
+ * rendered as an <img> src.
+ */
+export const IMAGE_URL_PATTERN = /\.(jpe?g|png|webp)(?:[?#]|$)/i;
+
+/** The same list in words, for a validation message and for form hint text. */
+export const IMAGE_URL_FORMATS = 'JPG, PNG or WebP';
+
 /** Documents an admin may attach to a posting. PDF only: a Word file renders
  *  differently on every machine and cannot be shown inline in a browser. */
 export const ALLOWED_DOC_CONTENT_TYPES = ['application/pdf'] as const;
