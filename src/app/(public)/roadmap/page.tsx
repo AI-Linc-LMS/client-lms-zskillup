@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { DEMO_ROADMAP_STEPS, type RoadmapStatus } from '@/lib/demo-data-extra';
 import { getStudentStats, type ApiStudentStats } from '@/lib/api/gamification';
+import { hasRoleHint } from '@/lib/session-hints';
 
 const STATUS_CONFIG: Record<RoadmapStatus, { icon: typeof CheckCircle2; label: string; style: string }> = {
   done: { icon: CheckCircle2, label: 'Done', style: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
@@ -22,6 +23,19 @@ export default function RoadmapPage() {
   const [stats, setStats] = useState<ApiStudentStats | null>(null);
 
   useEffect(() => {
+    // THIS PAGE IS PUBLIC, AND THIS CALL WAS CLOSING IT.
+    //
+    // /roadmap is in the sitemap and carries its own SEO metadata, and the page is built
+    // to be read logged-out: it falls back to 0 XP and offers a "Log in" button. But
+    // getStudentStats() runs on the apiClient's `default` posture, which on a second 401
+    // clears session state and hard-navigates to /login. So every anonymous visitor —
+    // including anyone arriving from search — was bounced off the page before reading a
+    // word of it. Verified against production before the fix: prephasz.com/roadmap landed
+    // on /login.
+    //
+    // There is nothing to fetch for a signed-out reader anyway: the XP bar is theirs or
+    // it is zero.
+    if (!hasRoleHint()) return;
     getStudentStats().then(setStats).catch(() => {});
   }, []);
 
