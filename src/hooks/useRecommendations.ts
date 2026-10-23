@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getMyRecommendations, type RecommendationsResponseDto } from '@/lib/api/recommendations';
+import { hasRoleHint } from '@/lib/session-hints';
 
 /**
  * Session-cached recommendations, so the top-bar "Recommended for you" dropdown
@@ -40,6 +41,23 @@ export function useRecommendations(): RecommendationsResponseDto | null {
   const [data, setData] = useState<RecommendationsResponseDto | null>(cache);
 
   useEffect(() => {
+    // NOTHING TO RECOMMEND TO A VISITOR WHO IS NOT SIGNED IN.
+    //
+    // `/jobs` is a public page that lives in the (student) route group, so a logged-out
+    // visitor gets the authenticated AppShell — TopBar, and this menu inside it. The
+    // call then 401s on every public page view: harmless, because the catch below
+    // swallows it, but it is a request per visitor and a console error that trains
+    // everyone to ignore console errors.
+    //
+    // The role hint is the right signal rather than the access token: the token is null
+    // on first paint even for a signed-in user, until the refresh completes, so gating on
+    // it would suppress the fetch for exactly the people it is for. The hint is
+    // re-stamped on every refresh and outlives a browser restart, and the middleware
+    // already treats it as its only session signal. It is a UX hint and not a boundary —
+    // which is the correct kind of thing to decide "should we even ask" with, since the
+    // Nest guard remains the authority on the answer.
+    if (!hasRoleHint()) return;
+
     let alive = true;
     const apply = (d: RecommendationsResponseDto) => {
       if (alive) setData(d);

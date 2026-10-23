@@ -15,6 +15,7 @@ import {
 } from '@/lib/sections/section-catalog';
 import { useMySubscription } from '@/hooks/useMySubscription';
 import { getPricing } from '@/lib/api/payments';
+import { hasRoleHint } from '@/lib/session-hints';
 import { buildPriceMap, retailPrice } from '@/lib/payments/pricing';
 import { BillingPeriod, EntitlementScope } from '@/shared/enums';
 import type { PriceBookEntryDto } from '@/shared/dto/payments.dto';
@@ -33,6 +34,13 @@ export function SectionsExplorer() {
   const [prices, setPrices] = useState<PriceBookEntryDto[]>([]);
 
   useEffect(() => {
+    // The price book is role-gated (STUDENT / COLLEGE_ADMIN), and both of these
+    // explorers render on pages a logged-out visitor can reach — so unguarded this
+    // 401s on every public view. There is nothing to show them either way: with no
+    // prices the card renders without a price, which is already what the failed call
+    // produced. `roleHint` is the signal useMySubscription above already uses, and it
+    // beats the access token, which is still null on first paint for a real session.
+    if (!hasRoleHint()) return;
     getPricing()
       .then(setPrices)
       .catch(() => setPrices([]));
