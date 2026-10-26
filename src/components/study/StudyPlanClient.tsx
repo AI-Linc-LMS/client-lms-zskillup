@@ -14,7 +14,7 @@ import {
   Trophy,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useCalibrationStatus } from '@/hooks/useCalibrationStatus';
+import { useCalibrationStatus, type CalibrationState } from '@/hooks/useCalibrationStatus';
 import { BriefingHeroCanvas } from '@/components/student/BriefingHeroCanvas';
 import {
   generateRoadmap,
@@ -99,7 +99,7 @@ export function StudyPlanClient() {
   }
 
   const s = ov?.summary;
-  if (!s?.calibrated) return <NotCalibrated mockId={cal.mockTestId} />;
+  if (!s?.calibrated) return <NotCalibrated cal={cal} />;
   if (!s.exists) return <GenerateHero generating={generating} onGenerate={generate} />;
 
   return (
@@ -413,7 +413,28 @@ function DayRing({ done, total }: { done: number; total: number }) {
 }
 
 // ── Gates ───────────────────────────────────────────────────────────────────────
-function NotCalibrated({ mockId }: { mockId: string | null }) {
+/**
+ * The gate a student sees before they have a readiness test result.
+ *
+ * THE CTA IS ONLY A CTA WHEN THERE IS SOMETHING TO START. This used to read
+ * `href={mockId ? `/dashboard/quiz?mock=${mockId}` : '/dashboard'}`, so when no
+ * calibration assessment was configured the button silently became a link to the
+ * dashboard — the student pressed "Start the placement readiness test" and landed back
+ * on their dashboard with no explanation, which reads as a broken product rather than
+ * an unfinished setup. Nobody could tell from the screen whether it was a bug or a
+ * missing config, which is exactly what a silent fallback costs.
+ *
+ * `mockTestId` is null whenever no row in `scheduled_assessments` carries
+ * `is_calibration = true` (active, with a mock attached) — an admin picks that at
+ * /admin/calibration. It is ALSO null for the moment before the status call returns, so
+ * the loading case is held separately: rendering the live button against a not-yet-known
+ * id is how a fast click reached the old fallback even on a correctly configured site.
+ *
+ * The gate itself stays. It is not cosmetic: roadmap generation reads the calibration
+ * scores and the server refuses with NOT_CALIBRATED without them, so there is genuinely
+ * no plan to show until the test is taken.
+ */
+function NotCalibrated({ cal }: { cal: CalibrationState }) {
   return (
     <div className="mt-4 grid place-items-center rounded-3xl border border-dashed border-slate-200 bg-gradient-to-b from-white to-slate-50/60 p-10 text-center">
       <span className="grid size-14 place-items-center rounded-2xl bg-[#ffc42d] ring-4 ring-[#ffc42d]/15">
@@ -425,12 +446,30 @@ function NotCalibrated({ mockId }: { mockId: string | null }) {
         so every day targets exactly what will move your placement readiness fastest. Everything else on the platform is
         already open to you.
       </p>
-      <Link
-        href={mockId ? `/dashboard/quiz?mock=${mockId}` : '/dashboard'}
-        className="mt-5 inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2.5 text-sm font-bold text-[#171717] transition hover:bg-orange/90"
-      >
-        Start the placement readiness test <ArrowRight className="size-4" />
-      </Link>
+
+      {cal.loading ? (
+        <span className="mt-5 inline-flex items-center gap-2 rounded-full bg-slate-100 px-5 py-2.5 text-sm font-bold text-slate-500">
+          <Loader2 className="size-4 animate-spin" /> Checking for your test
+        </span>
+      ) : cal.mockTestId ? (
+        <Link
+          href={`/dashboard/quiz?mock=${cal.mockTestId}`}
+          className="mt-5 inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2.5 text-sm font-bold text-[#171717] transition hover:bg-orange/90"
+        >
+          Start the placement readiness test <ArrowRight className="size-4" />
+        </Link>
+      ) : (
+        /* No test is configured yet. Say so plainly instead of offering a button that
+           goes nowhere — and do not blame the student for it. */
+        <p
+          role="status"
+          className="mt-5 max-w-md rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900"
+        >
+          The readiness test has not been set up for your institute yet, so there is nothing to
+          start here. Your placement team is notified. Everything else on the platform is open to
+          you in the meantime.
+        </p>
+      )}
     </div>
   );
 }
