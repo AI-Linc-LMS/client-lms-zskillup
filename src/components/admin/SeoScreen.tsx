@@ -9,8 +9,8 @@
  * Two thin route files render this one screen, so each console keeps its own nav.
  */
 
-import { useEffect, useState } from 'react';
-import { Check, Loader2, Plus, RotateCcw, Trash2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Check, ChevronDown, Loader2, Plus, RotateCcw, Search, Trash2 } from 'lucide-react';
 import { deleteSeo, listSeo, upsertSeo, type SeoMetadata } from '@/lib/api/seo';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -22,6 +22,11 @@ export function SeoScreen() {
   const [rows, setRows] = useState<SeoMetadata[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  // ONE section at a time. The catalog is ~110 pages and every row carries eight
+  // fields, so rendering them all at once made the page unscrollable in practice —
+  // finding /company/[slug]/syllabus meant paging past 60 admin screens.
+  const [active, setActive] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     listSeo()
@@ -87,6 +92,19 @@ export function SeoScreen() {
   }
 
   const sections = groupBySection(rows);
+  const activeSection = active ?? sections[0]?.section ?? null;
+  const q = query.trim().toLowerCase();
+  const searching = q.length > 0;
+  // While searching, ignore the section filter: the whole point is not knowing which
+  // group the page is in.
+  const visibleRows = searching
+    ? rows.filter(
+        (r) =>
+          r.key.toLowerCase().includes(q) ||
+          (r.label ?? '').toLowerCase().includes(q) ||
+          (r.title ?? '').toLowerCase().includes(q),
+      )
+    : (sections.find((x) => x.section === activeSection)?.rows ?? []);
 
   return (
     <div className="space-y-8">
@@ -94,9 +112,10 @@ export function SeoScreen() {
         <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Admin</p>
         <h1 className="text-[28px] font-extrabold tracking-tight text-navy">SEO metadata</h1>
         <p className="mt-1 text-sm text-slate-600">
-          Meta title, description, keywords and social image for every page, grouped by audience.
-          Each page ships with a sensible default — edit only what you want to override. Changes go
-          live within ~5 minutes — no deploy needed.
+          Meta title, description, keywords, social image and on-page media for every page. Pick an
+          audience group below, or search for a path directly. Each page ships with a sensible
+          default — open a row to override only what you want. Changes go live within ~5 minutes —
+          no deploy needed.
         </p>
       </div>
       {err && (
@@ -105,25 +124,72 @@ export function SeoScreen() {
         </div>
       )}
       <AddPage onAdd={addPage} />
-      {sections.map(({ section, rows: sectionRows }) => (
-        <section key={section} className="space-y-5">
-          <div className="flex items-center gap-3">
-            <h2 className="text-lg font-bold text-navy">{section}</h2>
-            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-500">
-              {sectionRows.length} {sectionRows.length === 1 ? 'page' : 'pages'}
-            </span>
-            <span className="h-px flex-1 bg-slate-200" />
-          </div>
-          <div className="space-y-5">
-            {sectionRows.map((r) => (
-              <SeoRow key={r.key} row={r} onPatch={(f, v) => patch(r.key, f, v)} onRemove={() => remove(r)} />
+
+      {/* Search spans EVERY section — a path you half-remember is faster to type than
+          to find by guessing which audience group it belongs to. */}
+      <div className="sticky top-0 z-10 -mx-1 space-y-3 bg-background/95 px-1 py-3">
+        <div className="relative max-w-md">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+          <input
+            className={cn(inputCls, 'pl-9')}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by path or page name…"
+            aria-label="Search pages"
+          />
+        </div>
+        {!searching && (
+          <div className="flex flex-wrap gap-2">
+            {sections.map(({ section, rows: sr }) => (
+              <button
+                key={section}
+                type="button"
+                onClick={() => setActive(section)}
+                aria-current={section === activeSection ? 'true' : undefined}
+                className={cn(
+                  'rounded-full px-3 py-1 text-xs font-semibold transition-colors',
+                  section === activeSection
+                    ? 'bg-navy text-white'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
+                )}
+              >
+                {section}
+                <span
+                  className={cn(
+                    'ml-1.5 rounded-full px-1.5 text-[10px]',
+                    section === activeSection ? 'bg-white/20' : 'bg-white text-slate-500',
+                  )}
+                >
+                  {sr.length}
+                </span>
+              </button>
             ))}
           </div>
-        </section>
-      ))}
-      {rows.length === 0 && !err && (
-        <p className="text-sm text-slate-500">No pages configured yet.</p>
-      )}
+        )}
+      </div>
+
+      <div className="space-y-3">
+        {searching && (
+          <p className="text-sm text-slate-500">
+            {visibleRows.length} {visibleRows.length === 1 ? 'page' : 'pages'} matching
+            &ldquo;{query.trim()}&rdquo;
+          </p>
+        )}
+        {visibleRows.map((r) => (
+          <SeoRow
+            key={r.key}
+            row={r}
+            showSection={searching}
+            onPatch={(f, v) => patch(r.key, f, v)}
+            onRemove={() => remove(r)}
+          />
+        ))}
+        {visibleRows.length === 0 && !err && (
+          <p className="text-sm text-slate-500">
+            {searching ? 'No pages match that search.' : 'No pages configured yet.'}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -214,14 +280,20 @@ function SeoRow({
   row,
   onPatch,
   onRemove,
+  showSection,
 }: {
   row: SeoMetadata;
   onPatch: (field: keyof SeoMetadata, value: string) => void;
   onRemove: () => void;
+  /** Search results span groups, so each hit says which one it came from. */
+  showSection?: boolean;
 }) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Collapsed by default: a section holds up to 27 pages and each editor is eight
+  // fields tall, so the list is only scannable when the rows are one line each.
+  const [open, setOpen] = useState(false);
 
   const save = async () => {
     setSaving(true);
@@ -249,19 +321,53 @@ function SeoRow({
   };
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
-          {row.label ? <span className="text-sm font-bold text-navy">{row.label}</span> : null}
-          <span className="rounded-full bg-slate-100 px-2.5 py-0.5 font-mono text-xs font-semibold text-slate-600">
+    <div className="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+      <div className="flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          className="flex min-w-0 flex-1 items-center gap-2 text-left"
+        >
+          <ChevronDown
+            className={cn(
+              'size-4 shrink-0 text-slate-400 transition-transform',
+              open && 'rotate-180',
+            )}
+            aria-hidden
+          />
+          {row.label ? <span className="truncate text-sm font-bold text-navy">{row.label}</span> : null}
+          <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 font-mono text-xs font-semibold text-slate-600">
             {row.key}
           </span>
-        </span>
-        <span className="flex items-center gap-2">
-          <Button type="button" variant="secondary" size="sm" onClick={save} disabled={saving}>
-            {saving ? <Loader2 className="animate-spin" /> : saved ? <Check /> : null}
-            {saved ? 'Saved' : 'Save'}
-          </Button>
+          {showSection && row.section ? (
+            <span className="shrink-0 rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-500 ring-1 ring-slate-200">
+              {row.section}
+            </span>
+          ) : null}
+          {row.isCustom ? (
+            <span className="shrink-0 rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-700 ring-1 ring-sky-200">
+              Added
+            </span>
+          ) : null}
+          {row.embedUrl ? (
+            <span className="shrink-0 rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-700 ring-1 ring-violet-200">
+              Video
+            </span>
+          ) : null}
+          {row.heroImageUrl ? (
+            <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
+              Image
+            </span>
+          ) : null}
+        </button>
+        <span className="flex shrink-0 items-center gap-2">
+          {open && (
+            <Button type="button" variant="secondary" size="sm" onClick={save} disabled={saving}>
+              {saving ? <Loader2 className="animate-spin" /> : saved ? <Check /> : null}
+              {saved ? 'Saved' : 'Save'}
+            </Button>
+          )}
           <Button
             type="button"
             variant="ghost"
@@ -278,7 +384,11 @@ function SeoRow({
           </Button>
         </span>
       </div>
-      <div className="grid gap-3 sm:grid-cols-2">
+      {!open && row.title ? (
+        <p className="mt-1.5 truncate pl-6 text-xs text-slate-500">{row.title}</p>
+      ) : null}
+      {!open ? null : (
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <label className="space-y-1 sm:col-span-2">
           <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Meta title</span>
           <input
@@ -391,6 +501,7 @@ function SeoRow({
           </div>
         ) : null}
       </div>
+      )}
       {error && <p className="mt-2 text-xs font-medium text-red-600">{error}</p>}
     </div>
   );
