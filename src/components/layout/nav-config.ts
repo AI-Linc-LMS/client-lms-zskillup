@@ -45,6 +45,8 @@ import {
   Video,
   Wallet,
   Repeat,
+  ReceiptText,
+  Undo2,
 } from 'lucide-react';
 import type { FeatureLockModule } from '@/lib/api/feature-locks';
 
@@ -146,6 +148,7 @@ export const STUDENT_NAV: NavSection[] = [
     items: [
       { label: 'Explore Plans', href: '/shop', icon: Compass, tip: 'View and compare the available subscription plans.' },
       { label: 'Upgrade & Renew', href: '/upgrade', icon: Crown, tip: 'Upgrade your subscription or renew an existing plan.' },
+      { label: 'Purchases', href: '/billing', icon: ReceiptText, tip: 'Your purchase history, and refund requests within 3 days of payment.' },
       { label: 'Help & Support', href: '/support', icon: LifeBuoy, tip: 'Get assistance, report issues, or contact the support team.' },
     ],
   },
@@ -225,6 +228,9 @@ export const SUPERADMIN_NAV: NavSection[] = [
       { label: 'Billing & Revenue', href: '/superadmin/billing', icon: Wallet },
       { label: 'Coupons', href: '/admin/coupons', icon: Ticket },
       { label: 'Autopay', href: '/admin/autopay', icon: Repeat },
+      // Own console route, not /admin/refunds: navForPath picks the sidebar from the
+      // PATHNAME, so linking a super-admin into /admin flips their whole rail.
+      { label: 'Refunds', href: '/superadmin/refunds', icon: Undo2, tip: 'Student refund requests inside the 3-day window — approve or decline.' },
       { label: 'Financials', href: '/superadmin/financials', icon: IndianRupee },
       { label: 'Reports', href: '/superadmin/reports', icon: FileText },
       { label: 'Broadcasts', href: '/superadmin/broadcasts', icon: Megaphone },
@@ -379,6 +385,7 @@ export const ADMIN_NAV: NavSection[] = [
       { label: 'Promo Banners', href: '/admin/banners', icon: Megaphone, tip: 'Campaign banners per module — scheduled, with their own CTA.' },
       { label: 'Coupons', href: '/admin/coupons', icon: Ticket },
       { label: 'Autopay', href: '/admin/autopay', icon: Repeat },
+      { label: 'Refunds', href: '/admin/refunds', icon: Undo2, tip: 'Student refund requests inside the 3-day window — approve or decline.' },
     ],
   },
   {
