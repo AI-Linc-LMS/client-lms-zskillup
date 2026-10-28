@@ -263,6 +263,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
       // but only the admin nav linked it — so the accounts the owner actually
       // signs in as could not see the SEO module at all.
       { label: 'SEO', href: '/admin/seo', icon: Search, tip: 'Meta title, description, keywords and OG image for every page — including the pSEO landing pages.' },
+      { label: 'Promo Banners', href: '/admin/banners', icon: Megaphone, tip: 'Campaign banners per module — scheduled, with their own CTA.' },
     ],
   },
   {
@@ -375,6 +376,7 @@ export const ADMIN_NAV: NavSection[] = [
       { label: 'Blog', href: '/admin/blogs', icon: Newspaper },
       { label: 'Testimonials', href: '/admin/testimonials', icon: Quote },
       { label: 'SEO', href: '/admin/seo', icon: Search },
+      { label: 'Promo Banners', href: '/admin/banners', icon: Megaphone, tip: 'Campaign banners per module — scheduled, with their own CTA.' },
       { label: 'Coupons', href: '/admin/coupons', icon: Ticket },
       { label: 'Autopay', href: '/admin/autopay', icon: Repeat },
     ],

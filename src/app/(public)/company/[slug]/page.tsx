@@ -9,6 +9,7 @@ import { getPublicCompanies, getPublicCompany } from '@/lib/server/public-conten
 import { breadcrumbLd, JsonLd } from '@/components/seo/JsonLd';
 import { seoTemplateMetadataFor } from '@/lib/seo/page-metadata';
 import { COMPANY_FEATURES } from '@/shared/company-features';
+import { PromoBannerSlot } from '@/components/promo/PromoBannerSlot';
 import type { ApiCompany } from '@/lib/api/catalog';
 
 const SITE = 'https://prephasz.com';
@@ -217,6 +218,10 @@ export default async function CompanyLandingPage({ params }: { params: Promise<{
               ))}
             </div>
           </section>
+
+          {/* Admin-scheduled campaign for this module. Renders nothing when empty, so a
+              page with no live campaign looks exactly as it did before banners existed. */}
+          <PromoBannerSlot placement="PUBLIC_COMPANY" />
 
           {/* Mid-page ask, after the visitor knows what the page is about. */}
           <SignupCta

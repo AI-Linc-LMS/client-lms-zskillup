@@ -1,6 +1,7 @@
 import type { BlogPostDto, PlacementRecordDto, TestimonialDto } from '@/shared/dto/content.dto';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
 import type { ApiCompany, ApiCompanyHub, ApiTopic } from '@/lib/api/catalog';
+import type { PromoBannerDto } from '@/lib/api/promo';
 
 /**
  * Server-side fetch of public marketing content (Phase 5). Used by the public
@@ -104,6 +105,24 @@ export async function getPublicCompanies(): Promise<ApiCompany[]> {
 export async function getPublicCompany(slug: string): Promise<ApiCompany | null> {
   const all = await getPublicCompanies();
   return all.find((c) => c.slug === slug) ?? null;
+}
+
+/**
+ * The banners on screen right now for one module slot.
+ *
+ * The schedule is applied by the API, not here: these responses are shared-cached, and a
+ * banner filtered in the page would already have shipped its copy to everyone who asked
+ * before its start date.
+ *
+ * Returns [] on any failure, so a promo outage never takes a page with it — a slot that
+ * renders nothing is invisible, which is the correct failure mode for an advert.
+ */
+export async function getPublicBanners(placement: string): Promise<PromoBannerDto[]> {
+  return (
+    (await getJson<PromoBannerDto[]>(
+      `/api/v1/promo-banners?placement=${encodeURIComponent(placement)}`,
+    )) ?? []
+  );
 }
 
 /**

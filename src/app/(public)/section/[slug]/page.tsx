@@ -4,6 +4,7 @@ import { Code2 } from 'lucide-react';
 import { PublicHeader } from '@/components/marketing/PublicHeader';
 import { breadcrumbLd, JsonLd } from '@/components/seo/JsonLd';
 import { seoTemplateMetadataFor } from '@/lib/seo/page-metadata';
+import { PromoBannerSlot } from '@/components/promo/PromoBannerSlot';
 import { PublicFooter } from '@/components/marketing/PublicFooter';
 import { SignupCta } from '@/components/marketing/SignupCta';
 import {
@@ -174,6 +175,7 @@ export default async function SectionLandingPage({ params }: { params: Promise<{
                 </div>
               </section>
             )}
+            <PromoBannerSlot placement="PUBLIC_SECTION" />
             <SignupCta
               heading="Start solving placement coding problems"
               sub="Create a free account to run your solutions against real test cases and sit timed coding rounds."
@@ -228,6 +230,8 @@ export default async function SectionLandingPage({ params }: { params: Promise<{
               </div>
             </section>
           )}
+
+          <PromoBannerSlot placement="PUBLIC_SECTION" />
 
           <SignupCta
             heading={`Start practising ${section.name.toLowerCase()}`}

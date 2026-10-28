@@ -8,6 +8,7 @@ import { SignupCta } from '@/components/marketing/SignupCta';
 import { getPublicCodingTopics, getPublicCompanies, getPublicCompanyHub } from '@/lib/server/public-content';
 import { breadcrumbLd, itemListLd, JsonLd } from '@/components/seo/JsonLd';
 import { seoTemplateMetadataFor } from '@/lib/seo/page-metadata';
+import { PromoBannerSlot } from '@/components/promo/PromoBannerSlot';
 import { COMPANY_FEATURES, companyFeatureSeoKey, findCompanyFeature } from '@/shared/company-features';
 import type { ApiCompanyHub } from '@/lib/api/catalog';
 
@@ -504,6 +505,8 @@ export default async function CompanyFeaturePage({
               </p>
             </Section>
           )}
+
+          <PromoBannerSlot placement="PUBLIC_COMPANY" />
 
           <SignupCta
             heading={`Start your ${company.name} preparation`}
