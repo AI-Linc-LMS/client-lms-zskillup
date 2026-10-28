@@ -22,11 +22,11 @@ import { Reveal } from '@/components/motion/primitives';
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
-  searchParams: Promise<{ company?: string }>;
+  searchParams: Promise<{ company?: string; q?: string }>;
 }
 
 export default async function PracticePage({ searchParams }: PageProps) {
-  const { company } = await searchParams;
+  const { company, q } = await searchParams;
   const companyParam = company ? `&company=${encodeURIComponent(company)}` : '';
 
   let topics: ApiTopic[] = [];
@@ -120,7 +120,12 @@ export default async function PracticePage({ searchParams }: PageProps) {
 
       <UpgradeBanner />
 
-      <PracticePicker topics={topics} companies={pickerCompanies} companyParam={companyParam} />
+      <PracticePicker
+        topics={topics}
+        companies={pickerCompanies}
+        companyParam={companyParam}
+        initialQuery={q}
+      />
 
       <TopicAccuracyPanels />
       </ProfileLockGate>

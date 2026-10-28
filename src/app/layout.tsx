@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { JsonLd, websiteLd } from '@/components/seo/JsonLd';
 import { Bricolage_Grotesque, Instrument_Serif, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 
@@ -52,6 +53,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${jakarta.variable} ${bricolage.variable} ${instrument.variable}`}>
       <body className="min-h-screen bg-background font-sans text-foreground antialiased">
+        {/* Site identity for crawlers, on every page. In the body rather than <head>
+            because App Router owns <head> through the Metadata API, and schema.org
+            is read the same either way. */}
+        <JsonLd data={websiteLd()} />
         {children}
       </body>
     </html>

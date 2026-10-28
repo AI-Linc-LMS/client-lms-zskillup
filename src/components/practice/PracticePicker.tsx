@@ -48,12 +48,16 @@ export function PracticePicker({
   topics,
   companies,
   companyParam,
+  initialQuery,
 }: {
   topics: ApiTopic[];
   companies: PickerCompany[];
   companyParam: string;
+  /** Seeded from `?q=` so a search URL is shareable and the SearchAction target in our
+   *  WebSite JSON-LD lands on results instead of an empty picker. */
+  initialQuery?: string;
 }) {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialQuery ?? '');
   const q = query.trim().toLowerCase();
 
   // ── access control: what the student owns, from live entitlements ──────────

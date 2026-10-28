@@ -51,3 +51,34 @@ export function itemListLd(name: string, items: Array<{ name: string; path: stri
     })),
   };
 }
+
+/**
+ * Site-level identity, emitted on EVERY page from the root layout.
+ *
+ * `WebSite` + `name` is what Google reads to decide the site name it prints above a
+ * result — the one part of this block that still earns its place.
+ *
+ * `potentialAction`/`SearchAction` is the sitelinks-searchbox markup. Google retired
+ * that feature on 2024-11-21 and no longer renders a search box for it, so this is
+ * kept for the other consumers that read schema.org (Bing, LLM crawlers) and because
+ * Google states unsupported types cause no harm — NOT because it will produce a
+ * search box. The target points at /practice?q=, which is a real, working search URL;
+ * markup that names a URL the site cannot serve is the version worth avoiding.
+ */
+export function websiteLd() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Prephasz',
+    alternateName: 'ZSkillup',
+    url: `${SITE}/`,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${SITE}/practice?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+}
