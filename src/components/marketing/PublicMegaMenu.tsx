@@ -3,6 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import { getPublicCompanies } from '@/lib/server/public-content';
 import { COMPANY_FEATURES } from '@/shared/company-features';
 import { PRODUCT_FEATURES } from '@/shared/product-features';
+import { LANDING_NAV } from '@/lib/landing-config';
 
 /**
  * The Companies / Preparation dropdowns in the marketing header.
@@ -18,9 +19,25 @@ import { PRODUCT_FEATURES } from '@/shared/product-features';
  * the same panel through `focus-within`, and the trigger is a real link to the index
  * page, so the menu is never the only route to the content.
  */
+/**
+ * Labels already shown as flat links in the header bar.
+ *
+ * A module whose name matches one of them is left out of this panel: the header was
+ * rendering "Leaderboard" twice, once here pointing at the /features marketing page and
+ * once in the bar pointing at the live page. Two identical words, two destinations.
+ *
+ * Derived rather than a hardcoded exclusion list, so a future feature that happens to
+ * share a bar label does not quietly reintroduce the collision. Nothing is lost: the
+ * /features index lists every module, and the siblings on each feature page link across.
+ */
+const BAR_LABELS = new Set(
+  LANDING_NAV.filter((l) => !('inMegaMenu' in l && l.inMegaMenu)).map((l) => l.label.toLowerCase()),
+);
+
 export async function PublicMegaMenu() {
   const companies = await getPublicCompanies();
   if (companies.length === 0) return null;
+  const modules = PRODUCT_FEATURES.filter((f) => !BAR_LABELS.has(f.label.toLowerCase()));
 
   return (
     <>
@@ -70,7 +87,7 @@ export async function PublicMegaMenu() {
               By module
             </p>
             <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1">
-              {PRODUCT_FEATURES.map((f) => (
+              {modules.map((f) => (
                 <Link
                   key={f.slug}
                   href={`/features/${f.slug}`}
