@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { Code2 } from 'lucide-react';
 import { PublicHeader } from '@/components/marketing/PublicHeader';
 import { breadcrumbLd, JsonLd } from '@/components/seo/JsonLd';
+import { seoTemplateMetadataFor } from '@/lib/seo/page-metadata';
 import { PublicFooter } from '@/components/marketing/PublicFooter';
 import { SignupCta } from '@/components/marketing/SignupCta';
 import {
@@ -66,17 +67,31 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  // Coding is the synthetic 5th section — no row in the topic taxonomy, but it is a
+  // real indexable page, so it goes through the same "/section/[slug]" template.
   if (slug === CODING_SECTION_SLUG) {
-    const title = 'Coding Practice for Placements — Company-Wise Problems | prephasz';
-    const description =
-      'Practise placement coding problems company by company, with real previous-round patterns and timed assessments.';
-    return { title, description, alternates: { canonical: `${SITE}/section/coding` } };
+    const seo = await seoTemplateMetadataFor(
+      '/section/[slug]',
+      { section: 'Coding' },
+      {
+        title: 'Coding Practice for Placements — Company-Wise Problems | prephasz',
+        description:
+          'Practise placement coding problems company by company, with real previous-round patterns and timed assessments.',
+      },
+    );
+    return { ...seo, alternates: { canonical: `${SITE}/section/coding` } };
   }
   const section = await findPublicSection(slug);
   if (!section) return { title: 'Practice sections · ZSkillup' };
-  const title = `${section.name} Practice Questions for Placements | prephasz`;
-  const description = `Practise ${section.name.toLowerCase()} for placement tests — ${section.questionCount} questions across ${section.topicCount} topics, with timed mocks and previous-year papers.`;
-  return { title, description, alternates: { canonical: `${SITE}/section/${section.slug}` } };
+  const seo = await seoTemplateMetadataFor(
+    '/section/[slug]',
+    { section: section.name },
+    {
+      title: `${section.name} Practice Questions for Placements | prephasz`,
+      description: `Practise ${section.name.toLowerCase()} for placement tests — ${section.questionCount} questions across ${section.topicCount} topics, with timed mocks and previous-year papers.`,
+    },
+  );
+  return { ...seo, alternates: { canonical: `${SITE}/section/${section.slug}` } };
 }
 
 function Hero({ eyebrow, title, sub }: { eyebrow: string; title: string; sub: string }) {

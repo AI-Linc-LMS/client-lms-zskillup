@@ -4,6 +4,7 @@ import { PublicFooter } from '@/components/marketing/PublicFooter';
 import { SignupCta } from '@/components/marketing/SignupCta';
 import { getPublicCompanies } from '@/lib/server/public-content';
 import { breadcrumbLd, itemListLd, JsonLd } from '@/components/seo/JsonLd';
+import { seoMetadataFor } from '@/lib/seo/page-metadata';
 
 const SITE = 'https://prephasz.com';
 
@@ -17,10 +18,14 @@ const SITE = 'https://prephasz.com';
 export const revalidate = 300;
 
 export async function generateMetadata() {
-  const title = 'Company-Wise Placement Preparation | prephasz';
-  const description =
-    'Prepare company by company — aptitude, previous-year questions, coding problems and interview rounds for the recruiters that hire freshers.';
-  return { title, description, alternates: { canonical: `${SITE}/company` } };
+  // Title/description/keywords come from the SEO module (section "SEO Landing Pages"),
+  // falling back to these defaults; the canonical is structural and stays in code.
+  const seo = await seoMetadataFor('/company', {
+    title: 'Company-Wise Placement Preparation | prephasz',
+    description:
+      'Prepare company by company — aptitude, previous-year questions, coding problems and interview rounds for the recruiters that hire freshers.',
+  });
+  return { ...seo, alternates: { canonical: `${SITE}/company` } };
 }
 
 export default async function CompanyIndexPage() {

@@ -5,6 +5,7 @@ import { SignupCta } from '@/components/marketing/SignupCta';
 import { getPublicTopics } from '@/lib/server/public-content';
 import { buildSections, buildSoftSkillsSection } from '@/lib/sections/section-catalog';
 import { breadcrumbLd, itemListLd, JsonLd } from '@/components/seo/JsonLd';
+import { seoMetadataFor } from '@/lib/seo/page-metadata';
 
 const SITE = 'https://prephasz.com';
 
@@ -12,10 +13,12 @@ const SITE = 'https://prephasz.com';
 export const revalidate = 300;
 
 export async function generateMetadata() {
-  const title = 'Placement Practice by Section — Aptitude, Reasoning, Verbal, Coding | prephasz';
-  const description =
-    'Practise section by section: numerical ability, logical reasoning, verbal ability, technical MCQs, interview preparation and coding.';
-  return { title, description, alternates: { canonical: `${SITE}/section` } };
+  const seo = await seoMetadataFor('/section', {
+    title: 'Placement Practice by Section — Aptitude, Reasoning, Verbal, Coding | prephasz',
+    description:
+      'Practise section by section: numerical ability, logical reasoning, verbal ability, technical MCQs, interview preparation and coding.',
+  });
+  return { ...seo, alternates: { canonical: `${SITE}/section` } };
 }
 
 export default async function SectionIndexPage() {

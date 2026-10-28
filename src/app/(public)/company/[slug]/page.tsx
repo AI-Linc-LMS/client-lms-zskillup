@@ -7,6 +7,7 @@ import { PublicFooter } from '@/components/marketing/PublicFooter';
 import { SignupCta } from '@/components/marketing/SignupCta';
 import { getPublicCompanies, getPublicCompany } from '@/lib/server/public-content';
 import { breadcrumbLd, JsonLd } from '@/components/seo/JsonLd';
+import { seoTemplateMetadataFor } from '@/lib/seo/page-metadata';
 import type { ApiCompany } from '@/lib/api/catalog';
 
 const SITE = 'https://prephasz.com';
@@ -42,17 +43,27 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const c = await getPublicCompany(slug);
   if (!c) return { title: 'Company preparation · ZSkillup' };
-  const title = `${c.name} Placement Preparation — Aptitude, Coding & Interview | prephasz`;
-  const description =
-    c.description ??
-    c.tagline ??
-    `Prepare for the ${c.name} recruitment process with company-specific aptitude, previous-year questions, coding practice and interview rounds.`;
+  // One catalog row — "/company/[slug]" in the SEO module — templates every company
+  // hub; `{company}` is substituted here. The company's own description still wins as
+  // the fallback, so a hub with real copy does not lose it to a generic template.
+  const seo = await seoTemplateMetadataFor(
+    '/company/[slug]',
+    { company: c.name },
+    {
+      title: `${c.name} Placement Preparation — Aptitude, Coding & Interview | prephasz`,
+      description:
+        c.description ??
+        c.tagline ??
+        `Prepare for the ${c.name} recruitment process with company-specific aptitude, previous-year questions, coding practice and interview rounds.`,
+    },
+  );
   return {
-    title,
-    description,
+    ...seo,
     alternates: { canonical: `${SITE}/company/${c.slug}` },
-    openGraph: { title, description, images: c.logoUrl ? [{ url: c.logoUrl }] : undefined },
-    twitter: { card: 'summary_large_image' as const, title, description },
+    openGraph: {
+      ...seo.openGraph,
+      images: c.logoUrl ? [{ url: c.logoUrl }] : seo.openGraph?.images,
+    },
   };
 }
 

@@ -258,6 +258,11 @@ export const SUPERADMIN_NAV: NavSection[] = [
       { label: 'Blog', href: '/superadmin/blogs', icon: Newspaper },
       { label: 'Testimonials', href: '/superadmin/testimonials', icon: Quote },
       { label: "Today's Tips", href: '/superadmin/tips', icon: Sparkles },
+      // Same omission as Feature Locks and the JOBS links: /admin/seo is
+      // @Roles(ADMIN, SUPER_ADMIN) and middleware lets a super-admin into /admin,
+      // but only the admin nav linked it — so the accounts the owner actually
+      // signs in as could not see the SEO module at all.
+      { label: 'SEO', href: '/admin/seo', icon: Search, tip: 'Meta title, description, keywords and OG image for every page — including the pSEO landing pages.' },
     ],
   },
   {
