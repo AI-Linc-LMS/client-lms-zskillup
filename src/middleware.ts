@@ -38,6 +38,10 @@ const PROTECTED_PREFIXES = [
   // '/jobs' is deliberately absent: the public board is the point. '/applications' is
   // the student's own list and is not.
   '/applications',
+  // A student's own purchase history and refund requests. The API is the real boundary
+  // (401 without a token), but rendering this page to a logged-out visitor shows them a
+  // "Purchases & refunds" screen with a load error instead of the login they need.
+  '/billing',
   '/tpo',
   '/admin',
   '/superadmin',
