@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 import { getPublicCompanies } from '@/lib/server/public-content';
 import { COMPANY_FEATURES } from '@/shared/company-features';
+import { PRODUCT_FEATURES } from '@/shared/product-features';
 
 /**
  * The Companies / Preparation dropdowns in the marketing header.
@@ -63,10 +64,24 @@ export async function PublicMegaMenu() {
         >
           Preparation <ChevronDown className="size-3.5" aria-hidden />
         </Link>
-        <div className="invisible absolute left-1/2 top-full z-50 w-[420px] -translate-x-1/2 pt-3 opacity-0 transition-opacity group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+        <div className="invisible absolute left-1/2 top-full z-50 w-[460px] -translate-x-1/2 pt-3 opacity-0 transition-opacity group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
           <div className="rounded-2xl border border-[var(--color-line)] bg-white p-5 shadow-md">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--color-text-subtle)]">
-              By resource
+              By module
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1">
+              {PRODUCT_FEATURES.map((f) => (
+                <Link
+                  key={f.slug}
+                  href={`/features/${f.slug}`}
+                  className="rounded-lg px-2 py-1.5 text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-line)]/30"
+                >
+                  {f.label}
+                </Link>
+              ))}
+            </div>
+            <p className="mt-4 border-t border-[var(--color-line)] pt-4 text-[10px] font-semibold uppercase tracking-widest text-[var(--color-text-subtle)]">
+              By company resource
             </p>
             {/* Each points at the FIRST company's page for that feature — a link to a real
                 page beats a dead "category" URL that would have to be invented for it. */}

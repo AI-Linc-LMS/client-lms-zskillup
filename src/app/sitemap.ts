@@ -11,6 +11,7 @@ import {
   CODING_SECTION_SLUG,
 } from '@/lib/sections/section-catalog';
 import { COMPANY_FEATURES } from '@/shared/company-features';
+import { PRODUCT_FEATURES } from '@/shared/product-features';
 
 /**
  * The public map of the site.
@@ -50,6 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE}/blog`, changeFrequency: 'weekly', priority: 0.6 },
     { url: `${SITE}/company`, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${SITE}/section`, changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${SITE}/features`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${SITE}/roadmap`, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${SITE}/login`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${SITE}/signup`, changeFrequency: 'yearly', priority: 0.4 },
@@ -79,6 +81,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...sectionSlugs.map((slug) => ({
       url: `${SITE}/section/${slug}`,
       changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    })),
+    // The public face of each logged-in module.
+    ...PRODUCT_FEATURES.map((f) => ({
+      url: `${SITE}/features/${f.slug}`,
+      changeFrequency: 'monthly' as const,
       priority: 0.7,
     })),
     // The company x feature matrix. Every pair is prerendered by generateStaticParams

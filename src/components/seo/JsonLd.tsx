@@ -82,3 +82,22 @@ export function websiteLd() {
     },
   };
 }
+
+/**
+ * Visible Q&A, marked up.
+ *
+ * The questions and answers passed here MUST be the ones rendered on the page. Marking up
+ * FAQs the visitor cannot see is the definition of hidden structured data and is a
+ * manual-action risk, not a shortcut to a richer result.
+ */
+export function faqLd(items: Array<{ q: string; a: string }>) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map((it) => ({
+      '@type': 'Question',
+      name: it.q,
+      acceptedAnswer: { '@type': 'Answer', text: it.a },
+    })),
+  };
+}
