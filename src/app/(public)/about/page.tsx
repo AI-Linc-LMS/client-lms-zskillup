@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { PublicHeader } from '@/components/marketing/PublicHeader';
+import { PublicFooter } from '@/components/marketing/PublicFooter';
 import {
   ArrowRight,
   Check,
@@ -67,7 +69,9 @@ const PRINCIPLES = [
 
 export default function AboutPage() {
   return (
-    <main className="bg-background">
+    <>
+      <PublicHeader />
+      <main className="bg-background">
       {/* Hero */}
       <section className="relative overflow-hidden bg-navy text-white">
         <div
@@ -225,6 +229,8 @@ export default function AboutPage() {
           </Button>
         </div>
       </section>
-    </main>
+      </main>
+      <PublicFooter />
+    </>
   );
 }

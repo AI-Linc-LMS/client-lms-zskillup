@@ -4,6 +4,7 @@ import { PublicFooter } from '@/components/marketing/PublicFooter';
 import { SignupCta } from '@/components/marketing/SignupCta';
 import { getPublicTopics } from '@/lib/server/public-content';
 import { buildSections, buildSoftSkillsSection } from '@/lib/sections/section-catalog';
+import { breadcrumbLd, itemListLd, JsonLd } from '@/components/seo/JsonLd';
 
 const SITE = 'https://prephasz.com';
 
@@ -27,6 +28,22 @@ export default async function SectionIndexPage() {
   return (
     <>
       <PublicHeader />
+      <JsonLd
+        data={breadcrumbLd([
+          { name: 'Home', path: '/' },
+          { name: 'Sections', path: '/section' },
+        ])}
+      />
+      <JsonLd
+        data={itemListLd(
+          'Placement practice by section',
+          // Coding is appended because it is listed on the page but is not a topic root.
+          [
+            ...listed.map((s) => ({ name: s.name, path: `/section/${s.slug}` })),
+            { name: 'Coding', path: '/section/coding' },
+          ],
+        )}
+      />
       <main>
         <section className="relative overflow-hidden bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] px-5 py-16 text-white md:px-8">
           <div aria-hidden className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-[#f5b400]/20 blur-3xl" />

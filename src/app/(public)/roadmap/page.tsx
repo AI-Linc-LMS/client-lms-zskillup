@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { PublicHeader } from '@/components/marketing/PublicHeader';
+import { PublicFooter } from '@/components/marketing/PublicFooter';
 import Link from 'next/link';
-import { BrandLogo } from '@/components/layout/BrandLogo';
 import { CheckCircle2, Circle, Lock, BookOpen, Building2, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -59,17 +60,7 @@ export default function RoadmapPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Public navbar */}
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white px-4 sm:px-6">
-        <BrandLogo variant="dark" className="h-7" />
-        <div className="flex items-center gap-2 sm:gap-3">
-          <Button variant="ghost" asChild>
-            <Link href="/login">Log in</Link>
-          </Button>
-          <Button asChild>
-            <Link href="/signup">Create account</Link>
-          </Button>
-        </div>
-      </header>
+      <PublicHeader />
 
       {/* Hero (Zone C - dark navy) */}
       <section className="relative overflow-hidden bg-navy text-white">
@@ -250,9 +241,7 @@ export default function RoadmapPage() {
         </div>
       </main>
 
-      <footer className="mt-16 border-t px-4 py-8 text-center text-xs text-muted-foreground sm:px-6">
-        © 2026 ZSkillup · Future-ready graduates, future-strong institutions
-      </footer>
+      <PublicFooter />
     </div>
   );
 }
