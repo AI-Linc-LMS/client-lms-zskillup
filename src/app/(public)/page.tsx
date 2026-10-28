@@ -12,22 +12,18 @@ import {
   Cpu,
   FileText,
   Flame,
-  Instagram,
   LineChart,
-  Linkedin,
   MessageSquare,
   Sparkles,
   Star,
   Trophy,
   Users,
-  Youtube,
   Zap,
 } from 'lucide-react';
 import { HOMEPAGE_COMPANY_LOGOS } from '@/lib/demo-data-extra';
-import { PublicMobileMenu } from '@/components/marketing/PublicMobileMenu';
 import { Disclaimer } from '@/components/legal/Disclaimer';
-import { PublicAuthCta } from '@/components/marketing/PublicAuthCta';
-import { BrandLogo } from '@/components/layout/BrandLogo';
+import { PublicHeader } from '@/components/marketing/PublicHeader';
+import { PublicFooter } from '@/components/marketing/PublicFooter';
 import { HomeFeaturedTracks } from '@/components/marketing/HomeFeaturedTracks';
 import { GamifiedShowcase } from '@/components/marketing/GamifiedShowcase';
 import { HomeBlogSection } from '@/components/marketing/HomeBlogSection';
@@ -48,16 +44,10 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 import {
-  LANDING_FOOTER,
   LANDING_HERO_STATS,
   LANDING_HREFS,
-  LANDING_NAV,
-  LANDING_SOCIALS,
 } from '@/lib/landing-config';
 import { FestiveBanner } from '@/components/marketing/FestiveBanner';
-
-/** Footer "Follow us" icon per social label. */
-const SOCIAL_ICON = { Instagram, LinkedIn: Linkedin, YouTube: Youtube } as const;
 
 const HERO_STATS = LANDING_HERO_STATS;
 
@@ -201,26 +191,7 @@ export default async function HomePage() {
       <FestiveBanner />
 
       {/* ── Public Navbar ─────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-white/10 bg-gradient-to-r from-[#0a0a0c] to-[#141a2e] px-5 md:px-8">
-        <BrandLogo variant="light" priority className="h-8" />
-        <nav className="hidden items-center gap-6 lg:flex" aria-label="Primary">
-          {/* Keyed by label, not href: two links legitimately CAN share a destination, and
-              keying on href silently produced duplicate React keys when they did. */}
-          {LANDING_NAV.map((l) => (
-            <Link
-              key={l.label}
-              href={l.href}
-              className="text-sm font-medium text-white/75 transition-colors hover:text-white"
-            >
-              {l.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="flex items-center gap-3">
-          <PublicAuthCta />
-          <PublicMobileMenu />
-        </div>
-      </header>
+      <PublicHeader />
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden">
@@ -812,75 +783,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── Footer ────────────────────────────────────────────────────────── */}
-      <footer className="border-t border-[var(--color-line)] bg-white px-5 py-12 md:px-8">
-        <div className="mx-auto grid max-w-[1400px] gap-8 sm:grid-cols-4">
-          <div className="sm:col-span-1">
-            <BrandLogo variant="dark" className="h-7" />
-            <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-              Company-wise prep, timed mocks, and cohort analytics - all in one platform.
-            </p>
-            <p className="group-label mb-3 mt-6">Follow us</p>
-            <div className="flex items-center gap-2.5">
-              {LANDING_SOCIALS.map((s) => {
-                const Icon = SOCIAL_ICON[s.label];
-                return (
-                  <a
-                    key={s.label}
-                    href={s.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={s.label}
-                    className="grid size-9 place-items-center rounded-full border border-[var(--color-line)] text-[var(--color-text-muted)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-primary)]"
-                  >
-                    <Icon className="size-4" />
-                  </a>
-                );
-              })}
-            </div>
-          </div>
-          <div>
-            <p className="group-label mb-3">Product</p>
-            <ul className="space-y-2">
-              {LANDING_FOOTER.product.map((l) => (
-                <li key={l.label}>
-                  <Link href={l.href} className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <p className="group-label mb-3">Account</p>
-            <ul className="space-y-2">
-              {LANDING_FOOTER.account.map((l) => (
-                <li key={l.label}>
-                  <Link href={l.href} className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <p className="group-label mb-3">Coverage</p>
-            <ul className="space-y-2">
-              {LANDING_FOOTER.coverage.map((l) => (
-                <li key={l.label}>
-                  <Link href={l.href} className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-        {/* Affiliation disclaimer moved up next to the recruiter logos (above the "Aligned
-            with the hiring patterns of" strip), so it no longer lives in the footer. */}
-        <div className="mx-auto mt-10 max-w-[1400px] border-t border-[var(--color-line)] pt-6 text-center text-xs text-[var(--color-text-subtle)]">
-          © 2026 prephasz · Powered by ZSkillup · Future-ready graduates, future-strong institutions
-        </div>
-      </footer>
+      <PublicFooter />
     </main>
   );
 }

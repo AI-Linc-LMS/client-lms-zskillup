@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { PublicHeader } from '@/components/marketing/PublicHeader';
+import { PublicFooter } from '@/components/marketing/PublicFooter';
 import { ArrowRight } from 'lucide-react';
 import { getPublicBlogs } from '@/lib/server/public-content';
 import type { BlogPostDto } from '@/shared';
@@ -115,70 +117,74 @@ export default async function BlogIndexPage() {
   const [featured, ...rest] = posts;
 
   return (
-    <main>
-      {/* ── Full-width hero ─────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] text-white">
-        <div aria-hidden className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-[#f5b400]/20 blur-3xl" />
-        <div aria-hidden className="pointer-events-none absolute -bottom-40 right-0 h-96 w-96 rounded-full bg-white/[0.06] blur-3xl" />
-        <div
-          aria-hidden
-          className="absolute inset-0 opacity-[0.05]"
-          style={{ backgroundImage: 'radial-gradient(rgb(255 255 255 / 0.8) 1px, transparent 1px)', backgroundSize: '22px 22px' }}
-        />
-        <div className="relative mx-auto max-w-[1400px] px-5 py-16 md:px-8 lg:py-24">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em]">
-            <ShinyText text="The prephasz blog" speed={4} color="rgba(255,255,255,0.75)" shineColor="#ffffff" />
-          </span>
-          <h1 className="mt-5 max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">
-            Guides for cracking{' '}
-            <RotatingText
-              texts={HERO_TOPICS}
-              mainClassName="inline-flex overflow-hidden py-1 -my-1 text-[#ffc42d]"
-              staggerFrom="last"
-              staggerDuration={0.02}
-              rotationInterval={2000}
-              splitBy="characters"
-              transition={{ type: 'spring', damping: 26, stiffness: 340 }}
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '-120%' }}
-            />
-          </h1>
-          <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/70 sm:text-lg">
-            Company-wise prep, coding patterns, aptitude shortcuts and interview playbooks - written by the
-            team behind India&apos;s #1 campus prep platform.
-          </p>
-          {posts.length > 0 && (
-            <p className="mt-8 text-sm font-semibold text-white/80">
-              <CountUp to={posts.length} duration={1.6} className="num-tab text-[#ffc42d]" /> guides and counting
+    <>
+      <PublicHeader />
+      <main>
+        {/* ── Full-width hero ─────────────────────────────────────────────── */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] text-white">
+          <div aria-hidden className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-[#f5b400]/20 blur-3xl" />
+          <div aria-hidden className="pointer-events-none absolute -bottom-40 right-0 h-96 w-96 rounded-full bg-white/[0.06] blur-3xl" />
+          <div
+            aria-hidden
+            className="absolute inset-0 opacity-[0.05]"
+            style={{ backgroundImage: 'radial-gradient(rgb(255 255 255 / 0.8) 1px, transparent 1px)', backgroundSize: '22px 22px' }}
+          />
+          <div className="relative mx-auto max-w-[1400px] px-5 py-16 md:px-8 lg:py-24">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em]">
+              <ShinyText text="The prephasz blog" speed={4} color="rgba(255,255,255,0.75)" shineColor="#ffffff" />
+            </span>
+            <h1 className="mt-5 max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">
+              Guides for cracking{' '}
+              <RotatingText
+                texts={HERO_TOPICS}
+                mainClassName="inline-flex overflow-hidden py-1 -my-1 text-[#ffc42d]"
+                staggerFrom="last"
+                staggerDuration={0.02}
+                rotationInterval={2000}
+                splitBy="characters"
+                transition={{ type: 'spring', damping: 26, stiffness: 340 }}
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '-120%' }}
+              />
+            </h1>
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/70 sm:text-lg">
+              Company-wise prep, coding patterns, aptitude shortcuts and interview playbooks - written by the
+              team behind India&apos;s #1 campus prep platform.
             </p>
-          )}
-        </div>
-      </section>
+            {posts.length > 0 && (
+              <p className="mt-8 text-sm font-semibold text-white/80">
+                <CountUp to={posts.length} duration={1.6} className="num-tab text-[#ffc42d]" /> guides and counting
+              </p>
+            )}
+          </div>
+        </section>
 
-      {posts.length === 0 ? (
-        <div className="mx-auto max-w-[1400px] px-5 py-16 md:px-8">
-          <p className="rounded-xl border border-[var(--color-line)] bg-white p-10 text-center text-sm text-[var(--color-text-muted)]">
-            No posts yet - check back soon.
-          </p>
-        </div>
-      ) : (
-        <div className="mx-auto max-w-[1400px] px-5 py-14 md:px-8 lg:py-16">
-          {featured && <FeaturedCard post={featured} />}
-          {rest.length > 0 && (
-            <>
-              <h2 className="mb-6 mt-14 text-sm font-bold uppercase tracking-[0.14em] text-[var(--color-text-subtle)]">
-                Latest guides
-              </h2>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {rest.map((p) => (
-                  <BlogCard key={p.id} post={p} />
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )}
-    </main>
+        {posts.length === 0 ? (
+          <div className="mx-auto max-w-[1400px] px-5 py-16 md:px-8">
+            <p className="rounded-xl border border-[var(--color-line)] bg-white p-10 text-center text-sm text-[var(--color-text-muted)]">
+              No posts yet - check back soon.
+            </p>
+          </div>
+        ) : (
+          <div className="mx-auto max-w-[1400px] px-5 py-14 md:px-8 lg:py-16">
+            {featured && <FeaturedCard post={featured} />}
+            {rest.length > 0 && (
+              <>
+                <h2 className="mb-6 mt-14 text-sm font-bold uppercase tracking-[0.14em] text-[var(--color-text-subtle)]">
+                  Latest guides
+                </h2>
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {rest.map((p) => (
+                    <BlogCard key={p.id} post={p} />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </main>
+      <PublicFooter />
+    </>
   );
 }
