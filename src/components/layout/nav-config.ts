@@ -262,8 +262,8 @@ export const SUPERADMIN_NAV: NavSection[] = [
       // @Roles(ADMIN, SUPER_ADMIN) and middleware lets a super-admin into /admin,
       // but only the admin nav linked it — so the accounts the owner actually
       // signs in as could not see the SEO module at all.
-      { label: 'SEO', href: '/admin/seo', icon: Search, tip: 'Meta title, description, keywords and OG image for every page — including the pSEO landing pages.' },
-      { label: 'Promo Banners', href: '/admin/banners', icon: Megaphone, tip: 'Campaign banners per module — scheduled, with their own CTA.' },
+      { label: 'SEO', href: '/superadmin/seo', icon: Search, tip: 'Meta title, description, keywords, OG image and on-page media for every page — including the pSEO landing pages.' },
+      { label: 'Promo Banners', href: '/superadmin/banners', icon: Megaphone, tip: 'Campaign banners per module — scheduled, with their own CTA.' },
     ],
   },
   {
