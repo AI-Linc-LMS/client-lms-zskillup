@@ -1,5 +1,6 @@
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { StudyPlanClient } from '@/components/study/StudyPlanClient';
+import { PromoBannerSlot } from '@/components/promo/PromoBannerSlot';
 
 /**
  * Smart Study Plan - the fixed, AI-generated 90-day placement roadmap. Built once
@@ -11,6 +12,7 @@ export default function StudyPlanPage() {
   return (
     <div data-tour="plan:hero" className="w-full">
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Study Plan' }]} />
+      <PromoBannerSlot placement="STUDY_PLAN" />
       <StudyPlanClient />
     </div>
   );

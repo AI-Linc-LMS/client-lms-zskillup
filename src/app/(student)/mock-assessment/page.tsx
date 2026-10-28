@@ -5,6 +5,7 @@ import { MockAllowanceChip } from '@/components/practice/MockAllowanceChip';
 import { MockHistory } from '@/components/practice/MockHistory';
 import { ProfileLockGate } from '@/components/student/ProfileLockGate';
 import { Reveal } from '@/components/motion/primitives';
+import { PromoBannerSlot } from '@/components/promo/PromoBannerSlot';
 
 /**
  * Mock Assessment (Mode 3) - student-assembled, non-adaptive, PROCTORED practice
@@ -25,6 +26,7 @@ export default function MockAssessmentPage() {
           { label: 'Mock Assessment' },
         ]}
       />
+      <PromoBannerSlot placement="MOCK_ASSESSMENT" />
 
       <ProfileLockGate feature="Mock Assessment" contentClassName="space-y-8">
       <Reveal>

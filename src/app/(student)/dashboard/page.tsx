@@ -19,6 +19,7 @@ import { CalibrationRecommendations } from '@/components/student/CalibrationReco
 import { PerformanceParticipation } from '@/components/student/PerformanceParticipation';
 import { CompanyReadiness } from '@/components/student/CompanyReadiness';
 import { Reveal } from '@/components/motion/primitives';
+import { PromoBannerSlot } from '@/components/promo/PromoBannerSlot';
 
 /**
  * Student dashboard - redesigned (Aurora). Above the fold is the AI-personalized
@@ -30,6 +31,7 @@ export default function StudentDashboardPage() {
   return (
     <div>
       <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Dashboard' }]} />
+      <PromoBannerSlot placement="DASHBOARD" />
 
       <div className="grid gap-6 xl:grid-cols-[1fr_20rem]">
         <div className="min-w-0 space-y-6">

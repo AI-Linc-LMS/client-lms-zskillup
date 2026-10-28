@@ -25,6 +25,8 @@ export const PROMO_PLACEMENTS = [
   { key: 'MOCK_INTERVIEW', label: 'Mock interviews', group: 'Student' },
   { key: 'RESUME', label: 'Resume builder', group: 'Student' },
   { key: 'PLACEMENT_READINESS', label: 'Placement readiness', group: 'Student' },
+  { key: 'CODING', label: 'Coding practice', group: 'Student' },
+  { key: 'PERFORMANCE', label: 'Performance & analytics', group: 'Student' },
   { key: 'LEADERBOARD', label: 'Leaderboard', group: 'Student' },
   { key: 'COMMUNITY', label: 'Community', group: 'Student' },
   { key: 'SHOP', label: 'Shop & explore', group: 'Student' },

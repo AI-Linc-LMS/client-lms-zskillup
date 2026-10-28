@@ -1,6 +1,7 @@
 import { LineChart } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { PerformanceDashboard } from '@/components/student/PerformanceDashboard';
+import { PromoBannerSlot } from '@/components/promo/PromoBannerSlot';
 
 /**
  * Performance - a visual analytics report: placement readiness (overall +
@@ -17,6 +18,7 @@ export default function PerformancePage() {
           { label: 'Performance' },
         ]}
       />
+      <PromoBannerSlot placement="PERFORMANCE" />
 
       <div>
         <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-indigo-600 ring-1 ring-inset ring-indigo-100">

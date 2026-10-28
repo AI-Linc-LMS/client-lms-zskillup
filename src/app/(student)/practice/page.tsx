@@ -13,6 +13,7 @@ import { TopicAccuracyPanels } from '@/components/practice/TopicAccuracyPanels';
 import { PracticePicker } from '@/components/practice/PracticePicker';
 import { UpgradeBanner } from '@/components/billing/UpgradeBanner';
 import { Reveal } from '@/components/motion/primitives';
+import { PromoBannerSlot } from '@/components/promo/PromoBannerSlot';
 
 /**
  * Practice (Mode 1) - adaptive, non-proctored picker. Server fetches the topic
@@ -75,6 +76,7 @@ export default async function PracticePage({ searchParams }: PageProps) {
           { label: 'Adaptive' },
         ]}
       />
+      <PromoBannerSlot placement="PRACTICE" />
 
       <ProfileLockGate feature="Adaptive practice" contentClassName="space-y-8">
       <Reveal>

@@ -3,6 +3,7 @@ import { ArrowLeft, Code2, Compass } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { CodingProblemsList } from '@/components/coding/CodingProblemsList';
 import { Reveal } from '@/components/motion/primitives';
+import { PromoBannerSlot } from '@/components/promo/PromoBannerSlot';
 
 /**
  * Coding practice catalogue (Practice → Coding section). Lists the active coding
@@ -28,6 +29,7 @@ export default async function CodingPracticePage({ searchParams }: PageProps) {
           { label: topic ? `Coding · ${topic}` : 'Coding' },
         ]}
       />
+      <PromoBannerSlot placement="CODING" />
 
       <Reveal>
         <section data-tour="coding:hero" className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] p-6 text-white sm:p-8">
