@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { formatSec } from '@/shared/answer-timing';
 import { getStudentReport, type AdminStudentFullReport } from '@/lib/api/admin';
 import { Panel, StatCard } from '@/components/superadmin/dashboard-ui';
 import {

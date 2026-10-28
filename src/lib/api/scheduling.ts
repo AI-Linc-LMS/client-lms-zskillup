@@ -237,6 +237,13 @@ export interface AssessmentResultRow {
   incorrectAnswers: number;
   /** Correct / attempted, %. */
   accuracy: number;
+  /**
+   * Measured speed. `timedQuestions: 0` (and a null average) means NOT RECORDED —
+   * every attempt sat before per-question timing shipped — so show "—", not 0s.
+   * Optional so the table degrades against an older backend.
+   */
+  timedQuestions?: number;
+  avgSecPerQuestion?: number | null;
   status: string;
   proctored: boolean;
   tabSwitches: number;

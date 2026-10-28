@@ -151,6 +151,11 @@ export interface ApiMockReviewQuestion {
   correctOptionIds: string[];
   yourOptionIds: string[];
   isCorrect: boolean;
+  /**
+   * Milliseconds on this question. NULL means NOT RECORDED — every attempt taken before
+   * per-question timing shipped — so render "—", never "0s".
+   */
+  timeMs?: number | null;
   coding?: {
     language: string | null;
     sourceCode: string | null;
@@ -188,6 +193,19 @@ export interface ApiMockProctoring {
   warnings?: ApiMockProctorWarning[];
 }
 
+/** Measured speed over the attempt. All figures null when nothing was measured. */
+export interface ApiMockTiming {
+  recorded: number;
+  total: number;
+  avgSec: number | null;
+  medianSec: number | null;
+  fastestSec: number | null;
+  slowestSec: number | null;
+  measuredTotalSec: number | null;
+  avgSecCorrect: number | null;
+  avgSecIncorrect: number | null;
+}
+
 export interface ApiMockReport extends ApiMockResult {
   title: string;
   passingScore: number;
@@ -195,6 +213,8 @@ export interface ApiMockReport extends ApiMockResult {
   topicBreakdown: ApiMockTopicBreakdown[];
   questions: ApiMockReviewQuestion[];
   proctoring?: ApiMockProctoring | null;
+  /** Measured per-question speed. `recorded: 0` on every pre-timing attempt. */
+  timing?: ApiMockTiming | null;
   /** True when this attempt is the one-time calibration assessment (renders the recommendation-centric results). */
   isCalibration?: boolean;
 }

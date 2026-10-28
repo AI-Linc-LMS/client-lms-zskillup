@@ -5,6 +5,7 @@ import { use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { formatSec } from '@/shared/answer-timing';
 import { deleteAdminStudent, getStudentReport, type AdminStudentFullReport } from '@/lib/api/admin';
 import { getMe } from '@/lib/api/me';
 import { ArrowLeft, BadgeCheck, Loader2, Trash2, XCircle } from 'lucide-react';
@@ -144,6 +145,9 @@ export default function AdminStudentDetailPage({ params }: { params: Promise<{ i
                       <th className="px-4 py-3 text-right">Score</th>
                       <th className="px-4 py-3 text-right">%</th>
                       <th className="px-4 py-3 text-right">Percentile</th>
+                      {/* Speed beside accuracy. "—" where timing was never recorded. */}
+                      <th className="px-4 py-3 text-right">Median/q</th>
+                      <th className="px-4 py-3 text-right">Avg/q</th>
                       <th className="px-4 py-3">Status</th>
                       <th className="px-4 py-3">Submitted</th>
                     </tr>
@@ -161,6 +165,19 @@ export default function AdminStudentDetailPage({ params }: { params: Promise<{ i
                         </td>
                         <td className="px-4 py-3 text-right tabular-nums text-slate-700">
                           {a.percentile ?? '-'}
+                        </td>
+                        <td className="px-4 py-3 text-right tabular-nums text-slate-700">
+                          {a.recordedQuestions ? formatSec(a.medianSecPerQuestion) : '—'}
+                        </td>
+                        <td
+                          className="px-4 py-3 text-right tabular-nums text-slate-700"
+                          title={
+                            a.recordedQuestions
+                              ? `Timed on ${a.recordedQuestions} of ${a.answeredQuestions ?? 0} answered questions`
+                              : 'Per-question timing was not recorded for this attempt'
+                          }
+                        >
+                          {a.recordedQuestions ? formatSec(a.avgSecPerQuestion) : '—'}
                         </td>
                         <td className="px-4 py-3 text-xs text-slate-600">{a.status}</td>
                         <td className="px-4 py-3 text-xs text-slate-500">

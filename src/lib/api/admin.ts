@@ -872,6 +872,17 @@ export interface AdminMockAttemptReport {
   startedAt: string;
   submittedAt: string | null;
   timeTakenSec: number | null;
+  /**
+   * Measured per-question speed. `recordedQuestions: 0` means NOT RECORDED — every
+   * attempt taken before per-question timing shipped — so the UI shows "—", not "0s".
+   * Optional so the page degrades against an older backend that omits them.
+   */
+  recordedQuestions?: number;
+  answeredQuestions?: number;
+  avgSecPerQuestion?: number | null;
+  medianSecPerQuestion?: number | null;
+  avgSecCorrect?: number | null;
+  avgSecIncorrect?: number | null;
 }
 
 export interface AdminStudentFullReport {

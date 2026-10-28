@@ -6,8 +6,16 @@ import type { AssessmentResults } from '@/lib/api/scheduling';
 import { exportResultsCsv, exportResultsPdf, exportResultsXlsx } from '@/lib/results-export';
 import { branchLabel, branchShort } from '@/lib/branch';
 import { cn } from '@/lib/utils';
+import { formatSec } from '@/shared/answer-timing';
 
-type SortKey = 'rank' | 'scorePct' | 'accuracy' | 'violations' | 'integrityScore' | 'timeTakenSec';
+type SortKey =
+  | 'rank'
+  | 'scorePct'
+  | 'accuracy'
+  | 'violations'
+  | 'integrityScore'
+  | 'timeTakenSec'
+  | 'avgSecPerQuestion';
 
 const fmtTime = (s: number) => {
   const m = Math.floor(s / 60);
@@ -57,9 +65,20 @@ export function ResultsReport({
       );
     }
     if (pass !== 'all') rows = rows.filter((r) => (pass === 'pass' ? r.passed : !r.passed));
-    // rank + time sort ascending (lower is better/faster); everything else descending.
-    const asc = sort === 'rank' || sort === 'timeTakenSec';
+    // rank + both time columns sort ascending (lower is better/faster); the rest descending.
+    const asc = sort === 'rank' || sort === 'timeTakenSec' || sort === 'avgSecPerQuestion';
     return [...rows].sort((a, b) => {
+      // Unmeasured speed sorts LAST in either direction. Coercing it to 0 would park
+      // every pre-timing attempt at the top of an "fastest first" sort as though those
+      // students answered instantly — the exact lie this feature exists to avoid.
+      if (sort === 'avgSecPerQuestion') {
+        const am = a.timedQuestions ? (a.avgSecPerQuestion ?? null) : null;
+        const bm = b.timedQuestions ? (b.avgSecPerQuestion ?? null) : null;
+        if (am === null && bm === null) return 0;
+        if (am === null) return 1;
+        if (bm === null) return -1;
+        return asc ? am - bm : bm - am;
+      }
       const av = (a[sort] ?? 0) as number;
       const bv = (b[sort] ?? 0) as number;
       return asc ? av - bv : bv - av;
@@ -263,6 +282,13 @@ export function ResultsReport({
                   Accuracy (attempted)
                 </Th>
                 <Th k="timeTakenSec" className="text-right">Time</Th>
+                <Th
+                  k="avgSecPerQuestion"
+                  className="text-right"
+                  title="Mean time per question, over the questions where time was recorded. Blank for attempts sat before per-question timing was captured — that is 'not measured', not 'instant'."
+                >
+                  Avg / question
+                </Th>
                 <Th k="violations" className="text-right">Integrity</Th>
                 <Th className="text-right">Result</Th>
               </tr>
@@ -299,6 +325,25 @@ export function ResultsReport({
                   </td>
                   <td className="px-3 py-2.5 text-right tabular-nums text-slate-600">{r.accuracy}%</td>
                   <td className="px-3 py-2.5 text-right text-[11px] tabular-nums text-slate-500">{fmtTime(r.timeTakenSec)}</td>
+                  <td className="px-3 py-2.5 text-right text-[11px] tabular-nums text-slate-500">
+                    {r.timedQuestions ? (
+                      <>
+                        {formatSec(r.avgSecPerQuestion)}
+                        {r.timedQuestions < r.attemptedQuestions ? (
+                          <span
+                            className="block text-[10px] text-slate-400"
+                            title={`Timing recorded on ${r.timedQuestions} of ${r.attemptedQuestions} attempted questions`}
+                          >
+                            {r.timedQuestions}/{r.attemptedQuestions} timed
+                          </span>
+                        ) : null}
+                      </>
+                    ) : (
+                      <span className="text-slate-400" title="Per-question timing was not recorded for this attempt">
+                        —
+                      </span>
+                    )}
+                  </td>
                   <td className="px-3 py-2.5 text-right">
                     {!r.proctored ? (
                       <span

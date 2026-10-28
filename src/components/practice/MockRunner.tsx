@@ -1,6 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { QuestionTimer } from '@/shared/question-timer';
+import { formatSec } from '@/shared/answer-timing';
+import { SpeedPanel } from '@/components/practice/SpeedPanel';
 import Link from 'next/link';
 import {
   AlertTriangle,
@@ -195,6 +198,11 @@ export function MockRunner({
   // isn't known until beginAttempt resolves, so read it from a ref the callback
   // closes over (keeps the callback stable). Failures are swallowed - proctoring
   // is advisory and must never break the exam.
+  /**
+   * Per-question stopwatch. A ref, not state: it ticks continuously and must never
+   * trigger a re-render of a timed exam screen.
+   */
+  const timerRef = useRef(new QuestionTimer());
   const attemptIdRef = useRef<string | null>(null);
   const proctorRef = useRef<ProctoringController | null>(null);
   const finishRef = useRef<() => void>(() => {});
@@ -467,9 +475,17 @@ export function MockRunner({
         ([questionId, selectedOptionIds]) =>
           ackedRef.current.get(questionId) !== JSON.stringify(selectedOptionIds),
       );
+      // Submit-time flush carries each question's final total, so the last question —
+      // the one the student was on when the clock ran out — is not the only one missing
+      // a duration.
+      const finalTimes = timerRef.current.snapshot(Date.now());
       await Promise.allSettled(
         unsynced.map(([questionId, selectedOptionIds]) =>
-          answerMock(start.attemptId, { questionId, selectedOptionIds }),
+          answerMock(start.attemptId, {
+            questionId,
+            selectedOptionIds,
+            timeMs: finalTimes.get(questionId),
+          }),
         ),
       );
       // Let any in-flight coding submission land (recorded + graded server-side) BEFORE
@@ -532,6 +548,33 @@ export function MockRunner({
     }
   }, [startImmediately, phase, meLoaded, handleStart]);
 
+  // ── Per-question stopwatch ────────────────────────────────────────────────
+  //
+  // Starts the clock on whichever question is on screen and stops it whenever the
+  // student is not actually looking at it, so "time on question 3" means what it says.
+  // Only runs while the attempt is open — the report screen must not keep accruing.
+  useEffect(() => {
+    if (phase !== 'running' || !start) return;
+    const qid = start.questions[idx]?.id;
+    if (!qid) return;
+    const timer = timerRef.current;
+    timer.focus(qid, Date.now());
+
+    // A hidden tab is not time spent. Counting it would inflate exactly the attempts
+    // proctoring already flags for tab-switching, and make every cohort average useless.
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') timer.blur(Date.now());
+      else timer.resume(Date.now());
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    // Blur on cleanup so navigating away banks the elapsed time instead of losing it,
+    // and so the next focus() cannot bill this question for the gap.
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      timer.blur(Date.now());
+    };
+  }, [phase, start, idx]);
+
   // ── Server-authoritative countdown ────────────────────────────────────────
   useEffect(() => {
     if (phase !== 'running' || deadlineRef.current === null) return;
@@ -565,8 +608,12 @@ export function MockRunner({
           : [optionId];
         // Persist in click order through the save queue; on ack remember what
         // the server has, so submit only needs to flush the diff.
+        // Read the total BEFORE queueing: the seconds just spent choosing belong to
+        // this answer, and reading it inside the queued callback would also bill the
+        // wait for every earlier save in the queue.
+        const timeMs = timerRef.current.totalFor(questionId, Date.now());
         saveQueueRef.current = saveQueueRef.current
-          .then(() => answerMock(start.attemptId, { questionId, selectedOptionIds: next }))
+          .then(() => answerMock(start.attemptId, { questionId, selectedOptionIds: next, timeMs }))
           .then(() => {
             ackedRef.current.set(questionId, JSON.stringify(next));
           })
@@ -583,8 +630,9 @@ export function MockRunner({
       if (!start || submittedRef.current) return;
       setAnswers((prev) => {
         if (!(prev[questionId]?.length)) return prev;
+        const timeMs = timerRef.current.totalFor(questionId, Date.now());
         saveQueueRef.current = saveQueueRef.current
-          .then(() => answerMock(start.attemptId, { questionId, selectedOptionIds: [] }))
+          .then(() => answerMock(start.attemptId, { questionId, selectedOptionIds: [], timeMs }))
           .then(() => {
             ackedRef.current.set(questionId, JSON.stringify([]));
           })
@@ -1545,7 +1593,15 @@ export function MockReportView({
             <StatTile label="Percentile" value={`${report.percentile}th`} />
             <StatTile label="Marks" value={`${report.score}/${report.total}`} />
             <StatTile label="Time" value={formatDuration(report.timeTakenSec)} />
-            <StatTile label="Avg / question" value={`${report.avgSecPerQuestion}s`} />
+            {/* Prefer the MEASURED median over `avgSecPerQuestion`, which is only
+                total ÷ question count and reads the same whether the student paced
+                evenly or burned the clock on one question. Falls back to it when this
+                attempt has no per-question data. */}
+            {report.timing && report.timing.recorded > 0 ? (
+              <StatTile label="Median / question" value={formatSec(report.timing.medianSec)} />
+            ) : (
+              <StatTile label="Avg / question" value={`${report.avgSecPerQuestion}s`} />
+            )}
           </div>
 
           {reward && (reward.xpEarned > 0 || reward.streakDays > 0) ? (
@@ -1601,6 +1657,8 @@ export function MockReportView({
             </ul>
           </section>
         ) : null}
+
+        <SpeedPanel timing={report.timing} totalTimeSec={report.timeTakenSec} />
 
         {/* Proctoring / integrity summary (proctored assessments only) */}
         {report.proctoring?.proctored ? (
@@ -1679,23 +1737,33 @@ export function MockReportView({
                   <p className="text-sm font-semibold leading-relaxed text-navy">
                     <span className="text-slate-500">{qi + 1}.</span> {q.stem}
                   </p>
-                  <span
-                    className={cn(
-                      'inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1',
-                      q.isCorrect
-                        ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                        : 'bg-red-50 text-red-700 ring-red-200',
-                    )}
-                  >
-                    {q.isCorrect ? (
-                      <>
-                        <Check className="size-3" aria-hidden="true" /> Correct
-                      </>
-                    ) : (
-                      <>
-                        <X className="size-3" aria-hidden="true" /> Incorrect
-                      </>
-                    )}
+                  <span className="flex shrink-0 items-center gap-2">
+                    {/* Time on THIS question. Rendered only when measured — a "0s" on a
+                        pre-timing attempt would claim an instant answer. */}
+                    {typeof q.timeMs === 'number' ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600">
+                        <Clock className="size-3" aria-hidden="true" />
+                        {formatSec(q.timeMs / 1000)}
+                      </span>
+                    ) : null}
+                    <span
+                      className={cn(
+                        'inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1',
+                        q.isCorrect
+                          ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                          : 'bg-red-50 text-red-700 ring-red-200',
+                      )}
+                    >
+                      {q.isCorrect ? (
+                        <>
+                          <Check className="size-3" aria-hidden="true" /> Correct
+                        </>
+                      ) : (
+                        <>
+                          <X className="size-3" aria-hidden="true" /> Incorrect
+                        </>
+                      )}
+                    </span>
                   </span>
                 </div>
 
