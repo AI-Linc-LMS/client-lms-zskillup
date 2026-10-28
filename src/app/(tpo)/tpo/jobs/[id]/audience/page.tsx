@@ -1,5 +1,6 @@
 import { Eye } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { DriveTabs } from '@/components/admin/jobs/DriveTabs';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { TargetPicker } from '@/components/admin/jobs/TargetPicker';
 import { TPO_JOBS_BASE } from '@/lib/api/jobs';
@@ -37,6 +38,7 @@ export default async function TpoDriveAudiencePage({
         title="Who sees this drive"
         description="Pick students individually, or open it to a batch, branch or cohort."
       />
+      <DriveTabs driveId={id} console="tpo" />
       <TargetPicker jobId={id} base={TPO_JOBS_BASE} />
     </div>
   );

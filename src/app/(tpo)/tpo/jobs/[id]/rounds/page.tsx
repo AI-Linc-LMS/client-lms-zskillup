@@ -1,5 +1,6 @@
 import { ListChecks } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { DriveTabs } from '@/components/admin/jobs/DriveTabs';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { JdPracticeScreen } from '@/components/admin/jobs/JdPracticeScreen';
 import { TPO_JOBS_BASE } from '@/lib/api/jobs';
@@ -38,6 +39,7 @@ export default async function TpoDriveRoundsPage({
         title="Rounds & assessments"
         description="What each round of this drive tests, and what your students practise against."
       />
+      <DriveTabs driveId={id} console="tpo" />
       <JdPracticeScreen driveId={id} base={TPO_JOBS_BASE} />
     </div>
   );

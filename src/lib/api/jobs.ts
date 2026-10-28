@@ -43,6 +43,22 @@ export type JobsApiBase = '/api/v1/admin/jobs' | '/api/v1/tpo/jobs';
 export const ADMIN_JOBS_BASE: JobsApiBase = '/api/v1/admin/jobs';
 export const TPO_JOBS_BASE: JobsApiBase = '/api/v1/tpo/jobs';
 
+/**
+ * The SCREEN path that matches an API base.
+ *
+ * The shared PMS components were given a `base` for their fetches and kept their links
+ * hardcoded to /admin/jobs. The APIs were therefore correct while every link out of
+ * them pointed into the admin console — which middleware refuses to a COLLEGE_ADMIN, so
+ * a TPO pressing "New posting" was bounced to their dashboard. The API being right is
+ * what made it invisible to route probes: nothing 404s, nothing errors, the user just
+ * ends up somewhere else.
+ *
+ * One prop now drives both, so they cannot disagree again.
+ */
+export function uiBaseFor(base: JobsApiBase): '/admin/jobs' | '/tpo/jobs' {
+  return base === TPO_JOBS_BASE ? '/tpo/jobs' : '/admin/jobs';
+}
+
 /** Admin: every posting including drafts. */
 export async function listAdminJobs(base: JobsApiBase = ADMIN_JOBS_BASE): Promise<JobPostingDto[]> {
   return (await apiClient.get<JobPostingDto[]>(base)).data;

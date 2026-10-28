@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import { listAdminJobs, type JobPostingDto } from '@/lib/api/jobs';
+import { ADMIN_JOBS_BASE, listAdminJobs, type JobPostingDto , type JobsApiBase } from '@/lib/api/jobs';
 import { JobComposer } from './JobComposer';
 
 /**
@@ -12,13 +12,21 @@ import { JobComposer } from './JobComposer';
  * call the console already makes, and a posting an admin can edit is by definition one
  * they can see on it.
  */
-export function EditJobComposer({ jobId }: { jobId: string }) {
+/** `base` follows the console: a TPO edits through the college-scoped controller and
+ *  its list, so it only ever resolves drives that college can see. */
+export function EditJobComposer({
+  jobId,
+  base = ADMIN_JOBS_BASE,
+}: {
+  jobId: string;
+  base?: JobsApiBase;
+}) {
   const [job, setJob] = useState<JobPostingDto | null>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'missing'>('loading');
 
   useEffect(() => {
     let alive = true;
-    listAdminJobs()
+    listAdminJobs(base)
       .then((jobs) => {
         if (!alive) return;
         const found = jobs.find((j) => j.id === jobId);
@@ -29,7 +37,7 @@ export function EditJobComposer({ jobId }: { jobId: string }) {
     return () => {
       alive = false;
     };
-  }, [jobId]);
+  }, [jobId, base]);
 
   if (state === 'loading') {
     return (
@@ -45,5 +53,5 @@ export function EditJobComposer({ jobId }: { jobId: string }) {
       </p>
     );
   }
-  return <JobComposer existing={job} />;
+  return <JobComposer existing={job} base={base} />;
 }

@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
  * Order follows the drive's own life — set it up, see who fits, work the pipeline, run
  * the rounds, then read what happened.
  */
-const TABS = [
+const ADMIN_TABS = [
   { seg: '', label: 'Overview' },
   { seg: 'candidates', label: 'Candidate fit' },
   { seg: 'applicants', label: 'Applicants' },
@@ -26,9 +26,33 @@ const TABS = [
   { seg: 'report', label: 'Report' },
 ] as const;
 
-export function DriveTabs({ driveId }: { driveId: string }) {
+/**
+ * The TPO console has its own, SHORTER set — only the screens that exist there.
+ *
+ * Listing a tab whose page does not exist is worse than omitting it: the tab looks
+ * like a feature, and pressing it 404s. The admin's Search, Practice and Report
+ * screens have no TPO equivalent yet; its Rounds screen is where the JD-to-assessment
+ * flow lives, which the admin console keeps under Practice.
+ */
+const TPO_TABS = [
+  { seg: '', label: 'Overview' },
+  { seg: 'candidates', label: 'Candidate fit' },
+  { seg: 'applicants', label: 'Applicants' },
+  { seg: 'audience', label: 'Audience' },
+  { seg: 'rounds', label: 'Rounds & assessments' },
+] as const;
+
+export function DriveTabs({
+  driveId,
+  console: which = 'admin',
+}: {
+  driveId: string;
+  /** Which console these tabs belong to — decides both the links and the tab set. */
+  console?: 'admin' | 'tpo';
+}) {
   const pathname = usePathname() ?? '';
-  const base = `/admin/jobs/${driveId}`;
+  const TABS = which === 'tpo' ? TPO_TABS : ADMIN_TABS;
+  const base = `/${which === 'tpo' ? 'tpo' : 'admin'}/jobs/${driveId}`;
   const current = pathname.startsWith(base) ? pathname.slice(base.length).replace(/^\//, '') : '';
 
   return (

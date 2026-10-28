@@ -25,6 +25,7 @@ import {
   deleteJob,
   exportApplicantsCsv,
   listAdminJobs,
+  uiBaseFor,
   updateJob,
   type JobsApiBase,
 } from '@/lib/api/jobs';
@@ -67,6 +68,8 @@ const PAGE_SIZE = 12;
  * controller. Defaults to the admin PMS, so every existing caller is unchanged.
  */
 export function JobsListing({ base = ADMIN_JOBS_BASE }: { base?: JobsApiBase } = {}) {
+  // Links follow the same console the fetches do — see uiBaseFor.
+  const ui = uiBaseFor(base);
   const router = useRouter();
   const [jobs, setJobs] = useState<JobPostingDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -159,7 +162,7 @@ export function JobsListing({ base = ADMIN_JOBS_BASE }: { base?: JobsApiBase } =
       toast.success(`Cloned "${j.title}" as a draft.`);
       // Land on the copy so the admin can tweak and publish it - a clone exists to be
       // edited, not admired in the list.
-      router.push(`/admin/jobs/${created.id}`);
+      router.push(`${ui}/${created.id}`);
     } catch (err) {
       toast.error(describeError(err, 'Could not clone the posting.'));
     } finally {
@@ -189,7 +192,7 @@ export function JobsListing({ base = ADMIN_JOBS_BASE }: { base?: JobsApiBase } =
           {exporting ? 'Exporting…' : 'Export all applicants'}
         </Button>
         <Button asChild>
-          <Link href="/admin/jobs/new">
+          <Link href={`${ui}/new`}>
             <Plus className="size-4" /> New posting
           </Link>
         </Button>
@@ -235,7 +238,7 @@ export function JobsListing({ base = ADMIN_JOBS_BASE }: { base?: JobsApiBase } =
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <Link
-                      href={`/admin/jobs/${j.id}`}
+                      href={`${ui}/${j.id}`}
                       className="truncate text-sm font-bold text-navy hover:underline"
                     >
                       {j.title}
@@ -251,7 +254,7 @@ export function JobsListing({ base = ADMIN_JOBS_BASE }: { base?: JobsApiBase } =
 
                 <div className="flex shrink-0 flex-wrap items-center gap-2">
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/admin/jobs/${j.id}/applicants`}>
+                    <Link href={`${ui}/${j.id}/applicants`}>
                       <Users className="size-3.5" /> Applicants
                     </Link>
                   </Button>
@@ -259,7 +262,7 @@ export function JobsListing({ base = ADMIN_JOBS_BASE }: { base?: JobsApiBase } =
                   {/* A status move is its own decision, with its own screen — cancelling
                       emails every applicant, so it does not belong on an edit form. */}
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/admin/jobs/${j.id}/candidates`}>
+                    <Link href={`${ui}/${j.id}/candidates`}>
                       <Target className="size-3.5" /> Candidates
                     </Link>
                   </Button>

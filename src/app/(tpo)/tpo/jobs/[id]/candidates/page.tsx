@@ -1,5 +1,6 @@
 import { Target } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { DriveTabs } from '@/components/admin/jobs/DriveTabs';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { CandidateFitScreen } from '@/components/admin/jobs/CandidateFitScreen';
 import { TPO_JOBS_BASE } from '@/lib/api/jobs';
@@ -38,6 +39,7 @@ export default async function TpoDriveCandidatesPage({
         title="Ranked candidates"
         description="Job-fit score, skills match and eligibility for your students on this drive."
       />
+      <DriveTabs driveId={id} console="tpo" />
       <CandidateFitScreen jobId={id} base={TPO_JOBS_BASE} />
     </div>
   );

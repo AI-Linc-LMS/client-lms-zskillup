@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import {
   ADMIN_JOBS_BASE,
   createJob,
+  uiBaseFor,
   updateJob,
   type JobPostingDto,
   type JobsApiBase,
@@ -1104,7 +1105,7 @@ export function JobComposer({
                 >
                   {job?.isPublished ? 'Unpublish' : 'Publish now'}
                 </Button>
-                <Button variant="outline" onClick={() => router.push('/admin/jobs')}>
+                <Button variant="outline" onClick={() => router.push(uiBaseFor(base))}>
                   Back to all postings
                 </Button>
               </div>

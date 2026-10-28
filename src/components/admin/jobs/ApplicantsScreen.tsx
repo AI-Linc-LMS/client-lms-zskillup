@@ -25,6 +25,7 @@ import {
   getApplicantFacets,
   listAdminJobs,
   listApplicants,
+  uiBaseFor,
   moveApplicationStage,
   updateJobApplication,
   type JobApplicantDto,
@@ -288,7 +289,7 @@ export function ApplicantsScreen({
   return (
     <div className="space-y-5">
       <Link
-        href="/admin/jobs"
+        href={uiBaseFor(base)}
         className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-navy"
       >
         <ArrowLeft className="size-4" /> All postings

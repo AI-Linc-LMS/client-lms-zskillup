@@ -1,5 +1,6 @@
 import { Users } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { DriveTabs } from '@/components/admin/jobs/DriveTabs';
 import { ConsoleHero } from '@/components/layout/ConsoleHero';
 import { ApplicantsScreen } from '@/components/admin/jobs/ApplicantsScreen';
 import { TPO_JOBS_BASE } from '@/lib/api/jobs';
@@ -33,6 +34,7 @@ export default async function TpoDriveApplicantsPage({
         title="Applicants"
         description="Move your students through the drive — shortlisted, interviewed, offered, joined."
       />
+      <DriveTabs driveId={id} console="tpo" />
       <ApplicantsScreen jobId={id} base={TPO_JOBS_BASE} />
     </div>
   );
