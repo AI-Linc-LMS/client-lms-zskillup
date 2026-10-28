@@ -936,8 +936,11 @@ export interface RoundPlansDto {
   };
 }
 
-export async function getRoundPlans(driveId: string): Promise<RoundPlansDto> {
-  const res = await apiClient.get<RoundPlansDto>(`/api/v1/admin/jobs/${driveId}/round-plans`);
+export async function getRoundPlans(
+  driveId: string,
+  base: JobsApiBase = ADMIN_JOBS_BASE,
+): Promise<RoundPlansDto> {
+  const res = await apiClient.get<RoundPlansDto>(`${base}/${driveId}/round-plans`);
   return res.data;
 }
 
@@ -951,9 +954,10 @@ export async function upsertRoundPlan(
     note?: string | null;
     gateApprovedBy?: string | null;
   },
+  base: JobsApiBase = ADMIN_JOBS_BASE,
 ): Promise<Record<string, unknown>> {
   const res = await apiClient.post<Record<string, unknown>>(
-    `/api/v1/admin/jobs/${driveId}/round-plans/${encodeURIComponent(roundId)}`,
+    `${base}/${driveId}/round-plans/${encodeURIComponent(roundId)}`,
     body,
   );
   return res.data;

@@ -1,18 +1,19 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { AlertTriangle, CircleHelp, FileText, Info, Loader2, Sparkles } from 'lucide-react';
+import { AlertTriangle, CircleHelp, Info, Loader2, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { cn } from '@/lib/utils';
 import { describeError } from '@/lib/api/errors';
 import {
+  ADMIN_JOBS_BASE,
   applyJdExtraction,
   extractJd,
   getRoundPlans,
   reviewJdExtraction,
   type JdExtractionResultDto,
+  type JobsApiBase,
   type RoundPlansDto,
 } from '@/lib/api/jobs';
 import { ExtractionConfidence, type ExtractedField } from '@/shared/jd-extraction';
@@ -63,7 +64,15 @@ function Found<T>({ name, field, render }: { name: string; field?: ExtractedFiel
  *   auto-scored rounds from rubric-reviewed ones, and a case study with "pass mark 60"
  *   would show students a threshold no number is ever compared against.
  */
-export function JdPracticeScreen({ driveId }: { driveId: string }) {
+/** `base` lets the TPO console read the same round plans through its college-scoped
+ *  controller. Defaults to the admin PMS. */
+export function JdPracticeScreen({
+  driveId,
+  base = ADMIN_JOBS_BASE,
+}: {
+  driveId: string;
+  base?: JobsApiBase;
+}) {
   const [jdText, setJdText] = useState('');
   const [result, setResult] = useState<JdExtractionResultDto | null>(null);
   const [plans, setPlans] = useState<RoundPlansDto | null>(null);
@@ -73,7 +82,7 @@ export function JdPracticeScreen({ driveId }: { driveId: string }) {
 
   const loadPlans = useCallback(async () => {
     try {
-      setPlans(await getRoundPlans(driveId));
+      setPlans(await getRoundPlans(driveId, base));
     } catch {
       /* A drive with no rounds yet has no plans — not an error worth a banner. */
     }
