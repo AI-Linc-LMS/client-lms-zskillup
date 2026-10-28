@@ -4,7 +4,11 @@ import { Code2 } from 'lucide-react';
 import { PublicHeader } from '@/components/marketing/PublicHeader';
 import { PublicFooter } from '@/components/marketing/PublicFooter';
 import { SignupCta } from '@/components/marketing/SignupCta';
-import { getPublicCompanies, getPublicTopics } from '@/lib/server/public-content';
+import {
+  getPublicCodingTopics,
+  getPublicCompanies,
+  getPublicTopics,
+} from '@/lib/server/public-content';
 import {
   buildSections,
   buildSoftSkillsSection,
@@ -23,12 +27,13 @@ const SITE = 'https://prephasz.com';
  * the same public topic tree the product uses, so the syllabus shown here is the syllabus
  * that exists rather than marketing copy about it.
  *
- * CODING IS THE ONE SECTION WITHOUT A PUBLIC SYLLABUS. It is synthetic — its topics are
- * Judge0 tags, not bank topics, and the only endpoint that lists them
- * (`/api/v1/mocks/coding-topics`) answers 401. Rather than leave the URL the team asked
- * for as a 404, or invent a topic list, the coding page is built from what IS public: the
- * companies whose banks carry coding problems, with their real counts. Opening that
- * endpoint would let this page show the same syllabus grid as the others.
+ * CODING IS STILL THE ODD ONE OUT. It is synthetic — its topics are Judge0 tags rather
+ * than bank topic roots, so it has no row in the tree above and is handled separately.
+ * Its syllabus comes from `/api/v1/mocks/coding-topics`, which answered 401 until it was
+ * explicitly opened for this page (it returns tag names and counts, nothing else). The
+ * fetcher degrades to [] if it is ever closed again, so the grid disappears rather than
+ * the page breaking — and the company list below it, built from the already-public
+ * company counts, stands on its own either way.
  *
  * `/dashboard/section/[slug]` — the product hub for the same subject — is NOT public; it
  * redirects to /login. That is left alone: this page is the public face, and its CTAs go
@@ -94,7 +99,11 @@ export default async function SectionLandingPage({ params }: { params: Promise<{
   const { slug } = await params;
 
   if (slug === CODING_SECTION_SLUG) {
-    const companies = (await getPublicCompanies()).filter((c) => (c.codingCount ?? 0) > 0);
+    const [companiesAll, codingTopics] = await Promise.all([
+      getPublicCompanies(),
+      getPublicCodingTopics(),
+    ]);
+    const companies = companiesAll.filter((c) => (c.codingCount ?? 0) > 0);
     return (
       <>
         <PublicHeader />
@@ -105,6 +114,21 @@ export default async function SectionLandingPage({ params }: { params: Promise<{
             sub="Company-wise coding problems drawn from real recruitment rounds, run against test cases and timed like the assessment itself."
           />
           <div className="mx-auto max-w-[1100px] space-y-12 px-5 py-14 md:px-8">
+            {codingTopics.length > 0 && (
+              <section>
+                <h2 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)]">What this section covers</h2>
+                <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {codingTopics.map((t) => (
+                    <div key={t.topic} className="rounded-xl border border-[var(--color-line)] bg-white p-4">
+                      <p className="font-bold text-[var(--color-text)]">{t.topic}</p>
+                      <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                        {t.count.toLocaleString('en-IN')} problems
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
             {companies.length > 0 && (
               <section>
                 <h2 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)]">Coding banks by company</h2>

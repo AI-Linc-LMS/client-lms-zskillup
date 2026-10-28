@@ -13,6 +13,25 @@ import type { CompanyType, Difficulty } from '@/lib/demo-data';
  */
 export const dynamic = 'force-dynamic';
 
+/**
+ * POINT SEARCH ENGINES AT THE PUBLIC LANDING PAGE, NOT THIS ONE.
+ *
+ * This hub is publicly reachable — middleware exempts /dashboard/company so a logged-out
+ * visitor following a marketing link is not bounced to /login. That makes it a second,
+ * near-identical page about the same company as /company/[slug], and left alone a crawler
+ * is free to rank whichever it likes. The app URL is the worse one to land on: it is the
+ * product surface, it reads as an app screen, and it carries no sign-up CTA.
+ *
+ * Declaring the landing page canonical settles that without redirecting anyone — students
+ * who are already here keep using this page exactly as before.
+ *
+ * Only `alternates` is set; everything else still inherits from the root layout.
+ */
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  return { alternates: { canonical: `https://prephasz.com/company/${slug}` } };
+}
+
 function mapType(t: string): CompanyType {
   return t === 'PRODUCT' ? 'Product' : t === 'CONSULTING' ? 'Consulting' : 'Service';
 }

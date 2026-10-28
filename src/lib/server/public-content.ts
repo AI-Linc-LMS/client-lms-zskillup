@@ -116,3 +116,15 @@ export async function getPublicCompany(slug: string): Promise<ApiCompany | null>
 export async function getPublicTopics(): Promise<ApiTopic[]> {
   return (await getJson<ApiTopic[]>('/api/v1/topics/with-counts')) ?? [];
 }
+
+/**
+ * Coding topics (Judge0 primary tags) with their problem counts, for /section/coding.
+ *
+ * The endpoint sits on the @Roles(STUDENT) mocks controller and was 401 until it was
+ * explicitly opened — it is the only public route on that controller, pinned by
+ * mocks-coding-topics-public.spec.ts in the backend. If it is ever closed again this
+ * returns [] and the section page drops its syllabus grid rather than failing.
+ */
+export async function getPublicCodingTopics(): Promise<Array<{ topic: string; count: number }>> {
+  return (await getJson<Array<{ topic: string; count: number }>>('/api/v1/mocks/coding-topics')) ?? [];
+}
