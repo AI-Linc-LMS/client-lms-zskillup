@@ -6,6 +6,7 @@ import { PublicHeader } from '@/components/marketing/PublicHeader';
 import { PublicFooter } from '@/components/marketing/PublicFooter';
 import { SignupCta } from '@/components/marketing/SignupCta';
 import { getPublicCompanies, getPublicCompany } from '@/lib/server/public-content';
+import { breadcrumbLd, JsonLd } from '@/components/seo/JsonLd';
 import type { ApiCompany } from '@/lib/api/catalog';
 
 const SITE = 'https://prephasz.com';
@@ -96,12 +97,22 @@ export default async function CompanyLandingPage({ params }: { params: Promise<{
   return (
     <>
       <PublicHeader />
+      {/* Trail matches the visible breadcrumb above, crumb for crumb. */}
+      <JsonLd
+        data={breadcrumbLd([
+          { name: 'Home', path: '/' },
+          { name: 'Companies', path: '/company' },
+          { name: company.name, path: `/company/${company.slug}` },
+        ])}
+      />
       <main>
         <section className="relative overflow-hidden bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] px-5 py-16 text-white md:px-8">
           <div aria-hidden className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-[#f5b400]/20 blur-3xl" />
           <div className="relative mx-auto max-w-[1100px]">
             <nav aria-label="Breadcrumb" className="text-xs text-white/50">
               <Link href="/" className="hover:text-white">Home</Link>
+              <span className="px-1.5">/</span>
+              <Link href="/company" className="hover:text-white">Companies</Link>
               <span className="px-1.5">/</span>
               <span className="text-white/80">{company.name}</span>
             </nav>

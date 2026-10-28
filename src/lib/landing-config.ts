@@ -7,17 +7,29 @@
  */
 
 /** Where the marketing CTAs should go (public visitors are logged out). */
+/**
+ * Where the PUBLIC surfaces link. Consumed by the navbar, the footer and the landing
+ * page's CTAs — every one of them rendered to logged-out visitors and to crawlers.
+ *
+ * THESE MUST POINT AT PUBLIC URLS, AND TWO OF THEM DID NOT. `companies` pointed at
+ * /dashboard/company and `prepare` at /practice: both are app surfaces, and
+ * /dashboard is `Disallow`ed in robots.txt. So the header on every public page —
+ * landing, blog, and all 23 of the new SEO pages — sent crawlers into a blocked area,
+ * while the public /company and /section pages they should have been pointing at had no
+ * internal links at all and were reachable only from the sitemap, which is the weakest
+ * signal there is. A logged-out human fared no better: /practice needs an account.
+ */
 export const LANDING_HREFS = {
-  /** "Prepare" - the practice picker: sections, topics and coding. Deliberately NOT the
-   *  company hubs: `prepare` and `companies` both pointed at /dashboard/company, so the
-   *  navbar shipped two links that went to the same page. */
-  prepare: '/practice',
+  /** "Prepare" - the public sections picker (numerical, logical, verbal, technical,
+   *  interview prep, coding). The app's /practice needs an account; this does not. */
+  prepare: '/section',
   /** "Start a session" - practice needs an account, so start = sign up. */
   start: '/signup',
   /** "Browse the catalog" of topics - full catalog unlocks after sign-up. */
   catalog: '/signup',
-  /** "Companies" - the company hubs (company-specific tracks). */
-  companies: '/dashboard/company',
+  /** "Companies" - the public company landing pages, NOT /dashboard/company, which is
+   *  robots-disallowed and carries no sign-up CTA. */
+  companies: '/company',
 } as const;
 
 /**

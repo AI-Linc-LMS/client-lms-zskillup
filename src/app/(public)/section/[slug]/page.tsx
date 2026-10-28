@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Code2 } from 'lucide-react';
 import { PublicHeader } from '@/components/marketing/PublicHeader';
+import { breadcrumbLd, JsonLd } from '@/components/seo/JsonLd';
 import { PublicFooter } from '@/components/marketing/PublicFooter';
 import { SignupCta } from '@/components/marketing/SignupCta';
 import {
@@ -86,6 +87,8 @@ function Hero({ eyebrow, title, sub }: { eyebrow: string; title: string; sub: st
         <nav aria-label="Breadcrumb" className="text-xs text-white/50">
           <Link href="/" className="hover:text-white">Home</Link>
           <span className="px-1.5">/</span>
+          <Link href="/section" className="hover:text-white">Sections</Link>
+          <span className="px-1.5">/</span>
           <span className="text-white/80">{eyebrow}</span>
         </nav>
         <h1 className="mt-4 text-3xl font-extrabold tracking-tight sm:text-[42px] sm:leading-tight">{title}</h1>
@@ -107,6 +110,13 @@ export default async function SectionLandingPage({ params }: { params: Promise<{
     return (
       <>
         <PublicHeader />
+        <JsonLd
+          data={breadcrumbLd([
+            { name: 'Home', path: '/' },
+            { name: 'Sections', path: '/section' },
+            { name: 'Coding', path: '/section/coding' },
+          ])}
+        />
         <main>
           <Hero
             eyebrow="Coding"
@@ -174,6 +184,13 @@ export default async function SectionLandingPage({ params }: { params: Promise<{
   return (
     <>
       <PublicHeader />
+      <JsonLd
+        data={breadcrumbLd([
+          { name: 'Home', path: '/' },
+          { name: 'Sections', path: '/section' },
+          { name: section.name, path: `/section/${section.slug}` },
+        ])}
+      />
       <main>
         <Hero
           eyebrow={section.name}
