@@ -120,7 +120,7 @@ export const PRODUCT_FEATURES: ProductFeature[] = [
   {
     slug: 'resume-builder',
     label: 'Resume builder',
-    appHref: '/resume',
+    appHref: '/resume-builder',
     title: 'Free Resume Builder for Freshers — ATS-Friendly Templates | Prephasz',
     description:
       'Build a fresher placement resume that gets past screening: structured sections, ATS-friendly templates and a clean one-page PDF.',
@@ -148,7 +148,7 @@ export const PRODUCT_FEATURES: ProductFeature[] = [
   {
     slug: 'placement-readiness',
     label: 'Placement readiness',
-    appHref: '/placement-readiness',
+    appHref: '/dashboard',
     title: 'Placement Readiness Score — Know If You Are Drive-Ready | Prephasz',
     description:
       'A single readiness score across aptitude, technical, coding and communication, built from your real attempts — so you know what to fix before the drive.',
