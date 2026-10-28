@@ -1,5 +1,6 @@
 import type { BlogPostDto, PlacementRecordDto, TestimonialDto } from '@/shared/dto/content.dto';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
+import type { ApiCompany, ApiTopic } from '@/lib/api/catalog';
 
 /**
  * Server-side fetch of public marketing content (Phase 5). Used by the public
@@ -82,4 +83,36 @@ export async function getPublicJobs(): Promise<JobPostingDto[]> {
 /** One job by its shareable slug. Null when it does not exist or is still a draft. */
 export async function getPublicJob(slug: string): Promise<JobPostingDto | null> {
   return getJson<JobPostingDto>(`/api/v1/jobs/${encodeURIComponent(slug)}`);
+}
+
+/**
+ * Published company hubs, for the public /company/[slug] landing pages and the sitemap.
+ *
+ * TYPE-ONLY IMPORT OF ApiCompany ON PURPOSE. `lib/api/catalog` pulls in `apiClient`,
+ * which reads the in-memory auth store and is meant for the browser; importing the type
+ * erases at compile time, so a server component gets the shape without the client.
+ *
+ * The endpoint is already @Public — a logged-out visitor can read it today, which is
+ * what makes these pages indexable without a login barrier.
+ */
+export async function getPublicCompanies(): Promise<ApiCompany[]> {
+  // Same { data, meta } envelope as the rest; getJson unwraps it. The limit is well
+  // above the nine published hubs so a tenth appears without a code change.
+  return (await getJson<ApiCompany[]>('/api/v1/companies?limit=200')) ?? [];
+}
+
+export async function getPublicCompany(slug: string): Promise<ApiCompany | null> {
+  const all = await getPublicCompanies();
+  return all.find((c) => c.slug === slug) ?? null;
+}
+
+/**
+ * The whole topic tree with live PUBLISHED-question counts, for /section/[slug].
+ *
+ * Returned flat, parents and leaves together, exactly as `buildSections` in
+ * `lib/sections/section-catalog` expects — the section "hubs" are a view over this tree
+ * rather than rows of their own, so there is nothing else to fetch.
+ */
+export async function getPublicTopics(): Promise<ApiTopic[]> {
+  return (await getJson<ApiTopic[]>('/api/v1/topics/with-counts')) ?? [];
 }
