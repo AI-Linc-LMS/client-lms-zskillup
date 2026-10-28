@@ -69,11 +69,6 @@ export default async function CompanyIndexPage() {
               >
                 <p className="font-bold text-[var(--color-text)] group-hover:text-[var(--color-primary)]">{c.name}</p>
                 {c.tagline && <p className="mt-1 line-clamp-2 text-sm text-[var(--color-text-muted)]">{c.tagline}</p>}
-                {(c.questionCount ?? 0) > 0 && (
-                  <p className="mt-3 text-xs text-[var(--color-text-subtle)]">
-                    {c.questionCount?.toLocaleString('en-IN')} practice questions
-                  </p>
-                )}
               </Link>
             ))}
           </div>

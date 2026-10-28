@@ -1,13 +1,14 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { BookOpen, Code2, FileText, Layers, Lock } from 'lucide-react';
+import { BookOpen, Layers, Lock, Target, Users, Wallet } from 'lucide-react';
 import { PublicHeader } from '@/components/marketing/PublicHeader';
 import { PublicFooter } from '@/components/marketing/PublicFooter';
 import { SignupCta } from '@/components/marketing/SignupCta';
 import { getPublicCodingTopics, getPublicCompanies, getPublicCompanyHub } from '@/lib/server/public-content';
 import { breadcrumbLd, itemListLd, JsonLd } from '@/components/seo/JsonLd';
-import { seoTemplateMetadataFor } from '@/lib/seo/page-metadata';
+import { seoPageMedia, seoTemplateMetadataFor } from '@/lib/seo/page-metadata';
+import { PageMedia } from '@/components/seo/PageMedia';
 import { PromoBannerSlot } from '@/components/promo/PromoBannerSlot';
 import { COMPANY_FEATURES, companyFeatureSeoKey, findCompanyFeature } from '@/shared/company-features';
 import type { ApiCompanyHub } from '@/lib/api/catalog';
@@ -60,7 +61,9 @@ export async function generateMetadata({
   const vars = { company: company.name, year: currentYear() };
   const fill = (t: string) => t.split('{company}').join(company.name).split('{year}').join(vars.year);
 
-  const seo = await seoTemplateMetadataFor(companyFeatureSeoKey(f.slug), vars, {
+  // Exact path first, then the shared template — an admin can retitle ONE company's
+  // page from the SEO module without touching the other eight.
+  const seo = await seoTemplateMetadataFor([`/company/${slug}/${f.slug}`, companyFeatureSeoKey(f.slug)], vars, {
     title: fill(f.titleTemplate),
     description: fill(f.descriptionTemplate),
   });
@@ -246,16 +249,15 @@ function featureBody(
   }
 
   if (feature === 'previous-papers') {
-    if (company.pyqCount) {
-      nodes.push(
-        <Section key="intro" title={`What is in the ${name} question bank`}>
-          <p className="max-w-3xl text-sm leading-relaxed text-[var(--color-text-muted)]">
-            {company.pyqCount} previous-year questions from real {name} drives, grouped by the
-            section that asked them. Every question carries a worked solution.
-          </p>
-        </Section>,
-      );
-    }
+    nodes.push(
+      <Section key="intro" title={`What is in the ${name} question bank`}>
+        <p className="max-w-3xl text-sm leading-relaxed text-[var(--color-text-muted)]">
+          Previous-year questions from real {name} drives, grouped by the section that asked
+          them. Every question carries a worked solution, so a paper you get wrong is a topic
+          you can fix rather than a score you have to accept.
+        </p>
+      </Section>,
+    );
     if (hub?.overview?.topicGrid?.length) {
       nodes.push(
         <Section key="topics" title={`${name} papers by topic`}>
@@ -282,9 +284,9 @@ function featureBody(
     nodes.push(
       <Section key="coding" title={`${name} coding round`}>
         <p className="max-w-3xl text-sm leading-relaxed text-[var(--color-text-muted)]">
-          {company.codingCount
-            ? `${company.codingCount} coding problems from ${name} drives, solvable in-browser in C, C++, Java, Python and JavaScript against real test cases.`
-            : `Coding problems from ${name} drives, solvable in-browser against real test cases.`}
+          Coding problems from {name} drives, solvable in-browser in C, C++, Java, Python and
+          JavaScript against real test cases — including the edge cases that fail a solution
+          which looked correct.
         </p>
       </Section>,
     );
@@ -395,10 +397,13 @@ export default async function CompanyFeaturePage({
   const f = findCompanyFeature(feature);
   if (!f) notFound();
 
-  const [company, all, codingTopics] = await Promise.all([
+  const [company, all, codingTopics, media] = await Promise.all([
     getPublicCompanyHub(slug),
     getPublicCompanies(),
     feature === 'coding-questions' ? getPublicCodingTopics() : Promise.resolve([]),
+    // Exact path first, then the shared template key — so one company can carry its own
+    // video on one feature without the other eight inheriting it.
+    seoPageMedia([`/company/${slug}/${feature}`, companyFeatureSeoKey(feature)]),
   ]);
   if (!company) notFound();
 
@@ -408,12 +413,24 @@ export default async function CompanyFeaturePage({
   const appHref = `/dashboard/company/${company.slug}`;
   const { nodes, listed } = featureBody(f.slug, company, appHref, codingTopics);
 
+  // See the hub page: bank-size counts are not public.
   const stats = [
-    company.questionCount ? { icon: BookOpen, value: String(company.questionCount), label: 'Practice questions' } : null,
-    company.pyqCount ? { icon: FileText, value: String(company.pyqCount), label: 'Previous-year questions' } : null,
-    company.codingCount ? { icon: Code2, value: String(company.codingCount), label: 'Coding problems' } : null,
     company.rounds ? { icon: Layers, value: String(company.rounds), label: 'Selection rounds' } : null,
+    company.difficulty ? { icon: Target, value: company.difficulty, label: 'Difficulty' } : null,
+    company.package ? { icon: Wallet, value: company.package, label: 'Package' } : null,
+    company.enrolled ? { icon: Users, value: company.enrolled, label: 'Learners preparing' } : null,
   ].filter((s): s is NonNullable<typeof s> => s !== null);
+
+  // The "at a glance" rail. Deliberately company facts, never bank-size counts.
+  const q = company.hub?.quickStats;
+  const quickFacts = ([
+    ['Total rounds', q?.rounds ? String(q.rounds) : company.rounds ? String(company.rounds) : ''],
+    ['Type of exam', q?.examType ?? ''],
+    ['Negative marking', q?.negativeMarking ?? ''],
+    ['Difficulty', company.difficulty ?? ''],
+    ['Package', company.package ?? ''],
+    ['Open positions', q?.openRoles ?? ''],
+  ] as [string, string][]).filter(([, v]) => v && v !== 'null');
 
   const siblings = COMPANY_FEATURES.filter((x) => x.slug !== f.slug);
   const others = all.filter((c) => c.slug !== company.slug).slice(0, 6);
@@ -495,7 +512,8 @@ export default async function CompanyFeaturePage({
           </div>
         </nav>
 
-        <div className="mx-auto max-w-[1100px] space-y-12 px-5 py-14 md:px-8">
+        <div className="mx-auto max-w-[1100px] gap-10 px-5 py-14 md:px-8 lg:grid lg:grid-cols-[minmax(0,1fr)_340px]">
+          <div className="space-y-12">
           {nodes.length > 0 ? (
             nodes
           ) : (
@@ -542,6 +560,30 @@ export default async function CompanyFeaturePage({
             cta="Create free account"
             redirect={appHref}
           />
+          </div>
+
+          {/* Right rail: the admin-attached video/image, then the company facts. Sticky
+              on desktop, stacked under the content on mobile. */}
+          <aside className="mt-10 space-y-4 lg:mt-0">
+            <div className="lg:sticky lg:top-20 lg:space-y-4">
+              <PageMedia media={media} />
+              {quickFacts.length > 0 && (
+                <div className="rounded-xl border border-[var(--color-line)] bg-white p-5 shadow-sm">
+                  <h2 className="text-[10px] font-semibold uppercase tracking-widest text-[var(--color-text-subtle)]">
+                    {company.name} at a glance
+                  </h2>
+                  <dl className="mt-3 space-y-3">
+                    {quickFacts.map(([k, v]) => (
+                      <div key={k} className="flex items-baseline justify-between gap-3">
+                        <dt className="text-sm text-[var(--color-text-muted)]">{k}</dt>
+                        <dd className="text-sm font-bold text-[var(--color-text)]">{v}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              )}
+            </div>
+          </aside>
         </div>
       </main>
       <PublicFooter />

@@ -22,15 +22,20 @@ export function PublicHeader() {
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-white/10 bg-gradient-to-r from-[#0a0a0c] to-[#141a2e] px-5 md:px-8">
       <BrandLogo variant="light" priority className="h-8" />
-      <nav className="hidden items-center gap-6 lg:flex" aria-label="Primary">
+      <nav className="hidden items-center gap-5 lg:flex" aria-label="Primary">
+        {/* Two groups, told apart by shape rather than by reading them: the browse
+            surfaces (which open a panel) sit left of a hairline rule, the plain
+            destinations to its right. */}
         <PublicMegaMenu />
+        <span aria-hidden className="h-4 w-px bg-white/15" />
         {/* Keyed by label, not href: two links legitimately CAN share a destination, and
-            keying on href silently produced duplicate React keys when they did. */}
-        {LANDING_NAV.map((l) => (
+            keying on href silently produced duplicate React keys when they did.
+            `inMegaMenu` entries are already reachable from the dropdowns above. */}
+        {LANDING_NAV.filter((l) => !('inMegaMenu' in l && l.inMegaMenu)).map((l) => (
           <Link
             key={l.label}
             href={l.href}
-            className="text-sm font-medium text-white/75 transition-colors hover:text-white"
+            className="text-sm text-white/65 transition-colors hover:text-white"
           >
             {l.label}
           </Link>

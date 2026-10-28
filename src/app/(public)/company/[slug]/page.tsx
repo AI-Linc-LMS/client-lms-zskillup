@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { BookOpen, Code2, FileText, Layers } from 'lucide-react';
+import { BookOpen, Layers, Target, Users, Wallet } from 'lucide-react';
 import { PublicHeader } from '@/components/marketing/PublicHeader';
 import { PublicFooter } from '@/components/marketing/PublicFooter';
 import { SignupCta } from '@/components/marketing/SignupCta';
@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   // hub; `{company}` is substituted here. The company's own description still wins as
   // the fallback, so a hub with real copy does not lose it to a generic template.
   const seo = await seoTemplateMetadataFor(
-    '/company/[slug]',
+    [`/company/${c.slug}`, '/company/[slug]'],
     { company: c.name },
     {
       title: `${c.name} Placement Preparation — Aptitude, Coding & Interview | prephasz`,
@@ -100,11 +100,14 @@ export default async function CompanyLandingPage({ params }: { params: Promise<{
   const others = all.filter((c) => c.slug !== company.slug).slice(0, 6);
   // Only show a stat the bank can back. A "0 questions" tile on a landing page is an
   // argument against signing up.
+  // Bank-size counts are deliberately NOT shown publicly. They varied by a factor of
+  // five across hubs, which reads as "this company is barely covered" on exactly the
+  // pages meant to win that company's traffic. What stays is company fact, not inventory.
   const stats = [
-    company.questionCount ? { icon: BookOpen, value: String(company.questionCount), label: 'Practice questions' } : null,
-    company.pyqCount ? { icon: FileText, value: String(company.pyqCount), label: 'Previous-year questions' } : null,
-    company.codingCount ? { icon: Code2, value: String(company.codingCount), label: 'Coding problems' } : null,
     company.rounds ? { icon: Layers, value: String(company.rounds), label: 'Selection rounds' } : null,
+    company.difficulty ? { icon: Target, value: company.difficulty, label: 'Difficulty' } : null,
+    company.package ? { icon: Wallet, value: company.package, label: 'Package' } : null,
+    company.enrolled ? { icon: Users, value: company.enrolled, label: 'Learners preparing' } : null,
   ].filter((s): s is NonNullable<typeof s> => s !== null);
 
   return (

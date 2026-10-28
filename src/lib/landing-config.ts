@@ -36,10 +36,16 @@ export const LANDING_HREFS = {
  * The public navbar's primary links. ONE list, consumed by both the desktop nav in the
  * landing header and the PublicMobileMenu hamburger - the mobile menu used to hand-copy
  * these, so the two could (and did) drift apart.
+ *
+ * `inMegaMenu` marks the entries the desktop mega-menu already opens on. Those two are
+ * DROPPED from the desktop row (the dropdown trigger links to the same place, and the
+ * header was briefly showing "Companies v  Preparation v  Companies  Prepare") but kept
+ * for mobile, where there is no mega-menu and the hamburger is the only way to reach
+ * them. One list, two renderings — rather than a second list that drifts.
  */
 export const LANDING_NAV = [
-  { label: 'Companies', href: LANDING_HREFS.companies },
-  { label: 'Prepare', href: LANDING_HREFS.prepare },
+  { label: 'Companies', href: LANDING_HREFS.companies, inMegaMenu: true },
+  { label: 'Prepare', href: LANDING_HREFS.prepare, inMegaMenu: true },
   { label: 'Leaderboard', href: '/leaderboard' },
   { label: 'Blog', href: '/blog' },
 ] as const;

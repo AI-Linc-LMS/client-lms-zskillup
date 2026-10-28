@@ -27,9 +27,9 @@ export async function PublicMegaMenu() {
       <div className="group relative">
         <Link
           href="/company"
-          className="flex items-center gap-1 text-sm font-medium text-white/75 transition-colors hover:text-white"
+          className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-white/10 group-hover:bg-white/10 group-focus-within:bg-white/10"
         >
-          Companies <ChevronDown className="size-3.5" aria-hidden />
+          Companies <ChevronDown className="size-3.5 text-white/55" aria-hidden />
         </Link>
         <div className="invisible absolute left-1/2 top-full z-50 w-[520px] -translate-x-1/2 pt-3 opacity-0 transition-opacity group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
           <div className="rounded-2xl border border-[var(--color-line)] bg-white p-5 shadow-md">
@@ -60,9 +60,9 @@ export async function PublicMegaMenu() {
       <div className="group relative">
         <Link
           href="/section"
-          className="flex items-center gap-1 text-sm font-medium text-white/75 transition-colors hover:text-white"
+          className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-white/10 group-hover:bg-white/10 group-focus-within:bg-white/10"
         >
-          Preparation <ChevronDown className="size-3.5" aria-hidden />
+          Preparation <ChevronDown className="size-3.5 text-white/55" aria-hidden />
         </Link>
         <div className="invisible absolute left-1/2 top-full z-50 w-[460px] -translate-x-1/2 pt-3 opacity-0 transition-opacity group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
           <div className="rounded-2xl border border-[var(--color-line)] bg-white p-5 shadow-md">

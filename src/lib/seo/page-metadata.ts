@@ -7,11 +7,15 @@ import { getPublicSeo } from '@/lib/api/seo';
  * `generateMetadata()`. Fails soft to the defaults if there is no override.
  */
 export async function seoMetadataFor(
-  key: string,
+  key: string | string[],
   fallback: { title: string; description: string },
 ): Promise<Metadata> {
   const all = await getPublicSeo();
-  const o = all.find((s) => s.key === key);
+  // Several keys = most specific first. A page generated from a shared template passes
+  // its EXACT path ahead of the template key, so adding /company/accenture/syllabus in
+  // the admin overrides that one page while its eight siblings keep the template.
+  const keys = Array.isArray(key) ? key : [key];
+  const o = keys.map((k) => all.find((s) => s.key === k)).find((r) => r && (r.title || r.description));
   const title = o?.title || fallback.title;
   const description = o?.description || fallback.description;
   const keywords = o?.keywords
@@ -41,7 +45,7 @@ export async function seoMetadataFor(
  * identical ones.
  */
 export async function seoTemplateMetadataFor(
-  key: string,
+  key: string | string[],
   vars: Record<string, string>,
   fallback: { title: string; description: string },
 ): Promise<Metadata> {
@@ -65,4 +69,44 @@ export async function seoTemplateMetadataFor(
     openGraph: { ...base.openGraph, title: title as string, description, images },
     twitter: { card: 'summary_large_image', title: title as string, description, images },
   };
+}
+
+export interface SeoPageMedia {
+  heroImageUrl: string | null;
+  heroImageAlt: string | null;
+  embedUrl: string | null;
+  embedTitle: string | null;
+}
+
+const EMPTY_MEDIA: SeoPageMedia = {
+  heroImageUrl: null,
+  heroImageAlt: null,
+  embedUrl: null,
+  embedTitle: null,
+};
+
+/**
+ * The image / video an admin attached to a page, most specific first.
+ *
+ * `keys` is tried in order, so a page passes its EXACT path before the template key it
+ * shares with its siblings: `/company/accenture/syllabus` beats `/company/[slug]/syllabus`.
+ * That is what makes one video per company possible on 81 pages generated from 9 rows —
+ * the admin adds the exact path only for the pages that need their own.
+ *
+ * Fails soft to no media; getPublicSeo already returns [] on any error.
+ */
+export async function seoPageMedia(keys: string[]): Promise<SeoPageMedia> {
+  const all = await getPublicSeo();
+  for (const key of keys) {
+    const row = all.find((s) => s.key === key);
+    if (row && (row.heroImageUrl || row.embedUrl)) {
+      return {
+        heroImageUrl: row.heroImageUrl ?? null,
+        heroImageAlt: row.heroImageAlt ?? null,
+        embedUrl: row.embedUrl ?? null,
+        embedTitle: row.embedTitle ?? null,
+      };
+    }
+  }
+  return EMPTY_MEDIA;
 }

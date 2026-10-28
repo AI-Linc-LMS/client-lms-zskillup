@@ -11,6 +11,13 @@ export interface SeoMetadata {
   description: string | null;
   keywords: string | null;
   ogImageUrl: string | null;
+  /** Page media. `embedUrl` arrives already normalised to an embeddable URL. */
+  heroImageUrl?: string | null;
+  heroImageAlt?: string | null;
+  embedUrl?: string | null;
+  embedTitle?: string | null;
+  /** True when an admin added this row rather than it shipping in the code catalog. */
+  isCustom?: boolean;
 }
 
 /**
@@ -42,7 +49,16 @@ export async function upsertSeo(dto: {
   description?: string | null;
   keywords?: string | null;
   ogImageUrl?: string | null;
+  heroImageUrl?: string | null;
+  heroImageAlt?: string | null;
+  embedUrl?: string | null;
+  embedTitle?: string | null;
 }): Promise<SeoMetadata> {
   const res = await apiClient.put<SeoMetadata>('/api/v1/admin/seo', dto);
   return res.data;
+}
+
+/** Resets a catalog page to its shipped defaults, or removes an admin-added page. */
+export async function deleteSeo(key: string): Promise<void> {
+  await apiClient.delete(`/api/v1/admin/seo?key=${encodeURIComponent(key)}`);
 }

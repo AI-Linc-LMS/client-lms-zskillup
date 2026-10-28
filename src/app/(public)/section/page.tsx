@@ -70,7 +70,7 @@ export default async function SectionIndexPage() {
               >
                 <p className="font-bold text-[var(--color-text)] group-hover:text-[var(--color-primary)]">{s.name}</p>
                 <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                  {s.questionCount.toLocaleString('en-IN')} questions · {s.topicCount} topics
+                  {s.topicCount} topics
                 </p>
               </Link>
             ))}

@@ -72,7 +72,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   // real indexable page, so it goes through the same "/section/[slug]" template.
   if (slug === CODING_SECTION_SLUG) {
     const seo = await seoTemplateMetadataFor(
-      '/section/[slug]',
+      [`/section/${CODING_SECTION_SLUG}`, '/section/[slug]'],
       { section: 'Coding' },
       {
         title: 'Coding Practice for Placements — Company-Wise Problems | prephasz',
@@ -85,11 +85,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const section = await findPublicSection(slug);
   if (!section) return { title: 'Practice sections · ZSkillup' };
   const seo = await seoTemplateMetadataFor(
-    '/section/[slug]',
+    [`/section/${section.slug}`, '/section/[slug]'],
     { section: section.name },
     {
       title: `${section.name} Practice Questions for Placements | prephasz`,
-      description: `Practise ${section.name.toLowerCase()} for placement tests — ${section.questionCount} questions across ${section.topicCount} topics, with timed mocks and previous-year papers.`,
+      description: `Practise ${section.name.toLowerCase()} for placement tests — ${section.topicCount} topics, with timed mocks and previous-year papers.`,
     },
   );
   return { ...seo, alternates: { canonical: `${SITE}/section/${section.slug}` } };
@@ -166,10 +166,7 @@ export default async function SectionLandingPage({ params }: { params: Promise<{
                       className="group flex items-center justify-between rounded-xl border border-[var(--color-line)] bg-white p-4 transition hover:border-[var(--color-accent)]"
                     >
                       <span className="font-bold text-[var(--color-text)] group-hover:text-[var(--color-primary)]">{c.name}</span>
-                      <span className="flex items-center gap-1.5 text-sm text-[var(--color-text-muted)]">
-                        <Code2 className="size-4" />
-                        {c.codingCount}
-                      </span>
+                      <Code2 className="size-4 text-[var(--color-text-muted)]" aria-hidden />
                     </Link>
                   ))}
                 </div>
@@ -212,7 +209,7 @@ export default async function SectionLandingPage({ params }: { params: Promise<{
         <Hero
           eyebrow={section.name}
           title={`${section.name} practice for placements`}
-          sub={`${section.questionCount.toLocaleString('en-IN')} practice questions across ${section.topicCount} topics, drawn from the same bank used for timed mocks and previous-year papers.`}
+          sub={`${section.topicCount} topics, drawn from the same bank used for timed mocks and previous-year papers.`}
         />
         <div className="mx-auto max-w-[1100px] space-y-12 px-5 py-14 md:px-8">
           {topics.length > 0 && (
