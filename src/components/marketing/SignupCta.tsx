@@ -19,14 +19,24 @@ export function SignupCta({
   sub,
   cta = 'Get started free',
   tone = 'dark',
+  redirect,
 }: {
   heading: string;
   sub: string;
   cta?: string;
   /** `dark` for the mid-page break against light content; `light` to close the page. */
   tone?: 'dark' | 'light';
+  /**
+   * Where to land AFTER signing up — the in-app page this public page represents.
+   * Without it every conversion from a company feature page dumps the visitor on the
+   * generic dashboard, losing the intent that brought them in from search. The auth
+   * pages already carry a `?redirect=` through the 3-step signup and the Google popup
+   * (`sanitizeRedirect` rejects anything not same-site), so this only has to set it.
+   */
+  redirect?: string;
 }) {
   const dark = tone === 'dark';
+  const href = redirect ? `/signup?redirect=${encodeURIComponent(redirect)}` : '/signup';
   return (
     <section
       className={
@@ -53,7 +63,7 @@ export function SignupCta({
           {sub}
         </p>
         <Link
-          href="/signup"
+          href={href}
           className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#f5b400] px-6 py-3 text-sm font-bold text-[#171717] transition hover:bg-[#f5b400]/90"
         >
           {cta} <ArrowRight className="size-4" />

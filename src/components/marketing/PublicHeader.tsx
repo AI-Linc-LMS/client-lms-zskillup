@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { BrandLogo } from '@/components/layout/BrandLogo';
 import { PublicAuthCta } from '@/components/marketing/PublicAuthCta';
 import { PublicMobileMenu } from '@/components/marketing/PublicMobileMenu';
+import { PublicMegaMenu } from '@/components/marketing/PublicMegaMenu';
 import { LANDING_NAV } from '@/lib/landing-config';
 
 /**
@@ -22,6 +23,7 @@ export function PublicHeader() {
     <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-white/10 bg-gradient-to-r from-[#0a0a0c] to-[#141a2e] px-5 md:px-8">
       <BrandLogo variant="light" priority className="h-8" />
       <nav className="hidden items-center gap-6 lg:flex" aria-label="Primary">
+        <PublicMegaMenu />
         {/* Keyed by label, not href: two links legitimately CAN share a destination, and
             keying on href silently produced duplicate React keys when they did. */}
         {LANDING_NAV.map((l) => (

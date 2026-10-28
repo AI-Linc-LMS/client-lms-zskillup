@@ -1,6 +1,6 @@
 import type { BlogPostDto, PlacementRecordDto, TestimonialDto } from '@/shared/dto/content.dto';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
-import type { ApiCompany, ApiTopic } from '@/lib/api/catalog';
+import type { ApiCompany, ApiCompanyHub, ApiTopic } from '@/lib/api/catalog';
 
 /**
  * Server-side fetch of public marketing content (Phase 5). Used by the public
@@ -104,6 +104,17 @@ export async function getPublicCompanies(): Promise<ApiCompany[]> {
 export async function getPublicCompany(slug: string): Promise<ApiCompany | null> {
   const all = await getPublicCompanies();
   return all.find((c) => c.slug === slug) ?? null;
+}
+
+/**
+ * One company WITH its 7-tab hub body — the content behind /company/[slug]/[feature].
+ *
+ * The same endpoint the logged-in hub uses; it is a public read (catalog.ts documents
+ * why) so these pages need no session. Returns null rather than throwing, so a feature
+ * page degrades to its company header and CTAs instead of 500-ing on a backend blip.
+ */
+export async function getPublicCompanyHub(slug: string): Promise<ApiCompanyHub | null> {
+  return await getJson<ApiCompanyHub>(`/api/v1/companies/${encodeURIComponent(slug)}`);
 }
 
 /**

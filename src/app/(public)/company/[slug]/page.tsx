@@ -8,6 +8,7 @@ import { SignupCta } from '@/components/marketing/SignupCta';
 import { getPublicCompanies, getPublicCompany } from '@/lib/server/public-content';
 import { breadcrumbLd, JsonLd } from '@/components/seo/JsonLd';
 import { seoTemplateMetadataFor } from '@/lib/seo/page-metadata';
+import { COMPANY_FEATURES } from '@/shared/company-features';
 import type { ApiCompany } from '@/lib/api/catalog';
 
 const SITE = 'https://prephasz.com';
@@ -190,6 +191,32 @@ export default async function CompanyLandingPage({ params }: { params: Promise<{
               </dl>
             </section>
           )}
+
+          {/* The crawl path into the company x feature matrix. Without it each of those
+              pages is reachable only from the sitemap and its own siblings, which is the
+              weakest internal linking there is — and this is the page that ranks for the
+              company name, so it is the one with authority to pass down. */}
+          <section>
+            <h2 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)]">
+              {company.name} preparation resources
+            </h2>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {COMPANY_FEATURES.map((f) => (
+                <Link
+                  key={f.slug}
+                  href={`/company/${company.slug}/${f.slug}`}
+                  className="group block rounded-xl border border-[var(--color-line)] bg-white p-4 transition hover:border-[var(--color-accent)]"
+                >
+                  <p className="font-bold text-[var(--color-text)] group-hover:text-[var(--color-primary)]">
+                    {company.name} {f.label.toLowerCase()}
+                  </p>
+                  <p className="mt-1 line-clamp-2 text-sm text-[var(--color-text-muted)]">
+                    {f.descriptionTemplate.split('{company}').join(company.name).split('{year}').join(String(new Date().getFullYear()))}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </section>
 
           {/* Mid-page ask, after the visitor knows what the page is about. */}
           <SignupCta

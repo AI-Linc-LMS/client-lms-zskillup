@@ -10,6 +10,7 @@ import {
   buildSoftSkillsSection,
   CODING_SECTION_SLUG,
 } from '@/lib/sections/section-catalog';
+import { COMPANY_FEATURES } from '@/shared/company-features';
 
 /**
  * The public map of the site.
@@ -80,5 +81,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly' as const,
       priority: 0.7,
     })),
+    // The company x feature matrix. Every pair is prerendered by generateStaticParams
+    // over the SAME two lists, so the sitemap and the routes cannot disagree.
+    ...companies.flatMap((c) =>
+      COMPANY_FEATURES.map((f) => ({
+        url: `${SITE}/company/${c.slug}/${f.slug}`,
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+      })),
+    ),
   ];
 }
