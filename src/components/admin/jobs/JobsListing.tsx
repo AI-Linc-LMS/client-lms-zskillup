@@ -19,7 +19,15 @@ import {
   MoveRight,
   Target,} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cloneJob, deleteJob, exportApplicantsCsv, listAdminJobs, updateJob } from '@/lib/api/jobs';
+import {
+  ADMIN_JOBS_BASE,
+  cloneJob,
+  deleteJob,
+  exportApplicantsCsv,
+  listAdminJobs,
+  updateJob,
+  type JobsApiBase,
+} from '@/lib/api/jobs';
 import type { JobPostingDto } from '@/shared/dto/jobs.dto';
 import { JobStatus } from '@/shared/enums';
 import { describeError } from '@/lib/api/errors';
@@ -54,7 +62,11 @@ const FILTERS: Array<{ key: Filter; label: string }> = [
  */
 const PAGE_SIZE = 12;
 
-export function JobsListing() {
+/**
+ * `base` lets the TPO console reuse this screen against its own college-scoped
+ * controller. Defaults to the admin PMS, so every existing caller is unchanged.
+ */
+export function JobsListing({ base = ADMIN_JOBS_BASE }: { base?: JobsApiBase } = {}) {
   const router = useRouter();
   const [jobs, setJobs] = useState<JobPostingDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,7 +81,7 @@ export function JobsListing() {
 
   const load = useCallback(() => {
     setLoading(true);
-    listAdminJobs()
+    listAdminJobs(base)
       .then(setJobs)
       .catch((err) => toast.error(describeError(err, 'Could not load the job board.')))
       .finally(() => setLoading(false));
@@ -120,7 +132,7 @@ export function JobsListing() {
   const patch = async (job: JobPostingDto, dto: Parameters<typeof updateJob>[1], msg: string) => {
     setBusyId(job.id);
     try {
-      const updated = await updateJob(job.id, dto);
+      const updated = await updateJob(job.id, dto, base);
       setJobs((prev) => prev.map((j) => (j.id === job.id ? updated : j)));
       toast.success(msg);
     } catch (err) {

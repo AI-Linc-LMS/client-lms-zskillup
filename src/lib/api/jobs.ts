@@ -28,13 +28,31 @@ export type {
   JobTargetViewDto,
 } from '@/shared/dto/jobs.dto';
 
+/**
+ * Which PMS a call goes to.
+ *
+ * The TPO console reuses the admin PMS screens wholesale — same composer, same
+ * applicants table, same stage machine — against a controller that scopes everything to
+ * one college. Rather than fork those components, the handful of calls they make take a
+ * base and default to the admin one, so an existing caller is unchanged.
+ *
+ * It is NOT a free-text path: a mistyped base would silently call an endpoint that does
+ * not exist, and the screen would render an empty table rather than an error.
+ */
+export type JobsApiBase = '/api/v1/admin/jobs' | '/api/v1/tpo/jobs';
+export const ADMIN_JOBS_BASE: JobsApiBase = '/api/v1/admin/jobs';
+export const TPO_JOBS_BASE: JobsApiBase = '/api/v1/tpo/jobs';
+
 /** Admin: every posting including drafts. */
-export async function listAdminJobs(): Promise<JobPostingDto[]> {
-  return (await apiClient.get<JobPostingDto[]>('/api/v1/admin/jobs')).data;
+export async function listAdminJobs(base: JobsApiBase = ADMIN_JOBS_BASE): Promise<JobPostingDto[]> {
+  return (await apiClient.get<JobPostingDto[]>(base)).data;
 }
 
-export async function createJob(dto: CreateJobPostingDto): Promise<JobPostingDto> {
-  return (await apiClient.post<JobPostingDto>('/api/v1/admin/jobs', dto)).data;
+export async function createJob(
+  dto: CreateJobPostingDto,
+  base: JobsApiBase = ADMIN_JOBS_BASE,
+): Promise<JobPostingDto> {
+  return (await apiClient.post<JobPostingDto>(base, dto)).data;
 }
 
 /** Duplicate a posting as a fresh unpublished draft (fields, questions and targets), so
@@ -43,8 +61,12 @@ export async function cloneJob(id: string): Promise<JobPostingDto> {
   return (await apiClient.post<JobPostingDto>(`/api/v1/admin/jobs/${id}/clone`, {})).data;
 }
 
-export async function updateJob(id: string, dto: JobPostingPatch): Promise<JobPostingDto> {
-  return (await apiClient.patch<JobPostingDto>(`/api/v1/admin/jobs/${id}`, dto)).data;
+export async function updateJob(
+  id: string,
+  dto: JobPostingPatch,
+  base: JobsApiBase = ADMIN_JOBS_BASE,
+): Promise<JobPostingDto> {
+  return (await apiClient.patch<JobPostingDto>(`${base}/${id}`, dto)).data;
 }
 
 export async function deleteJob(id: string): Promise<void> {
@@ -248,8 +270,9 @@ export async function listApplicants(
   jobId: string | null,
   // §10 stage strings, not the six-value enum — the API accepts all twenty-one.
   opts: { status?: string[]; search?: string; sort?: string; limit?: number; offset?: number } = {},
+  apiBase: JobsApiBase = ADMIN_JOBS_BASE,
 ): Promise<ApplicantPage> {
-  const base = jobId ? `/api/v1/admin/jobs/${jobId}/applications` : '/api/v1/admin/jobs/applications';
+  const base = jobId ? `${apiBase}/${jobId}/applications` : `${apiBase}/applications`;
   return (await apiClient.get<ApplicantPage>(`${base}${toQuery(opts as Record<string, unknown>)}`)).data;
 }
 
@@ -488,9 +511,10 @@ export interface MoveStageResultDto {
 export async function moveApplicationStage(
   applicationId: string,
   body: { to: string; reason?: string | null; roundId?: string | null; feedback?: string | null; score?: number | null },
+  base: JobsApiBase = ADMIN_JOBS_BASE,
 ): Promise<MoveStageResultDto> {
   const res = await apiClient.post<MoveStageResultDto>(
-    `/api/v1/admin/jobs/applications/${applicationId}/stage`,
+    `${base}/applications/${applicationId}/stage`,
     body,
   );
   return res.data;
@@ -507,11 +531,11 @@ export async function moveApplicationStagesBulk(body: {
   to: string;
   reason?: string | null;
   roundId?: string | null;
-}): Promise<{ moved: number; failed: Array<{ applicationId: string; reason: string }> }> {
+}, base: JobsApiBase = ADMIN_JOBS_BASE): Promise<{ moved: number; failed: Array<{ applicationId: string; reason: string }> }> {
   const res = await apiClient.post<{
     moved: number;
     failed: Array<{ applicationId: string; reason: string }>;
-  }>(`/api/v1/admin/jobs/applications/stage/bulk`, body);
+  }>(`${base}/applications/stage/bulk`, body);
   return res.data;
 }
 

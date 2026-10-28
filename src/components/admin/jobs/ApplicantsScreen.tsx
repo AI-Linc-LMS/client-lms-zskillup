@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { StatusPill } from '@/components/student/StatusPill';
 import { Modal } from '@/components/ui/Modal';
 import {
+  ADMIN_JOBS_BASE,
   emailJobApplicant,
   exportApplicantsCsv,
   getApplicantFacets,
@@ -27,6 +28,7 @@ import {
   moveApplicationStage,
   updateJobApplication,
   type JobApplicantDto,
+  type JobsApiBase,
 } from '@/lib/api/jobs';
 import { StageMoveDialog } from './StageMoveDialog';
 import { ApplicationHistory } from './ApplicationHistory';
@@ -59,7 +61,17 @@ const PAGE = 25;
  * identical on a job with nine applicants and silently lies on one with nine hundred,
  * which is exactly the job where it matters.
  */
-export function ApplicantsScreen({ jobId }: { jobId: string }) {
+/**
+ * `base` lets the TPO console reuse this screen against its own college-scoped
+ * controller. Defaults to the admin PMS, so every existing caller is unchanged.
+ */
+export function ApplicantsScreen({
+  jobId,
+  base = ADMIN_JOBS_BASE,
+}: {
+  jobId: string;
+  base?: JobsApiBase;
+}) {
   const [rows, setRows] = useState<JobApplicantDto[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -100,7 +112,7 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
       search: debounced || undefined,
       limit: PAGE,
       offset: page * PAGE,
-    })
+    }, base)
       .then((r) => {
         setRows(r.items);
         setTotal(r.total);
@@ -142,7 +154,7 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
     let alive = true;
     // There is no single-drive admin GET, so this reads the list and picks the one —
     // the same thing EditJobComposer does.
-    listAdminJobs()
+    listAdminJobs(base)
       .then((all) => {
         if (!alive) return;
         const drive = all.find((d) => d.id === jobId);
@@ -172,7 +184,7 @@ export function ApplicantsScreen({ jobId }: { jobId: string }) {
     if (!moving) return;
     setMovingBusy(true);
     try {
-      await moveApplicationStage(moving.id, input);
+      await moveApplicationStage(moving.id, input, base);
       toast.success(`${moving.fullName ?? moving.email} → ${STAGE_LABELS[input.to]}`);
       setMoving(null);
       await load();

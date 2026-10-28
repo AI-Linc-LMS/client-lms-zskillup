@@ -5,7 +5,13 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Check, ChevronLeft, ChevronRight, Loader2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { createJob, updateJob, type JobPostingDto } from '@/lib/api/jobs';
+import {
+  ADMIN_JOBS_BASE,
+  createJob,
+  updateJob,
+  type JobPostingDto,
+  type JobsApiBase,
+} from '@/lib/api/jobs';
 import { uploadCompanyLogo, uploadJobDescription } from '@/lib/api/media';
 import {
   CompensationKind,
@@ -79,7 +85,17 @@ function toLocalInput(iso: string | null | undefined): string {
  * It also means "Publish" on the last step flips one boolean instead of submitting a
  * six-step form that can half-fail.
  */
-export function JobComposer({ existing }: { existing?: JobPostingDto }) {
+/**
+ * `base` lets the TPO console create and edit drives through its own college-scoped
+ * controller, with the same composer and the same validation. Defaults to the admin PMS.
+ */
+export function JobComposer({
+  existing,
+  base = ADMIN_JOBS_BASE,
+}: {
+  existing?: JobPostingDto;
+  base?: JobsApiBase;
+}) {
   const router = useRouter();
   const [job, setJob] = useState<JobPostingDto | null>(existing ?? null);
   const [step, setStep] = useState(0);
@@ -328,8 +344,11 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
     setSaving(true);
     try {
       const saved = job
-        ? await updateJob(job.id, payload())
-        : await createJob({ ...payload(), title: form.title.trim(), companyName: form.companyName.trim() });
+        ? await updateJob(job.id, payload(), base)
+        : await createJob(
+            { ...payload(), title: form.title.trim(), companyName: form.companyName.trim() },
+            base,
+          );
       setJob(saved);
       setDirty(false);
       return saved;
@@ -1075,7 +1094,7 @@ export function JobComposer({ existing }: { existing?: JobPostingDto }) {
                     const saved = await persist();
                     if (!saved) return;
                     try {
-                      const out = await updateJob(saved.id, { isPublished: !saved.isPublished });
+                      const out = await updateJob(saved.id, { isPublished: !saved.isPublished }, base);
                       setJob(out);
                       toast.success(out.isPublished ? 'Published' : 'Unpublished');
                     } catch (err) {

@@ -301,6 +301,7 @@ export const TPO_NAV: NavSection[] = [
   {
     heading: 'MANAGE',
     items: [
+      { label: 'Job Drives', href: '/tpo/jobs', icon: Briefcase },
       { label: 'Placement', href: '/tpo/placement', icon: Briefcase },
       { label: 'Student Search', href: '/tpo/search', icon: Search },
       { label: 'Student Management', href: '/tpo/students', icon: Users },
