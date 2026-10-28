@@ -185,16 +185,26 @@ export async function listSavedJobSlugs(): Promise<string[]> {
 
 /* --- admin: targeting --- */
 
-export async function getJobTargets(jobId: string): Promise<JobTargetViewDto[]> {
-  return (await apiClient.get<JobTargetViewDto[]>(`/api/v1/admin/jobs/${jobId}/targets`)).data;
+export async function getJobTargets(
+  jobId: string,
+  base: JobsApiBase = ADMIN_JOBS_BASE,
+): Promise<JobTargetViewDto[]> {
+  return (await apiClient.get<JobTargetViewDto[]>(`${base}/${jobId}/targets`)).data;
 }
 
-export async function setJobTargets(jobId: string, targets: JobTargetDto[]): Promise<JobTargetViewDto[]> {
-  return (await apiClient.put<JobTargetViewDto[]>(`/api/v1/admin/jobs/${jobId}/targets`, { targets })).data;
+export async function setJobTargets(
+  jobId: string,
+  targets: JobTargetDto[],
+  base: JobsApiBase = ADMIN_JOBS_BASE,
+): Promise<JobTargetViewDto[]> {
+  return (await apiClient.put<JobTargetViewDto[]>(`${base}/${jobId}/targets`, { targets })).data;
 }
 
-export async function getJobReach(jobId: string): Promise<{ isPublic: boolean; students: number }> {
-  return (await apiClient.get<{ isPublic: boolean; students: number }>(`/api/v1/admin/jobs/${jobId}/reach`)).data;
+export async function getJobReach(
+  jobId: string,
+  base: JobsApiBase = ADMIN_JOBS_BASE,
+): Promise<{ isPublic: boolean; students: number }> {
+  return (await apiClient.get<{ isPublic: boolean; students: number }>(`${base}/${jobId}/reach`)).data;
 }
 
 /* --- admin: questions --- */
@@ -374,8 +384,11 @@ export interface CandidateView {
 }
 
 /** Eligibility and match for everyone a drive reaches. Staff-only. */
-export async function getDriveCandidates(id: string): Promise<CandidateView> {
-  const res = await apiClient.get<CandidateView>(`/api/v1/admin/jobs/${id}/candidates`);
+export async function getDriveCandidates(
+  id: string,
+  base: JobsApiBase = ADMIN_JOBS_BASE,
+): Promise<CandidateView> {
+  const res = await apiClient.get<CandidateView>(`${base}/${id}/candidates`);
   return res.data;
 }
 

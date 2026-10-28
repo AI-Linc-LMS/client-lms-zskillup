@@ -5,7 +5,7 @@ import { AlertTriangle, CircleHelp, Loader2, Search, ShieldCheck, ShieldX } from
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { describeError } from '@/lib/api/errors';
-import { getDriveCandidates, type CandidateRow, type CandidateView } from '@/lib/api/jobs';
+import { ADMIN_JOBS_BASE, getDriveCandidates, type CandidateRow, type CandidateView , type JobsApiBase } from '@/lib/api/jobs';
 import { branchShort } from '@/lib/branch';
 import { EligibilityVerdict } from '@/shared/drive-eligibility';
 import { DIMENSION_LABELS, MatchDimension } from '@/shared/drive-matching';
@@ -79,7 +79,15 @@ function ScoreCell({ row, dimension }: { row: CandidateRow; dimension: MatchDime
  * most misleading thing this page could show. Coverage sits beside every score, "n/a"
  * never renders as a zero, and a candidate the engine cannot judge says so.
  */
-export function CandidateFitScreen({ jobId }: { jobId: string }) {
+/** `base` lets the TPO console use this screen against its college-scoped
+ *  controller. Defaults to the admin PMS, so every existing caller is unchanged. */
+export function CandidateFitScreen({
+  jobId,
+  base = ADMIN_JOBS_BASE,
+}: {
+  jobId: string;
+  base?: JobsApiBase;
+}) {
   const [view, setView] = useState<CandidateView | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -90,7 +98,7 @@ export function CandidateFitScreen({ jobId }: { jobId: string }) {
     setLoading(true);
     setError(null);
     try {
-      setView(await getDriveCandidates(jobId));
+      setView(await getDriveCandidates(jobId, base));
     } catch (e) {
       setError(describeError(e, 'Could not build the candidate view.'));
     } finally {

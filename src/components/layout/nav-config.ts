@@ -313,6 +313,7 @@ export const TPO_NAV: NavSection[] = [
   {
     heading: 'ACCOUNT',
     items: [
+      { label: 'Placement Report', href: '/tpo/placement-report', icon: BarChart3 },
       { label: 'Reports & Exports', href: '/tpo/reports', icon: FileText },
       { label: 'Subscription', href: '/tpo/subscription', icon: CreditCard },
     ],

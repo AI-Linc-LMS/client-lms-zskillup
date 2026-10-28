@@ -317,7 +317,30 @@ export interface AnalyticsFilters {
   from?: string | null;
   to?: string | null;
   collegeId?: string | null;
+  /**
+   * The colleges the CALLER may read at all — not a filter the user chose.
+   *
+   * `null` means unscoped (SUPER_ADMIN, or an ADMIN with no portfolio). An array
+   * confines every aggregate to those colleges, and an EMPTY array matches nothing,
+   * which is the safe reading of "assigned to no colleges".
+   *
+   * The controller computed this and passed it for a long time while the service
+   * ignored it, so a portfolio-scoped admin was being shown platform-wide numbers on
+   * the two endpoints where scope is the only control. It is part of the filter set
+   * now so it cannot be dropped silently again.
+   */
+  scopedToColleges?: string[] | null;
   cohort?: string | null;
+  /**
+   * Passout year, e.g. "2027" — what a placement office calls a batch.
+   *
+   * DELIBERATELY NOT THE SAME AS `cohort`. A cohort is a real tenancy.cohorts row; a
+   * batch is everyone graduating that year, which usually spans several cohorts and
+   * sometimes several colleges. Conflating them would silently merge two cohorts that
+   * graduate together — the service comment warned about exactly this before the filter
+   * existed to honour it.
+   */
+  batch?: string | null;
   department?: string | null;
   companyId?: string | null;
   driveId?: string | null;

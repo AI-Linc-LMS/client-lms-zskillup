@@ -3,7 +3,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, Globe2, Loader2, Search, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { getJobReach, getJobTargets, setJobTargets } from '@/lib/api/jobs';
+import {
+  ADMIN_JOBS_BASE,
+  getJobReach,
+  getJobTargets,
+  setJobTargets,
+  type JobsApiBase,
+} from '@/lib/api/jobs';
 import type { JobTargetViewDto } from '@/shared/dto/jobs.dto';
 import { Branch, JobTargetType } from '@/shared/enums';
 import {
@@ -59,7 +65,15 @@ const BATCH_YEARS = (() => {
  * a posting stops being public, and that consequence should be visible at the click,
  * not discovered later when nobody applies.
  */
-export function TargetPicker({ jobId }: { jobId: string }) {
+/** `base` lets the TPO console use this screen against its college-scoped
+ *  controller. Defaults to the admin PMS, so every existing caller is unchanged. */
+export function TargetPicker({
+  jobId,
+  base = ADMIN_JOBS_BASE,
+}: {
+  jobId: string;
+  base?: JobsApiBase;
+}) {
   const [targets, setTargets] = useState<JobTargetViewDto[]>([]);
   const [options, setOptions] = useState<Option[]>([]);
   const [reach, setReach] = useState<{ isPublic: boolean; students: number } | null>(null);
@@ -78,7 +92,7 @@ export function TargetPicker({ jobId }: { jobId: string }) {
   const [searchingStudents, setSearchingStudents] = useState(false);
 
   const refresh = async () => {
-    const [t, r] = await Promise.all([getJobTargets(jobId), getJobReach(jobId)]);
+    const [t, r] = await Promise.all([getJobTargets(jobId, base), getJobReach(jobId, base)]);
     setTargets(t);
     setReach(r);
   };
@@ -86,8 +100,8 @@ export function TargetPicker({ jobId }: { jobId: string }) {
   useEffect(() => {
     let alive = true;
     Promise.all([
-      getJobTargets(jobId),
-      getJobReach(jobId),
+      getJobTargets(jobId, base),
+      getJobReach(jobId, base),
       listAdminColleges().catch(() => []),
       listAdminCompanies().catch(() => []),
     ])
@@ -221,6 +235,7 @@ export function TargetPicker({ jobId }: { jobId: string }) {
           targetValue: t.targetValue ?? undefined,
           isExclusion: t.isExclusion,
         })),
+        base,
       );
       await refresh();
     } catch (err) {
