@@ -227,6 +227,7 @@ export default async function CompanyLandingPage({ params }: { params: Promise<{
           <SignupCta
             heading={`Start preparing for ${company.name}`}
             sub="Create a free account to practise this company's questions, sit timed mocks and track your placement readiness."
+            redirect={`/dashboard/company/${company.slug}`}
           />
 
           {others.length > 0 && (
@@ -244,6 +245,7 @@ export default async function CompanyLandingPage({ params }: { params: Promise<{
             tone="light"
             heading="Your placement preparation, in one place"
             sub="Company-wise practice, previous-year questions, coding problems and timed mock assessments."
+            redirect={`/dashboard/company/${company.slug}`}
             cta="Create your free account"
           />
         </div>
