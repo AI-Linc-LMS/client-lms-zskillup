@@ -1,5 +1,6 @@
 import { apiClient } from './client';
 import { API_BASE_URL } from './base';
+import type { SeoPageContent } from '@/shared/seo-content';
 
 export interface SeoMetadata {
   key: string;
@@ -16,6 +17,11 @@ export interface SeoMetadata {
   heroImageAlt?: string | null;
   embedUrl?: string | null;
   embedTitle?: string | null;
+  /**
+   * Admin-authored page body — heading, lead, sections, FAQs. Already normalised by the
+   * API; normalised AGAIN on the render side because this is a jsonb column.
+   */
+  content?: SeoPageContent | null;
   /** True when an admin added this row rather than it shipping in the code catalog. */
   isCustom?: boolean;
 }
@@ -53,6 +59,8 @@ export async function upsertSeo(dto: {
   heroImageAlt?: string | null;
   embedUrl?: string | null;
   embedTitle?: string | null;
+  /** `null` clears the page body back to the code-shipped copy. */
+  content?: SeoPageContent | null;
 }): Promise<SeoMetadata> {
   const res = await apiClient.put<SeoMetadata>('/api/v1/admin/seo', dto);
   return res.data;

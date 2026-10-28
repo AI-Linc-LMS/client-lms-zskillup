@@ -10,8 +10,13 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { Check, ChevronDown, Loader2, Plus, RotateCcw, Search, Trash2 } from 'lucide-react';
+import { Check, ChevronDown, Loader2, Plus, RotateCcw, Search, Trash2, X } from 'lucide-react';
 import { deleteSeo, listSeo, upsertSeo, type SeoMetadata } from '@/lib/api/seo';
+import {
+  SEO_CONTENT_LIMITS,
+  isSeoContentEmpty,
+  type SeoPageContent,
+} from '@/shared/seo-content';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -37,6 +42,10 @@ export function SeoScreen() {
 
   const patch = (key: string, field: keyof SeoMetadata, value: string) =>
     setRows((rs) => rs.map((r) => (r.key === key ? { ...r, [field]: value } : r)));
+
+  /** Body copy is a nested object, so it gets its own setter rather than the string one. */
+  const patchContent = (key: string, content: SeoPageContent | null) =>
+    setRows((rs) => rs.map((r) => (r.key === key ? { ...r, content } : r)));
 
   const reload = () =>
     listSeo()
@@ -110,12 +119,13 @@ export function SeoScreen() {
     <div className="space-y-8">
       <div>
         <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Admin</p>
-        <h1 className="text-[28px] font-extrabold tracking-tight text-navy">SEO metadata</h1>
+        <h1 className="text-[28px] font-extrabold tracking-tight text-navy">SEO &amp; page content</h1>
         <p className="mt-1 text-sm text-slate-600">
-          Meta title, description, keywords, social image and on-page media for every page. Pick an
-          audience group below, or search for a path directly. Each page ships with a sensible
-          default — open a row to override only what you want. Changes go live within ~5 minutes —
-          no deploy needed.
+          Everything editable about a page: meta title, description, keywords and social image,
+          the video or image shown on it, and its body copy — heading, intro, content sections and
+          FAQs. Pick an audience group below, or search for a path directly. Each page ships with a
+          sensible default — open a row to override only what you want. Changes go live within ~5
+          minutes — no deploy needed.
         </p>
       </div>
       {err && (
@@ -181,6 +191,7 @@ export function SeoScreen() {
             row={r}
             showSection={searching}
             onPatch={(f, v) => patch(r.key, f, v)}
+            onPatchContent={(c) => patchContent(r.key, c)}
             onRemove={() => remove(r)}
           />
         ))}
@@ -279,11 +290,13 @@ function groupBySection(rows: SeoMetadata[]): { section: string; rows: SeoMetada
 function SeoRow({
   row,
   onPatch,
+  onPatchContent,
   onRemove,
   showSection,
 }: {
   row: SeoMetadata;
   onPatch: (field: keyof SeoMetadata, value: string) => void;
+  onPatchContent: (content: SeoPageContent | null) => void;
   onRemove: () => void;
   /** Search results span groups, so each hit says which one it came from. */
   showSection?: boolean;
@@ -310,6 +323,8 @@ function SeoRow({
         heroImageAlt: row.heroImageAlt ?? null,
         embedUrl: row.embedUrl ?? null,
         embedTitle: row.embedTitle ?? null,
+        // null clears the body back to the copy shipped in code.
+        content: isSeoContentEmpty(row.content) ? null : row.content,
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
@@ -358,6 +373,11 @@ function SeoRow({
           {row.heroImageUrl ? (
             <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
               Image
+            </span>
+          ) : null}
+          {!isSeoContentEmpty(row.content) ? (
+            <span className="shrink-0 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold text-orange ring-1 ring-orange/25">
+              Content
             </span>
           ) : null}
         </button>
@@ -502,7 +522,243 @@ function SeoRow({
         ) : null}
       </div>
       )}
+      {open && <ContentEditor pageKey={row.key} content={row.content ?? null} onChange={onPatchContent} />}
       {error && <p className="mt-2 text-xs font-medium text-red-600">{error}</p>}
+    </div>
+  );
+}
+
+/** The tokens a templated key may use, so the hint names the real ones per family. */
+function tokensFor(pageKey: string): string[] {
+  if (!pageKey.includes('[')) return [];
+  if (pageKey.startsWith('/company/')) return ['{company}', '{year}'];
+  if (pageKey.startsWith('/section/')) return ['{section}'];
+  return [];
+}
+
+/**
+ * The page BODY editor — H1, lead paragraph, content sections and FAQs.
+ *
+ * Why it sits next to the meta fields rather than in its own screen: an operator writing
+ * a page thinks about the title and the first paragraph together, and the row is already
+ * the unit of "everything editable about this page".
+ *
+ * Every field is optional and empty means "use the copy shipped in code", so a page left
+ * untouched renders exactly as it did before this editor existed. That is also why Save
+ * sends `null` for an empty body instead of an empty object — see the save() above.
+ *
+ * Bullets are one-per-line in a textarea rather than a nested add/remove list: the list
+ * is short, reordering is a drag in either UI, and a textarea is the thing an operator
+ * can paste into from a doc.
+ */
+function ContentEditor({
+  pageKey,
+  content,
+  onChange,
+}: {
+  pageKey: string;
+  content: SeoPageContent | null;
+  onChange: (content: SeoPageContent | null) => void;
+}) {
+  const sections = content?.sections ?? [];
+  const faqs = content?.faqs ?? [];
+  const tokens = tokensFor(pageKey);
+
+  const set = (next: Partial<SeoPageContent>) => onChange({ ...(content ?? {}), ...next });
+
+  const setSection = (i: number, field: 'title' | 'body' | 'bullets', value: string) =>
+    set({
+      sections: sections.map((sec, j) =>
+        j !== i
+          ? sec
+          : field === 'bullets'
+            ? { ...sec, bullets: value.split('\n').map((b) => b.trim()).filter(Boolean) }
+            : { ...sec, [field]: value },
+      ),
+    });
+
+  const setFaq = (i: number, field: 'q' | 'a', value: string) =>
+    set({ faqs: faqs.map((f, j) => (j === i ? { ...f, [field]: value } : f)) });
+
+  return (
+    <div className="mt-4 border-t border-slate-200 pt-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+          Page content
+        </p>
+        {tokens.length > 0 && (
+          <p className="text-xs text-slate-400">
+            This row covers every page in the family — use{' '}
+            <span className="font-mono font-semibold text-slate-500">{tokens.join(' ')}</span> and it
+            is filled in per page.
+          </p>
+        )}
+      </div>
+
+      <div className="mt-3 grid gap-4">
+        <label className="block space-y-1.5">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            Page heading (H1)
+          </span>
+          <input
+            className={inputCls}
+            value={content?.heading ?? ''}
+            onChange={(e) => set({ heading: e.target.value })}
+            maxLength={SEO_CONTENT_LIMITS.heading}
+            placeholder="Leave empty to use the heading shipped in code"
+          />
+        </label>
+
+        <label className="block space-y-1.5">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            Intro paragraph
+          </span>
+          <textarea
+            className="min-h-20 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-relaxed text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+            value={content?.intro ?? ''}
+            onChange={(e) => set({ intro: e.target.value })}
+            maxLength={SEO_CONTENT_LIMITS.intro}
+            placeholder="The paragraph under the heading. Leave empty to keep the shipped copy."
+          />
+        </label>
+      </div>
+
+      {/* ── Sections ─────────────────────────────────────────────────────── */}
+      <div className="mt-5">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            Content sections{sections.length > 0 ? ` (${sections.length})` : ''}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={sections.length >= SEO_CONTENT_LIMITS.sections}
+            onClick={() => set({ sections: [...sections, { title: '', body: '' }] })}
+          >
+            <Plus /> Add section
+          </Button>
+        </div>
+        {sections.length === 0 ? (
+          <p className="mt-2 text-xs text-slate-400">
+            None — the page shows only what it builds from real data.
+          </p>
+        ) : (
+          <div className="mt-3 space-y-3">
+            {sections.map((sec, i) => (
+              <div key={i} className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+                <div className="flex items-start gap-2">
+                  <input
+                    className={inputCls}
+                    value={sec.title}
+                    onChange={(e) => setSection(i, 'title', e.target.value)}
+                    maxLength={SEO_CONTENT_LIMITS.sectionTitle}
+                    placeholder="Section heading"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    aria-label={`Remove section ${i + 1}`}
+                    onClick={() => set({ sections: sections.filter((_, j) => j !== i) })}
+                  >
+                    <X className="size-4 text-slate-400" />
+                  </Button>
+                </div>
+                <textarea
+                  className="mt-2 min-h-24 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-relaxed text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+                  value={sec.body}
+                  onChange={(e) => setSection(i, 'body', e.target.value)}
+                  maxLength={SEO_CONTENT_LIMITS.sectionBody}
+                  placeholder="Body text. Leave a blank line between paragraphs."
+                />
+                <label className="mt-2 block space-y-1.5">
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                    Bullets — one per line
+                  </span>
+                  <textarea
+                    className="min-h-16 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-relaxed text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+                    value={(sec.bullets ?? []).join('\n')}
+                    onChange={(e) => setSection(i, 'bullets', e.target.value)}
+                    placeholder="Optional"
+                  />
+                </label>
+                {!sec.title.trim() || (!sec.body.trim() && !(sec.bullets ?? []).length) ? (
+                  <p className="mt-2 text-xs font-medium text-amber-700">
+                    Needs a heading and either body text or bullets — otherwise it is dropped on save.
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── FAQs ─────────────────────────────────────────────────────────── */}
+      <div className="mt-5">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            FAQs{faqs.length > 0 ? ` (${faqs.length})` : ''}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={faqs.length >= SEO_CONTENT_LIMITS.faqs}
+            onClick={() => set({ faqs: [...faqs, { q: '', a: '' }] })}
+          >
+            <Plus /> Add question
+          </Button>
+        </div>
+        <p className="mt-1.5 text-xs text-slate-400">
+          Shown on the page and submitted to Google as FAQ structured data, which is what
+          earns the expandable questions under a search result.
+        </p>
+        {faqs.length > 0 && (
+          <div className="mt-3 space-y-3">
+            {faqs.map((f, i) => (
+              <div key={i} className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+                <div className="flex items-start gap-2">
+                  <input
+                    className={inputCls}
+                    value={f.q}
+                    onChange={(e) => setFaq(i, 'q', e.target.value)}
+                    maxLength={SEO_CONTENT_LIMITS.faqQuestion}
+                    placeholder="Question"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    aria-label={`Remove question ${i + 1}`}
+                    onClick={() => set({ faqs: faqs.filter((_, j) => j !== i) })}
+                  >
+                    <X className="size-4 text-slate-400" />
+                  </Button>
+                </div>
+                <textarea
+                  className="mt-2 min-h-20 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-relaxed text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+                  value={f.a}
+                  onChange={(e) => setFaq(i, 'a', e.target.value)}
+                  maxLength={SEO_CONTENT_LIMITS.faqAnswer}
+                  placeholder="Answer"
+                />
+                {!f.q.trim() || !f.a.trim() ? (
+                  <p className="mt-2 text-xs font-medium text-amber-700">
+                    Needs both a question and an answer — a half-filled pair invalidates the
+                    structured data for the whole page, so it is dropped on save.
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <p className="mt-4 text-xs text-slate-400">
+        Text only — formatting marks are shown literally, never rendered. Live within about
+        five minutes of saving.
+      </p>
     </div>
   );
 }

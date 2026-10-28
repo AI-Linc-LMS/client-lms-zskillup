@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation';
 import { Code2 } from 'lucide-react';
 import { PublicHeader } from '@/components/marketing/PublicHeader';
 import { breadcrumbLd, JsonLd } from '@/components/seo/JsonLd';
-import { seoTemplateMetadataFor } from '@/lib/seo/page-metadata';
+import { seoPageContent, seoTemplateMetadataFor } from '@/lib/seo/page-metadata';
+import { PageFaqs, PageSections } from '@/components/seo/PageContent';
 import { PromoBannerSlot } from '@/components/promo/PromoBannerSlot';
 import { PublicFooter } from '@/components/marketing/PublicFooter';
 import { SignupCta } from '@/components/marketing/SignupCta';
@@ -118,9 +119,10 @@ export default async function SectionLandingPage({ params }: { params: Promise<{
   const { slug } = await params;
 
   if (slug === CODING_SECTION_SLUG) {
-    const [companiesAll, codingTopics] = await Promise.all([
+    const [companiesAll, codingTopics, content] = await Promise.all([
       getPublicCompanies(),
       getPublicCodingTopics(),
+      seoPageContent([`/section/${slug}`, '/section/[slug]'], { section: 'Coding' }),
     ]);
     const companies = companiesAll.filter((c) => (c.codingCount ?? 0) > 0);
     return (
@@ -172,6 +174,9 @@ export default async function SectionLandingPage({ params }: { params: Promise<{
                 </div>
               </section>
             )}
+            <PageSections content={content} />
+            <PageFaqs content={content} heading="Coding round FAQs" />
+
             <PromoBannerSlot placement="PUBLIC_SECTION" />
             <SignupCta
               heading="Start solving placement coding problems"
@@ -192,6 +197,12 @@ export default async function SectionLandingPage({ params }: { params: Promise<{
 
   const section = await findPublicSection(slug);
   if (!section) notFound();
+
+  // Exact path beats the shared `/section/[slug]` template; `{section}` is filled from
+  // the resolved section, so one row can write every section hub.
+  const content = await seoPageContent([`/section/${slug}`, '/section/[slug]'], {
+    section: section.name,
+  });
 
   const topics = section.topics.filter((t) => t.questionCount > 0);
 
@@ -227,6 +238,9 @@ export default async function SectionLandingPage({ params }: { params: Promise<{
               </div>
             </section>
           )}
+
+          <PageSections content={content} />
+          <PageFaqs content={content} heading={`${section.name} FAQs`} />
 
           <PromoBannerSlot placement="PUBLIC_SECTION" />
 

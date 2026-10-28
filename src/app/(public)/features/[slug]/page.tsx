@@ -6,7 +6,8 @@ import { PublicFooter } from '@/components/marketing/PublicFooter';
 import { SignupCta } from '@/components/marketing/SignupCta';
 import { PromoBannerSlot } from '@/components/promo/PromoBannerSlot';
 import { breadcrumbLd, faqLd, JsonLd } from '@/components/seo/JsonLd';
-import { seoMetadataFor } from '@/lib/seo/page-metadata';
+import { seoMetadataFor, seoPageContent } from '@/lib/seo/page-metadata';
+import { PageSections } from '@/components/seo/PageContent';
 import {
   findProductFeature,
   PRODUCT_FEATURES,
@@ -52,6 +53,14 @@ export default async function ProductFeaturePage({
   const f = findProductFeature(slug);
   if (!f) notFound();
 
+  const content = await seoPageContent([`/features/${slug}`, productFeatureSeoKey(slug)]);
+  const heading = content?.heading || f.heading;
+  const intro = content?.intro || f.intro;
+  // Admin FAQs REPLACE the code-shipped set rather than appending to it. Two FAQPage
+  // blocks on one page is invalid structured data for the whole page, and a visible list
+  // that disagrees with the markup is a manual-action risk — so one list feeds both.
+  const faqs = content?.faqs?.length ? content.faqs : f.faqs;
+
   const others = PRODUCT_FEATURES.filter((x) => x.slug !== f.slug);
 
   return (
@@ -66,7 +75,7 @@ export default async function ProductFeaturePage({
       />
       {/* The SAME questions rendered below — markup the visitor cannot see is a
           manual-action risk, not a richer result. */}
-      <JsonLd data={faqLd(f.faqs)} />
+      <JsonLd data={faqLd(faqs)} />
 
       <main>
         <section className="relative overflow-hidden bg-gradient-to-br from-[#0a0a0c] via-[#0d0e13] to-[#141a2e] px-5 py-16 text-white md:px-8">
@@ -80,9 +89,9 @@ export default async function ProductFeaturePage({
               <span className="text-white/80">{f.label}</span>
             </nav>
             <h1 className="mt-5 text-3xl font-extrabold tracking-tight sm:text-[42px] sm:leading-tight">
-              {f.heading}
+              {heading}
             </h1>
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/70">{f.intro}</p>
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/70">{intro}</p>
             <Link
               href={`/signup?redirect=${encodeURIComponent(f.appHref)}`}
               className="mt-7 inline-flex items-center gap-2 rounded-full bg-[#f5b400] px-6 py-3 text-sm font-bold text-[#171717] transition hover:bg-[#f5b400]/90"
@@ -121,6 +130,9 @@ export default async function ProductFeaturePage({
             </ol>
           </section>
 
+          {/* Admin-authored sections sit above the CTA, after the code-shipped blocks. */}
+          <PageSections content={content} />
+
           <PromoBannerSlot placement="PUBLIC_HOME" />
 
           <SignupCta
@@ -134,7 +146,7 @@ export default async function ProductFeaturePage({
               Frequently asked questions
             </h2>
             <dl className="mt-4 space-y-3">
-              {f.faqs.map((it) => (
+              {faqs.map((it) => (
                 <div key={it.q} className="rounded-xl border border-[var(--color-line)] bg-white p-5">
                   <dt className="text-base font-bold text-[var(--color-text)]">{it.q}</dt>
                   <dd className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">{it.a}</dd>

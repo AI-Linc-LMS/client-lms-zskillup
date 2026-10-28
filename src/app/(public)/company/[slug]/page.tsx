@@ -7,7 +7,9 @@ import { PublicFooter } from '@/components/marketing/PublicFooter';
 import { SignupCta } from '@/components/marketing/SignupCta';
 import { getPublicCompanies, getPublicCompany } from '@/lib/server/public-content';
 import { breadcrumbLd, JsonLd } from '@/components/seo/JsonLd';
-import { seoTemplateMetadataFor } from '@/lib/seo/page-metadata';
+import { seoPageContent, seoTemplateMetadataFor } from '@/lib/seo/page-metadata';
+import { PageFaqs, PageSections } from '@/components/seo/PageContent';
+import { fillSeoContent } from '@/shared/seo-content';
 import { COMPANY_FEATURES } from '@/shared/company-features';
 import { PromoBannerSlot } from '@/components/promo/PromoBannerSlot';
 import type { ApiCompany } from '@/lib/api/catalog';
@@ -94,8 +96,19 @@ function OtherCompany({ c }: { c: ApiCompany }) {
 
 export default async function CompanyLandingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [company, all] = await Promise.all([getPublicCompany(slug), getPublicCompanies()]);
+  const [company, all, rawContent] = await Promise.all([
+    getPublicCompany(slug),
+    getPublicCompanies(),
+    // Exact path beats the shared `/company/[slug]` template, so one hub can be written
+    // by hand while the other eight keep the template.
+    seoPageContent([`/company/${slug}`, '/company/[slug]']),
+  ]);
   if (!company) notFound();
+
+  // Tokens are filled only now — the company name is not known inside the Promise.all.
+  const content = rawContent
+    ? fillSeoContent(rawContent, { company: company.name, year: String(new Date().getFullYear()) })
+    : null;
 
   const others = all.filter((c) => c.slug !== company.slug).slice(0, 6);
   // Only show a stat the bank can back. A "0 questions" tile on a landing page is an
@@ -149,11 +162,13 @@ export default async function CompanyLandingPage({ params }: { params: Promise<{
                   </span>
                 )}
                 <h1 className="mt-1 text-3xl font-extrabold tracking-tight sm:text-[42px] sm:leading-tight">
-                  {company.name} placement preparation
+                  {content?.heading || `${company.name} placement preparation`}
                 </h1>
               </div>
             </div>
-            {company.tagline && <p className="mt-4 max-w-2xl text-base text-white/70">{company.tagline}</p>}
+            {(content?.intro || company.tagline) && (
+              <p className="mt-4 max-w-2xl text-base text-white/70">{content?.intro || company.tagline}</p>
+            )}
             {stats.length > 0 && (
               <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {stats.map((s) => (
@@ -221,6 +236,10 @@ export default async function CompanyLandingPage({ params }: { params: Promise<{
               ))}
             </div>
           </section>
+
+          {/* Body copy written in the SEO module, after the data-derived blocks. */}
+          <PageSections content={content} />
+          <PageFaqs content={content} heading={`${company.name} placement FAQs`} />
 
           {/* Admin-scheduled campaign for this module. Renders nothing when empty, so a
               page with no live campaign looks exactly as it did before banners existed. */}

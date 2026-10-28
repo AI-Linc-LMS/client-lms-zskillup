@@ -7,10 +7,12 @@ import { PublicFooter } from '@/components/marketing/PublicFooter';
 import { SignupCta } from '@/components/marketing/SignupCta';
 import { getPublicCodingTopics, getPublicCompanies, getPublicCompanyHub } from '@/lib/server/public-content';
 import { breadcrumbLd, itemListLd, JsonLd } from '@/components/seo/JsonLd';
-import { seoPageMedia, seoTemplateMetadataFor } from '@/lib/seo/page-metadata';
+import { seoPageContent, seoPageMedia, seoTemplateMetadataFor } from '@/lib/seo/page-metadata';
 import { PageMedia } from '@/components/seo/PageMedia';
+import { PageFaqs, PageSections } from '@/components/seo/PageContent';
 import { PromoBannerSlot } from '@/components/promo/PromoBannerSlot';
 import { COMPANY_FEATURES, companyFeatureSeoKey, findCompanyFeature } from '@/shared/company-features';
+import { fillSeoContent } from '@/shared/seo-content';
 import type { ApiCompanyHub } from '@/lib/api/catalog';
 
 const SITE = 'https://prephasz.com';
@@ -397,18 +399,32 @@ export default async function CompanyFeaturePage({
   const f = findCompanyFeature(feature);
   if (!f) notFound();
 
-  const [company, all, codingTopics, media] = await Promise.all([
+  const seoKeys = [`/company/${slug}/${feature}`, companyFeatureSeoKey(feature)];
+  const year = currentYear();
+
+  const [company, all, codingTopics, media, rawContent] = await Promise.all([
     getPublicCompanyHub(slug),
     getPublicCompanies(),
     feature === 'coding-questions' ? getPublicCodingTopics() : Promise.resolve([]),
     // Exact path first, then the shared template key — so one company can carry its own
     // video on one feature without the other eight inheriting it.
-    seoPageMedia([`/company/${slug}/${feature}`, companyFeatureSeoKey(feature)]),
+    seoPageMedia(seoKeys),
+    // Same precedence for the body copy. Tokens are NOT filled here — the company name
+    // is not resolved until this Promise.all settles, and passing a blank for it would
+    // substitute `{company}` away to nothing on every templated page.
+    seoPageContent(seoKeys),
   ]);
   if (!company) notFound();
 
-  const year = currentYear();
   const fill = (t: string) => t.split('{company}').join(company.name).split('{year}').join(year);
+  // Now that the company is known, fill `{company}`/`{year}` through the admin's copy so
+  // one template row reads as this company's own page on all nine.
+  const content = rawContent && fillSeoContent(rawContent, { company: company.name, year });
+  // Admin copy wins over the code-shipped template, per field. The fallbacks are what
+  // every page rendered before the SEO module could write a page body, so an operator
+  // who sets only an H1 does not blank the paragraph under it.
+  const heading = content?.heading || fill(f.headingTemplate);
+  const lead = content?.intro || fill(f.descriptionTemplate);
   // Where this page's content actually lives once you have an account.
   const appHref = `/dashboard/company/${company.slug}`;
   const { nodes, listed } = featureBody(f.slug, company, appHref, codingTopics);
@@ -476,10 +492,10 @@ export default async function CompanyFeaturePage({
                 />
               )}
               <h1 className="text-3xl font-extrabold tracking-tight sm:text-[42px] sm:leading-tight">
-                {fill(f.headingTemplate)}
+                {heading}
               </h1>
             </div>
-            <p className="mt-4 max-w-2xl text-base text-white/70">{fill(f.descriptionTemplate)}</p>
+            <p className="mt-4 max-w-2xl text-base text-white/70">{lead}</p>
             {stats.length > 0 && (
               <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {stats.map((s) => (
@@ -517,12 +533,18 @@ export default async function CompanyFeaturePage({
           {nodes.length > 0 ? (
             nodes
           ) : (
-            <Section title={`${company.name} ${f.label.toLowerCase()}`}>
-              <p className="max-w-3xl text-sm leading-relaxed text-[var(--color-text-muted)]">
-                {fill(f.descriptionTemplate)}
-              </p>
-            </Section>
+            !content?.sections?.length && (
+              <Section title={`${company.name} ${f.label.toLowerCase()}`}>
+                <p className="max-w-3xl text-sm leading-relaxed text-[var(--color-text-muted)]">
+                  {lead}
+                </p>
+              </Section>
+            )
           )}
+
+          {/* Admin-authored sections, after the data-derived ones: what the operator adds
+              is editorial depth on top of the real bank, not a replacement for it. */}
+          <PageSections content={content} />
 
           <PromoBannerSlot placement="PUBLIC_COMPANY" />
 
@@ -552,6 +574,11 @@ export default async function CompanyFeaturePage({
               </div>
             </Section>
           )}
+
+          <PageFaqs
+            content={content}
+            heading={`${company.name} ${f.label.toLowerCase()} — FAQs`}
+          />
 
           <SignupCta
             tone="light"

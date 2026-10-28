@@ -1,5 +1,10 @@
 import type { Metadata } from 'next';
 import { getPublicSeo } from '@/lib/api/seo';
+import {
+  fillSeoContent,
+  normaliseSeoContent,
+  type SeoPageContent,
+} from '@/shared/seo-content';
 
 /**
  * Build a Next.js Metadata object for a public route from the admin-edited SEO
@@ -109,4 +114,37 @@ export async function seoPageMedia(keys: string[]): Promise<SeoPageMedia> {
     }
   }
   return EMPTY_MEDIA;
+}
+
+/**
+ * The body copy an admin wrote for a page, most specific first, with template tokens
+ * substituted — the content twin of `seoPageMedia`.
+ *
+ * `keys` is tried in order exactly as the metadata and media resolvers do, so a page
+ * passes its EXACT path before the template key it shares with its siblings:
+ * `/company/accenture/syllabus` beats `/company/[slug]/syllabus`. That is what lets one
+ * row write all 9 companies' syllabus pages while a single company can still be given
+ * its own words.
+ *
+ * `vars` fills `{company}` / `{year}` / `{section}` so a template row reads as real
+ * copy on every page in the family rather than as nine identical paragraphs.
+ *
+ * Returns null when no key carries content, which is the state of most pages — the page
+ * then renders exactly what it rendered before this feature existed.
+ *
+ * Normalises again here: `content_json` is jsonb, so the row may have been written by a
+ * script, an older build, or a psql session. A malformed body must render as nothing,
+ * never as a build-time crash on a prerendered page.
+ */
+export async function seoPageContent(
+  keys: string[],
+  vars: Record<string, string> = {},
+): Promise<SeoPageContent | null> {
+  const all = await getPublicSeo();
+  for (const key of keys) {
+    const row = all.find((s) => s.key === key);
+    const content = normaliseSeoContent(row?.content);
+    if (content) return Object.keys(vars).length ? fillSeoContent(content, vars) : content;
+  }
+  return null;
 }
