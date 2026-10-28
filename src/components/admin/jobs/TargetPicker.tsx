@@ -5,7 +5,7 @@ import { AlertTriangle, Globe2, Loader2, Search, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { getJobReach, getJobTargets, setJobTargets } from '@/lib/api/jobs';
 import type { JobTargetViewDto } from '@/shared/dto/jobs.dto';
-import { JobTargetType } from '@/shared/enums';
+import { Branch, JobTargetType } from '@/shared/enums';
 import {
   listAdminCollegeCohorts,
   listAdminColleges,
@@ -16,18 +16,36 @@ import { describeError } from '@/lib/api/errors';
 import { cn } from '@/lib/utils';
 
 interface Option {
+  /** The uuid for row-typed targets; for BATCH/BRANCH it is the value itself, which is
+   *  also what makes it unique in the list. */
   id: string;
   name: string;
   type: JobTargetType;
   hint?: string;
 }
 
+/** BATCH and BRANCH name a value on the student profile rather than a row, so they are
+ *  sent as `targetValue`. Kept as one helper so the add and remove paths cannot
+ *  disagree about which column a row lives in. */
+const isValueTyped = (t: JobTargetType) =>
+  t === JobTargetType.BATCH || t === JobTargetType.BRANCH;
+
 const TYPE_LABEL: Record<JobTargetType, string> = {
   [JobTargetType.COLLEGE]: 'College',
   [JobTargetType.COHORT]: 'Cohort',
   [JobTargetType.USER]: 'Student',
   [JobTargetType.COMPANY]: 'Drive registrants',
+  [JobTargetType.BATCH]: 'Batch',
+  [JobTargetType.BRANCH]: 'Branch',
 };
+
+/** Passout years offered as batches: this year back two, forward four. A placement
+ *  office targets a graduating cohort, which is always within that window, and the list
+ *  is generated rather than stored so it never needs maintaining. */
+const BATCH_YEARS = (() => {
+  const now = new Date().getFullYear();
+  return Array.from({ length: 7 }, (_, i) => String(now - 2 + i));
+})();
 
 /**
  * Who this posting is for.
@@ -148,7 +166,12 @@ export function TargetPicker({ jobId }: { jobId: string }) {
     };
   }, [type, query]);
 
-  const chosen = useMemo(() => new Set(targets.map((t) => `${t.targetType}:${t.targetId}`)), [targets]);
+  // Keyed on whichever column the row actually uses. Keying on targetId alone made every
+  // BATCH row collide on `BATCH:null`, so picking one year greyed out all of them.
+  const chosen = useMemo(
+    () => new Set(targets.map((t) => `${t.targetType}:${t.targetId ?? t.targetValue ?? ''}`)),
+    [targets],
+  );
 
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -156,6 +179,8 @@ export function TargetPicker({ jobId }: { jobId: string }) {
     if (type === JobTargetType.USER) {
       return students.filter((o) => !chosen.has(`${o.type}:${o.id}`)).slice(0, 8);
     }
+    // BATCH and BRANCH are fixed lists rather than fetched: a passout year is arithmetic
+    // and the branches are a shared enum, so neither needs a round trip or can go stale.
     const pool: Option[] =
       type === JobTargetType.COHORT
         ? cohorts.map((c) => ({
@@ -164,7 +189,21 @@ export function TargetPicker({ jobId }: { jobId: string }) {
             type: JobTargetType.COHORT,
             hint: `${c.studentCount} student${c.studentCount === 1 ? '' : 's'}`,
           }))
-        : options.filter((o) => o.type === type);
+        : type === JobTargetType.BATCH
+          ? BATCH_YEARS.map((y) => ({
+              id: y,
+              name: `Batch of ${y}`,
+              type: JobTargetType.BATCH,
+              hint: 'Passout year',
+            }))
+          : type === JobTargetType.BRANCH
+            ? Object.values(Branch).map((b) => ({
+                id: b,
+                name: b,
+                type: JobTargetType.BRANCH,
+                hint: 'Branch',
+              }))
+            : options.filter((o) => o.type === type);
     return pool
       .filter((o) => !chosen.has(`${o.type}:${o.id}`))
       .filter((o) => (q ? o.name.toLowerCase().includes(q) : true))
@@ -178,7 +217,8 @@ export function TargetPicker({ jobId }: { jobId: string }) {
         jobId,
         next.map((t) => ({
           targetType: t.targetType,
-          targetId: t.targetId,
+          targetId: t.targetId ?? undefined,
+          targetValue: t.targetValue ?? undefined,
           isExclusion: t.isExclusion,
         })),
       );
@@ -197,12 +237,29 @@ export function TargetPicker({ jobId }: { jobId: string }) {
     setQuery('');
     void commit([
       ...targets,
-      { targetType: o.type, targetId: o.id, label: o.name, isExclusion: mode === 'EXCLUDE' },
+      {
+        targetType: o.type,
+        targetId: isValueTyped(o.type) ? null : o.id,
+        targetValue: isValueTyped(o.type) ? o.id : null,
+        label: o.name,
+        isExclusion: mode === 'EXCLUDE',
+      },
     ]);
   };
 
   const remove = (t: JobTargetViewDto) =>
-    void commit(targets.filter((x) => !(x.targetType === t.targetType && x.targetId === t.targetId)));
+    void commit(
+      targets.filter(
+        (x) =>
+          // Both halves matter. Every BATCH row has a null targetId, so matching on type
+          // and id alone would remove all of them when the officer clicked one.
+          !(
+            x.targetType === t.targetType &&
+            (x.targetId ?? null) === (t.targetId ?? null) &&
+            (x.targetValue ?? null) === (t.targetValue ?? null)
+          ),
+      ),
+    );
 
   if (loading) {
     return (

@@ -520,7 +520,27 @@ export enum JobTargetType {
   /** Students registered for a company's drive - the closest thing the platform has
    *  to course enrolment, which does not exist. */
   COMPANY = 'COMPANY',
+  /**
+   * A passout year, e.g. "2027" — what a placement office calls a batch.
+   *
+   * VALUE-TYPED, not a row: these two carry `target_value` rather than `target_id`,
+   * because a batch and a branch are facts on a student profile and have no table to
+   * point at. Minting a cohort per batch instead would have polluted the cohort list
+   * permanently and made "2027" mean different things to different colleges.
+   */
+  BATCH = 'BATCH',
+  /** A branch/department from the `Branch` enum, e.g. "CSE". Also value-typed. */
+  BRANCH = 'BRANCH',
 }
+
+/** The target types whose audience is a VALUE on the student profile rather than a row
+ *  the platform owns. They populate `target_value` and leave `target_id` null — the
+ *  database enforces that pairing, so a half-formed row cannot reach the predicate and
+ *  silently match nobody. */
+export const VALUE_TYPED_JOB_TARGETS: readonly JobTargetType[] = [
+  JobTargetType.BATCH,
+  JobTargetType.BRANCH,
+];
 
 /** How an application question renders and validates. */
 export enum JobQuestionKind {

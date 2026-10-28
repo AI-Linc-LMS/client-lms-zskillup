@@ -40,6 +40,7 @@ import {
   JobQuestionKind,
   JobStatus,
   JobTargetType,
+  VALUE_TYPED_JOB_TARGETS,
   WorkMode,
 } from '../enums';
 import {
@@ -892,13 +893,29 @@ export class JobBoardFilters {
   offset?: number;
 }
 
-/** One audience row on a posting. */
+/**
+ * One audience row on a posting.
+ *
+ * TWO SHAPES, PICKED BY THE TYPE. COLLEGE/COHORT/USER/COMPANY name a row and carry
+ * `targetId`; BATCH/BRANCH name a value on the student profile and carry `targetValue`.
+ * The pairing is validated here AND by a database CHECK, because a row with the wrong
+ * one filled in does not error at read time — it simply never matches, which is an
+ * audience that silently reaches nobody.
+ */
 export class JobTargetDto {
   @IsEnum(JobTargetType)
   targetType!: JobTargetType;
 
+  /** Required for the row-typed targets, and rejected for the value-typed ones. */
+  @ValidateIf((o: JobTargetDto) => !VALUE_TYPED_JOB_TARGETS.includes(o.targetType))
   @IsUUID()
-  targetId!: string;
+  targetId?: string;
+
+  /** Required for BATCH ("2027") and BRANCH ("CSE"). */
+  @ValidateIf((o: JobTargetDto) => VALUE_TYPED_JOB_TARGETS.includes(o.targetType))
+  @IsString()
+  @MaxLength(64)
+  targetValue?: string;
 
   /** Subtractive rather than additive (PRD §4 "named candidate inclusion/exclusion").
    *  Inclusion rows are OR-ed to WIDEN reach; an exclusion row removes whoever it names
@@ -945,7 +962,9 @@ export class SetJobTargetsDto {
 /** An audience row as the admin screen renders it - resolved to a human name. */
 export interface JobTargetViewDto {
   targetType: JobTargetType;
-  targetId: string;
+  targetId: string | null;
+  /** Set for BATCH/BRANCH, which have no row to point at. */
+  targetValue?: string | null;
   /** True when this row REMOVES its audience rather than adding it. */
   isExclusion: boolean;
   /** Null when the college/cohort/student it pointed at no longer exists. The row is
