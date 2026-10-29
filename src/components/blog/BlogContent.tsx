@@ -1,13 +1,21 @@
 import Link from 'next/link';
 import { Fragment, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { parseTable, type Align } from '@/lib/blog-table';
 
 /**
  * Dependency-free markdown renderer for long-form blog bodies. Supports:
  * `##`/`###` headings, `**bold**`, `*italic*`, `` `code` ``, `[text](url)`
- * links (internal `/…` → next/link), and `-`/`1.` lists. Pure (no client
- * hooks) so it renders inside a Server Component. Input is our own authored
- * copy, so there is no untrusted-HTML injection surface.
+ * links (internal `/…` → next/link), `-`/`1.` lists, `>` quotes, ``` fences,
+ * and GFM pipe TABLES. Pure (no client hooks) so it renders inside a Server
+ * Component. Input is our own authored copy, so there is no untrusted-HTML
+ * injection surface.
+ *
+ * Tables were the one common markdown construct this did not handle, and the
+ * failure was silent rather than loud: a pasted table fell through to the
+ * paragraph branch and shipped a wall of literal `|` characters to a public
+ * page. Both the public post AND the admin editor's live preview render through
+ * this one component, so they cannot disagree about what a table looks like.
  */
 
 const INLINE = /\*\*([^*]+)\*\*|\*([^*]+)\*|`([^`]+)`|\[([^\]]+)\]\(([^)]+)\)/g;
@@ -65,6 +73,12 @@ function renderInline(text: string): ReactNode[] {
   if (last < text.length) nodes.push(text.slice(last));
   return nodes;
 }
+
+const ALIGN_CLASS: Record<Align, string> = {
+  left: 'text-left',
+  center: 'text-center',
+  right: 'text-right',
+};
 
 export function BlogContent({ markdown, className }: { markdown: string; className?: string }) {
   const lines = (markdown ?? '').replace(/\r\n/g, '\n').split('\n');
@@ -131,7 +145,10 @@ export function BlogContent({ markdown, className }: { markdown: string; classNa
   let inCode = false;
   let codeLines: string[] = [];
 
-  for (const raw of lines) {
+  // Indexed rather than for-of: a table is recognised by looking AHEAD one line to its
+  // `|---|` delimiter, which a for-of loop cannot do.
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i];
     const line = raw.replace(/\s+$/, '');
     const fence = /^```(\w*)\s*$/.exec(line);
     // Inside a ``` fenced block everything is literal until the closing fence.
@@ -161,6 +178,65 @@ export function BlogContent({ markdown, className }: { markdown: string; classNa
       codeLines = [];
       continue;
     }
+    // ── GFM table ────────────────────────────────────────────────────────────
+    // Header row + delimiter row, with the SAME number of cells. Requiring the cell
+    // counts to match stops a line of prose that happens to contain a pipe from
+    // swallowing the paragraph after it.
+    if (line.includes('|')) {
+      const table = parseTable(lines, i);
+      if (table) {
+        const { header, aligns } = table;
+        flushPara();
+        flushList();
+        flushQuote();
+        const rows = table.rows;
+        out.push(
+          // overflow-x-auto on a wrapper, not the table: a wide comparison table is
+          // normal in these posts and must scroll in its own box rather than make the
+          // whole page scroll sideways on a phone.
+          <div key={key++} className="mb-6 overflow-x-auto rounded-xl border border-[var(--color-line)]">
+            <table className="w-full border-collapse text-left text-[0.97rem]">
+              <thead>
+                <tr className="border-b border-[var(--color-line)] bg-[var(--color-surface-2)]">
+                  {header.map((h, c) => (
+                    <th
+                      key={c}
+                      scope="col"
+                      className={cn(
+                        'whitespace-nowrap px-4 py-3 font-bold text-[var(--color-text)]',
+                        ALIGN_CLASS[aligns[c] ?? 'left'],
+                      )}
+                    >
+                      {renderInline(h)}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r, ri) => (
+                  <tr key={ri} className="border-b border-[var(--color-line)] last:border-0">
+                    {r.map((cellText, c) => (
+                      <td
+                        key={c}
+                        className={cn(
+                          'px-4 py-3 align-top leading-7 text-[var(--color-text-muted)]',
+                          ALIGN_CLASS[aligns[c] ?? 'left'],
+                        )}
+                      >
+                        {renderInline(cellText)}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>,
+        );
+        i = table.endIndex;
+        continue;
+      }
+    }
+
     const quoteM = /^>\s?(.*)$/.exec(line);
     const h2 = /^##\s+(.*)$/.exec(line);
     const h3 = /^###\s+(.*)$/.exec(line);

@@ -14,6 +14,7 @@ import {
   ListOrdered,
   Quote,
   SquareCode,
+  Table,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BlogContent } from '@/components/blog/BlogContent';
@@ -65,6 +66,31 @@ function fenceBlock(v: string, s: number, e: number): Sel {
   const newBlock = '```\n' + block + '\n```';
   const value = v.slice(0, start) + newBlock + v.slice(end);
   return { value, selStart: start + 4, selEnd: start + 4 + block.length };
+}
+
+/**
+ * Insert a 3x3 GFM table skeleton on its own lines.
+ *
+ * A toolbar button rather than documentation: the renderer supports tables, but an author
+ * who does not know the pipe syntax will paste one from a spreadsheet and get a wall of
+ * literal pipes — which is exactly the bug this was reported as.
+ */
+function makeTable(v: string, s: number, e: number): Sel {
+  const { start, end } = lineRange(v, s, e);
+  const block = [
+    '| Column | Column | Column |',
+    '| --- | --- | --- |',
+    '|  |  |  |',
+    '|  |  |  |',
+  ].join('\n');
+  // Keep a blank line either side: a table butted against a paragraph is still parsed,
+  // but the source is far harder to edit.
+  const before = start > 0 && v[start - 1] !== '\n' ? '\n\n' : '';
+  const existing = v.slice(start, end).trim();
+  const body = (existing ? existing + '\n\n' : '') + block;
+  const value = v.slice(0, start) + before + body + '\n' + v.slice(end);
+  const caret = start + before.length + (existing ? existing.length + 2 : 0) + 2;
+  return { value, selStart: caret, selEnd: caret + 6 };
 }
 
 /** Insert a [text](url) link, selecting the "url" placeholder for quick editing. */
@@ -133,6 +159,7 @@ export function MarkdownEditor({
         <Tb title="Inline code" onClick={() => run((v, s, e) => wrapInline(v, s, e, '`'))}><Code className="size-4" /></Tb>
         <Tb title="Code block" onClick={() => run(fenceBlock)}><SquareCode className="size-4" /></Tb>
         <Tb title="Link  (⌘K)" onClick={() => run(makeLink)}><Link2 className="size-4" /></Tb>
+        <Tb title="Table" onClick={() => run(makeTable)}><Table className="size-4" /></Tb>
         <button
           type="button"
           onClick={() => setPreview((p) => !p)}
@@ -150,7 +177,7 @@ export function MarkdownEditor({
           onKeyDown={onKeyDown}
           rows={rows}
           spellCheck
-          placeholder="Write your post… use the toolbar, or markdown directly (**bold**, ## heading, - list, > quote)"
+          placeholder="Write your post… use the toolbar, or markdown directly (**bold**, ## heading, - list, > quote, | table |)"
           className="w-full resize-y bg-transparent px-3 py-2.5 font-mono text-[13px] leading-relaxed text-navy placeholder:text-slate-400 focus:outline-none"
         />
         {preview && (
