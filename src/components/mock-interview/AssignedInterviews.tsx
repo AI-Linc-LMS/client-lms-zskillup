@@ -63,7 +63,9 @@ export function AssignedInterviews() {
     try {
       // Already started (or finished) → go straight to it rather than creating a second.
       const id = a.interviewId ?? (await startAssignedInterview(a.id)).id;
-      router.push(`/mock-interview/${id}`);
+      // There is NO /mock-interview/[id] page — only /take and /result. Routing to the
+      // bare id 404s, which is what this did until the route manifest was checked.
+      router.push(`/mock-interview/${id}/${a.attemptStatus === 'completed' ? 'result' : 'take'}`);
     } catch (e) {
       setErr(e instanceof Error ? e.message : 'Could not open that interview.');
       setBusyId(null);
