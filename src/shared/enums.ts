@@ -121,6 +121,17 @@ export enum QuestionType {
   MULTI_SELECT = 'MULTI_SELECT',
   NUMERIC = 'NUMERIC',
   CODING = 'CODING',
+  /**
+   * Descriptive / long-form. The ONLY type that cannot be auto-graded: the student types
+   * prose and an admin or TPO awards marks and writes feedback (migration 150). An
+   * attempt containing one of these carries a PROVISIONAL score until it is reviewed.
+   */
+  SUBJECTIVE = 'SUBJECTIVE',
+}
+
+/** True for a type whose marks a human must award. */
+export function isManuallyGraded(type: QuestionType | string): boolean {
+  return type === QuestionType.SUBJECTIVE;
 }
 
 /** Question difficulty (Implementation Plan §3.3). */

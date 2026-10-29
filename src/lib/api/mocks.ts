@@ -42,7 +42,7 @@ export interface ApiMockCodingPayload {
 
 export interface ApiMockQuestion {
   id: string;
-  type: 'MCQ' | 'MULTI_SELECT' | 'NUMERIC' | 'CODING';
+  type: 'MCQ' | 'MULTI_SELECT' | 'NUMERIC' | 'CODING' | 'SUBJECTIVE';
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   stem: string;
   imageUrl?: string | null;
@@ -55,12 +55,16 @@ export interface ApiMockQuestion {
   /** Question source; PATTERN_BASED (no company/year) → "SIMILAR PATTERN" tag. */
   source?: string | null;
   options: ApiMockOption[];
+  /** SUBJECTIVE only: the word ceiling the runner counts against. Null = no limit. */
+  maxWords?: number | null;
   coding?: ApiMockCodingPayload;
 }
 
 export interface ApiMockSavedAnswer {
   questionId: string;
   selectedOptionIds: string[];
+  /** SUBJECTIVE only: prose already typed, replayed on resume. */
+  textAnswer?: string | null;
 }
 
 export interface ApiMockSavedCoding {
@@ -115,7 +119,15 @@ export interface ApiMockResult {
   total: number;
   percentile: number;
   pct: number;
+  /** True ONLY when the awarded marks already clear the pass mark. */
   passed: boolean;
+  /**
+   * Marks are awaiting manual evaluation. While this is true, `passed` is NOT a verdict —
+   * render "result pending review", because the unread marks can still clear the bar.
+   */
+  resultPending?: boolean;
+  pendingMarks?: number;
+  pendingQuestions?: number;
   timeTakenSec: number;
   avgSecPerQuestion: number;
   /** XP/streak/level deltas from this submission (present on the submit response). */
@@ -142,7 +154,7 @@ export interface ApiMockAttemptHistory {
 
 export interface ApiMockReviewQuestion {
   id: string;
-  type: 'MCQ' | 'MULTI_SELECT' | 'NUMERIC' | 'CODING';
+  type: 'MCQ' | 'MULTI_SELECT' | 'NUMERIC' | 'CODING' | 'SUBJECTIVE';
   stem: string;
   imageUrl?: string | null;
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
@@ -156,6 +168,15 @@ export interface ApiMockReviewQuestion {
    * per-question timing shipped — so render "—", never "0s".
    */
   timeMs?: number | null;
+  /** SUBJECTIVE only: the student's own prose. */
+  textAnswer?: string | null;
+  /** Marks a human awarded. NULL = not yet evaluated (0 is a real mark). */
+  awardedMarks?: number | null;
+  /** The paper's marks for this question. */
+  marks?: number | null;
+  /** The evaluator's comment. */
+  feedback?: string | null;
+  maxWords?: number | null;
   coding?: {
     language: string | null;
     sourceCode: string | null;

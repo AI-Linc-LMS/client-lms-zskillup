@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { QuestionTimer } from '@/shared/question-timer';
 import { formatSec } from '@/shared/answer-timing';
+import { exceedsWordLimit, wordCount } from '@/shared/subjective-grading';
 import { SpeedPanel } from '@/components/practice/SpeedPanel';
 import Link from 'next/link';
 import {
@@ -203,6 +204,10 @@ export function MockRunner({
    * trigger a re-render of a timed exam screen.
    */
   const timerRef = useRef(new QuestionTimer());
+  /** Latest prose per question, for the submit-time flush (state may lag a keystroke). */
+  const textRef = useRef<Record<string, string>>({});
+  /** Pending debounce timers for prose autosave, one per question. */
+  const textTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const attemptIdRef = useRef<string | null>(null);
   const proctorRef = useRef<ProctoringController | null>(null);
   const finishRef = useRef<() => void>(() => {});
@@ -245,6 +250,8 @@ export function MockRunner({
   const [mock, setMock] = useState<ApiMockSummary | null>(null);
   const [start, setStart] = useState<ApiMockStart | null>(null);
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
+  /** SUBJECTIVE prose, by question id. Separate from `answers`, which holds option ids. */
+  const [textAnswers, setTextAnswers] = useState<Record<string, string>>({});
   // Coding answers (keyed by problemId) - recorded server-side on submit, mirrored
   // here so the navigator + answered count reflect coding questions too.
   const [codingResults, setCodingResults] = useState<Record<string, ApiMockSavedCoding>>({});
@@ -365,13 +372,19 @@ export function MockRunner({
       if (isAssessment) writeLiveAttempt(liveKey, s.expiresAt);
       const hydrated: Record<string, string[]> = {};
       ackedRef.current = new Map();
+      const hydratedText: Record<string, string> = {};
       for (const a of s.savedAnswers) {
         hydrated[a.questionId] = a.selectedOptionIds;
+        // Replay the prose too, or a mid-attempt reload shows an empty box and reads as
+        // a lost essay even though the server has it.
+        if (a.textAnswer) hydratedText[a.questionId] = a.textAnswer;
         // Resumed answers are already on the server - no need to re-flush them.
         ackedRef.current.set(a.questionId, JSON.stringify(a.selectedOptionIds));
       }
+      textRef.current = hydratedText;
       setStart(s);
       setAnswers(hydrated);
+      setTextAnswers(hydratedText);
       setCodingResults(
         Object.fromEntries((s.savedCoding ?? []).map((c) => [c.problemId, c])),
       );
@@ -479,6 +492,20 @@ export function MockRunner({
       // the one the student was on when the clock ran out — is not the only one missing
       // a duration.
       const finalTimes = timerRef.current.snapshot(Date.now());
+      // Cancel pending debounces and flush prose explicitly: a student who types their
+      // last sentence and hits Submit within 900ms must not lose it.
+      for (const t of Object.values(textTimers.current)) clearTimeout(t);
+      const proseEntries = Object.entries(textRef.current).filter(([, v]) => v.trim() !== '');
+      await Promise.allSettled(
+        proseEntries.map(([questionId, textAnswer]) =>
+          answerMock(start.attemptId, {
+            questionId,
+            selectedOptionIds: [],
+            textAnswer,
+            timeMs: finalTimes.get(questionId),
+          }),
+        ),
+      );
       await Promise.allSettled(
         unsynced.map(([questionId, selectedOptionIds]) =>
           answerMock(start.attemptId, {
@@ -624,6 +651,42 @@ export function MockRunner({
     [start],
   );
 
+  /**
+   * Record prose for a SUBJECTIVE question.
+   *
+   * Debounced (900ms) rather than saved per keystroke: an essay answer would otherwise
+   * fire a request per character on a timed exam screen.
+   *
+   * An over-limit answer is NOT auto-saved and NOT truncated. Truncating would silently
+   * destroy the student's words; saving would just 400 on every keystroke. Instead the
+   * counter turns red and says the answer is unsaved until trimmed, so the state is
+   * visible rather than guessed at.
+   */
+  const onTextChange = useCallback(
+    (questionId: string, value: string, maxWords: number | null | undefined) => {
+      if (!start || submittedRef.current) return;
+      textRef.current[questionId] = value;
+      setTextAnswers((prev) => ({ ...prev, [questionId]: value }));
+      if (exceedsWordLimit(value, maxWords)) return;
+
+      clearTimeout(textTimers.current[questionId]);
+      textTimers.current[questionId] = setTimeout(() => {
+        const timeMs = timerRef.current.totalFor(questionId, Date.now());
+        saveQueueRef.current = saveQueueRef.current
+          .then(async () => {
+            await answerMock(start.attemptId, {
+              questionId,
+              selectedOptionIds: [],
+              textAnswer: textRef.current[questionId] ?? '',
+              timeMs,
+            });
+          })
+          .catch(() => {});
+      }, 900);
+    },
+    [start],
+  );
+
   /** NTA-style "Clear Response": drop the current MCQ answer (persisted as empty). */
   const clearResponse = useCallback(
     (questionId: string) => {
@@ -741,6 +804,8 @@ export function MockRunner({
           error={error}
           proctored={proctored}
           onSelect={selectOption}
+          textAnswers={textAnswers}
+          onTextChange={onTextChange}
           onClear={clearResponse}
           onCodeSubmitted={onCodeSubmitted}
           registerCodingInFlight={registerCodingInFlight}
@@ -1061,6 +1126,8 @@ function MockRunningView({
   error,
   proctored,
   onSelect,
+  textAnswers,
+  onTextChange,
   onClear,
   onCodeSubmitted,
   registerCodingInFlight,
@@ -1076,6 +1143,9 @@ function MockRunningView({
   error: string | null;
   proctored: boolean;
   onSelect: (questionId: string, optionId: string, multi: boolean) => void;
+  /** SUBJECTIVE prose by question id, and its debounced setter. */
+  textAnswers: Record<string, string>;
+  onTextChange: (questionId: string, value: string, maxWords: number | null) => void;
   onClear: (questionId: string) => void;
   onCodeSubmitted: (
     problemId: string,
@@ -1092,7 +1162,11 @@ function MockRunningView({
   const question = start.questions[idx];
   const total = start.questions.length;
   const isAnswered = (q: ApiMockStart['questions'][number]) =>
-    q.type === 'CODING' ? !!codingResults[q.id] : (answers[q.id]?.length ?? 0) > 0;
+    q.type === 'CODING'
+      ? !!codingResults[q.id]
+      : q.type === 'SUBJECTIVE'
+        ? (textAnswers[q.id] ?? '').trim() !== ''
+        : (answers[q.id]?.length ?? 0) > 0;
   const answeredCount = useMemo(
     () => start.questions.filter((q) => isAnswered(q)).length,
     [start.questions, answers, codingResults],
@@ -1310,6 +1384,12 @@ function MockRunningView({
           </div>
           {question.type === 'CODING' ? (
             <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-bold text-indigo-600">Coding problem</p>
+          ) : question.type === 'SUBJECTIVE' ? (
+            // Says up front that a human marks this one, so a student is not waiting for
+            // a score that cannot appear until someone reads it.
+            <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-bold text-violet-700">
+              Written answer · marked by a reviewer
+            </p>
           ) : null}
           <QuestionStem text={question.stem} imageUrl={question.imageUrl} className="mt-4 text-base font-semibold leading-relaxed text-navy" />
           {question.type === 'MULTI_SELECT' ? <p className="mt-1 text-xs text-slate-500">Select all that apply.</p> : null}
@@ -1328,6 +1408,13 @@ function MockRunningView({
               }}
               onSubmitted={(r) => onCodeSubmitted(question.id, r)}
               registerInFlight={registerCodingInFlight}
+            />
+          ) : question.type === 'SUBJECTIVE' ? (
+            <SubjectiveAnswer
+              key={question.id}
+              value={textAnswers[question.id] ?? ''}
+              maxWords={question.maxWords ?? null}
+              onChange={(v) => onTextChange(question.id, v, question.maxWords ?? null)}
             />
           ) : (
             <div className="mt-5 space-y-2.5">
@@ -1523,7 +1610,8 @@ export function MockReportView({
   const isAssessment = kind === 'assessment';
   const backHref = isAssessment ? '/assessments' : '/mock-assessment';
   const backLabel = isAssessment ? 'Assessments' : 'Mock tests';
-  const tone = report.passed ? 'emerald' : report.pct >= 40 ? 'amber' : 'red';
+  // A pending result is amber whatever the partial percentage says — it is not a fail.
+  const tone = report.passed ? 'emerald' : report.resultPending ? 'amber' : report.pct >= 40 ? 'amber' : 'red';
   // Show the reward reveal first (only when we actually awarded this submission).
   const [showReward, setShowReward] = useState<boolean>(!!reward);
   return (
@@ -1564,16 +1652,32 @@ export function MockReportView({
           <p className="mt-2 text-sm text-slate-600">
             {report.score} of {report.total} marks · pass mark {report.passingScore}% (
             {Math.ceil((report.total * report.passingScore) / 100)} marks)
+            {report.resultPending && report.pendingMarks ? (
+              <span className="mt-1 block font-semibold text-amber-700">
+                {report.pendingMarks} mark{report.pendingMarks === 1 ? '' : 's'} across{' '}
+                {report.pendingQuestions} written answer
+                {report.pendingQuestions === 1 ? '' : 's'} are still being reviewed — your
+                score can only go up.
+              </span>
+            ) : null}
           </p>
           <span
             className={cn(
               'mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold ring-1',
+              // Amber, not red, while a reviewer still has marks to award: the student
+              // has not failed, and a red pill says they have.
               report.passed
                 ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                : 'bg-red-50 text-red-700 ring-red-200',
+                : report.resultPending
+                  ? 'bg-amber-50 text-amber-700 ring-amber-200'
+                  : 'bg-red-50 text-red-700 ring-red-200',
             )}
           >
-            {report.passed ? (
+            {report.resultPending && !report.passed ? (
+              <>
+                <Clock className="size-3.5" aria-hidden="true" /> Result pending review
+              </>
+            ) : report.passed ? (
               <>
                 <Check className="size-3.5" aria-hidden="true" /> Passed · cleared {report.passingScore}%
               </>
@@ -1746,24 +1850,38 @@ export function MockReportView({
                         {formatSec(q.timeMs / 1000)}
                       </span>
                     ) : null}
-                    <span
-                      className={cn(
-                        'inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1',
-                        q.isCorrect
-                          ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                          : 'bg-red-50 text-red-700 ring-red-200',
-                      )}
-                    >
-                      {q.isCorrect ? (
-                        <>
-                          <Check className="size-3" aria-hidden="true" /> Correct
-                        </>
+                    {/* A written answer is never "Correct"/"Incorrect" — it carries the
+                        marks a reviewer awarded, or says it is still unread. */}
+                    {q.type === 'SUBJECTIVE' ? (
+                      typeof q.awardedMarks === 'number' ? (
+                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-sky-50 px-2.5 py-0.5 text-[11px] font-semibold text-sky-700 ring-1 ring-sky-200">
+                          {q.awardedMarks} / {q.marks ?? '?'} marks
+                        </span>
                       ) : (
-                        <>
-                          <X className="size-3" aria-hidden="true" /> Incorrect
-                        </>
-                      )}
-                    </span>
+                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-200">
+                          <Clock className="size-3" aria-hidden="true" /> Awaiting review
+                        </span>
+                      )
+                    ) : (
+                      <span
+                        className={cn(
+                          'inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1',
+                          q.isCorrect
+                            ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                            : 'bg-red-50 text-red-700 ring-red-200',
+                        )}
+                      >
+                        {q.isCorrect ? (
+                          <>
+                            <Check className="size-3" aria-hidden="true" /> Correct
+                          </>
+                        ) : (
+                          <>
+                            <X className="size-3" aria-hidden="true" /> Incorrect
+                          </>
+                        )}
+                      </span>
+                    )}
                   </span>
                 </div>
 
@@ -1794,6 +1912,38 @@ export function MockReportView({
                     ) : (
                       <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">No solution submitted.</p>
                     )}
+                  </div>
+                ) : q.type === 'SUBJECTIVE' ? (
+                  <div className="mt-3 space-y-3">
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                        Your answer
+                      </p>
+                      {q.textAnswer?.trim() ? (
+                        // whitespace-pre-wrap so the student's own paragraphing survives;
+                        // a text node, never innerHTML.
+                        <p className="mt-1.5 whitespace-pre-wrap rounded-lg bg-slate-50 p-3 text-sm leading-relaxed text-slate-700">
+                          {q.textAnswer}
+                        </p>
+                      ) : (
+                        <p className="mt-1.5 text-sm font-semibold text-amber-600">Not answered</p>
+                      )}
+                    </div>
+                    {q.feedback?.trim() ? (
+                      <div className="rounded-lg bg-sky-50 p-3 ring-1 ring-sky-200">
+                        <p className="text-[10px] font-semibold uppercase tracking-widest text-sky-700">
+                          Reviewer feedback
+                        </p>
+                        <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-sky-900">
+                          {q.feedback}
+                        </p>
+                      </div>
+                    ) : typeof q.awardedMarks !== 'number' ? (
+                      <p className="text-sm text-slate-500">
+                        A reviewer will read this and award marks. Your score updates here once
+                        they do.
+                      </p>
+                    ) : null}
                   </div>
                 ) : (
                   <>
@@ -1944,4 +2094,61 @@ export function MockReportLoader({ attemptId }: { attemptId: string }) {
 
   if (report.isCalibration) return <CalibrationResults report={report} />;
   return <MockReportView report={report} />;
+}
+
+/**
+ * The free-text box for a SUBJECTIVE question, with a live word counter.
+ *
+ * Over the limit the counter turns red and the hint says the answer is NOT saved. It is
+ * deliberately not truncated — silently cutting a student's words mid-exam is far worse
+ * than telling them to trim — and deliberately not auto-saved either, because the server
+ * rejects an over-length answer and would 400 on every keystroke.
+ */
+function SubjectiveAnswer({
+  value,
+  maxWords,
+  onChange,
+}: {
+  value: string;
+  maxWords: number | null;
+  onChange: (v: string) => void;
+}) {
+  const words = wordCount(value);
+  const over = exceedsWordLimit(value, maxWords);
+  return (
+    <div className="mt-5">
+      <label className="sr-only" htmlFor="subjective-answer">
+        Your answer
+      </label>
+      <textarea
+        id="subjective-answer"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        rows={12}
+        spellCheck
+        placeholder="Type your answer here. Structure it in short paragraphs — a reviewer reads this."
+        className={cn(
+          'w-full resize-y rounded-lg border bg-white px-3.5 py-3 text-sm leading-relaxed text-navy focus:outline-none focus-visible:ring-2',
+          over
+            ? 'border-red-300 focus-visible:ring-red-300/40'
+            : 'border-slate-200 focus:border-orange focus-visible:ring-orange/30',
+        )}
+      />
+      <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
+        <p className={cn('text-xs font-medium', over ? 'text-red-600' : 'text-slate-500')}>
+          {words} {words === 1 ? 'word' : 'words'}
+          {maxWords ? ` of ${maxWords}` : ''}
+        </p>
+        <p className="text-xs text-slate-400">
+          {over ? (
+            <span className="font-semibold text-red-600">
+              Over the limit — trim it to save. This answer is not saved yet.
+            </span>
+          ) : (
+            'Saved automatically as you type.'
+          )}
+        </p>
+      </div>
+    </div>
+  );
 }

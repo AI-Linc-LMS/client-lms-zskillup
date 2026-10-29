@@ -6,6 +6,7 @@
  * grading, scoring, and percentile happen server-side at submit (the client
  * never receives `isCorrect` on a question during the attempt).
  */
+import { SUBJECTIVE_ANSWER_MAX_CHARS } from '../subjective-grading';
 import {
   ArrayMaxSize,
   IsArray,
@@ -50,6 +51,19 @@ export class MockAnswerDto {
   @Min(0)
   @Max(MAX_ANSWER_TIME_MS)
   timeMs?: number;
+
+  /**
+   * Free-text answer for a SUBJECTIVE question. Ignored for every other type, which
+   * answer through `selectedOptionIds`.
+   *
+   * The per-question word limit is enforced on the SERVER as well as counted in the
+   * runner, so a client that ignores it cannot post an essay into a 200-word box. The
+   * character cap here is the absolute ceiling, independent of any word limit.
+   */
+  @IsOptional()
+  @IsString()
+  @MaxLength(SUBJECTIVE_ANSWER_MAX_CHARS)
+  textAnswer?: string;
 }
 
 /** Submit a coding solution for a CODING problem within a mock attempt. */

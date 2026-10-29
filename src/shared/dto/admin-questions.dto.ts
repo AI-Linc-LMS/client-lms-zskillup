@@ -159,6 +159,12 @@ export class AdminCreateQuestionDto {
   @ValidateNested({ each: true })
   @Type(() => AdminQuestionOptionInputDto)
   options: AdminQuestionOptionInputDto[] = [];
+  /** SUBJECTIVE only: what the evaluator should look for. Never sent to students. */
+  @IsOptional() @IsString() @MaxLength(5000) answerGuidance?: string | null;
+
+  /** SUBJECTIVE only: optional word ceiling. Null/absent = no limit. */
+  @IsOptional() @IsInt() @Min(1) @Max(5000) maxWords?: number | null;
+
 }
 
 export class AdminUpdateQuestionDto {
@@ -247,6 +253,12 @@ export class AdminUpdateQuestionDto {
   @ValidateNested({ each: true })
   @Type(() => AdminQuestionOptionInputDto)
   options?: AdminQuestionOptionInputDto[];
+  /** SUBJECTIVE only: what the evaluator should look for. Never sent to students. */
+  @IsOptional() @IsString() @MaxLength(5000) answerGuidance?: string | null;
+
+  /** SUBJECTIVE only: optional word ceiling. Null/absent = no limit. */
+  @IsOptional() @IsInt() @Min(1) @Max(5000) maxWords?: number | null;
+
 }
 
 /** Body for POST /admin/questions/:id/companies */
@@ -349,6 +361,9 @@ export class AdminBulkUploadItemDto {
   /** Correct answer text — required for NUMERIC / CODING. */
   @IsOptional() @IsString() @MaxLength(2000) answer?: string;
   @IsOptional() @IsString() @MaxLength(4000) hint?: string;
+  /** SUBJECTIVE only — see the create DTO. */
+  @IsOptional() @IsString() @MaxLength(5000) answerGuidance?: string | null;
+  @IsOptional() @IsInt() @Min(1) @Max(5000) maxWords?: number | null;
   @IsOptional() @IsString() @MaxLength(8000) explanation?: string;
   @IsOptional() @IsString() @MaxLength(8000) solution?: string;
   /**

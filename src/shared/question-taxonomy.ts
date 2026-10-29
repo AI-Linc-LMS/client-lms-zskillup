@@ -24,4 +24,8 @@ export const QUESTION_TYPE_LABEL: Record<`${QuestionType}`, string> = {
   MULTI_SELECT: 'Multi-select',
   NUMERIC: 'Numeric',
   CODING: 'Coding',
+  // Descriptive / long-form, graded by a human (migration 150). The Record is keyed on
+  // the whole enum deliberately: a partial map here compiles until someone adds a type,
+  // and then renders `undefined` as a label on an admin screen.
+  SUBJECTIVE: 'Subjective',
 };

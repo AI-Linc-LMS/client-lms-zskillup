@@ -1481,6 +1481,9 @@ function QuestionImageField({ value, onChange }: { value: string; onChange: (v: 
 
 function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
   const [type, setType] = useState<QuestionType>(QuestionType.MCQ);
+  // SUBJECTIVE only. Guidance is for the marker and never reaches the student.
+  const [answerGuidance, setAnswerGuidance] = useState('');
+  const [maxWords, setMaxWords] = useState('');
   const [difficulty, setDifficulty] = useState<QuestionDifficulty>(QuestionDifficulty.MEDIUM);
   const [stem, setStem] = useState('');
   const [imageUrl, setImageUrl] = useState('');
@@ -1556,6 +1559,13 @@ function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
       options: isChoice
         ? cleanOptions.map((o, i) => ({ text: o.text.trim(), isCorrect: o.isCorrect, orderIndex: i }))
         : [],
+      ...(type === QuestionType.SUBJECTIVE
+        ? {
+            answerGuidance: answerGuidance.trim() || null,
+            // Blank means "no limit", which is null — not 0, which the API rejects.
+            maxWords: maxWords.trim() ? Number(maxWords) : null,
+          }
+        : {}),
     };
 
     setSubmitting(true);
@@ -1709,6 +1719,43 @@ function AddQuestionForm({ onCreated }: { onCreated: () => void }) {
               </div>
             ))}
           </div>
+        </div>
+      ) : type === QuestionType.SUBJECTIVE ? (
+        <div className="mt-4 space-y-4">
+          <p className="rounded-lg bg-violet-50 p-3 text-xs text-violet-900 ring-1 ring-violet-200">
+            A written question has no options and no single correct answer — a reviewer reads
+            the student&apos;s prose and awards marks. Until they do, the student&apos;s result
+            shows as <strong className="font-semibold">pending review</strong>, never as a fail.
+          </p>
+          <label className="block space-y-1.5">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              Marking guidance (optional) — shown to the reviewer, never to the student
+            </span>
+            <textarea
+              value={answerGuidance}
+              onChange={(e) => setAnswerGuidance(e.target.value)}
+              maxLength={5000}
+              className="min-h-20 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-relaxed text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30"
+              placeholder="Award full marks for: the trade-off named, one concrete example, and a stated conclusion."
+            />
+          </label>
+          <label className="block space-y-1.5">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              Word limit (optional)
+            </span>
+            <input
+              type="number"
+              min={1}
+              max={5000}
+              value={maxWords}
+              onChange={(e) => setMaxWords(e.target.value)}
+              className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy focus:border-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-orange/30 md:w-48"
+              placeholder="No limit"
+            />
+            <span className="block text-xs text-slate-400">
+              The student sees a live counter, and the server refuses an over-length answer.
+            </span>
+          </label>
         </div>
       ) : (
         <p className="mt-4 rounded-lg bg-slate-50 p-3 text-xs text-slate-600">
