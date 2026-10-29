@@ -248,6 +248,7 @@ export const SUPERADMIN_NAV: NavSection[] = [
       { label: 'Coding Bank', href: '/superadmin/coding', icon: Code2 },
       { label: 'Mock Tests', href: '/superadmin/mocks', icon: FileCheck2 },
       { label: 'Mark Answers', href: '/superadmin/evaluation', icon: PenLine, tip: 'Mark written (subjective) answers. Until these are marked a student sees "pending review", not a fail.' },
+      { label: 'Assign Interviews', href: '/superadmin/interview-assignments', icon: ClipboardList, tip: 'Define a mock interview and assign it to a student, a batch or a cohort.' },
       { label: 'Assessments', href: '/superadmin/scheduled-assessments', icon: CalendarClock },
       { label: 'Challenges', href: '/superadmin/challenges', icon: Trophy },
       { label: 'Courses', href: '/superadmin/courses', icon: GraduationCap },
@@ -331,6 +332,7 @@ export const TPO_NAV: NavSection[] = [
       // Own console route, not /admin/evaluation: navForPath selects the rail by
       // PATHNAME, so a TPO following an /admin link loses their own sidebar.
       { label: 'Mark Answers', href: '/tpo/evaluation', icon: PenLine, tip: 'Mark written (subjective) answers. Until these are marked a student sees "pending review", not a fail.' },
+      { label: 'Assign Interviews', href: '/tpo/interview-assignments', icon: ClipboardList, tip: 'Define a mock interview and assign it to a student, a batch or a cohort.' },
       { label: 'Reports & Exports', href: '/tpo/reports', icon: FileText },
       { label: 'Subscription', href: '/tpo/subscription', icon: CreditCard },
     ],
@@ -401,6 +403,7 @@ export const ADMIN_NAV: NavSection[] = [
       { label: 'Coding Bank', href: '/admin/coding', icon: Code2 },
       { label: 'Mock Tests', href: '/admin/mocks', icon: FileCheck2 },
       { label: 'Mark Answers', href: '/admin/evaluation', icon: PenLine, tip: 'Mark written (subjective) answers. Until these are marked a student sees "pending review", not a fail.' },
+      { label: 'Assign Interviews', href: '/admin/interview-assignments', icon: ClipboardList, tip: 'Define a mock interview and assign it to a student, a batch or a cohort.' },
       { label: 'Assessments', href: '/admin/scheduled-assessments', icon: CalendarClock },
       { label: 'Calibration', href: '/admin/calibration', icon: Target, tip: 'Toggle the Placement Readiness Test gate and pick which scheduled assessment is the calibration.' },
       { label: 'Feature Locks', href: '/admin/settings', icon: SlidersHorizontal, tip: 'Per-module subscription + profile-completion locks, tunable without a deploy.' },

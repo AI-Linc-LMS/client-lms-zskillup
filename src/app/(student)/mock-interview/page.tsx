@@ -1,6 +1,7 @@
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { MockInterviewHome } from '@/components/mock-interview/MockInterviewHome';
 import { SubscriptionLockGate } from '@/components/billing/SubscriptionLockGate';
+import { AssignedInterviews } from '@/components/mock-interview/AssignedInterviews';
 import { Bot, ShieldCheck, Sparkles, Zap } from 'lucide-react';
 
 export const metadata = {
@@ -53,6 +54,12 @@ export default function MockInterviewPage() {
           </div>
         </div>
       </header>
+
+      {/* Assigned interviews sit ABOVE the paywall gate on purpose: the college set this
+          work, it does not spend the student's free allowance, and an upsell must not
+          stand between them and what their placement office told them to do. Renders
+          nothing when there are none. */}
+      <AssignedInterviews />
 
       <SubscriptionLockGate tool="mock-interview" feature="Mock Interview">
         <MockInterviewHome />
